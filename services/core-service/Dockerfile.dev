@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS dev
+WORKDIR /app
+
+# Install dotnet-ef for migrations in dev
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+COPY ["Vyne.Core/Vyne.Core.csproj", "Vyne.Core/"]
+RUN dotnet restore "Vyne.Core/Vyne.Core.csproj"
+
+COPY Vyne.Core/ Vyne.Core/
+WORKDIR /app/Vyne.Core
+
+EXPOSE 5001
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:5001
+
+# Hot reload
+ENTRYPOINT ["dotnet", "watch", "run", "--no-hot-reload"]

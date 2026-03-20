@@ -1,0 +1,62 @@
+name: Terraform Apply
+
+on:
+  push:
+    paths:
+      - "infrastructure/terraform/**"
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_VERSION: "1.9.8"
+  AWS_REGION: "us-east-1"
+  ENVIRONMENT: "dev"
+
+jobs:
+  terraform-apply:
+    name: Terraform Apply (${{ env.ENVIRONMENT }})
+    runs-on: ubuntu-latest
+    environment: ${{ env.ENVIRONMENT }}  # Requires manual approval for prod
+
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/environments/${{ env.ENVIRONMENT }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init -reconfigure
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="account_id=${{ secrets.AWS_ACCOUNT_ID }}" \
+            -var="github_org=${{ github.repository_owner }}" \
+            -var="acm_certificate_arn=${{ secrets.ACM_CERTIFICATE_ARN }}"
+
+      - name: Capture outputs
+        run: terraform output -json > tf-outputs.json
+
+      - name: Upload outputs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-outputs-${{ env.ENVIRONMENT }}
+          path: infrastructure/terraform/environments/${{ env.ENVIRONMENT }}/tf-outputs.json
+          retention-days: 30
