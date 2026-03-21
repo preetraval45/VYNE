@@ -10,6 +10,7 @@ using Vyne.Projects.Infrastructure.Data;
 using Vyne.Projects.Infrastructure.Events;
 using Vyne.Projects.Infrastructure.Middleware;
 using Vyne.Projects.Infrastructure.Repositories;
+using Vyne.Projects.Domain.Docs;
 using Vyne.Projects.Infrastructure.Services;
 using Vyne.Projects.Hubs;
 
@@ -96,6 +97,7 @@ try
     builder.Services.AddScoped<ISprintRepository, SprintRepository>();
     builder.Services.AddScoped<ICommentRepository, CommentRepository>();
     builder.Services.AddScoped<ILabelRepository, LabelRepository>();
+    builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
     builder.Services.AddScoped<IEventPublisher, EventBridgePublisher>();
     builder.Services.AddScoped<IBedrockEmbeddingService, BedrockEmbeddingService>();
     builder.Services.AddHostedService<IssueEmbeddingWorker>();

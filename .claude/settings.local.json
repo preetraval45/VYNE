@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\(auth\\)/\")",
+      "Bash(ls \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\(auth\\)/login/\")",
+      "Bash(ls \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\(auth\\)/signup/\")",
+      "Bash(ls \"c:\\\\Users\\\\preet\\\\OneDrive\\\\Documents\\\\GitHub\\\\VYNE\\\\apps\\\\web\\\\src\\\\app\\\\\\(dashboard\\)\")",
+      "Bash(ls \"c:\\\\Users\\\\preet\\\\OneDrive\\\\Documents\\\\GitHub\\\\VYNE\\\\apps\\\\web\\\\src\\\\app\\\\\\(dashboard\\)\\\\crm\")",
+      "Bash(ls \"c:\\\\Users\\\\preet\\\\OneDrive\\\\Documents\\\\GitHub\\\\VYNE\\\\apps\\\\web\\\\src\\\\app\\\\\\(dashboard\\)\\\\ai\")",
+      "Bash(ls \"c:\\\\Users\\\\preet\\\\OneDrive\\\\Documents\\\\GitHub\\\\VYNE\\\\apps\\\\web\\\\src\\\\app\\\\\\(dashboard\\)\\\\hr\")",
+      "Bash(npx tsc:*)",
+      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/src -type f -name *.ts -o -name *.tsx)",
+      "Bash(grep -r import.*from.*@/ /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src --include=*.tsx --include=*.ts)",
+      "Bash(ls \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/app/\\(auth\\)/\")",
+      "Bash(ls \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/app/\\(tabs\\)/\")",
+      "Bash(wc -l \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/app/\\(tabs\\)/index.tsx\" \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/app/\\(tabs\\)/chat.tsx\" \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/mobile/app/\\(tabs\\)/projects.tsx\")",
+      "Bash(wc -l \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\(dashboard\\)/observe/page.tsx\")",
+      "Bash(wc -l \"c:/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\(dashboard\\)/automations/page.tsx\")",
+      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\\\\\(dashboard\\\\\\) -name \"page.tsx\" -exec wc -l {} +)",
+      "Bash(wc -l /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*.cs /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.cs /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.ts /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.py)",
+      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/components -name \"*.tsx\" -exec wc -l {} +)",
+      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/hooks -name \"*.ts\" -exec wc -l {} +)"
+    ]
+  }
+}

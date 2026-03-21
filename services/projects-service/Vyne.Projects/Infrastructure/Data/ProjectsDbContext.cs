@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Pgvector.EntityFrameworkCore;
+using Vyne.Projects.Domain.Docs;
 using Vyne.Projects.Domain.Issues;
 using Vyne.Projects.Domain.Projects;
 
@@ -24,6 +25,8 @@ public class ProjectsDbContext : DbContext
     public DbSet<Label> Labels => Set<Label>();
     public DbSet<IssueLabel> IssueLabels => Set<IssueLabel>();
     public DbSet<ProjectIssueCounter> IssueCounters => Set<ProjectIssueCounter>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<DocumentVersion> DocumentVersions => Set<DocumentVersion>();
 
     protected override void OnModelCreating(ModelBuilder m)
     {
@@ -178,6 +181,44 @@ public class ProjectsDbContext : DbContext
             e.HasKey(c => c.ProjectId);
             e.Property(c => c.ProjectId).HasColumnName("project_id");
             e.Property(c => c.NextNumber).HasColumnName("next_number").HasDefaultValue(1);
+        });
+
+        // ── Document ──────────────────────────────────────────────
+
+        m.Entity<Document>(e =>
+        {
+            e.ToTable("documents");
+            e.HasKey(d => d.Id);
+            e.Property(d => d.Id).HasColumnName("id");
+            e.Property(d => d.OrgId).HasColumnName("org_id");
+            e.Property(d => d.ParentId).HasColumnName("parent_id");
+            e.Property(d => d.Title).HasColumnName("title").HasMaxLength(500).IsRequired();
+            e.Property(d => d.Icon).HasColumnName("icon").HasMaxLength(10);
+            e.Property(d => d.CoverUrl).HasColumnName("cover_url");
+            e.Property(d => d.IsPublished).HasColumnName("is_published").HasDefaultValue(false);
+            e.Property(d => d.IsTemplate).HasColumnName("is_template").HasDefaultValue(false);
+            e.Property(d => d.CreatedBy).HasColumnName("created_by");
+            e.Property(d => d.UpdatedBy).HasColumnName("updated_by");
+            e.Property(d => d.Position).HasColumnName("position").HasColumnType("decimal(10,4)");
+            e.Property(d => d.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
+            e.Property(d => d.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("NOW()");
+            e.Property(d => d.DeletedAt).HasColumnName("deleted_at");
+            e.Ignore(d => d.Content); // loaded separately from document_versions
+            e.HasQueryFilter(d => d.DeletedAt == null);
+        });
+
+        // ── DocumentVersion ───────────────────────────────────────
+
+        m.Entity<DocumentVersion>(e =>
+        {
+            e.ToTable("document_versions");
+            e.HasKey(v => v.Id);
+            e.Property(v => v.Id).HasColumnName("id");
+            e.Property(v => v.DocumentId).HasColumnName("document_id");
+            e.Property(v => v.Content).HasColumnName("content").HasColumnType("jsonb").IsRequired();
+            e.Property(v => v.Version).HasColumnName("version");
+            e.Property(v => v.CreatedBy).HasColumnName("created_by");
+            e.Property(v => v.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("NOW()");
         });
     }
 

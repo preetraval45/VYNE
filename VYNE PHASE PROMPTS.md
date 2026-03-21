@@ -1,32 +1,361 @@
 # VYNE — Phase Implementation Prompts
 ## Give These Prompts to Claude to Build Each Phase
 
+**Version 2.0 — Updated March 2026**
+
+> **CURRENT STATUS (March 2026):** Full MVP v2 is built and demo-ready. All modules live:
+> Chat + AI slash commands (Slack++) · Projects with Kanban DnD · Docs editor · ERP/MRP ·
+> Finance · Code/DevOps · Observability/Metrics · HR + Payroll · CRM Pipeline + Forecasting ·
+> Expenses + Approvals · AI BI Dashboard · Automations/Workflow Builder · Admin Panel ·
+> Mobile (Home + Chat + Projects + Finance + ERP tabs) · Light/Dark mode · Roadmap ·
+> CommandPalette (⌘K) with all 30+ commands · Vercel deployment config
+
 > **HOW TO USE THIS FILE:**
-> 1. Open a new Claude conversation
-> 2. Copy the entire prompt for the phase you're on
-> 3. Paste it and Claude will build that phase in extreme detail
-> 4. Each prompt is self-contained — it includes all context needed
+> 1. Open a new Claude conversation in the VYNE project directory
+> 2. Copy the entire prompt for the phase you want to build
+> 3. Paste it — Claude will build that phase completely
+> 4. Each prompt is self-contained with all context needed
 
 ---
 
-## ⚡ MASTER CONTEXT BLOCK
+## ⚡ MASTER CONTEXT BLOCK (v2 — always include this)
 *(Include this at the top of EVERY phase prompt)*
 
 ```
-VYNE PROJECT CONTEXT (always include this):
-- Product: Vyne — AI-native Company Operating System (replaces Slack + Jira + Notion + Datadog + Odoo)
+VYNE PROJECT CONTEXT (v2 — March 2026):
+- Product: Vyne — AI-native Company Operating System
+  Replaces: Slack + Jira + Notion + GitHub + Datadog + Odoo in ONE platform
 - Stack: TypeScript (Next.js 15 + Node.js Fastify) | C# .NET 9 | Python 3.12 FastAPI
-- Mobile: React Native + Expo SDK 52
-- Cloud: AWS only (ECS Fargate, Aurora PostgreSQL Serverless v2, ElastiCache Valkey, Bedrock, Cognito, EventBridge, SQS, ECR, ALB, Route53, ACM, SES, SNS, S3, Secrets Manager)
-- Database: PostgreSQL 17 + pgvector + TimescaleDB (all on Aurora Serverless v2)
-- Auth: AWS Cognito + Custom JWT middleware + PostgreSQL RLS for multi-tenancy
+- Mobile: React Native + Expo SDK 52 (apps/mobile — BUILT)
+- Cloud: AWS only (ECS Fargate, Aurora PostgreSQL Serverless v2, ElastiCache Valkey, Bedrock,
+  Cognito, EventBridge, SQS, ECR, ALB, Route53, ACM, SES, SNS, S3, Secrets Manager)
+- Database: PostgreSQL 17 + pgvector + TimescaleDB
+- Auth: AWS Cognito + Custom JWT + PostgreSQL RLS for multi-tenancy
 - Package manager: pnpm workspaces + Turborepo
 - CI/CD: GitHub Actions + ECR + ArgoCD + Argo Rollouts (canary)
 - IaC: Terraform (modular, S3 state + DynamoDB lock)
-- AI: AWS Bedrock (Claude 3.5 Sonnet + Titan Embeddings v2) + LangGraph agents
-- Design: Slack-inspired dark sidebar + clean light content area, Geist font
-- No personal servers — everything on AWS managed services
+- AI: AWS Bedrock (Claude 3.5 Sonnet + Titan Embeddings v2) + LangGraph multi-step agents
+- Design tokens: Dark sidebar #1C1C2E · Content bg uses var(--content-bg) · Brand purple #6C47FF
+  Supports LIGHT + DARK mode via CSS custom properties + data-theme attribute on <html>
+- SonarQube rules enforced: S1128 (unused imports), S6759 (Readonly props), S3358 (nested ternaries),
+  S6848 (non-native interactive), S7773 (Number.parseInt), S7781 (replaceAll), S6853 (label a11y)
+- Demo mode: all pages have mock data fallback when backend unavailable
 - Solo developer building a startup — optimize for speed AND production quality
+
+WHAT IS ALREADY BUILT (do not rebuild):
+- apps/web pages: home, chat (+ AI slash commands), projects, docs, ops, finance, code,
+  observe, settings, roadmap, crm, hr, expenses, ai (BI dashboard), automations, admin
+- apps/mobile tabs: home, chat, projects, profile, finance, erp (Expo Router v4)
+- services: api-gateway, messaging-service, erp-service, projects-service, ai-service,
+  observability-service, notification-service
+- Theme system: Zustand theme store (light/dark), ThemeApplier component, CSS variables in globals.css
+- Auth store: useAuthStore with login(), signup(), setUser(), setToken(), logout()
+- API client: src/lib/api/client.ts — authApi, messagingApi, erpApi, codeApi, docsApi, usersApi
+- CommandPalette: ⌘K global palette with 30+ commands across all modules
+- vercel.json: one-click deploy to Vercel from apps/web/
+```
+
+---
+
+## 🆕 PHASE 5 — ADVANCED ERP MODULES (Beat Odoo)
+
+### Prompt P5-A: CRM Pipeline + Lead Management
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Build a full CRM Pipeline module for VYNE that is faster and more intuitive than Odoo CRM.
+
+TARGET FILE: apps/web/src/app/(dashboard)/crm/page.tsx (NEW FILE)
+Also add 'CRM' nav item to apps/web/src/components/layout/Sidebar.tsx under Business section.
+
+WHAT TO BUILD:
+1. PIPELINE VIEW — Kanban-style drag-and-drop pipeline:
+   - Columns: Lead → Qualified → Proposal → Negotiation → Won → Lost
+   - Each card shows: company name, deal value, probability %, assignee avatar, next activity date
+   - Color coding: green (won), red (lost), amber (at risk = no activity 7+ days)
+   - Click card → right-side panel with full deal details
+
+2. LEADS TABLE — list view with:
+   - Name, company, email, phone, source, stage, value, last contact, assignee
+   - Filters: stage, assignee, source (website/referral/outbound/inbound), date range
+   - Quick actions: Call, Email, Create Proposal, Mark Won/Lost
+   - Import from CSV button
+
+3. DEAL DETAIL PANEL — slide-over from right:
+   - Contact info + company info sections
+   - Deal value + probability + expected close date
+   - Activity timeline (calls logged, emails sent, notes added)
+   - Files attached
+   - Next action + reminder
+   - Convert to Order button (creates ERP sales order from won deal)
+
+4. FORECASTING SIDEBAR:
+   - This month pipeline value by stage
+   - Win rate last 90 days
+   - Average deal size
+   - Top performing rep
+
+5. MOCK DATA: 8 leads across all stages, realistic company names and deal values.
+
+DESIGN: Match existing VYNE style (inline styles, no Tailwind classes for layout).
+All component props must use Readonly<{...}>. No nested ternaries — extract to variables/functions.
+Add to Sidebar under Business section with icon "🎯".
+```
+
+---
+
+### Prompt P5-B: HR + Payroll Module
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Build an HR module for VYNE that replaces BambooHR/Rippling for SMBs.
+
+TARGET FILE: apps/web/src/app/(dashboard)/hr/page.tsx (NEW FILE)
+
+TABS TO BUILD:
+1. EMPLOYEES — employee directory:
+   - Card grid: avatar, name, role, department, location, email, phone
+   - Status: active/on-leave/remote
+   - Click → employee profile modal with full details + history
+
+2. ORG CHART — visual hierarchy:
+   - Tree diagram showing reporting structure
+   - Drag to reassign (optimistic update)
+
+3. LEAVE MANAGEMENT:
+   - Leave balance per employee (vacation, sick, personal)
+   - Leave request approval workflow (Approve / Reject buttons)
+   - Calendar view of who is out when
+
+4. PAYROLL:
+   - Payroll run table: employee, base salary, deductions, bonuses, net pay
+   - Run Payroll button (triggers calculation + generates payslips)
+   - Download payslips as PDF (mock — show toast "Generating payslips…")
+   - YTD summary chart
+
+5. ONBOARDING:
+   - Onboarding checklists for new hires
+   - IT setup, paperwork, training tasks with checkboxes
+   - Assign buddy / manager
+
+MOCK DATA: 8 employees across Engineering, Sales, Operations, Finance departments.
+Add to Sidebar under Business with icon "👥". Follow all VYNE design/lint rules.
+```
+
+---
+
+### Prompt P5-C: Expense Reports Module
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Build an Expense Reports module better than Expensify/Concur for VYNE.
+
+TARGET FILE: apps/web/src/app/(dashboard)/expenses/page.tsx (NEW FILE)
+
+FEATURES:
+1. MY EXPENSES tab:
+   - Submit expense form: date, category (travel/meals/software/office/other), amount, currency, description, receipt upload button
+   - Expense list with status badges (draft/submitted/approved/rejected/paid)
+   - Quick totals: pending approval, approved this month, rejected
+
+2. APPROVALS tab (manager view):
+   - List of all team expense submissions needing approval
+   - Approve / Reject with note buttons
+   - Bulk approve selected
+
+3. REPORTS tab:
+   - Expense summary by category (donut chart as CSS bars)
+   - Department spend comparison
+   - Month-over-month trend
+   - Export to CSV button
+
+4. POLICIES tab:
+   - Per-category spending limits configurable by admin
+   - Auto-flag expenses over limit
+   - Receipt required threshold
+
+MOCK DATA: 6 expenses in various states, realistic categories and amounts.
+Auto-sync approved expenses to Finance journal entries (call erpApi.listJournalEntries on load).
+Add to Sidebar under Business with icon "🧾". Follow VYNE design rules.
+```
+
+---
+
+## 🆕 PHASE 6 — ADVANCED CHAT (Kill Slack)
+
+### Prompt P6-A: AI-Powered Chat Features
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Upgrade the existing chat page with AI-powered features that Slack charges extra for.
+
+TARGET FILE: apps/web/src/app/(dashboard)/chat/page.tsx (EXTEND EXISTING)
+
+ADD THESE FEATURES to the existing chat:
+
+1. AI THREAD SUMMARY BUTTON:
+   - In every channel with 5+ messages, show "✨ Summarize thread" button in the header
+   - Clicking shows a purple AI bubble at top of messages with a 3-bullet summary
+   - Mock the summary with realistic content from the mock messages
+
+2. SMART NOTIFICATION PANEL (new right-side panel):
+   - Shows "🧠 AI Priority" section at top with only the 2-3 most important unread items
+   - Below: full notification list with priority badges (urgent/normal/low)
+   - "Mark all as read" button
+
+3. /SLASH COMMANDS with ERP integration:
+   - Show autocomplete dropdown when user types / in message composer
+   - Commands: /order [id], /stock [product], /approve [id], /status [service], /help
+   - /order ORD-123 → shows order card inline in chat
+   - /stock PWR-003 → shows stock level card inline
+   - These commands work in demo mode (show mock cards)
+
+4. MESSAGE SCHEDULING:
+   - Add "📅 Schedule" option to send button dropdown
+   - Time picker modal (today, tomorrow, custom date/time)
+   - Show "Scheduled" badge on message, grayed out with clock icon
+
+5. EMOJI STATUS on user profiles:
+   - Click user avatar → show status picker (🎯 Focused, 🚗 Commuting, 🤒 Sick, 🏖 Vacation)
+   - Status shows next to name in DM list
+
+Follow all VYNE design rules. No nested ternaries. Readonly props. All changes backward-compatible.
+```
+
+---
+
+## 🆕 PHASE 7 — AI INTELLIGENCE ENGINE
+
+### Prompt P7-A: AI Business Intelligence Dashboard
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Build an AI Business Intelligence page that no other tool offers — natural language queries
+over all VYNE data (ERP + Projects + Chat + DevOps).
+
+TARGET FILE: apps/web/src/app/(dashboard)/ai/page.tsx (NEW FILE)
+Add to Sidebar under "DevOps + AI" section with icon "🧠 AI" (replace existing Observe AI section).
+
+WHAT TO BUILD:
+
+1. QUERY BAR (top, full width):
+   - Large input: "Ask anything about your business…"
+   - Suggested queries as chips below: "Which customers haven't paid?", "What caused last week's incident?",
+     "Which products need reordering?", "Show me top 5 deals by value", "What slowed down deployment?"
+   - On submit → show animated "Thinking…" → then show answer card
+
+2. ANSWER CARDS — each query returns a formatted response:
+   - Text answer + supporting data table/chart
+   - Sources cited (e.g. "From: Orders module, 3 records" with link to /ops)
+   - Follow-up question suggestions
+
+3. INSIGHTS FEED (left sidebar):
+   - Auto-generated daily insights:
+     • "⚠ 3 invoices overdue totaling $8,400"
+     • "📦 PWR-003 will stock out in ~4 days at current rate"
+     • "🚀 Deployment success rate dropped to 60% this week"
+     • "💬 #alerts channel has 47 unread messages"
+   - Each insight links to the relevant module
+
+4. AGENT RUNS panel (bottom):
+   - Table of recent LangGraph agent runs: type, status, started, result summary
+   - Types: incident-investigation, stock-reorder, meeting-summary, anomaly-detection
+   - Click row → see full agent reasoning trace (step by step)
+
+5. MOCK ALL DATA — no backend calls needed, all mock data that tells a coherent story.
+
+Design: AI/dark aesthetic — purple gradient header, cards with purple accent borders.
+Follow all VYNE lint rules. Readonly props.
+```
+
+---
+
+## 🆕 PHASE 8 — MOBILE APP V2
+
+### Prompt P8-A: Extend Mobile with ERP + AI screens
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+The mobile app at apps/mobile/ is already built with: Login, Home, Chat, Projects, Profile.
+Now extend it with ERP and AI screens.
+
+ADD THESE SCREENS:
+
+1. apps/mobile/app/(tabs)/ops.tsx — Mobile ERP overview:
+   - Summary cards: Open Orders, Low Stock Items, Pending Approvals
+   - Recent orders list (tap to see detail)
+   - Quick actions: + New Order, Check Stock, Approve PO
+   - Pull to refresh
+
+2. apps/mobile/app/(tabs)/finance.tsx — Mobile Finance:
+   - This month revenue vs expenses (simple bar visualization)
+   - Recent transactions list
+   - 3 quick KPI cards (revenue, expenses, profit margin)
+
+3. Update apps/mobile/app/(tabs)/_layout.tsx:
+   - Add "Ops" tab with icon "package" between Projects and Profile
+   - Keep max 5 tabs total
+
+4. Add notification badge support to all tabs (read from mock unread counts)
+
+5. apps/mobile/components/AIAlertBanner.tsx:
+   - Reusable purple banner component for AI incidents/alerts
+   - Props: message, severity (info/warning/critical), onDismiss, onAction
+   - Use on Home screen and Ops screen
+
+Follow React Native best practices. Use StyleSheet.create (not inline styles where possible).
+All mock data — no backend needed. Expo SDK 52 + expo-router v4.
+```
+
+---
+
+## 🆕 PHASE 9 — MULTI-TENANT SAAS + WHITE-LABEL
+
+### Prompt P9-A: White-Label + Tenant Customization
+
+```
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+Build the white-label and multi-tenant customization system that lets Preet sell VYNE to companies.
+
+WHAT TO BUILD:
+
+1. ADMIN PANEL at /admin (separate from main dashboard, admin-only route):
+   - /admin/tenants — list of all customer organizations
+     • Create new org (name, slug, plan, admin email)
+     • Org card: name, plan, users count, monthly revenue, status
+     • Click → manage org settings
+   - /admin/tenants/[id]/branding — customize per org:
+     • Upload logo (mock upload → base64 preview)
+     • Primary color picker (replaces #6C47FF brand purple)
+     • Custom domain field
+     • Welcome message
+   - /admin/tenants/[id]/modules — enable/disable modules per org:
+     • Toggle switches for: Chat, Projects, Docs, ERP, Finance, Code, HR, CRM, AI
+     • Each toggle disables nav item for that org's users
+   - /admin/billing — subscription management:
+     • Tenant table with plan (Starter/Growth/Enterprise), MRR, next billing date
+     • Change plan buttons
+     • Revenue summary at top
+
+2. TENANT-AWARE SIDEBAR:
+   - Read org branding from settings store
+   - Apply custom primary color as CSS variable override
+   - Show custom logo if set, otherwise Vyne logo
+
+3. ONBOARDING WIZARD at /onboarding (new auth flow route):
+   - Step 1: Company name + industry + size
+   - Step 2: Choose which modules to activate
+   - Step 3: Invite team members (email list)
+   - Step 4: Done — redirect to /home with confetti animation
+
+All mock data. Admin route protected by role === 'owner'. Follow all VYNE design/lint rules.
 ```
 
 ---
