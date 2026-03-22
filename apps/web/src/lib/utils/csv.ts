@@ -19,7 +19,7 @@ function escapeCSVCell(value: unknown): string {
     str.includes("\n") ||
     str.includes("\r")
   ) {
-    return `"${str.replace(/"/g, '""')}"`;
+    return `"${str.replaceAll('"', '""')}"`;
   }
   return str;
 }
@@ -178,7 +178,7 @@ export function parseCSV<T>(
       const text = (event.target?.result as string) ?? "";
 
       // Strip BOM if present
-      const cleaned = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+      const cleaned = text.codePointAt(0) === 0xfeff ? text.slice(1) : text;
 
       const lines = splitCSVLines(cleaned);
 

@@ -84,7 +84,7 @@ export default function AutomationsPage() {
           padding: "0 18px",
           gap: 10,
           flexShrink: 0,
-          background: "#fff",
+          background: "var(--content-bg)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

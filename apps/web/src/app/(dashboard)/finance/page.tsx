@@ -165,7 +165,7 @@ function PLTab() {
       {/* P&L Statement */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -298,7 +298,7 @@ function PLTab() {
           <div
             key={label}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 10,
               padding: "14px 16px",
@@ -355,7 +355,7 @@ function PLTab() {
         {/* Mini chart */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 10,
             padding: "14px 16px",
@@ -483,7 +483,7 @@ function JournalTab() {
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -598,7 +598,7 @@ function JournalTab() {
         >
           <div
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               borderRadius: 12,
               width: 420,
               padding: 24,
@@ -762,7 +762,7 @@ function AccountsTab() {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 10,
         overflow: "hidden",
@@ -884,7 +884,7 @@ export default function FinancePage() {
         style={{
           padding: "14px 20px 0",
           borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >

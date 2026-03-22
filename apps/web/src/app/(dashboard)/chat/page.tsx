@@ -32,7 +32,13 @@ export default function ChatPage() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "#fff" }}>
+    <div
+      style={{
+        display: "flex",
+        height: "100%",
+        background: "var(--content-bg)",
+      }}
+    >
       {/* ── Channel sidebar ─────────────────────────────── */}
       <ChannelSidebar
         channels={channels}

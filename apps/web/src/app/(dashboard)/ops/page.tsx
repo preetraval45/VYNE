@@ -120,7 +120,7 @@ function Modal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 12,
           width,
           padding: 24,
@@ -274,7 +274,7 @@ function OverviewTab({
           <div
             key={label}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 10,
               padding: "14px 16px",
@@ -336,7 +336,7 @@ function OverviewTab({
       >
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 10,
             overflow: "hidden",
@@ -429,7 +429,7 @@ function OverviewTab({
 
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 10,
             overflow: "hidden",
@@ -586,7 +586,7 @@ function InventoryTab({
             alignItems: "center",
             gap: 7,
             background: "#F0F0F8",
-            border: "1px solid #E8E8F0",
+            border: "1px solid var(--content-border)",
             borderRadius: 8,
             padding: "6px 10px",
             flex: 1,
@@ -631,7 +631,7 @@ function InventoryTab({
       {/* Table */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -1094,7 +1094,7 @@ function OrdersTab({
               alignItems: "center",
               gap: 7,
               background: "#F0F0F8",
-              border: "1px solid #E8E8F0",
+              border: "1px solid var(--content-border)",
               borderRadius: 8,
               padding: "5px 10px",
             }}
@@ -1137,7 +1137,7 @@ function OrdersTab({
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -1460,7 +1460,7 @@ function SuppliersTab({
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -1683,7 +1683,7 @@ function ManufacturingTab({
       {subTab === "boms" && (
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 10,
             overflow: "hidden",
@@ -1805,7 +1805,7 @@ function ManufacturingTab({
           </div>
           <div
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 10,
               overflow: "hidden",
@@ -2140,7 +2140,7 @@ export default function OpsPage() {
         style={{
           padding: "14px 20px 0",
           borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >

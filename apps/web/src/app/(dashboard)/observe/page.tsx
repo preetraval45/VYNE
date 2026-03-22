@@ -166,7 +166,7 @@ function KpiCard({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         padding: "16px 18px",
@@ -246,7 +246,7 @@ function ServiceCard({ svc }: Readonly<{ svc: Service }>) {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         padding: "14px 16px",
@@ -483,7 +483,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -493,7 +493,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
         </div>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -506,7 +506,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
       {/* Slowest endpoints */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 12,
           padding: "16px 18px",
@@ -614,7 +614,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
       {/* Recent deploys */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 12,
           padding: "16px 18px",
@@ -722,7 +722,7 @@ function MetricsTab() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -744,7 +744,7 @@ function MetricsTab() {
         </div>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -774,7 +774,7 @@ function MetricsTab() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -832,7 +832,7 @@ function MetricsTab() {
         </div>
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -978,7 +978,7 @@ function LogsTab() {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         padding: "16px 18px",
@@ -1038,7 +1038,7 @@ function LogsTab() {
             borderRadius: 8,
             fontSize: 11,
             border: "1px solid rgba(0,0,0,0.12)",
-            background: "#fff",
+            background: "var(--content-bg)",
             color: "var(--text-primary)",
             cursor: "pointer",
           }}
@@ -1076,7 +1076,7 @@ function LogsTab() {
             borderRadius: 8,
             fontSize: 11,
             border: "1px solid rgba(0,0,0,0.12)",
-            background: "#fff",
+            background: "var(--content-bg)",
             color: "var(--text-primary)",
           }}
         />
@@ -1271,7 +1271,7 @@ function AlertsTab() {
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 12,
           padding: "16px 18px",
@@ -1407,7 +1407,7 @@ function TracesTab() {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         padding: "16px 18px",
@@ -1645,7 +1645,7 @@ export default function ObservePage() {
         style={{
           height: 48,
           borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          background: "var(--content-bg)",
           display: "flex",
           alignItems: "center",
           padding: "0 18px",
@@ -1831,7 +1831,7 @@ export default function ObservePage() {
         {/* Service Health Map */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px 18px",
@@ -1934,7 +1934,7 @@ export default function ObservePage() {
         {/* Tabs */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             overflow: "hidden",

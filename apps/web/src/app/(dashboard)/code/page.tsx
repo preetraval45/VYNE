@@ -245,7 +245,7 @@ function Modal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 12,
           padding: 24,
           width: 480,
@@ -429,7 +429,7 @@ function OverviewTab({
         {/* Recent deployments */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid var(--content-border)",
             borderRadius: 12,
             overflow: "hidden",
@@ -529,7 +529,7 @@ function OverviewTab({
         {/* Service health */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid var(--content-border)",
             borderRadius: 12,
             overflow: "hidden",
@@ -724,7 +724,7 @@ function DeploymentsTab({
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           overflow: "hidden",
@@ -928,7 +928,7 @@ function DeploymentsTab({
                 padding: "8px 16px",
                 borderRadius: 8,
                 border: "1px solid var(--content-border)",
-                background: "#fff",
+                background: "var(--content-bg)",
                 fontSize: 13,
                 cursor: "pointer",
                 color: "var(--text-secondary)",
@@ -1030,7 +1030,7 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           overflow: "hidden",
@@ -1188,7 +1188,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
           <div
             key={repo.id}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid var(--content-border)",
               borderRadius: 12,
               padding: "16px 18px",
@@ -1308,7 +1308,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
                 padding: "8px 16px",
                 borderRadius: 8,
                 border: "1px solid var(--content-border)",
-                background: "#fff",
+                background: "var(--content-bg)",
                 fontSize: 13,
                 cursor: "pointer",
                 color: "var(--text-secondary)",
@@ -1419,7 +1419,7 @@ export default function CodePage() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        background: "#fff",
+        background: "var(--content-bg)",
       }}
     >
       {/* Header */}

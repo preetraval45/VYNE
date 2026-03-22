@@ -179,7 +179,7 @@ function DealModal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 14,
           width: 580,
           maxHeight: "88vh",
@@ -738,7 +738,7 @@ function AddDealModal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 14,
           width: 480,
           maxHeight: "88vh",
@@ -989,7 +989,7 @@ function PipelineTab({
             {/* Column header */}
             <div
               style={{
-                background: "#fff",
+                background: "var(--content-bg)",
                 borderRadius: 10,
                 padding: "10px 12px",
                 border: "1px solid rgba(0,0,0,0.08)",
@@ -1060,7 +1060,7 @@ function PipelineTab({
                     key={deal.id}
                     onClick={() => onDealClick(deal)}
                     style={{
-                      background: "#fff",
+                      background: "var(--content-bg)",
                       borderRadius: 10,
                       padding: "12px 13px",
                       border: showOrange
@@ -1293,7 +1293,7 @@ function DealsTableTab({
               padding: "7px 10px 7px 30px",
               border: "1px solid #D8D8E8",
               borderRadius: 8,
-              background: "#fff",
+              background: "var(--content-bg)",
               outline: "none",
               fontSize: 12,
               color: "var(--text-primary)",
@@ -1344,7 +1344,7 @@ function DealsTableTab({
             padding: "6px 10px",
             border: "1px solid #D8D8E8",
             borderRadius: 8,
-            background: "#fff",
+            background: "var(--content-bg)",
             outline: "none",
             fontSize: 12,
             color: "var(--text-secondary)",
@@ -1363,7 +1363,7 @@ function DealsTableTab({
       {/* Table */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 10,
           overflow: "hidden",
@@ -1635,7 +1635,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
           <div
             key={label}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               borderRadius: 12,
               padding: "18px 20px",
               border: "1px solid rgba(0,0,0,0.08)",
@@ -1699,7 +1699,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
         {/* Bar chart by stage */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             borderRadius: 12,
             padding: "18px 20px",
             border: "1px solid rgba(0,0,0,0.08)",
@@ -1790,7 +1790,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
         {/* Top deals */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             borderRadius: 12,
             padding: "18px 20px",
             border: "1px solid rgba(0,0,0,0.08)",
@@ -1939,7 +1939,7 @@ export default function CRMPage() {
         style={{
           padding: "14px 20px 0",
           borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >

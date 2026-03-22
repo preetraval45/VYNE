@@ -173,7 +173,7 @@ function EmployeeModal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 14,
           width: 720,
           maxHeight: "85vh",
@@ -517,7 +517,7 @@ function EmployeesTab() {
             key={emp.id}
             onClick={() => setSelectedEmp(emp)}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 12,
               padding: "18px 16px",
@@ -751,7 +751,7 @@ function LeaveTab() {
           {/* Balances table */}
           <div
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 12,
               overflow: "hidden",
@@ -875,7 +875,7 @@ function LeaveTab() {
           {/* Pending requests */}
           <div
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid rgba(0,0,0,0.08)",
               borderRadius: 12,
               overflow: "hidden",
@@ -1033,7 +1033,7 @@ function LeaveTab() {
         {/* Right: calendar */}
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: 12,
             padding: "16px",
@@ -1248,7 +1248,7 @@ function PayrollTab() {
       {/* Payroll table */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: 12,
           overflow: "hidden",
@@ -1457,7 +1457,7 @@ function PayrollTab() {
         >
           <div
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               borderRadius: 14,
               width: 420,
               padding: 28,
@@ -1560,7 +1560,7 @@ function OrgNode({ emp }: Readonly<{ emp: Employee }>) {
         alignItems: "center",
         gap: 6,
         padding: "14px 16px",
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         minWidth: 120,
@@ -1731,7 +1731,7 @@ export default function HRPage() {
         style={{
           padding: "14px 20px 0",
           borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >

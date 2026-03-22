@@ -236,7 +236,7 @@ function ThinkingIndicator() {
         alignItems: "center",
         gap: 10,
         padding: "18px 20px",
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(108,71,255,0.15)",
         borderRadius: 12,
         boxShadow: "0 2px 12px rgba(108,71,255,0.06)",
@@ -284,7 +284,7 @@ function ResultCard({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(108,71,255,0.15)",
         borderRadius: 12,
         overflow: "hidden",
@@ -487,7 +487,7 @@ function AgentRunsTable({ runs }: Readonly<{ runs: AgentRun[] }>) {
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid rgba(0,0,0,0.08)",
         borderRadius: 12,
         overflow: "hidden",
@@ -808,7 +808,7 @@ export default function AIPage() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            background: "#F8F8FC",
+            background: "var(--content-bg-secondary)",
           }}
         >
           {/* Purple gradient header */}
@@ -886,7 +886,7 @@ export default function AIPage() {
             {/* ── Query bar ── */}
             <div
               style={{
-                background: "#fff",
+                background: "var(--content-bg)",
                 borderRadius: 14,
                 boxShadow: "0 4px 24px rgba(108,71,255,0.1)",
                 border: "1px solid rgba(108,71,255,0.18)",

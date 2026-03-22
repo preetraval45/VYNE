@@ -76,8 +76,8 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => {
         set({ user: null, token: null, refreshToken: null, error: null });
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
         }
       },
 

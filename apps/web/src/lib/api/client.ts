@@ -38,7 +38,8 @@ function getStoredAuth(): {
   token: string | null;
   refreshToken: string | null;
 } {
-  if (typeof window === "undefined") return { token: null, refreshToken: null };
+  if (globalThis.window === undefined)
+    return { token: null, refreshToken: null };
   try {
     const authStorage = localStorage.getItem("vyne-auth");
     if (authStorage) {
@@ -55,7 +56,7 @@ function getStoredAuth(): {
 }
 
 function updateStoredTokens(token: string, refreshToken: string) {
-  if (typeof window === "undefined") return;
+  if (globalThis.window === undefined) return;
   try {
     const authStorage = localStorage.getItem("vyne-auth");
     if (authStorage) {
@@ -69,7 +70,7 @@ function updateStoredTokens(token: string, refreshToken: string) {
 }
 
 function clearStoredAuth() {
-  if (typeof window === "undefined") return;
+  if (globalThis.window === undefined) return;
   localStorage.removeItem("vyne-auth");
 }
 
@@ -84,7 +85,9 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    throw error;
+  },
 );
 
 // ─── Response Interceptor (with token refresh) ──────────────────
@@ -130,10 +133,10 @@ apiClient.interceptors.response.use(
         // No refresh token available — redirect to login
         isRefreshing = false;
         clearStoredAuth();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
         }
-        return Promise.reject(error);
+        throw error;
       }
 
       try {
@@ -157,16 +160,16 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearStoredAuth();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
         }
-        return Promise.reject(refreshError);
+        throw refreshError;
       } finally {
         isRefreshing = false;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   },
 );
 

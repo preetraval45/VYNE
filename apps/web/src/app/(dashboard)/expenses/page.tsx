@@ -147,7 +147,7 @@ function Modal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 12,
           padding: 24,
           width: 480,
@@ -345,7 +345,7 @@ function MyExpensesTab({
 
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           overflow: "hidden",
@@ -663,7 +663,7 @@ function MyExpensesTab({
                 padding: "8px 16px",
                 borderRadius: 8,
                 border: "1px solid var(--content-border)",
-                background: "#fff",
+                background: "var(--content-bg)",
                 fontSize: 13,
                 cursor: "pointer",
                 color: "var(--text-secondary)",
@@ -792,10 +792,10 @@ function ApprovalsTab({
           <div
             key={e.id}
             style={{
-              background: "#fff",
+              background: "var(--content-bg)",
               border: isOverLimit(e)
                 ? "1px solid rgba(239,68,68,0.3)"
-                : "1px solid #E8E8F0",
+                : "1px solid var(--content-border)",
               borderRadius: 12,
               padding: "14px 18px",
               display: "flex",
@@ -967,7 +967,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
       {/* By category */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "18px 20px",
@@ -1033,7 +1033,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
           style={{
             marginTop: 16,
             paddingTop: 12,
-            borderTop: "1px solid #E8E8F0",
+            borderTop: "1px solid var(--content-border)",
             display: "flex",
             justifyContent: "space-between",
           }}
@@ -1056,7 +1056,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
       {/* Monthly trend */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "18px 20px",
@@ -1145,7 +1145,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
       {/* Policies */}
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "18px 20px",
@@ -1272,7 +1272,7 @@ export default function ExpensesPage() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        background: "#fff",
+        background: "var(--content-bg)",
       }}
     >
       {/* Header */}

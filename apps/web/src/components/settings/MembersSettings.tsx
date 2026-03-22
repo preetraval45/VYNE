@@ -187,7 +187,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                         width: 32,
                         height: 32,
                         borderRadius: "50%",
-                        background: `hsl(${(m.name.charCodeAt(0) * 12) % 360}, 60%, 55%)`,
+                        background: `hsl(${((m.name.codePointAt(0) ?? 0) * 12) % 360}, 60%, 55%)`,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

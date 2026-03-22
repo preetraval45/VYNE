@@ -1,3 +1,5 @@
+"use client";
+
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
@@ -11,7 +13,7 @@ export default function DashboardLayout({
   return (
     <div
       className="flex h-screen overflow-hidden"
-      style={{ background: "#F8F8FC" }}
+      style={{ background: "var(--content-bg-secondary)" }}
       aria-label="Dashboard"
     >
       {/* Skip to content link — visible on keyboard focus */}
@@ -25,7 +27,7 @@ export default function DashboardLayout({
         id="main-content"
         role="main"
         className="flex-1 overflow-auto content-scroll"
-        style={{ background: "#FFFFFF" }}
+        style={{ background: "var(--content-bg)" }}
         tabIndex={-1}
       >
         <ErrorBoundary>{children}</ErrorBoundary>

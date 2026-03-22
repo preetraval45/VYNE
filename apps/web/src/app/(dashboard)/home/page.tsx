@@ -24,10 +24,13 @@ function StatCard({
   deltaColor: string;
 }>) {
   return (
-    <div
-      role="region"
+    <section
       aria-label={`${label}: ${value}`}
-      style={{ background: "#F7F7FB", borderRadius: 8, padding: "14px 16px" }}
+      style={{
+        background: "var(--content-bg-secondary)",
+        borderRadius: 8,
+        padding: "14px 16px",
+      }}
     >
       <div
         style={{
@@ -55,7 +58,7 @@ function StatCard({
       >
         {delta}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -516,29 +519,23 @@ export default function HomePage() {
                   77%
                 </span>
               </div>
-              <div
-                role="progressbar"
-                aria-valuenow={77}
-                aria-valuemin={0}
-                aria-valuemax={100}
+              <progress
+                value={77}
+                max={100}
                 aria-label="Sprint 12 progress: 77%"
                 style={{
                   height: 4,
-                  background: "#F0F0F8",
+                  width: "100%",
                   borderRadius: 4,
                   overflow: "hidden",
                   marginBottom: 16,
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  border: "none",
+                  background: "var(--content-bg-secondary)",
+                  accentColor: "#6C47FF",
                 }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: "77%",
-                    background: "var(--vyne-purple)",
-                    borderRadius: 4,
-                  }}
-                />
-              </div>
+              />
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {SPRINT_BADGES.map(({ label, bg, color }) => (
                   <span
