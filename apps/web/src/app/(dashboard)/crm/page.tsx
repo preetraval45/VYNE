@@ -65,7 +65,7 @@ function fmt(n: number): string {
 }
 
 function daysSince(isoDate: string): number {
-  return Math.floor((NOW - new Date(isoDate).getTime()) / 86400000);
+  return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000);
 }
 
 function initials(name: string): string {
