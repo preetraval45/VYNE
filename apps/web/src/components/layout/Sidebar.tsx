@@ -1,8 +1,32 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Settings, LogOut } from "lucide-react";
+import {
+  Home,
+  MessageSquare,
+  FolderKanban,
+  FileText,
+  Map,
+  GitBranch,
+  Activity,
+  Package,
+  DollarSign,
+  Target,
+  Users,
+  Receipt,
+  Brain,
+  Zap,
+  Settings,
+  Shield,
+  LogOut,
+  Search,
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Hash,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
 import { useTheme, useThemeStore } from "@/lib/stores/theme";
@@ -106,86 +130,38 @@ function MiniAvatar({
   );
 }
 
-// ── Nav section label ─────────────────────────────────────────────
-function SectionLabel({
-  children,
-  id,
-}: Readonly<{ children: React.ReactNode; id?: string }>) {
-  return (
-    <div
-      id={id}
-      style={{
-        fontSize: 9,
-        fontWeight: 600,
-        color: "rgba(255,255,255,0.22)",
-        letterSpacing: "0.08em",
-        padding: "8px 8px 3px",
-        textTransform: "uppercase",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ── Divider ───────────────────────────────────────────────────────
-function SbDivider() {
-  return (
-    <hr
-      style={{
-        height: 1,
-        background: "rgba(255,255,255,0.06)",
-        margin: "6px 0",
-        border: "none",
-      }}
-    />
-  );
-}
-
-// ── Nav item ──────────────────────────────────────────────────────
-interface NavItemProps {
-  readonly icon: string;
+// ── Nav sub-item (inside expandable section) ─────────────────────
+interface NavSubItemProps {
+  readonly icon: LucideIcon;
   readonly label: string;
+  readonly href: string;
   readonly badge?: number;
-  readonly badgeWarn?: boolean;
-  readonly active?: boolean;
+  readonly active: boolean;
   readonly onClick: () => void;
 }
 
-function NavItem({
-  icon,
+function NavSubItem({
+  icon: Icon,
   label,
   badge,
-  badgeWarn,
   active,
   onClick,
-}: NavItemProps) {
+}: NavSubItemProps) {
   const [hovered, setHovered] = useState(false);
 
-  let color = "rgba(255,255,255,0.45)";
+  let color = "rgba(255,255,255,0.5)";
   if (active) color = "#fff";
-  else if (hovered) color = "rgba(255,255,255,0.75)";
+  else if (hovered) color = "rgba(255,255,255,0.8)";
 
   let bg = "transparent";
-  if (active) bg = "rgba(108,71,255,0.2)";
+  if (active) bg = "rgba(108,71,255,0.18)";
   else if (hovered) bg = "rgba(255,255,255,0.06)";
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        onClick();
-      }
-    },
-    [onClick],
-  );
 
   return (
     <button
       role="menuitem"
       aria-current={active ? "page" : undefined}
       onClick={onClick}
-      onKeyDown={handleKeyDown}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -193,39 +169,33 @@ function NavItem({
         display: "flex",
         alignItems: "center",
         gap: 8,
-        padding: "5px 8px",
-        borderRadius: 8,
+        padding: "5px 8px 5px 20px",
+        borderRadius: 7,
         cursor: "pointer",
         fontSize: 12,
         color,
         background: bg,
         border: "none",
+        borderLeft: active ? "2px solid #8B68FF" : "2px solid transparent",
         marginBottom: 1,
         userSelect: "none",
-        transition: "all 0.12s",
+        transition: "all 0.15s ease",
+        textAlign: "left",
       }}
     >
-      <span
-        aria-hidden="true"
+      <Icon
+        size={15}
         style={{
-          width: 18,
-          height: 18,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 13,
-          opacity: active ? 1 : 0.7,
           flexShrink: 0,
+          opacity: active ? 1 : 0.7,
         }}
-      >
-        {icon}
-      </span>
+      />
       <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
       {badge !== undefined && (
         <span
           aria-label={`${badge} notification${badge === 1 ? "" : "s"}`}
           style={{
-            background: badgeWarn ? "#E24B4A" : "var(--vyne-purple)",
+            background: "var(--vyne-purple)",
             color: "#fff",
             borderRadius: 10,
             padding: "1px 6px",
@@ -239,6 +209,165 @@ function NavItem({
         </span>
       )}
     </button>
+  );
+}
+
+// ── Direct link nav item (Home, Settings, Admin) ─────────────────
+interface NavDirectItemProps {
+  readonly icon: LucideIcon;
+  readonly label: string;
+  readonly active: boolean;
+  readonly onClick: () => void;
+}
+
+function NavDirectItem({
+  icon: Icon,
+  label,
+  active,
+  onClick,
+}: NavDirectItemProps) {
+  const [hovered, setHovered] = useState(false);
+
+  let color = "rgba(255,255,255,0.5)";
+  if (active) color = "#fff";
+  else if (hovered) color = "rgba(255,255,255,0.8)";
+
+  let bg = "transparent";
+  if (active) bg = "rgba(108,71,255,0.18)";
+  else if (hovered) bg = "rgba(255,255,255,0.06)";
+
+  return (
+    <button
+      role="menuitem"
+      aria-current={active ? "page" : undefined}
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "6px 8px",
+        borderRadius: 7,
+        cursor: "pointer",
+        fontSize: 12.5,
+        fontWeight: 500,
+        color,
+        background: bg,
+        border: "none",
+        borderLeft: active ? "2px solid #8B68FF" : "2px solid transparent",
+        marginBottom: 1,
+        userSelect: "none",
+        transition: "all 0.15s ease",
+        textAlign: "left",
+      }}
+    >
+      <Icon
+        size={16}
+        style={{
+          flexShrink: 0,
+          opacity: active ? 1 : 0.7,
+        }}
+      />
+      <span style={{ flex: 1, textAlign: "left" }}>{label}</span>
+    </button>
+  );
+}
+
+// ── Expandable section ───────────────────────────────────────────
+interface SubItemDef {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+  badge?: number;
+}
+
+interface ExpandableSectionProps {
+  readonly title: string;
+  readonly items: SubItemDef[];
+  readonly expanded: boolean;
+  readonly onToggle: () => void;
+  readonly pathname: string;
+  readonly onNavigate: (href: string) => void;
+}
+
+function ExpandableSection({
+  title,
+  items,
+  expanded,
+  onToggle,
+  pathname,
+  onNavigate,
+}: ExpandableSectionProps) {
+  const [hovered, setHovered] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, [items]);
+
+  return (
+    <div style={{ marginBottom: 2 }}>
+      {/* Section header */}
+      <button
+        onClick={onToggle}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        aria-expanded={expanded}
+        style={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          padding: "6px 8px 4px",
+          cursor: "pointer",
+          fontSize: 10,
+          fontWeight: 600,
+          color: hovered ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.4)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          background: "transparent",
+          border: "none",
+          borderRadius: 4,
+          transition: "color 0.15s ease",
+          userSelect: "none",
+        }}
+      >
+        {expanded ? (
+          <ChevronDown size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
+        ) : (
+          <ChevronRight size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
+        )}
+        <span style={{ flex: 1, textAlign: "left" }}>{title}</span>
+      </button>
+
+      {/* Collapsible sub-items */}
+      <div
+        style={{
+          overflow: "hidden",
+          maxHeight: expanded ? contentHeight + 8 : 0,
+          transition: "max-height 0.2s ease-in-out",
+        }}
+      >
+        <div ref={contentRef} style={{ padding: "2px 0" }}>
+          {items.map((item) => (
+            <NavSubItem
+              key={item.href}
+              icon={item.icon}
+              label={item.label}
+              href={item.href}
+              badge={item.badge}
+              active={pathname.startsWith(item.href)}
+              onClick={() => onNavigate(item.href)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -272,7 +401,7 @@ function ChannelItem({
         display: "flex",
         alignItems: "center",
         gap: 7,
-        padding: "3px 8px",
+        padding: "3px 8px 3px 20px",
         borderRadius: 6,
         cursor: "pointer",
         fontSize: 11,
@@ -284,25 +413,7 @@ function ChannelItem({
         transition: "all 0.12s",
       }}
     >
-      {unread ? (
-        <span
-          aria-hidden="true"
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "var(--vyne-purple)",
-            flexShrink: 0,
-          }}
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          style={{ fontSize: 11, opacity: 0.4, width: 12 }}
-        >
-          #
-        </span>
-      )}
+      <Hash size={12} style={{ opacity: 0.5, flexShrink: 0 }} />
       <span style={{ flex: 1, textAlign: "left" }}>{name}</span>
       {isAI && (
         <span
@@ -360,7 +471,7 @@ function DMItem({
         display: "flex",
         alignItems: "center",
         gap: 7,
-        padding: "3px 8px",
+        padding: "3px 8px 3px 20px",
         borderRadius: 6,
         cursor: "pointer",
         fontSize: 11,
@@ -378,7 +489,7 @@ function DMItem({
         </span>
       </span>
       <span style={{ flex: 1, textAlign: "left" }}>{name}</span>
-      {badge && (
+      {badge !== undefined && badge > 0 && (
         <span
           aria-label={`${badge} unread message${badge === 1 ? "" : "s"}`}
           style={{
@@ -397,6 +508,80 @@ function DMItem({
   );
 }
 
+// ── Divider ───────────────────────────────────────────────────────
+function SbDivider() {
+  return (
+    <hr
+      style={{
+        height: 1,
+        background: "rgba(255,255,255,0.06)",
+        margin: "6px 0",
+        border: "none",
+      }}
+    />
+  );
+}
+
+// ── Section navigation data ───────────────────────────────────────
+interface NavSection {
+  key: string;
+  title: string;
+  items: SubItemDef[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
+  {
+    key: "work",
+    title: "Work",
+    items: [
+      { icon: MessageSquare, label: "Chat", href: "/chat", badge: 3 },
+      { icon: FolderKanban, label: "Projects", href: "/projects", badge: 2 },
+      { icon: FileText, label: "Docs", href: "/docs" },
+      { icon: Map, label: "Roadmap", href: "/roadmap" },
+    ],
+  },
+  {
+    key: "devops",
+    title: "DevOps",
+    items: [
+      { icon: GitBranch, label: "Code", href: "/code" },
+      { icon: Activity, label: "Observe", href: "/observe", badge: 1 },
+    ],
+  },
+  {
+    key: "business",
+    title: "Business",
+    items: [
+      { icon: Package, label: "Ops / ERP", href: "/ops" },
+      { icon: DollarSign, label: "Finance", href: "/finance" },
+      { icon: Target, label: "CRM", href: "/crm" },
+      { icon: Users, label: "HR", href: "/hr" },
+      { icon: Receipt, label: "Expenses", href: "/expenses" },
+    ],
+  },
+  {
+    key: "intelligence",
+    title: "Intelligence",
+    items: [
+      { icon: Brain, label: "AI Assistant", href: "/ai" },
+      { icon: Zap, label: "Automations", href: "/automations" },
+    ],
+  },
+];
+
+// ── Helper: determine which sections should be auto-expanded ─────
+function getAutoExpandedSections(pathname: string): Set<string> {
+  const expanded = new Set<string>();
+  for (const section of NAV_SECTIONS) {
+    for (const item of section.items) {
+      if (pathname.startsWith(item.href)) {
+        expanded.add(section.key);
+      }
+    }
+  }
+  return expanded;
+}
+
 // ── Main Sidebar ──────────────────────────────────────────────────
 export function Sidebar() {
   const pathname = usePathname();
@@ -407,9 +592,39 @@ export function Sidebar() {
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
 
-  function isActive(href: string) {
-    return pathname.startsWith(href);
-  }
+  // Compute initial expanded sections based on current pathname
+  const initialExpanded = useMemo(
+    () => getAutoExpandedSections(pathname),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [], // Only compute on mount
+  );
+
+  const [expandedSections, setExpandedSections] =
+    useState<Set<string>>(initialExpanded);
+
+  // Auto-expand section when navigating to a page within it
+  useEffect(() => {
+    const autoExpanded = getAutoExpandedSections(pathname);
+    if (autoExpanded.size > 0) {
+      setExpandedSections((prev) => {
+        const next = new Set(prev);
+        autoExpanded.forEach((key) => next.add(key));
+        return next;
+      });
+    }
+  }, [pathname]);
+
+  const toggleSection = useCallback((key: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   function go(href: string) {
     router.push(href);
@@ -441,7 +656,7 @@ export function Sidebar() {
         zIndex: 10,
       }}
     >
-      {/* ── Workspace ─────────────────────────────── */}
+      {/* ── Workspace header ───────────────────────── */}
       <div
         style={{
           padding: "10px 10px 6px",
@@ -507,7 +722,7 @@ export function Sidebar() {
               marginLeft: "auto",
             }}
           >
-            ⌄
+            <ChevronDown size={14} />
           </span>
         </button>
 
@@ -578,7 +793,7 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* ── Search / ⌘K ───────────────────────────── */}
+      {/* ── Search / Cmd+K ─────────────────────────── */}
       <button
         onClick={toggleCommandPalette}
         aria-label="Search Vyne, press Command K"
@@ -607,12 +822,10 @@ export function Sidebar() {
             "rgba(255,255,255,0.08)";
         }}
       >
-        <span
-          aria-hidden="true"
-          style={{ fontSize: 14, color: "rgba(255,255,255,0.35)" }}
-        >
-          🔍
-        </span>
+        <Search
+          size={14}
+          style={{ color: "rgba(255,255,255,0.35)", flexShrink: 0 }}
+        />
         <span
           style={{
             fontSize: 11,
@@ -638,154 +851,130 @@ export function Sidebar() {
         </kbd>
       </button>
 
-      {/* ── Nav ───────────────────────────────────── */}
+      {/* ── Scrollable nav area ────────────────────── */}
       <div
         className="sidebar-scroll"
         role="menu"
         aria-label="Navigation menu"
-        style={{ padding: "4px 8px", flex: 1, overflowY: "auto" }}
+        style={{
+          padding: "4px 8px",
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+        }}
       >
-        <NavItem
-          icon="◈"
+        {/* Home — direct link */}
+        <NavDirectItem
+          icon={Home}
           label="Home"
           active={pathname === "/home" || pathname === "/"}
           onClick={() => go("/home")}
         />
-        <NavItem
-          icon="📥"
-          label="Inbox"
-          active={isActive("/chat")}
-          badge={5}
-          onClick={() => go("/chat")}
+
+        <SbDivider />
+
+        {/* Expandable sections */}
+        {NAV_SECTIONS.map((section) => (
+          <ExpandableSection
+            key={section.key}
+            title={section.title}
+            items={section.items}
+            expanded={expandedSections.has(section.key)}
+            onToggle={() => toggleSection(section.key)}
+            pathname={pathname}
+            onNavigate={go}
+          />
+        ))}
+
+        <SbDivider />
+
+        {/* Settings — direct link */}
+        <NavDirectItem
+          icon={Settings}
+          label="Settings"
+          active={pathname.startsWith("/settings")}
+          onClick={() => go("/settings")}
+        />
+
+        {/* Admin Panel — direct link */}
+        <NavDirectItem
+          icon={Shield}
+          label="Admin Panel"
+          active={pathname.startsWith("/admin")}
+          onClick={() => go("/admin")}
         />
 
         <SbDivider />
-        <SectionLabel id="nav-section-work">Work</SectionLabel>
-        <div aria-labelledby="nav-section-work">
-          <NavItem
-            icon="💬"
-            label="Chat"
-            active={isActive("/chat")}
-            badge={3}
-            onClick={() => go("/chat")}
-          />
-          <NavItem
-            icon="◷"
-            label="Projects"
-            active={isActive("/projects")}
-            badge={2}
-            badgeWarn
-            onClick={() => go("/projects")}
-          />
-          <NavItem
-            icon="📄"
-            label="Docs"
-            active={isActive("/docs")}
-            onClick={() => go("/docs")}
-          />
-        </div>
 
-        <SbDivider />
-        <SectionLabel id="nav-section-devops">DevOps + AI</SectionLabel>
-        <div aria-labelledby="nav-section-devops">
-          <NavItem
-            icon="⌨"
-            label="Code"
-            active={isActive("/code")}
-            onClick={() => go("/code")}
-          />
-          <NavItem
-            icon="📊"
-            label="Observe"
-            active={isActive("/observe")}
-            badge={1}
-            badgeWarn
-            onClick={() => go("/observe")}
-          />
-        </div>
-
-        <SbDivider />
-        <SectionLabel id="nav-section-business">Business</SectionLabel>
-        <div aria-labelledby="nav-section-business">
-          <NavItem
-            icon="📦"
-            label="Ops"
-            active={isActive("/ops")}
-            onClick={() => go("/ops")}
-          />
-          <NavItem
-            icon="💰"
-            label="Finance"
-            active={isActive("/finance")}
-            onClick={() => go("/finance")}
-          />
-          <NavItem
-            icon="🎯"
-            label="CRM"
-            active={isActive("/crm")}
-            onClick={() => go("/crm")}
-          />
-          <NavItem
-            icon="👥"
-            label="HR"
-            active={isActive("/hr")}
-            onClick={() => go("/hr")}
-          />
-          <NavItem
-            icon="🧾"
-            label="Expenses"
-            active={isActive("/expenses")}
-            onClick={() => go("/expenses")}
-          />
-        </div>
-
-        <SbDivider />
-        <SectionLabel id="nav-section-intelligence">Intelligence</SectionLabel>
-        <div aria-labelledby="nav-section-intelligence">
-          <NavItem
-            icon="🧠"
-            label="AI Assistant"
-            active={isActive("/ai")}
-            onClick={() => go("/ai")}
-          />
-          <NavItem
-            icon="⚡"
-            label="Automations"
-            active={isActive("/automations")}
-            onClick={() => go("/automations")}
-          />
-          <NavItem
-            icon="🗺"
-            label="Roadmap"
-            active={isActive("/roadmap")}
-            onClick={() => go("/roadmap")}
-          />
-          <NavItem
-            icon="⚙"
-            label="Settings"
-            active={isActive("/settings")}
-            onClick={() => go("/settings")}
-          />
-          <NavItem
-            icon="🛡"
-            label="Admin Panel"
-            active={isActive("/admin")}
-            onClick={() => go("/admin")}
-          />
-        </div>
-
-        <SbDivider />
-        <SectionLabel id="nav-section-channels">Channels</SectionLabel>
-        <div aria-labelledby="nav-section-channels">
+        {/* ── Channels section ─────────────────────── */}
+        <div style={{ marginBottom: 2 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "6px 8px 4px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.4)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                flex: 1,
+              }}
+            >
+              Channels
+            </span>
+            <button
+              aria-label="Add channel"
+              onClick={() => go("/chat")}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "rgba(255,255,255,0.3)",
+                padding: 2,
+                borderRadius: 4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "rgba(255,255,255,0.7)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "rgba(255,255,255,0.3)")
+              }
+            >
+              <Plus size={13} />
+            </button>
+          </div>
           <ChannelItem name="general" onClick={() => go("/chat")} />
-          <ChannelItem name="alerts" unread isAI onClick={() => go("/chat")} />
-          <ChannelItem name="deployments" isAI onClick={() => go("/chat")} />
-          <ChannelItem name="eng-team" unread onClick={() => go("/chat")} />
-          <ChannelItem name="inventory" isAI onClick={() => go("/chat")} />
+          <ChannelItem name="alerts" isAI onClick={() => go("/chat")} />
+          <ChannelItem name="deployments" onClick={() => go("/chat")} />
+          <ChannelItem name="eng-team" onClick={() => go("/chat")} />
+          <ChannelItem name="inventory" onClick={() => go("/chat")} />
         </div>
 
-        <SectionLabel id="nav-section-dms">Direct Messages</SectionLabel>
-        <div aria-labelledby="nav-section-dms">
+        {/* ── Direct Messages section ──────────────── */}
+        <div style={{ marginBottom: 8 }}>
+          <div
+            style={{
+              padding: "6px 8px 4px",
+              fontSize: 10,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.4)",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+            }}
+          >
+            Direct Messages
+          </div>
           <DMItem
             name="Sarah K."
             initials="S"
@@ -811,7 +1000,7 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* ── User footer ───────────────────────────── */}
+      {/* ── User footer ────────────────────────────── */}
       <div
         style={{
           padding: "10px 12px",
@@ -860,7 +1049,6 @@ export function Sidebar() {
             system: "Switch to light mode",
           }[theme];
 
-          // Sun icon for dark mode, Moon icon for light mode, Monitor for system
           const iconMap = {
             light: (
               <svg
