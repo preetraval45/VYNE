@@ -22,6 +22,8 @@ import {
   LogOut,
   ChevronRight,
   Menu,
+  FileSpreadsheet,
+  Wrench,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -242,6 +244,34 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "All Rules", href: "/automations" },
       { label: "Run History", href: "/automations" },
       { label: "Templates", href: "/automations" },
+    ],
+  },
+  {
+    icon: FileSpreadsheet,
+    label: "Invoicing",
+    href: "/invoicing",
+    color: "#2ECC71",
+    subs: [
+      { label: "Customers", href: "/invoicing" },
+      { label: "Invoices", href: "/invoicing" },
+      { label: "Credit Notes", href: "/invoicing" },
+      { label: "Payments", href: "/invoicing" },
+      { label: "Vendors", href: "/invoicing" },
+      { label: "Bills", href: "/invoicing" },
+      { label: "Refunds", href: "/invoicing" },
+    ],
+  },
+  {
+    icon: Wrench,
+    label: "Maintenance",
+    href: "/maintenance",
+    color: "#E67E22",
+    subs: [
+      { label: "Equipment", href: "/maintenance" },
+      { label: "Requests", href: "/maintenance" },
+      { label: "Preventive", href: "/maintenance" },
+      { label: "Work Orders", href: "/maintenance" },
+      { label: "Parts & Inventory", href: "/maintenance" },
     ],
   },
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },

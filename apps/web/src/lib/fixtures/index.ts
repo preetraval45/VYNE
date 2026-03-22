@@ -9,3 +9,4 @@ export * from "./hr";
 export * from "./expenses";
 export * from "./ai";
 export * from "./automations";
+export * from "./projects";

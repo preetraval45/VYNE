@@ -304,6 +304,18 @@ export default function HomePage() {
                 href: "/roadmap",
               },
               {
+                label: "Invoicing",
+                icon: "📑",
+                color: "#2ECC71",
+                href: "/invoicing",
+              },
+              {
+                label: "Maintenance",
+                icon: "🔧",
+                color: "#E67E22",
+                href: "/maintenance",
+              },
+              {
                 label: "Settings",
                 icon: "⚙️",
                 color: "#7F8C8D",
