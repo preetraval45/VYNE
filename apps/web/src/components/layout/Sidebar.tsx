@@ -26,7 +26,12 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
-import { useTheme, useThemeStore } from "@/lib/stores/theme";
+import {
+  useTheme,
+  useThemeStore,
+  ACCENT_COLORS,
+  type AccentColor,
+} from "@/lib/stores/theme";
 
 // ── Vyne logo (exact SVG from prototype) ──────────────────────────
 function VyneLogo({ size = 20 }: Readonly<{ size?: number }>) {
@@ -80,12 +85,18 @@ function VyneLogo({ size = 20 }: Readonly<{ size?: number }>) {
 }
 
 // ── Navigation item definition ────────────────────────────────────
+interface SubItem {
+  label: string;
+  href: string;
+}
+
 interface NavItemDef {
   icon: LucideIcon;
   label: string;
   href: string;
   color: string;
   badge?: number;
+  subs?: SubItem[];
 }
 
 const NAV_ITEMS: NavItemDef[] = [
@@ -96,6 +107,11 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/chat",
     color: "#3498DB",
     badge: 3,
+    subs: [
+      { label: "Channels", href: "/chat" },
+      { label: "Direct Messages", href: "/chat" },
+      { label: "Threads", href: "/chat" },
+    ],
   },
   {
     icon: FolderKanban,
@@ -103,25 +119,145 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/projects",
     color: "#9B59B6",
     badge: 2,
+    subs: [
+      { label: "All Projects", href: "/projects" },
+      { label: "Issues", href: "/projects" },
+      { label: "Sprints", href: "/projects" },
+      { label: "Roadmap", href: "/roadmap" },
+    ],
   },
-  { icon: FileText, label: "Docs", href: "/docs", color: "#2ECC71" },
-  { icon: Package, label: "Ops / ERP", href: "/ops", color: "#F39C12" },
-  { icon: DollarSign, label: "Finance", href: "/finance", color: "#1ABC9C" },
-  { icon: Target, label: "CRM", href: "/crm", color: "#E67E22" },
-  { icon: Users, label: "HR", href: "/hr", color: "#3498DB" },
-  { icon: Receipt, label: "Expenses", href: "/expenses", color: "#95A5A6" },
-  { icon: GitBranch, label: "Code / DevOps", href: "/code", color: "#8E44AD" },
+  {
+    icon: FileText,
+    label: "Docs",
+    href: "/docs",
+    color: "#2ECC71",
+    subs: [
+      { label: "All Documents", href: "/docs" },
+      { label: "Recent", href: "/docs" },
+      { label: "Shared with Me", href: "/docs" },
+    ],
+  },
+  {
+    icon: Package,
+    label: "Ops / ERP",
+    href: "/ops",
+    color: "#F39C12",
+    subs: [
+      { label: "Overview", href: "/ops" },
+      { label: "Inventory", href: "/ops" },
+      { label: "Orders", href: "/ops" },
+      { label: "Suppliers", href: "/ops" },
+      { label: "Manufacturing", href: "/ops" },
+    ],
+  },
+  {
+    icon: DollarSign,
+    label: "Finance",
+    href: "/finance",
+    color: "#1ABC9C",
+    subs: [
+      { label: "P&L Statement", href: "/finance" },
+      { label: "Journal Entries", href: "/finance" },
+      { label: "Chart of Accounts", href: "/finance" },
+      { label: "Invoices", href: "/finance" },
+    ],
+  },
+  {
+    icon: Target,
+    label: "CRM",
+    href: "/crm",
+    color: "#E67E22",
+    subs: [
+      { label: "Pipeline", href: "/crm" },
+      { label: "Contacts", href: "/crm" },
+      { label: "Deals", href: "/crm" },
+      { label: "Activities", href: "/crm" },
+    ],
+  },
+  {
+    icon: Users,
+    label: "HR",
+    href: "/hr",
+    color: "#3498DB",
+    subs: [
+      { label: "Employees", href: "/hr" },
+      { label: "Leave", href: "/hr" },
+      { label: "Payroll", href: "/hr" },
+      { label: "Org Chart", href: "/hr" },
+    ],
+  },
+  {
+    icon: Receipt,
+    label: "Expenses",
+    href: "/expenses",
+    color: "#95A5A6",
+    subs: [
+      { label: "My Expenses", href: "/expenses" },
+      { label: "Approvals", href: "/expenses" },
+      { label: "Reports", href: "/expenses" },
+    ],
+  },
+  {
+    icon: GitBranch,
+    label: "Code / DevOps",
+    href: "/code",
+    color: "#8E44AD",
+    subs: [
+      { label: "Deployments", href: "/code" },
+      { label: "Pull Requests", href: "/code" },
+      { label: "Repositories", href: "/code" },
+    ],
+  },
   {
     icon: Activity,
     label: "Observe",
     href: "/observe",
     color: "#E74C3C",
     badge: 1,
+    subs: [
+      { label: "Overview", href: "/observe" },
+      { label: "Metrics", href: "/observe" },
+      { label: "Logs", href: "/observe" },
+      { label: "Alerts", href: "/observe" },
+      { label: "Traces", href: "/observe" },
+    ],
   },
-  { icon: Brain, label: "AI Assistant", href: "/ai", color: "#6C47FF" },
-  { icon: Zap, label: "Automations", href: "/automations", color: "#F1C40F" },
+  {
+    icon: Brain,
+    label: "AI Assistant",
+    href: "/ai",
+    color: "#6C47FF",
+    subs: [
+      { label: "Insights", href: "/ai" },
+      { label: "Ask AI", href: "/ai" },
+      { label: "Agent Runs", href: "/ai" },
+    ],
+  },
+  {
+    icon: Zap,
+    label: "Automations",
+    href: "/automations",
+    color: "#F1C40F",
+    subs: [
+      { label: "All Rules", href: "/automations" },
+      { label: "Run History", href: "/automations" },
+      { label: "Templates", href: "/automations" },
+    ],
+  },
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
-  { icon: Settings, label: "Settings", href: "/settings", color: "#7F8C8D" },
+  {
+    icon: Settings,
+    label: "Settings",
+    href: "/settings",
+    color: "#7F8C8D",
+    subs: [
+      { label: "General", href: "/settings" },
+      { label: "Members", href: "/settings" },
+      { label: "Notifications", href: "/settings" },
+      { label: "ERP Config", href: "/settings" },
+      { label: "Billing", href: "/settings" },
+    ],
+  },
   { icon: Shield, label: "Admin", href: "/admin", color: "#2C3E50" },
 ];
 
@@ -132,95 +268,224 @@ function getNavRowBg(active: boolean, hovered: boolean): string {
   return "transparent";
 }
 
-// ── Single nav row ────────────────────────────────────────────────
+// ── Single nav row with expandable sub-items ─────────────────────
 interface NavRowProps {
   readonly item: NavItemDef;
   readonly active: boolean;
-  readonly onClick: () => void;
+  readonly expanded: boolean;
+  readonly onToggle: () => void;
+  readonly onNavigate: (href: string) => void;
 }
 
-function NavRow({ item, active, onClick }: NavRowProps) {
+function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
   const [hovered, setHovered] = useState(false);
   const Icon = item.icon;
+  const hasSubs = item.subs && item.subs.length > 0;
 
   return (
-    <button
-      role="menuitem"
-      aria-current={active ? "page" : undefined}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: "100%",
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        padding: "12px 16px",
-        cursor: "pointer",
-        fontSize: 13,
-        fontWeight: active ? 600 : 450,
-        color: "var(--text-primary)",
-        background: getNavRowBg(active, hovered),
-        border: "none",
-        borderLeft: active ? "3px solid #6C47FF" : "3px solid transparent",
-        transition: "all 0.15s ease",
-        textAlign: "left",
-        userSelect: "none",
-        position: "relative",
-      }}
-    >
-      {/* Colored icon circle */}
-      <span
-        aria-hidden="true"
+    <div>
+      <button
+        role="menuitem"
+        aria-current={active ? "page" : undefined}
+        aria-expanded={hasSubs ? expanded : undefined}
+        onClick={() => {
+          if (hasSubs) {
+            onToggle();
+          } else {
+            onNavigate(item.href);
+          }
+        }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         style={{
-          width: 24,
-          height: 24,
-          borderRadius: 6,
-          background: `rgba(${hexToRgb(item.color)}, 0.12)`,
-          color: item.color,
-          display: "inline-flex",
+          width: "100%",
+          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
+          gap: 10,
+          padding: "10px 16px",
+          cursor: "pointer",
+          fontSize: 13,
+          fontWeight: active ? 600 : 450,
+          color: "var(--text-primary)",
+          background: getNavRowBg(active, hovered),
+          border: "none",
+          borderLeft: active
+            ? "3px solid var(--vyne-purple)"
+            : "3px solid transparent",
+          transition: "all 0.15s ease",
+          textAlign: "left",
+          userSelect: "none",
+          position: "relative",
         }}
       >
-        <Icon size={14} />
-      </span>
-
-      {/* Label */}
-      <span style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
-
-      {/* Badge */}
-      {item.badge !== undefined && item.badge > 0 && (
+        {/* Colored icon circle */}
         <span
-          aria-label={`${item.badge} notification${item.badge === 1 ? "" : "s"}`}
+          aria-hidden="true"
           style={{
-            background: "#6C47FF",
-            color: "#fff",
-            borderRadius: 10,
-            padding: "1px 6px",
-            fontSize: 10,
-            fontWeight: 600,
-            minWidth: 18,
-            textAlign: "center",
-            lineHeight: "16px",
+            width: 24,
+            height: 24,
+            borderRadius: 6,
+            background: `rgba(${hexToRgb(item.color)}, 0.12)`,
+            color: item.color,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
           }}
         >
-          {item.badge}
+          <Icon size={14} />
         </span>
-      )}
 
-      {/* Chevron arrow */}
-      <ChevronRight
-        size={14}
+        {/* Label */}
+        <span style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
+
+        {/* Badge */}
+        {item.badge !== undefined && item.badge > 0 && (
+          <span
+            aria-label={`${item.badge} notification${item.badge === 1 ? "" : "s"}`}
+            style={{
+              background: "var(--vyne-purple)",
+              color: "#fff",
+              borderRadius: 10,
+              padding: "1px 6px",
+              fontSize: 10,
+              fontWeight: 600,
+              minWidth: 18,
+              textAlign: "center",
+              lineHeight: "16px",
+            }}
+          >
+            {item.badge}
+          </span>
+        )}
+
+        {/* Chevron arrow — rotates when expanded */}
+        <ChevronRight
+          size={14}
+          style={{
+            color: "var(--text-tertiary)",
+            flexShrink: 0,
+            opacity: hovered || active ? 0.8 : 0.4,
+            transition: "all 0.15s ease",
+            transform: expanded ? "rotate(90deg)" : "none",
+          }}
+        />
+      </button>
+
+      {/* Sub-items dropdown */}
+      {hasSubs && expanded && (
+        <div
+          style={{
+            overflow: "hidden",
+            borderLeft: "3px solid transparent",
+          }}
+        >
+          {item.subs!.map((sub) => (
+            <button
+              key={sub.label}
+              onClick={() => onNavigate(sub.href)}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.background =
+                  "rgba(108,71,255,0.04)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.background =
+                  "transparent")
+              }
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "7px 16px 7px 50px",
+                cursor: "pointer",
+                fontSize: 12,
+                color: "var(--text-secondary)",
+                background: "transparent",
+                border: "none",
+                textAlign: "left",
+                transition: "all 0.12s ease",
+              }}
+            >
+              <span
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: "50%",
+                  background: "var(--text-tertiary)",
+                  flexShrink: 0,
+                }}
+              />
+              {sub.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Color Picker Component ─────────────────────────────────────────
+function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
+  const accent = useThemeStore((s) => s.accent);
+  const setAccent = useThemeStore((s) => s.setAccent);
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "100%",
+        left: 0,
+        right: 0,
+        marginBottom: 8,
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
+        borderRadius: 10,
+        padding: "12px 14px",
+        boxShadow: "var(--shadow-lg)",
+        zIndex: 100,
+      }}
+    >
+      <div
         style={{
-          color: "var(--text-tertiary)",
-          flexShrink: 0,
-          opacity: hovered || active ? 0.8 : 0.4,
-          transition: "opacity 0.15s ease",
+          fontSize: 11,
+          fontWeight: 600,
+          color: "var(--text-secondary)",
+          marginBottom: 8,
         }}
-      />
-    </button>
+      >
+        Accent Color
+      </div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {(Object.keys(ACCENT_COLORS) as AccentColor[]).map((key) => {
+          const c = ACCENT_COLORS[key];
+          const isActive = accent === key;
+          return (
+            <button
+              key={key}
+              title={c.label}
+              onClick={() => {
+                setAccent(key);
+                onClose();
+              }}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: c.primary,
+                border: isActive
+                  ? "3px solid var(--text-primary)"
+                  : "3px solid transparent",
+                cursor: "pointer",
+                outline: isActive ? `2px solid ${c.primary}` : "none",
+                outlineOffset: 2,
+                transition: "all 0.15s",
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -240,6 +505,20 @@ export function Sidebar() {
   const theme = useTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const toggleExpand = useCallback((label: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }, []);
 
   const go = useCallback(
     (href: string) => {
@@ -355,10 +634,12 @@ export function Sidebar() {
       >
         {NAV_ITEMS.map((item) => (
           <NavRow
-            key={item.href}
+            key={item.label}
             item={item}
             active={isActive(item.href)}
-            onClick={() => go(item.href)}
+            expanded={expandedItems.has(item.label)}
+            onToggle={() => toggleExpand(item.label)}
+            onNavigate={go}
           />
         ))}
       </div>
@@ -544,6 +825,58 @@ export function Sidebar() {
             </button>
           );
         })()}
+
+        {/* Color picker button */}
+        <div style={{ position: "relative" }}>
+          <button
+            onClick={() => setShowColorPicker(!showColorPicker)}
+            aria-label="Change accent color"
+            title="Accent color"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+              borderRadius: 6,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLElement).style.color =
+                "var(--vyne-purple)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLElement).style.color =
+                "var(--text-tertiary)")
+            }
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+                fill="var(--vyne-purple)"
+                stroke="none"
+              />
+            </svg>
+          </button>
+          {showColorPicker && (
+            <AccentPicker onClose={() => setShowColorPicker(false)} />
+          )}
+        </div>
 
         {/* Logout button */}
         <button
