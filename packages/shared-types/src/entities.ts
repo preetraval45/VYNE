@@ -477,6 +477,71 @@ export interface AlertHistory {
   status: "firing" | "resolved";
 }
 
+// ── Code / DevOps ────────────────────────────────────────────
+
+export type DeploymentStatus =
+  | "in_progress"
+  | "success"
+  | "failed"
+  | "rolled_back";
+
+export interface Deployment {
+  id: UUID;
+  orgId: UUID;
+  serviceName: string;
+  version: string | null;
+  environment: string;
+  status: DeploymentStatus;
+  triggeredBy: UUID | null;
+  commitSha: string | null;
+  commitMessage: string | null;
+  branch: string | null;
+  startedAt: ISODateString;
+  completedAt: ISODateString | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface DeploymentStats {
+  totalThisWeek: number;
+  successRate: number | null;
+  avgDurationSeconds: number | null;
+}
+
+export type PullRequestState = "open" | "closed" | "merged";
+
+export interface PullRequest {
+  id: UUID;
+  orgId: UUID;
+  repoName: string;
+  prNumber: number;
+  title: string | null;
+  state: PullRequestState;
+  author: string | null;
+  baseBranch: string | null;
+  headBranch: string | null;
+  url: string | null;
+  openedAt: ISODateString | null;
+  mergedAt: ISODateString | null;
+  closedAt: ISODateString | null;
+}
+
+export interface PullRequestStats {
+  openCount: number;
+  mergedThisWeek: number;
+  avgHoursToMerge: number | null;
+}
+
+export interface Repository {
+  id: UUID;
+  orgId: UUID;
+  repoName: string;
+  githubUrl: string | null;
+  defaultBranch: string;
+  connectedAt: ISODateString;
+  lastDeployAt: ISODateString | null;
+  lastDeployStatus: DeploymentStatus | null;
+}
+
 // ── Notifications ────────────────────────────────────────────
 
 export type NotificationType =
@@ -502,3 +567,38 @@ export interface Notification {
   readAt: ISODateString | null;
   createdAt: ISODateString;
 }
+
+// ── Status / Priority Metadata ──────────────────────────────
+
+export const STATUS_META: Record<
+  Exclude<IssueStatus, "cancelled">,
+  { label: string; color: string; bgColor: string }
+> = {
+  backlog: { label: "Backlog", color: "#A0A0B8", bgColor: "#F0F0F8" },
+  todo: { label: "Todo", color: "#6B6B8A", bgColor: "#EBEBF5" },
+  in_progress: { label: "In Progress", color: "#3B82F6", bgColor: "#EFF6FF" },
+  in_review: { label: "In Review", color: "#F59E0B", bgColor: "#FFFBEB" },
+  done: { label: "Done", color: "#22C55E", bgColor: "#F0FDF4" },
+};
+
+export const PRIORITY_META: Record<
+  IssuePriority,
+  { label: string; color: string }
+> = {
+  urgent: { label: "Urgent", color: "#EF4444" },
+  high: { label: "High", color: "#F59E0B" },
+  medium: { label: "Medium", color: "#3B82F6" },
+  low: { label: "Low", color: "#A0A0B8" },
+  none: { label: "No Priority", color: "#D1D1E0" },
+};
+
+export const PROJECT_COLORS = [
+  "#6C47FF",
+  "#3B82F6",
+  "#22C55E",
+  "#F59E0B",
+  "#EF4444",
+  "#EC4899",
+  "#8B5CF6",
+  "#06B6D4",
+] as const;

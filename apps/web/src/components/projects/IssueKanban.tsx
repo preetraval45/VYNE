@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -12,62 +12,67 @@ import {
   type DragStartEvent,
   type DragOverEvent,
   closestCorners,
-} from '@dnd-kit/core'
+} from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Loader2 } from 'lucide-react'
-import type { Issue, IssueStatus, Project } from '@/types'
-import { STATUS_META } from '@/types'
-import { IssueCard } from './IssueCard'
-import { useCreateIssue, useReorderIssues } from '@/hooks/useIssues'
-import { useQueryClient } from '@tanstack/react-query'
-import { issueKeys } from '@/hooks/useIssues'
-import { cn } from '@/lib/utils'
-import toast from 'react-hot-toast'
+} from "@dnd-kit/sortable";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Loader2 } from "lucide-react";
+import type { Issue, IssueStatus, Project } from "@/types";
+import { STATUS_META } from "@/types";
+import { IssueCard } from "./IssueCard";
+import { useCreateIssue, useReorderIssues, issueKeys } from "@/hooks/useIssues";
+import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import toast from "react-hot-toast";
 
-const COLUMN_ORDER: IssueStatus[] = ['backlog', 'todo', 'in_progress', 'in_review', 'done']
+const COLUMN_ORDER: IssueStatus[] = [
+  "backlog",
+  "todo",
+  "in_progress",
+  "in_review",
+  "done",
+];
 
 interface IssueKanbanProps {
-  project: Project
-  issues: Issue[]
-  showCreateIssue?: boolean
-  createIssueStatus?: IssueStatus
-  onCreateIssueClose?: () => void
+  readonly project: Project;
+  readonly issues: Issue[];
+  readonly showCreateIssue?: boolean;
+  readonly createIssueStatus?: IssueStatus;
+  readonly onCreateIssueClose?: () => void;
 }
 
 interface InlineCreateState {
-  columnId: IssueStatus | null
-  title: string
+  columnId: IssueStatus | null;
+  title: string;
 }
 
 export function IssueKanban({
   project,
   issues,
   showCreateIssue = false,
-  createIssueStatus = 'todo',
+  createIssueStatus = "todo",
   onCreateIssueClose,
 }: IssueKanbanProps) {
-  const queryClient = useQueryClient()
-  const createIssue = useCreateIssue()
-  const reorderIssues = useReorderIssues()
+  const queryClient = useQueryClient();
+  const createIssue = useCreateIssue();
+  const reorderIssues = useReorderIssues();
 
-  const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
-  const [overId, setOverId] = useState<string | null>(null)
+  const [activeIssue, setActiveIssue] = useState<Issue | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const [inlineCreate, setInlineCreate] = useState<InlineCreateState>({
     columnId: showCreateIssue ? createIssueStatus : null,
-    title: '',
-  })
+    title: "",
+  });
 
   // Initialize inline create from prop
   useEffect(() => {
     if (showCreateIssue) {
-      setInlineCreate({ columnId: createIssueStatus, title: '' })
+      setInlineCreate({ columnId: createIssueStatus, title: "" });
     }
-  }, [showCreateIssue, createIssueStatus])
+  }, [showCreateIssue, createIssueStatus]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -75,8 +80,8 @@ export function IssueKanban({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
+    }),
+  );
 
   // Group issues by status
   const columns = COLUMN_ORDER.map((status) => ({
@@ -85,65 +90,73 @@ export function IssueKanban({
     issues: issues
       .filter((i) => i.status === status)
       .sort((a, b) => a.order - b.order),
-  }))
+  }));
 
   function handleDragStart(event: DragStartEvent) {
-    const issue = issues.find((i) => i.id === event.active.id)
-    if (issue) setActiveIssue(issue)
+    const issue = issues.find((i) => i.id === event.active.id);
+    if (issue) setActiveIssue(issue);
   }
 
   function handleDragOver(event: DragOverEvent) {
-    setOverId(event.over?.id?.toString() ?? null)
+    setOverId(event.over?.id?.toString() ?? null);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    setActiveIssue(null)
-    setOverId(null)
+    setActiveIssue(null);
+    setOverId(null);
 
-    const { active, over } = event
-    if (!over || active.id === over.id) return
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const draggedIssue = issues.find((i) => i.id === active.id)
-    if (!draggedIssue) return
+    const draggedIssue = issues.find((i) => i.id === active.id);
+    if (!draggedIssue) return;
 
     // Determine target status (column or issue card)
-    let targetStatus: IssueStatus = draggedIssue.status
-    let targetOrder = draggedIssue.order
+    let targetStatus: IssueStatus = draggedIssue.status;
+    let targetOrder = draggedIssue.order;
 
-    const overIssue = issues.find((i) => i.id === over.id)
+    const overIssue = issues.find((i) => i.id === over.id);
     if (overIssue) {
-      targetStatus = overIssue.status
-      targetOrder = overIssue.order
+      targetStatus = overIssue.status;
+      targetOrder = overIssue.order;
     } else if (COLUMN_ORDER.includes(over.id as IssueStatus)) {
-      targetStatus = over.id as IssueStatus
-      const colIssues = issues.filter((i) => i.status === targetStatus)
-      targetOrder = colIssues.length > 0 ? Math.max(...colIssues.map((i) => i.order)) + 1 : 0
+      targetStatus = over.id as IssueStatus;
+      const colIssues = issues.filter((i) => i.status === targetStatus);
+      targetOrder =
+        colIssues.length > 0
+          ? Math.max(...colIssues.map((i) => i.order)) + 1
+          : 0;
     }
 
-    if (targetStatus === draggedIssue.status && targetOrder === draggedIssue.order) return
+    if (
+      targetStatus === draggedIssue.status &&
+      targetOrder === draggedIssue.order
+    )
+      return;
 
     // Optimistic update
-    queryClient.setQueryData<Issue[]>(
-      issueKeys.byProject(project.id),
-      (old) => old?.map((issue) =>
+    queryClient.setQueryData<Issue[]>(issueKeys.byProject(project.id), (old) =>
+      old?.map((issue) =>
         issue.id === draggedIssue.id
           ? { ...issue, status: targetStatus, order: targetOrder }
-          : issue
-      )
-    )
+          : issue,
+      ),
+    );
 
     // Persist
     reorderIssues.mutate({
       projectId: project.id,
-      updates: [{ id: draggedIssue.id, status: targetStatus, order: targetOrder }],
-    })
+      updates: [
+        { id: draggedIssue.id, status: targetStatus, order: targetOrder },
+      ],
+    });
   }
 
   async function handleCreateIssue(status: IssueStatus, title: string) {
     if (!title.trim()) {
-      setInlineCreate({ columnId: null, title: '' })
-      onCreateIssueClose?.()
-      return
+      setInlineCreate({ columnId: null, title: "" });
+      onCreateIssueClose?.();
+      return;
     }
 
     try {
@@ -151,16 +164,20 @@ export function IssueKanban({
         projectId: project.id,
         title: title.trim(),
         status,
-        priority: 'medium',
-      })
-      toast.success('Issue created')
+        priority: "medium",
+      });
+      toast.success("Issue created");
     } catch {
-      toast.error('Failed to create issue')
+      toast.error("Failed to create issue");
     } finally {
-      setInlineCreate({ columnId: null, title: '' })
-      onCreateIssueClose?.()
+      setInlineCreate({ columnId: null, title: "" });
+      onCreateIssueClose?.();
     }
   }
+
+  // Keyboard instructions for screen readers
+  const kanbanInstructions =
+    "Use Tab to navigate between issue cards. Press Enter to open an issue. Press Space to pick up a card for dragging, then use arrow keys to move it and Space to drop.";
 
   return (
     <DndContext
@@ -170,35 +187,69 @@ export function IssueKanban({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div
+      <section
         className="flex gap-3 h-full overflow-x-auto px-6 py-4"
-        style={{ minWidth: 'max-content', alignItems: 'flex-start' }}
+        style={{ minWidth: "max-content", alignItems: "flex-start" }}
+        aria-roledescription="kanban board"
+        aria-label={`${project.name} issue board`}
       >
-        {columns.map((column) => (
-          <KanbanColumn
-            key={column.id}
-            columnId={column.id}
-            label={column.meta.label}
-            color={column.meta.color}
-            bgColor={column.meta.bgColor}
-            issues={column.issues}
-            overId={overId}
-            inlineCreate={inlineCreate}
-            onAddIssue={() =>
-              setInlineCreate({ columnId: column.id, title: '' })
-            }
-            onInlineCreateSubmit={(title) => handleCreateIssue(column.id, title)}
-            onInlineCreateChange={(title) =>
-              setInlineCreate((prev) => ({ ...prev, title }))
-            }
-            onInlineCreateCancel={() => {
-              setInlineCreate({ columnId: null, title: '' })
-              onCreateIssueClose?.()
-            }}
-            isCreating={createIssue.isPending}
-          />
-        ))}
-      </div>
+        {/* Screen-reader-only instructions */}
+        <div
+          id="kanban-instructions"
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            margin: -1,
+            padding: 0,
+            overflow: "hidden",
+            clip: "rect(0, 0, 0, 0)",
+            whiteSpace: "nowrap",
+            border: 0,
+          }}
+        >
+          {kanbanInstructions}
+        </div>
+
+        <ul
+          aria-describedby="kanban-instructions"
+          className="flex gap-3"
+          style={{
+            minWidth: "max-content",
+            alignItems: "flex-start",
+            listStyle: "none",
+            margin: 0,
+            padding: 0,
+          }}
+        >
+          {columns.map((column) => (
+            <KanbanColumn
+              key={column.id}
+              columnId={column.id}
+              label={column.meta.label}
+              color={column.meta.color}
+              bgColor={column.meta.bgColor}
+              issues={column.issues}
+              overId={overId}
+              inlineCreate={inlineCreate}
+              onAddIssue={() =>
+                setInlineCreate({ columnId: column.id, title: "" })
+              }
+              onInlineCreateSubmit={(title) =>
+                handleCreateIssue(column.id, title)
+              }
+              onInlineCreateChange={(title) =>
+                setInlineCreate((prev) => ({ ...prev, title }))
+              }
+              onInlineCreateCancel={() => {
+                setInlineCreate({ columnId: null, title: "" });
+                onCreateIssueClose?.();
+              }}
+              isCreating={createIssue.isPending}
+            />
+          ))}
+        </ul>
+      </section>
 
       {/* Drag overlay */}
       <DragOverlay>
@@ -209,24 +260,24 @@ export function IssueKanban({
         ) : null}
       </DragOverlay>
     </DndContext>
-  )
+  );
 }
 
 // ─── Kanban Column ───────────────────────────────────────────────
 
 interface KanbanColumnProps {
-  columnId: IssueStatus
-  label: string
-  color: string
-  bgColor: string
-  issues: Issue[]
-  overId: string | null
-  inlineCreate: InlineCreateState
-  onAddIssue: () => void
-  onInlineCreateSubmit: (title: string) => void
-  onInlineCreateChange: (title: string) => void
-  onInlineCreateCancel: () => void
-  isCreating: boolean
+  readonly columnId: IssueStatus;
+  readonly label: string;
+  readonly color: string;
+  readonly bgColor: string;
+  readonly issues: Issue[];
+  readonly overId: string | null;
+  readonly inlineCreate: InlineCreateState;
+  readonly onAddIssue: () => void;
+  readonly onInlineCreateSubmit: (title: string) => void;
+  readonly onInlineCreateChange: (title: string) => void;
+  readonly onInlineCreateCancel: () => void;
+  readonly isCreating: boolean;
 }
 
 function KanbanColumn({
@@ -243,21 +294,22 @@ function KanbanColumn({
   onInlineCreateCancel,
   isCreating,
 }: KanbanColumnProps) {
-  const showInlineCreate = inlineCreate.columnId === columnId
-  const isOver = overId === columnId
+  const showInlineCreate = inlineCreate.columnId === columnId;
+  const isOver = overId === columnId;
 
   return (
-    <div
+    <li
+      aria-label={`${label} column, ${issues.length} issue${issues.length === 1 ? "" : "s"}`}
       className={cn(
-        'kanban-col flex flex-col rounded-xl transition-colors',
-        isOver && 'ring-2'
+        "kanban-col flex flex-col rounded-xl transition-colors",
+        isOver && "ring-2",
       )}
       style={{
-        width: '272px',
-        minWidth: '272px',
-        background: isOver ? bgColor : '#F8F8FC',
+        width: "272px",
+        minWidth: "272px",
+        background: isOver ? bgColor : "#F8F8FC",
         ringColor: color,
-        border: isOver ? `1px solid ${color}40` : '1px solid transparent',
+        border: isOver ? `1px solid ${color}40` : "1px solid transparent",
       }}
     >
       {/* Column Header */}
@@ -267,15 +319,20 @@ function KanbanColumn({
       >
         <div className="flex items-center gap-2">
           <span
+            aria-hidden="true"
             className="w-2.5 h-2.5 rounded-full flex-shrink-0"
             style={{ background: color }}
           />
-          <span className="text-sm font-semibold" style={{ color: '#1A1A2E' }}>
+          <span
+            className="text-sm font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
             {label}
           </span>
           <span
             className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
             style={{ background: bgColor, color }}
+            aria-hidden="true"
           >
             {issues.length}
           </span>
@@ -283,15 +340,16 @@ function KanbanColumn({
         <button
           onClick={onAddIssue}
           className="p-1 rounded-lg transition-colors"
-          style={{ color: '#A0A0B8' }}
+          style={{ color: "var(--text-tertiary)" }}
           onMouseEnter={(e) => {
-            ;(e.currentTarget as HTMLElement).style.background = '#EEEEF8'
-            ;(e.currentTarget as HTMLElement).style.color = color
+            (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
+            (e.currentTarget as HTMLElement).style.color = color;
           }}
           onMouseLeave={(e) => {
-            ;(e.currentTarget as HTMLElement).style.background = 'transparent'
-            ;(e.currentTarget as HTMLElement).style.color = '#A0A0B8'
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
           }}
+          aria-label={`Add issue to ${label}`}
           title={`Add issue to ${label}`}
         >
           <Plus size={14} />
@@ -304,10 +362,14 @@ function KanbanColumn({
         items={issues.map((i) => i.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className="flex flex-col gap-2 p-2 flex-1 min-h-[60px]">
+        <ul
+          className="flex flex-col gap-2 p-2 flex-1 min-h-[60px]"
+          aria-label={`${label} issues`}
+          style={{ listStyle: "none", margin: 0, padding: "0.5rem" }}
+        >
           <AnimatePresence mode="popLayout">
             {issues.map((issue) => (
-              <motion.div
+              <motion.li
                 key={issue.id}
                 layout
                 initial={{ opacity: 0, y: 8 }}
@@ -316,7 +378,7 @@ function KanbanColumn({
                 transition={{ duration: 0.15 }}
               >
                 <IssueCard issue={issue} />
-              </motion.div>
+              </motion.li>
             ))}
           </AnimatePresence>
 
@@ -325,56 +387,74 @@ function KanbanColumn({
             {showInlineCreate && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.15 }}
               >
                 <div
                   className="p-2.5 rounded-lg"
                   style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #6C47FF',
-                    boxShadow: '0 0 0 3px rgba(108,71,255,0.08)',
+                    background: "#FFFFFF",
+                    border: "1px solid #6C47FF",
+                    boxShadow: "0 0 0 3px rgba(108,71,255,0.08)",
                   }}
                 >
+                  <label
+                    htmlFor={`inline-create-${columnId}`}
+                    className="sr-only"
+                  >
+                    New issue title for {label}
+                  </label>
                   <textarea
+                    id={`inline-create-${columnId}`}
                     autoFocus
                     value={inlineCreate.title}
                     onChange={(e) => onInlineCreateChange(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        onInlineCreateSubmit(inlineCreate.title)
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        onInlineCreateSubmit(inlineCreate.title);
                       }
-                      if (e.key === 'Escape') {
-                        onInlineCreateCancel()
+                      if (e.key === "Escape") {
+                        onInlineCreateCancel();
                       }
                     }}
                     placeholder="Issue title…"
                     rows={2}
                     className="w-full bg-transparent text-sm resize-none focus:outline-none placeholder:text-[#C0C0D8]"
-                    style={{ color: '#1A1A2E' }}
+                    style={{ color: "var(--text-primary)" }}
+                    aria-label={`New issue title for ${label} column`}
                   />
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => onInlineCreateSubmit(inlineCreate.title)}
                       disabled={!inlineCreate.title.trim() || isCreating}
                       className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
-                      style={{ background: '#6C47FF' }}
+                      style={{ background: "var(--vyne-purple)" }}
+                      aria-label="Create issue"
                     >
                       {isCreating ? (
-                        <Loader2 size={10} className="animate-spin" />
+                        <Loader2
+                          size={10}
+                          className="animate-spin"
+                          aria-hidden="true"
+                        />
                       ) : null}
                       Create
                     </button>
                     <button
                       onClick={onInlineCreateCancel}
                       className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
-                      style={{ color: '#6B6B8A', background: '#F0F0F8' }}
+                      style={{ color: "#6B6B8A", background: "#F0F0F8" }}
+                      aria-label="Cancel creating issue"
                     >
                       Cancel
                     </button>
-                    <span className="text-xs ml-auto" style={{ color: '#C0C0D8' }}>
+                    <span
+                      className="text-xs ml-auto"
+                      style={{ color: "#C0C0D8" }}
+                      aria-hidden="true"
+                    >
                       ↵ to create
                     </span>
                   </div>
@@ -382,7 +462,7 @@ function KanbanColumn({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </ul>
       </SortableContext>
 
       {/* Add issue button at bottom */}
@@ -390,20 +470,21 @@ function KanbanColumn({
         <button
           onClick={onAddIssue}
           className="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-medium transition-colors rounded-b-xl"
-          style={{ color: '#A0A0B8' }}
+          style={{ color: "var(--text-tertiary)" }}
           onMouseEnter={(e) => {
-            ;(e.currentTarget as HTMLElement).style.background = '#EEEEF8'
-            ;(e.currentTarget as HTMLElement).style.color = '#6C47FF'
+            (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
+            (e.currentTarget as HTMLElement).style.color = "#6C47FF";
           }}
           onMouseLeave={(e) => {
-            ;(e.currentTarget as HTMLElement).style.background = 'transparent'
-            ;(e.currentTarget as HTMLElement).style.color = '#A0A0B8'
+            (e.currentTarget as HTMLElement).style.background = "transparent";
+            (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
           }}
+          aria-label={`Add issue to ${label}`}
         >
-          <Plus size={13} />
+          <Plus size={13} aria-hidden="true" />
           Add issue
         </button>
       )}
-    </div>
-  )
+    </li>
+  );
 }

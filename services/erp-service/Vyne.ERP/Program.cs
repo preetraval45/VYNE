@@ -7,6 +7,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Vyne.ERP.Infrastructure.Data;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Vyne.ERP.Infrastructure.Middleware;
 
 Log.Logger = new LoggerConfiguration()
@@ -161,7 +163,26 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
-    app.MapHealthChecks("/health");
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            var hasPostgres = report.Entries.TryGetValue("postgres", out var pgEntry);
+            var dbStatus = hasPostgres
+                ? (pgEntry.Status == HealthStatus.Healthy ? "connected" : "disconnected")
+                : "unknown";
+            var overallStatus = report.Status == HealthStatus.Healthy ? "healthy" : "unhealthy";
+            await context.Response.WriteAsJsonAsync(new
+            {
+                status = overallStatus,
+                service = "erp-service",
+                timestamp = DateTime.UtcNow.ToString("o"),
+                version = "0.1.0",
+                database = dbStatus,
+            });
+        }
+    });
 
     await app.RunAsync();
 }

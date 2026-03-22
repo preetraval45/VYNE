@@ -19,7 +19,22 @@
       "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/app/\\\\\\(dashboard\\\\\\) -name \"page.tsx\" -exec wc -l {} +)",
       "Bash(wc -l /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*.cs /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.cs /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.ts /c/Users/preet/OneDrive/Documents/GitHub/VYNE/services/*/*/*.py)",
       "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/components -name \"*.tsx\" -exec wc -l {} +)",
-      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/hooks -name \"*.ts\" -exec wc -l {} +)"
+      "Bash(find /c/Users/preet/OneDrive/Documents/GitHub/VYNE/apps/web/src/hooks -name \"*.ts\" -exec wc -l {} +)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm install:*)",
+      "Bash(NEXT_PUBLIC_DEMO_MODE=true npx next dev --turbo --port 3000)",
+      "Bash(NEXT_PUBLIC_DEMO_MODE=true npx next dev --turbo --port 3001)",
+      "Bash(NEXT_PUBLIC_DEMO_MODE=true npx next dev --port 3001)",
+      "Bash(netstat -ano)",
+      "Bash(powershell.exe -Command 'Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue')",
+      "Bash(ls services/*/Dockerfile.dev)",
+      "Bash(ls services/*/Dockerfile)",
+      "Bash(docker --version)",
+      "Bash(docker compose:*)",
+      "Bash(docker info:*)",
+      "Bash(docker volume:*)",
+      "Bash(git add:*)",
+      "Bash(git reset:*)"
     ]
   }
 }

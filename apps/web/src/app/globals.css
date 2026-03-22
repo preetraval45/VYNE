@@ -1,3 +1,23 @@
+/* =============================================
+ * VYNE Design System — CSS Custom Properties
+ * =============================================
+ *
+ * Sections:
+ * 1. Brand Colors
+ * 2. Surface & Background
+ * 3. Text Colors (auto-adapt to surface)
+ * 4. Status Colors
+ * 5. Sidebar
+ * 6. Chat
+ * 7. Typography (responsive)
+ * 8. Spacing (responsive)
+ * 9. Layout
+ * 10. Borders & Radius
+ * 11. Shadows
+ * 12. Transitions
+ * 13. Dark Theme Overrides
+ * ============================================= */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -5,62 +25,129 @@
 @tailwind utilities;
 
 :root {
-  /* Sidebar */
+  /* ── 5. Sidebar ──────────────────────────────────────────────────── */
   --sidebar-bg: #1C1C2E;
   --sidebar-text: #A0A0B8;
   --sidebar-active: #FFFFFF;
   --sidebar-hover: #2A2A3E;
   --sidebar-accent: #6C47FF;
   --sidebar-width: 240px;
+  --sidebar-collapsed-width: 60px;
 
-  /* Brand */
+  /* ── 1. Brand Colors ─────────────────────────────────────────────── */
   --vyne-purple: #6C47FF;
   --vyne-purple-light: #8B6BFF;
   --vyne-purple-dark: #5235CC;
 
-  /* Content */
+  /* ── 2. Surface & Background ─────────────────────────────────────── */
   --content-bg: #FFFFFF;
   --content-secondary: #F8F8FC;
   --content-border: #E8E8F0;
 
-  /* Text */
+  /* ── 3. Text Colors ──────────────────────────────────────────────── */
   --text-primary: #1A1A2E;
   --text-secondary: #6B6B8A;
   --text-tertiary: #A0A0B8;
 
-  /* Status */
+  /* On-surface text colors (for light backgrounds) */
+  --on-surface: #1A1A2E;
+  --on-surface-secondary: #6B6B8A;
+  --on-surface-tertiary: #A0A0B8;
+
+  /* On-primary text colors (for purple/dark backgrounds) */
+  --on-primary: #FFFFFF;
+  --on-primary-secondary: rgba(255,255,255,0.7);
+
+  /* On-dark text colors (for dark backgrounds like sidebar) */
+  --on-dark: #FFFFFF;
+  --on-dark-secondary: #A0A0B8;
+  --on-dark-tertiary: #6B6B8A;
+
+  /* ── 4. Status Colors ────────────────────────────────────────────── */
   --status-success: #22C55E;
   --status-warning: #F59E0B;
   --status-danger: #EF4444;
   --status-info: #3B82F6;
 
-  /* Shadows */
+  /* ── 6. Chat / Messaging ─────────────────────────────────────────── */
+  --message-bg-self: #EEE9FF;
+  --message-bg-other: #F4F4F8;
+
+  /* ── 7. Typography (responsive) ──────────────────────────────────── */
+  --text-xs: clamp(10px, 1.2vw, 11px);
+  --text-sm: clamp(11px, 1.4vw, 13px);
+  --text-base: clamp(13px, 1.5vw, 14px);
+  --text-md: clamp(14px, 1.6vw, 15px);
+  --text-lg: clamp(15px, 1.8vw, 17px);
+  --text-xl: clamp(17px, 2vw, 20px);
+  --text-2xl: clamp(20px, 2.5vw, 24px);
+  --text-3xl: clamp(24px, 3vw, 30px);
+
+  /* ── 8. Spacing (responsive) ─────────────────────────────────────── */
+  --space-xs: clamp(4px, 0.5vw, 6px);
+  --space-sm: clamp(6px, 0.8vw, 8px);
+  --space-md: clamp(10px, 1.2vw, 14px);
+  --space-lg: clamp(14px, 1.8vw, 20px);
+  --space-xl: clamp(20px, 2.5vw, 28px);
+  --space-2xl: clamp(28px, 3.5vw, 40px);
+
+  /* ── 9. Layout ───────────────────────────────────────────────────── */
+  --topbar-height: 56px;
+  --content-max-width: 1200px;
+
+  /* ── 10. Borders & Radius ────────────────────────────────────────── */
+  --radius: 8px;
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+
+  /* ── 11. Shadows ─────────────────────────────────────────────────── */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
   --shadow-panel: 0 0 0 1px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.12);
 
-  --radius: 8px;
+  /* ── 12. Transitions ─────────────────────────────────────────────── */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 }
 
-/* ─── Dark Theme ────────────────────────────────────────────────── */
+/* ─── 13. Dark Theme Overrides ─────────────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
   /* Content */
-  --content-bg: #0D0D1A;
-  --content-secondary: #13131F;
-  --content-border: rgba(255,255,255,0.07);
+  --content-bg: #1A1A2E;
+  --content-bg-secondary: #232340;
+  --content-secondary: #232340;
+  --content-border: #2E2E4A;
 
   /* Text */
-  --text-primary: #E2E2F0;
-  --text-secondary: #9090A8;
-  --text-tertiary: #5A5A72;
+  --text-primary: #E8E8F0;
+  --text-secondary: #A0A0B8;
+  --text-tertiary: #6B6B8A;
+
+  /* On-surface (dark theme) */
+  --on-surface: #E8E8F0;
+  --on-surface-secondary: #A0A0B8;
+  --on-surface-tertiary: #6B6B8A;
+
+  /* Messaging */
+  --message-bg-self: #2E2255;
+  --message-bg-other: #232340;
+
+  /* Sidebar vars stay the same (already dark) */
+  /* Status colors stay the same */
+  /* Brand purple stays the same */
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25);
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.5);
   --shadow-panel: 0 0 0 1px rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.5);
 }
 
@@ -216,11 +303,11 @@ a {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E8E8F0;
+  background: var(--content-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #A0A0B8;
+  background: var(--text-tertiary);
 }
 
 /* ─── Utility classes ───────────────────────────────────────────── */
@@ -268,4 +355,29 @@ a {
 .command-palette-bg {
   background: rgba(28, 28, 46, 0.96);
   backdrop-filter: blur(20px);
+}
+
+/* ─── Responsive Breakpoints ───────────────────────────────────── */
+
+/* Mobile-first breakpoints */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --border-radius-lg: 8px;
+    --border-radius-xl: 12px;
+  }
+}
+
+/* ─── Responsive Visibility Utilities ──────────────────────────── */
+
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
 }

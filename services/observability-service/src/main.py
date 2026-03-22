@@ -83,11 +83,13 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 @app.get("/health", tags=["health"])
 async def health_check() -> dict:
+    from datetime import datetime, timezone
+
     return {
-        "status": "ok",
+        "status": "healthy",
         "service": "observability-service",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "0.1.0",
-        "environment": settings.environment,
     }
 
 

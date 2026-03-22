@@ -1,0 +1,19 @@
+FROM node:22-alpine
+WORKDIR /app
+
+# Copy package files
+COPY package.json ./
+
+# Install dependencies with npm (flat node_modules structure)
+RUN npm install
+
+# Copy source code
+COPY . .
+
+EXPOSE 3000
+
+ENV NODE_ENV=development
+ENV NEXT_PUBLIC_DEMO_MODE=true
+ENV NEXT_TELEMETRY_DISABLED=1
+
+CMD ["node", "node_modules/next/dist/bin/next", "dev", "--hostname", "0.0.0.0"]

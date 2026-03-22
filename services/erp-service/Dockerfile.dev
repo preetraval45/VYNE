@@ -1,0 +1,9 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine
+WORKDIR /app
+COPY Vyne.ERP/*.csproj ./Vyne.ERP/
+RUN dotnet restore Vyne.ERP/Vyne.ERP.csproj
+COPY . .
+WORKDIR /app/Vyne.ERP
+EXPOSE 5005
+ENV ASPNETCORE_ENVIRONMENT=Development
+CMD ["dotnet", "watch", "run", "--urls", "http://+:5005"]

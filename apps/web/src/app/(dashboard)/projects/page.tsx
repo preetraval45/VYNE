@@ -1,20 +1,29 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, LayoutGrid, Loader2, Search, SlidersHorizontal } from 'lucide-react'
-import { useProjects } from '@/hooks/useProjects'
-import { ProjectCard } from '@/components/projects/ProjectCard'
-import { CreateProjectModal } from '@/components/projects/CreateProjectModal'
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Plus,
+  LayoutGrid,
+  Loader2,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+import { useDebounce } from "@/hooks/useDebounce";
+import { ProjectCard } from "@/components/projects/ProjectCard";
+import { CreateProjectModal } from "@/components/projects/CreateProjectModal";
 
 export default function ProjectsPage() {
-  const { data: projects, isLoading, error } = useProjects()
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [search, setSearch] = useState('')
+  const { data: projects, isLoading, error } = useProjects();
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
 
-  const filtered = projects?.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  ) ?? []
+  const filtered =
+    projects?.filter((p) =>
+      p.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+    ) ?? [];
 
   return (
     <div className="flex flex-col h-full">
@@ -22,9 +31,9 @@ export default function ProjectsPage() {
       <header
         className="flex items-center justify-between px-6 py-4 flex-shrink-0"
         style={{
-          borderBottom: '1px solid #E8E8F0',
-          background: '#FFFFFF',
-          position: 'sticky',
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+          position: "sticky",
           top: 0,
           zIndex: 10,
         }}
@@ -32,15 +41,18 @@ export default function ProjectsPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: 'rgba(108,71,255,0.08)' }}
+            style={{ background: "rgba(108,71,255,0.08)" }}
           >
-            <LayoutGrid size={18} style={{ color: '#6C47FF' }} />
+            <LayoutGrid size={18} style={{ color: "var(--vyne-purple)" }} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: '#1A1A2E' }}>
+            <h1
+              className="text-lg font-semibold"
+              style={{ color: "var(--text-primary)" }}
+            >
               Projects
             </h1>
-            <p className="text-xs" style={{ color: '#A0A0B8' }}>
+            <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
               {projects?.length ?? 0} projects
             </p>
           </div>
@@ -51,19 +63,19 @@ export default function ProjectsPage() {
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
             style={{
-              background: '#F8F8FC',
-              border: '1px solid #E8E8F0',
-              width: '220px',
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+              width: "220px",
             }}
           >
-            <Search size={14} style={{ color: '#A0A0B8' }} />
+            <Search size={14} style={{ color: "var(--text-tertiary)" }} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search projects…"
               className="flex-1 bg-transparent text-sm focus:outline-none"
-              style={{ color: '#1A1A2E' }}
+              style={{ color: "var(--text-primary)" }}
             />
           </div>
 
@@ -71,9 +83,9 @@ export default function ProjectsPage() {
           <button
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
             style={{
-              background: '#F8F8FC',
-              border: '1px solid #E8E8F0',
-              color: '#6B6B8A',
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+              color: "var(--text-secondary)",
             }}
           >
             <SlidersHorizontal size={14} />
@@ -85,16 +97,20 @@ export default function ProjectsPage() {
             onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
             style={{
-              background: 'linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)',
-              boxShadow: '0 2px 8px rgba(108,71,255,0.3)',
+              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+              boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
             }}
             onMouseEnter={(e) => {
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 14px rgba(108,71,255,0.45)'
-              ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 4px 14px rgba(108,71,255,0.45)";
+              (e.currentTarget as HTMLElement).style.transform =
+                "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
-              ;(e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(108,71,255,0.3)'
-              ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+              (e.currentTarget as HTMLElement).style.boxShadow =
+                "0 2px 8px rgba(108,71,255,0.3)";
+              (e.currentTarget as HTMLElement).style.transform =
+                "translateY(0)";
             }}
           >
             <Plus size={16} />
@@ -107,15 +123,22 @@ export default function ProjectsPage() {
       <div className="flex-1 overflow-auto content-scroll px-6 py-6">
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 size={24} className="animate-spin" style={{ color: '#6C47FF' }} />
+            <Loader2
+              size={24}
+              className="animate-spin"
+              style={{ color: "var(--vyne-purple)" }}
+            />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="text-4xl mb-4">⚠️</div>
-            <h3 className="font-semibold mb-1" style={{ color: '#1A1A2E' }}>
+            <h3
+              className="font-semibold mb-1"
+              style={{ color: "var(--text-primary)" }}
+            >
               Failed to load projects
             </h3>
-            <p className="text-sm" style={{ color: '#A0A0B8' }}>
+            <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>
               Please check your connection and try again
             </p>
           </div>
@@ -123,23 +146,32 @@ export default function ProjectsPage() {
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'rgba(108,71,255,0.08)' }}
+              style={{ background: "rgba(108,71,255,0.08)" }}
             >
-              <LayoutGrid size={28} style={{ color: '#6C47FF' }} />
+              <LayoutGrid size={28} style={{ color: "var(--vyne-purple)" }} />
             </div>
-            <h3 className="font-semibold text-lg mb-2" style={{ color: '#1A1A2E' }}>
-              {search ? 'No projects found' : 'No projects yet'}
+            <h3
+              className="font-semibold text-lg mb-2"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {search ? "No projects found" : "No projects yet"}
             </h3>
-            <p className="text-sm mb-6 max-w-xs" style={{ color: '#A0A0B8' }}>
+            <p
+              className="text-sm mb-6 max-w-xs"
+              style={{ color: "var(--text-tertiary)" }}
+            >
               {search
                 ? `No projects match "${search}"`
-                : 'Create your first project to start tracking work with your team'}
+                : "Create your first project to start tracking work with your team"}
             </p>
             {!search && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white"
-                style={{ background: 'linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)' }}
+                style={{
+                  background:
+                    "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+                }}
               >
                 <Plus size={16} />
                 Create first project
@@ -152,7 +184,7 @@ export default function ProjectsPage() {
             animate={{ opacity: 1 }}
             className="grid gap-4"
             style={{
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
             }}
           >
             <AnimatePresence mode="popLayout">
@@ -178,5 +210,5 @@ export default function ProjectsPage() {
         onClose={() => setShowCreateModal(false)}
       />
     </div>
-  )
+  );
 }

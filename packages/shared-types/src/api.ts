@@ -25,6 +25,8 @@ import type {
   WorkOrder,
   Invoice,
   AlertRule,
+  Deployment,
+  DeploymentStatus,
   UUID,
 } from "./entities";
 
@@ -54,6 +56,25 @@ export interface PaginationParams {
   page?: number;
   limit?: number;
   cursor?: string;
+}
+
+/** Standard offset-based paginated response envelope. */
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+/** Cursor-based paginated response envelope for feeds / infinite scroll. */
+export interface CursorPaginatedResponse<T> {
+  data: T[];
+  nextCursor: string | null;
+  prevCursor: string | null;
+  hasMore: boolean;
 }
 
 // ── Auth ─────────────────────────────────────────────────────
@@ -409,6 +430,44 @@ export interface LogSearchParams extends PaginationParams {
   traceId?: string;
 }
 
+// ── Code / DevOps ────────────────────────────────────────────
+
+export interface DeploymentFilters extends PaginationParams {
+  serviceName?: string;
+  environment?: string;
+  status?: DeploymentStatus;
+  branch?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface CreateDeploymentRequest {
+  serviceName: string;
+  version?: string;
+  environment: string;
+  commitSha?: string;
+  commitMessage?: string;
+  branch?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ConnectRepositoryRequest {
+  repoName: string;
+  githubUrl: string;
+  defaultBranch?: string;
+}
+
+export interface UpdateRepositoryRequest {
+  defaultBranch?: string;
+  githubUrl?: string;
+}
+
+export interface PullRequestFilters extends PaginationParams {
+  repoName?: string;
+  state?: "open" | "closed" | "merged";
+  author?: string;
+}
+
 // ── Upload ───────────────────────────────────────────────────
 
 export interface UploadUrlRequest {
@@ -422,3 +481,11 @@ export interface UploadUrlResponse {
   fileUrl: string;
   expiresAt: string;
 }
+
+// ── Convenience Aliases ─────────────────────────────────────
+
+/** Alias for RegisterRequest — used in some frontend forms. */
+export type SignupRequest = RegisterRequest;
+
+/** Alias for AuthResponse — used by login flows. */
+export type LoginResponse = AuthResponse;

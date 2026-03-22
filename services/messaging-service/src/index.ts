@@ -1,17 +1,17 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import jwt from '@fastify/jwt';
-import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
-import { createServer } from 'http';
-import type { Server as SocketServer } from 'socket.io';
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import jwt from "@fastify/jwt";
+import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
+import { createServer } from "http";
+import type { Server as SocketServer } from "socket.io";
 
-import { connectDB } from './db/index.js';
-import { createSocketServer } from './socket/index.js';
-import { startEmbeddingWorker } from './workers/embedding.worker.js';
-import channelsRoutes from './routes/channels.js';
-import messagesRoutes from './routes/messages.js';
-import { logger } from './utils/logger.js';
+import { connectDB } from "./db/index.js";
+import { createSocketServer } from "./socket/index.js";
+import { startEmbeddingWorker } from "./workers/embedding.worker.js";
+import channelsRoutes from "./routes/channels.js";
+import messagesRoutes from "./routes/messages.js";
+import { logger } from "./utils/logger.js";
 
 // ─── Fastify Instance ─────────────────────────────────────────────────────────
 
@@ -27,46 +27,57 @@ await fastify.register(helmet, {
 });
 
 await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN ?? '*',
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: process.env.CORS_ORIGIN ?? "*",
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 });
 
 await fastify.register(rateLimit, {
   global: true,
   max: Number(process.env.RATE_LIMIT_MAX ?? 500),
-  timeWindow: '1 minute',
+  timeWindow: "1 minute",
   errorResponseBuilder: (_request, context) => ({
     statusCode: 429,
-    error: 'Too Many Requests',
+    error: "Too Many Requests",
     message: `Rate limit exceeded. Retry after ${context.after}.`,
   }),
 });
 
 await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET ?? 'dev-secret',
+  secret: process.env.JWT_SECRET ?? "dev-secret",
   sign: {
-    algorithm: 'HS256',
-    expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
+    algorithm: "HS256",
+    expiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   },
 });
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 
-fastify.get('/health', async (_request, reply) => {
+fastify.get("/health", async (_request, reply) => {
+  let database: "connected" | "disconnected" = "disconnected";
+  try {
+    const client = await (await import("./db/index.js")).pool.connect();
+    await client.query("SELECT 1");
+    client.release();
+    database = "connected";
+  } catch {
+    // DB not reachable
+  }
+
   return reply.send({
-    status: 'ok',
-    service: 'messaging-service',
+    status: "healthy",
+    service: "messaging-service",
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
+    version: "0.1.0",
+    database,
   });
 });
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 
-await fastify.register(channelsRoutes, { prefix: '/api/v1' });
-await fastify.register(messagesRoutes, { prefix: '/api/v1' });
+await fastify.register(channelsRoutes, { prefix: "/api/v1" });
+await fastify.register(messagesRoutes, { prefix: "/api/v1" });
 
 // ─── HTTP Server + Socket.io ──────────────────────────────────────────────────
 
@@ -83,22 +94,22 @@ async function shutdown(signal: string): Promise<void> {
   try {
     await fastify.close();
     io.close();
-    logger.info('Server closed');
+    logger.info("Server closed");
     process.exit(0);
   } catch (err) {
-    logger.error('Error during shutdown', { error: (err as Error).message });
+    logger.error("Error during shutdown", { error: (err as Error).message });
     process.exit(1);
   }
 }
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 
 // ─── Startup ──────────────────────────────────────────────────────────────────
 
 async function start(): Promise<void> {
   const PORT = Number(process.env.PORT ?? 5003);
-  const HOST = process.env.HOST ?? '0.0.0.0';
+  const HOST = process.env.HOST ?? "0.0.0.0";
 
   try {
     // Verify database connectivity
@@ -121,10 +132,12 @@ async function start(): Promise<void> {
     logger.info(`Messaging service running`, {
       host: HOST,
       port: PORT,
-      env: process.env.NODE_ENV ?? 'development',
+      env: process.env.NODE_ENV ?? "development",
     });
   } catch (err) {
-    logger.error('Failed to start messaging service', { error: (err as Error).message });
+    logger.error("Failed to start messaging service", {
+      error: (err as Error).message,
+    });
     process.exit(1);
   }
 }

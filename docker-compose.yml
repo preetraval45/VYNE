@@ -26,7 +26,7 @@ services:
       POSTGRES_PASSWORD: vyne_dev_password
       POSTGRES_DB: vyne_dev
     ports:
-      - "5432:5432"
+      - "100:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -43,7 +43,7 @@ services:
     container_name: vyne-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "101:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -60,7 +60,7 @@ services:
     container_name: vyne-localstack
     restart: unless-stopped
     ports:
-      - "4566:4566"
+      - "102:4566"
     environment:
       SERVICES: s3,sqs,sns,secretsmanager,eventbridge,cognito-idp
       DEBUG: 0
@@ -79,7 +79,7 @@ services:
     container_name: vyne-api-gateway
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - "104:4000"
     environment:
       NODE_ENV: development
       PORT: 4000
@@ -93,7 +93,7 @@ services:
       OBSERVABILITY_SERVICE_URL: http://observability-service:5006
       NOTIFICATION_SERVICE_URL: http://notification-service:5007
       JWT_SECRET: local_dev_jwt_secret_replace_in_production
-      SOCKET_IO_CORS_ORIGIN: http://localhost:3000
+      SOCKET_IO_CORS_ORIGIN: http://localhost:3001
       AWS_ENDPOINT_URL: http://localstack:4566
       AWS_REGION: us-east-1
       AWS_ACCESS_KEY_ID: test
@@ -117,7 +117,7 @@ services:
     container_name: vyne-core-service
     restart: unless-stopped
     ports:
-      - "5001:5001"
+      - "105:5001"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5001
@@ -145,7 +145,7 @@ services:
     container_name: vyne-projects-service
     restart: unless-stopped
     ports:
-      - "5002:5002"
+      - "106:5002"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5002
@@ -171,7 +171,7 @@ services:
     container_name: vyne-messaging-service
     restart: unless-stopped
     ports:
-      - "5003:5003"
+      - "107:5003"
     environment:
       NODE_ENV: development
       PORT: 5003
@@ -202,7 +202,7 @@ services:
     container_name: vyne-ai-service
     restart: unless-stopped
     ports:
-      - "5004:5004"
+      - "108:5004"
     environment:
       ENVIRONMENT: development
       PORT: 5004
@@ -231,7 +231,7 @@ services:
     container_name: vyne-erp-service
     restart: unless-stopped
     ports:
-      - "5005:5005"
+      - "109:5005"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5005
@@ -257,7 +257,7 @@ services:
     container_name: vyne-observability-service
     restart: unless-stopped
     ports:
-      - "5006:5006"
+      - "110:5006"
     environment:
       ENVIRONMENT: development
       PORT: 5006
@@ -282,7 +282,7 @@ services:
     container_name: vyne-notification-service
     restart: unless-stopped
     ports:
-      - "5007:5007"
+      - "111:5007"
     environment:
       NODE_ENV: development
       PORT: 5007
@@ -303,6 +303,33 @@ services:
     networks:
       - vyne-network
 
+  # ── Code Service (Node.js) ──────────────────────────────────
+  code-service:
+    build:
+      context: ./services/code-service
+      dockerfile: Dockerfile.dev
+    container_name: vyne-code-service
+    restart: unless-stopped
+    ports:
+      - "112:5008"
+    environment:
+      NODE_ENV: development
+      PORT: 5008
+      DATABASE_URL: postgresql://vyne:vyne_dev_password@postgres:5432/vyne_dev
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      GITHUB_WEBHOOK_SECRET: local_dev_webhook_secret
+    volumes:
+      - ./services/code-service:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - vyne-network
+
   # ── Web App (Next.js 15) ───────────────────────────────────
   web:
     build:
@@ -311,21 +338,18 @@ services:
     container_name: vyne-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3100:3000"
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_WS_URL: ws://localhost:4000
+      NEXT_PUBLIC_API_URL: http://localhost:104
+      NEXT_PUBLIC_WS_URL: ws://localhost:104
+      NEXT_PUBLIC_DEMO_MODE: "true"
       NEXT_PUBLIC_COGNITO_USER_POOL_ID: local_pool
       NEXT_PUBLIC_COGNITO_CLIENT_ID: local_client
       NEXT_PUBLIC_COGNITO_REGION: us-east-1
       NEXT_PUBLIC_APP_ENV: development
-      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL: http://localhost:3100
       NEXTAUTH_SECRET: local_dev_nextauth_secret_32chars_min
-    volumes:
-      - ./apps/web:/app
-      - /app/node_modules
-      - /app/.next
     depends_on:
       - api-gateway
     networks:

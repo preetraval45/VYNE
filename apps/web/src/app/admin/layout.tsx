@@ -1,81 +1,258 @@
-import Link from 'next/link'
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+// ── Admin nav item ──────────────────────────────────────────────
+function AdminNavItem({
+  icon,
+  label,
+  href,
+  active,
+}: Readonly<{
+  icon: string;
+  label: string;
+  href: string;
+  active: boolean;
+}>) {
+  const [hovered, setHovered] = useState(false);
+
+  let color = "rgba(255,255,255,0.5)";
+  if (active) color = "#fff";
+  else if (hovered) color = "rgba(255,255,255,0.8)";
+
+  let bg = "transparent";
+  if (active) bg = "rgba(108,71,255,0.22)";
+  else if (hovered) bg = "rgba(255,255,255,0.06)";
+
+  return (
+    <Link
+      href={href}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "9px 14px",
+        borderRadius: 10,
+        fontSize: 13,
+        fontWeight: active ? 600 : 400,
+        color,
+        background: bg,
+        textDecoration: "none",
+        transition: "all 0.15s",
+        marginBottom: 2,
+        position: "relative",
+      }}
+    >
+      {active && (
+        <span
+          style={{
+            position: "absolute",
+            left: 0,
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 3,
+            height: 20,
+            borderRadius: "0 3px 3px 0",
+            background: "#6C47FF",
+          }}
+        />
+      )}
+      <span
+        style={{ fontSize: 15, width: 22, textAlign: "center", flexShrink: 0 }}
+      >
+        {icon}
+      </span>
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+// ── Vyne Admin Logo ─────────────────────────────────────────────
+function VyneAdminLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.15" />
+      <line
+        x1="6"
+        y1="8"
+        x2="18"
+        y2="28"
+        stroke="#8B68FF"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <line
+        x1="30"
+        y1="8"
+        x2="18"
+        y2="28"
+        stroke="#6C47FF"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <circle cx="6" cy="8" r="3.3" fill="#8B68FF" />
+      <circle cx="30" cy="8" r="3.3" fill="#8B68FF" />
+      <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
+      <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
+    </svg>
+  );
+}
 
 export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const pathname = usePathname();
+  const [backHovered, setBackHovered] = useState(false);
+
+  const navItems = [
+    { icon: "📊", label: "Dashboard", href: "/admin" },
+    { icon: "🏢", label: "Tenants", href: "/admin/tenants" },
+    { icon: "💳", label: "Billing", href: "/admin/billing" },
+    { icon: "🖥", label: "System Health", href: "/admin/system" },
+  ];
+
+  function isActive(href: string) {
+    if (href === "/admin") return pathname === "/admin";
+    return pathname.startsWith(href);
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#0F0F1A', display: 'flex', flexDirection: 'column' }}>
-      {/* Header bar */}
-      <header
+    <div style={{ minHeight: "100vh", background: "#0F0F1A", display: "flex" }}>
+      {/* ── Left sidebar ──────────────────────────── */}
+      <aside
         style={{
-          height: 52,
-          background: '#13131F',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 24px',
-          gap: 16,
-          flexShrink: 0,
-          position: 'sticky',
+          width: 240,
+          minWidth: 240,
+          background: "#1C1C2E",
+          borderRight: "1px solid rgba(255,255,255,0.07)",
+          display: "flex",
+          flexDirection: "column",
+          height: "100vh",
+          position: "sticky",
           top: 0,
-          zIndex: 50,
+          flexShrink: 0,
+          zIndex: 20,
         }}
       >
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
-            <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.15" />
-            <line x1="6" y1="8" x2="18" y2="28" stroke="#8B68FF" strokeWidth="2.2" strokeLinecap="round" />
-            <line x1="30" y1="8" x2="18" y2="28" stroke="#6C47FF" strokeWidth="2.2" strokeLinecap="round" />
-            <circle cx="6" cy="8" r="3.3" fill="#8B68FF" />
-            <circle cx="30" cy="8" r="3.3" fill="#8B68FF" />
-            <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
-            <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
-          </svg>
-          <span style={{ fontSize: 15, fontWeight: 700, color: '#E8E8F8', letterSpacing: '-0.02em' }}>VYNE Admin</span>
+        {/* Header with gradient */}
+        <div
+          style={{
+            padding: "20px 18px 16px",
+            borderBottom: "1px solid rgba(255,255,255,0.07)",
+            background:
+              "linear-gradient(135deg, rgba(108,71,255,0.15) 0%, rgba(139,104,255,0.08) 100%)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <VyneAdminLogo />
+            <div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  background: "linear-gradient(135deg, #C4B5FD, #8B68FF)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Vyne Admin
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.4)",
+                  marginTop: 1,
+                }}
+              >
+                Platform Management
+              </div>
+            </div>
+          </div>
           <span
             style={{
+              display: "inline-block",
+              marginTop: 10,
               fontSize: 9,
               fontWeight: 700,
-              color: '#6C47FF',
-              background: 'rgba(108,71,255,0.18)',
-              padding: '2px 7px',
+              color: "#6C47FF",
+              background: "rgba(108,71,255,0.18)",
+              padding: "2px 8px",
               borderRadius: 4,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
             }}
           >
             INTERNAL
           </span>
         </div>
 
-        {/* Spacer */}
-        <div style={{ flex: 1 }} />
+        {/* Navigation */}
+        <nav style={{ padding: "12px 10px", flex: 1, overflowY: "auto" }}>
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.22)",
+              letterSpacing: "0.1em",
+              padding: "4px 14px 8px",
+              textTransform: "uppercase",
+            }}
+          >
+            Navigation
+          </div>
+          {navItems.map((item) => (
+            <AdminNavItem
+              key={item.href}
+              icon={item.icon}
+              label={item.label}
+              href={item.href}
+              active={isActive(item.href)}
+            />
+          ))}
+        </nav>
 
-        {/* Back link */}
-        <Link
-          href="/home"
+        {/* Back to main app */}
+        <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 12,
-            color: '#9090B0',
-            textDecoration: 'none',
-            padding: '5px 12px',
-            borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.1)',
-            transition: 'color 0.15s',
+            padding: "12px 14px",
+            borderTop: "1px solid rgba(255,255,255,0.07)",
           }}
         >
-          <span style={{ fontSize: 14 }}>&#8592;</span> Back to App
-        </Link>
-      </header>
+          <Link
+            href="/home"
+            onMouseEnter={() => setBackHovered(true)}
+            onMouseLeave={() => setBackHovered(false)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 12,
+              color: backHovered ? "rgba(255,255,255,0.8)" : "#9090B0",
+              textDecoration: "none",
+              padding: "9px 14px",
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: backHovered
+                ? "rgba(255,255,255,0.04)"
+                : "transparent",
+              transition: "all 0.15s",
+            }}
+          >
+            <span style={{ fontSize: 14 }}>&#8592;</span>
+            <span>Back to App</span>
+          </Link>
+        </div>
+      </aside>
 
-      {/* Page content */}
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      {/* ── Main content ──────────────────────────── */}
+      <main style={{ flex: 1, overflowY: "auto", minHeight: "100vh" }}>
         {children}
       </main>
     </div>
-  )
+  );
 }

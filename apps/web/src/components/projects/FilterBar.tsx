@@ -1,64 +1,77 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import * as Popover from '@radix-ui/react-popover'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, ChevronDown, SlidersHorizontal } from 'lucide-react'
-import type { FilterState, IssueStatus, IssuePriority } from '@/types'
-import { STATUS_META, PRIORITY_META } from '@/types'
+import { motion } from "framer-motion";
+import { X, SlidersHorizontal } from "lucide-react";
+import type { FilterState, IssueStatus, IssuePriority } from "@/types";
+import { STATUS_META, PRIORITY_META } from "@/types";
 
 interface FilterBarProps {
-  filters: FilterState
-  onChange: (filters: FilterState) => void
+  readonly filters: FilterState;
+  readonly onChange: (filters: FilterState) => void;
 }
 
 export function FilterBar({ filters, onChange }: FilterBarProps) {
   const hasActiveFilters = Object.values(filters).some(
-    (v) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)
-  )
+    (v) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true),
+  );
 
   function toggleStatus(status: IssueStatus) {
-    const current = filters.status ?? []
+    const current = filters.status ?? [];
     const updated = current.includes(status)
       ? current.filter((s) => s !== status)
-      : [...current, status]
-    onChange({ ...filters, status: updated.length > 0 ? updated : undefined })
+      : [...current, status];
+    onChange({ ...filters, status: updated.length > 0 ? updated : undefined });
   }
 
   function togglePriority(priority: IssuePriority) {
-    const current = filters.priority ?? []
+    const current = filters.priority ?? [];
     const updated = current.includes(priority)
       ? current.filter((p) => p !== priority)
-      : [...current, priority]
-    onChange({ ...filters, priority: updated.length > 0 ? updated : undefined })
+      : [...current, priority];
+    onChange({
+      ...filters,
+      priority: updated.length > 0 ? updated : undefined,
+    });
   }
 
   function clearAll() {
-    onChange({})
+    onChange({});
   }
 
-  if (!hasActiveFilters) return null
+  if (!hasActiveFilters) return null;
+
+  const activeCount =
+    (filters.status?.length ?? 0) + (filters.priority?.length ?? 0);
 
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
+      animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.15 }}
+      role="toolbar"
+      aria-label="Issue filters"
       className="flex items-center gap-2 px-6 py-2.5 overflow-x-auto"
       style={{
-        borderBottom: '1px solid #E8E8F0',
-        background: '#FAFAFE',
+        borderBottom: "1px solid #E8E8F0",
+        background: "#FAFAFE",
       }}
     >
-      <SlidersHorizontal size={13} style={{ color: '#A0A0B8', flexShrink: 0 }} />
-      <span className="text-xs font-medium flex-shrink-0" style={{ color: '#6B6B8A' }}>
-        Filters:
+      <SlidersHorizontal
+        size={13}
+        style={{ color: "#A0A0B8", flexShrink: 0 }}
+        aria-hidden="true"
+      />
+      <span
+        className="text-xs font-medium flex-shrink-0"
+        style={{ color: "#6B6B8A" }}
+      >
+        Filters{activeCount > 0 ? ` (${activeCount} active)` : ""}:
       </span>
 
       {/* Status filters */}
       {filters.status?.map((status) => {
-        const meta = STATUS_META[status]
+        const meta = STATUS_META[status];
         return (
           <FilterPill
             key={`status-${status}`}
@@ -67,21 +80,21 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
             bg={meta.bgColor}
             onRemove={() => toggleStatus(status)}
           />
-        )
+        );
       })}
 
       {/* Priority filters */}
       {filters.priority?.map((priority) => {
-        const meta = PRIORITY_META[priority]
+        const meta = PRIORITY_META[priority];
         return (
           <FilterPill
             key={`priority-${priority}`}
             label={meta.label}
             color={meta.color}
-            bg={meta.color + '18'}
+            bg={meta.color + "18"}
             onRemove={() => togglePriority(priority)}
           />
-        )
+        );
       })}
 
       {/* Clear all */}
@@ -89,15 +102,20 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         <button
           onClick={clearAll}
           className="ml-1 text-xs font-medium transition-colors flex-shrink-0"
-          style={{ color: '#6C47FF' }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = '#5235CC')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = '#6C47FF')}
+          style={{ color: "#6C47FF" }}
+          onMouseEnter={(e) =>
+            ((e.currentTarget as HTMLElement).style.color = "#5235CC")
+          }
+          onMouseLeave={(e) =>
+            ((e.currentTarget as HTMLElement).style.color = "#6C47FF")
+          }
+          aria-label="Clear all filters"
         >
           Clear all
         </button>
       )}
     </motion.div>
-  )
+  );
 }
 
 function FilterPill({
@@ -105,17 +123,19 @@ function FilterPill({
   color,
   bg,
   onRemove,
-}: {
-  label: string
-  color: string
-  bg: string
-  onRemove: () => void
-}) {
+}: Readonly<{
+  label: string;
+  color: string;
+  bg: string;
+  onRemove: () => void;
+}>) {
   return (
     <motion.span
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
+      role="status"
+      aria-label={`Filter: ${label}`}
       className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium flex-shrink-0"
       style={{ background: bg, color }}
     >
@@ -123,9 +143,10 @@ function FilterPill({
       <button
         onClick={onRemove}
         className="rounded-full p-0.5 transition-colors hover:bg-black/10"
+        aria-label={`Remove ${label} filter`}
       >
-        <X size={10} />
+        <X size={10} aria-hidden="true" />
       </button>
     </motion.span>
-  )
+  );
 }

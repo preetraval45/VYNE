@@ -116,6 +116,104 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// POST /auth/forgot-password — Initiate password reset flow
+    /// Sends a verification code to the user's email via Cognito.
+    /// Always returns 200 to prevent email enumeration.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct)
+    {
+        try
+        {
+            await _cognito.ForgotPasswordAsync(request.Email, ct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("Forgot-password rate limited for {Email}: {Message}", request.Email, ex.Message);
+            return TooManyRequests(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't expose internal errors — always return success to prevent enumeration
+            _logger.LogError(ex, "Unexpected error during forgot-password for {Email}", request.Email);
+        }
+
+        // Always return success to prevent email enumeration
+        return Ok(new
+        {
+            message = "If an account with that email exists, we've sent a password reset code."
+        });
+    }
+
+    /// <summary>
+    /// POST /auth/reset-password — Complete password reset using the verification code
+    /// </summary>
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request, CancellationToken ct)
+    {
+        try
+        {
+            // The token is a composite of email:code, base64-encoded for URL safety
+            string email;
+            string code;
+            try
+            {
+                var decoded = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(request.Token));
+                var parts = decoded.Split(':', 2);
+                if (parts.Length != 2)
+                    return BadRequest(new { error = new { code = "INVALID_TOKEN", message = "Invalid reset token format." } });
+
+                email = parts[0];
+                code = parts[1];
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { error = new { code = "INVALID_TOKEN", message = "Invalid reset token." } });
+            }
+
+            await _cognito.ConfirmForgotPasswordAsync(email, code, request.NewPassword, ct);
+
+            _logger.LogInformation("Password successfully reset for {Email}", email);
+
+            return Ok(new
+            {
+                message = "Password has been reset successfully. You can now sign in with your new password."
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = new { code = "RESET_FAILED", message = ex.Message } });
+        }
+    }
+
+    /// <summary>
+    /// POST /auth/refresh — Refresh JWT tokens using a Cognito refresh token
+    /// </summary>
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken ct)
+    {
+        try
+        {
+            var result = await _cognito.RefreshTokenAsync(request.RefreshToken, ct);
+
+            return Ok(new
+            {
+                token = result.IdToken,
+                accessToken = result.AccessToken,
+                // If Cognito returns a new refresh token, use it; otherwise return the original
+                refreshToken = result.RefreshToken ?? request.RefreshToken
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Unauthorized(new { error = new { code = "REFRESH_FAILED", message = ex.Message } });
+        }
+    }
+
     private static object MapOrg(Organization org) => new
     {
         id = org.Id,
@@ -141,6 +239,9 @@ public class AuthController : ControllerBase
         presence = user.Presence.ToString().ToLower(),
         createdAt = user.CreatedAt
     };
+
+    private ObjectResult TooManyRequests(string message) =>
+        StatusCode(429, new { error = new { code = "TOO_MANY_REQUESTS", message } });
 }
 
 public record RegisterRequest(
@@ -149,4 +250,17 @@ public record RegisterRequest(
     [Required, MinLength(2)] string Name,
     [Required, MinLength(2)] string OrganizationName,
     [Required, MinLength(2), MaxLength(50)] string OrganizationSlug
+);
+
+public record ForgotPasswordRequest(
+    [Required, EmailAddress] string Email
+);
+
+public record ResetPasswordRequest(
+    [Required] string Token,
+    [Required, MinLength(8)] string NewPassword
+);
+
+public record RefreshTokenRequest(
+    [Required] string RefreshToken
 );

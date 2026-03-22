@@ -1,30 +1,47 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { FileText, Clock, Search, X } from 'lucide-react'
-import { useDocs, useDoc, useCreateDoc, useUpdateDoc, useDeleteDoc, useDocSearch } from '@/hooks/useDocs'
-import { DocTree } from '@/components/docs/DocTree'
-import { DocEditor } from '@/components/docs/DocEditor'
-import { formatDistanceToNow } from 'date-fns'
+import { useState } from "react";
+import { FileText, Clock, Search, X } from "lucide-react";
+import {
+  useDocs,
+  useDoc,
+  useCreateDoc,
+  useUpdateDoc,
+  useDeleteDoc,
+  useDocSearch,
+} from "@/hooks/useDocs";
+import { useDebounce } from "@/hooks/useDebounce";
+import { DocTree } from "@/components/docs/DocTree";
+import { DocEditor } from "@/components/docs/DocEditor";
+import { formatDistanceToNow } from "date-fns";
 
 // ── Recent Docs Grid ──────────────────────────────────────────────
 function RecentDocsGrid({
   docs,
   onSelect,
 }: {
-  docs: { id: string; title: string; icon?: string | null; updatedAt: string }[]
-  onSelect: (id: string) => void
+  docs: {
+    id: string;
+    title: string;
+    icon?: string | null;
+    updatedAt: string;
+  }[];
+  onSelect: (id: string) => void;
 }) {
   if (docs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <div className="w-14 h-14 rounded-2xl bg-[#F0EDFF] flex items-center justify-center">
-          <FileText size={24} style={{ color: '#6C47FF' }} />
+          <FileText size={24} style={{ color: "var(--vyne-purple)" }} />
         </div>
-        <p className="text-[15px] font-semibold text-[#1A1A2E]">No documents yet</p>
-        <p className="text-[13px] text-[#A0A0B8]">Create your first page from the sidebar</p>
+        <p className="text-[15px] font-semibold text-[#1A1A2E]">
+          No documents yet
+        </p>
+        <p className="text-[13px] text-[#A0A0B8]">
+          Create your first page from the sidebar
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -35,7 +52,7 @@ function RecentDocsGrid({
           onClick={() => onSelect(doc.id)}
           className="group flex flex-col gap-2 p-4 rounded-xl border border-[#E8E8F0] bg-white hover:border-[#6C47FF] hover:shadow-vyne-sm transition-all text-left"
         >
-          <span className="text-2xl leading-none">{doc.icon ?? '📄'}</span>
+          <span className="text-2xl leading-none">{doc.icon ?? "📄"}</span>
           <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-2 group-hover:text-[#6C47FF] transition-colors">
             {doc.title}
           </span>
@@ -45,7 +62,7 @@ function RecentDocsGrid({
         </button>
       ))}
     </div>
-  )
+  );
 }
 
 // ── Search Results ────────────────────────────────────────────────
@@ -54,11 +71,11 @@ function SearchResults({
   onSelect,
   onClear,
 }: {
-  query: string
-  onSelect: (id: string) => void
-  onClear: () => void
+  query: string;
+  onSelect: (id: string) => void;
+  onClear: () => void;
 }) {
-  const { data: results, isLoading } = useDocSearch(query)
+  const { data: results, isLoading } = useDocSearch(query);
 
   return (
     <div>
@@ -75,9 +92,7 @@ function SearchResults({
         </button>
       </div>
 
-      {isLoading && (
-        <p className="text-[13px] text-[#A0A0B8]">Searching…</p>
-      )}
+      {isLoading && <p className="text-[13px] text-[#A0A0B8]">Searching…</p>}
 
       {!isLoading && results?.length === 0 && (
         <p className="text-[13px] text-[#A0A0B8]">No documents found.</p>
@@ -87,33 +102,41 @@ function SearchResults({
         {results?.map((doc) => (
           <button
             key={doc.id}
-            onClick={() => { onSelect(doc.id); onClear() }}
+            onClick={() => {
+              onSelect(doc.id);
+              onClear();
+            }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E8F0] bg-white hover:border-[#6C47FF] hover:shadow-vyne-sm transition-all text-left"
           >
-            <span className="text-lg">{doc.icon ?? '📄'}</span>
+            <span className="text-lg">{doc.icon ?? "📄"}</span>
             <div>
-              <p className="text-[13px] font-medium text-[#1A1A2E]">{doc.title}</p>
+              <p className="text-[13px] font-medium text-[#1A1A2E]">
+                {doc.title}
+              </p>
               <p className="text-[11px] text-[#A0A0B8]">
-                Updated {formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}
+                Updated{" "}
+                {formatDistanceToNow(new Date(doc.updatedAt), {
+                  addSuffix: true,
+                })}
               </p>
             </div>
           </button>
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // ── Active Doc Loader ─────────────────────────────────────────────
 function ActiveDocPanel({ id }: { id: string }) {
-  const { data: doc, isLoading } = useDoc(id)
+  const { data: doc, isLoading } = useDoc(id);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="w-5 h-5 border-2 border-[#6C47FF] border-t-transparent rounded-full animate-spin" />
       </div>
-    )
+    );
   }
 
   if (!doc) {
@@ -121,69 +144,72 @@ function ActiveDocPanel({ id }: { id: string }) {
       <div className="flex items-center justify-center h-full">
         <p className="text-[13px] text-[#A0A0B8]">Document not found.</p>
       </div>
-    )
+    );
   }
 
-  return <DocEditor doc={doc} />
+  return <DocEditor doc={doc} />;
 }
 
 // ── Main Docs Page ────────────────────────────────────────────────
 export default function DocsPage() {
-  const [activeDocId, setActiveDocId] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchInput, setSearchInput] = useState('')
+  const [activeDocId, setActiveDocId] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const searchQuery = useDebounce(searchInput.trim(), 300);
 
-  const { data: allDocs = [], isLoading } = useDocs()
-  const createDoc = useCreateDoc()
-  const updateDoc = useUpdateDoc()
-  const deleteDoc = useDeleteDoc()
+  const { data: allDocs = [], isLoading } = useDocs();
+  const createDoc = useCreateDoc();
+  const updateDoc = useUpdateDoc();
+  const deleteDoc = useDeleteDoc();
 
   // Root-level docs
-  const rootDocs = allDocs.filter((d) => !d.parentId)
+  const rootDocs = allDocs.filter((d) => !d.parentId);
 
   // Recent docs (last 20 sorted by updatedAt)
-  const recentDocs = [...allDocs].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  ).slice(0, 20)
+  const recentDocs = [...allDocs]
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    )
+    .slice(0, 20);
 
   async function handleCreateRoot() {
-    const doc = await createDoc.mutateAsync({ title: 'Untitled' })
-    setActiveDocId(doc.id)
+    const doc = await createDoc.mutateAsync({ title: "Untitled" });
+    setActiveDocId(doc.id);
   }
 
   async function handleCreateChild(parentId: string) {
-    const doc = await createDoc.mutateAsync({ parentId, title: 'Untitled' })
-    setActiveDocId(doc.id)
+    const doc = await createDoc.mutateAsync({ parentId, title: "Untitled" });
+    setActiveDocId(doc.id);
   }
 
   function handleRename(id: string, title: string) {
-    updateDoc.mutate({ id, data: { title } })
+    updateDoc.mutate({ id, data: { title } });
   }
 
   function handleDelete(id: string) {
-    deleteDoc.mutate(id)
-    if (activeDocId === id) setActiveDocId(null)
+    deleteDoc.mutate(id);
+    if (activeDocId === id) setActiveDocId(null);
   }
 
   function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (searchInput.trim().length >= 2) {
-      setSearchQuery(searchInput.trim())
-    }
+    e.preventDefault();
   }
 
-  const isShowingSearch = searchQuery.length >= 2
+  const isShowingSearch = searchQuery.length >= 2;
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#FFFFFF' }}>
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{ background: "var(--content-bg)" }}
+    >
       {/* ── Sidebar / Doc Tree ───────────────────────────────── */}
       <aside
         className="flex flex-col border-r border-[#E8E8F0] flex-shrink-0 overflow-hidden"
-        style={{ width: 220, background: '#FAFAFE' }}
+        style={{ width: 220, background: "#FAFAFE" }}
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-3 border-b border-[#E8E8F0]">
-          <FileText size={15} style={{ color: '#6C47FF' }} />
+          <FileText size={15} style={{ color: "var(--vyne-purple)" }} />
           <span className="text-[13px] font-semibold text-[#1A1A2E]">Docs</span>
         </div>
 
@@ -232,13 +258,17 @@ export default function DocsPage() {
                 <SearchResults
                   query={searchQuery}
                   onSelect={setActiveDocId}
-                  onClear={() => { setSearchQuery(''); setSearchInput('') }}
+                  onClear={() => {
+                    setSearchInput("");
+                  }}
                 />
               ) : (
                 <>
                   {/* Welcome header */}
                   <div className="mb-8">
-                    <h1 className="text-[1.75rem] font-bold text-[#1A1A2E] mb-1">Docs</h1>
+                    <h1 className="text-[1.75rem] font-bold text-[#1A1A2E] mb-1">
+                      Docs
+                    </h1>
                     <p className="text-[14px] text-[#A0A0B8]">
                       Your team&rsquo;s knowledge base — all in one place.
                     </p>
@@ -259,5 +289,5 @@ export default function DocsPage() {
         )}
       </main>
     </div>
-  )
+  );
 }

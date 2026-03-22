@@ -1,206 +1,1056 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Search, LayoutGrid, FileText, MessageSquare, Code2, Activity,
-  Package, ArrowRight, Hash, DollarSign, Users, Receipt, Target,
-  Map, Shield, Sparkles, Zap, Settings, LogOut, Sun, Moon,
-} from 'lucide-react'
-import { useUIStore, useTheme } from '@/lib/stores/ui'
-import { useAuthStore } from '@/lib/stores/auth'
-import { cn } from '@/lib/utils'
+  Search,
+  LayoutGrid,
+  FileText,
+  MessageSquare,
+  Code2,
+  Activity,
+  Package,
+  ArrowRight,
+  Hash,
+  DollarSign,
+  Users,
+  Receipt,
+  Target,
+  Map,
+  Shield,
+  Sparkles,
+  Zap,
+  Settings,
+  LogOut,
+  Sun,
+  Moon,
+  Plus,
+  Clock,
+  ShoppingCart,
+  User,
+  ChevronRight,
+} from "lucide-react";
+import { useUIStore } from "@/lib/stores/ui";
+import { useTheme, useThemeStore } from "@/lib/stores/theme";
+import { useAuthStore } from "@/lib/stores/auth";
+import { cn } from "@/lib/utils";
+import { useDebounce } from "@/hooks/useDebounce";
+
+// ── Fixture imports for demo search ────────────────────────────────
+import { MOCK_PRODUCTS, MOCK_ORDERS } from "@/lib/fixtures/ops";
+import { EMPLOYEES } from "@/lib/fixtures/hr";
+
+// ── Constants ──────────────────────────────────────────────────────
+const RECENT_SEARCHES_KEY = "vyne-recent-searches";
+const MAX_RECENT_SEARCHES = 5;
+
+// ── Types ──────────────────────────────────────────────────────────
+type ResultCategory =
+  | "Navigate"
+  | "Issues"
+  | "Documents"
+  | "Channels"
+  | "Messages"
+  | "Products"
+  | "Orders"
+  | "Team"
+  | "Quick Actions"
+  | "Create"
+  | "Actions"
+  | "Recent Searches";
 
 interface CommandItem {
-  id: string
-  label: string
-  description?: string
-  icon: React.ReactNode
-  action: () => void
-  category: string
-  keywords?: string
+  readonly id: string;
+  readonly label: string;
+  readonly description?: string;
+  readonly icon: React.ReactNode;
+  readonly action: () => void;
+  readonly category: ResultCategory;
+  readonly keywords?: string;
+  readonly badge?: string;
 }
 
+// ── Mock searchable data for demo mode ─────────────────────────────
+const MOCK_ISSUES = [
+  {
+    id: "i1",
+    key: "ENG-43",
+    title: "Fix Secrets Manager IAM permissions",
+    status: "in_progress",
+    priority: "urgent",
+  },
+  {
+    id: "i2",
+    key: "ENG-45",
+    title: "LangGraph agent orchestration review",
+    status: "todo",
+    priority: "high",
+  },
+  {
+    id: "i3",
+    key: "ENG-41",
+    title: "TimescaleDB metrics schema migration",
+    status: "in_review",
+    priority: "medium",
+  },
+  {
+    id: "i4",
+    key: "ENG-38",
+    title: "API gateway rate limiting implementation",
+    status: "done",
+    priority: "high",
+  },
+  {
+    id: "i5",
+    key: "ENG-50",
+    title: "WebSocket reconnection handling",
+    status: "backlog",
+    priority: "medium",
+  },
+  {
+    id: "i6",
+    key: "ENG-52",
+    title: "Add dark mode support to billing page",
+    status: "todo",
+    priority: "low",
+  },
+  {
+    id: "i7",
+    key: "DES-12",
+    title: "Redesign onboarding flow",
+    status: "in_progress",
+    priority: "high",
+  },
+  {
+    id: "i8",
+    key: "DES-14",
+    title: "Update component library icons",
+    status: "backlog",
+    priority: "medium",
+  },
+] as const;
+
+const MOCK_DOCUMENTS = [
+  { id: "d1", title: "Product Roadmap Q2 2026", icon: "🗺️" },
+  { id: "d2", title: "Engineering Onboarding Guide", icon: "📖" },
+  { id: "d3", title: "API Design Principles", icon: "⚙️" },
+  { id: "d4", title: "Sprint 12 Retrospective", icon: "📝" },
+  { id: "d5", title: "Architecture Decision Records", icon: "🏗️" },
+  { id: "d6", title: "Security Incident Playbook", icon: "🛡️" },
+] as const;
+
+const MOCK_CHANNELS = [
+  { id: "ch1", name: "general", memberCount: 8 },
+  { id: "ch2", name: "engineering", memberCount: 5 },
+  { id: "ch3", name: "product-updates", memberCount: 8 },
+  { id: "ch4", name: "random", memberCount: 8 },
+  { id: "ch5", name: "sales-pipeline", memberCount: 3 },
+  { id: "ch6", name: "incidents", memberCount: 4 },
+] as const;
+
+const MOCK_MESSAGES = [
+  {
+    id: "m1",
+    content: "The API gateway deployment is blocked on DevOps approvals",
+    channel: "engineering",
+    author: "Preet",
+  },
+  {
+    id: "m2",
+    content: "Acme Corp pilot onboarding starts next week",
+    channel: "sales-pipeline",
+    author: "Alex",
+  },
+  {
+    id: "m3",
+    content: "New design system tokens are ready for review",
+    channel: "product-updates",
+    author: "Sarah",
+  },
+  {
+    id: "m4",
+    content: "Deployed auth-service v1.8.2 successfully",
+    channel: "engineering",
+    author: "Tony",
+  },
+  {
+    id: "m5",
+    content: "Monthly revenue report is attached",
+    channel: "general",
+    author: "Emma",
+  },
+] as const;
+
+// ── localStorage helpers ───────────────────────────────────────────
+function loadRecentSearches(): string[] {
+  if (globalThis.window === undefined) return [];
+  try {
+    const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
+    if (raw) return JSON.parse(raw) as string[];
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveRecentSearches(searches: string[]): void {
+  if (globalThis.window === undefined) return;
+  try {
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+  } catch {
+    /* ignore */
+  }
+}
+
+// ── Per-module search helpers ───────────────────────────────────────
+// Each function searches one data source and returns matching CommandItems.
+// Extracted to keep cognitive complexity low in the main search memo.
+
+function searchIssues(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_ISSUES.filter(
+    (issue) =>
+      issue.title.toLowerCase().includes(q) ||
+      issue.key.toLowerCase().includes(q),
+  ).map((issue) => ({
+    id: `search-issue-${issue.id}`,
+    label: `${issue.key}: ${issue.title}`,
+    description: "Projects",
+    icon: <Hash size={16} />,
+    action: () => navigate("/projects"),
+    category: "Issues" as ResultCategory,
+    badge: issue.priority,
+  }));
+}
+
+function searchDocuments(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_DOCUMENTS.filter((doc) =>
+    doc.title.toLowerCase().includes(q),
+  ).map((doc) => ({
+    id: `search-doc-${doc.id}`,
+    label: `${doc.icon} ${doc.title}`,
+    description: "Docs",
+    icon: <FileText size={16} />,
+    action: () => navigate("/docs"),
+    category: "Documents" as ResultCategory,
+  }));
+}
+
+function searchChannels(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_CHANNELS.filter((ch) => ch.name.toLowerCase().includes(q)).map(
+    (ch) => ({
+      id: `search-ch-${ch.id}`,
+      label: `#${ch.name}`,
+      description: "Chat",
+      icon: <MessageSquare size={16} />,
+      action: () => navigate("/chat"),
+      category: "Channels" as ResultCategory,
+      badge: `${ch.memberCount} members`,
+    }),
+  );
+}
+
+function searchMessages(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_MESSAGES.filter((msg) =>
+    msg.content.toLowerCase().includes(q),
+  ).map((msg) => {
+    const preview =
+      msg.content.length > 60 ? msg.content.slice(0, 60) + "..." : msg.content;
+    return {
+      id: `search-msg-${msg.id}`,
+      label: preview,
+      description: `#${msg.channel} by ${msg.author}`,
+      icon: <MessageSquare size={16} />,
+      action: () => navigate("/chat"),
+      category: "Messages" as ResultCategory,
+    };
+  });
+}
+
+function searchProducts(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_PRODUCTS.filter(
+    (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q),
+  ).map((product) => ({
+    id: `search-product-${product.id}`,
+    label: product.name,
+    description: `SKU: ${product.sku}`,
+    icon: <Package size={16} />,
+    action: () => navigate("/ops"),
+    category: "Products" as ResultCategory,
+    badge:
+      product.status === "out_of_stock"
+        ? "Out of stock"
+        : `${product.stockQty} in stock`,
+  }));
+}
+
+function searchOrders(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_ORDERS.filter(
+    (o) =>
+      o.orderNumber.toLowerCase().includes(q) ||
+      o.customerName.toLowerCase().includes(q),
+  ).map((order) => ({
+    id: `search-order-${order.id}`,
+    label: `${order.orderNumber} - ${order.customerName}`,
+    description: "Ops",
+    icon: <ShoppingCart size={16} />,
+    action: () => navigate("/ops"),
+    category: "Orders" as ResultCategory,
+    badge: order.status,
+  }));
+}
+
+function searchTeam(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return EMPLOYEES.filter(
+    (emp) =>
+      emp.name.toLowerCase().includes(q) || emp.email.toLowerCase().includes(q),
+  ).map((emp) => ({
+    id: `search-team-${emp.id}`,
+    label: emp.name,
+    description: `${emp.title} · ${emp.email}`,
+    icon: <User size={16} />,
+    action: () => navigate("/hr"),
+    category: "Team" as ResultCategory,
+    badge: emp.department,
+  }));
+}
+
+// ── Category icon map ──────────────────────────────────────────────
+const CATEGORY_ICONS: Record<ResultCategory, React.ReactNode> = {
+  Navigate: <LayoutGrid size={12} />,
+  Issues: <Hash size={12} />,
+  Documents: <FileText size={12} />,
+  Channels: <MessageSquare size={12} />,
+  Messages: <MessageSquare size={12} />,
+  Products: <Package size={12} />,
+  Orders: <ShoppingCart size={12} />,
+  Team: <Users size={12} />,
+  "Quick Actions": <Zap size={12} />,
+  Create: <Plus size={12} />,
+  Actions: <Settings size={12} />,
+  "Recent Searches": <Clock size={12} />,
+};
+
+// ── Sub-components ─────────────────────────────────────────────────
+
+type SectionHeaderProps = Readonly<{
+  category: ResultCategory;
+}>;
+
+function SectionHeader({ category }: SectionHeaderProps) {
+  return (
+    <div
+      className="flex items-center gap-2 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider"
+      style={{ color: "#4A4A6A" }}
+    >
+      <span className="flex-shrink-0 opacity-60">
+        {CATEGORY_ICONS[category]}
+      </span>
+      {category}
+    </div>
+  );
+}
+
+type ResultItemProps = Readonly<{
+  item: CommandItem;
+  isSelected: boolean;
+  onSelect: () => void;
+  onHover: () => void;
+}>;
+
+function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
+  const itemRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isSelected && itemRef.current) {
+      itemRef.current.scrollIntoView({ block: "nearest" });
+    }
+  }, [isSelected]);
+
+  return (
+    <button
+      ref={itemRef}
+      onClick={onSelect}
+      onMouseEnter={onHover}
+      className={cn(
+        "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left",
+      )}
+      style={{
+        background: isSelected ? "rgba(108,71,255,0.15)" : "transparent",
+        color: isSelected ? "#FFFFFF" : "#A0A0B8",
+      }}
+    >
+      <span
+        className="flex-shrink-0"
+        style={{ color: isSelected ? "#8B6BFF" : "#6B6B8A" }}
+      >
+        {item.icon}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="font-medium truncate">{item.label}</div>
+        {item.description && (
+          <div
+            className="text-xs truncate"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {item.description}
+          </div>
+        )}
+      </div>
+      {item.badge && (
+        <span
+          className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded"
+          style={{ background: "rgba(108,71,255,0.15)", color: "#8B6BFF" }}
+        >
+          {item.badge}
+        </span>
+      )}
+      {isSelected && (
+        <ArrowRight
+          size={14}
+          style={{ color: "var(--vyne-purple)", flexShrink: 0 }}
+        />
+      )}
+    </button>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────
 export function CommandPalette() {
-  const router = useRouter()
-  const { commandPaletteOpen, setCommandPaletteOpen, toggleTheme } = useUIStore()
-  const theme = useTheme()
-  const { logout } = useAuthStore()
-  const [query, setQuery] = useState('')
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const { commandPaletteOpen, setCommandPaletteOpen } = useUIStore();
+  const theme = useTheme();
+  const toggleTheme = useThemeStore((s) => s.toggleTheme);
+  const { logout } = useAuthStore();
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const allCommands: CommandItem[] = [
-    // ── Navigate ────────────────────────────────────────────────
-    { id: 'nav-home',        label: 'Go to Home',        description: 'Main dashboard',               icon: <LayoutGrid size={16} />,   action: () => router.push('/home'),        category: 'Navigate' },
-    { id: 'nav-chat',        label: 'Go to Chat',        description: 'Messages and channels',        icon: <MessageSquare size={16} />, action: () => router.push('/chat'),       category: 'Navigate' },
-    { id: 'nav-projects',    label: 'Go to Projects',    description: 'Project management',           icon: <Hash size={16} />,          action: () => router.push('/projects'),   category: 'Navigate' },
-    { id: 'nav-crm',         label: 'Go to CRM',         description: 'Pipeline and deals',           icon: <Target size={16} />,        action: () => router.push('/crm'),        category: 'Navigate' },
-    { id: 'nav-finance',     label: 'Go to Finance',     description: 'P&L, invoices, journal',       icon: <DollarSign size={16} />,    action: () => router.push('/finance'),    category: 'Navigate' },
-    { id: 'nav-ops',         label: 'Go to Ops',         description: 'Inventory and ERP',            icon: <Package size={16} />,       action: () => router.push('/ops'),        category: 'Navigate' },
-    { id: 'nav-hr',          label: 'Go to HR',          description: 'Employees, leave, payroll',    icon: <Users size={16} />,         action: () => router.push('/hr'),         category: 'Navigate' },
-    { id: 'nav-expenses',    label: 'Go to Expenses',    description: 'Expense reports',              icon: <Receipt size={16} />,       action: () => router.push('/expenses'),   category: 'Navigate' },
-    { id: 'nav-docs',        label: 'Go to Docs',        description: 'Documentation editor',         icon: <FileText size={16} />,      action: () => router.push('/docs'),       category: 'Navigate' },
-    { id: 'nav-code',        label: 'Go to Code',        description: 'Deployments and PRs',          icon: <Code2 size={16} />,         action: () => router.push('/code'),       category: 'Navigate' },
-    { id: 'nav-observe',     label: 'Go to Observe',     description: 'Metrics and monitoring',       icon: <Activity size={16} />,      action: () => router.push('/observe'),    category: 'Navigate' },
-    { id: 'nav-ai',          label: 'Go to AI Assistant', description: 'Business intelligence',       icon: <Sparkles size={16} />,      action: () => router.push('/ai'),         category: 'Navigate' },
-    { id: 'nav-automations', label: 'Go to Automations', description: 'Workflow builder',             icon: <Zap size={16} />,           action: () => router.push('/automations'), category: 'Navigate' },
-    { id: 'nav-roadmap',     label: 'Go to Roadmap',     description: 'Feature gap analysis',         icon: <Map size={16} />,           action: () => router.push('/roadmap'),    category: 'Navigate' },
-    { id: 'nav-admin',       label: 'Go to Admin',       description: 'Tenant and billing management',icon: <Shield size={16} />,        action: () => router.push('/admin'),      category: 'Navigate' },
-    { id: 'nav-settings',    label: 'Go to Settings',    description: 'Organization settings',        icon: <Settings size={16} />,      action: () => router.push('/settings'),   category: 'Navigate' },
-    // ── Create ──────────────────────────────────────────────────
-    { id: 'create-project',  label: 'New Project',       description: 'Create a new project',         icon: <Hash size={16} />,          action: () => router.push('/projects'),   category: 'Create', keywords: 'add project' },
-    { id: 'create-issue',    label: 'New Issue',         description: 'Create a task or bug',         icon: <Hash size={16} />,          action: () => router.push('/projects'),   category: 'Create', keywords: 'add task bug' },
-    { id: 'create-invoice',  label: 'New Invoice',       description: 'Create a draft invoice',       icon: <Receipt size={16} />,       action: () => router.push('/finance'),    category: 'Create', keywords: 'bill payment' },
-    { id: 'create-deal',     label: 'New CRM Deal',      description: 'Add a deal to the pipeline',   icon: <Target size={16} />,        action: () => router.push('/crm'),        category: 'Create', keywords: 'lead sale' },
-    { id: 'create-expense',  label: 'New Expense',       description: 'Submit an expense report',     icon: <Receipt size={16} />,       action: () => router.push('/expenses'),   category: 'Create', keywords: 'report cost' },
-    { id: 'create-doc',      label: 'New Document',      description: 'Create a new doc or page',     icon: <FileText size={16} />,      action: () => router.push('/docs'),       category: 'Create', keywords: 'wiki page note' },
-    { id: 'create-channel',  label: 'New Channel',       description: 'Create a chat channel',        icon: <MessageSquare size={16} />, action: () => router.push('/chat'),       category: 'Create', keywords: 'slack message' },
-    { id: 'create-automation', label: 'New Automation',  description: 'Build a workflow rule',        icon: <Zap size={16} />,           action: () => router.push('/automations'), category: 'Create', keywords: 'workflow rule trigger' },
-    // ── Actions ─────────────────────────────────────────────────
-    { id: 'toggle-theme',    label: theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode', description: 'Toggle color scheme', icon: theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />, action: toggleTheme, category: 'Actions' },
-    { id: 'logout',          label: 'Sign Out',          description: 'Log out of VYNE',              icon: <LogOut size={16} />,        action: () => { logout(); router.push('/login') }, category: 'Actions' },
-  ]
+  // Load recent searches on mount
+  useEffect(() => {
+    setRecentSearches(loadRecentSearches());
+  }, []);
 
-  const filtered = query
-    ? allCommands.filter((cmd) => {
-        const q = query.toLowerCase()
-        return (
-          cmd.label.toLowerCase().includes(q) ||
-          (cmd.description?.toLowerCase().includes(q) ?? false) ||
-          (cmd.keywords?.toLowerCase().includes(q) ?? false)
-        )
-      })
-    : allCommands
+  // ── Close helper ────────────────────────────────────────────────
+  const close = useCallback(() => {
+    setCommandPaletteOpen(false);
+  }, [setCommandPaletteOpen]);
 
-  const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, cmd) => {
-    if (!acc[cmd.category]) acc[cmd.category] = []
-    acc[cmd.category].push(cmd)
-    return acc
-  }, {})
+  // ── Save a search to recents ────────────────────────────────────
+  const addRecentSearch = useCallback((term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed || trimmed.startsWith(">")) return;
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((s) => s !== trimmed);
+      const next = [trimmed, ...filtered].slice(0, MAX_RECENT_SEARCHES);
+      saveRecentSearches(next);
+      return next;
+    });
+  }, []);
 
-  useEffect(() => { setSelectedIndex(0) }, [query])
+  // ── Navigation commands ─────────────────────────────────────────
+  const navigationCommands: CommandItem[] = useMemo(
+    () => [
+      {
+        id: "nav-home",
+        label: "Go to Home",
+        description: "Main dashboard",
+        icon: <LayoutGrid size={16} />,
+        action: () => router.push("/home"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-chat",
+        label: "Go to Chat",
+        description: "Messages and channels",
+        icon: <MessageSquare size={16} />,
+        action: () => router.push("/chat"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-projects",
+        label: "Go to Projects",
+        description: "Project management",
+        icon: <Hash size={16} />,
+        action: () => router.push("/projects"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-crm",
+        label: "Go to CRM",
+        description: "Pipeline and deals",
+        icon: <Target size={16} />,
+        action: () => router.push("/crm"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-finance",
+        label: "Go to Finance",
+        description: "P&L, invoices, journal",
+        icon: <DollarSign size={16} />,
+        action: () => router.push("/finance"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-ops",
+        label: "Go to Ops",
+        description: "Inventory and ERP",
+        icon: <Package size={16} />,
+        action: () => router.push("/ops"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-hr",
+        label: "Go to HR",
+        description: "Employees, leave, payroll",
+        icon: <Users size={16} />,
+        action: () => router.push("/hr"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-expenses",
+        label: "Go to Expenses",
+        description: "Expense reports",
+        icon: <Receipt size={16} />,
+        action: () => router.push("/expenses"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-docs",
+        label: "Go to Docs",
+        description: "Documentation editor",
+        icon: <FileText size={16} />,
+        action: () => router.push("/docs"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-code",
+        label: "Go to Code",
+        description: "Deployments and PRs",
+        icon: <Code2 size={16} />,
+        action: () => router.push("/code"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-observe",
+        label: "Go to Observe",
+        description: "Metrics and monitoring",
+        icon: <Activity size={16} />,
+        action: () => router.push("/observe"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-ai",
+        label: "Go to AI Assistant",
+        description: "Business intelligence",
+        icon: <Sparkles size={16} />,
+        action: () => router.push("/ai"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-automations",
+        label: "Go to Automations",
+        description: "Workflow builder",
+        icon: <Zap size={16} />,
+        action: () => router.push("/automations"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-roadmap",
+        label: "Go to Roadmap",
+        description: "Feature gap analysis",
+        icon: <Map size={16} />,
+        action: () => router.push("/roadmap"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-admin",
+        label: "Go to Admin",
+        description: "Tenant and billing management",
+        icon: <Shield size={16} />,
+        action: () => router.push("/admin"),
+        category: "Navigate",
+      },
+      {
+        id: "nav-settings",
+        label: "Go to Settings",
+        description: "Organization settings",
+        icon: <Settings size={16} />,
+        action: () => router.push("/settings"),
+        category: "Navigate",
+      },
+    ],
+    [router],
+  );
 
+  // ── Create commands ─────────────────────────────────────────────
+  const createCommands: CommandItem[] = useMemo(
+    () => [
+      {
+        id: "create-issue",
+        label: "New Issue",
+        description: "Create a task or bug",
+        icon: <Hash size={16} />,
+        action: () => router.push("/projects"),
+        category: "Create",
+        keywords: "add task bug",
+      },
+      {
+        id: "create-project",
+        label: "New Project",
+        description: "Create a new project",
+        icon: <Hash size={16} />,
+        action: () => router.push("/projects"),
+        category: "Create",
+        keywords: "add project",
+      },
+      {
+        id: "create-invoice",
+        label: "New Invoice",
+        description: "Create a draft invoice",
+        icon: <Receipt size={16} />,
+        action: () => router.push("/finance"),
+        category: "Create",
+        keywords: "bill payment",
+      },
+      {
+        id: "create-deal",
+        label: "New CRM Deal",
+        description: "Add a deal to the pipeline",
+        icon: <Target size={16} />,
+        action: () => router.push("/crm"),
+        category: "Create",
+        keywords: "lead sale",
+      },
+      {
+        id: "create-expense",
+        label: "New Expense",
+        description: "Submit an expense report",
+        icon: <Receipt size={16} />,
+        action: () => router.push("/expenses"),
+        category: "Create",
+        keywords: "report cost",
+      },
+      {
+        id: "create-doc",
+        label: "New Document",
+        description: "Create a new doc or page",
+        icon: <FileText size={16} />,
+        action: () => router.push("/docs"),
+        category: "Create",
+        keywords: "wiki page note",
+      },
+      {
+        id: "create-channel",
+        label: "New Channel",
+        description: "Create a chat channel",
+        icon: <MessageSquare size={16} />,
+        action: () => router.push("/chat"),
+        category: "Create",
+        keywords: "slack message",
+      },
+      {
+        id: "create-order",
+        label: "New Order",
+        description: "Create a new order",
+        icon: <ShoppingCart size={16} />,
+        action: () => router.push("/ops"),
+        category: "Create",
+        keywords: "purchase sale",
+      },
+      {
+        id: "create-automation",
+        label: "New Automation",
+        description: "Build a workflow rule",
+        icon: <Zap size={16} />,
+        action: () => router.push("/automations"),
+        category: "Create",
+        keywords: "workflow rule trigger",
+      },
+    ],
+    [router],
+  );
+
+  // ── Action commands ─────────────────────────────────────────────
+  const actionCommands: CommandItem[] = useMemo(() => {
+    const themeLabel = {
+      light: "Switch to Dark Mode",
+      dark: "Switch to System Mode",
+      system: "Switch to Light Mode",
+    }[theme];
+    const themeIcon = {
+      light: <Moon size={16} />,
+      dark: <Sun size={16} />,
+      system: <Sun size={16} />,
+    }[theme];
+    return [
+      {
+        id: "toggle-theme",
+        label: themeLabel,
+        description: "Toggle color scheme",
+        icon: themeIcon,
+        action: toggleTheme,
+        category: "Actions",
+      },
+      {
+        id: "logout",
+        label: "Sign Out",
+        description: "Log out of VYNE",
+        icon: <LogOut size={16} />,
+        action: () => {
+          logout();
+          router.push("/login");
+        },
+        category: "Actions",
+      },
+    ];
+  }, [theme, toggleTheme, logout, router]);
+
+  // ── Quick actions (triggered by ">" prefix) ─────────────────────
+  const quickActions: CommandItem[] = useMemo(
+    () => [
+      {
+        id: "qa-issue",
+        label: "Create new issue",
+        description: "Open the create issue flow",
+        icon: <Plus size={16} />,
+        action: () => router.push("/projects"),
+        category: "Quick Actions",
+      },
+      {
+        id: "qa-project",
+        label: "Create new project",
+        description: "Open the create project modal",
+        icon: <Plus size={16} />,
+        action: () => router.push("/projects"),
+        category: "Quick Actions",
+      },
+      {
+        id: "qa-channel",
+        label: "Create new channel",
+        description: "Navigate to chat",
+        icon: <Plus size={16} />,
+        action: () => router.push("/chat"),
+        category: "Quick Actions",
+      },
+      {
+        id: "qa-doc",
+        label: "New document",
+        description: "Navigate to docs",
+        icon: <Plus size={16} />,
+        action: () => router.push("/docs"),
+        category: "Quick Actions",
+      },
+      {
+        id: "qa-order",
+        label: "New order",
+        description: "Navigate to ops",
+        icon: <Plus size={16} />,
+        action: () => router.push("/ops"),
+        category: "Quick Actions",
+      },
+    ],
+    [router],
+  );
+
+  // ── Search fixtures for matching results (debounced to 300ms) ────
+  const searchResults = useMemo((): CommandItem[] => {
+    const q = debouncedQuery.toLowerCase().trim();
+    if (!q || q.startsWith(">")) return [];
+
+    const navigate = (path: string) => router.push(path);
+    return [
+      ...searchIssues(q, navigate),
+      ...searchDocuments(q, navigate),
+      ...searchChannels(q, navigate),
+      ...searchMessages(q, navigate),
+      ...searchProducts(q, navigate),
+      ...searchOrders(q, navigate),
+      ...searchTeam(q, navigate),
+    ];
+  }, [debouncedQuery, router]);
+
+  // ── Build the final filtered item list ──────────────────────────
+  const filteredItems = useMemo((): CommandItem[] => {
+    const q = query.toLowerCase().trim();
+
+    // Quick actions mode: ">" prefix
+    if (q.startsWith(">")) {
+      const actionQuery = q.slice(1).trim();
+      if (!actionQuery) return quickActions;
+      return quickActions.filter(
+        (cmd) =>
+          cmd.label.toLowerCase().includes(actionQuery) ||
+          (cmd.description?.toLowerCase().includes(actionQuery) ?? false),
+      );
+    }
+
+    // Empty query: show recent searches then navigation + create
+    if (!q) {
+      const recentItems: CommandItem[] = recentSearches.map((term, idx) => ({
+        id: `recent-${idx}`,
+        label: term,
+        description: "Search again",
+        icon: <Clock size={16} />,
+        action: () => setQuery(term),
+        category: "Recent Searches" as ResultCategory,
+      }));
+
+      return [
+        ...recentItems,
+        ...navigationCommands,
+        ...createCommands,
+        ...actionCommands,
+      ];
+    }
+
+    // Active search: combine search results with matching commands
+    const matchingNavCommands = navigationCommands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(q) ||
+        (cmd.description?.toLowerCase().includes(q) ?? false),
+    );
+
+    const matchingCreateCommands = createCommands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(q) ||
+        (cmd.description?.toLowerCase().includes(q) ?? false) ||
+        (cmd.keywords?.toLowerCase().includes(q) ?? false),
+    );
+
+    const matchingActionCommands = actionCommands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(q) ||
+        (cmd.description?.toLowerCase().includes(q) ?? false),
+    );
+
+    // Search results first, then matching commands
+    return [
+      ...searchResults,
+      ...matchingNavCommands,
+      ...matchingCreateCommands,
+      ...matchingActionCommands,
+    ];
+  }, [
+    query,
+    searchResults,
+    navigationCommands,
+    createCommands,
+    actionCommands,
+    quickActions,
+    recentSearches,
+  ]);
+
+  // ── Group items by category ─────────────────────────────────────
+  const grouped = useMemo(() => {
+    const groups: Record<string, CommandItem[]> = {};
+    for (const item of filteredItems) {
+      if (!groups[item.category]) groups[item.category] = [];
+      groups[item.category].push(item);
+    }
+    return groups;
+  }, [filteredItems]);
+
+  // ── Reset selected index on query change ────────────────────────
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [query]);
+
+  // ── Focus input on open ─────────────────────────────────────────
   useEffect(() => {
     if (commandPaletteOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50)
-      setQuery('')
+      setTimeout(() => inputRef.current?.focus(), 50);
+      setQuery("");
+      setRecentSearches(loadRecentSearches());
     }
-  }, [commandPaletteOpen])
+  }, [commandPaletteOpen]);
 
+  // ── Global keyboard shortcut ────────────────────────────────────
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setCommandPaletteOpen(!commandPaletteOpen)
+    function handleGlobalKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(!commandPaletteOpen);
       }
-      if (e.key === 'Escape' && commandPaletteOpen) {
-        setCommandPaletteOpen(false)
+      if (e.key === "Escape" && commandPaletteOpen) {
+        close();
       }
     }
-    globalThis.addEventListener('keydown', handleKeyDown)
-    return () => globalThis.removeEventListener('keydown', handleKeyDown)
-  }, [commandPaletteOpen, setCommandPaletteOpen])
+    globalThis.addEventListener("keydown", handleGlobalKeyDown);
+    return () => globalThis.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [commandPaletteOpen, setCommandPaletteOpen, close]);
 
+  // ── Keyboard navigation inside the palette ──────────────────────
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedIndex((i) => Math.min(i + 1, filtered.length - 1)) }
-    if (e.key === 'ArrowUp')   { e.preventDefault(); setSelectedIndex((i) => Math.max(i - 1, 0)) }
-    if (e.key === 'Enter' && filtered[selectedIndex]) { filtered[selectedIndex].action(); setCommandPaletteOpen(false) }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.min(i + 1, filteredItems.length - 1));
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedIndex((i) => Math.max(i - 1, 0));
+    }
+    if (e.key === "Enter" && filteredItems[selectedIndex]) {
+      e.preventDefault();
+      runCommand(filteredItems[selectedIndex]);
+    }
   }
 
+  // ── Execute a command ───────────────────────────────────────────
   function runCommand(cmd: CommandItem) {
-    cmd.action()
-    setCommandPaletteOpen(false)
+    // Save search term when selecting a search result
+    if (query.trim() && !query.startsWith(">")) {
+      addRecentSearch(query);
+    }
+    cmd.action();
+    close();
   }
 
-  const flatFiltered = Object.values(grouped).flat()
+  // ── Detect platform for shortcut hint ───────────────────────────
+  const isMac =
+    globalThis.navigator !== undefined &&
+    /Mac|iPod|iPhone|iPad/.test(globalThis.navigator.userAgent);
+  const shortcutHint = isMac ? "\u2318K" : "Ctrl+K";
 
   return (
     <AnimatePresence>
       {commandPaletteOpen && (
         <>
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50"
-            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
-            onClick={() => setCommandPaletteOpen(false)}
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(4px)",
+            }}
+            onClick={close}
           />
 
+          {/* Palette */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             className="fixed top-[18vh] left-1/2 -translate-x-1/2 z-50 w-full max-w-[580px] rounded-xl overflow-hidden"
             style={{
-              background: '#1C1C2E',
-              border: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,71,255,0.15)',
+              background: "var(--content-bg, #1C1C2E)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow:
+                "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,71,255,0.15)",
             }}
           >
             {/* Search input */}
-            <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <Search size={16} style={{ color: '#6B6B8A', flexShrink: 0 }} />
+            <div
+              className="flex items-center gap-3 px-4 py-3.5"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+            >
+              <Search
+                size={16}
+                style={{ color: "var(--text-secondary)", flexShrink: 0 }}
+              />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search pages, actions, create…"
+                placeholder="Search everything... or type > for actions"
                 className="flex-1 bg-transparent text-sm text-white placeholder:text-[#4A4A6A] focus:outline-none"
               />
               {query.length > 0 && (
                 <button
-                  onClick={() => setQuery('')}
-                  style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 4, padding: '2px 6px', color: '#6B6B8A', cursor: 'pointer', fontSize: 11 }}
+                  onClick={() => setQuery("")}
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "2px 6px",
+                    color: "var(--text-secondary)",
+                    cursor: "pointer",
+                    fontSize: 11,
+                  }}
                 >
                   Clear
                 </button>
               )}
-              <kbd className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(255,255,255,0.08)', color: '#6B6B8A', fontFamily: 'var(--font-geist-mono)' }}>
+              <kbd
+                className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  color: "var(--text-secondary)",
+                  fontFamily: "var(--font-geist-mono)",
+                }}
+              >
                 ESC
               </kbd>
             </div>
 
+            {/* Query mode indicator */}
+            {query.startsWith(">") && (
+              <div
+                className="flex items-center gap-2 px-4 py-2 text-xs"
+                style={{
+                  background: "rgba(108,71,255,0.08)",
+                  color: "#8B6BFF",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <ChevronRight size={12} />
+                Quick Actions Mode
+              </div>
+            )}
+
             {/* Results */}
             <div className="max-h-[400px] overflow-y-auto content-scroll py-2">
-              {flatFiltered.length === 0 ? (
-                <div className="px-4 py-8 text-center text-sm" style={{ color: '#6B6B8A' }}>
+              {filteredItems.length === 0 ? (
+                <div
+                  className="px-4 py-8 text-center text-sm"
+                  style={{ color: "var(--text-secondary)" }}
+                >
                   No results for &quot;{query}&quot;
                 </div>
               ) : (
                 Object.entries(grouped).map(([category, items]) => (
                   <div key={category}>
-                    <div className="px-4 py-1.5 text-xs font-semibold uppercase tracking-wider" style={{ color: '#4A4A6A' }}>
-                      {category}
-                    </div>
+                    <SectionHeader category={category as ResultCategory} />
                     {items.map((cmd) => {
-                      const globalIndex = flatFiltered.indexOf(cmd)
-                      const isSelected = globalIndex === selectedIndex
+                      const globalIndex = filteredItems.indexOf(cmd);
                       return (
-                        <button
+                        <ResultItem
                           key={cmd.id}
-                          onClick={() => runCommand(cmd)}
-                          onMouseEnter={() => setSelectedIndex(globalIndex)}
-                          className={cn('w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left')}
-                          style={{ background: isSelected ? 'rgba(108,71,255,0.15)' : 'transparent', color: isSelected ? '#FFFFFF' : '#A0A0B8' }}
-                        >
-                          <span className="flex-shrink-0" style={{ color: isSelected ? '#8B6BFF' : '#6B6B8A' }}>
-                            {cmd.icon}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium">{cmd.label}</div>
-                            {cmd.description && (
-                              <div className="text-xs truncate" style={{ color: '#6B6B8A' }}>{cmd.description}</div>
-                            )}
-                          </div>
-                          {isSelected && <ArrowRight size={14} style={{ color: '#6C47FF', flexShrink: 0 }} />}
-                        </button>
-                      )
+                          item={cmd}
+                          isSelected={globalIndex === selectedIndex}
+                          onSelect={() => runCommand(cmd)}
+                          onHover={() => setSelectedIndex(globalIndex)}
+                        />
+                      );
                     })}
                   </div>
                 ))
@@ -208,23 +1058,65 @@ export function CommandPalette() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-4 px-4 py-2.5 text-xs" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: '#4A4A6A' }}>
+            <div
+              className="flex items-center gap-4 px-4 py-2.5 text-xs"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.06)",
+                color: "#4A4A6A",
+              }}
+            >
               <span className="flex items-center gap-1">
-                <kbd className="px-1 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)', fontFamily: 'var(--font-geist-mono)' }}>↑↓</kbd>
-                {' '}Navigate
+                <kbd
+                  className="px-1 py-0.5 rounded"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    fontFamily: "var(--font-geist-mono)",
+                  }}
+                >
+                  ↑↓
+                </kbd>{" "}
+                Navigate
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)', fontFamily: 'var(--font-geist-mono)' }}>↵</kbd>
-                {' '}Select
+                <kbd
+                  className="px-1 py-0.5 rounded"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    fontFamily: "var(--font-geist-mono)",
+                  }}
+                >
+                  ↵
+                </kbd>{" "}
+                Select
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd
+                  className="px-1 py-0.5 rounded"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    fontFamily: "var(--font-geist-mono)",
+                  }}
+                >
+                  &gt;
+                </kbd>{" "}
+                Actions
               </span>
               <span className="flex items-center gap-1 ml-auto">
-                <kbd className="px-1 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.08)', fontFamily: 'var(--font-geist-mono)' }}>⌘K</kbd>
-                {' '}Toggle
+                <kbd
+                  className="px-1 py-0.5 rounded"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    fontFamily: "var(--font-geist-mono)",
+                  }}
+                >
+                  {shortcutHint}
+                </kbd>{" "}
+                Toggle
               </span>
             </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
-  )
+  );
 }
