@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { Plus, Search, Upload, X, Pencil, Trash2 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
@@ -287,6 +287,7 @@ function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         style={{
           flex: 1,
           border: "none",
@@ -299,6 +300,7 @@ function SearchInput({
       {value && (
         <button
           onClick={() => onChange("")}
+          aria-label="Clear search"
           style={{
             border: "none",
             background: "transparent",
@@ -331,6 +333,7 @@ function FilterDropdown({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        aria-label={label}
         style={{
           padding: "7px 28px 7px 12px",
           borderRadius: 8,
@@ -502,8 +505,13 @@ function ConfirmDialog({
 }>) {
   if (!open) return null;
   return (
-    <div style={confirmOverlayStyle} onClick={onCancel}>
-      <div style={confirmContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={confirmOverlayStyle} onClick={onCancel} role="presentation">
+      <div
+        style={confirmContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={title}
+      >
         <div
           style={{
             fontSize: 16,
@@ -561,7 +569,6 @@ function AccountModal({
   );
 
   // Reset form when initial changes
-  const initialId = initial?.id ?? "";
   useState(() => {
     setName(initial?.name ?? "");
     setIndustry(initial?.industry ?? "Technology");
@@ -591,8 +598,13 @@ function AccountModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={initial ? "Edit Account" : "New Account"}
+      >
         <div
           style={{
             display: "flex",
@@ -816,8 +828,13 @@ function ContactModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={initial ? "Edit Contact" : "New Contact"}
+      >
         <div
           style={{
             display: "flex",
@@ -1914,6 +1931,9 @@ function ImportTab() {
           Quick Upload
         </div>
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload file drop zone"
           onDragOver={(e) => {
             e.preventDefault();
             setDragOver(true);
@@ -1929,6 +1949,12 @@ function ImportTab() {
             }
           }}
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
           style={{
             border: `2px dashed ${dragOver ? "var(--vyne-purple)" : "var(--content-border)"}`,
             borderRadius: 10,
@@ -1983,6 +2009,7 @@ function ImportTab() {
             ref={fileInputRef}
             type="file"
             accept=".csv,.xlsx,.xls"
+            aria-label="Upload CSV or Excel file"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {

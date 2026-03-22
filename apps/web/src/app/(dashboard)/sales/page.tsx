@@ -14,19 +14,13 @@ import {
   Users,
   Pencil,
   Trash2,
-  CheckCircle,
-  XCircle,
-  Send,
-  ChevronRight,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import {
   useSalesStore,
   type Opportunity,
   type Quote,
-  type SalesOrder,
   type Product,
-  type Customer,
   type OpportunityStage,
   type QuoteStatus,
   type OrderStatus,
@@ -112,6 +106,19 @@ function initials(name: string): string {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+}
+
+function probabilityBadgeStyle(probability: number): {
+  background: string;
+  color: string;
+} {
+  if (probability >= 60) {
+    return { background: "#F0FDF4", color: "#166534" };
+  }
+  if (probability >= 30) {
+    return { background: "#FFFBEB", color: "#92400E" };
+  }
+  return { background: "#FEF2F2", color: "#991B1B" };
 }
 
 // ─── Style constants ─────────────────────────────────────────────
@@ -295,6 +302,7 @@ function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         style={{
           flex: 1,
           border: "none",
@@ -307,6 +315,7 @@ function SearchInput({
       {value && (
         <button
           onClick={() => onChange("")}
+          aria-label="Clear search"
           style={{
             border: "none",
             background: "transparent",
@@ -338,6 +347,7 @@ function FilterDropdown({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={label}
       style={{
         padding: "7px 28px 7px 12px",
         borderRadius: 8,
@@ -619,8 +629,10 @@ function ConfirmDialog({
 }>) {
   if (!open) return null;
   return (
-    <div style={modalOverlayStyle} onClick={onCancel}>
+    <div style={modalOverlayStyle} onClick={onCancel} role="presentation">
       <div
+        role="dialog"
+        aria-label={title}
         style={{
           background: "var(--content-bg)",
           borderRadius: 14,
@@ -697,7 +709,7 @@ function LineItemsEditor({
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {items.map((item, idx) => (
           <div
-            key={idx}
+            key={`line-item-${idx}-${item.productName}`}
             style={{
               display: "grid",
               gridTemplateColumns: "2fr 1fr 1fr auto",
@@ -710,6 +722,7 @@ function LineItemsEditor({
               value={item.productName}
               onChange={(e) => updateItem(idx, "productName", e.target.value)}
               placeholder="Product name"
+              aria-label={`Line item ${idx + 1} product name`}
             />
             <input
               style={inputStyle}
@@ -720,6 +733,7 @@ function LineItemsEditor({
                 updateItem(idx, "quantity", Number(e.target.value) || 1)
               }
               placeholder="Qty"
+              aria-label={`Line item ${idx + 1} quantity`}
             />
             <input
               style={inputStyle}
@@ -730,9 +744,11 @@ function LineItemsEditor({
                 updateItem(idx, "unitPrice", Number(e.target.value) || 0)
               }
               placeholder="Price"
+              aria-label={`Line item ${idx + 1} unit price`}
             />
             <button
               onClick={() => removeItem(idx)}
+              aria-label={`Remove line item ${idx + 1}`}
               style={{
                 padding: 4,
                 border: "none",
@@ -835,8 +851,13 @@ function DealModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={initial ? "Edit Deal" : "New Deal"}
+      >
         <div
           style={{
             display: "flex",
@@ -1047,8 +1068,13 @@ function QuotationModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={initial ? "Edit Quotation" : "New Quotation"}
+      >
         <div
           style={{
             display: "flex",
@@ -1151,8 +1177,13 @@ function SalesOrderModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="New Sales Order"
+      >
         <div
           style={{
             display: "flex",
@@ -1269,8 +1300,13 @@ function ProductModal({
   };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlayStyle} onClick={onClose} role="presentation">
+      <div
+        style={modalContentStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={initial ? "Edit Product" : "Add Product"}
+      >
         <div
           style={{
             display: "flex",
@@ -1412,8 +1448,6 @@ function OpportunitiesTab() {
   const updateDeal = useSalesStore((s) => s.updateDeal);
   const deleteDeal = useSalesStore((s) => s.deleteDeal);
   const moveDealStage = useSalesStore((s) => s.moveDealStage);
-  const winDeal = useSalesStore((s) => s.winDeal);
-  const loseDeal = useSalesStore((s) => s.loseDeal);
 
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("");
@@ -1734,18 +1768,7 @@ function OpportunitiesTab() {
                             fontWeight: 600,
                             padding: "1px 6px",
                             borderRadius: 10,
-                            background:
-                              opp.probability >= 60
-                                ? "#F0FDF4"
-                                : opp.probability >= 30
-                                  ? "#FFFBEB"
-                                  : "#FEF2F2",
-                            color:
-                              opp.probability >= 60
-                                ? "#166534"
-                                : opp.probability >= 30
-                                  ? "#92400E"
-                                  : "#991B1B",
+                            ...probabilityBadgeStyle(opp.probability),
                           }}
                         >
                           {opp.probability}%
