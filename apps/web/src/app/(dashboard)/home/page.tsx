@@ -236,6 +236,142 @@ export default function HomePage() {
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: 20 }}
       >
+        {/* ── Module Grid (App Drawer) ────────────────── */}
+        <section
+          aria-label="Modules"
+          style={{
+            marginBottom: 24,
+            padding: "20px 0",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+              gap: 12,
+              maxWidth: 800,
+              margin: "0 auto",
+            }}
+          >
+            {[
+              { label: "Home", icon: "🏠", color: "#E74C3C", href: "/home" },
+              { label: "Chat", icon: "💬", color: "#3498DB", href: "/chat" },
+              {
+                label: "Projects",
+                icon: "📋",
+                color: "#9B59B6",
+                href: "/projects",
+              },
+              { label: "Docs", icon: "📄", color: "#2ECC71", href: "/docs" },
+              {
+                label: "Ops / ERP",
+                icon: "📦",
+                color: "#F39C12",
+                href: "/ops",
+              },
+              {
+                label: "Finance",
+                icon: "💰",
+                color: "#1ABC9C",
+                href: "/finance",
+              },
+              { label: "CRM", icon: "🎯", color: "#E67E22", href: "/crm" },
+              { label: "HR", icon: "👥", color: "#3498DB", href: "/hr" },
+              {
+                label: "Expenses",
+                icon: "🧾",
+                color: "#95A5A6",
+                href: "/expenses",
+              },
+              { label: "Code", icon: "⌨️", color: "#8E44AD", href: "/code" },
+              {
+                label: "Observe",
+                icon: "📊",
+                color: "#E74C3C",
+                href: "/observe",
+              },
+              { label: "AI", icon: "🧠", color: "#6C47FF", href: "/ai" },
+              {
+                label: "Automations",
+                icon: "⚡",
+                color: "#F1C40F",
+                href: "/automations",
+              },
+              {
+                label: "Roadmap",
+                icon: "🗺️",
+                color: "#1ABC9C",
+                href: "/roadmap",
+              },
+              {
+                label: "Settings",
+                icon: "⚙️",
+                color: "#7F8C8D",
+                href: "/settings",
+              },
+              { label: "Admin", icon: "🛡️", color: "#2C3E50", href: "/admin" },
+            ].map((mod) => (
+              <button
+                key={mod.href}
+                onClick={() => router.push(mod.href)}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "16px 8px",
+                  borderRadius: 12,
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-bg)",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    `rgba(${mod.color === "#6C47FF" ? "108,71,255" : "0,0,0"}, 0.04)`;
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    mod.color;
+                  (e.currentTarget as HTMLElement).style.transform =
+                    "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--content-bg)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--content-border)";
+                  (e.currentTarget as HTMLElement).style.transform = "none";
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    background: `${mod.color}18`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 22,
+                  }}
+                >
+                  {mod.icon}
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "var(--text-primary)",
+                    textAlign: "center",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {mod.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* AI Alert Card */}
         <section
           aria-label="Active incident alert"
