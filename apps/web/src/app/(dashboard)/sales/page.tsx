@@ -12,567 +12,28 @@ import {
   ShoppingCart,
   BarChart3,
   Users,
+  Pencil,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Send,
+  ChevronRight,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
-
-// ─── Types ───────────────────────────────────────────────────────
-type SalesTab =
-  | "opportunities"
-  | "quotations"
-  | "orders"
-  | "products"
-  | "customers"
-  | "reports";
-
-type OpportunityStage =
-  | "Qualification"
-  | "Proposal"
-  | "Negotiation"
-  | "Closed Won"
-  | "Closed Lost";
-type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Rejected";
-type OrderStatus = "Confirmed" | "Processing" | "Shipped" | "Delivered";
-type ProductStatus = "Active" | "Low Stock" | "Out of Stock";
-type CustomerStatus = "Active" | "Inactive" | "New";
-
-interface Opportunity {
-  id: string;
-  name: string;
-  company: string;
-  value: number;
-  probability: number;
-  stage: OpportunityStage;
-  expectedClose: string;
-  assignee: string;
-  createdAt: string;
-}
-
-interface Quote {
-  id: string;
-  number: string;
-  customer: string;
-  date: string;
-  expiry: string;
-  amount: number;
-  status: QuoteStatus;
-  items: number;
-}
-
-interface SalesOrder {
-  id: string;
-  number: string;
-  customer: string;
-  date: string;
-  amount: number;
-  status: OrderStatus;
-  tracking: string;
-  items: number;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: ProductStatus;
-}
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  totalOrders: number;
-  totalRevenue: number;
-  lastOrder: string;
-  status: CustomerStatus;
-}
-
-// ─── Mock Data ───────────────────────────────────────────────────
-const NOW = Date.now();
-const daysAgo = (d: number) =>
-  new Date(NOW - d * 86400000).toISOString().slice(0, 10);
-const daysFromNow = (d: number) =>
-  new Date(NOW + d * 86400000).toISOString().slice(0, 10);
-
-const MOCK_OPPORTUNITIES: Opportunity[] = [
-  {
-    id: "opp1",
-    name: "Enterprise License Deal",
-    company: "Acme Corp",
-    value: 120000,
-    probability: 30,
-    stage: "Qualification",
-    expectedClose: daysFromNow(45),
-    assignee: "Alex Rivera",
-    createdAt: daysAgo(12),
-  },
-  {
-    id: "opp2",
-    name: "Platform Migration",
-    company: "TechStart Inc",
-    value: 85000,
-    probability: 55,
-    stage: "Proposal",
-    expectedClose: daysFromNow(30),
-    assignee: "Priya Shah",
-    createdAt: daysAgo(20),
-  },
-  {
-    id: "opp3",
-    name: "API Integration Suite",
-    company: "DataFlow Ltd",
-    value: 64000,
-    probability: 70,
-    stage: "Negotiation",
-    expectedClose: daysFromNow(15),
-    assignee: "Sam Chen",
-    createdAt: daysAgo(35),
-  },
-  {
-    id: "opp4",
-    name: "Annual SaaS Contract",
-    company: "Global Retail",
-    value: 48000,
-    probability: 40,
-    stage: "Proposal",
-    expectedClose: daysFromNow(25),
-    assignee: "Alex Rivera",
-    createdAt: daysAgo(18),
-  },
-  {
-    id: "opp5",
-    name: "Custom Analytics Module",
-    company: "FinEdge Capital",
-    value: 156000,
-    probability: 60,
-    stage: "Negotiation",
-    expectedClose: daysFromNow(20),
-    assignee: "Priya Shah",
-    createdAt: daysAgo(40),
-  },
-  {
-    id: "opp6",
-    name: "Cloud Infrastructure",
-    company: "ManuCo",
-    value: 92000,
-    probability: 100,
-    stage: "Closed Won",
-    expectedClose: daysAgo(5),
-    assignee: "Sam Chen",
-    createdAt: daysAgo(60),
-  },
-  {
-    id: "opp7",
-    name: "Security Audit Package",
-    company: "CloudOps Solutions",
-    value: 35000,
-    probability: 25,
-    stage: "Qualification",
-    expectedClose: daysFromNow(50),
-    assignee: "Jordan Lee",
-    createdAt: daysAgo(8),
-  },
-  {
-    id: "opp8",
-    name: "Data Warehouse Setup",
-    company: "PharmaLink",
-    value: 210000,
-    probability: 45,
-    stage: "Proposal",
-    expectedClose: daysFromNow(35),
-    assignee: "Priya Shah",
-    createdAt: daysAgo(25),
-  },
-  {
-    id: "opp9",
-    name: "DevOps Consulting",
-    company: "BuildWorks Inc",
-    value: 28000,
-    probability: 80,
-    stage: "Negotiation",
-    expectedClose: daysFromNow(10),
-    assignee: "Alex Rivera",
-    createdAt: daysAgo(30),
-  },
-  {
-    id: "opp10",
-    name: "Support Tier Upgrade",
-    company: "RetailNow",
-    value: 18000,
-    probability: 0,
-    stage: "Closed Lost",
-    expectedClose: daysAgo(3),
-    assignee: "Jordan Lee",
-    createdAt: daysAgo(45),
-  },
-  {
-    id: "opp11",
-    name: "ML Pipeline License",
-    company: "GreenVolt Energy",
-    value: 145000,
-    probability: 100,
-    stage: "Closed Won",
-    expectedClose: daysAgo(8),
-    assignee: "Sam Chen",
-    createdAt: daysAgo(55),
-  },
-  {
-    id: "opp12",
-    name: "Compliance Toolkit",
-    company: "EduSpark",
-    value: 42000,
-    probability: 20,
-    stage: "Qualification",
-    expectedClose: daysFromNow(60),
-    assignee: "Jordan Lee",
-    createdAt: daysAgo(5),
-  },
-];
-
-const MOCK_QUOTES: Quote[] = [
-  {
-    id: "q1",
-    number: "QT-2026-001",
-    customer: "Acme Corp",
-    date: daysAgo(3),
-    expiry: daysFromNow(27),
-    amount: 120000,
-    status: "Sent",
-    items: 5,
-  },
-  {
-    id: "q2",
-    number: "QT-2026-002",
-    customer: "TechStart Inc",
-    date: daysAgo(7),
-    expiry: daysFromNow(23),
-    amount: 85000,
-    status: "Draft",
-    items: 3,
-  },
-  {
-    id: "q3",
-    number: "QT-2026-003",
-    customer: "DataFlow Ltd",
-    date: daysAgo(14),
-    expiry: daysFromNow(16),
-    amount: 64000,
-    status: "Accepted",
-    items: 4,
-  },
-  {
-    id: "q4",
-    number: "QT-2026-004",
-    customer: "Global Retail",
-    date: daysAgo(5),
-    expiry: daysFromNow(25),
-    amount: 48000,
-    status: "Sent",
-    items: 2,
-  },
-  {
-    id: "q5",
-    number: "QT-2026-005",
-    customer: "FinEdge Capital",
-    date: daysAgo(10),
-    expiry: daysFromNow(20),
-    amount: 156000,
-    status: "Sent",
-    items: 7,
-  },
-  {
-    id: "q6",
-    number: "QT-2026-006",
-    customer: "ManuCo",
-    date: daysAgo(20),
-    expiry: daysAgo(5),
-    amount: 92000,
-    status: "Accepted",
-    items: 4,
-  },
-  {
-    id: "q7",
-    number: "QT-2026-007",
-    customer: "RetailNow",
-    date: daysAgo(12),
-    expiry: daysFromNow(18),
-    amount: 18000,
-    status: "Rejected",
-    items: 1,
-  },
-  {
-    id: "q8",
-    number: "QT-2026-008",
-    customer: "PharmaLink",
-    date: daysAgo(2),
-    expiry: daysFromNow(28),
-    amount: 210000,
-    status: "Draft",
-    items: 8,
-  },
-];
-
-const MOCK_ORDERS: SalesOrder[] = [
-  {
-    id: "so1",
-    number: "SO-2026-001",
-    customer: "ManuCo",
-    date: daysAgo(5),
-    amount: 92000,
-    status: "Delivered",
-    tracking: "TRK-88291",
-    items: 4,
-  },
-  {
-    id: "so2",
-    number: "SO-2026-002",
-    customer: "DataFlow Ltd",
-    date: daysAgo(8),
-    amount: 64000,
-    status: "Shipped",
-    tracking: "TRK-77142",
-    items: 3,
-  },
-  {
-    id: "so3",
-    number: "SO-2026-003",
-    customer: "GreenVolt Energy",
-    date: daysAgo(3),
-    amount: 145000,
-    status: "Processing",
-    tracking: "--",
-    items: 6,
-  },
-  {
-    id: "so4",
-    number: "SO-2026-004",
-    customer: "Acme Corp",
-    date: daysAgo(15),
-    amount: 38000,
-    status: "Delivered",
-    tracking: "TRK-66039",
-    items: 2,
-  },
-  {
-    id: "so5",
-    number: "SO-2026-005",
-    customer: "FinEdge Capital",
-    date: daysAgo(1),
-    amount: 156000,
-    status: "Confirmed",
-    tracking: "--",
-    items: 7,
-  },
-  {
-    id: "so6",
-    number: "SO-2026-006",
-    customer: "BuildWorks Inc",
-    date: daysAgo(10),
-    amount: 28000,
-    status: "Shipped",
-    tracking: "TRK-55487",
-    items: 2,
-  },
-  {
-    id: "so7",
-    number: "SO-2026-007",
-    customer: "CloudOps Solutions",
-    date: daysAgo(6),
-    amount: 52000,
-    status: "Processing",
-    tracking: "--",
-    items: 3,
-  },
-  {
-    id: "so8",
-    number: "SO-2026-008",
-    customer: "PharmaLink",
-    date: daysAgo(2),
-    amount: 210000,
-    status: "Confirmed",
-    tracking: "--",
-    items: 8,
-  },
-];
-
-const MOCK_PRODUCTS: Product[] = [
-  {
-    id: "p1",
-    name: "VYNE Platform License",
-    sku: "VPL-001",
-    category: "Software",
-    price: 12000,
-    stock: 999,
-    status: "Active",
-  },
-  {
-    id: "p2",
-    name: "API Gateway Module",
-    sku: "AGM-002",
-    category: "Add-ons",
-    price: 4500,
-    stock: 999,
-    status: "Active",
-  },
-  {
-    id: "p3",
-    name: "Analytics Dashboard",
-    sku: "ADH-003",
-    category: "Add-ons",
-    price: 3200,
-    stock: 999,
-    status: "Active",
-  },
-  {
-    id: "p4",
-    name: "Enterprise Support Plan",
-    sku: "ESP-004",
-    category: "Services",
-    price: 8000,
-    stock: 50,
-    status: "Active",
-  },
-  {
-    id: "p5",
-    name: "Custom Integration Setup",
-    sku: "CIS-005",
-    category: "Services",
-    price: 15000,
-    stock: 20,
-    status: "Active",
-  },
-  {
-    id: "p6",
-    name: "ML Pipeline Module",
-    sku: "MPM-006",
-    category: "Add-ons",
-    price: 6800,
-    stock: 999,
-    status: "Active",
-  },
-  {
-    id: "p7",
-    name: "Compliance Toolkit",
-    sku: "CTK-007",
-    category: "Add-ons",
-    price: 2400,
-    stock: 5,
-    status: "Low Stock",
-  },
-  {
-    id: "p8",
-    name: "Data Migration Service",
-    sku: "DMS-008",
-    category: "Services",
-    price: 10000,
-    stock: 0,
-    status: "Out of Stock",
-  },
-  {
-    id: "p9",
-    name: "Security Audit Package",
-    sku: "SAP-009",
-    category: "Services",
-    price: 7500,
-    stock: 15,
-    status: "Active",
-  },
-  {
-    id: "p10",
-    name: "Training Workshop (5-day)",
-    sku: "TWK-010",
-    category: "Training",
-    price: 5000,
-    stock: 8,
-    status: "Low Stock",
-  },
-];
-
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: "cust1",
-    name: "Acme Corp",
-    email: "billing@acme.com",
-    totalOrders: 8,
-    totalRevenue: 284000,
-    lastOrder: daysAgo(5),
-    status: "Active",
-  },
-  {
-    id: "cust2",
-    name: "TechStart Inc",
-    email: "accounts@techstart.io",
-    totalOrders: 3,
-    totalRevenue: 96000,
-    lastOrder: daysAgo(12),
-    status: "Active",
-  },
-  {
-    id: "cust3",
-    name: "DataFlow Ltd",
-    email: "finance@dataflow.co",
-    totalOrders: 5,
-    totalRevenue: 178000,
-    lastOrder: daysAgo(8),
-    status: "Active",
-  },
-  {
-    id: "cust4",
-    name: "Global Retail",
-    email: "procurement@globalretail.com",
-    totalOrders: 2,
-    totalRevenue: 48000,
-    lastOrder: daysAgo(30),
-    status: "Inactive",
-  },
-  {
-    id: "cust5",
-    name: "FinEdge Capital",
-    email: "ops@finedge.com",
-    totalOrders: 6,
-    totalRevenue: 312000,
-    lastOrder: daysAgo(1),
-    status: "Active",
-  },
-  {
-    id: "cust6",
-    name: "ManuCo",
-    email: "purchasing@manuco.com",
-    totalOrders: 4,
-    totalRevenue: 198000,
-    lastOrder: daysAgo(5),
-    status: "Active",
-  },
-  {
-    id: "cust7",
-    name: "GreenVolt Energy",
-    email: "admin@greenvolt.io",
-    totalOrders: 7,
-    totalRevenue: 420000,
-    lastOrder: daysAgo(3),
-    status: "Active",
-  },
-  {
-    id: "cust8",
-    name: "EduSpark",
-    email: "info@eduspark.org",
-    totalOrders: 1,
-    totalRevenue: 12000,
-    lastOrder: daysAgo(60),
-    status: "New",
-  },
-];
-
-const MONTHLY_REVENUE = [
-  { month: "Oct 2025", revenue: 182000 },
-  { month: "Nov 2025", revenue: 215000 },
-  { month: "Dec 2025", revenue: 198000 },
-  { month: "Jan 2026", revenue: 242000 },
-  { month: "Feb 2026", revenue: 278000 },
-  { month: "Mar 2026", revenue: 310000 },
-];
+import {
+  useSalesStore,
+  type Opportunity,
+  type Quote,
+  type SalesOrder,
+  type Product,
+  type Customer,
+  type OpportunityStage,
+  type QuoteStatus,
+  type OrderStatus,
+  type ProductStatus,
+  type CustomerStatus,
+  type QuoteLineItem,
+} from "@/lib/stores/sales";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function fmt(n: number): string {
@@ -653,7 +114,98 @@ function initials(name: string): string {
     .slice(0, 2);
 }
 
+// ─── Style constants ─────────────────────────────────────────────
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-secondary)",
+  fontSize: 12,
+  color: "var(--text-primary)",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  cursor: "pointer",
+  appearance: "none" as const,
+  WebkitAppearance: "none" as const,
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  color: "var(--text-secondary)",
+  marginBottom: 4,
+  display: "block",
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.5)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000,
+};
+
+const modalContentStyle: React.CSSProperties = {
+  background: "var(--content-bg)",
+  borderRadius: 14,
+  padding: 28,
+  width: 520,
+  maxWidth: "95vw",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+  border: "1px solid var(--content-border)",
+};
+
+const primaryBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "none",
+  background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const secondaryBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "transparent",
+  color: "var(--text-primary)",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 500,
+};
+
+const dangerBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "none",
+  background: "#EF4444",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
 // ─── Shared UI ───────────────────────────────────────────────────
+type SalesTab =
+  | "opportunities"
+  | "quotations"
+  | "orders"
+  | "products"
+  | "customers"
+  | "reports";
+
 function TabBtn({
   label,
   icon,
@@ -969,11 +521,905 @@ function KpiCard({
   );
 }
 
+function IconBtn({
+  icon,
+  title,
+  onClick,
+  danger,
+}: Readonly<{
+  icon: React.ReactNode;
+  title: string;
+  onClick: (e: React.MouseEvent) => void;
+  danger?: boolean;
+}>) {
+  return (
+    <button
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      style={{
+        padding: 4,
+        borderRadius: 6,
+        border: "1px solid var(--content-border)",
+        background: "transparent",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: danger ? "#EF4444" : "var(--text-secondary)",
+        transition: "all 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = danger
+          ? "#FEF2F2"
+          : "var(--content-secondary)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent";
+      }}
+    >
+      {icon}
+    </button>
+  );
+}
+
+function SmallBtn({
+  label,
+  onClick,
+  color,
+  bg,
+}: Readonly<{
+  label: string;
+  onClick: (e: React.MouseEvent) => void;
+  color?: string;
+  bg?: string;
+}>) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      style={{
+        padding: "3px 8px",
+        borderRadius: 6,
+        border: bg ? "none" : "1px solid var(--content-border)",
+        background: bg || "transparent",
+        fontSize: 10,
+        fontWeight: 500,
+        color: color || "var(--text-secondary)",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+// ─── Confirm Dialog ──────────────────────────────────────────────
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  confirmLabel,
+  confirmStyle,
+}: Readonly<{
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmLabel?: string;
+  confirmStyle?: React.CSSProperties;
+}>) {
+  if (!open) return null;
+  return (
+    <div style={modalOverlayStyle} onClick={onCancel}>
+      <div
+        style={{
+          background: "var(--content-bg)",
+          borderRadius: 14,
+          padding: 24,
+          width: 400,
+          maxWidth: "90vw",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          border: "1px solid var(--content-border)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            marginBottom: 8,
+          }}
+        >
+          {title}
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: "var(--text-secondary)",
+            marginBottom: 20,
+            lineHeight: "1.5",
+          }}
+        >
+          {message}
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button style={secondaryBtnStyle} onClick={onCancel}>
+            Cancel
+          </button>
+          <button style={confirmStyle || dangerBtnStyle} onClick={onConfirm}>
+            {confirmLabel || "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Line Items Editor ───────────────────────────────────────────
+function LineItemsEditor({
+  items,
+  onChange,
+}: {
+  items: QuoteLineItem[];
+  onChange: (items: QuoteLineItem[]) => void;
+}) {
+  const addItem = () => {
+    onChange([...items, { productName: "", quantity: 1, unitPrice: 0 }]);
+  };
+
+  const updateItem = (
+    idx: number,
+    field: keyof QuoteLineItem,
+    val: string | number,
+  ) => {
+    const next = [...items];
+    next[idx] = { ...next[idx], [field]: val };
+    onChange(next);
+  };
+
+  const removeItem = (idx: number) => {
+    onChange(items.filter((_, i) => i !== idx));
+  };
+
+  return (
+    <div>
+      <label style={labelStyle}>Line Items</label>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {items.map((item, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr 1fr auto",
+              gap: 6,
+              alignItems: "center",
+            }}
+          >
+            <input
+              style={inputStyle}
+              value={item.productName}
+              onChange={(e) => updateItem(idx, "productName", e.target.value)}
+              placeholder="Product name"
+            />
+            <input
+              style={inputStyle}
+              type="number"
+              min={1}
+              value={item.quantity}
+              onChange={(e) =>
+                updateItem(idx, "quantity", Number(e.target.value) || 1)
+              }
+              placeholder="Qty"
+            />
+            <input
+              style={inputStyle}
+              type="number"
+              min={0}
+              value={item.unitPrice}
+              onChange={(e) =>
+                updateItem(idx, "unitPrice", Number(e.target.value) || 0)
+              }
+              placeholder="Price"
+            />
+            <button
+              onClick={() => removeItem(idx)}
+              style={{
+                padding: 4,
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: "#EF4444",
+                display: "flex",
+              }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={addItem}
+        style={{
+          marginTop: 8,
+          padding: "4px 10px",
+          borderRadius: 6,
+          border: "1px dashed var(--content-border)",
+          background: "transparent",
+          fontSize: 11,
+          color: "var(--vyne-purple)",
+          cursor: "pointer",
+          fontWeight: 500,
+        }}
+      >
+        + Add Line Item
+      </button>
+      {items.length > 0 && (
+        <div
+          style={{
+            marginTop: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            textAlign: "right",
+          }}
+        >
+          Total:{" "}
+          {fmtFull(items.reduce((s, li) => s + li.quantity * li.unitPrice, 0))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Deal Modal ──────────────────────────────────────────────────
+function DealModal({
+  open,
+  onClose,
+  initial,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  initial?: Opportunity | null;
+  onSave: (data: Omit<Opportunity, "id" | "createdAt">) => void;
+}>) {
+  const STAGES: OpportunityStage[] = [
+    "Qualification",
+    "Proposal",
+    "Negotiation",
+    "Closed Won",
+    "Closed Lost",
+  ];
+  const ASSIGNEES = ["Alex Rivera", "Priya Shah", "Sam Chen", "Jordan Lee"];
+
+  const [name, setName] = useState(initial?.name ?? "");
+  const [company, setCompany] = useState(initial?.company ?? "");
+  const [contact, setContact] = useState(initial?.contact ?? "");
+  const [value, setValue] = useState(String(initial?.value ?? ""));
+  const [stage, setStage] = useState<OpportunityStage>(
+    initial?.stage ?? "Qualification",
+  );
+  const [probability, setProbability] = useState(
+    String(initial?.probability ?? "25"),
+  );
+  const [expectedClose, setExpectedClose] = useState(
+    initial?.expectedClose ?? "",
+  );
+  const [assignee, setAssignee] = useState(initial?.assignee ?? ASSIGNEES[0]);
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!name.trim() || !company.trim()) return;
+    onSave({
+      name: name.trim(),
+      company: company.trim(),
+      contact: contact.trim(),
+      value: Number(value) || 0,
+      stage,
+      probability: Number(probability) || 0,
+      expectedClose,
+      assignee,
+    });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {initial ? "Edit Deal" : "New Deal"}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Deal Name <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enterprise License Deal"
+            />
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>
+                Company <span style={{ color: "#EF4444" }}>*</span>
+              </label>
+              <input
+                style={inputStyle}
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
+                placeholder="Acme Corp"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Contact</label>
+              <input
+                style={inputStyle}
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                placeholder="Contact name"
+              />
+            </div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>Value ($)</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Probability (%)</label>
+              <input
+                style={inputStyle}
+                type="number"
+                min={0}
+                max={100}
+                value={probability}
+                onChange={(e) => setProbability(e.target.value)}
+              />
+            </div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>Stage</label>
+              <select
+                style={selectStyle}
+                value={stage}
+                onChange={(e) => setStage(e.target.value as OpportunityStage)}
+              >
+                {STAGES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Expected Close</label>
+              <input
+                style={inputStyle}
+                type="date"
+                value={expectedClose}
+                onChange={(e) => setExpectedClose(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Assignee</label>
+            <select
+              style={selectStyle}
+              value={assignee}
+              onChange={(e) => setAssignee(e.target.value)}
+            >
+              {ASSIGNEES.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            style={{
+              ...primaryBtnStyle,
+              opacity: name.trim() && company.trim() ? 1 : 0.5,
+            }}
+            onClick={handleSubmit}
+            disabled={!name.trim() || !company.trim()}
+          >
+            {initial ? "Save Changes" : "Create Deal"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Quotation Modal ─────────────────────────────────────────────
+function QuotationModal({
+  open,
+  onClose,
+  initial,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  initial?: Quote | null;
+  onSave: (data: {
+    customer: string;
+    expiry: string;
+    lineItems: QuoteLineItem[];
+  }) => void;
+}>) {
+  const [customer, setCustomer] = useState(initial?.customer ?? "");
+  const [expiry, setExpiry] = useState(initial?.expiry ?? "");
+  const [lineItems, setLineItems] = useState<QuoteLineItem[]>(
+    initial?.lineItems?.length
+      ? initial.lineItems
+      : [{ productName: "", quantity: 1, unitPrice: 0 }],
+  );
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!customer.trim()) return;
+    const validItems = lineItems.filter((li) => li.productName.trim());
+    if (validItems.length === 0) return;
+    onSave({ customer: customer.trim(), expiry, lineItems: validItems });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {initial ? "Edit Quotation" : "New Quotation"}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Customer <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              placeholder="Customer name"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Expiry Date</label>
+            <input
+              style={inputStyle}
+              type="date"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
+            />
+          </div>
+          <LineItemsEditor items={lineItems} onChange={setLineItems} />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button style={primaryBtnStyle} onClick={handleSubmit}>
+            {initial ? "Save Changes" : "Create Quotation"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Sales Order Modal ───────────────────────────────────────────
+function SalesOrderModal({
+  open,
+  onClose,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  onSave: (data: { customer: string; lineItems: QuoteLineItem[] }) => void;
+}>) {
+  const [customer, setCustomer] = useState("");
+  const [lineItems, setLineItems] = useState<QuoteLineItem[]>([
+    { productName: "", quantity: 1, unitPrice: 0 },
+  ]);
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!customer.trim()) return;
+    const validItems = lineItems.filter((li) => li.productName.trim());
+    if (validItems.length === 0) return;
+    onSave({ customer: customer.trim(), lineItems: validItems });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            New Sales Order
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <p
+          style={{
+            fontSize: 11,
+            color: "var(--text-tertiary)",
+            margin: "0 0 14px",
+          }}
+        >
+          SO number will be auto-generated
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Customer <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={customer}
+              onChange={(e) => setCustomer(e.target.value)}
+              placeholder="Customer name"
+            />
+          </div>
+          <LineItemsEditor items={lineItems} onChange={setLineItems} />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button style={primaryBtnStyle} onClick={handleSubmit}>
+            Create Sales Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Product Modal ───────────────────────────────────────────────
+function ProductModal({
+  open,
+  onClose,
+  initial,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  initial?: Product | null;
+  onSave: (data: Omit<Product, "id" | "status">) => void;
+}>) {
+  const CATEGORIES = [
+    "Software",
+    "Add-ons",
+    "Services",
+    "Training",
+    "Hardware",
+  ];
+  const [name, setName] = useState(initial?.name ?? "");
+  const [sku, setSku] = useState(initial?.sku ?? "");
+  const [category, setCategory] = useState(initial?.category ?? CATEGORIES[0]);
+  const [price, setPrice] = useState(String(initial?.price ?? ""));
+  const [stock, setStock] = useState(String(initial?.stock ?? ""));
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!name.trim() || !sku.trim()) return;
+    onSave({
+      name: name.trim(),
+      sku: sku.trim(),
+      category,
+      price: Number(price) || 0,
+      stock: Number(stock) || 0,
+    });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {initial ? "Edit Product" : "Add Product"}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Name <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Product name"
+            />
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>
+                SKU <span style={{ color: "#EF4444" }}>*</span>
+              </label>
+              <input
+                style={inputStyle}
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+                placeholder="ABC-001"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Category</label>
+              <select
+                style={selectStyle}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+            }}
+          >
+            <div>
+              <label style={labelStyle}>Price ($)</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Stock</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            style={{
+              ...primaryBtnStyle,
+              opacity: name.trim() && sku.trim() ? 1 : 0.5,
+            }}
+            onClick={handleSubmit}
+            disabled={!name.trim() || !sku.trim()}
+          >
+            {initial ? "Save Changes" : "Add Product"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Opportunities Tab (Kanban) ──────────────────────────────────
 function OpportunitiesTab() {
-  const [opportunities] = useState<Opportunity[]>(MOCK_OPPORTUNITIES);
+  const deals = useSalesStore((s) => s.deals);
+  const addDeal = useSalesStore((s) => s.addDeal);
+  const updateDeal = useSalesStore((s) => s.updateDeal);
+  const deleteDeal = useSalesStore((s) => s.deleteDeal);
+  const moveDealStage = useSalesStore((s) => s.moveDealStage);
+  const winDeal = useSalesStore((s) => s.winDeal);
+  const loseDeal = useSalesStore((s) => s.loseDeal);
+
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<Opportunity | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const stages: OpportunityStage[] = [
     "Qualification",
@@ -983,7 +1429,7 @@ function OpportunitiesTab() {
     "Closed Lost",
   ];
 
-  const filtered = opportunities.filter((o) => {
+  const filtered = deals.filter((o) => {
     const matchSearch =
       o.name.toLowerCase().includes(search.toLowerCase()) ||
       o.company.toLowerCase().includes(search.toLowerCase()) ||
@@ -992,15 +1438,15 @@ function OpportunitiesTab() {
     return matchSearch && matchStage;
   });
 
-  const totalPipeline = opportunities
+  const totalPipeline = deals
     .filter((o) => o.stage !== "Closed Won" && o.stage !== "Closed Lost")
     .reduce((s, o) => s + o.value, 0);
 
-  const weightedPipeline = opportunities
+  const weightedPipeline = deals
     .filter((o) => o.stage !== "Closed Won" && o.stage !== "Closed Lost")
     .reduce((s, o) => s + o.value * (o.probability / 100), 0);
 
-  const wonDeals = opportunities.filter((o) => o.stage === "Closed Won");
+  const wonDeals = deals.filter((o) => o.stage === "Closed Won");
   const wonTotal = wonDeals.reduce((s, o) => s + o.value, 0);
 
   const exportData = filtered.map((o) => ({
@@ -1012,6 +1458,8 @@ function OpportunitiesTab() {
     expectedClose: o.expectedClose,
     assignee: o.assignee,
   }));
+
+  const deleteTarget = deleteId ? deals.find((d) => d.id === deleteId) : null;
 
   return (
     <div>
@@ -1038,7 +1486,7 @@ function OpportunitiesTab() {
         <KpiCard
           label="Open Deals"
           value={String(
-            opportunities.filter(
+            deals.filter(
               (o) => o.stage !== "Closed Won" && o.stage !== "Closed Lost",
             ).length,
           )}
@@ -1085,7 +1533,13 @@ function OpportunitiesTab() {
               { key: "assignee", header: "Assignee" },
             ]}
           />
-          <NewButton label="New Deal" onClick={() => {}} />
+          <NewButton
+            label="New Deal"
+            onClick={() => {
+              setEditingDeal(null);
+              setShowModal(true);
+            }}
+          />
         </div>
       </div>
 
@@ -1135,7 +1589,11 @@ function OpportunitiesTab() {
                     }}
                   />
                   <span
-                    style={{ fontSize: 12, fontWeight: 600, color: cfg.color }}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: cfg.color,
+                    }}
                   >
                     {stage}
                   </span>
@@ -1212,13 +1670,37 @@ function OpportunitiesTab() {
                     >
                       <div
                         style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: "var(--text-primary)",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "flex-start",
                           marginBottom: 4,
                         }}
                       >
-                        {opp.name}
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: "var(--text-primary)",
+                          }}
+                        >
+                          {opp.name}
+                        </div>
+                        <div style={{ display: "flex", gap: 2 }}>
+                          <IconBtn
+                            icon={<Pencil size={11} />}
+                            title="Edit"
+                            onClick={() => {
+                              setEditingDeal(opp);
+                              setShowModal(true);
+                            }}
+                          />
+                          <IconBtn
+                            icon={<Trash2 size={11} />}
+                            title="Delete"
+                            danger
+                            onClick={() => setDeleteId(opp.id)}
+                          />
+                        </div>
                       </div>
                       <div
                         style={{
@@ -1274,6 +1756,7 @@ function OpportunitiesTab() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "space-between",
+                          marginBottom: 8,
                         }}
                       >
                         <div
@@ -1317,6 +1800,36 @@ function OpportunitiesTab() {
                           {opp.expectedClose}
                         </span>
                       </div>
+
+                      {/* Stage move buttons */}
+                      {opp.stage !== "Closed Won" &&
+                        opp.stage !== "Closed Lost" && (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 4,
+                              flexWrap: "wrap",
+                              borderTop: "1px solid var(--content-border)",
+                              paddingTop: 8,
+                              marginTop: 4,
+                            }}
+                          >
+                            {stages
+                              .filter((s) => s !== opp.stage)
+                              .map((s) => {
+                                const sc = stageConfig(s);
+                                return (
+                                  <SmallBtn
+                                    key={s}
+                                    label={s}
+                                    color={sc.color}
+                                    bg={sc.bg}
+                                    onClick={() => moveDealStage(opp.id, s)}
+                                  />
+                                );
+                              })}
+                          </div>
+                        )}
                     </div>
                   ))
                 )}
@@ -1325,15 +1838,53 @@ function OpportunitiesTab() {
           );
         })}
       </div>
+
+      {/* Deal Modal */}
+      <DealModal
+        key={editingDeal?.id ?? "new"}
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingDeal(null);
+        }}
+        initial={editingDeal}
+        onSave={(data) => {
+          if (editingDeal) {
+            updateDeal(editingDeal.id, data);
+          } else {
+            addDeal(data);
+          }
+        }}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Deal"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteDeal(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Quotations Tab ──────────────────────────────────────────────
 function QuotationsTab() {
-  const [quotes] = useState<Quote[]>(MOCK_QUOTES);
+  const quotes = useSalesStore((s) => s.quotations);
+  const addQuotation = useSalesStore((s) => s.addQuotation);
+  const deleteQuotation = useSalesStore((s) => s.deleteQuotation);
+  const acceptQuotation = useSalesStore((s) => s.acceptQuotation);
+  const rejectQuotation = useSalesStore((s) => s.rejectQuotation);
+  const sendQuotation = useSalesStore((s) => s.sendQuotation);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = quotes.filter((q) => {
     const matchSearch =
@@ -1352,6 +1903,8 @@ function QuotationsTab() {
     status: q.status,
     items: String(q.items),
   }));
+
+  const deleteTarget = deleteId ? quotes.find((q) => q.id === deleteId) : null;
 
   return (
     <div>
@@ -1391,7 +1944,7 @@ function QuotationsTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="New Quote" onClick={() => {}} />
+          <NewButton label="New Quote" onClick={() => setShowModal(true)} />
         </div>
       </div>
 
@@ -1414,7 +1967,7 @@ function QuotationsTab() {
                 <Th>Items</Th>
                 <Th>Amount</Th>
                 <Th>Status</Th>
-                <Th>Actions</Th>
+                <Th width={180}>Actions</Th>
               </tr>
             </thead>
             <tbody>
@@ -1485,36 +2038,37 @@ function QuotationsTab() {
                         <StatusBadge label={q.status} config={cfg} />
                       </Td>
                       <Td>
-                        <div style={{ display: "flex", gap: 6 }}>
-                          <button
-                            style={{
-                              padding: "4px 10px",
-                              borderRadius: 6,
-                              border: "1px solid var(--content-border)",
-                              background: "transparent",
-                              fontSize: 11,
-                              color: "var(--text-secondary)",
-                              cursor: "pointer",
-                            }}
-                          >
-                            View
-                          </button>
+                        <div style={{ display: "flex", gap: 4 }}>
                           {q.status === "Draft" && (
-                            <button
-                              style={{
-                                padding: "4px 10px",
-                                borderRadius: 6,
-                                border: "none",
-                                background: "var(--vyne-purple)",
-                                fontSize: 11,
-                                color: "#fff",
-                                cursor: "pointer",
-                                fontWeight: 500,
-                              }}
-                            >
-                              Send
-                            </button>
+                            <SmallBtn
+                              label="Send"
+                              color="#fff"
+                              bg="var(--vyne-purple)"
+                              onClick={() => sendQuotation(q.id)}
+                            />
                           )}
+                          {(q.status === "Sent" || q.status === "Draft") && (
+                            <>
+                              <SmallBtn
+                                label="Accept"
+                                color="#166534"
+                                bg="#F0FDF4"
+                                onClick={() => acceptQuotation(q.id)}
+                              />
+                              <SmallBtn
+                                label="Reject"
+                                color="#991B1B"
+                                bg="#FEF2F2"
+                                onClick={() => rejectQuotation(q.id)}
+                              />
+                            </>
+                          )}
+                          <IconBtn
+                            icon={<Trash2 size={12} />}
+                            title="Delete"
+                            danger
+                            onClick={() => setDeleteId(q.id)}
+                          />
                         </div>
                       </Td>
                     </tr>
@@ -1525,15 +2079,37 @@ function QuotationsTab() {
           </table>
         </div>
       </div>
+
+      <QuotationModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={(data) => addQuotation(data)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Quotation"
+        message={`Are you sure you want to delete "${deleteTarget?.number}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteQuotation(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Sales Orders Tab ────────────────────────────────────────────
 function SalesOrdersTab() {
-  const [orders] = useState<SalesOrder[]>(MOCK_ORDERS);
+  const orders = useSalesStore((s) => s.salesOrders);
+  const addSalesOrder = useSalesStore((s) => s.addSalesOrder);
+  const deleteSalesOrder = useSalesStore((s) => s.deleteSalesOrder);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = orders.filter((o) => {
     const matchSearch =
@@ -1552,6 +2128,8 @@ function SalesOrdersTab() {
     status: o.status,
     tracking: o.tracking,
   }));
+
+  const deleteTarget = deleteId ? orders.find((o) => o.id === deleteId) : null;
 
   return (
     <div>
@@ -1591,7 +2169,7 @@ function SalesOrdersTab() {
               { key: "tracking", header: "Tracking" },
             ]}
           />
-          <NewButton label="New Order" onClick={() => {}} />
+          <NewButton label="New Order" onClick={() => setShowModal(true)} />
         </div>
       </div>
 
@@ -1614,13 +2192,14 @@ function SalesOrdersTab() {
                 <Th>Amount</Th>
                 <Th>Status</Th>
                 <Th>Tracking</Th>
+                <Th width={60}>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     style={{
                       padding: 40,
                       textAlign: "center",
@@ -1684,6 +2263,14 @@ function SalesOrdersTab() {
                           </span>
                         )}
                       </Td>
+                      <Td>
+                        <IconBtn
+                          icon={<Trash2 size={12} />}
+                          title="Delete"
+                          danger
+                          onClick={() => setDeleteId(order.id)}
+                        />
+                      </Td>
                     </tr>
                   );
                 })
@@ -1692,15 +2279,39 @@ function SalesOrdersTab() {
           </table>
         </div>
       </div>
+
+      <SalesOrderModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={(data) => addSalesOrder(data)}
+      />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Sales Order"
+        message={`Are you sure you want to delete "${deleteTarget?.number}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteSalesOrder(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Products Tab ────────────────────────────────────────────────
 function ProductsTab() {
-  const [products] = useState<Product[]>(MOCK_PRODUCTS);
+  const products = useSalesStore((s) => s.products);
+  const addProduct = useSalesStore((s) => s.addProduct);
+  const updateProduct = useSalesStore((s) => s.updateProduct);
+  const deleteProduct = useSalesStore((s) => s.deleteProduct);
+
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const categories = [...new Set(products.map((p) => p.category))].sort();
 
@@ -1720,6 +2331,10 @@ function ProductsTab() {
     stock: String(p.stock),
     status: p.status,
   }));
+
+  const deleteTarget = deleteId
+    ? products.find((p) => p.id === deleteId)
+    : null;
 
   return (
     <div>
@@ -1759,7 +2374,13 @@ function ProductsTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="Add Product" onClick={() => {}} />
+          <NewButton
+            label="Add Product"
+            onClick={() => {
+              setEditingProduct(null);
+              setShowModal(true);
+            }}
+          />
         </div>
       </div>
 
@@ -1781,13 +2402,14 @@ function ProductsTab() {
                 <Th>Price</Th>
                 <Th>Stock</Th>
                 <Th>Status</Th>
+                <Th width={80}>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       padding: 40,
                       textAlign: "center",
@@ -1870,6 +2492,24 @@ function ProductsTab() {
                       <Td>
                         <StatusBadge label={product.status} config={cfg} />
                       </Td>
+                      <Td>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <IconBtn
+                            icon={<Pencil size={13} />}
+                            title="Edit"
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setShowModal(true);
+                            }}
+                          />
+                          <IconBtn
+                            icon={<Trash2 size={13} />}
+                            title="Delete"
+                            danger
+                            onClick={() => setDeleteId(product.id)}
+                          />
+                        </div>
+                      </Td>
                     </tr>
                   );
                 })
@@ -1878,15 +2518,46 @@ function ProductsTab() {
           </table>
         </div>
       </div>
+
+      <ProductModal
+        key={editingProduct?.id ?? "new"}
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingProduct(null);
+        }}
+        initial={editingProduct}
+        onSave={(data) => {
+          if (editingProduct) {
+            updateProduct(editingProduct.id, data);
+          } else {
+            addProduct(data);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteProduct(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Customers Tab ───────────────────────────────────────────────
 function CustomersTab() {
-  const [customers] = useState<Customer[]>(MOCK_CUSTOMERS);
+  const customers = useSalesStore((s) => s.customers);
+  const deleteCustomer = useSalesStore((s) => s.deleteCustomer);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = customers.filter((c) => {
     const matchSearch =
@@ -1904,6 +2575,10 @@ function CustomersTab() {
     lastOrder: c.lastOrder,
     status: c.status,
   }));
+
+  const deleteTarget = deleteId
+    ? customers.find((c) => c.id === deleteId)
+    : null;
 
   return (
     <div>
@@ -1943,7 +2618,6 @@ function CustomersTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="Add Customer" onClick={() => {}} />
         </div>
       </div>
 
@@ -1965,13 +2639,14 @@ function CustomersTab() {
                 <Th>Total Revenue</Th>
                 <Th>Last Order</Th>
                 <Th>Status</Th>
+                <Th width={60}>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       padding: 40,
                       textAlign: "center",
@@ -2044,6 +2719,14 @@ function CustomersTab() {
                       <Td>
                         <StatusBadge label={cust.status} config={cfg} />
                       </Td>
+                      <Td>
+                        <IconBtn
+                          icon={<Trash2 size={12} />}
+                          title="Delete"
+                          danger
+                          onClick={() => setDeleteId(cust.id)}
+                        />
+                      </Td>
                     </tr>
                   );
                 })
@@ -2052,15 +2735,38 @@ function CustomersTab() {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Customer"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteCustomer(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Reports Tab ─────────────────────────────────────────────────
+const MONTHLY_REVENUE = [
+  { month: "Oct 2025", revenue: 182000 },
+  { month: "Nov 2025", revenue: 215000 },
+  { month: "Dec 2025", revenue: 198000 },
+  { month: "Jan 2026", revenue: 242000 },
+  { month: "Feb 2026", revenue: 278000 },
+  { month: "Mar 2026", revenue: 310000 },
+];
+
 function ReportsTab() {
-  const totalRevenue = MOCK_CUSTOMERS.reduce((s, c) => s + c.totalRevenue, 0);
-  const wonDeals = MOCK_OPPORTUNITIES.filter((o) => o.stage === "Closed Won");
-  const lostDeals = MOCK_OPPORTUNITIES.filter((o) => o.stage === "Closed Lost");
+  const deals = useSalesStore((s) => s.deals);
+  const customers = useSalesStore((s) => s.customers);
+
+  const totalRevenue = customers.reduce((s, c) => s + c.totalRevenue, 0);
+  const wonDeals = deals.filter((o) => o.stage === "Closed Won");
+  const lostDeals = deals.filter((o) => o.stage === "Closed Lost");
   const avgDealSize =
     wonDeals.length > 0
       ? wonDeals.reduce((s, o) => s + o.value, 0) / wonDeals.length
@@ -2071,11 +2777,19 @@ function ReportsTab() {
           (wonDeals.length / (wonDeals.length + lostDeals.length)) * 100,
         )
       : 0;
-  const pipelineValue = MOCK_OPPORTUNITIES.filter(
-    (o) => o.stage !== "Closed Won" && o.stage !== "Closed Lost",
-  ).reduce((s, o) => s + o.value, 0);
+  const pipelineValue = deals
+    .filter((o) => o.stage !== "Closed Won" && o.stage !== "Closed Lost")
+    .reduce((s, o) => s + o.value, 0);
 
   const maxRevenue = Math.max(...MONTHLY_REVENUE.map((m) => m.revenue));
+
+  const stages: OpportunityStage[] = [
+    "Qualification",
+    "Proposal",
+    "Negotiation",
+    "Closed Won",
+    "Closed Lost",
+  ];
 
   return (
     <div>
@@ -2181,7 +2895,6 @@ function ReportsTab() {
                   gap: 8,
                 }}
               >
-                {/* Value label */}
                 <span
                   style={{
                     fontSize: 10,
@@ -2191,8 +2904,6 @@ function ReportsTab() {
                 >
                   {fmt(m.revenue)}
                 </span>
-
-                {/* Bar */}
                 <div
                   style={{
                     width: "100%",
@@ -2208,8 +2919,6 @@ function ReportsTab() {
                   }}
                   title={`${m.month}: ${fmtFull(m.revenue)}`}
                 />
-
-                {/* Month label */}
                 <span
                   style={{
                     fontSize: 10,
@@ -2285,7 +2994,10 @@ function ReportsTab() {
                         {deal.name}
                       </div>
                       <div
-                        style={{ fontSize: 11, color: "var(--text-tertiary)" }}
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-tertiary)",
+                        }}
                       >
                         {deal.company}
                       </div>
@@ -2325,24 +3037,11 @@ function ReportsTab() {
             Pipeline by Stage
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {(
-              [
-                "Qualification",
-                "Proposal",
-                "Negotiation",
-                "Closed Won",
-                "Closed Lost",
-              ] as OpportunityStage[]
-            ).map((stage) => {
-              const stageOpps = MOCK_OPPORTUNITIES.filter(
-                (o) => o.stage === stage,
-              );
+            {stages.map((stage) => {
+              const stageOpps = deals.filter((o) => o.stage === stage);
               const stageTotal = stageOpps.reduce((s, o) => s + o.value, 0);
               const cfg = stageConfig(stage);
-              const allTotal = MOCK_OPPORTUNITIES.reduce(
-                (s, o) => s + o.value,
-                0,
-              );
+              const allTotal = deals.reduce((s, o) => s + o.value, 0);
               const pct =
                 allTotal > 0 ? Math.round((stageTotal / allTotal) * 100) : 0;
 
@@ -2357,7 +3056,11 @@ function ReportsTab() {
                     }}
                   >
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
                     >
                       <div
                         style={{
@@ -2377,7 +3080,10 @@ function ReportsTab() {
                         {stage}
                       </span>
                       <span
-                        style={{ fontSize: 11, color: "var(--text-tertiary)" }}
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-tertiary)",
+                        }}
                       >
                         ({stageOpps.length})
                       </span>
@@ -2449,7 +3155,7 @@ function ReportsTab() {
               </tr>
             </thead>
             <tbody>
-              {[...MOCK_CUSTOMERS]
+              {[...customers]
                 .sort((a, b) => b.totalRevenue - a.totalRevenue)
                 .slice(0, 5)
                 .map((cust) => (
@@ -2503,6 +3209,8 @@ function ReportsTab() {
 // ─── Main Page ───────────────────────────────────────────────────
 export default function SalesPage() {
   const [activeTab, setActiveTab] = useState<SalesTab>("opportunities");
+  const deals = useSalesStore((s) => s.deals);
+  const salesOrders = useSalesStore((s) => s.salesOrders);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -2548,8 +3256,7 @@ export default function SalesPage() {
             <p
               style={{ fontSize: 12, color: "var(--text-tertiary)", margin: 0 }}
             >
-              {MOCK_OPPORTUNITIES.length} opportunities, {MOCK_ORDERS.length}{" "}
-              orders
+              {deals.length} opportunities, {salesOrders.length} orders
             </p>
           </div>
         </div>

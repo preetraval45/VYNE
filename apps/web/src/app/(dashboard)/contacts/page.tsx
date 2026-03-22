@@ -1,50 +1,19 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Plus, Search, Upload, X, ChevronDown } from "lucide-react";
+import { Plus, Search, Upload, X, Pencil, Trash2 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
+import {
+  useContactsStore,
+  type Account,
+  type Contact,
+  type AccountStatus,
+  type ContactTag,
+} from "@/lib/stores/contacts";
 
-// ─── Types ───────────────────────────────────────────────────────
+// ─── Constants ──────────────────────────────────────────────────
 type ContactsTab = "accounts" | "contacts" | "import";
-
-type AccountStatus = "Active" | "Prospect" | "Inactive";
-type ContactTag =
-  | "VIP"
-  | "Decision Maker"
-  | "Technical"
-  | "Billing"
-  | "Primary";
-
-interface Account {
-  id: string;
-  name: string;
-  industry: string;
-  website: string;
-  phone: string;
-  revenue: number;
-  employees: number;
-  owner: string;
-  status: AccountStatus;
-}
-
-interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  accountId: string;
-  title: string;
-  department: string;
-  lastContact: string;
-  tags: ContactTag[];
-}
-
-// ─── Mock Data ───────────────────────────────────────────────────
-const NOW = Date.now();
-const daysAgo = (d: number) =>
-  new Date(NOW - d * 86400000).toISOString().slice(0, 10);
 
 const INDUSTRIES = [
   "Technology",
@@ -57,301 +26,15 @@ const INDUSTRIES = [
   "Real Estate",
 ];
 
-const MOCK_ACCOUNTS: Account[] = [
-  {
-    id: "acc1",
-    name: "Acme Corp",
-    industry: "Technology",
-    website: "acme.com",
-    phone: "+1 (555) 100-2000",
-    revenue: 12500000,
-    employees: 340,
-    owner: "Alex Rivera",
-    status: "Active",
-  },
-  {
-    id: "acc2",
-    name: "MediHealth Systems",
-    industry: "Healthcare",
-    website: "medihealth.io",
-    phone: "+1 (555) 200-3000",
-    revenue: 8400000,
-    employees: 520,
-    owner: "Priya Shah",
-    status: "Active",
-  },
-  {
-    id: "acc3",
-    name: "FinEdge Capital",
-    industry: "Finance",
-    website: "finedge.com",
-    phone: "+1 (555) 300-4000",
-    revenue: 45000000,
-    employees: 1200,
-    owner: "Sam Chen",
-    status: "Prospect",
-  },
-  {
-    id: "acc4",
-    name: "BuildWorks Inc",
-    industry: "Manufacturing",
-    website: "buildworks.co",
-    phone: "+1 (555) 400-5000",
-    revenue: 6800000,
-    employees: 190,
-    owner: "Alex Rivera",
-    status: "Active",
-  },
-  {
-    id: "acc5",
-    name: "RetailNow",
-    industry: "Retail",
-    website: "retailnow.com",
-    phone: "+1 (555) 500-6000",
-    revenue: 3200000,
-    employees: 85,
-    owner: "Jordan Lee",
-    status: "Inactive",
-  },
-  {
-    id: "acc6",
-    name: "GreenVolt Energy",
-    industry: "Energy",
-    website: "greenvolt.io",
-    phone: "+1 (555) 600-7000",
-    revenue: 18700000,
-    employees: 430,
-    owner: "Priya Shah",
-    status: "Active",
-  },
-  {
-    id: "acc7",
-    name: "EduSpark",
-    industry: "Education",
-    website: "eduspark.org",
-    phone: "+1 (555) 700-8000",
-    revenue: 2100000,
-    employees: 65,
-    owner: "Sam Chen",
-    status: "Prospect",
-  },
-  {
-    id: "acc8",
-    name: "UrbanPrime Realty",
-    industry: "Real Estate",
-    website: "urbanprime.com",
-    phone: "+1 (555) 800-9000",
-    revenue: 28500000,
-    employees: 310,
-    owner: "Jordan Lee",
-    status: "Active",
-  },
-  {
-    id: "acc9",
-    name: "CloudOps Solutions",
-    industry: "Technology",
-    website: "cloudops.dev",
-    phone: "+1 (555) 900-1000",
-    revenue: 9600000,
-    employees: 210,
-    owner: "Alex Rivera",
-    status: "Active",
-  },
-  {
-    id: "acc10",
-    name: "PharmaLink",
-    industry: "Healthcare",
-    website: "pharmalink.com",
-    phone: "+1 (555) 110-2200",
-    revenue: 35000000,
-    employees: 890,
-    owner: "Priya Shah",
-    status: "Prospect",
-  },
+const ALL_TAGS: ContactTag[] = [
+  "VIP",
+  "Decision Maker",
+  "Technical",
+  "Billing",
+  "Primary",
 ];
 
-const MOCK_CONTACTS: Contact[] = [
-  {
-    id: "c1",
-    name: "Sarah Johnson",
-    email: "sarah@acme.com",
-    phone: "+1 (555) 101-0001",
-    company: "Acme Corp",
-    accountId: "acc1",
-    title: "VP of Engineering",
-    department: "Engineering",
-    lastContact: daysAgo(2),
-    tags: ["Decision Maker", "VIP"],
-  },
-  {
-    id: "c2",
-    name: "Marcus Chen",
-    email: "marcus@acme.com",
-    phone: "+1 (555) 101-0002",
-    company: "Acme Corp",
-    accountId: "acc1",
-    title: "CTO",
-    department: "Engineering",
-    lastContact: daysAgo(5),
-    tags: ["Decision Maker"],
-  },
-  {
-    id: "c3",
-    name: "Emily Watson",
-    email: "emily@medihealth.io",
-    phone: "+1 (555) 201-0001",
-    company: "MediHealth Systems",
-    accountId: "acc2",
-    title: "Procurement Manager",
-    department: "Operations",
-    lastContact: daysAgo(1),
-    tags: ["Billing", "Primary"],
-  },
-  {
-    id: "c4",
-    name: "David Park",
-    email: "david@medihealth.io",
-    phone: "+1 (555) 201-0002",
-    company: "MediHealth Systems",
-    accountId: "acc2",
-    title: "IT Director",
-    department: "IT",
-    lastContact: daysAgo(8),
-    tags: ["Technical"],
-  },
-  {
-    id: "c5",
-    name: "Rachel Adams",
-    email: "rachel@finedge.com",
-    phone: "+1 (555) 301-0001",
-    company: "FinEdge Capital",
-    accountId: "acc3",
-    title: "CFO",
-    department: "Finance",
-    lastContact: daysAgo(3),
-    tags: ["Decision Maker", "VIP"],
-  },
-  {
-    id: "c6",
-    name: "Tom Bradley",
-    email: "tom@finedge.com",
-    phone: "+1 (555) 301-0002",
-    company: "FinEdge Capital",
-    accountId: "acc3",
-    title: "Senior Analyst",
-    department: "Finance",
-    lastContact: daysAgo(12),
-    tags: ["Technical"],
-  },
-  {
-    id: "c7",
-    name: "Ana Rodriguez",
-    email: "ana@buildworks.co",
-    phone: "+1 (555) 401-0001",
-    company: "BuildWorks Inc",
-    accountId: "acc4",
-    title: "Operations Head",
-    department: "Operations",
-    lastContact: daysAgo(6),
-    tags: ["Decision Maker", "Primary"],
-  },
-  {
-    id: "c8",
-    name: "Kevin Zhao",
-    email: "kevin@retailnow.com",
-    phone: "+1 (555) 501-0001",
-    company: "RetailNow",
-    accountId: "acc5",
-    title: "Store Director",
-    department: "Sales",
-    lastContact: daysAgo(30),
-    tags: ["Primary"],
-  },
-  {
-    id: "c9",
-    name: "Lisa Patel",
-    email: "lisa@greenvolt.io",
-    phone: "+1 (555) 601-0001",
-    company: "GreenVolt Energy",
-    accountId: "acc6",
-    title: "VP of Sales",
-    department: "Sales",
-    lastContact: daysAgo(4),
-    tags: ["VIP", "Decision Maker"],
-  },
-  {
-    id: "c10",
-    name: "James Wright",
-    email: "james@greenvolt.io",
-    phone: "+1 (555) 601-0002",
-    company: "GreenVolt Energy",
-    accountId: "acc6",
-    title: "Engineer",
-    department: "Engineering",
-    lastContact: daysAgo(15),
-    tags: ["Technical"],
-  },
-  {
-    id: "c11",
-    name: "Sophie Kim",
-    email: "sophie@eduspark.org",
-    phone: "+1 (555) 701-0001",
-    company: "EduSpark",
-    accountId: "acc7",
-    title: "Director of Programs",
-    department: "Education",
-    lastContact: daysAgo(7),
-    tags: ["Decision Maker"],
-  },
-  {
-    id: "c12",
-    name: "Nathan Brooks",
-    email: "nathan@urbanprime.com",
-    phone: "+1 (555) 801-0001",
-    company: "UrbanPrime Realty",
-    accountId: "acc8",
-    title: "Managing Partner",
-    department: "Executive",
-    lastContact: daysAgo(2),
-    tags: ["VIP", "Decision Maker"],
-  },
-  {
-    id: "c13",
-    name: "Mia Foster",
-    email: "mia@urbanprime.com",
-    phone: "+1 (555) 801-0002",
-    company: "UrbanPrime Realty",
-    accountId: "acc8",
-    title: "Legal Counsel",
-    department: "Legal",
-    lastContact: daysAgo(9),
-    tags: ["Billing"],
-  },
-  {
-    id: "c14",
-    name: "Derek Ng",
-    email: "derek@cloudops.dev",
-    phone: "+1 (555) 901-0001",
-    company: "CloudOps Solutions",
-    accountId: "acc9",
-    title: "Lead Architect",
-    department: "Engineering",
-    lastContact: daysAgo(1),
-    tags: ["Technical", "Primary"],
-  },
-  {
-    id: "c15",
-    name: "Olivia Martinez",
-    email: "olivia@pharmalink.com",
-    phone: "+1 (555) 111-0001",
-    company: "PharmaLink",
-    accountId: "acc10",
-    title: "Head of Procurement",
-    department: "Operations",
-    lastContact: daysAgo(11),
-    tags: ["Decision Maker", "Billing"],
-  },
-];
+const OWNERS = ["Alex Rivera", "Priya Shah", "Sam Chen", "Jordan Lee"];
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function fmtRevenue(n: number): string {
@@ -388,6 +71,101 @@ function daysSinceStr(isoDate: string): string {
 }
 
 // ─── Shared UI ───────────────────────────────────────────────────
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-secondary)",
+  fontSize: 12,
+  color: "var(--text-primary)",
+  outline: "none",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...inputStyle,
+  cursor: "pointer",
+  appearance: "none" as const,
+  WebkitAppearance: "none" as const,
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  color: "var(--text-secondary)",
+  marginBottom: 4,
+  display: "block",
+};
+
+const modalOverlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.5)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000,
+};
+
+const modalContentStyle: React.CSSProperties = {
+  background: "var(--content-bg)",
+  borderRadius: 14,
+  padding: 28,
+  width: 480,
+  maxWidth: "95vw",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+  border: "1px solid var(--content-border)",
+};
+
+const confirmOverlayStyle: React.CSSProperties = {
+  ...modalOverlayStyle,
+};
+
+const confirmContentStyle: React.CSSProperties = {
+  background: "var(--content-bg)",
+  borderRadius: 14,
+  padding: 24,
+  width: 400,
+  maxWidth: "90vw",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+  border: "1px solid var(--content-border)",
+};
+
+const primaryBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "none",
+  background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const secondaryBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "transparent",
+  color: "var(--text-primary)",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 500,
+};
+
+const dangerBtnStyle: React.CSSProperties = {
+  padding: "8px 20px",
+  borderRadius: 8,
+  border: "none",
+  background: "#EF4444",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
 function TabBtn({
   label,
   active,
@@ -620,7 +398,6 @@ function NewButton({
   );
 }
 
-// Table header cell
 function Th({
   children,
   width,
@@ -645,7 +422,6 @@ function Th({
   );
 }
 
-// Table data cell
 function Td({
   children,
   mono,
@@ -666,12 +442,564 @@ function Td({
   );
 }
 
+function IconBtn({
+  icon,
+  title,
+  onClick,
+  danger,
+}: Readonly<{
+  icon: React.ReactNode;
+  title: string;
+  onClick: (e: React.MouseEvent) => void;
+  danger?: boolean;
+}>) {
+  return (
+    <button
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      style={{
+        padding: 4,
+        borderRadius: 6,
+        border: "1px solid var(--content-border)",
+        background: "transparent",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: danger ? "#EF4444" : "var(--text-secondary)",
+        transition: "all 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = danger
+          ? "#FEF2F2"
+          : "var(--content-secondary)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent";
+      }}
+    >
+      {icon}
+    </button>
+  );
+}
+
+// ─── Confirm Dialog ──────────────────────────────────────────────
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: Readonly<{
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}>) {
+  if (!open) return null;
+  return (
+    <div style={confirmOverlayStyle} onClick={onCancel}>
+      <div style={confirmContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            marginBottom: 8,
+          }}
+        >
+          {title}
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: "var(--text-secondary)",
+            marginBottom: 20,
+            lineHeight: "1.5",
+          }}
+        >
+          {message}
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button style={secondaryBtnStyle} onClick={onCancel}>
+            Cancel
+          </button>
+          <button style={dangerBtnStyle} onClick={onConfirm}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Account Modal ───────────────────────────────────────────────
+function AccountModal({
+  open,
+  onClose,
+  initial,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  initial?: Account | null;
+  onSave: (data: Omit<Account, "id">) => void;
+}>) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [industry, setIndustry] = useState(initial?.industry ?? "Technology");
+  const [website, setWebsite] = useState(initial?.website ?? "");
+  const [phone, setPhone] = useState(initial?.phone ?? "");
+  const [revenue, setRevenue] = useState(String(initial?.revenue ?? ""));
+  const [employees, setEmployees] = useState(String(initial?.employees ?? ""));
+  const [owner, setOwner] = useState(initial?.owner ?? OWNERS[0]);
+  const [status, setStatus] = useState<AccountStatus>(
+    initial?.status ?? "Prospect",
+  );
+
+  // Reset form when initial changes
+  const initialId = initial?.id ?? "";
+  useState(() => {
+    setName(initial?.name ?? "");
+    setIndustry(initial?.industry ?? "Technology");
+    setWebsite(initial?.website ?? "");
+    setPhone(initial?.phone ?? "");
+    setRevenue(String(initial?.revenue ?? ""));
+    setEmployees(String(initial?.employees ?? ""));
+    setOwner(initial?.owner ?? OWNERS[0]);
+    setStatus(initial?.status ?? "Prospect");
+  });
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    onSave({
+      name: name.trim(),
+      industry,
+      website: website.trim(),
+      phone: phone.trim(),
+      revenue: Number(revenue) || 0,
+      employees: Number(employees) || 0,
+      owner,
+      status,
+    });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {initial ? "Edit Account" : "New Account"}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Name <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Company name"
+            />
+          </div>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <div>
+              <label style={labelStyle}>Industry</label>
+              <select
+                style={selectStyle}
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+              >
+                {INDUSTRIES.map((i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Status</label>
+              <select
+                style={selectStyle}
+                value={status}
+                onChange={(e) => setStatus(e.target.value as AccountStatus)}
+              >
+                <option value="Active">Active</option>
+                <option value="Prospect">Prospect</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Website</label>
+            <input
+              style={inputStyle}
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="example.com"
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Phone</label>
+            <input
+              style={inputStyle}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (555) 000-0000"
+            />
+          </div>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <div>
+              <label style={labelStyle}>Revenue ($)</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={revenue}
+                onChange={(e) => setRevenue(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Employees</label>
+              <input
+                style={inputStyle}
+                type="number"
+                value={employees}
+                onChange={(e) => setEmployees(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Owner</label>
+            <select
+              style={selectStyle}
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+            >
+              {OWNERS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            style={{
+              ...primaryBtnStyle,
+              opacity: name.trim() ? 1 : 0.5,
+            }}
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+          >
+            {initial ? "Save Changes" : "Create Account"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Contact Modal ───────────────────────────────────────────────
+function ContactModal({
+  open,
+  onClose,
+  initial,
+  accounts,
+  onSave,
+}: Readonly<{
+  open: boolean;
+  onClose: () => void;
+  initial?: Contact | null;
+  accounts: Account[];
+  onSave: (data: Omit<Contact, "id">) => void;
+}>) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
+  const [phone, setPhone] = useState(initial?.phone ?? "");
+  const [accountId, setAccountId] = useState(
+    initial?.accountId ?? accounts[0]?.id ?? "",
+  );
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [department, setDepartment] = useState(initial?.department ?? "");
+  const [selectedTags, setSelectedTags] = useState<ContactTag[]>(
+    initial?.tags ?? [],
+  );
+
+  useState(() => {
+    setName(initial?.name ?? "");
+    setEmail(initial?.email ?? "");
+    setPhone(initial?.phone ?? "");
+    setAccountId(initial?.accountId ?? accounts[0]?.id ?? "");
+    setTitle(initial?.title ?? "");
+    setDepartment(initial?.department ?? "");
+    setSelectedTags(initial?.tags ?? []);
+  });
+
+  if (!open) return null;
+
+  const toggleTag = (tag: ContactTag) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  };
+
+  const selectedAccount = accounts.find((a) => a.id === accountId);
+
+  const handleSubmit = () => {
+    if (!name.trim() || !email.trim()) return;
+    onSave({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      company: selectedAccount?.name ?? "",
+      accountId,
+      title: title.trim(),
+      department: department.trim(),
+      lastContact:
+        initial?.lastContact ?? new Date().toISOString().slice(0, 10),
+      tags: selectedTags,
+    });
+    onClose();
+  };
+
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}
+          >
+            {initial ? "Edit Contact" : "New Contact"}
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              color: "var(--text-tertiary)",
+              padding: 4,
+            }}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div>
+            <label style={labelStyle}>
+              Name <span style={{ color: "#EF4444" }}>*</span>
+            </label>
+            <input
+              style={inputStyle}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Full name"
+            />
+          </div>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <div>
+              <label style={labelStyle}>
+                Email <span style={{ color: "#EF4444" }}>*</span>
+              </label>
+              <input
+                style={inputStyle}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Phone</label>
+              <input
+                style={inputStyle}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 (555) 000-0000"
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Company (Account)</label>
+            <select
+              style={selectStyle}
+              value={accountId}
+              onChange={(e) => setAccountId(e.target.value)}
+            >
+              <option value="">-- Select Account --</option>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <div>
+              <label style={labelStyle}>Title</label>
+              <input
+                style={inputStyle}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="VP of Engineering"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Department</label>
+              <input
+                style={inputStyle}
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                placeholder="Engineering"
+              />
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Tags</label>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {ALL_TAGS.map((tag) => {
+                const isSelected = selectedTags.includes(tag);
+                const cfg = tagConfig(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    style={{
+                      padding: "4px 10px",
+                      borderRadius: 14,
+                      fontSize: 11,
+                      fontWeight: 500,
+                      border: isSelected
+                        ? `2px solid ${cfg.color}`
+                        : "2px solid var(--content-border)",
+                      background: isSelected ? cfg.bg : "transparent",
+                      color: isSelected ? cfg.color : "var(--text-tertiary)",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "flex-end",
+            marginTop: 24,
+          }}
+        >
+          <button style={secondaryBtnStyle} onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            style={{
+              ...primaryBtnStyle,
+              opacity: name.trim() && email.trim() ? 1 : 0.5,
+            }}
+            onClick={handleSubmit}
+            disabled={!name.trim() || !email.trim()}
+          >
+            {initial ? "Save Changes" : "Create Contact"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Accounts Tab ────────────────────────────────────────────────
 function AccountsTab() {
-  const [accounts] = useState<Account[]>(MOCK_ACCOUNTS);
+  const accounts = useContactsStore((s) => s.accounts);
+  const addAccount = useContactsStore((s) => s.addAccount);
+  const updateAccount = useContactsStore((s) => s.updateAccount);
+  const deleteAccount = useContactsStore((s) => s.deleteAccount);
+
   const [search, setSearch] = useState("");
   const [industryFilter, setIndustryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteTarget = deleteId
+    ? accounts.find((a) => a.id === deleteId)
+    : null;
 
   const filtered = accounts.filter((a) => {
     const matchSearch =
@@ -747,7 +1075,13 @@ function AccountsTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="New Account" onClick={() => {}} />
+          <NewButton
+            label="New Account"
+            onClick={() => {
+              setEditingAccount(null);
+              setShowModal(true);
+            }}
+          />
         </div>
       </div>
 
@@ -834,13 +1168,14 @@ function AccountsTab() {
                 <Th>Employees</Th>
                 <Th>Owner</Th>
                 <Th>Status</Th>
+                <Th width={80}>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     style={{
                       padding: 40,
                       textAlign: "center",
@@ -915,6 +1250,24 @@ function AccountsTab() {
                       <Td>
                         <StatusBadge status={account.status} config={sc} />
                       </Td>
+                      <Td>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <IconBtn
+                            icon={<Pencil size={13} />}
+                            title="Edit"
+                            onClick={() => {
+                              setEditingAccount(account);
+                              setShowModal(true);
+                            }}
+                          />
+                          <IconBtn
+                            icon={<Trash2 size={13} />}
+                            title="Delete"
+                            danger
+                            onClick={() => setDeleteId(account.id)}
+                          />
+                        </div>
+                      </Td>
                     </tr>
                   );
                 })
@@ -923,16 +1276,58 @@ function AccountsTab() {
           </table>
         </div>
       </div>
+
+      {/* Account Modal */}
+      <AccountModal
+        key={editingAccount?.id ?? "new"}
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingAccount(null);
+        }}
+        initial={editingAccount}
+        onSave={(data) => {
+          if (editingAccount) {
+            updateAccount(editingAccount.id, data);
+          } else {
+            addAccount(data);
+          }
+        }}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Account"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteAccount(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Contacts Tab ────────────────────────────────────────────────
-function ContactsTab() {
-  const [contacts] = useState<Contact[]>(MOCK_CONTACTS);
+function ContactsTabContent() {
+  const contacts = useContactsStore((s) => s.contacts);
+  const accounts = useContactsStore((s) => s.accounts);
+  const addContact = useContactsStore((s) => s.addContact);
+  const updateContact = useContactsStore((s) => s.updateContact);
+  const deleteContact = useContactsStore((s) => s.deleteContact);
+
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
+
+  const [showModal, setShowModal] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const deleteTarget = deleteId
+    ? contacts.find((c) => c.id === deleteId)
+    : null;
 
   const companies = [...new Set(contacts.map((c) => c.company))].sort();
   const departments = [...new Set(contacts.map((c) => c.department))].sort();
@@ -1012,7 +1407,13 @@ function ContactsTab() {
               { key: "tags", header: "Tags" },
             ]}
           />
-          <NewButton label="New Contact" onClick={() => {}} />
+          <NewButton
+            label="New Contact"
+            onClick={() => {
+              setEditingContact(null);
+              setShowModal(true);
+            }}
+          />
         </div>
       </div>
 
@@ -1037,13 +1438,14 @@ function ContactsTab() {
                 <Th>Department</Th>
                 <Th>Last Contact</Th>
                 <Th>Tags</Th>
+                <Th width={80}>Actions</Th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     style={{
                       padding: 40,
                       textAlign: "center",
@@ -1129,6 +1531,24 @@ function ContactsTab() {
                         ))}
                       </div>
                     </Td>
+                    <Td>
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <IconBtn
+                          icon={<Pencil size={13} />}
+                          title="Edit"
+                          onClick={() => {
+                            setEditingContact(contact);
+                            setShowModal(true);
+                          }}
+                        />
+                        <IconBtn
+                          icon={<Trash2 size={13} />}
+                          title="Delete"
+                          danger
+                          onClick={() => setDeleteId(contact.id)}
+                        />
+                      </div>
+                    </Td>
                   </tr>
                 ))
               )}
@@ -1136,12 +1556,46 @@ function ContactsTab() {
           </table>
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        key={editingContact?.id ?? "new"}
+        open={showModal}
+        onClose={() => {
+          setShowModal(false);
+          setEditingContact(null);
+        }}
+        initial={editingContact}
+        accounts={accounts}
+        onSave={(data) => {
+          if (editingContact) {
+            updateContact(editingContact.id, data);
+          } else {
+            addContact(data);
+          }
+        }}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete Contact"
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        onConfirm={() => {
+          if (deleteId) deleteContact(deleteId);
+          setDeleteId(null);
+        }}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   );
 }
 
 // ─── Import Tab ──────────────────────────────────────────────────
 function ImportTab() {
+  const importAccounts = useContactsStore((s) => s.importAccounts);
+  const importContacts = useContactsStore((s) => s.importContacts);
+
   const [showImportModal, setShowImportModal] = useState(false);
   const [importType, setImportType] = useState<"accounts" | "contacts">(
     "contacts",
@@ -1649,6 +2103,11 @@ function ImportTab() {
           importType === "accounts" ? accountColumns : contactColumns
         }
         onImport={(rows) => {
+          if (importType === "accounts") {
+            importAccounts(rows);
+          } else {
+            importContacts(rows);
+          }
           setShowImportModal(false);
           setSelectedFile(null);
         }}
@@ -1660,6 +2119,8 @@ function ImportTab() {
 // ─── Main Page ───────────────────────────────────────────────────
 export default function ContactsPage() {
   const [activeTab, setActiveTab] = useState<ContactsTab>("accounts");
+  const accounts = useContactsStore((s) => s.accounts);
+  const contacts = useContactsStore((s) => s.contacts);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -1727,7 +2188,7 @@ export default function ContactsPage() {
             <p
               style={{ fontSize: 12, color: "var(--text-tertiary)", margin: 0 }}
             >
-              {MOCK_ACCOUNTS.length} accounts, {MOCK_CONTACTS.length} contacts
+              {accounts.length} accounts, {contacts.length} contacts
             </p>
           </div>
         </div>
@@ -1748,13 +2209,13 @@ export default function ContactsPage() {
           label="Accounts"
           active={activeTab === "accounts"}
           onClick={() => setActiveTab("accounts")}
-          count={MOCK_ACCOUNTS.length}
+          count={accounts.length}
         />
         <TabBtn
           label="Contacts"
           active={activeTab === "contacts"}
           onClick={() => setActiveTab("contacts")}
-          count={MOCK_CONTACTS.length}
+          count={contacts.length}
         />
         <TabBtn
           label="Import"
@@ -1766,7 +2227,7 @@ export default function ContactsPage() {
       {/* Content */}
       <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
         {activeTab === "accounts" && <AccountsTab />}
-        {activeTab === "contacts" && <ContactsTab />}
+        {activeTab === "contacts" && <ContactsTabContent />}
         {activeTab === "import" && <ImportTab />}
       </div>
     </div>

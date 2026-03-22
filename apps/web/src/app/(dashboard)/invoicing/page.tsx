@@ -6,17 +6,39 @@ import {
   Plus,
   Send,
   CheckCircle,
-  Download,
   ChevronUp,
   ChevronDown,
-  DollarSign,
   FileText,
   AlertTriangle,
   Clock,
+  Edit2,
+  Trash2,
+  X,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import {
+  useInvoicingStore,
+  type Customer,
+  type Invoice,
+  type InvoiceLineItem,
+  type CreditNote,
+  type Payment,
+  type Vendor,
+  type Bill,
+  type BillLineItem,
+  type Refund,
+  type InvoiceStatus,
+  type BillStatus,
+  type CreditNoteStatus,
+  type PaymentMethod,
+  type PaymentStatus,
+  type CustomerStatus,
+  type VendorStatus,
+  type RefundStatus,
+  type RefundType,
+} from "@/lib/stores/invoicing";
 
-// ─── Types ────────────────────────────────────────────────────────
+// ─── Shared Types ─────────────────────────────────────────────────
 type Tab =
   | "customers"
   | "invoices"
@@ -26,503 +48,7 @@ type Tab =
   | "bills"
   | "refunds";
 
-type CustomerStatus = "Active" | "Inactive";
-type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue" | "Cancelled";
-type CreditNoteStatus = "Draft" | "Applied" | "Refunded";
-type PaymentMethod = "Bank Transfer" | "Credit Card" | "Check";
-type PaymentStatus = "Completed" | "Pending" | "Failed";
-type VendorStatus = "Active" | "Inactive";
-type BillStatus = "Draft" | "Received" | "Paid" | "Overdue";
-type RefundType = "Customer Refund" | "Vendor Refund";
-type RefundStatus = "Processed" | "Pending" | "Cancelled";
-
 type SortDir = "asc" | "desc";
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  totalRevenue: number;
-  outstandingBalance: number;
-  lastInvoice: string;
-  status: CustomerStatus;
-}
-
-interface Invoice {
-  id: string;
-  number: string;
-  customer: string;
-  date: string;
-  dueDate: string;
-  amount: number;
-  status: InvoiceStatus;
-}
-
-interface CreditNote {
-  id: string;
-  number: string;
-  customer: string;
-  originalInvoice: string;
-  amount: number;
-  date: string;
-  status: CreditNoteStatus;
-}
-
-interface Payment {
-  id: string;
-  number: string;
-  customer: string;
-  invoice: string;
-  amount: number;
-  method: PaymentMethod;
-  date: string;
-  status: PaymentStatus;
-}
-
-interface Vendor {
-  id: string;
-  name: string;
-  contact: string;
-  email: string;
-  totalPurchased: number;
-  outstanding: number;
-  status: VendorStatus;
-}
-
-interface Bill {
-  id: string;
-  number: string;
-  vendor: string;
-  date: string;
-  dueDate: string;
-  amount: number;
-  status: BillStatus;
-}
-
-interface Refund {
-  id: string;
-  number: string;
-  customerOrVendor: string;
-  type: RefundType;
-  amount: number;
-  date: string;
-  status: RefundStatus;
-}
-
-// ─── Mock Data ────────────────────────────────────────────────────
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: "c1",
-    name: "Acme Corp",
-    email: "billing@acmecorp.com",
-    phone: "(415) 555-0101",
-    totalRevenue: 248500,
-    outstandingBalance: 12400,
-    lastInvoice: "2026-03-15",
-    status: "Active",
-  },
-  {
-    id: "c2",
-    name: "Globex Industries",
-    email: "ap@globex.io",
-    phone: "(312) 555-0202",
-    totalRevenue: 187200,
-    outstandingBalance: 0,
-    lastInvoice: "2026-03-10",
-    status: "Active",
-  },
-  {
-    id: "c3",
-    name: "Initech LLC",
-    email: "finance@initech.com",
-    phone: "(512) 555-0303",
-    totalRevenue: 94300,
-    outstandingBalance: 8750,
-    lastInvoice: "2026-02-28",
-    status: "Active",
-  },
-  {
-    id: "c4",
-    name: "Soylent Corp",
-    email: "accounts@soylent.co",
-    phone: "(646) 555-0404",
-    totalRevenue: 156800,
-    outstandingBalance: 23100,
-    lastInvoice: "2026-03-18",
-    status: "Active",
-  },
-  {
-    id: "c5",
-    name: "Umbrella Inc",
-    email: "payments@umbrella.com",
-    phone: "(213) 555-0505",
-    totalRevenue: 72100,
-    outstandingBalance: 0,
-    lastInvoice: "2026-01-22",
-    status: "Inactive",
-  },
-  {
-    id: "c6",
-    name: "Wayne Enterprises",
-    email: "ar@wayne.com",
-    phone: "(305) 555-0606",
-    totalRevenue: 312600,
-    outstandingBalance: 45000,
-    lastInvoice: "2026-03-20",
-    status: "Active",
-  },
-  {
-    id: "c7",
-    name: "Stark Solutions",
-    email: "billing@stark.io",
-    phone: "(617) 555-0707",
-    totalRevenue: 201400,
-    outstandingBalance: 15600,
-    lastInvoice: "2026-03-12",
-    status: "Active",
-  },
-  {
-    id: "c8",
-    name: "Pied Piper Inc",
-    email: "invoices@piedpiper.com",
-    phone: "(408) 555-0808",
-    totalRevenue: 43200,
-    outstandingBalance: 0,
-    lastInvoice: "2025-12-15",
-    status: "Inactive",
-  },
-];
-
-const MOCK_INVOICES: Invoice[] = [
-  {
-    id: "i1",
-    number: "INV-2026-001",
-    customer: "Wayne Enterprises",
-    date: "2026-03-20",
-    dueDate: "2026-04-19",
-    amount: 45000,
-    status: "Sent",
-  },
-  {
-    id: "i2",
-    number: "INV-2026-002",
-    customer: "Soylent Corp",
-    date: "2026-03-18",
-    dueDate: "2026-04-17",
-    amount: 23100,
-    status: "Sent",
-  },
-  {
-    id: "i3",
-    number: "INV-2026-003",
-    customer: "Acme Corp",
-    date: "2026-03-15",
-    dueDate: "2026-04-14",
-    amount: 12400,
-    status: "Draft",
-  },
-  {
-    id: "i4",
-    number: "INV-2026-004",
-    customer: "Stark Solutions",
-    date: "2026-03-12",
-    dueDate: "2026-04-11",
-    amount: 15600,
-    status: "Sent",
-  },
-  {
-    id: "i5",
-    number: "INV-2026-005",
-    customer: "Globex Industries",
-    date: "2026-03-10",
-    dueDate: "2026-04-09",
-    amount: 34200,
-    status: "Paid",
-  },
-  {
-    id: "i6",
-    number: "INV-2026-006",
-    customer: "Initech LLC",
-    date: "2026-02-28",
-    dueDate: "2026-03-30",
-    amount: 8750,
-    status: "Overdue",
-  },
-  {
-    id: "i7",
-    number: "INV-2026-007",
-    customer: "Acme Corp",
-    date: "2026-02-15",
-    dueDate: "2026-03-17",
-    amount: 28500,
-    status: "Paid",
-  },
-  {
-    id: "i8",
-    number: "INV-2026-008",
-    customer: "Wayne Enterprises",
-    date: "2026-02-10",
-    dueDate: "2026-03-12",
-    amount: 67600,
-    status: "Paid",
-  },
-  {
-    id: "i9",
-    number: "INV-2026-009",
-    customer: "Pied Piper Inc",
-    date: "2026-01-20",
-    dueDate: "2026-02-19",
-    amount: 12800,
-    status: "Cancelled",
-  },
-  {
-    id: "i10",
-    number: "INV-2026-010",
-    customer: "Soylent Corp",
-    date: "2026-01-05",
-    dueDate: "2026-02-04",
-    amount: 41500,
-    status: "Paid",
-  },
-];
-
-const MOCK_CREDIT_NOTES: CreditNote[] = [
-  {
-    id: "cn1",
-    number: "CN-2026-001",
-    customer: "Acme Corp",
-    originalInvoice: "INV-2026-007",
-    amount: 4200,
-    date: "2026-02-20",
-    status: "Applied",
-  },
-  {
-    id: "cn2",
-    number: "CN-2026-002",
-    customer: "Pied Piper Inc",
-    originalInvoice: "INV-2026-009",
-    amount: 12800,
-    date: "2026-01-25",
-    status: "Refunded",
-  },
-  {
-    id: "cn3",
-    number: "CN-2026-003",
-    customer: "Globex Industries",
-    originalInvoice: "INV-2026-005",
-    amount: 2100,
-    date: "2026-03-14",
-    status: "Draft",
-  },
-];
-
-const MOCK_PAYMENTS: Payment[] = [
-  {
-    id: "p1",
-    number: "PAY-2026-001",
-    customer: "Globex Industries",
-    invoice: "INV-2026-005",
-    amount: 34200,
-    method: "Bank Transfer",
-    date: "2026-03-18",
-    status: "Completed",
-  },
-  {
-    id: "p2",
-    number: "PAY-2026-002",
-    customer: "Acme Corp",
-    invoice: "INV-2026-007",
-    amount: 24300,
-    method: "Credit Card",
-    date: "2026-03-02",
-    status: "Completed",
-  },
-  {
-    id: "p3",
-    number: "PAY-2026-003",
-    customer: "Wayne Enterprises",
-    invoice: "INV-2026-008",
-    amount: 67600,
-    method: "Bank Transfer",
-    date: "2026-03-05",
-    status: "Completed",
-  },
-  {
-    id: "p4",
-    number: "PAY-2026-004",
-    customer: "Soylent Corp",
-    invoice: "INV-2026-010",
-    amount: 41500,
-    method: "Check",
-    date: "2026-02-01",
-    status: "Completed",
-  },
-  {
-    id: "p5",
-    number: "PAY-2026-005",
-    customer: "Stark Solutions",
-    invoice: "INV-2026-004",
-    amount: 15600,
-    method: "Credit Card",
-    date: "2026-03-20",
-    status: "Pending",
-  },
-  {
-    id: "p6",
-    number: "PAY-2026-006",
-    customer: "Initech LLC",
-    invoice: "INV-2026-006",
-    amount: 8750,
-    method: "Bank Transfer",
-    date: "2026-03-21",
-    status: "Failed",
-  },
-];
-
-const MOCK_VENDORS: Vendor[] = [
-  {
-    id: "v1",
-    name: "CloudHost Pro",
-    contact: "Sarah Chen",
-    email: "billing@cloudhostpro.com",
-    totalPurchased: 86400,
-    outstanding: 7200,
-    status: "Active",
-  },
-  {
-    id: "v2",
-    name: "Office Depot",
-    contact: "Mike Johnson",
-    email: "business@officedepot.com",
-    totalPurchased: 23100,
-    outstanding: 0,
-    status: "Active",
-  },
-  {
-    id: "v3",
-    name: "TechSupply Co",
-    contact: "Raj Patel",
-    email: "sales@techsupply.com",
-    totalPurchased: 142800,
-    outstanding: 18500,
-    status: "Active",
-  },
-  {
-    id: "v4",
-    name: "Legal Eagles LLP",
-    contact: "Diana Prince",
-    email: "invoicing@legaleagles.com",
-    totalPurchased: 54000,
-    outstanding: 12000,
-    status: "Active",
-  },
-  {
-    id: "v5",
-    name: "GreenClean Services",
-    contact: "Tom Hardy",
-    email: "accounts@greenclean.co",
-    totalPurchased: 18600,
-    outstanding: 0,
-    status: "Inactive",
-  },
-];
-
-const MOCK_BILLS: Bill[] = [
-  {
-    id: "b1",
-    number: "BILL-2026-001",
-    vendor: "CloudHost Pro",
-    date: "2026-03-01",
-    dueDate: "2026-03-31",
-    amount: 7200,
-    status: "Received",
-  },
-  {
-    id: "b2",
-    number: "BILL-2026-002",
-    vendor: "TechSupply Co",
-    date: "2026-03-05",
-    dueDate: "2026-04-04",
-    amount: 18500,
-    status: "Received",
-  },
-  {
-    id: "b3",
-    number: "BILL-2026-003",
-    vendor: "Legal Eagles LLP",
-    date: "2026-02-15",
-    dueDate: "2026-03-17",
-    amount: 12000,
-    status: "Overdue",
-  },
-  {
-    id: "b4",
-    number: "BILL-2026-004",
-    vendor: "Office Depot",
-    date: "2026-02-20",
-    dueDate: "2026-03-22",
-    amount: 4800,
-    status: "Paid",
-  },
-  {
-    id: "b5",
-    number: "BILL-2026-005",
-    vendor: "GreenClean Services",
-    date: "2026-01-10",
-    dueDate: "2026-02-09",
-    amount: 3100,
-    status: "Paid",
-  },
-  {
-    id: "b6",
-    number: "BILL-2026-006",
-    vendor: "CloudHost Pro",
-    date: "2026-03-15",
-    dueDate: "2026-04-14",
-    amount: 7200,
-    status: "Draft",
-  },
-];
-
-const MOCK_REFUNDS: Refund[] = [
-  {
-    id: "r1",
-    number: "REF-2026-001",
-    customerOrVendor: "Pied Piper Inc",
-    type: "Customer Refund",
-    amount: 12800,
-    date: "2026-01-28",
-    status: "Processed",
-  },
-  {
-    id: "r2",
-    number: "REF-2026-002",
-    customerOrVendor: "Office Depot",
-    type: "Vendor Refund",
-    amount: 1200,
-    date: "2026-02-25",
-    status: "Processed",
-  },
-  {
-    id: "r3",
-    number: "REF-2026-003",
-    customerOrVendor: "Acme Corp",
-    type: "Customer Refund",
-    amount: 4200,
-    date: "2026-03-01",
-    status: "Pending",
-  },
-  {
-    id: "r4",
-    number: "REF-2026-004",
-    customerOrVendor: "TechSupply Co",
-    type: "Vendor Refund",
-    amount: 3400,
-    date: "2026-03-10",
-    status: "Cancelled",
-  },
-];
 
 // ─── Helpers ──────────────────────────────────────────────────────
 function fmt(n: number): string {
@@ -532,7 +58,10 @@ function fmt(n: number): string {
 }
 
 function fmtFull(n: number): string {
-  return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `$${n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function fmtDate(iso: string): string {
@@ -1056,10 +585,984 @@ function useSortableData<T>(
   return { sorted, sortKey, sortDir, handleSort };
 }
 
+// ─── Modal / Overlay ──────────────────────────────────────────────
+const overlayStyle: React.CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.35)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000,
+};
+
+const modalStyle: React.CSSProperties = {
+  background: "var(--content-bg, #fff)",
+  borderRadius: 12,
+  padding: 24,
+  width: "95%",
+  maxWidth: 520,
+  maxHeight: "90vh",
+  overflowY: "auto",
+  boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+};
+
+const fieldLabelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  color: "var(--text-secondary)",
+  marginBottom: 4,
+  display: "block",
+  textTransform: "uppercase",
+  letterSpacing: "0.04em",
+};
+
+const fieldInputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 10px",
+  border: "1px solid rgba(0,0,0,0.12)",
+  borderRadius: 6,
+  fontSize: 13,
+  outline: "none",
+  background: "#FAFAFE",
+  color: "var(--text-primary)",
+  boxSizing: "border-box",
+};
+
+const selectStyle: React.CSSProperties = {
+  ...fieldInputStyle,
+  appearance: "auto" as React.CSSProperties["appearance"],
+};
+
+function ModalHeader({
+  title,
+  onClose,
+}: Readonly<{ title: string; onClose: () => void }>) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 20,
+      }}
+    >
+      <h3
+        style={{
+          margin: 0,
+          fontSize: 16,
+          fontWeight: 700,
+          color: "var(--text-primary)",
+        }}
+      >
+        {title}
+      </h3>
+      <button
+        onClick={onClose}
+        style={{
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          color: "var(--text-tertiary)",
+          padding: 4,
+        }}
+      >
+        <X size={18} />
+      </button>
+    </div>
+  );
+}
+
+function ModalActions({
+  onCancel,
+  onSubmit,
+  submitLabel,
+}: Readonly<{
+  onCancel: () => void;
+  onSubmit: () => void;
+  submitLabel: string;
+}>) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: 8,
+        marginTop: 20,
+      }}
+    >
+      <button
+        onClick={onCancel}
+        style={{
+          padding: "8px 16px",
+          borderRadius: 6,
+          border: "1px solid rgba(0,0,0,0.12)",
+          background: "transparent",
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: "pointer",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Cancel
+      </button>
+      <button
+        onClick={onSubmit}
+        style={{
+          padding: "8px 16px",
+          borderRadius: 6,
+          border: "none",
+          background: "var(--vyne-purple)",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: 500,
+          cursor: "pointer",
+        }}
+      >
+        {submitLabel}
+      </button>
+    </div>
+  );
+}
+
+function FieldGroup({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <div style={{ marginBottom: 14 }}>{children}</div>;
+}
+
+// ─── Confirm Delete Dialog ────────────────────────────────────────
+function ConfirmDeleteDialog({
+  name,
+  onConfirm,
+  onCancel,
+}: Readonly<{
+  name: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}>) {
+  return (
+    <div style={overlayStyle} onClick={onCancel}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="Confirm Delete" onClose={onCancel} />
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--text-primary)",
+            margin: "0 0 20px",
+            lineHeight: 1.5,
+          }}
+        >
+          Are you sure you want to delete <strong>{name}</strong>? This action
+          cannot be undone.
+        </p>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 6,
+              border: "1px solid rgba(0,0,0,0.12)",
+              background: "transparent",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              color: "var(--text-secondary)",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 6,
+              border: "none",
+              background: "#DC2626",
+              color: "#fff",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+            }}
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Line Items Editor ────────────────────────────────────────────
+function LineItemsEditor({
+  items,
+  onChange,
+}: {
+  items: InvoiceLineItem[];
+  onChange: (items: InvoiceLineItem[]) => void;
+}) {
+  const addLine = () =>
+    onChange([...items, { description: "", qty: 1, rate: 0 }]);
+  const removeLine = (idx: number) =>
+    onChange(items.filter((_, i) => i !== idx));
+  const updateLine = (
+    idx: number,
+    field: keyof InvoiceLineItem,
+    value: string | number,
+  ) => {
+    const updated = items.map((item, i) =>
+      i === idx ? { ...item, [field]: value } : item,
+    );
+    onChange(updated);
+  };
+
+  const total = items.reduce((s, li) => s + li.qty * li.rate, 0);
+
+  return (
+    <div>
+      <label style={fieldLabelStyle}>Line Items</label>
+      <div
+        style={{
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 60px 90px 28px",
+            gap: 0,
+            padding: "6px 8px",
+            background: "#F7F7FB",
+            fontSize: 10,
+            fontWeight: 600,
+            color: "var(--text-secondary)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+          }}
+        >
+          <span>Description</span>
+          <span>Qty</span>
+          <span>Rate</span>
+          <span></span>
+        </div>
+        {items.map((li, idx) => (
+          <div
+            key={idx}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 60px 90px 28px",
+              gap: 4,
+              padding: "4px 8px",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              alignItems: "center",
+            }}
+          >
+            <input
+              value={li.description}
+              onChange={(e) => updateLine(idx, "description", e.target.value)}
+              placeholder="Item description"
+              style={{ ...fieldInputStyle, padding: "5px 6px", fontSize: 12 }}
+            />
+            <input
+              type="number"
+              min={1}
+              value={li.qty}
+              onChange={(e) =>
+                updateLine(idx, "qty", parseInt(e.target.value) || 0)
+              }
+              style={{ ...fieldInputStyle, padding: "5px 6px", fontSize: 12 }}
+            />
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              value={li.rate}
+              onChange={(e) =>
+                updateLine(idx, "rate", parseFloat(e.target.value) || 0)
+              }
+              style={{ ...fieldInputStyle, padding: "5px 6px", fontSize: 12 }}
+            />
+            <button
+              onClick={() => removeLine(idx)}
+              style={{
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                color: "#DC2626",
+                padding: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              title="Remove line"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "8px",
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+          }}
+        >
+          <button
+            onClick={addLine}
+            style={{
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              fontSize: 11,
+              fontWeight: 500,
+              color: "var(--vyne-purple)",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <Plus size={12} /> Add line item
+          </button>
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+            }}
+          >
+            Total: {fmtFull(total)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Customer Modal ───────────────────────────────────────────────
+function CustomerModal({
+  existing,
+  onClose,
+}: {
+  existing?: Customer;
+  onClose: () => void;
+}) {
+  const { addCustomer, updateCustomer } = useInvoicingStore();
+  const [name, setName] = useState(existing?.name ?? "");
+  const [email, setEmail] = useState(existing?.email ?? "");
+  const [phone, setPhone] = useState(existing?.phone ?? "");
+  const [status, setStatus] = useState<CustomerStatus>(
+    existing?.status ?? "Active",
+  );
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    if (existing) {
+      updateCustomer(existing.id, { name, email, phone, status });
+    } else {
+      addCustomer({ name, email, phone });
+    }
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader
+          title={existing ? "Edit Customer" : "New Customer"}
+          onClose={onClose}
+        />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Name</label>
+          <input
+            style={fieldInputStyle}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Company name"
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Email</label>
+          <input
+            style={fieldInputStyle}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="billing@company.com"
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Phone</label>
+          <input
+            style={fieldInputStyle}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(555) 000-0000"
+          />
+        </FieldGroup>
+        {existing && (
+          <FieldGroup>
+            <label style={fieldLabelStyle}>Status</label>
+            <select
+              style={selectStyle}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as CustomerStatus)}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </FieldGroup>
+        )}
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel={existing ? "Save Changes" : "Create Customer"}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Invoice Modal ────────────────────────────────────────────────
+function InvoiceModal({
+  existing,
+  onClose,
+}: {
+  existing?: Invoice;
+  onClose: () => void;
+}) {
+  const { customers, addInvoice, updateInvoice } = useInvoicingStore();
+  const [customer, setCustomer] = useState(existing?.customer ?? "");
+  const [dueDate, setDueDate] = useState(existing?.dueDate ?? "");
+  const [notes, setNotes] = useState(existing?.notes ?? "");
+  const [items, setItems] = useState<InvoiceLineItem[]>(
+    existing?.items?.length
+      ? existing.items
+      : [{ description: "", qty: 1, rate: 0 }],
+  );
+
+  const handleSubmit = () => {
+    if (!customer || items.length === 0 || !dueDate) return;
+    if (existing) {
+      updateInvoice(existing.id, { customer, dueDate, notes, items });
+    } else {
+      addInvoice({ customer, items, dueDate, notes });
+    }
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div
+        style={{ ...modalStyle, maxWidth: 600 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ModalHeader
+          title={existing ? "Edit Invoice" : "New Invoice"}
+          onClose={onClose}
+        />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Customer</label>
+          <select
+            style={selectStyle}
+            value={customer}
+            onChange={(e) => setCustomer(e.target.value)}
+          >
+            <option value="">Select a customer...</option>
+            {customers
+              .filter((c) => c.status === "Active")
+              .map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <LineItemsEditor items={items} onChange={setItems} />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Due Date</label>
+          <input
+            style={fieldInputStyle}
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Notes</label>
+          <textarea
+            style={{ ...fieldInputStyle, minHeight: 60, resize: "vertical" }}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Payment terms, special instructions..."
+          />
+        </FieldGroup>
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel={existing ? "Save Changes" : "Create Invoice"}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Credit Note Modal ────────────────────────────────────────────
+function CreditNoteModal({ onClose }: { onClose: () => void }) {
+  const { customers, invoices, addCreditNote } = useInvoicingStore();
+  const [customer, setCustomer] = useState("");
+  const [originalInvoice, setOriginalInvoice] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [reason, setReason] = useState("");
+
+  const customerInvoices = invoices.filter((i) => i.customer === customer);
+
+  const handleSubmit = () => {
+    if (!customer || !originalInvoice || amount <= 0) return;
+    addCreditNote({ customer, originalInvoice, amount, reason });
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="New Credit Note" onClose={onClose} />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Customer</label>
+          <select
+            style={selectStyle}
+            value={customer}
+            onChange={(e) => {
+              setCustomer(e.target.value);
+              setOriginalInvoice("");
+            }}
+          >
+            <option value="">Select a customer...</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Original Invoice</label>
+          <select
+            style={selectStyle}
+            value={originalInvoice}
+            onChange={(e) => setOriginalInvoice(e.target.value)}
+          >
+            <option value="">Select an invoice...</option>
+            {customerInvoices.map((inv) => (
+              <option key={inv.id} value={inv.number}>
+                {inv.number} - {fmtFull(inv.amount)}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Amount</label>
+          <input
+            style={fieldInputStyle}
+            type="number"
+            min={0}
+            step={0.01}
+            value={amount}
+            onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Reason</label>
+          <textarea
+            style={{ ...fieldInputStyle, minHeight: 60, resize: "vertical" }}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Reason for credit note..."
+          />
+        </FieldGroup>
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel="Create Credit Note"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Payment Modal ────────────────────────────────────────────────
+function PaymentModal({ onClose }: { onClose: () => void }) {
+  const { customers, invoices, addPayment } = useInvoicingStore();
+  const [customer, setCustomer] = useState("");
+  const [invoice, setInvoice] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [method, setMethod] = useState<PaymentMethod>("Bank Transfer");
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+
+  const customerInvoices = invoices.filter(
+    (i) =>
+      i.customer === customer &&
+      (i.status === "Sent" || i.status === "Overdue" || i.status === "Draft"),
+  );
+
+  const handleSubmit = () => {
+    if (!customer || !invoice || amount <= 0) return;
+    addPayment({ customer, invoice, amount, method, date });
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="Record Payment" onClose={onClose} />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Customer</label>
+          <select
+            style={selectStyle}
+            value={customer}
+            onChange={(e) => {
+              setCustomer(e.target.value);
+              setInvoice("");
+            }}
+          >
+            <option value="">Select a customer...</option>
+            {customers.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Invoice</label>
+          <select
+            style={selectStyle}
+            value={invoice}
+            onChange={(e) => {
+              setInvoice(e.target.value);
+              const inv = invoices.find((i) => i.number === e.target.value);
+              if (inv) setAmount(inv.amount);
+            }}
+          >
+            <option value="">Select an invoice...</option>
+            {customerInvoices.map((inv) => (
+              <option key={inv.id} value={inv.number}>
+                {inv.number} - {fmtFull(inv.amount)} ({inv.status})
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Amount</label>
+          <input
+            style={fieldInputStyle}
+            type="number"
+            min={0}
+            step={0.01}
+            value={amount}
+            onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Method</label>
+          <select
+            style={selectStyle}
+            value={method}
+            onChange={(e) => setMethod(e.target.value as PaymentMethod)}
+          >
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Check">Check</option>
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Date</label>
+          <input
+            style={fieldInputStyle}
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </FieldGroup>
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel="Record Payment"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Vendor Modal ─────────────────────────────────────────────────
+function VendorModal({
+  existing,
+  onClose,
+}: {
+  existing?: Vendor;
+  onClose: () => void;
+}) {
+  const { addVendor, updateVendor } = useInvoicingStore();
+  const [name, setName] = useState(existing?.name ?? "");
+  const [contact, setContact] = useState(existing?.contact ?? "");
+  const [email, setEmail] = useState(existing?.email ?? "");
+  const [phone, setPhone] = useState(existing?.phone ?? "");
+  const [status, setStatus] = useState<VendorStatus>(
+    existing?.status ?? "Active",
+  );
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    if (existing) {
+      updateVendor(existing.id, { name, contact, email, phone, status });
+    } else {
+      addVendor({ name, contact, email, phone });
+    }
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader
+          title={existing ? "Edit Vendor" : "New Vendor"}
+          onClose={onClose}
+        />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Name</label>
+          <input
+            style={fieldInputStyle}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Vendor company name"
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Contact Person</label>
+          <input
+            style={fieldInputStyle}
+            value={contact}
+            onChange={(e) => setContact(e.target.value)}
+            placeholder="Contact person name"
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Email</label>
+          <input
+            style={fieldInputStyle}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="vendor@company.com"
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Phone</label>
+          <input
+            style={fieldInputStyle}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="(555) 000-0000"
+          />
+        </FieldGroup>
+        {existing && (
+          <FieldGroup>
+            <label style={fieldLabelStyle}>Status</label>
+            <select
+              style={selectStyle}
+              value={status}
+              onChange={(e) => setStatus(e.target.value as VendorStatus)}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </FieldGroup>
+        )}
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel={existing ? "Save Changes" : "Create Vendor"}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Bill Modal ───────────────────────────────────────────────────
+function BillModal({
+  existing,
+  onClose,
+}: {
+  existing?: Bill;
+  onClose: () => void;
+}) {
+  const { vendors, addBill, updateBill } = useInvoicingStore();
+  const [vendor, setVendor] = useState(existing?.vendor ?? "");
+  const [dueDate, setDueDate] = useState(existing?.dueDate ?? "");
+  const [items, setItems] = useState<BillLineItem[]>(
+    existing?.items?.length
+      ? existing.items
+      : [{ description: "", qty: 1, rate: 0 }],
+  );
+
+  const handleSubmit = () => {
+    if (!vendor || items.length === 0 || !dueDate) return;
+    if (existing) {
+      updateBill(existing.id, { vendor, dueDate, items });
+    } else {
+      addBill({ vendor, items, dueDate });
+    }
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div
+        style={{ ...modalStyle, maxWidth: 600 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ModalHeader
+          title={existing ? "Edit Bill" : "New Bill"}
+          onClose={onClose}
+        />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Vendor</label>
+          <select
+            style={selectStyle}
+            value={vendor}
+            onChange={(e) => setVendor(e.target.value)}
+          >
+            <option value="">Select a vendor...</option>
+            {vendors
+              .filter((v) => v.status === "Active")
+              .map((v) => (
+                <option key={v.id} value={v.name}>
+                  {v.name}
+                </option>
+              ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <LineItemsEditor items={items} onChange={setItems} />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Due Date</label>
+          <input
+            style={fieldInputStyle}
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </FieldGroup>
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel={existing ? "Save Changes" : "Create Bill"}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ─── Refund Modal ─────────────────────────────────────────────────
+function RefundModal({ onClose }: { onClose: () => void }) {
+  const { customers, vendors, addRefund } = useInvoicingStore();
+  const [type, setType] = useState<RefundType>("Customer Refund");
+  const [customerOrVendor, setCustomerOrVendor] = useState("");
+  const [amount, setAmount] = useState(0);
+  const [reason, setReason] = useState("");
+
+  const options =
+    type === "Customer Refund"
+      ? customers.map((c) => c.name)
+      : vendors.map((v) => v.name);
+
+  const handleSubmit = () => {
+    if (!customerOrVendor || amount <= 0) return;
+    addRefund({ customerOrVendor, type, amount, reason });
+    onClose();
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="New Refund" onClose={onClose} />
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Refund Type</label>
+          <select
+            style={selectStyle}
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value as RefundType);
+              setCustomerOrVendor("");
+            }}
+          >
+            <option value="Customer Refund">Customer Refund</option>
+            <option value="Vendor Refund">Vendor Refund</option>
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>
+            {type === "Customer Refund" ? "Customer" : "Vendor"}
+          </label>
+          <select
+            style={selectStyle}
+            value={customerOrVendor}
+            onChange={(e) => setCustomerOrVendor(e.target.value)}
+          >
+            <option value="">
+              Select a {type === "Customer Refund" ? "customer" : "vendor"}...
+            </option>
+            {options.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Amount</label>
+          <input
+            style={fieldInputStyle}
+            type="number"
+            min={0}
+            step={0.01}
+            value={amount}
+            onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
+          />
+        </FieldGroup>
+        <FieldGroup>
+          <label style={fieldLabelStyle}>Reason</label>
+          <textarea
+            style={{ ...fieldInputStyle, minHeight: 60, resize: "vertical" }}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Reason for refund..."
+          />
+        </FieldGroup>
+        <ModalActions
+          onCancel={onClose}
+          onSubmit={handleSubmit}
+          submitLabel="Create Refund"
+        />
+      </div>
+    </div>
+  );
+}
+
 // ─── Tab: Customers ───────────────────────────────────────────────
 function CustomersTab() {
+  const { customers, deleteCustomer } = useInvoicingStore();
   const [search, setSearch] = useState("");
-  const filtered = MOCK_CUSTOMERS.filter(
+  const [modal, setModal] = useState<
+    { type: "create" } | { type: "edit"; customer: Customer } | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
+
+  const filtered = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase()),
@@ -1088,7 +1591,7 @@ function CustomersTab() {
         />
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <ExportButton
-            data={MOCK_CUSTOMERS as unknown as Record<string, unknown>[]}
+            data={customers as unknown as Record<string, unknown>[]}
             filename="vyne-customers"
             columns={[
               { key: "name", header: "Name" },
@@ -1103,7 +1606,7 @@ function CustomersTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Customer"
-            onClick={() => {}}
+            onClick={() => setModal({ type: "create" })}
           />
         </div>
       </div>
@@ -1160,6 +1663,19 @@ function CustomersTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -1187,13 +1703,35 @@ function CustomersTab() {
                 <Td>
                   <StatusBadge label={c.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActionBtn
+                      icon={<Edit2 size={12} />}
+                      label="Edit"
+                      onClick={() => setModal({ type: "edit", customer: c })}
+                      color="var(--vyne-purple)"
+                    />
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(c)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
           {sorted.length === 0 && (
             <tr>
               <td
-                colSpan={7}
+                colSpan={8}
                 style={{
                   padding: 40,
                   textAlign: "center",
@@ -1207,14 +1745,39 @@ function CustomersTab() {
           )}
         </tbody>
       </TableContainer>
+
+      {modal?.type === "create" && (
+        <CustomerModal onClose={() => setModal(null)} />
+      )}
+      {modal?.type === "edit" && (
+        <CustomerModal
+          existing={modal.customer}
+          onClose={() => setModal(null)}
+        />
+      )}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.name}
+          onConfirm={() => {
+            deleteCustomer(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Invoices ────────────────────────────────────────────────
 function InvoicesTab() {
+  const { invoices, markAsPaid, sendInvoice, deleteInvoice } =
+    useInvoicingStore();
   const [filter, setFilter] = useState<"All" | InvoiceStatus>("All");
-  const [invoices, setInvoices] = useState(MOCK_INVOICES);
+  const [modal, setModal] = useState<
+    { type: "create" } | { type: "edit"; invoice: Invoice } | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
 
   const filtered =
     filter === "All"
@@ -1246,14 +1809,6 @@ function InvoicesTab() {
     Overdue: invoices.filter((i) => i.status === "Overdue").length,
   };
 
-  function markPaid(id: string) {
-    setInvoices((prev) =>
-      prev.map((inv) =>
-        inv.id === id ? { ...inv, status: "Paid" as InvoiceStatus } : inv,
-      ),
-    );
-  }
-
   return (
     <div>
       {/* KPI Cards */}
@@ -1270,7 +1825,7 @@ function InvoicesTab() {
           value={fmt(totalInvoiced)}
           icon={<FileText size={16} style={{ color: "var(--vyne-purple)" }} />}
           iconBg="rgba(108,71,255,0.08)"
-          delta="+12.4% vs last month"
+          delta={`${counts.Paid + counts.Sent + counts.Draft + (counts.Overdue ?? 0)} invoices total`}
           deltaUp
         />
         <KpiCard
@@ -1280,7 +1835,7 @@ function InvoicesTab() {
             <CheckCircle size={16} style={{ color: "var(--status-success)" }} />
           }
           iconBg="rgba(34,197,94,0.08)"
-          delta="4 invoices"
+          delta={`${counts.Paid} invoices`}
           deltaUp
         />
         <KpiCard
@@ -1288,7 +1843,7 @@ function InvoicesTab() {
           value={fmt(totalOutstanding)}
           icon={<Clock size={16} style={{ color: "#F59E0B" }} />}
           iconBg="rgba(245,158,11,0.08)"
-          delta="4 invoices pending"
+          delta={`${counts.Draft + counts.Sent} invoices pending`}
           deltaUp={false}
         />
         <KpiCard
@@ -1301,7 +1856,7 @@ function InvoicesTab() {
             />
           }
           iconBg="rgba(239,68,68,0.08)"
-          delta="1 invoice overdue"
+          delta={`${counts.Overdue} invoice${counts.Overdue === 1 ? "" : "s"} overdue`}
           deltaUp={false}
         />
       </div>
@@ -1344,7 +1899,7 @@ function InvoicesTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Invoice"
-            onClick={() => {}}
+            onClick={() => setModal({ type: "create" })}
           />
         </div>
       </div>
@@ -1432,10 +1987,18 @@ function InvoicesTab() {
                       justifyContent: "center",
                     }}
                   >
-                    {(inv.status === "Draft" || inv.status === "Sent") && (
+                    {inv.status === "Draft" && (
                       <ActionBtn
                         icon={<Send size={12} />}
                         label="Send"
+                        onClick={() => sendInvoice(inv.id)}
+                        color="#1E40AF"
+                      />
+                    )}
+                    {inv.status === "Sent" && (
+                      <ActionBtn
+                        icon={<Send size={12} />}
+                        label="Resend"
                         onClick={() => {}}
                         color="#1E40AF"
                       />
@@ -1444,14 +2007,23 @@ function InvoicesTab() {
                       <ActionBtn
                         icon={<CheckCircle size={12} />}
                         label="Mark Paid"
-                        onClick={() => markPaid(inv.id)}
+                        onClick={() => markAsPaid(inv.id)}
                         color="#166534"
                       />
                     )}
+                    {(inv.status === "Draft" || inv.status === "Sent") && (
+                      <ActionBtn
+                        icon={<Edit2 size={12} />}
+                        label="Edit"
+                        onClick={() => setModal({ type: "edit", invoice: inv })}
+                        color="var(--vyne-purple)"
+                      />
+                    )}
                     <ActionBtn
-                      icon={<Download size={12} />}
-                      label="Download PDF"
-                      onClick={() => {}}
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(inv)}
+                      color="#DC2626"
                     />
                   </div>
                 </Td>
@@ -1475,14 +2047,35 @@ function InvoicesTab() {
           )}
         </tbody>
       </TableContainer>
+
+      {modal?.type === "create" && (
+        <InvoiceModal onClose={() => setModal(null)} />
+      )}
+      {modal?.type === "edit" && (
+        <InvoiceModal existing={modal.invoice} onClose={() => setModal(null)} />
+      )}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.number}
+          onConfirm={() => {
+            deleteInvoice(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Credit Notes ────────────────────────────────────────────
 function CreditNotesTab() {
+  const { creditNotes, deleteCreditNote } = useInvoicingStore();
+  const [showModal, setShowModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<CreditNote | null>(null);
+
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
-    MOCK_CREDIT_NOTES,
+    creditNotes,
     "date",
     "desc",
   );
@@ -1499,7 +2092,7 @@ function CreditNotesTab() {
         }}
       >
         <ExportButton
-          data={MOCK_CREDIT_NOTES as unknown as Record<string, unknown>[]}
+          data={creditNotes as unknown as Record<string, unknown>[]}
           filename="vyne-credit-notes"
           columns={[
             { key: "number", header: "Credit Note #" },
@@ -1513,7 +2106,7 @@ function CreditNotesTab() {
         <PrimaryBtn
           icon={<Plus size={13} />}
           label="New Credit Note"
-          onClick={() => {}}
+          onClick={() => setShowModal(true)}
         />
       </div>
 
@@ -1562,6 +2155,19 @@ function CreditNotesTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -1581,25 +2187,71 @@ function CreditNotesTab() {
                 <Td>
                   <StatusBadge label={cn.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(cn)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
+          {sorted.length === 0 && (
+            <tr>
+              <td
+                colSpan={7}
+                style={{
+                  padding: 40,
+                  textAlign: "center",
+                  fontSize: 13,
+                  color: "var(--text-tertiary)",
+                }}
+              >
+                No credit notes found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </TableContainer>
+
+      {showModal && <CreditNoteModal onClose={() => setShowModal(false)} />}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.number}
+          onConfirm={() => {
+            deleteCreditNote(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Payments ────────────────────────────────────────────────
 function PaymentsTab() {
+  const { payments, deletePayment } = useInvoicingStore();
   const [methodFilter, setMethodFilter] = useState<"All" | PaymentMethod>(
     "All",
   );
+  const [showModal, setShowModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
 
   const filtered =
     methodFilter === "All"
-      ? MOCK_PAYMENTS
-      : MOCK_PAYMENTS.filter((p) => p.method === methodFilter);
+      ? payments
+      : payments.filter((p) => p.method === methodFilter);
 
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
@@ -1631,19 +2283,26 @@ function PaymentsTab() {
             ),
           )}
         </div>
-        <ExportButton
-          data={MOCK_PAYMENTS as unknown as Record<string, unknown>[]}
-          filename="vyne-payments"
-          columns={[
-            { key: "number", header: "Payment #" },
-            { key: "customer", header: "Customer" },
-            { key: "invoice", header: "Invoice" },
-            { key: "amount", header: "Amount" },
-            { key: "method", header: "Method" },
-            { key: "date", header: "Date" },
-            { key: "status", header: "Status" },
-          ]}
-        />
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <ExportButton
+            data={payments as unknown as Record<string, unknown>[]}
+            filename="vyne-payments"
+            columns={[
+              { key: "number", header: "Payment #" },
+              { key: "customer", header: "Customer" },
+              { key: "invoice", header: "Invoice" },
+              { key: "amount", header: "Amount" },
+              { key: "method", header: "Method" },
+              { key: "date", header: "Date" },
+              { key: "status", header: "Status" },
+            ]}
+          />
+          <PrimaryBtn
+            icon={<Plus size={13} />}
+            label="Record Payment"
+            onClick={() => setShowModal(true)}
+          />
+        </div>
       </div>
 
       <TableContainer>
@@ -1698,6 +2357,19 @@ function PaymentsTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -1731,13 +2403,29 @@ function PaymentsTab() {
                 <Td>
                   <StatusBadge label={p.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(p)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
           {sorted.length === 0 && (
             <tr>
               <td
-                colSpan={7}
+                colSpan={8}
                 style={{
                   padding: 40,
                   textAlign: "center",
@@ -1751,14 +2439,32 @@ function PaymentsTab() {
           )}
         </tbody>
       </TableContainer>
+
+      {showModal && <PaymentModal onClose={() => setShowModal(false)} />}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.number}
+          onConfirm={() => {
+            deletePayment(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Vendors ─────────────────────────────────────────────────
 function VendorsTab() {
+  const { vendors, deleteVendor } = useInvoicingStore();
   const [search, setSearch] = useState("");
-  const filtered = MOCK_VENDORS.filter(
+  const [modal, setModal] = useState<
+    { type: "create" } | { type: "edit"; vendor: Vendor } | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<Vendor | null>(null);
+
+  const filtered = vendors.filter(
     (v) =>
       v.name.toLowerCase().includes(search.toLowerCase()) ||
       v.contact.toLowerCase().includes(search.toLowerCase()) ||
@@ -1788,7 +2494,7 @@ function VendorsTab() {
         />
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <ExportButton
-            data={MOCK_VENDORS as unknown as Record<string, unknown>[]}
+            data={vendors as unknown as Record<string, unknown>[]}
             filename="vyne-vendors"
             columns={[
               { key: "name", header: "Name" },
@@ -1802,7 +2508,7 @@ function VendorsTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Vendor"
-            onClick={() => {}}
+            onClick={() => setModal({ type: "create" })}
           />
         </div>
       </div>
@@ -1852,6 +2558,19 @@ function VendorsTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -1874,13 +2593,35 @@ function VendorsTab() {
                 <Td>
                   <StatusBadge label={v.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActionBtn
+                      icon={<Edit2 size={12} />}
+                      label="Edit"
+                      onClick={() => setModal({ type: "edit", vendor: v })}
+                      color="var(--vyne-purple)"
+                    />
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(v)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
           {sorted.length === 0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={7}
                 style={{
                   padding: 40,
                   textAlign: "center",
@@ -1894,18 +2635,38 @@ function VendorsTab() {
           )}
         </tbody>
       </TableContainer>
+
+      {modal?.type === "create" && (
+        <VendorModal onClose={() => setModal(null)} />
+      )}
+      {modal?.type === "edit" && (
+        <VendorModal existing={modal.vendor} onClose={() => setModal(null)} />
+      )}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.name}
+          onConfirm={() => {
+            deleteVendor(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Bills ───────────────────────────────────────────────────
 function BillsTab() {
+  const { bills, markBillPaid, deleteBill } = useInvoicingStore();
   const [filter, setFilter] = useState<"All" | BillStatus>("All");
+  const [modal, setModal] = useState<
+    { type: "create" } | { type: "edit"; bill: Bill } | null
+  >(null);
+  const [deleteTarget, setDeleteTarget] = useState<Bill | null>(null);
 
   const filtered =
-    filter === "All"
-      ? MOCK_BILLS
-      : MOCK_BILLS.filter((b) => b.status === filter);
+    filter === "All" ? bills : bills.filter((b) => b.status === filter);
 
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
@@ -1913,24 +2674,23 @@ function BillsTab() {
     "desc",
   );
 
-  const totalBilled = MOCK_BILLS.reduce((s, b) => s + b.amount, 0);
-  const totalBillsPaid = MOCK_BILLS.filter((b) => b.status === "Paid").reduce(
-    (s, b) => s + b.amount,
-    0,
-  );
-  const totalBillsOutstanding = MOCK_BILLS.filter(
-    (b) => b.status === "Received" || b.status === "Draft",
-  ).reduce((s, b) => s + b.amount, 0);
-  const totalBillsOverdue = MOCK_BILLS.filter(
-    (b) => b.status === "Overdue",
-  ).reduce((s, b) => s + b.amount, 0);
+  const totalBilled = bills.reduce((s, b) => s + b.amount, 0);
+  const totalBillsPaid = bills
+    .filter((b) => b.status === "Paid")
+    .reduce((s, b) => s + b.amount, 0);
+  const totalBillsOutstanding = bills
+    .filter((b) => b.status === "Received" || b.status === "Draft")
+    .reduce((s, b) => s + b.amount, 0);
+  const totalBillsOverdue = bills
+    .filter((b) => b.status === "Overdue")
+    .reduce((s, b) => s + b.amount, 0);
 
   const counts: Record<string, number> = {
-    All: MOCK_BILLS.length,
-    Draft: MOCK_BILLS.filter((b) => b.status === "Draft").length,
-    Received: MOCK_BILLS.filter((b) => b.status === "Received").length,
-    Paid: MOCK_BILLS.filter((b) => b.status === "Paid").length,
-    Overdue: MOCK_BILLS.filter((b) => b.status === "Overdue").length,
+    All: bills.length,
+    Draft: bills.filter((b) => b.status === "Draft").length,
+    Received: bills.filter((b) => b.status === "Received").length,
+    Paid: bills.filter((b) => b.status === "Paid").length,
+    Overdue: bills.filter((b) => b.status === "Overdue").length,
   };
 
   return (
@@ -2003,7 +2763,7 @@ function BillsTab() {
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <ExportButton
-            data={MOCK_BILLS as unknown as Record<string, unknown>[]}
+            data={bills as unknown as Record<string, unknown>[]}
             filename="vyne-bills"
             columns={[
               { key: "number", header: "Bill #" },
@@ -2017,7 +2777,7 @@ function BillsTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Bill"
-            onClick={() => {}}
+            onClick={() => setModal({ type: "create" })}
           />
         </div>
       </div>
@@ -2067,6 +2827,19 @@ function BillsTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -2084,13 +2857,45 @@ function BillsTab() {
                 <Td>
                   <StatusBadge label={b.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    {(b.status === "Received" || b.status === "Overdue") && (
+                      <ActionBtn
+                        icon={<CheckCircle size={12} />}
+                        label="Mark Paid"
+                        onClick={() => markBillPaid(b.id)}
+                        color="#166534"
+                      />
+                    )}
+                    {(b.status === "Draft" || b.status === "Received") && (
+                      <ActionBtn
+                        icon={<Edit2 size={12} />}
+                        label="Edit"
+                        onClick={() => setModal({ type: "edit", bill: b })}
+                        color="var(--vyne-purple)"
+                      />
+                    )}
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(b)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
           {sorted.length === 0 && (
             <tr>
               <td
-                colSpan={6}
+                colSpan={7}
                 style={{
                   padding: 40,
                   textAlign: "center",
@@ -2104,14 +2909,33 @@ function BillsTab() {
           )}
         </tbody>
       </TableContainer>
+
+      {modal?.type === "create" && <BillModal onClose={() => setModal(null)} />}
+      {modal?.type === "edit" && (
+        <BillModal existing={modal.bill} onClose={() => setModal(null)} />
+      )}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.number}
+          onConfirm={() => {
+            deleteBill(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
 
 // ─── Tab: Refunds ─────────────────────────────────────────────────
 function RefundsTab() {
+  const { refunds, deleteRefund } = useInvoicingStore();
+  const [showModal, setShowModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Refund | null>(null);
+
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
-    MOCK_REFUNDS,
+    refunds,
     "date",
     "desc",
   );
@@ -2128,7 +2952,7 @@ function RefundsTab() {
         }}
       >
         <ExportButton
-          data={MOCK_REFUNDS as unknown as Record<string, unknown>[]}
+          data={refunds as unknown as Record<string, unknown>[]}
           filename="vyne-refunds"
           columns={[
             { key: "number", header: "Refund #" },
@@ -2142,7 +2966,7 @@ function RefundsTab() {
         <PrimaryBtn
           icon={<Plus size={13} />}
           label="New Refund"
-          onClick={() => {}}
+          onClick={() => setShowModal(true)}
         />
       </div>
 
@@ -2191,6 +3015,19 @@ function RefundsTab() {
               currentDir={sortDir}
               onSort={handleSort}
             />
+            <th
+              style={{
+                padding: "9px 16px",
+                textAlign: "center",
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -2225,11 +3062,54 @@ function RefundsTab() {
                 <Td>
                   <StatusBadge label={r.status} bg={st.bg} color={st.color} />
                 </Td>
+                <Td align="center">
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 4,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ActionBtn
+                      icon={<Trash2 size={12} />}
+                      label="Delete"
+                      onClick={() => setDeleteTarget(r)}
+                      color="#DC2626"
+                    />
+                  </div>
+                </Td>
               </TableRow>
             );
           })}
+          {sorted.length === 0 && (
+            <tr>
+              <td
+                colSpan={7}
+                style={{
+                  padding: 40,
+                  textAlign: "center",
+                  fontSize: 13,
+                  color: "var(--text-tertiary)",
+                }}
+              >
+                No refunds found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </TableContainer>
+
+      {showModal && <RefundModal onClose={() => setShowModal(false)} />}
+      {deleteTarget && (
+        <ConfirmDeleteDialog
+          name={deleteTarget.number}
+          onConfirm={() => {
+            deleteRefund(deleteTarget.id);
+            setDeleteTarget(null);
+          }}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }
@@ -2237,9 +3117,10 @@ function RefundsTab() {
 // ─── Main Page ────────────────────────────────────────────────────
 export default function InvoicingPage() {
   const [tab, setTab] = useState<Tab>("invoices");
+  const { customers, invoices, bills } = useInvoicingStore();
 
-  const totalRevenue = MOCK_CUSTOMERS.reduce((s, c) => s + c.totalRevenue, 0);
-  const totalOutstanding = MOCK_CUSTOMERS.reduce(
+  const totalRevenue = customers.reduce((s, c) => s + c.totalRevenue, 0);
+  const totalOutstanding = customers.reduce(
     (s, c) => s + c.outstandingBalance,
     0,
   );

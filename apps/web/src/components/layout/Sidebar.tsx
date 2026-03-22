@@ -208,7 +208,6 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Inventory", href: "/ops" },
       { label: "Orders", href: "/ops" },
       { label: "Suppliers", href: "/ops" },
-      { label: "Manufacturing", href: "/ops" },
     ],
   },
   {
