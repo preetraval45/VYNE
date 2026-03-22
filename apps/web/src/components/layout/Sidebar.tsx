@@ -24,6 +24,12 @@ import {
   Menu,
   FileSpreadsheet,
   Wrench,
+  Contact,
+  TrendingUp,
+  ShoppingCart,
+  Factory,
+  Megaphone,
+  BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -103,6 +109,59 @@ interface NavItemDef {
 
 const NAV_ITEMS: NavItemDef[] = [
   { icon: Home, label: "Home", href: "/home", color: "#E74C3C" },
+  {
+    icon: Contact,
+    label: "Accounts/Contacts",
+    href: "/contacts",
+    color: "#2C3E50",
+    subs: [
+      { label: "Accounts", href: "/contacts" },
+      { label: "Contacts", href: "/contacts" },
+      { label: "Import", href: "/contacts" },
+    ],
+  },
+  {
+    icon: TrendingUp,
+    label: "Sales",
+    href: "/sales",
+    color: "#27AE60",
+    subs: [
+      { label: "Opportunities", href: "/sales" },
+      { label: "Quotations", href: "/sales" },
+      { label: "Sales Orders", href: "/sales" },
+      { label: "Products", href: "/sales" },
+      { label: "Customers", href: "/sales" },
+      { label: "Reports", href: "/sales" },
+    ],
+  },
+  {
+    icon: ShoppingCart,
+    label: "Purchase",
+    href: "/purchase",
+    color: "#8E44AD",
+    subs: [
+      { label: "Purchase Orders", href: "/purchase" },
+      { label: "Vendors", href: "/purchase" },
+      { label: "Products", href: "/purchase" },
+      { label: "Receipts", href: "/purchase" },
+      { label: "Bills", href: "/purchase" },
+      { label: "Reports", href: "/purchase" },
+    ],
+  },
+  {
+    icon: Factory,
+    label: "Manufacturing",
+    href: "/manufacturing",
+    color: "#D35400",
+    subs: [
+      { label: "Bill of Materials", href: "/manufacturing" },
+      { label: "Manufacturing Orders", href: "/manufacturing" },
+      { label: "Work Centers", href: "/manufacturing" },
+      { label: "Operations", href: "/manufacturing" },
+      { label: "Quality Control", href: "/manufacturing" },
+      { label: "Reports", href: "/manufacturing" },
+    ],
+  },
   {
     icon: MessageSquare,
     label: "Chat",
@@ -197,6 +256,33 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "My Expenses", href: "/expenses" },
       { label: "Approvals", href: "/expenses" },
       { label: "Reports", href: "/expenses" },
+    ],
+  },
+  {
+    icon: Megaphone,
+    label: "Marketing",
+    href: "/marketing",
+    color: "#E91E63",
+    subs: [
+      { label: "Campaigns", href: "/marketing" },
+      { label: "Email Marketing", href: "/marketing" },
+      { label: "Social Media", href: "/marketing" },
+      { label: "Landing Pages", href: "/marketing" },
+      { label: "Analytics", href: "/marketing" },
+    ],
+  },
+  {
+    icon: BarChart3,
+    label: "Reporting",
+    href: "/reporting",
+    color: "#00ACC1",
+    subs: [
+      { label: "Dashboard", href: "/reporting" },
+      { label: "Sales Reports", href: "/reporting" },
+      { label: "Financial Reports", href: "/reporting" },
+      { label: "Operations Reports", href: "/reporting" },
+      { label: "HR Reports", href: "/reporting" },
+      { label: "Custom Reports", href: "/reporting" },
     ],
   },
   {

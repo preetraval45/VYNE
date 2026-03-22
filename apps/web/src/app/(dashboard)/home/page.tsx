@@ -255,6 +255,25 @@ export default function HomePage() {
           >
             {[
               { label: "Home", icon: "🏠", color: "#E74C3C", href: "/home" },
+              {
+                label: "Contacts",
+                icon: "📇",
+                color: "#2C3E50",
+                href: "/contacts",
+              },
+              { label: "Sales", icon: "📈", color: "#27AE60", href: "/sales" },
+              {
+                label: "Purchase",
+                icon: "🛒",
+                color: "#8E44AD",
+                href: "/purchase",
+              },
+              {
+                label: "Mfg",
+                icon: "🏭",
+                color: "#D35400",
+                href: "/manufacturing",
+              },
               { label: "Chat", icon: "💬", color: "#3498DB", href: "/chat" },
               {
                 label: "Projects",
@@ -314,6 +333,18 @@ export default function HomePage() {
                 icon: "🔧",
                 color: "#E67E22",
                 href: "/maintenance",
+              },
+              {
+                label: "Marketing",
+                icon: "📣",
+                color: "#E91E63",
+                href: "/marketing",
+              },
+              {
+                label: "Reporting",
+                icon: "📊",
+                color: "#607D8B",
+                href: "/reporting",
               },
               {
                 label: "Settings",
