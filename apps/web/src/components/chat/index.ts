@@ -11,6 +11,7 @@ export { MessageRow } from "./MessageRow";
 export { PresenceDot } from "./PresenceDot";
 export { SlashCommandMenu } from "./SlashCommandMenu";
 export { SummaryPanel } from "./SummaryPanel";
+export { NotificationPanel } from "./NotificationPanel";
 export { ThreadPanel } from "./ThreadPanel";
 export { UserAvatar } from "./UserAvatar";
 export type { SlashCmd, LocalMsg } from "./constants";

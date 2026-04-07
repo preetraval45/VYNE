@@ -78,7 +78,34 @@ export function MessageComposer({
         onCommand?.(cmd, rest.join(" "));
       }
     } else if (scheduledFor) {
-      onSend(`📅 Scheduled for ${scheduledFor}: ${trimmed}`);
+      // Calculate actual scheduled time
+      const now = new Date();
+      let sendAt: Date;
+      switch (scheduledFor) {
+        case "In 1 hour":
+          sendAt = new Date(now.getTime() + 60 * 60 * 1000);
+          break;
+        case "Tomorrow 9am": {
+          sendAt = new Date(now);
+          sendAt.setDate(sendAt.getDate() + 1);
+          sendAt.setHours(9, 0, 0, 0);
+          break;
+        }
+        case "Monday 9am": {
+          sendAt = new Date(now);
+          const daysUntilMonday = ((1 - now.getDay() + 7) % 7) || 7;
+          sendAt.setDate(sendAt.getDate() + daysUntilMonday);
+          sendAt.setHours(9, 0, 0, 0);
+          break;
+        }
+        default:
+          sendAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      }
+      // Store scheduled message in localStorage for persistence
+      const scheduled = JSON.parse(localStorage.getItem("vyne-scheduled-messages") || "[]");
+      scheduled.push({ text: trimmed, sendAt: sendAt.toISOString(), scheduledFor });
+      localStorage.setItem("vyne-scheduled-messages", JSON.stringify(scheduled));
+      onSend(`📅 Scheduled for ${scheduledFor} (${sendAt.toLocaleString()}): ${trimmed}`);
       setScheduledFor(null);
     } else {
       onSend(trimmed, hasAttachments ? files : undefined);

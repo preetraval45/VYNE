@@ -282,7 +282,7 @@ services:
     container_name: vyne-notification-service
     restart: unless-stopped
     ports:
-      - "111:5007"
+      - "1110:5007"
     environment:
       NODE_ENV: development
       PORT: 5007

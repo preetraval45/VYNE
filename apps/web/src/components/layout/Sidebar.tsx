@@ -611,6 +611,222 @@ function hexToRgb(hex: string): string {
   return `${Number.parseInt(result[1], 16)},${Number.parseInt(result[2], 16)},${Number.parseInt(result[3], 16)}`;
 }
 
+// ── Emoji Status Line ─────────────────────────────────────────────
+const STATUS_EMOJIS = ["😊", "🚀", "🔥", "💻", "🎯", "🏠", "🎧", "🤔", "☕", "🌴", "🔴", "📵"];
+const STATUS_PRESETS = [
+  { emoji: "💻", text: "Coding" },
+  { emoji: "🎧", text: "In a meeting" },
+  { emoji: "☕", text: "On a break" },
+  { emoji: "🏠", text: "Working remotely" },
+  { emoji: "🌴", text: "On vacation" },
+  { emoji: "🔴", text: "Do not disturb" },
+];
+
+function EmojiStatusLine() {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<{ emoji: string; text: string } | null>(null);
+  const [customText, setCustomText] = useState("");
+
+  function setPreset(preset: { emoji: string; text: string }) {
+    setStatus(preset);
+    setOpen(false);
+    localStorage.setItem("vyne-emoji-status", JSON.stringify(preset));
+  }
+
+  function clearStatus() {
+    setStatus(null);
+    setOpen(false);
+    localStorage.removeItem("vyne-emoji-status");
+  }
+
+  function setCustom(emoji: string) {
+    const newStatus = { emoji, text: customText || "Available" };
+    setStatus(newStatus);
+    setOpen(false);
+    localStorage.setItem("vyne-emoji-status", JSON.stringify(newStatus));
+  }
+
+  // Load from localStorage on mount
+  useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("vyne-emoji-status");
+      if (saved) {
+        try {
+          setStatus(JSON.parse(saved));
+        } catch { /* ignore */ }
+      }
+    }
+  });
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
+          fontSize: 10,
+          color: "var(--text-tertiary)",
+          display: "flex",
+          alignItems: "center",
+          gap: 3,
+          marginTop: 1,
+        }}
+      >
+        {status ? (
+          <>
+            <span style={{ fontSize: 11 }}>{status.emoji}</span>
+            <span
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 80,
+              }}
+            >
+              {status.text}
+            </span>
+          </>
+        ) : (
+          <span style={{ fontStyle: "italic" }}>Set status</span>
+        )}
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "calc(100% + 6px)",
+            left: 0,
+            width: 220,
+            background: "var(--content-bg, #fff)",
+            border: "1px solid var(--content-border, #E8E8F0)",
+            borderRadius: 10,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            zIndex: 100,
+            padding: 10,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: "var(--text-tertiary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              margin: "0 0 6px 2px",
+            }}
+          >
+            Set status
+          </p>
+
+          {/* Presets */}
+          {STATUS_PRESETS.map((p) => (
+            <button
+              key={p.text}
+              type="button"
+              onClick={() => setPreset(p)}
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "6px 8px",
+                borderRadius: 6,
+                border: "none",
+                background:
+                  status?.text === p.text
+                    ? "rgba(108,71,255,0.08)"
+                    : "transparent",
+                cursor: "pointer",
+                fontSize: 12,
+                color: "var(--text-primary)",
+                textAlign: "left",
+              }}
+            >
+              <span>{p.emoji}</span>
+              <span>{p.text}</span>
+            </button>
+          ))}
+
+          {/* Custom emoji row */}
+          <div
+            style={{
+              borderTop: "1px solid var(--content-border, #E8E8F0)",
+              marginTop: 6,
+              paddingTop: 6,
+            }}
+          >
+            <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 6 }}>
+              {STATUS_EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => setCustom(e)}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    borderRadius: 6,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    fontSize: 14,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={customText}
+              onChange={(e) => setCustomText(e.target.value)}
+              placeholder="Custom status..."
+              style={{
+                width: "100%",
+                padding: "5px 8px",
+                borderRadius: 6,
+                border: "1px solid var(--content-border, #E8E8F0)",
+                background: "var(--content-bg, #fff)",
+                color: "var(--text-primary)",
+                fontSize: 11,
+                outline: "none",
+              }}
+            />
+          </div>
+
+          {status && (
+            <button
+              type="button"
+              onClick={clearStatus}
+              style={{
+                width: "100%",
+                marginTop: 6,
+                padding: "5px 8px",
+                borderRadius: 6,
+                border: "none",
+                background: "rgba(239,68,68,0.08)",
+                color: "#EF4444",
+                fontSize: 11,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              Clear status
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main Sidebar ──────────────────────────────────────────────────
 export function Sidebar() {
   const pathname = usePathname();
@@ -797,7 +1013,7 @@ export function Sidebar() {
           {userInitials}
         </button>
 
-        {/* Name */}
+        {/* Name + Emoji Status */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -811,6 +1027,7 @@ export function Sidebar() {
           >
             {userName}
           </div>
+          <EmojiStatusLine />
         </div>
 
         {/* Settings gear */}

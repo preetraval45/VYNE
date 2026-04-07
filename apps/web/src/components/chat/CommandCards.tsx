@@ -355,12 +355,48 @@ function PollCard({
   );
 }
 
+// ─── Loading Card ───────────────────────────────────────────────
+
+function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
+  return (
+    <div
+      style={{
+        background: "#F8F8FC",
+        border: "1px solid #E8E8F0",
+        borderRadius: 8,
+        padding: "10px 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
+      <div
+        style={{
+          width: 14,
+          height: 14,
+          border: "2px solid #6C47FF",
+          borderTop: "2px solid transparent",
+          borderRadius: "50%",
+          animation: "cmd-spin 0.8s linear infinite",
+        }}
+      />
+      <span style={{ fontSize: 12, color: "#6B6B8A" }}>
+        Executing /{cmd}...
+      </span>
+      <style>{`@keyframes cmd-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
 // ─── Dispatcher ──────────────────────────────────────────────────
 
 export function cmdOutput(
   msg: LocalMsg,
   onVote?: (opt: string) => void,
 ): React.ReactNode {
+  // Show loading state
+  if (msg.loading) return <LoadingCard cmd={msg.cmd} />;
+
   if (msg.cmd === "approve-order")
     return <ApproveOrderCard args={msg.args.trim()} />;
   if (msg.cmd === "create-task")

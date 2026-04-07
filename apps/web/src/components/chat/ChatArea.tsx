@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Hash, Search, Settings, Sparkles, Zap } from "lucide-react";
+import { Hash, Search, Settings, Sparkles, Zap, Bell } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
+import { slashCommandApi } from "@/lib/api/client";
 import type { LocalMsg } from "./constants";
 import { UserAvatar } from "./UserAvatar";
 import { MessageRow } from "./MessageRow";
 import { MessageComposer } from "./MessageComposer";
 import { SummaryPanel } from "./SummaryPanel";
+import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
@@ -41,6 +43,7 @@ export function ChatArea({
   } = useMessages(channelId, isDM);
   const [cmdMessages, setCmdMessages] = useState<LocalMsg[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
 
@@ -48,6 +51,7 @@ export function ChatArea({
   useEffect(() => {
     setCmdMessages([]);
     setSummaryOpen(false);
+    setNotifOpen(false);
   }, [channelId]);
 
   useEffect(() => {
@@ -59,21 +63,66 @@ export function ChatArea({
     }
   }, [messages.length]);
 
-  function handleCommand(cmd: string, args: string) {
+  async function handleCommand(cmd: string, args: string) {
     if (cmd === "summarize") {
       setSummaryOpen(true);
       return;
     }
+
+    // Execute real API calls for ERP commands
     const newMsg: LocalMsg = {
       id: `cmd-${Date.now()}`,
       cmd,
       args,
       ts: new Date().toISOString(),
+      loading: true,
       pollVotes:
         cmd === "poll" ? { "Yes 👍": 3, "No 👎": 1, "Maybe 🤔": 2 } : undefined,
     };
     setCmdMessages((prev) => [...prev, newMsg]);
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    // Wire to real APIs
+    try {
+      let result: { success: boolean; data: unknown; message: string } | null = null;
+
+      switch (cmd) {
+        case "approve-order":
+          result = await slashCommandApi.approveOrder(args.trim() || "ORD-1042");
+          break;
+        case "stock-check":
+          result = await slashCommandApi.stockCheck(args.trim() || "SKU-001");
+          break;
+        case "invoice":
+          result = await slashCommandApi.createInvoice(args.trim() || "Acme Corp");
+          break;
+        case "create-task":
+          result = await slashCommandApi.createTask(args.trim() || "New Task");
+          break;
+        case "assign-lead":
+          result = await slashCommandApi.assignLead(args.trim() || "New Lead");
+          break;
+      }
+
+      // Update the command message with real data
+      if (result) {
+        setCmdMessages((prev) =>
+          prev.map((m) =>
+            m.id === newMsg.id
+              ? { ...m, loading: false, apiResult: result }
+              : m,
+          ),
+        );
+      } else {
+        setCmdMessages((prev) =>
+          prev.map((m) => (m.id === newMsg.id ? { ...m, loading: false } : m)),
+        );
+      }
+    } catch {
+      setCmdMessages((prev) =>
+        prev.map((m) => (m.id === newMsg.id ? { ...m, loading: false } : m)),
+      );
+    }
   }
 
   function handlePollVote(msgId: string, opt: string) {
@@ -184,6 +233,41 @@ export function ChatArea({
               }}
             >
               <Sparkles size={13} /> Summarize
+            </button>
+            <button
+              onClick={() => setNotifOpen((o) => !o)}
+              title="Smart Notifications"
+              style={{
+                padding: "5px 9px",
+                borderRadius: 7,
+                border: notifOpen
+                  ? "1px solid rgba(245,158,11,0.4)"
+                  : "1px solid transparent",
+                background: notifOpen
+                  ? "rgba(245,158,11,0.08)"
+                  : "transparent",
+                cursor: "pointer",
+                color: notifOpen ? "#F59E0B" : "#A0A0B8",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontSize: 11,
+                fontWeight: 500,
+                position: "relative",
+              }}
+            >
+              <Bell size={13} />
+              <span
+                style={{
+                  position: "absolute",
+                  top: 2,
+                  right: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#EF4444",
+                }}
+              />
             </button>
             <button
               style={{
@@ -377,7 +461,16 @@ export function ChatArea({
         <div style={{ position: "relative" }}>
           <AnimatePresence>
             {summaryOpen && (
-              <SummaryPanel onClose={() => setSummaryOpen(false)} />
+              <SummaryPanel
+                onClose={() => setSummaryOpen(false)}
+                messages={messages}
+                channelName={channelName}
+              />
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {notifOpen && (
+              <NotificationPanel onClose={() => setNotifOpen(false)} />
             )}
           </AnimatePresence>
           <MessageComposer

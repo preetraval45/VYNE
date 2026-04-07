@@ -25,9 +25,9 @@
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
 
     <!-- AWS -->
-    <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.402" />
-    <PackageReference Include="AWSSDK.EventBridge" Version="3.7.404" />
-    <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.407" />
+    <PackageReference Include="AWSSDK.SecretsManager" Version="3.7.*" />
+    <PackageReference Include="AWSSDK.EventBridge" Version="3.7.*" />
+    <PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.*" />
 
     <!-- Background jobs -->
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />

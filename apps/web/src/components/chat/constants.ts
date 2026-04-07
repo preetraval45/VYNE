@@ -17,6 +17,8 @@ export interface LocalMsg {
   ts: string;
   pollVotes?: Record<string, number>;
   pollVoted?: boolean;
+  loading?: boolean;
+  apiResult?: { success: boolean; data: unknown; message: string } | null;
 }
 
 export const SCHEDULE_OPTS = [

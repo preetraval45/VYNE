@@ -1,4 +1,5 @@
 # VYNE — Phase Implementation Prompts
+
 ## Give These Prompts to Claude to Build Each Phase
 
 **Version 2.0 — Updated March 2026**
@@ -9,8 +10,9 @@
 > Expenses + Approvals · AI BI Dashboard · Automations/Workflow Builder · Admin Panel ·
 > Mobile (Home + Chat + Projects + Finance + ERP tabs) · Light/Dark mode · Roadmap ·
 > CommandPalette (⌘K) with all 30+ commands · Vercel deployment config
-
+>
 > **HOW TO USE THIS FILE:**
+>
 > 1. Open a new Claude conversation in the VYNE project directory
 > 2. Copy the entire prompt for the phase you want to build
 > 3. Paste it — Claude will build that phase completely
@@ -18,10 +20,11 @@
 
 ---
 
-## ⚡ MASTER CONTEXT BLOCK (v2 — always include this)
-*(Include this at the top of EVERY phase prompt)*
+## MASTER CONTEXT BLOCK (v2 — always include this)
 
-```
+Include this at the top of EVERY phase prompt.
+
+```text
 VYNE PROJECT CONTEXT (v2 — March 2026):
 - Product: Vyne — AI-native Company Operating System
   Replaces: Slack + Jira + Notion + GitHub + Datadog + Odoo in ONE platform
@@ -57,11 +60,11 @@ WHAT IS ALREADY BUILT (do not rebuild):
 
 ---
 
-## 🆕 PHASE 5 — ADVANCED ERP MODULES (Beat Odoo)
+## PHASE 5 — ADVANCED ERP MODULES (Beat Odoo)
 
-### Prompt P5-A: CRM Pipeline + Lead Management
+### Prompt P5-A - CRM Pipeline + Lead Management
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build a full CRM Pipeline module for VYNE that is faster and more intuitive than Odoo CRM.
@@ -105,9 +108,9 @@ Add to Sidebar under Business section with icon "🎯".
 
 ---
 
-### Prompt P5-B: HR + Payroll Module
+### Prompt P5-B - HR + Payroll Module
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build an HR module for VYNE that replaces BambooHR/Rippling for SMBs.
@@ -146,9 +149,9 @@ Add to Sidebar under Business with icon "👥". Follow all VYNE design/lint rule
 
 ---
 
-### Prompt P5-C: Expense Reports Module
+### Prompt P5-C - Expense Reports Module
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build an Expense Reports module better than Expensify/Concur for VYNE.
@@ -184,11 +187,11 @@ Add to Sidebar under Business with icon "🧾". Follow VYNE design rules.
 
 ---
 
-## 🆕 PHASE 6 — ADVANCED CHAT (Kill Slack)
+## PHASE 6 — ADVANCED CHAT (Kill Slack)
 
-### Prompt P6-A: AI-Powered Chat Features
+### Prompt P6-A - AI-Powered Chat Features
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Upgrade the existing chat page with AI-powered features that Slack charges extra for.
@@ -228,11 +231,11 @@ Follow all VYNE design rules. No nested ternaries. Readonly props. All changes b
 
 ---
 
-## 🆕 PHASE 7 — AI INTELLIGENCE ENGINE
+## PHASE 7 — AI INTELLIGENCE ENGINE
 
-### Prompt P7-A: AI Business Intelligence Dashboard
+### Prompt P7-A - AI Business Intelligence Dashboard
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build an AI Business Intelligence page that no other tool offers — natural language queries
@@ -275,11 +278,11 @@ Follow all VYNE lint rules. Readonly props.
 
 ---
 
-## 🆕 PHASE 8 — MOBILE APP V2
+## PHASE 8 — MOBILE APP V2
 
-### Prompt P8-A: Extend Mobile with ERP + AI screens
+### Prompt P8-A - Extend Mobile with ERP + AI screens
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 The mobile app at apps/mobile/ is already built with: Login, Home, Chat, Projects, Profile.
@@ -315,11 +318,11 @@ All mock data — no backend needed. Expo SDK 52 + expo-router v4.
 
 ---
 
-## 🆕 PHASE 9 — MULTI-TENANT SAAS + WHITE-LABEL
+## PHASE 9 — MULTI-TENANT SAAS + WHITE-LABEL
 
-### Prompt P9-A: White-Label + Tenant Customization
+### Prompt P9-A - White-Label + Tenant Customization
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the white-label and multi-tenant customization system that lets Preet sell VYNE to companies.
@@ -362,9 +365,9 @@ All mock data. Admin route protected by role === 'owner'. Follow all VYNE design
 
 ## PHASE 0 — FOUNDATION
 
-### Prompt P0-A: Project Setup & Monorepo
+### Prompt P0-A - Project Setup and Monorepo
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 I am starting Phase 0 of building Vyne. Help me set up the complete monorepo foundation.
@@ -402,9 +405,9 @@ After generating, tell me the exact commands to run to get this working locally.
 
 ---
 
-### Prompt P0-B: Terraform Infrastructure
+### Prompt P0-B - Terraform Infrastructure
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 I need to build the complete Terraform infrastructure for Vyne on AWS.
@@ -469,9 +472,9 @@ Write every .tf file completely. No placeholder values except where I need to fi
 
 ---
 
-### Prompt P0-C: Core Service (Auth + Multi-tenancy)
+### Prompt P0-C - Core Service (Auth + Multi-tenancy)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete core-service for Vyne — C# .NET 9 Web API handling auth, organizations, users, and RBAC.
@@ -516,9 +519,9 @@ Make every file production-quality. Include error handling, logging, validation.
 
 ## PHASE 1 — PROJECTS MODULE
 
-### Prompt P1-A: Projects Service (Backend)
+### Prompt P1-A - Projects Service (Backend)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete projects-service for Vyne — C# .NET 9 Web API for project management (Linear-quality).
@@ -583,9 +586,9 @@ Write every file completely. Pay special attention to the position-based orderin
 
 ---
 
-### Prompt P1-B: Projects Frontend (Next.js 15)
+### Prompt P1-B - Projects Frontend (Next.js 15)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete Next.js 15 web application for Vyne — starting with the app shell and Projects module.
@@ -612,12 +615,12 @@ SETUP:
 LAYOUT:
 - apps/web/src/app/(dashboard)/layout.tsx — main app layout with Sidebar + Topbar
 - apps/web/src/components/layout/Sidebar.tsx — full Slack-like sidebar:
-  * Workspace switcher (org name + dropdown)
-  * AI Assistant button (Cmd+K)
-  * Navigation: Projects, Docs, Chat, Code, Observe, Ops
-  * Under Chat: channel list with unread counts, bold unread
-  * DM list with presence indicators
-  * Bottom: user avatar, settings, notifications bell
+  - Workspace switcher (org name + dropdown)
+  - AI Assistant button (Cmd+K)
+  - Navigation: Projects, Docs, Chat, Code, Observe, Ops
+  - Under Chat: channel list with unread counts, bold unread
+  - DM list with presence indicators
+  - Bottom: user avatar, settings, notifications bell
 - apps/web/src/components/layout/Topbar.tsx — breadcrumb + search + user menu
 - apps/web/src/components/layout/CommandPalette.tsx — Cmd+K modal with search
 
@@ -652,9 +655,9 @@ Write every component completely with full TypeScript types. Make the UI beautif
 
 ## PHASE 2 — CHAT/MESSAGING MODULE
 
-### Prompt P2-A: Messaging Service (Backend)
+### Prompt P2-A - Messaging Service (Backend)
 
-```
+````text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete messaging-service for Vyne — Node.js + Fastify + TypeScript.
@@ -745,13 +748,13 @@ ALSO BUILD:
 - Full TypeScript types throughout
 
 Write everything completely. The WebSocket architecture is critical — make sure reconnection logic is correct.
-```
+````
 
 ---
 
-### Prompt P2-B: Chat Frontend (Slack Clone UI)
+### Prompt P2-B - Chat Frontend (Slack Clone UI)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete Chat module frontend for Vyne — Slack-quality real-time messaging UI.
@@ -825,13 +828,14 @@ ChannelHeader:
 - Notification settings (all, mentions only, off)
 
 STORES (Zustand):
+
 - src/lib/stores/chat.ts:
-  * channels: Channel[] (sidebar data)
-  * activeChannelId: string
-  * messages: Record<channelId, Message[]> (cached messages per channel)
-  * unreadCounts: Record<channelId, number>
-  * typingUsers: Record<channelId, string[]>
-  * userPresence: Record<userId, PresenceStatus>
+  - channels: Channel[] (sidebar data)
+  - activeChannelId: string
+  - messages: Record<channelId, Message[]> (cached messages per channel)
+  - unreadCounts: Record<channelId, number>
+  - typingUsers: Record<channelId, string[]>
+  - userPresence: Record<userId, PresenceStatus>
 
 SOCKET.IO INTEGRATION:
 - Auto-reconnect with exponential backoff
@@ -855,9 +859,9 @@ Write every component with complete implementation. Include Framer Motion animat
 
 ## PHASE 3 — DOCS MODULE
 
-### Prompt P3-A: Docs Module (Full)
+### Prompt P3-A - Docs Module (Full)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete Docs module for Vyne — Notion-quality block editor integrated with Projects.
@@ -888,6 +892,7 @@ DocsSidebar (left panel):
 - Search docs
 
 TipTap Editor (full implementation):
+
 BLOCK TYPES:
   - /paragraph — normal text
   - /h1, /h2, /h3 — headings
@@ -921,9 +926,9 @@ Write full TipTap extension configuration, custom extensions for issue embeds, a
 
 ## PHASE 4 — AI MODULE
 
-### Prompt P4-A: AI Service (RAG + Agents)
+### Prompt P4-A - AI Service (RAG + Agents)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete AI service for Vyne — Python 3.12 + FastAPI + AWS Bedrock + LangGraph.
@@ -1042,9 +1047,9 @@ The cross-domain correlation (infrastructure ↔ business) is THE killer feature
 
 ## PHASE 5 — ERP/MRP MODULE
 
-### Prompt P5-A: ERP Service (Backend)
+### Prompt P5-ERP-A - ERP Service (Backend)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete ERP service for Vyne — C# .NET 9 Web API for inventory, orders, manufacturing, and finance.
@@ -1122,9 +1127,9 @@ Write everything completely. The MRP explosion algorithm is complex — implemen
 
 ---
 
-### Prompt P5-B: ERP Frontend (Slack-Style UI)
+### Prompt P5-ERP-B - ERP Frontend (Slack-Style UI)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete ERP/Ops module frontend for Vyne.
@@ -1155,7 +1160,7 @@ OpsDashboard:
 - Alerts feed (inventory_low, overdue invoices)
 
 InventoryView:
-- Toggle: Card view (product image, name, SKU, stock level indicator) | Table view (TanStack Table)
+- Toggle: Card view (product image, name, SKU, stock level indicator) / Table view (TanStack Table)
 - Search + filter by category/status
 - Stock level indicator: green=healthy, yellow=low, red=depleted
 - Bulk actions: adjust stock, export CSV
@@ -1179,7 +1184,7 @@ OrderDetail (side panel):
 - Invoice section at bottom
 
 ManufacturingKanban:
-- Columns: Draft | Confirmed | In Progress | QC | Done
+- Columns: Draft / Confirmed / In Progress / QC / Done
 - Work order card: product name, qty, assigned to, due date, progress bar
 - Drag to change status (same as issue Kanban)
 
@@ -1196,9 +1201,9 @@ Write every component completely with TypeScript types and TanStack Query for da
 
 ## PHASE 6 — OBSERVABILITY MODULE
 
-### Prompt P6-A: Observability Service + Frontend
+### Prompt P6-OBS-A - Observability Service + Frontend
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete Observability module for Vyne — metrics, logs, traces, and alerts.
@@ -1264,9 +1269,9 @@ Write all files completely.
 
 ## PHASE 7 — MOBILE APP
 
-### Prompt P7-A: Mobile App (React Native + Expo)
+### Prompt P7-MOB-A - Mobile App (React Native + Expo)
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Build the complete mobile app for Vyne — React Native + Expo SDK 52.
@@ -1306,7 +1311,7 @@ MobileMessageView:
 - Haptic feedback on send (Expo Haptics)
 
 MobileChannelList:
-- Section list: Channels | Direct Messages
+- Section list: Channels / Direct Messages
 - Unread count badges
 - Pull-to-refresh
 
@@ -1337,9 +1342,9 @@ Write every file completely. Test on both iOS and Android. Include proper TypeSc
 
 ## PRODUCTION HARDENING
 
-### Prompt PROD-A: Production Deployment + Security
+### Prompt PROD-A - Production Deployment + Security
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Help me harden Vyne for production and perform the initial production deployment.
@@ -1366,6 +1371,7 @@ TASKS:
    - Image optimization (Next.js Image component)
 
 3. KUBERNETES MIGRATION (if ECS Fargate hits limits):
+
    Write complete EKS migration guide:
    - EKS cluster Terraform module
    - Helm charts for each service
@@ -1399,9 +1405,9 @@ Write everything completely — Terraform, k8s manifests, Helm values, GitHub Ac
 
 ## LAUNCH PROMPTS
 
-### Prompt LAUNCH-A: ProductHunt Launch Assets
+### Prompt LAUNCH-A - ProductHunt Launch Assets
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Vyne is ready to launch on ProductHunt. Help me create all launch assets.
@@ -1438,11 +1444,11 @@ Make everything authentic, developer-focused, and honest. Don't over-promise.
 
 ---
 
-## REFERENCE PROMPT — WHEN STUCK
+## REFERENCE PROMPTS
 
-### Prompt REF-A: Debug Help
+### Prompt REF-A - Debug Help
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 I am stuck on: [DESCRIBE YOUR PROBLEM]
@@ -1462,9 +1468,9 @@ Please:
 4. Check if this bug might affect any other part of Vyne's architecture
 ```
 
-### Prompt REF-B: Code Review
+### Prompt REF-B - Code Review
 
-```
+```text
 [PASTE MASTER CONTEXT BLOCK HERE]
 
 Please review this code I wrote for Vyne:
@@ -1484,6 +1490,6 @@ Give me the improved version of every file that needs changes.
 
 ---
 
-*Save this file. Use one prompt per Claude conversation for best results.*
-*Each prompt is designed to produce complete, production-quality code.*
-*Version 1.0 — March 2026*
+Save this file. Use one prompt per Claude conversation for best results.
+Each prompt is designed to produce complete, production-quality code.
+Version 1.0 — March 2026
