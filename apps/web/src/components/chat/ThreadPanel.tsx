@@ -57,7 +57,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
         <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           Thread
         </span>
-        <button
+        <button aria-label="Close"
           onClick={onClose}
           style={{
             padding: 4,

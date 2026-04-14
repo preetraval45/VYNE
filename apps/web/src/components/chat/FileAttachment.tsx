@@ -81,7 +81,7 @@ function Lightbox({
         cursor: "zoom-out",
       }}
     >
-      <button
+      <button aria-label="Close"
         onClick={onClose}
         style={{
           position: "absolute",

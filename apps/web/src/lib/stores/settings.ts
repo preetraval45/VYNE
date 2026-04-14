@@ -15,6 +15,7 @@ export interface OrgSettings {
 export interface NotificationSettings {
   emailDigest: "daily" | "weekly" | "never";
   pushEnabled: boolean;
+  emailEnabled: boolean;
   aiAlerts: boolean;
   mentionAlerts: boolean;
   orderAlerts: boolean;
@@ -100,6 +101,7 @@ const DEFAULT_ORG: OrgSettings = {
 const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   emailDigest: "weekly",
   pushEnabled: false,
+  emailEnabled: true,
   aiAlerts: true,
   mentionAlerts: true,
   orderAlerts: true,

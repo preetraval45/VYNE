@@ -632,7 +632,7 @@ function AddDealModal({
             {field(
               "Stage",
               "add-stage",
-              <select
+              <select aria-label="Select option"
                 id="add-stage"
                 title="Stage"
                 value={form.stage}
@@ -652,7 +652,7 @@ function AddDealModal({
             {field(
               "Source",
               "add-source",
-              <select
+              <select aria-label="Select option"
                 id="add-source"
                 title="Source"
                 value={form.source}
@@ -672,7 +672,7 @@ function AddDealModal({
             {field(
               "Assignee",
               "add-assignee",
-              <select
+              <select aria-label="Select option"
                 id="add-assignee"
                 title="Assignee"
                 value={form.assignee}

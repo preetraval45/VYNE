@@ -204,7 +204,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               AI RANKED
             </span>
           </div>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             type="button"
             style={{

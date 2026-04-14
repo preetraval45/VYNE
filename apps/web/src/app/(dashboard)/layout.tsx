@@ -2,25 +2,31 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
+import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
+import { FocusModeToast } from "@/components/layout/FocusModeToast";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
+import { useUIStore } from "@/lib/stores/ui";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const focusMode = useUIStore((s) => s.focusMode);
+
   return (
     <div
       className="flex h-screen overflow-hidden"
       style={{ background: "var(--content-bg-secondary)" }}
       aria-label="Dashboard"
+      data-focus-mode={focusMode ? "on" : "off"}
     >
       {/* Skip to content link — visible on keyboard focus */}
       <SkipToContent />
 
-      {/* Fixed Sidebar */}
-      <Sidebar />
+      {/* Fixed Sidebar (hidden in focus mode) */}
+      {!focusMode && <Sidebar />}
 
       {/* Main Content */}
       <main
@@ -35,6 +41,12 @@ export default function DashboardLayout({
 
       {/* Global Command Palette */}
       <CommandPalette />
+
+      {/* Global Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal />
+
+      {/* Focus-mode indicator */}
+      <FocusModeToast />
     </div>
   );
 }

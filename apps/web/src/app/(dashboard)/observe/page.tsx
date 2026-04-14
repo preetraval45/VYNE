@@ -1029,7 +1029,7 @@ function LogsTab() {
         >
           Service
         </label>
-        <select
+        <select aria-label="Select option"
           id="log-service-select"
           value={serviceFilter}
           onChange={(e) => setServiceFilter(e.target.value)}

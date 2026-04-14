@@ -66,7 +66,7 @@ export default function TriggerSection(
         >
           Trigger Type
         </label>
-        <select
+        <select aria-label="Select option"
           id="trigger-type-select"
           value={triggerType}
           onChange={(e) => onTriggerChange(e.target.value)}

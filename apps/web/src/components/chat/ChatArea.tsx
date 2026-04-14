@@ -269,7 +269,7 @@ export function ChatArea({
                 }}
               />
             </button>
-            <button
+            <button aria-label="Search"
               style={{
                 padding: "5px",
                 borderRadius: 7,
@@ -283,7 +283,7 @@ export function ChatArea({
             >
               <Search size={15} />
             </button>
-            <button
+            <button aria-label="Settings"
               style={{
                 padding: "5px",
                 borderRadius: 7,

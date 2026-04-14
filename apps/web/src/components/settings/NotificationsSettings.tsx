@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useSettingsStore } from "@/lib/stores/settings";
+import { useAuthStore } from "@/lib/stores/auth";
 import type { NotificationSettings as NotifType } from "@/lib/stores/settings";
 
 // ─── Shared UI ───────────────────────────────────────────────────
@@ -89,6 +90,41 @@ export default function NotificationsSettings({
 }: NotificationsSettingsProps) {
   const notif = useSettingsStore((s) => s.notificationSettings);
   const update = useSettingsStore((s) => s.updateNotificationSettings);
+  const userEmail = useAuthStore((s) => s.user?.email);
+  const [sendingTest, setSendingTest] = useState(false);
+
+  const sendTestEmail = useCallback(async () => {
+    if (!userEmail) {
+      onToast("No email on file — sign in again to receive test messages");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const res = await fetch("/api/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: userEmail, kind: "test" }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        queued?: boolean;
+        provider?: string;
+        error?: string;
+      };
+      if (res.ok) {
+        onToast(
+          data.queued
+            ? `Test email queued via ${data.provider}`
+            : "Email provider not configured — preferences saved locally",
+        );
+      } else {
+        onToast(data.error ?? "Could not send test email");
+      }
+    } catch {
+      onToast("Could not reach the notifications service");
+    } finally {
+      setSendingTest(false);
+    }
+  }, [userEmail, onToast]);
 
   const toggle = useCallback(
     async (key: keyof NotifType) => {
@@ -157,6 +193,11 @@ export default function NotificationsSettings({
       title: "Delivery Channels",
       items: [
         {
+          key: "emailEnabled",
+          label: "Email notifications",
+          hint: "Receive alerts via email (@mentions, assignments, alerts)",
+        },
+        {
           key: "pushEnabled",
           label: "Push notifications",
           hint: "Browser or mobile push notifications",
@@ -214,7 +255,7 @@ export default function NotificationsSettings({
               Receive a summary email of recent activity
             </div>
           </div>
-          <select
+          <select aria-label="Select option"
             value={notif.emailDigest}
             onChange={(e) =>
               setDigest(e.target.value as "daily" | "weekly" | "never")
@@ -234,6 +275,43 @@ export default function NotificationsSettings({
             <option value="weekly">Weekly</option>
             <option value="never">Never</option>
           </select>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 16,
+            paddingTop: 16,
+            borderTop: "1px solid var(--content-border)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              Send test email
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
+              Verify delivery to {userEmail ?? "your email"}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={sendTestEmail}
+            disabled={sendingTest || !userEmail}
+            style={{
+              padding: "7px 14px",
+              borderRadius: 8,
+              border: "1px solid var(--vyne-purple)",
+              background: "transparent",
+              color: "var(--vyne-purple)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: sendingTest || !userEmail ? "default" : "pointer",
+              opacity: sendingTest || !userEmail ? 0.6 : 1,
+            }}
+          >
+            {sendingTest ? "Sending…" : "Send test"}
+          </button>
         </div>
       </SectionCard>
     </div>

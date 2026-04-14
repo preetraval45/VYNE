@@ -596,7 +596,7 @@ function CreateProjectModalLocal({
                     </p>
                   </div>
                   <Dialog.Close asChild>
-                    <button
+                    <button aria-label="Close"
                       className="p-1.5 rounded-lg transition-colors"
                       style={{ color: "var(--text-tertiary)" }}
                     >
@@ -899,7 +899,7 @@ function EditProjectModal({
                     Edit Project
                   </Dialog.Title>
                   <Dialog.Close asChild>
-                    <button
+                    <button aria-label="Close"
                       className="p-1.5 rounded-lg"
                       style={{ color: "var(--text-tertiary)" }}
                     >

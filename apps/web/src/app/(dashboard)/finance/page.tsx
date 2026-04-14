@@ -623,6 +623,8 @@ function JournalTab() {
                 New Journal Entry
               </span>
               <button
+                type="button"
+                aria-label="Close"
                 onClick={() => setNewOpen(false)}
                 style={{
                   border: "none",

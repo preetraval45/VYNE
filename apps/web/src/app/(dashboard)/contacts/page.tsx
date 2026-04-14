@@ -623,7 +623,7 @@ function AccountModal({
           >
             {initial ? "Edit Account" : "New Account"}
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -654,7 +654,7 @@ function AccountModal({
           >
             <div>
               <label style={labelStyle}>Industry</label>
-              <select
+              <select aria-label="Select option"
                 style={selectStyle}
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
@@ -668,7 +668,7 @@ function AccountModal({
             </div>
             <div>
               <label style={labelStyle}>Status</label>
-              <select
+              <select aria-label="Select option"
                 style={selectStyle}
                 value={status}
                 onChange={(e) => setStatus(e.target.value as AccountStatus)}
@@ -723,7 +723,7 @@ function AccountModal({
           </div>
           <div>
             <label style={labelStyle}>Owner</label>
-            <select
+            <select aria-label="Select option"
               style={selectStyle}
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
@@ -853,7 +853,7 @@ function ContactModal({
           >
             {initial ? "Edit Contact" : "New Contact"}
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -906,7 +906,7 @@ function ContactModal({
           </div>
           <div>
             <label style={labelStyle}>Company (Account)</label>
-            <select
+            <select aria-label="Select option"
               style={selectStyle}
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}

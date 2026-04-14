@@ -318,7 +318,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </FieldRow>
 
         <FieldRow label="Timezone">
-          <select
+          <select aria-label="Select option"
             value={local.timezone}
             onChange={(e) => setLocal({ ...local, timezone: e.target.value })}
             style={selectStyle}
@@ -341,7 +341,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </FieldRow>
 
         <FieldRow label="Language">
-          <select
+          <select aria-label="Select option"
             value={local.language}
             onChange={(e) => setLocal({ ...local, language: e.target.value })}
             style={{ ...selectStyle, maxWidth: 240 }}
@@ -368,7 +368,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           label="Currency"
           hint="Default currency for orders & invoices"
         >
-          <select
+          <select aria-label="Select option"
             value={local.defaultCurrency}
             onChange={(e) =>
               setLocal({ ...local, defaultCurrency: e.target.value })
@@ -385,7 +385,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           label="Fiscal Year Start"
           hint="Month the financial year begins"
         >
-          <select
+          <select aria-label="Select option"
             value={local.fiscalYearStart}
             onChange={(e) =>
               setLocal({ ...local, fiscalYearStart: e.target.value })

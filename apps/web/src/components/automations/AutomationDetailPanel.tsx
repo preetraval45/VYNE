@@ -444,7 +444,7 @@ export default function AutomationDetailPanel(
                   outline: "none",
                 }}
               />
-              <button
+              <button aria-label="Confirm"
                 onClick={handleNameSave}
                 style={{
                   background: "#6C47FF",

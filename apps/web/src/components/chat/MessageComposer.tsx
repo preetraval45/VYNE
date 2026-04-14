@@ -195,7 +195,7 @@ export function MessageComposer({
         >
           <Clock size={11} />
           Scheduled: {scheduledFor}
-          <button
+          <button aria-label="Close"
             onClick={() => setScheduledFor(null)}
             style={{
               marginLeft: "auto",

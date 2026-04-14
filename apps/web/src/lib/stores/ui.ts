@@ -6,6 +6,8 @@ interface UIStore {
   sidebarOpen: boolean;
   activeModule: Module;
   commandPaletteOpen: boolean;
+  shortcutsOpen: boolean;
+  focusMode: boolean;
   activeProjectId: string | null;
   activeIssueId: string | null;
 
@@ -14,6 +16,9 @@ interface UIStore {
   setActiveModule: (module: Module) => void;
   toggleCommandPalette: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  setShortcutsOpen: (open: boolean) => void;
+  toggleShortcuts: () => void;
+  toggleFocusMode: () => void;
   setActiveProjectId: (id: string | null) => void;
   setActiveIssueId: (id: string | null) => void;
 }
@@ -24,6 +29,8 @@ export const useUIStore = create<UIStore>()(
       sidebarOpen: true,
       activeModule: "projects",
       commandPaletteOpen: false,
+      shortcutsOpen: false,
+      focusMode: false,
       activeProjectId: null,
       activeIssueId: null,
 
@@ -39,6 +46,14 @@ export const useUIStore = create<UIStore>()(
 
       setCommandPaletteOpen: (open: boolean) =>
         set({ commandPaletteOpen: open }),
+
+      setShortcutsOpen: (open: boolean) => set({ shortcutsOpen: open }),
+
+      toggleShortcuts: () =>
+        set((state) => ({ shortcutsOpen: !state.shortcutsOpen })),
+
+      toggleFocusMode: () =>
+        set((state) => ({ focusMode: !state.focusMode })),
 
       setActiveProjectId: (id: string | null) => set({ activeProjectId: id }),
 

@@ -778,7 +778,7 @@ function FilterSelect({
   allLabel: string;
 }>) {
   return (
-    <select
+    <select aria-label="Select option"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{

@@ -486,7 +486,7 @@ function CreateTenantModal({
           >
             Plan
           </label>
-          <select
+          <select aria-label="Select option"
             id="nt-plan"
             value={form.plan}
             onChange={(e) => setForm({ ...form, plan: e.target.value as Plan })}
@@ -1040,7 +1040,7 @@ function TenantDetailPanel({
                 >
                   Upgrade or downgrade this tenant&apos;s plan
                 </div>
-                <select
+                <select aria-label="Select option"
                   value={tenant.plan}
                   onChange={() => onAction("plan_changed")}
                   style={{
@@ -1321,7 +1321,7 @@ export default function TenantsPage() {
             outline: "none",
           }}
         />
-        <select
+        <select aria-label="Select option"
           value={filterPlan}
           onChange={(e) => setFilterPlan(e.target.value as Plan | "All")}
           style={selectStyle}
@@ -1339,7 +1339,7 @@ export default function TenantsPage() {
             Enterprise
           </option>
         </select>
-        <select
+        <select aria-label="Select option"
           value={filterStatus}
           onChange={(e) =>
             setFilterStatus(e.target.value as TenantStatus | "All")

@@ -57,7 +57,7 @@ export function CreateChannelModal({
           <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
             Create a channel
           </span>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",

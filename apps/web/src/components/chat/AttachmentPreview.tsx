@@ -141,7 +141,7 @@ export function AttachmentPreview({
                 />
               </div>
             </div>
-            <button
+            <button aria-label="Close"
               onClick={() => onRemove(u.fileId)}
               style={{
                 position: "absolute",
@@ -232,7 +232,7 @@ export function AttachmentPreview({
           )}
 
           {/* Remove button */}
-          <button
+          <button aria-label="Close"
             onClick={() => onRemove(file.id)}
             style={{
               position: "absolute",
@@ -308,7 +308,7 @@ export function AttachmentPreview({
                 {u.error}
               </p>
             </div>
-            <button
+            <button aria-label="Close"
               onClick={() => onRemove(u.fileId)}
               style={{
                 position: "absolute",

@@ -660,19 +660,36 @@ export function DocEditor({ doc }: DocEditorProps) {
         accept="image/*"
         aria-label="Upload image"
         className="hidden"
-        onChange={(e) => {
+        onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file || !editor) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const src = ev.target?.result as string;
-            if (src) {
-              // Insert as base64 data URL (S3 upload when backend ready)
-              editor.chain().focus().setImage({ src, alt: file.name }).run();
+          const formData = new FormData();
+          formData.append("file", file);
+          try {
+            const res = await fetch("/api/upload-image", {
+              method: "POST",
+              body: formData,
+            });
+            const data = (await res.json()) as { url?: string; error?: string };
+            if (res.ok && data.url) {
+              editor.chain().focus().setImage({ src: data.url, alt: file.name }).run();
+            } else {
+              // Fallback to local base64 if the upload endpoint failed for any reason.
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                const src = ev.target?.result as string;
+                if (src) editor.chain().focus().setImage({ src, alt: file.name }).run();
+              };
+              reader.readAsDataURL(file);
             }
-          };
-          reader.readAsDataURL(file);
-          // Reset so same file can be re-selected
+          } catch {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              const src = ev.target?.result as string;
+              if (src) editor.chain().focus().setImage({ src, alt: file.name }).run();
+            };
+            reader.readAsDataURL(file);
+          }
           e.target.value = "";
         }}
       />

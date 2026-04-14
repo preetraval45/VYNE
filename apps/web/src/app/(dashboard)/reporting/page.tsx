@@ -1896,7 +1896,7 @@ function CustomReportsTab() {
           {/* Module */}
           <div>
             <span style={labelStyle}>Module</span>
-            <select
+            <select aria-label="Select option"
               value={module}
               onChange={(e) => {
                 setModule(e.target.value);
@@ -1917,7 +1917,7 @@ function CustomReportsTab() {
           {/* Date Range */}
           <div>
             <span style={labelStyle}>Date Range</span>
-            <select
+            <select aria-label="Select option"
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
               style={selectStyle}
@@ -1933,7 +1933,7 @@ function CustomReportsTab() {
           {/* Group By */}
           <div>
             <span style={labelStyle}>Group By</span>
-            <select
+            <select aria-label="Select option"
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value)}
               style={selectStyle}
@@ -1949,7 +1949,7 @@ function CustomReportsTab() {
           {/* Metric */}
           <div>
             <span style={labelStyle}>Metric</span>
-            <select
+            <select aria-label="Select option"
               value={metric}
               onChange={(e) => setMetric(e.target.value)}
               style={selectStyle}

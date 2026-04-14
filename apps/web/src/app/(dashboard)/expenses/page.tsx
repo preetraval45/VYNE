@@ -526,7 +526,7 @@ function MyExpensesTab({
             >
               Category
             </label>
-            <select
+            <select aria-label="Select option"
               id="exp-category"
               style={inputStyle}
               value={form.category}
@@ -623,7 +623,7 @@ function MyExpensesTab({
               >
                 Currency
               </label>
-              <select
+              <select aria-label="Select option"
                 id="exp-currency"
                 style={inputStyle}
                 value={form.currency}

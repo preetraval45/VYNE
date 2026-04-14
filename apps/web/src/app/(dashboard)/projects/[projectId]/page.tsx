@@ -547,7 +547,7 @@ function TaskListView({
                   </div>
                 </td>
                 <td className="px-3 py-2.5">
-                  <button
+                  <button aria-label="Delete"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (confirm("Delete this task?")) {
@@ -920,7 +920,7 @@ function AddTaskModal({
                     Add Task
                   </Dialog.Title>
                   <Dialog.Close asChild>
-                    <button
+                    <button aria-label="Close"
                       className="p-1.5 rounded-lg"
                       style={{ color: "var(--text-tertiary)" }}
                     >
@@ -969,7 +969,7 @@ function AddTaskModal({
                       <label className={labelClass} style={labelStyle}>
                         Status
                       </label>
-                      <select
+                      <select aria-label="Select option"
                         value={form.status}
                         onChange={(e) =>
                           setForm((f) => ({
@@ -991,7 +991,7 @@ function AddTaskModal({
                       <label className={labelClass} style={labelStyle}>
                         Priority
                       </label>
-                      <select
+                      <select aria-label="Select option"
                         value={form.priority}
                         onChange={(e) =>
                           setForm((f) => ({
@@ -1015,7 +1015,7 @@ function AddTaskModal({
                     <label className={labelClass} style={labelStyle}>
                       Assignee
                     </label>
-                    <select
+                    <select aria-label="Select option"
                       value={form.assigneeId}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, assigneeId: e.target.value }))
@@ -1339,7 +1339,7 @@ function TaskDetailPanel({
             >
               <Trash2 size={14} />
             </button>
-            <button
+            <button aria-label="Close"
               onClick={onClose}
               className="p-1.5 rounded-lg transition-colors"
               style={{ color: "var(--text-tertiary)" }}
@@ -1380,7 +1380,7 @@ function TaskDetailPanel({
             >
               {/* Status */}
               <PropRow icon={<Flag size={13} />} label="Status">
-                <select
+                <select aria-label="Select option"
                   value={task.status}
                   onChange={(e) =>
                     handleStatusChange(e.target.value as TaskStatus)
@@ -1402,7 +1402,7 @@ function TaskDetailPanel({
 
               {/* Priority */}
               <PropRow icon={<Flag size={13} />} label="Priority">
-                <select
+                <select aria-label="Select option"
                   value={task.priority}
                   onChange={(e) =>
                     handlePriorityChange(e.target.value as TaskPriority)
@@ -1424,7 +1424,7 @@ function TaskDetailPanel({
 
               {/* Assignee */}
               <PropRow icon={<User size={13} />} label="Assignee">
-                <select
+                <select aria-label="Select option"
                   value={task.assigneeId ?? ""}
                   onChange={(e) => handleAssigneeChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
@@ -1510,7 +1510,7 @@ function TaskDetailPanel({
                       }}
                     >
                       {tag}
-                      <button
+                      <button aria-label="Close"
                         onClick={() => handleRemoveTag(tag)}
                         className="hover:text-red-500 transition-colors"
                       >
@@ -1654,7 +1654,7 @@ function TaskDetailPanel({
                           {formatDate(st.dueDate)}
                         </span>
                       )}
-                      <button
+                      <button aria-label="Close"
                         onClick={() => {
                           deleteSubtask(task.id, st.id);
                           toast.success("Subtask removed");
@@ -1714,7 +1714,7 @@ function TaskDetailPanel({
                     }}
                   />
                   <div className="flex gap-2">
-                    <select
+                    <select aria-label="Select option"
                       value={newSubtaskAssignee}
                       onChange={(e) => setNewSubtaskAssignee(e.target.value)}
                       className="text-xs px-2 py-1 rounded flex-1 focus:outline-none"
@@ -1839,7 +1839,7 @@ function TaskDetailPanel({
                   }}
                 />
               </div>
-              <button
+              <button aria-label="Send"
                 type="submit"
                 disabled={!commentText.trim()}
                 className="p-2.5 rounded-lg transition-all disabled:opacity-40"

@@ -9,10 +9,10 @@ export interface StatCardData {
 }
 
 export const STAT_CARDS: StatCardData[] = [
-  { label: 'Active Issues', value: '42', delta: '\u2191 3 this week', deltaColor: '#3B82F6' },
-  { label: 'Messages Today', value: '284', delta: '\u2191 12% vs yesterday', deltaColor: '#22C55E' },
-  { label: 'Open Orders', value: '156', delta: '4 urgent today', deltaColor: '#F59E0B' },
-  { label: 'System Health', value: '4/5', delta: '1 service degraded', deltaColor: '#EF4444' },
+  { label: 'Active Issues', value: '42', delta: '\u2191 3 this week', deltaColor: 'var(--badge-info-text)' },
+  { label: 'Messages Today', value: '284', delta: '\u2191 12% vs yesterday', deltaColor: 'var(--badge-success-text)' },
+  { label: 'Open Orders', value: '156', delta: '4 urgent today', deltaColor: 'var(--badge-warning-text)' },
+  { label: 'System Health', value: '4/5', delta: '1 service degraded', deltaColor: 'var(--badge-danger-text)' },
 ]
 
 // ── Activity feed ─────────────────────────────────────────────────
@@ -55,10 +55,10 @@ export interface SprintBadge {
 }
 
 export const SPRINT_BADGES: SprintBadge[] = [
-  { label: '12 Done', bg: '#F0FDF4', color: '#166534' },
-  { label: '4 In Review', bg: '#EFF6FF', color: '#1E40AF' },
-  { label: '4 In Progress', bg: '#FFFBEB', color: '#92400E' },
-  { label: '8 Todo', bg: '#F0F0F8', color: '#6B6B8A' },
+  { label: '12 Done', bg: 'var(--badge-success-bg)', color: 'var(--badge-success-text)' },
+  { label: '4 In Review', bg: 'var(--badge-info-bg)', color: 'var(--badge-info-text)' },
+  { label: '4 In Progress', bg: 'var(--badge-warning-bg)', color: 'var(--badge-warning-text)' },
+  { label: '8 Todo', bg: 'var(--content-secondary)', color: 'var(--text-secondary)' },
 ]
 
 // ── My Focus Today ────────────────────────────────────────────────

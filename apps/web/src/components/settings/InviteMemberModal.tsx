@@ -59,7 +59,7 @@ export default function InviteMemberModal({
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
             Invite Team Member
           </span>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -127,7 +127,7 @@ export default function InviteMemberModal({
           >
             Role
           </label>
-          <select
+          <select aria-label="Select option"
             id="invite-role"
             value={role}
             onChange={(e) => setRole(e.target.value as "member" | "viewer")}

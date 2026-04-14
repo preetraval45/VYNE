@@ -146,7 +146,7 @@ function Modal({
           >
             {title}
           </span>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -848,7 +848,7 @@ function InventoryTab({
             />
           </FormField>
           <FormField label="Unit of Measure">
-            <select
+            <select aria-label="Select option"
               id="prod-uom"
               value={form.uom}
               onChange={(e) => setForm({ ...form, uom: e.target.value })}
@@ -952,7 +952,7 @@ function InventoryTab({
           />
         </FormField>
         <FormField label="Reason">
-          <select
+          <select aria-label="Select option"
             id="adj-reason"
             value={adjustReason}
             onChange={(e) => setAdjustReason(e.target.value)}

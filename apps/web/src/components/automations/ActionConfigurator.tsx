@@ -76,7 +76,7 @@ function ActionCard(
               {index + 1}
             </span>
           </div>
-          <select
+          <select aria-label="Select option"
             id={`action-type-${action.id}`}
             value={action.type}
             onChange={(e) => onTypeChange(action.id, e.target.value)}

@@ -491,7 +491,7 @@ export function ImportCSVModal({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <select
+                  <select aria-label="Select option"
                     value={columnMapping[col.key] ?? ""}
                     onChange={(e) =>
                       setColumnMapping((prev) => ({

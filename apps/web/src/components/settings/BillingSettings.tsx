@@ -536,7 +536,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                   </span>
                 </td>
                 <td style={{ padding: "10px 0", textAlign: "right" }}>
-                  <button
+                  <button aria-label="Download"
                     onClick={() => onToast(`Downloading ${inv.id}...`)}
                     style={{
                       padding: "4px 6px",

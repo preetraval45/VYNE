@@ -657,7 +657,7 @@ function ModalHeader({
       >
         {title}
       </h3>
-      <button
+      <button aria-label="Close"
         onClick={onClose}
         style={{
           border: "none",
@@ -1004,7 +1004,7 @@ function CustomerModal({
         {existing && (
           <FieldGroup>
             <label style={fieldLabelStyle}>Status</label>
-            <select
+            <select aria-label="Select option"
               style={selectStyle}
               value={status}
               onChange={(e) => setStatus(e.target.value as CustomerStatus)}
@@ -1064,7 +1064,7 @@ function InvoiceModal({
         />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
@@ -1132,7 +1132,7 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="New Credit Note" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => {
@@ -1150,7 +1150,7 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Original Invoice</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={originalInvoice}
             onChange={(e) => setOriginalInvoice(e.target.value)}
@@ -1220,7 +1220,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="Record Payment" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => {
@@ -1238,7 +1238,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Invoice</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={invoice}
             onChange={(e) => {
@@ -1268,7 +1268,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Method</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={method}
             onChange={(e) => setMethod(e.target.value as PaymentMethod)}
@@ -1371,7 +1371,7 @@ function VendorModal({
         {existing && (
           <FieldGroup>
             <label style={fieldLabelStyle}>Status</label>
-            <select
+            <select aria-label="Select option"
               style={selectStyle}
               value={status}
               onChange={(e) => setStatus(e.target.value as VendorStatus)}
@@ -1430,7 +1430,7 @@ function BillModal({
         />
         <FieldGroup>
           <label style={fieldLabelStyle}>Vendor</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={vendor}
             onChange={(e) => setVendor(e.target.value)}
@@ -1492,7 +1492,7 @@ function RefundModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="New Refund" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Refund Type</label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={type}
             onChange={(e) => {
@@ -1508,7 +1508,7 @@ function RefundModal({ onClose }: { onClose: () => void }) {
           <label style={fieldLabelStyle}>
             {type === "Customer Refund" ? "Customer" : "Vendor"}
           </label>
-          <select
+          <select aria-label="Select option"
             style={selectStyle}
             value={customerOrVendor}
             onChange={(e) => setCustomerOrVendor(e.target.value)}

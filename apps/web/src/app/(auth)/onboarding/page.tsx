@@ -178,10 +178,12 @@ function StepCompany({
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+          <label htmlFor="onboarding-industry" style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
             Industry
           </label>
           <select
+            id="onboarding-industry"
+            aria-label="Industry"
             value={data.industry}
             onChange={(e) => onChange({ industry: e.target.value })}
             style={{

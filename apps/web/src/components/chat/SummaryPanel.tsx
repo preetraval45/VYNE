@@ -212,7 +212,7 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
         </div>
         <div style={{ display: "flex", gap: 4 }}>
           {state === "done" && (
-            <button
+            <button aria-label="Refresh"
               onClick={fetchSummary}
               style={{
                 border: "none",
@@ -228,7 +228,7 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
               <RefreshCw size={13} />
             </button>
           )}
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",

@@ -95,7 +95,7 @@ export function FeatureRequestModal({
           <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>
             Request a Feature
           </span>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               background: "rgba(255,255,255,0.2)",
@@ -156,7 +156,7 @@ export function FeatureRequestModal({
           <div style={{ display: "flex", gap: 12 }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Module</label>
-              <select
+              <select aria-label="Select option"
                 value={module}
                 onChange={(e) => setModule(e.target.value as Module)}
                 style={inputStyle}
@@ -170,7 +170,7 @@ export function FeatureRequestModal({
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Priority Suggestion</label>
-              <select
+              <select aria-label="Select option"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
                 style={inputStyle}

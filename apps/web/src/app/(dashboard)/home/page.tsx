@@ -10,6 +10,15 @@ import {
   QUICK_ACTIONS,
 } from "@/lib/fixtures/home";
 import { VisuallyHidden } from "@/components/shared/VisuallyHidden";
+import { useAuthStore } from "@/lib/stores/auth";
+
+function greetingFor(hour: number): string {
+  if (hour < 5) return "Working late";
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  if (hour < 21) return "Good evening";
+  return "Working late";
+}
 
 // ── Stat card ────────────────────────────────────────────────────
 function StatCard({
@@ -113,6 +122,9 @@ function ActivityItem({
 
 export default function HomePage() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const firstName = (user?.name ?? "there").split(" ")[0];
+  const greeting = greetingFor(new Date().getHours());
 
   return (
     <div
@@ -176,7 +188,7 @@ export default function HomePage() {
               margin: 0,
             }}
           >
-            Good morning, Preet 👋
+            {greeting}, {firstName} 👋
           </h1>
         </div>
         <div

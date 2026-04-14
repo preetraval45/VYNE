@@ -876,7 +876,7 @@ function DealModal({
           >
             {initial ? "Edit Deal" : "New Deal"}
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -968,7 +968,7 @@ function DealModal({
           >
             <div>
               <label style={labelStyle}>Stage</label>
-              <select
+              <select aria-label="Select option"
                 style={selectStyle}
                 value={stage}
                 onChange={(e) => setStage(e.target.value as OpportunityStage)}
@@ -992,7 +992,7 @@ function DealModal({
           </div>
           <div>
             <label style={labelStyle}>Assignee</label>
-            <select
+            <select aria-label="Select option"
               style={selectStyle}
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
@@ -1093,7 +1093,7 @@ function QuotationModal({
           >
             {initial ? "Edit Quotation" : "New Quotation"}
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1202,7 +1202,7 @@ function SalesOrderModal({
           >
             New Sales Order
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1325,7 +1325,7 @@ function ProductModal({
           >
             {initial ? "Edit Product" : "Add Product"}
           </h2>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1371,7 +1371,7 @@ function ProductModal({
             </div>
             <div>
               <label style={labelStyle}>Category</label>
-              <select
+              <select aria-label="Select option"
                 style={selectStyle}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}

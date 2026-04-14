@@ -233,7 +233,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
           label="Default Warehouse"
           hint="Primary warehouse for stock operations"
         >
-          <select
+          <select aria-label="Select option"
             value={warehouse}
             onChange={(e) => setWarehouse(e.target.value)}
             style={{ ...selectStyle, maxWidth: 240 }}
@@ -382,7 +382,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   )}
                 </td>
                 <td style={{ padding: "9px 0", textAlign: "right" }}>
-                  <button
+                  <button aria-label="Delete"
                     onClick={() => handleRemoveTax(t.id)}
                     style={{
                       padding: "3px 6px",
@@ -484,7 +484,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                 {f.label}
               </span>
               <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{f.type}</span>
-              <button
+              <button aria-label="Delete"
                 onClick={() => handleRemoveField(f.id)}
                 style={{
                   padding: "3px 6px",
@@ -510,7 +510,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <select
+          <select aria-label="Select option"
             value={newFieldEntity}
             onChange={(e) => setNewFieldEntity(e.target.value)}
             style={{ ...selectStyle, width: 130, flex: "none" }}
@@ -525,7 +525,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
             placeholder="Field label"
             style={{ ...inputStyle, flex: 1 }}
           />
-          <select
+          <select aria-label="Select option"
             value={newFieldType}
             onChange={(e) =>
               setNewFieldType(e.target.value as CustomField["type"])

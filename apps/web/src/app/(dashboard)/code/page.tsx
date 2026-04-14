@@ -686,7 +686,7 @@ function DeploymentsTab({
               </button>
             ),
           )}
-          <select
+          <select aria-label="Select option"
             value={envFilter}
             onChange={(e) => setEnvFilter(e.target.value)}
             style={{
@@ -882,7 +882,7 @@ function DeploymentsTab({
             />
           </FormField>
           <FormField label="Environment">
-            <select
+            <select aria-label="Select option"
               style={inputStyle}
               value={form.environment}
               onChange={(e) =>

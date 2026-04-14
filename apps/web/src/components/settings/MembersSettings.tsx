@@ -227,7 +227,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                   {m.role === "admin" ? (
                     <RoleBadge role="admin" />
                   ) : (
-                    <select
+                    <select aria-label="Select option"
                       value={m.role}
                       onChange={(e) =>
                         handleRoleChange(
@@ -328,7 +328,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                         </button>
                       </div>
                     ) : (
-                      <button
+                      <button aria-label="Delete"
                         onClick={() => setConfirmDeleteId(m.id)}
                         style={{
                           padding: "4px 6px",

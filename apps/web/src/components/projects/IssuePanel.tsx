@@ -195,7 +195,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button
+                <button aria-label="ExternalLink"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
@@ -211,7 +211,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 >
                   <ExternalLink size={14} />
                 </button>
-                <button
+                <button aria-label="More options"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
@@ -227,7 +227,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 >
                   <MoreHorizontal size={14} />
                 </button>
-                <button
+                <button aria-label="Close"
                   onClick={onClose}
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
@@ -352,15 +352,15 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    onBlur={handleDescriptionBlur}
                     placeholder="Add a description…"
                     rows={5}
+                    aria-label="Description"
                     className={cn(
                       "w-full p-3 rounded-lg text-sm resize-none focus:outline-none transition-all",
                       "placeholder:text-[#C0C0D8]",
                     )}
                     style={{
-                      background: "#F8F8FC",
+                      background: "var(--content-secondary)",
                       border: "1px solid var(--content-border)",
                       color: "var(--text-primary)",
                       lineHeight: "1.6",
@@ -372,7 +372,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                     }}
                     onBlur={(e) => {
                       handleDescriptionBlur();
-                      e.target.style.border = "1px solid #E8E8F0";
+                      e.target.style.border = "1px solid var(--content-border)";
                       e.target.style.boxShadow = "none";
                     }}
                   />

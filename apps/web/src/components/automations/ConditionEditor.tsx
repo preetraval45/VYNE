@@ -35,7 +35,7 @@ function ConditionRow(
           padding: "8px 10px",
         }}
       >
-        <select
+        <select aria-label="Select option"
           id={`cond-field-${condition.id}`}
           value={condition.field}
           onChange={(e) => onUpdate(condition.id, "field", e.target.value)}
@@ -56,7 +56,7 @@ function ConditionRow(
             </option>
           ))}
         </select>
-        <select
+        <select aria-label="Select option"
           id={`cond-op-${condition.id}`}
           value={condition.operator}
           onChange={(e) =>
