@@ -91,7 +91,7 @@ const PRIORITY_CONFIG: Record<
   critical: { color: "#EF4444", bg: "rgba(239,68,68,0.08)", label: "CRITICAL", rank: 0 },
   high: { color: "#F59E0B", bg: "rgba(245,158,11,0.08)", label: "HIGH", rank: 1 },
   medium: { color: "#3B82F6", bg: "rgba(59,130,246,0.08)", label: "MEDIUM", rank: 2 },
-  low: { color: "#6B6B8A", bg: "rgba(107,107,138,0.06)", label: "LOW", rank: 3 },
+  low: { color: "var(--text-secondary)", bg: "rgba(107,107,138,0.06)", label: "LOW", rank: 3 },
 };
 
 const TYPE_ICONS: Record<string, React.ElementType> = {

@@ -34,7 +34,7 @@ function getFileIcon(type: string) {
     return <FileSpreadsheet size={16} style={{ color: "#27AE60" }} />;
   if (type.includes("word") || type === "application/msword")
     return <FileText size={16} style={{ color: "#2980B9" }} />;
-  return <FileIcon size={16} style={{ color: "#A0A0B8" }} />;
+  return <FileIcon size={16} style={{ color: "var(--text-tertiary)" }} />;
 }
 
 function isImage(type: string): boolean {
@@ -77,7 +77,7 @@ export function AttachmentPreview({
               gap: 8,
               padding: "8px 12px",
               borderRadius: 8,
-              background: "#F8F8FC",
+              background: "var(--content-secondary)",
               border: "1px solid #E8E8F0",
               minWidth: 120,
               maxWidth: 180,
@@ -112,7 +112,7 @@ export function AttachmentPreview({
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
-                  color: "#1A1A2E",
+                  color: "var(--text-primary)",
                   margin: 0,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -150,7 +150,7 @@ export function AttachmentPreview({
                 width: 18,
                 height: 18,
                 borderRadius: "50%",
-                background: "#fff",
+                background: "var(--content-bg)",
                 border: "1px solid #E8E8F0",
                 cursor: "pointer",
                 display: "flex",
@@ -160,7 +160,7 @@ export function AttachmentPreview({
                 boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
               }}
             >
-              <X size={10} style={{ color: "#6B6B8A" }} />
+              <X size={10} style={{ color: "var(--text-secondary)" }} />
             </button>
           </div>
         ))}
@@ -176,7 +176,7 @@ export function AttachmentPreview({
             gap: 8,
             padding: isImage(file.type) ? 4 : "8px 12px",
             borderRadius: 8,
-            background: "#F8F8FC",
+            background: "var(--content-secondary)",
             border: "1px solid #E8E8F0",
             minWidth: isImage(file.type) ? 68 : 120,
             maxWidth: isImage(file.type) ? 100 : 200,
@@ -215,7 +215,7 @@ export function AttachmentPreview({
                   style={{
                     fontSize: 11,
                     fontWeight: 500,
-                    color: "#1A1A2E",
+                    color: "var(--text-primary)",
                     margin: 0,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -224,7 +224,7 @@ export function AttachmentPreview({
                 >
                   {file.name}
                 </p>
-                <p style={{ fontSize: 10, color: "#A0A0B8", margin: 0 }}>
+                <p style={{ fontSize: 10, color: "var(--text-tertiary)", margin: 0 }}>
                   {formatSize(file.size)}
                 </p>
               </div>
@@ -241,7 +241,7 @@ export function AttachmentPreview({
               width: 18,
               height: 18,
               borderRadius: "50%",
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid #E8E8F0",
               cursor: "pointer",
               display: "flex",
@@ -251,7 +251,7 @@ export function AttachmentPreview({
               boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
             }}
           >
-            <X size={10} style={{ color: "#6B6B8A" }} />
+            <X size={10} style={{ color: "var(--text-secondary)" }} />
           </button>
         </div>
       ))}
@@ -269,7 +269,7 @@ export function AttachmentPreview({
               gap: 8,
               padding: "8px 12px",
               borderRadius: 8,
-              background: "#FEF2F2",
+              background: "var(--badge-danger-bg)",
               border: "1px solid #FECACA",
               minWidth: 120,
               maxWidth: 220,
@@ -295,7 +295,7 @@ export function AttachmentPreview({
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
-                  color: "#991B1B",
+                  color: "var(--badge-danger-text)",
                   margin: 0,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -317,7 +317,7 @@ export function AttachmentPreview({
                 width: 18,
                 height: 18,
                 borderRadius: "50%",
-                background: "#fff",
+                background: "var(--content-bg)",
                 border: "1px solid #FECACA",
                 cursor: "pointer",
                 display: "flex",

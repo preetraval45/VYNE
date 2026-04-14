@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Building2,
@@ -22,13 +22,15 @@ import {
   Eye,
   Wrench,
   UserCircle,
-  ChevronRight,
   Sparkles,
   PartyPopper,
   X,
   Plus,
+  Loader2,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth'
+import { orgsApi } from '@/lib/api/client'
+import type { OrgFeatures } from '@/lib/api/client'
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface ModuleOption {
@@ -360,11 +362,13 @@ function StepInvite({
   onAdd,
   onRemove,
   onChangeEmail,
+  onSkip,
 }: {
   emails: string[]
   onAdd: () => void
   onRemove: (i: number) => void
   onChangeEmail: (i: number, val: string) => void
+  onSkip: () => void
 }) {
   return (
     <div style={{ maxWidth: 480, margin: '0 auto' }}>
@@ -460,7 +464,7 @@ function StepInvite({
 
       <button
         type="button"
-        onClick={() => {}}
+        onClick={onSkip}
         style={{
           display: 'block',
           margin: '24px auto 0',
@@ -515,6 +519,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const [step, setStep] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Form state
   const [company, setCompany] = useState({ companyName: '', industry: '', size: '' })
@@ -545,23 +550,67 @@ export default function OnboardingPage() {
     return true
   }
 
-  function handleNext() {
-    if (step < 3) {
-      setStep(step + 1)
-    } else {
-      // Save onboarding data (in demo mode, just navigate)
-      localStorage.setItem('vyne-onboarded', 'true')
-      localStorage.setItem(
-        'vyne-onboarding',
-        JSON.stringify({
-          company,
-          modules: Array.from(selectedModules),
-          invites: inviteEmails.filter(Boolean),
-        })
-      )
-      router.push('/home')
+  // Build feature flags from selected module set
+  function buildFeatureFlags(): Partial<OrgFeatures> {
+    const s = selectedModules
+    return {
+      chat: s.has('chat'),
+      projects: s.has('projects'),
+      docs: s.has('docs'),
+      ai: s.has('ai'),
+      erp: s.has('erp'),
+      finance: s.has('finance'),
+      crm: s.has('crm'),
+      sales: s.has('sales'),
+      invoicing: s.has('invoicing'),
+      manufacturing: s.has('manufacturing'),
+      purchase: s.has('purchase'),
+      hr: s.has('hr'),
+      marketing: s.has('marketing'),
+      maintenance: s.has('maintenance'),
+      support: s.has('support'),
+      observability: s.has('observe'),
     }
   }
+
+  const handleNext = useCallback(async () => {
+    if (step < 3) {
+      setStep(step + 1)
+      return
+    }
+
+    // Step 3 → Done: persist onboarding data
+    setIsSaving(true)
+
+    // Always persist to localStorage for demo-mode / offline use
+    const onboardingData = {
+      company,
+      modules: Array.from(selectedModules),
+      invites: inviteEmails.filter(Boolean),
+    }
+    localStorage.setItem('vyne-onboarded', 'true')
+    localStorage.setItem('vyne-onboarding', JSON.stringify(onboardingData))
+    // Store enabled modules for sidebar filtering
+    localStorage.setItem('vyne-modules', JSON.stringify(Array.from(selectedModules)))
+
+    // If we have a real org ID, persist to backend
+    if (user?.orgId) {
+      try {
+        await orgsApi.update(user.orgId, {
+          name: company.companyName.trim() || undefined,
+          settings: {
+            features: buildFeatureFlags(),
+          },
+        })
+      } catch {
+        // Non-fatal: local state already saved
+      }
+    }
+
+    setIsSaving(false)
+    router.push('/home')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, company, selectedModules, inviteEmails, user, router])
 
   return (
     <div
@@ -654,6 +703,7 @@ export default function OnboardingPage() {
             onChangeEmail={(i, val) =>
               setInviteEmails((prev) => prev.map((e, idx) => (idx === i ? val : e)))
             }
+            onSkip={() => setStep(3)}
           />
         )}
         {step === 3 && <StepDone companyName={company.companyName} />}
@@ -699,7 +749,7 @@ export default function OnboardingPage() {
         <button
           type="button"
           onClick={handleNext}
-          disabled={!canAdvance()}
+          disabled={!canAdvance() || isSaving}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -707,17 +757,20 @@ export default function OnboardingPage() {
             padding: '10px 24px',
             borderRadius: 10,
             border: 'none',
-            background: canAdvance() ? 'linear-gradient(135deg, #6C47FF, #8B6BFF)' : 'var(--content-secondary)',
-            color: canAdvance() ? '#fff' : 'var(--text-tertiary)',
+            background: (canAdvance() && !isSaving) ? 'linear-gradient(135deg, #6C47FF, #8B6BFF)' : 'var(--content-secondary)',
+            color: (canAdvance() && !isSaving) ? '#fff' : 'var(--text-tertiary)',
             fontSize: 14,
             fontWeight: 600,
-            cursor: canAdvance() ? 'pointer' : 'default',
+            cursor: (canAdvance() && !isSaving) ? 'pointer' : 'default',
             transition: 'all 0.2s',
-            boxShadow: canAdvance() ? '0 4px 12px rgba(108,71,255,0.3)' : 'none',
+            boxShadow: (canAdvance() && !isSaving) ? '0 4px 12px rgba(108,71,255,0.3)' : 'none',
           }}
         >
-          {step === 3 ? 'Go to Dashboard' : step === 2 ? 'Finish Setup' : 'Continue'}
-          <ArrowRight size={16} />
+          {isSaving ? (
+            <><Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> Saving…</>
+          ) : (
+            <>{step === 3 ? 'Go to Dashboard' : step === 2 ? 'Finish Setup' : 'Continue'}<ArrowRight size={16} /></>
+          )}
         </button>
       </div>
     </div>

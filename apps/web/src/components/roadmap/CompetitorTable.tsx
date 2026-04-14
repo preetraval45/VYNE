@@ -140,7 +140,7 @@ export function CompetitorTable() {
                             padding: "1px 6px",
                             borderRadius: 4,
                             background: "rgba(34,197,94,0.12)",
-                            color: "#166534",
+                            color: "var(--badge-success-text)",
                             whiteSpace: "nowrap",
                           }}
                         >

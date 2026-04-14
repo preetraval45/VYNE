@@ -50,20 +50,20 @@ function stageConfig(s: OpportunityStage): {
     { bg: string; color: string; dotColor: string }
   > = {
     Qualification: { bg: "#EFF6FF", color: "#1E40AF", dotColor: "#3B82F6" },
-    Proposal: { bg: "#FFFBEB", color: "#92400E", dotColor: "#F59E0B" },
+    Proposal: { bg: "#FFFBEB", color: "var(--badge-warning-text)", dotColor: "#F59E0B" },
     Negotiation: { bg: "#F5F3FF", color: "#5B21B6", dotColor: "#8B5CF6" },
-    "Closed Won": { bg: "#F0FDF4", color: "#166534", dotColor: "#22C55E" },
-    "Closed Lost": { bg: "#FEF2F2", color: "#991B1B", dotColor: "#EF4444" },
+    "Closed Won": { bg: "#F0FDF4", color: "var(--badge-success-text)", dotColor: "#22C55E" },
+    "Closed Lost": { bg: "#FEF2F2", color: "var(--badge-danger-text)", dotColor: "#EF4444" },
   };
   return map[s];
 }
 
 function quoteStatusConfig(s: QuoteStatus): { bg: string; color: string } {
   const map: Record<QuoteStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F4F4F8", color: "#6B6B8A" },
+    Draft: { bg: "#F4F4F8", color: "var(--text-secondary)" },
     Sent: { bg: "#EFF6FF", color: "#1E40AF" },
-    Accepted: { bg: "#F0FDF4", color: "#166534" },
-    Rejected: { bg: "#FEF2F2", color: "#991B1B" },
+    Accepted: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Rejected: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
@@ -71,18 +71,18 @@ function quoteStatusConfig(s: QuoteStatus): { bg: string; color: string } {
 function orderStatusConfig(s: OrderStatus): { bg: string; color: string } {
   const map: Record<OrderStatus, { bg: string; color: string }> = {
     Confirmed: { bg: "#EFF6FF", color: "#1E40AF" },
-    Processing: { bg: "#FFFBEB", color: "#92400E" },
+    Processing: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Shipped: { bg: "#F5F3FF", color: "#5B21B6" },
-    Delivered: { bg: "#F0FDF4", color: "#166534" },
+    Delivered: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
   };
   return map[s];
 }
 
 function productStatusConfig(s: ProductStatus): { bg: string; color: string } {
   const map: Record<ProductStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
-    "Low Stock": { bg: "#FFFBEB", color: "#92400E" },
-    "Out of Stock": { bg: "#FEF2F2", color: "#991B1B" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    "Low Stock": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+    "Out of Stock": { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
@@ -92,8 +92,8 @@ function customerStatusConfig(s: CustomerStatus): {
   color: string;
 } {
   const map: Record<CustomerStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
-    Inactive: { bg: "#F4F4F8", color: "#6B6B8A" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Inactive: { bg: "#F4F4F8", color: "var(--text-secondary)" },
     New: { bg: "#EFF6FF", color: "#1E40AF" },
   };
   return map[s];
@@ -113,12 +113,12 @@ function probabilityBadgeStyle(probability: number): {
   color: string;
 } {
   if (probability >= 60) {
-    return { background: "#F0FDF4", color: "#166534" };
+    return { background: "var(--badge-success-bg)", color: "var(--badge-success-text)" };
   }
   if (probability >= 30) {
-    return { background: "#FFFBEB", color: "#92400E" };
+    return { background: "var(--badge-warning-bg)", color: "var(--badge-warning-text)" };
   }
-  return { background: "#FEF2F2", color: "#991B1B" };
+  return { background: "var(--badge-danger-bg)", color: "var(--badge-danger-text)" };
 }
 
 // ─── Style constants ─────────────────────────────────────────────
@@ -3029,7 +3029,7 @@ function ReportsTab() {
                       style={{
                         fontSize: 14,
                         fontWeight: 700,
-                        color: "#166534",
+                        color: "var(--badge-success-text)",
                       }}
                     >
                       {fmtFull(deal.value)}

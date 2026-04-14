@@ -43,7 +43,7 @@ export function ChannelSidebar({
         width: 240,
         minWidth: 240,
         borderRight: "1px solid #E8E8F0",
-        background: "#FAFAFE",
+        background: "var(--content-secondary)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
@@ -65,7 +65,7 @@ export function ChannelSidebar({
             marginBottom: 10,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
             Messages
           </span>
           <button
@@ -78,7 +78,7 @@ export function ChannelSidebar({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -106,7 +106,7 @@ export function ChannelSidebar({
             padding: "5px 10px",
           }}
         >
-          <Search size={12} style={{ color: "#A0A0B8", flexShrink: 0 }} />
+          <Search size={12} style={{ color: "var(--text-tertiary)", flexShrink: 0 }} />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -117,7 +117,7 @@ export function ChannelSidebar({
               border: "none",
               outline: "none",
               fontSize: 12,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
             }}
           />
         </div>
@@ -141,7 +141,7 @@ export function ChannelSidebar({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
             }}
           >
             <ChevronDown
@@ -259,7 +259,7 @@ export function ChannelSidebar({
                     cursor: "pointer",
                     fontSize: 12,
                     background: "transparent",
-                    color: "#A0A0B8",
+                    color: "var(--text-tertiary)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
@@ -292,7 +292,7 @@ export function ChannelSidebar({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
             }}
           >
             <ChevronDown
@@ -410,7 +410,7 @@ export function ChannelSidebar({
                     cursor: "pointer",
                     fontSize: 12,
                     background: "transparent",
-                    color: "#A0A0B8",
+                    color: "var(--text-tertiary)",
                   }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =

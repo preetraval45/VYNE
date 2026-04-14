@@ -77,7 +77,7 @@ function KPICard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         padding: "16px 18px",
         display: "flex",
@@ -111,7 +111,7 @@ function KPICard({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: trend.positive ? "#166534" : "#991B1B",
+              color: trend.positive ? "var(--badge-success-text)" : "var(--badge-danger-text)",
             }}
           >
             {trend.positive ? "+" : ""}
@@ -165,7 +165,7 @@ function TableCard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -173,7 +173,7 @@ function TableCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -204,7 +204,7 @@ function SectionPanel({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         padding: "18px",
       }}
@@ -235,15 +235,15 @@ const thStyle: React.CSSProperties = {
   letterSpacing: "0.04em",
   textAlign: "left",
   whiteSpace: "nowrap",
-  borderBottom: "1px solid rgba(0,0,0,0.06)",
-  background: "#FAFAFE",
+  borderBottom: "1px solid var(--content-border)",
+  background: "var(--content-secondary)",
 };
 
 const tdStyle: React.CSSProperties = {
   padding: "10px 14px",
   fontSize: 12,
   color: "var(--text-primary)",
-  borderBottom: "1px solid rgba(0,0,0,0.04)",
+  borderBottom: "1px solid var(--content-border)",
   whiteSpace: "nowrap",
 };
 
@@ -563,12 +563,12 @@ function PLRow({
 }>) {
   let valueColor = "var(--text-primary)";
   if (value < 0) valueColor = "var(--status-danger)";
-  else if (highlight) valueColor = "#166534";
+  else if (highlight) valueColor = "var(--badge-success-text)";
 
   return (
     <tr
       style={{
-        borderTop: "1px solid rgba(0,0,0,0.04)",
+        borderTop: "1px solid var(--content-border)",
         background: highlight
           ? value >= 0
             ? "#F0FDF4"
@@ -681,7 +681,7 @@ const AR_AGING = [
     bucket: "Current (0-30)",
     amount: 85000,
     count: 24,
-    color: "#166534",
+    color: "var(--badge-success-text)",
     bg: "#F0FDF4",
   },
   {
@@ -695,14 +695,14 @@ const AR_AGING = [
     bucket: "61-90 Days",
     amount: 12500,
     count: 3,
-    color: "#92400E",
+    color: "var(--badge-warning-text)",
     bg: "#FFFBEB",
   },
   {
     bucket: "90+ Days",
     amount: 4800,
     count: 2,
-    color: "#991B1B",
+    color: "var(--badge-danger-text)",
     bg: "#FEF2F2",
   },
 ];
@@ -1071,7 +1071,7 @@ function SalesTab() {
               const segColors: Record<string, { bg: string; color: string }> = {
                 Enterprise: { bg: "#F5F3FF", color: "#5B21B6" },
                 "Mid-Market": { bg: "#EFF6FF", color: "#1E40AF" },
-                SMB: { bg: "#F0FDF4", color: "#166534" },
+                SMB: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
               };
               const seg = segColors[c.segment] ?? {
                 bg: "#F0F0F8",
@@ -1248,7 +1248,7 @@ function FinancialTab() {
                   width: 12,
                   height: 12,
                   borderRadius: 3,
-                  background: "#166534",
+                  background: "var(--status-success)",
                 }}
               />
               <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
@@ -1261,7 +1261,7 @@ function FinancialTab() {
                   width: 12,
                   height: 12,
                   borderRadius: 3,
-                  background: "#991B1B",
+                  background: "var(--status-danger)",
                 }}
               />
               <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
@@ -1320,7 +1320,7 @@ function FinancialTab() {
                   </td>
                 </tr>
               ))}
-              <tr style={{ background: "#FAFAFE" }}>
+              <tr style={{ background: "var(--content-secondary)" }}>
                 <td style={{ ...tdStyle, fontWeight: 700 }}>Total</td>
                 <td style={{ ...tdStyle, textAlign: "right", fontWeight: 700 }}>
                   {fmt(totalAR)}
@@ -1485,9 +1485,9 @@ function OperationsTab() {
                 string,
                 { bg: string; color: string }
               > = {
-                A: { bg: "#F0FDF4", color: "#166534" },
-                B: { bg: "#FFFBEB", color: "#92400E" },
-                C: { bg: "#FEF2F2", color: "#991B1B" },
+                A: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+                B: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+                C: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
               };
               const rc = ratingColors[s.rating] ?? {
                 bg: "#F0F0F8",
@@ -1696,7 +1696,7 @@ function HRTab() {
               return (
                 <tr
                   key={p.category}
-                  style={{ background: isTotal ? "#FAFAFE" : "transparent" }}
+                  style={{ background: isTotal ? "var(--content-secondary)" : "transparent" }}
                 >
                   <td style={{ ...tdStyle, fontWeight: isTotal ? 700 : 400 }}>
                     {p.category}
@@ -1735,9 +1735,9 @@ function CustomReportsTab() {
   const selectStyle: React.CSSProperties = {
     width: "100%",
     padding: "8px 10px",
-    border: "1px solid #D8D8E8",
+    border: "1px solid var(--input-border)",
     borderRadius: 8,
-    background: "#FAFAFE",
+    background: "var(--content-secondary)",
     outline: "none",
     fontSize: 13,
     color: "var(--text-primary)",
@@ -1843,7 +1843,7 @@ function CustomReportsTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           padding: "24px",
         }}
@@ -1997,7 +1997,7 @@ function CustomReportsTab() {
             style={{
               padding: "10px 20px",
               borderRadius: 8,
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               background: "transparent",
               color: "var(--text-secondary)",
               fontSize: 13,
@@ -2073,9 +2073,9 @@ function CustomReportsTab() {
           style={{
             marginTop: 24,
             padding: "14px 20px",
-            background: "#FAFAFE",
+            background: "var(--content-secondary)",
             borderRadius: 8,
-            border: "1px solid rgba(0,0,0,0.06)",
+            border: "1px solid var(--content-border)",
             display: "flex",
             gap: 24,
             flexWrap: "wrap",
@@ -2229,7 +2229,7 @@ export default function ReportingPage() {
         style={{
           display: "flex",
           gap: 0,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           paddingLeft: 24,
           background: "var(--content-bg)",
           flexShrink: 0,

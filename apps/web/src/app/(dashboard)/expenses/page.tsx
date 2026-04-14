@@ -21,8 +21,8 @@ function statusConfig(s: ExpenseStatus): {
   > = {
     draft: { label: "Draft", bg: "#F0F0F8", color: "var(--text-secondary)" },
     submitted: { label: "Submitted", bg: "#EFF6FF", color: "#1E40AF" },
-    approved: { label: "Approved", bg: "#F0FDF4", color: "#166534" },
-    rejected: { label: "Rejected", bg: "#FEF2F2", color: "#991B1B" },
+    approved: { label: "Approved", bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    rejected: { label: "Rejected", bg: "#FEF2F2", color: "var(--badge-danger-text)" },
     paid: { label: "Paid", bg: "#F5F3FF", color: "#5B21B6" },
   };
   return map[s];
@@ -282,7 +282,7 @@ function MyExpensesTab({
           <div
             key={label}
             style={{
-              background: "#F7F7FB",
+              background: "var(--table-header-bg)",
               borderRadius: 10,
               padding: "14px 16px",
             }}
@@ -353,7 +353,7 @@ function MyExpensesTab({
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Date",
                 "Category",
@@ -1011,7 +1011,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                 <div
                   style={{
                     height: 6,
-                    background: "#F0F0F8",
+                    background: "var(--content-secondary)",
                     borderRadius: 4,
                     overflow: "hidden",
                   }}
@@ -1181,7 +1181,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                   padding: "12px 14px",
                   borderRadius: 8,
                   border: `1px solid ${overBudget ? "rgba(239,68,68,0.3)" : "var(--content-border)"}`,
-                  background: overBudget ? "rgba(239,68,68,0.04)" : "#FAFAFE",
+                  background: overBudget ? "rgba(239,68,68,0.04)" : "var(--content-secondary)",
                 }}
               >
                 <div style={{ fontSize: 18, marginBottom: 6 }}>
@@ -1317,7 +1317,7 @@ export default function ExpensesPage() {
                 padding: "3px 8px",
                 borderRadius: 6,
                 background: "rgba(245,158,11,0.1)",
-                color: "#92400E",
+                color: "var(--badge-warning-text)",
               }}
             >
               {pendingCount} pending approval

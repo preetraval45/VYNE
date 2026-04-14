@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { erpApi } from "@/lib/api/client";
 
 // ── Types ────────────────────────────────────────────────────────
 type PurchaseTab =
@@ -78,7 +79,7 @@ interface Bill {
 }
 
 // ── Mock Data ────────────────────────────────────────────────────
-const MOCK_POS: PurchaseOrder[] = [
+let MOCK_POS: PurchaseOrder[] = [
   {
     id: "po1",
     poNumber: "PO-2026-001",
@@ -181,7 +182,7 @@ const MOCK_POS: PurchaseOrder[] = [
   },
 ];
 
-const MOCK_VENDORS: Vendor[] = [
+let MOCK_VENDORS: Vendor[] = [
   {
     id: "v1",
     name: "Acme Supplies",
@@ -527,26 +528,26 @@ function poStatusStyle(s: POStatus): { bg: string; color: string } {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
     Sent: { bg: "#EFF6FF", color: "#1E40AF" },
     Confirmed: { bg: "#F5F3FF", color: "#5B21B6" },
-    Received: { bg: "#F0FDF4", color: "#166534" },
-    Cancelled: { bg: "#FEF2F2", color: "#991B1B" },
+    Received: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Cancelled: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
 
 function vendorStatusStyle(s: VendorStatus): { bg: string; color: string } {
   const map: Record<VendorStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
-    Inactive: { bg: "#FEF2F2", color: "#991B1B" },
-    Pending: { bg: "#FFFBEB", color: "#92400E" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Inactive: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
   };
   return map[s];
 }
 
 function qcStyle(r: QCResult): { bg: string; color: string } {
   const map: Record<QCResult, { bg: string; color: string }> = {
-    Pass: { bg: "#F0FDF4", color: "#166534" },
-    Fail: { bg: "#FEF2F2", color: "#991B1B" },
-    Pending: { bg: "#FFFBEB", color: "#92400E" },
+    Pass: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Fail: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
   };
   return map[r];
 }
@@ -555,8 +556,8 @@ function billStatusStyle(s: BillStatus): { bg: string; color: string } {
   const map: Record<BillStatus, { bg: string; color: string }> = {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
     Received: { bg: "#EFF6FF", color: "#1E40AF" },
-    Paid: { bg: "#F0FDF4", color: "#166534" },
-    Overdue: { bg: "#FEF2F2", color: "#991B1B" },
+    Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
@@ -651,7 +652,7 @@ function KPICard({
   return (
     <div
       style={{
-        background: "#F7F7FB",
+        background: "var(--table-header-bg)",
         borderRadius: 10,
         padding: "14px 16px",
       }}
@@ -923,7 +924,7 @@ function PurchaseOrdersTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "PO #",
                 "Vendor",
@@ -1062,7 +1063,7 @@ function VendorsTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Name",
                 "Contact",
@@ -1107,7 +1108,7 @@ function VendorsTab() {
                             padding: "1px 6px",
                             borderRadius: 4,
                             fontSize: 10,
-                            background: "#F0F0F8",
+                            background: "var(--content-secondary)",
                             color: "var(--text-secondary)",
                           }}
                         >
@@ -1209,7 +1210,7 @@ function ProductsTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Name",
                 "SKU",
@@ -1247,7 +1248,7 @@ function ProductsTab() {
                       padding: "2px 8px",
                       borderRadius: 4,
                       fontSize: 11,
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       color: "var(--text-secondary)",
                     }}
                   >
@@ -1348,7 +1349,7 @@ function ReceiptsTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Receipt #",
                 "PO Reference",
@@ -1495,7 +1496,7 @@ function BillsTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Bill #",
                 "Vendor",
@@ -1692,7 +1693,7 @@ function ReportsTab() {
                 <div
                   style={{
                     height: 8,
-                    background: "#F0F0F8",
+                    background: "var(--content-secondary)",
                     borderRadius: 4,
                     overflow: "hidden",
                   }}
@@ -1769,7 +1770,7 @@ function ReportsTab() {
                   <div
                     style={{
                       height: 8,
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       borderRadius: 4,
                       overflow: "hidden",
                     }}
@@ -1796,6 +1797,57 @@ function ReportsTab() {
 // ── Main Purchase Page ───────────────────────────────────────────
 export default function PurchasePage() {
   const [activeTab, setActiveTab] = useState<PurchaseTab>("orders");
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    erpApi
+      .listOrders({ status: "draft" })
+      .then((r) => {
+        if (r.data?.length) {
+          MOCK_POS = r.data.map((o, i) => ({
+            id: o.id,
+            poNumber: o.orderNumber,
+            vendor: o.customerName,
+            date: o.createdAt.slice(0, 10),
+            expectedDelivery: o.createdAt.slice(0, 10),
+            amount: o.total,
+            status: (
+              o.status === "delivered"
+                ? "Received"
+                : o.status === "shipped"
+                  ? "Confirmed"
+                  : o.status === "confirmed"
+                    ? "Sent"
+                    : o.status === "cancelled"
+                      ? "Cancelled"
+                      : "Draft"
+            ) as POStatus,
+            itemsCount: o.lines?.length ?? i + 1,
+          }));
+          setTick((t) => t + 1);
+        }
+      })
+      .catch(() => {});
+    erpApi
+      .listSuppliers()
+      .then((r) => {
+        if (r.data?.length) {
+          MOCK_VENDORS = r.data.map((s) => ({
+            id: s.id,
+            name: s.name,
+            contact: s.contactName ?? s.name,
+            email: s.email ?? "",
+            phone: s.phone ?? "",
+            productsSupplied: [],
+            totalPurchased: 0,
+            rating: 4,
+            status: (s.status === "inactive" ? "Inactive" : "Active") as VendorStatus,
+          }));
+          setTick((t) => t + 1);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function renderTab() {
     switch (activeTab) {

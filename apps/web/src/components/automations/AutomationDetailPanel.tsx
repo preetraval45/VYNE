@@ -29,7 +29,7 @@ function EmptyState() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        color: "#A0A0B8",
+        color: "var(--text-tertiary)",
       }}
     >
       <div
@@ -50,7 +50,7 @@ function EmptyState() {
         style={{
           fontSize: 14,
           fontWeight: 600,
-          color: "#1A1A2E",
+          color: "var(--text-primary)",
           marginBottom: 6,
         }}
       >
@@ -59,7 +59,7 @@ function EmptyState() {
       <div
         style={{
           fontSize: 12,
-          color: "#A0A0B8",
+          color: "var(--text-tertiary)",
           textAlign: "center",
           maxWidth: 240,
         }}
@@ -406,8 +406,8 @@ export default function AutomationDetailPanel(
       <div
         style={{
           padding: "14px 20px",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
-          background: "#fff",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >
@@ -436,11 +436,11 @@ export default function AutomationDetailPanel(
                   flex: 1,
                   fontSize: 15,
                   fontWeight: 600,
-                  color: "#1A1A2E",
+                  color: "var(--text-primary)",
                   border: "1px solid #6C47FF",
                   borderRadius: 7,
                   padding: "4px 8px",
-                  background: "#FAFAFE",
+                  background: "var(--content-secondary)",
                   outline: "none",
                 }}
               />
@@ -465,7 +465,7 @@ export default function AutomationDetailPanel(
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#6B6B8A",
+                  color: "var(--text-secondary)",
                   padding: 4,
                 }}
                 title="Cancel"
@@ -477,7 +477,7 @@ export default function AutomationDetailPanel(
             <div
               style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}
             >
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
                 {automation.name}
               </span>
               <button
@@ -486,7 +486,7 @@ export default function AutomationDetailPanel(
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "#A0A0B8",
+                  color: "var(--text-tertiary)",
                   padding: 3,
                   display: "flex",
                   alignItems: "center",
@@ -526,13 +526,13 @@ export default function AutomationDetailPanel(
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <StatusBadge status={automation.status} />
-          <span style={{ fontSize: 11, color: "#6B6B8A" }}>
-            <strong style={{ color: "#1A1A2E" }}>{automation.runCount}</strong>{" "}
+          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+            <strong style={{ color: "var(--text-primary)" }}>{automation.runCount}</strong>{" "}
             runs total
           </span>
-          <span style={{ fontSize: 11, color: "#6B6B8A" }}>
+          <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
             Last run:{" "}
-            <strong style={{ color: "#1A1A2E" }}>
+            <strong style={{ color: "var(--text-primary)" }}>
               {formatRelativeTime(automation.lastRun)}
             </strong>
           </span>
@@ -544,9 +544,9 @@ export default function AutomationDetailPanel(
         style={{
           display: "flex",
           gap: 0,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           padding: "0 20px",
-          background: "#fff",
+          background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >

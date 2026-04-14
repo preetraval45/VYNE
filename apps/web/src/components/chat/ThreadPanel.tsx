@@ -39,7 +39,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
         borderLeft: "1px solid #E8E8F0",
         display: "flex",
         flexDirection: "column",
-        background: "#fff",
+        background: "var(--content-bg)",
         overflow: "hidden",
       }}
     >
@@ -54,7 +54,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           Thread
         </span>
         <button
@@ -65,7 +65,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
             border: "none",
             background: "transparent",
             cursor: "pointer",
-            color: "#A0A0B8",
+            color: "var(--text-tertiary)",
             display: "flex",
           }}
           onMouseEnter={(e) => {
@@ -85,7 +85,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           padding: "14px 16px",
           borderBottom: "1px solid #F0F0F8",
           flexShrink: 0,
-          background: "#FAFAFE",
+          background: "var(--content-secondary)",
         }}
       >
         <div style={{ display: "flex", gap: 10 }}>
@@ -99,10 +99,10 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
                 marginBottom: 3,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
                 {parentMsg.author.name}
               </span>
-              <span style={{ fontSize: 10, color: "#A0A0B8" }}>
+              <span style={{ fontSize: 10, color: "var(--text-tertiary)" }}>
                 {formatRelativeTime(parentMsg.createdAt)}
               </span>
             </div>
@@ -151,7 +151,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           <p
             style={{
               fontSize: 12,
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               textAlign: "center",
               padding: "24px 0",
             }}
@@ -160,7 +160,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           </p>
         )}
         {typingUsers.length > 0 && (
-          <p style={{ fontSize: 11, color: "#A0A0B8", fontStyle: "italic" }}>
+          <p style={{ fontSize: 11, color: "var(--text-tertiary)", fontStyle: "italic" }}>
             {typingUsers[0].name} is typing…
           </p>
         )}

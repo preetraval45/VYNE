@@ -2,15 +2,62 @@
   "expo": {
     "name": "Vyne",
     "slug": "vyne",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "scheme": "vyne",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",
     "splash": { "backgroundColor": "#1C1C2E" },
-    "ios": { "supportsTablet": true, "bundleIdentifier": "ai.vyne.app" },
-    "android": { "adaptiveIcon": { "backgroundColor": "#1C1C2E" }, "package": "ai.vyne.app" },
-    "plugins": ["expo-router"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ai.vyne.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Vyne uses your camera to scan inventory barcodes and QR codes.",
+        "NSFaceIDUsageDescription": "Vyne uses Face ID to securely log you in."
+      },
+      "associatedDomains": ["applinks:vyne.ai"]
+    },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#1C1C2E" },
+      "package": "ai.vyne.app",
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "vyne.ai", "pathPrefix": "/" },
+            { "scheme": "vyne" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        { "cameraPermission": "Vyne uses your camera to scan inventory barcodes." }
+      ],
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Vyne uses Face ID to securely log you in." }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#6C47FF",
+          "sounds": []
+        }
+      ]
+    ],
     "experiments": { "typedRoutes": true }
   }
 }

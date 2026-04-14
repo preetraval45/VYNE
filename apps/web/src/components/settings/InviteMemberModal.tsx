@@ -40,7 +40,7 @@ export default function InviteMemberModal({
     >
       <div
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 12,
           width: 400,
           padding: 24,
@@ -56,7 +56,7 @@ export default function InviteMemberModal({
             marginBottom: 18,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
             Invite Team Member
           </span>
           <button
@@ -65,7 +65,7 @@ export default function InviteMemberModal({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               padding: 4,
               borderRadius: 6,
               display: "flex",
@@ -82,7 +82,7 @@ export default function InviteMemberModal({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               display: "block",
               marginBottom: 5,
               textTransform: "uppercase",
@@ -100,12 +100,12 @@ export default function InviteMemberModal({
             style={{
               width: "100%",
               padding: "8px 10px",
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               borderRadius: 8,
-              background: "#FAFAFE",
+              background: "var(--content-secondary)",
               outline: "none",
               fontSize: 13,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               boxSizing: "border-box",
             }}
           />
@@ -118,7 +118,7 @@ export default function InviteMemberModal({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               display: "block",
               marginBottom: 5,
               textTransform: "uppercase",
@@ -134,12 +134,12 @@ export default function InviteMemberModal({
             style={{
               width: "100%",
               padding: "8px 10px",
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               borderRadius: 8,
-              background: "#FAFAFE",
+              background: "var(--content-secondary)",
               outline: "none",
               fontSize: 13,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               boxSizing: "border-box",
             }}
           >
@@ -155,11 +155,11 @@ export default function InviteMemberModal({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
             }}
           >
             Cancel

@@ -85,8 +85,8 @@ export default function SettingsPage() {
         style={{
           width: 200,
           minWidth: 200,
-          borderRight: "1px solid rgba(0,0,0,0.08)",
-          background: "#FAFAFE",
+          borderRight: "1px solid var(--content-border)",
+          background: "var(--content-secondary)",
           padding: "16px 10px",
           flexShrink: 0,
         }}
@@ -95,7 +95,7 @@ export default function SettingsPage() {
           style={{
             fontSize: 11,
             fontWeight: 600,
-            color: "#A0A0B8",
+            color: "var(--text-tertiary)",
             textTransform: "uppercase",
             letterSpacing: "0.07em",
             padding: "0 8px",

@@ -49,7 +49,7 @@ function getDocIcon(type: string) {
   if (type.includes("word") || type === "application/msword")
     return <FileText size={18} style={{ color: "#2980B9" }} />;
   if (type === "text/plain")
-    return <FileText size={18} style={{ color: "#6B6B8A" }} />;
+    return <FileText size={18} style={{ color: "var(--text-secondary)" }} />;
   return <FileIcon size={18} style={{ color: "#A0A0B8" }} />;
 }
 
@@ -231,7 +231,7 @@ function DocAttachment({
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
-        (e.currentTarget as HTMLElement).style.borderColor = "#D8D8E8";
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "#F8F8FC";
@@ -243,7 +243,7 @@ function DocAttachment({
           width: 36,
           height: 36,
           borderRadius: 8,
-          background: "#fff",
+          background: "var(--content-bg)",
           border: "1px solid #E8E8F0",
           display: "flex",
           alignItems: "center",
@@ -258,7 +258,7 @@ function DocAttachment({
           style={{
             fontSize: 13,
             fontWeight: 500,
-            color: "#1A1A2E",
+            color: "var(--text-primary)",
             margin: 0,
             overflow: "hidden",
             textOverflow: "ellipsis",

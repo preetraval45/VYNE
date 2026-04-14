@@ -167,7 +167,7 @@ function KpiCard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "16px 18px",
         flex: 1,
@@ -247,7 +247,7 @@ function ServiceCard({ svc }: Readonly<{ svc: Service }>) {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "14px 16px",
         borderTop: `3px solid ${dotColor}`,
@@ -458,7 +458,7 @@ function ProgressBar({
       <div
         style={{
           height: 6,
-          background: "#F0F0F8",
+          background: "var(--content-secondary)",
           borderRadius: 6,
           overflow: "hidden",
         }}
@@ -484,7 +484,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -494,7 +494,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -507,7 +507,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "16px 18px",
         }}
@@ -536,7 +536,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
                     fontWeight: 500,
                     paddingBottom: 8,
                     fontSize: 11,
-                    borderBottom: "1px solid rgba(0,0,0,0.07)",
+                    borderBottom: "1px solid var(--content-border)",
                   }}
                 >
                   {h}
@@ -548,7 +548,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
             {SLOWEST_ENDPOINTS.map((ep) => (
               <tr
                 key={ep.id}
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}
+                style={{ borderBottom: "1px solid var(--content-border)" }}
               >
                 <td style={{ padding: "8px 0" }}>
                   <span
@@ -615,7 +615,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "16px 18px",
         }}
@@ -684,7 +684,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
                   <code
                     style={{
                       fontSize: 11,
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       padding: "1px 6px",
                       borderRadius: 4,
                       color: "var(--vyne-purple)",
@@ -723,7 +723,7 @@ function MetricsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -745,7 +745,7 @@ function MetricsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -775,7 +775,7 @@ function MetricsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -833,7 +833,7 @@ function MetricsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
           }}
@@ -885,7 +885,7 @@ function MetricsTab() {
           })}
           <div
             style={{
-              borderTop: "1px solid rgba(0,0,0,0.06)",
+              borderTop: "1px solid var(--content-border)",
               paddingTop: 14,
               marginTop: 4,
             }}
@@ -911,7 +911,7 @@ function MetricsTab() {
                 <div
                   key={m.id}
                   style={{
-                    background: "#F7F7FB",
+                    background: "var(--table-header-bg)",
                     borderRadius: 8,
                     padding: "10px 12px",
                   }}
@@ -979,7 +979,7 @@ function LogsTab() {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "16px 18px",
       }}
@@ -1037,7 +1037,7 @@ function LogsTab() {
             padding: "4px 8px",
             borderRadius: 8,
             fontSize: 11,
-            border: "1px solid rgba(0,0,0,0.12)",
+            border: "1px solid var(--content-border)",
             background: "var(--content-bg)",
             color: "var(--text-primary)",
             cursor: "pointer",
@@ -1075,7 +1075,7 @@ function LogsTab() {
             padding: "4px 10px",
             borderRadius: 8,
             fontSize: 11,
-            border: "1px solid rgba(0,0,0,0.12)",
+            border: "1px solid var(--content-border)",
             background: "var(--content-bg)",
             color: "var(--text-primary)",
           }}
@@ -1127,7 +1127,7 @@ function LogsTab() {
               alignItems: "flex-start",
               padding: "8px 10px",
               borderRadius: 6,
-              background: "#FAFAFE",
+              background: "var(--content-secondary)",
               fontFamily: "monospace",
               borderLeft: `3px solid ${getLevelColor(entry.level)}`,
             }}
@@ -1272,7 +1272,7 @@ function AlertsTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
           padding: "16px 18px",
         }}
@@ -1329,7 +1329,7 @@ function AlertsTab() {
                     fontWeight: 500,
                     paddingBottom: 8,
                     fontSize: 11,
-                    borderBottom: "1px solid rgba(0,0,0,0.07)",
+                    borderBottom: "1px solid var(--content-border)",
                   }}
                 >
                   {h}
@@ -1341,7 +1341,7 @@ function AlertsTab() {
             {ALERT_HISTORY.map((a) => (
               <tr
                 key={a.id}
-                style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}
+                style={{ borderBottom: "1px solid var(--content-border)" }}
               >
                 <td style={{ padding: "8px 0" }}>
                   <span
@@ -1408,7 +1408,7 @@ function TracesTab() {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "16px 18px",
       }}
@@ -1429,7 +1429,7 @@ function TracesTab() {
           <span>{"Trace ID: "}</span>
           <code
             style={{
-              background: "#F0F0F8",
+              background: "var(--content-secondary)",
               padding: "1px 5px",
               borderRadius: 3,
               fontSize: 10,
@@ -1483,7 +1483,7 @@ function TracesTab() {
         </div>
       </div>
 
-      <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: 12 }}>
+      <div style={{ borderTop: "1px solid var(--content-border)", paddingTop: 12 }}>
         {TRACE_SPANS.map((span, idx) => {
           const leftPct = (span.offsetMs / TOTAL_TRACE_MS) * 100;
           const widthPct = (span.durationMs / TOTAL_TRACE_MS) * 100;
@@ -1533,7 +1533,7 @@ function TracesTab() {
                   flex: 1,
                   height: 28,
                   position: "relative",
-                  background: "#F7F7FB",
+                  background: "var(--table-header-bg)",
                   borderRadius: 4,
                   overflow: "hidden",
                 }}
@@ -1577,7 +1577,7 @@ function TracesTab() {
           gap: 16,
           marginTop: 16,
           flexWrap: "wrap",
-          borderTop: "1px solid rgba(0,0,0,0.06)",
+          borderTop: "1px solid var(--content-border)",
           paddingTop: 12,
         }}
       >
@@ -1637,14 +1637,14 @@ export default function ObservePage() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        background: "#F7F7FB",
+        background: "var(--table-header-bg)",
       }}
     >
       {/* Header */}
       <div
         style={{
           height: 48,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           display: "flex",
           alignItems: "center",
@@ -1691,8 +1691,8 @@ export default function ObservePage() {
             style={{
               fontSize: 10,
               fontWeight: 600,
-              background: "#F0FDF4",
-              color: "#166534",
+              background: "var(--badge-success-bg)",
+              color: "var(--badge-success-text)",
               padding: "2px 7px",
               borderRadius: 20,
             }}
@@ -1714,7 +1714,7 @@ export default function ObservePage() {
             style={{
               display: "flex",
               gap: 2,
-              background: "#F0F0F8",
+              background: "var(--content-secondary)",
               borderRadius: 8,
               padding: 3,
             }}
@@ -1747,7 +1747,7 @@ export default function ObservePage() {
             style={{
               display: "flex",
               gap: 2,
-              background: "#F0F0F8",
+              background: "var(--content-secondary)",
               borderRadius: 8,
               padding: 3,
             }}
@@ -1777,7 +1777,7 @@ export default function ObservePage() {
           <button
             style={{
               background: "transparent",
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               borderRadius: 8,
               padding: "4px 12px",
               fontSize: 11,
@@ -1832,7 +1832,7 @@ export default function ObservePage() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px 18px",
             marginBottom: 18,
@@ -1935,7 +1935,7 @@ export default function ObservePage() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             overflow: "hidden",
           }}
@@ -1944,7 +1944,7 @@ export default function ObservePage() {
           <div
             style={{
               display: "flex",
-              borderBottom: "1px solid rgba(0,0,0,0.08)",
+              borderBottom: "1px solid var(--content-border)",
               padding: "0 18px",
             }}
           >

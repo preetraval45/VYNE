@@ -22,7 +22,7 @@ function Toggle({
           width: 36,
           height: 20,
           borderRadius: 10,
-          background: checked ? "#6C47FF" : "#D8D8E8",
+          background: checked ? "var(--vyne-purple)" : "var(--content-border)",
           position: "relative",
           cursor: "pointer",
           border: "none",
@@ -36,7 +36,7 @@ function Toggle({
             width: 16,
             height: 16,
             borderRadius: "50%",
-            background: "#fff",
+            background: "var(--content-bg)",
             position: "absolute",
             top: 2,
             left: checked ? 18 : 2,
@@ -44,7 +44,7 @@ function Toggle({
           }}
         />
       </button>
-      {label && <span style={{ fontSize: 12, color: "#1A1A2E" }}>{label}</span>}
+      {label && <span style={{ fontSize: 12, color: "var(--text-primary)" }}>{label}</span>}
     </div>
   );
 }
@@ -56,8 +56,8 @@ function SectionCard({
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         marginBottom: 16,
         overflow: "hidden",
@@ -66,10 +66,10 @@ function SectionCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           {title}
         </span>
       </div>
@@ -181,11 +181,11 @@ export default function NotificationsSettings({
             >
               <div>
                 <div
-                  style={{ fontSize: 13, fontWeight: 500, color: "#1A1A2E" }}
+                  style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}
                 >
                   {label}
                 </div>
-                <div style={{ fontSize: 11, color: "#A0A0B8", marginTop: 1 }}>
+                <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
                   {hint}
                 </div>
               </div>
@@ -207,10 +207,10 @@ export default function NotificationsSettings({
           }}
         >
           <div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: "#1A1A2E" }}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
               Digest frequency
             </div>
-            <div style={{ fontSize: 11, color: "#A0A0B8", marginTop: 1 }}>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
               Receive a summary email of recent activity
             </div>
           </div>
@@ -222,10 +222,10 @@ export default function NotificationsSettings({
             style={{
               padding: "6px 10px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
-              background: "#FAFAFE",
+              border: "1px solid var(--input-border)",
+              background: "var(--content-secondary)",
               fontSize: 13,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               cursor: "pointer",
               outline: "none",
             }}

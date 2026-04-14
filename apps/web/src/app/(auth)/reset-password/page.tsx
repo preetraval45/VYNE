@@ -410,7 +410,7 @@ export default function ResetPasswordPage() {
         </div>
 
         {/* Back to login */}
-        <p className="text-center text-sm mt-6" style={{ color: "#6B6B8A" }}>
+        <p className="text-center text-sm mt-6" style={{ color: "var(--text-secondary)" }}>
           Remember your password?{" "}
           <Link
             href="/login"

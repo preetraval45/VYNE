@@ -590,10 +590,10 @@ const equipmentStatusStyle: Record<
   EquipmentStatus,
   { bg: string; color: string }
 > = {
-  Operational: { bg: "#F0FDF4", color: "#166534" },
-  "Under Maintenance": { bg: "#FFFBEB", color: "#92400E" },
-  Broken: { bg: "#FEF2F2", color: "#991B1B" },
-  Retired: { bg: "#F0F0F8", color: "#6B6B8A" },
+  Operational: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+  "Under Maintenance": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+  Broken: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+  Retired: { bg: "#F0F0F8", color: "var(--text-secondary)" },
 };
 
 const priorityDotColor: Record<RequestPriority, string> = {
@@ -606,31 +606,31 @@ const priorityDotColor: Record<RequestPriority, string> = {
 const requestStatusStyle: Record<RequestStatus, { bg: string; color: string }> =
   {
     New: { bg: "#EFF6FF", color: "#1E40AF" },
-    "In Progress": { bg: "#FFFBEB", color: "#92400E" },
-    Done: { bg: "#F0FDF4", color: "#166534" },
-    Cancelled: { bg: "#F0F0F8", color: "#6B6B8A" },
+    "In Progress": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+    Done: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Cancelled: { bg: "#F0F0F8", color: "var(--text-secondary)" },
   };
 
 const frequencyBadgeStyle: Record<PMFrequency, { bg: string; color: string }> =
   {
-    Daily: { bg: "#FEF2F2", color: "#991B1B" },
-    Weekly: { bg: "#FFFBEB", color: "#92400E" },
+    Daily: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Weekly: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Monthly: { bg: "#EFF6FF", color: "#1E40AF" },
     Quarterly: { bg: "#F5F3FF", color: "#5B21B6" },
-    Yearly: { bg: "#F0FDF4", color: "#166534" },
+    Yearly: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
   };
 
 const woStatusStyle: Record<WOStatus, { bg: string; color: string }> = {
   Scheduled: { bg: "#EFF6FF", color: "#1E40AF" },
-  "In Progress": { bg: "#FFFBEB", color: "#92400E" },
-  Completed: { bg: "#F0FDF4", color: "#166534" },
-  "On Hold": { bg: "#F0F0F8", color: "#6B6B8A" },
+  "In Progress": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+  Completed: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+  "On Hold": { bg: "#F0F0F8", color: "var(--text-secondary)" },
 };
 
 const partStatusStyle: Record<PartStatus, { bg: string; color: string }> = {
-  "In Stock": { bg: "#F0FDF4", color: "#166534" },
-  "Low Stock": { bg: "#FFFBEB", color: "#92400E" },
-  "Out of Stock": { bg: "#FEF2F2", color: "#991B1B" },
+  "In Stock": { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+  "Low Stock": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+  "Out of Stock": { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
 };
 
 const thStyle: React.CSSProperties = {
@@ -1603,7 +1603,7 @@ function PartsTab() {
             alignItems: "center",
             gap: 10,
             padding: "12px 16px",
-            background: "#FEF2F2",
+            background: "var(--badge-danger-bg)",
             borderColor: "rgba(239,68,68,0.2)",
           }}
         >
@@ -1611,7 +1611,7 @@ function PartsTab() {
             size={16}
             style={{ color: "#EF4444", flexShrink: 0 }}
           />
-          <div style={{ fontSize: 12, color: "#991B1B" }}>
+          <div style={{ fontSize: 12, color: "var(--badge-danger-text)" }}>
             <strong>Low Stock Alert:</strong>{" "}
             {lowStockItems.map((p) => p.partName).join(", ")} —{" "}
             {lowStockItems.length === 1 ? "this item is" : "these items are"}{" "}

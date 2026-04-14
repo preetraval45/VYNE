@@ -24,21 +24,30 @@ import {
 function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!email) return
     setStatus('loading')
+    setErrorMessage('')
 
     try {
-      const res = await fetch('https://formspree.io/f/xpwdkpvl', {
+      const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, _subject: 'VYNE Waitlist Signup' }),
+        body: JSON.stringify({ email, source: variant }),
       })
-      setStatus(res.ok ? 'success' : 'error')
-      if (res.ok) setEmail('')
+      if (res.ok) {
+        setStatus('success')
+        setEmail('')
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string }
+        setErrorMessage(data.error ?? 'Something went wrong')
+        setStatus('error')
+      }
     } catch {
+      setErrorMessage('Network error — please try again')
       setStatus('error')
     }
   }
@@ -106,7 +115,9 @@ function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
         {status === 'loading' ? 'Joining...' : 'Join Waitlist'}
       </button>
       {status === 'error' && (
-        <span style={{ color: '#EF4444', fontSize: 13, alignSelf: 'center' }}>Something went wrong</span>
+        <span style={{ color: '#EF4444', fontSize: 13, alignSelf: 'center' }}>
+          {errorMessage || 'Something went wrong'}
+        </span>
       )}
     </form>
   )

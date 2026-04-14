@@ -19,7 +19,7 @@ export function EmojiPicker({ onPick, onClose }: EmojiPickerProps) {
         bottom: "100%",
         right: 0,
         zIndex: 50,
-        background: "#fff",
+        background: "var(--content-bg)",
         border: "1px solid #E8E8F0",
         borderRadius: 10,
         padding: 8,

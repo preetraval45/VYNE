@@ -71,14 +71,14 @@ export default function AutomationsPage() {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        background: "#FAFAFE",
+        background: "var(--content-secondary)",
       }}
     >
       {/* Top bar */}
       <div
         style={{
           height: 44,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           padding: "0 18px",
@@ -172,7 +172,7 @@ export default function AutomationsPage() {
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            background: "#F7F7FB",
+            background: "var(--table-header-bg)",
           }}
         >
           <AutomationDetailPanel

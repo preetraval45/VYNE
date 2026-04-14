@@ -60,7 +60,29 @@
       "Bash(NEXT_PUBLIC_DEMO_MODE=true NEXT_PUBLIC_API_URL=http://localhost:104 npx --prefix apps/web next dev --port 3001)",
       "Bash(ls \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web/playwright.config\"*)",
       "Bash(ls \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/playwright.config\"*)",
-      "Bash(npx playwright:*)"
+      "Bash(npx playwright:*)",
+      "Bash(xargs grep:*)",
+      "Bash(node -e ':*)",
+      "Bash(node fix-crm-styles.mjs)",
+      "Bash(node fix-crm-styles2.mjs)",
+      "Bash(grep -v \"//\")",
+      "Bash(sed -i 's/background: \"#fff\",/background: \"var\\(--content-bg\\)\",/g' app/admin/tenants/page.tsx)",
+      "Bash(sed -i 's/background: \"#FAFAFE\"/background: \"var\\(--content-secondary\\)\"/g' app/\\\\\\(dashboard\\\\\\)/docs/page.tsx)",
+      "Bash(sed -i 's/return \"#F7F7FB\"/return \"var\\(--table-header-bg\\)\"/g' app/\\\\\\(dashboard\\\\\\)/hr/page.tsx)",
+      "Bash(npx vercel:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(ls apps/web/*.json apps/web/*.lock)",
+      "Bash(ls *.json *.yaml echo \"---pnpm-workspace---\" cat pnpm-workspace.yaml)",
+      "Bash(vercel link:*)",
+      "Bash(vercel deploy:*)",
+      "Bash(cat next.config.ts)",
+      "Bash(cat next.config.js)",
+      "Bash(cat next.config.mjs)",
+      "Bash(npm view:*)",
+      "Bash(vercel alias:*)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://vyne.vercel.app)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} /api/waitlist \\(GET expects 405\\)\\\\n\" https://vyne.vercel.app/api/waitlist)",
+      "Bash(curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"invalid\"}' -w \"\\\\nHTTP %{http_code}\\\\n\" https://vyne.vercel.app/api/waitlist)"
     ]
   }
 }

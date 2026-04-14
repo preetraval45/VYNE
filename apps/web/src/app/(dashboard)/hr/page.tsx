@@ -59,8 +59,8 @@ function StatusBadge({ emp }: Readonly<{ emp: Employee }>) {
           borderRadius: 20,
           fontSize: 11,
           fontWeight: 500,
-          background: "#F0FDF4",
-          color: "#166534",
+          background: "var(--badge-success-bg)",
+          color: "var(--badge-success-text)",
         }}
       >
         Active
@@ -90,8 +90,8 @@ function StatusBadge({ emp }: Readonly<{ emp: Employee }>) {
         borderRadius: 20,
         fontSize: 11,
         fontWeight: 500,
-        background: "#FFFBEB",
-        color: "#92400E",
+        background: "var(--badge-warning-bg)",
+        color: "var(--badge-warning-text)",
       }}
     >
       On Leave{emp.leaveNote ? ` · ${emp.leaveNote}` : ""}
@@ -187,7 +187,7 @@ function EmployeeModal({
         <div
           style={{
             padding: "16px 20px",
-            borderBottom: "1px solid rgba(0,0,0,0.08)",
+            borderBottom: "1px solid var(--content-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -232,8 +232,8 @@ function EmployeeModal({
           <div
             style={{
               padding: "24px 20px",
-              background: "#FAFAFE",
-              borderRight: "1px solid rgba(0,0,0,0.08)",
+              background: "var(--content-secondary)",
+              borderRight: "1px solid var(--content-border)",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -267,7 +267,7 @@ function EmployeeModal({
             <div
               style={{
                 width: "100%",
-                borderTop: "1px solid rgba(0,0,0,0.06)",
+                borderTop: "1px solid var(--content-border)",
                 paddingTop: 12,
                 marginTop: 4,
               }}
@@ -280,7 +280,7 @@ function EmployeeModal({
             <div
               style={{
                 width: "100%",
-                borderTop: "1px solid rgba(0,0,0,0.06)",
+                borderTop: "1px solid var(--content-border)",
                 paddingTop: 12,
               }}
             >
@@ -357,9 +357,9 @@ function EmployeeModal({
                       alignItems: "center",
                       gap: 8,
                       padding: "7px 10px",
-                      background: "#F7F7FB",
+                      background: "var(--table-header-bg)",
                       borderRadius: 7,
-                      border: "1px solid rgba(0,0,0,0.06)",
+                      border: "1px solid var(--content-border)",
                     }}
                   >
                     <span style={{ fontSize: 14 }}>&#128196;</span>
@@ -518,7 +518,7 @@ function EmployeesTab() {
             onClick={() => setSelectedEmp(emp)}
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 12,
               padding: "18px 16px",
               cursor: "pointer",
@@ -591,12 +591,12 @@ function calendarCellBackground(
 ): string {
   if (day === null) return "transparent";
   if (hasAbsences) return "rgba(239,68,68,0.08)";
-  return "#F7F7FB";
+  return "var(--table-header-bg)";
 }
 
 function calendarCellBorder(day: number | null): string {
   if (day === null) return "none";
-  return "1px solid rgba(0,0,0,0.06)";
+  return "1px solid var(--content-border)";
 }
 
 // ─── Calendar strip ───────────────────────────────────────────────
@@ -705,7 +705,7 @@ function CalendarStrip() {
 
 // ─── Leave tab helpers ────────────────────────────────────────────
 function leaveRequestBackground(status: LeaveRequestStatus): string {
-  if (status === "Pending") return "#FAFAFE";
+  if (status === "Pending") return "var(--content-secondary)";
   if (status === "Approved") return "#F0FDF4";
   return "#FEF2F2";
 }
@@ -752,7 +752,7 @@ function LeaveTab() {
           <div
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 12,
               overflow: "hidden",
               marginBottom: 16,
@@ -761,7 +761,7 @@ function LeaveTab() {
             <div
               style={{
                 padding: "12px 18px",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                borderBottom: "1px solid var(--content-border)",
               }}
             >
               <span
@@ -776,7 +776,7 @@ function LeaveTab() {
             </div>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "#F7F7FB" }}>
+                <tr style={{ background: "var(--table-header-bg)" }}>
                   {[
                     "Employee",
                     "Vacation",
@@ -805,7 +805,7 @@ function LeaveTab() {
                 {EMPLOYEES.map((emp) => (
                   <tr
                     key={emp.id}
-                    style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                    style={{ borderTop: "1px solid var(--content-border)" }}
                   >
                     <td style={{ padding: "10px 14px" }}>
                       <div
@@ -876,7 +876,7 @@ function LeaveTab() {
           <div
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 12,
               overflow: "hidden",
             }}
@@ -884,7 +884,7 @@ function LeaveTab() {
             <div
               style={{
                 padding: "12px 18px",
-                borderBottom: "1px solid rgba(0,0,0,0.06)",
+                borderBottom: "1px solid var(--content-border)",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
@@ -928,7 +928,7 @@ function LeaveTab() {
                   style={{
                     padding: "12px 14px",
                     borderRadius: 10,
-                    border: "1px solid rgba(0,0,0,0.07)",
+                    border: "1px solid var(--content-border)",
                     background: leaveRequestBackground(req.status),
                   }}
                 >
@@ -1034,7 +1034,7 @@ function LeaveTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 12,
             padding: "16px",
           }}
@@ -1054,7 +1054,7 @@ function LeaveTab() {
             style={{
               marginTop: 14,
               padding: "10px 12px",
-              background: "#FEF2F2",
+              background: "var(--badge-danger-bg)",
               borderRadius: 8,
               border: "1px solid rgba(239,68,68,0.12)",
             }}
@@ -1063,7 +1063,7 @@ function LeaveTab() {
               style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: "#991B1B",
+                color: "var(--badge-danger-text)",
                 marginBottom: 6,
               }}
             >
@@ -1166,7 +1166,7 @@ function PayrollTab() {
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               background: "transparent",
               color: "var(--text-secondary)",
               fontSize: 13,
@@ -1216,10 +1216,10 @@ function PayrollTab() {
           <div
             key={label}
             style={{
-              background: "#F7F7FB",
+              background: "var(--table-header-bg)",
               borderRadius: 10,
               padding: "14px 16px",
-              border: "1px solid rgba(0,0,0,0.06)",
+              border: "1px solid var(--content-border)",
             }}
           >
             <div
@@ -1249,14 +1249,14 @@ function PayrollTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {[
                 "Employee",
                 "Base Salary",
@@ -1289,7 +1289,7 @@ function PayrollTab() {
               return (
                 <tr
                   key={emp.id}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  style={{ borderTop: "1px solid var(--content-border)" }}
                 >
                   <td style={{ padding: "11px 16px" }}>
                     <div
@@ -1375,7 +1375,7 @@ function PayrollTab() {
             <tr
               style={{
                 borderTop: "2px solid rgba(0,0,0,0.1)",
-                background: "#F7F7FB",
+                background: "var(--table-header-bg)",
               }}
             >
               <td
@@ -1497,7 +1497,7 @@ function PayrollTab() {
                 style={{
                   padding: "9px 18px",
                   borderRadius: 8,
-                  border: "1px solid rgba(0,0,0,0.12)",
+                  border: "1px solid var(--content-border)",
                   background: "transparent",
                   cursor: "pointer",
                   fontSize: 13,
@@ -1561,7 +1561,7 @@ function OrgNode({ emp }: Readonly<{ emp: Employee }>) {
         gap: 6,
         padding: "14px 16px",
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         minWidth: 120,
         boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
@@ -1730,7 +1730,7 @@ export default function HRPage() {
       <div
         style={{
           padding: "14px 20px 0",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
         }}
@@ -1772,7 +1772,7 @@ export default function HRPage() {
                 padding: "3px 10px",
                 borderRadius: 20,
                 background: "rgba(34,197,94,0.1)",
-                color: "#166534",
+                color: "var(--badge-success-text)",
               }}
             >
               {EMPLOYEES.filter((e) => e.status === "Active").length} Active
@@ -1794,7 +1794,7 @@ export default function HRPage() {
                 padding: "3px 10px",
                 borderRadius: 20,
                 background: "rgba(245,158,11,0.1)",
-                color: "#92400E",
+                color: "var(--badge-warning-text)",
               }}
             >
               {EMPLOYEES.filter((e) => e.status === "On Leave").length} On Leave

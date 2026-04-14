@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, Search, Edit2, Check, XCircle } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import {
   INITIAL_DEALS,
   STAGES,
@@ -13,6 +14,36 @@ import {
   type Source,
   type Deal,
 } from "@/lib/fixtures/crm";
+
+// ─── API adapter ─────────────────────────────────────────────────
+function statusToStage(status: string): Stage {
+  if (status === "active") return "Won";
+  if (status === "inactive") return "Lost";
+  return "Lead";
+}
+
+function statusToProbability(status: string): number {
+  if (status === "active") return 80;
+  if (status === "inactive") return 0;
+  return 20;
+}
+
+function customerToDeal(c: ERPCustomer): Deal {
+  return {
+    id: c.id,
+    company: c.name,
+    contactName: c.name,
+    email: c.email ?? "",
+    stage: statusToStage(c.status),
+    value: c.totalRevenue ?? 0,
+    probability: statusToProbability(c.status),
+    assignee: "Alex",
+    lastActivity: new Date().toISOString(),
+    nextAction: "Follow up",
+    source: "inbound",
+    notes: "",
+  };
+}
 
 // ─── Helper Functions (no nested ternaries) ───────────────────────
 function stageColor(stage: Stage): string {
@@ -68,6 +99,12 @@ function daysSince(isoDate: string): number {
   return Math.floor((Date.now() - new Date(isoDate).getTime()) / 86400000);
 }
 
+function pillBg(isActive: boolean, s: Stage | "All"): string {
+  if (!isActive) return "#F4F4F8";
+  if (s === "All") return "rgba(108,71,255,0.1)";
+  return stageBg(s);
+}
+
 function initials(name: string): string {
   return name
     .split(" ")
@@ -86,19 +123,13 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      style={{
-        padding: "8px 14px",
-        border: "none",
-        cursor: "pointer",
-        fontSize: 12,
-        fontWeight: 500,
-        background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
-        borderBottom: active
-          ? "2px solid var(--vyne-purple)"
-          : "2px solid transparent",
-        transition: "all 0.15s",
-      }}
+      className={[
+        "px-[14px] py-2 border-0 cursor-pointer text-xs font-medium bg-transparent transition-all duration-150",
+        "border-b-2",
+        active
+          ? "border-b-vyne-purple text-vyne-purple"
+          : "border-b-transparent text-text-secondary",
+      ].join(" ")}
     >
       {label}
     </button>
@@ -108,15 +139,8 @@ function TabBtn({
 function StagePill({ stage }: Readonly<{ stage: Stage }>) {
   return (
     <span
-      style={{
-        padding: "2px 8px",
-        borderRadius: 20,
-        fontSize: 11,
-        fontWeight: 600,
-        background: stageBg(stage),
-        color: stageColor(stage),
-        whiteSpace: "nowrap",
-      }}
+      className="px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap"
+      style={{ background: stageBg(stage), color: stageColor(stage) }}
     >
       {stage}
     </span>
@@ -166,225 +190,138 @@ function DealModal({
   const actColor = priorityColor(priority);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.40)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 300,
-      }}
+    <div className="fixed inset-0 flex items-center justify-center z-[300] bg-black/40"
     >
       <div
+        className="rounded-[14px] w-[580px] max-h-[88vh] overflow-hidden flex flex-col"
         style={{
           background: "var(--content-bg)",
-          borderRadius: 14,
-          width: 580,
-          maxHeight: "88vh",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
           boxShadow: "0 24px 64px rgba(0,0,0,0.22)",
         }}
       >
         {/* Header */}
         <div
+          className="flex items-start justify-between"
           style={{
             padding: "18px 22px 14px",
-            borderBottom: "1px solid rgba(0,0,0,0.07)",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
+            borderBottom: "1px solid var(--content-border)",
           }}
         >
           <div>
             <div
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                marginBottom: 4,
-              }}
+              className="text-base font-bold mb-1 text-text-primary"
             >
               {deal.company}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+            <div className="text-xs text-text-secondary">
               {deal.contactName} · {deal.email}
             </div>
           </div>
           <button
             onClick={onClose}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "var(--text-tertiary)",
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-            }}
+            aria-label="Close"
+            className="border-0 bg-transparent cursor-pointer p-1 rounded-md flex text-text-tertiary"
           >
             <X size={16} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px" }}>
+        <div className="flex-1 overflow-y-auto px-[22px] py-[18px]" >
           {/* Value + Probability */}
-          <div style={{ display: "flex", gap: 16, marginBottom: 20 }}>
+          <div className="flex gap-4 mb-5">
             <div
+              className="flex-1 rounded-[10px] border"
               style={{
-                flex: 1,
-                background: "#FAFAFE",
-                borderRadius: 10,
+                background: "var(--content-secondary)",
                 padding: "14px 16px",
-                border: "1px solid rgba(0,0,0,0.07)",
+                border: "1px solid var(--content-border)",
               }}
             >
               <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-tertiary)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 4,
-                }}
+                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
               >
                 Deal Value
               </div>
               <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: "var(--text-primary)",
-                  letterSpacing: "-0.03em",
-                }}
+                className="text-[22px] font-bold text-text-primary tracking-[-0.03em]" 
               >
                 {fmt(deal.value)}
               </div>
             </div>
             <div
+              className="flex-1 rounded-[10px]"
               style={{
-                flex: 1,
-                background: "#FAFAFE",
-                borderRadius: 10,
+                background: "var(--content-secondary)",
                 padding: "14px 16px",
-                border: "1px solid rgba(0,0,0,0.07)",
+                border: "1px solid var(--content-border)",
               }}
             >
               <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-tertiary)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 4,
-                }}
+                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
               >
                 Probability
               </div>
               <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  color: probabilityColor(deal.probability),
-                  letterSpacing: "-0.03em",
-                }}
+                className="text-[22px] font-bold"
+                style={{ color: probabilityColor(deal.probability), letterSpacing: "-0.03em" }}
               >
                 {deal.probability}%
               </div>
               <div
-                style={{
-                  marginTop: 8,
-                  height: 6,
-                  borderRadius: 3,
-                  background: "var(--content-border)",
-                  overflow: "hidden",
-                }}
+                className="mt-2 h-[6px] rounded-full overflow-hidden bg-content-border"
               >
                 <div
+                  className="h-full rounded-full transition-[width] duration-[0.4s]"
                   style={{
-                    height: "100%",
                     width: `${deal.probability}%`,
                     background: probabilityColor(deal.probability),
-                    borderRadius: 3,
-                    transition: "width 0.4s",
                   }}
                 />
               </div>
             </div>
             <div
+              className="flex-1 rounded-[10px]"
               style={{
-                flex: 1,
-                background: "#FAFAFE",
-                borderRadius: 10,
+                background: "var(--content-secondary)",
                 padding: "14px 16px",
-                border: "1px solid rgba(0,0,0,0.07)",
+                border: "1px solid var(--content-border)",
               }}
             >
               <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-tertiary)",
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  marginBottom: 4,
-                }}
+                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
               >
                 Last Activity
               </div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: actColor }}>
+              <div className="text-sm font-semibold" style={{ color: actColor }}>
                 {days}d ago
               </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--text-tertiary)",
-                  marginTop: 2,
-                }}
-              >
+              <div className="text-[11px] mt-0.5 text-text-tertiary">
                 Source: {deal.source}
               </div>
             </div>
           </div>
 
           {/* Stage selector */}
-          <div style={{ marginBottom: 20 }}>
+          <div className="mb-5">
             <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "var(--text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 10,
-              }}
+              className="text-[11px] font-semibold uppercase mb-2.5 text-text-secondary tracking-[0.06em]" 
             >
               Stage
             </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            <div className="flex flex-wrap gap-1.5">
               {STAGES.map((s) => {
                 const isActive = stage === s;
                 return (
                   <button
                     key={s}
                     onClick={() => setStage(s)}
+                    className="px-3 py-[5px] rounded-full text-xs font-semibold cursor-pointer transition-all duration-150"
                     style={{
-                      padding: "5px 12px",
-                      borderRadius: 20,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: "pointer",
                       border: isActive
                         ? `2px solid ${stageColor(s)}`
                         : "2px solid transparent",
                       background: isActive ? stageBg(s) : "#F4F4F8",
                       color: isActive ? stageColor(s) : "var(--text-secondary)",
-                      transition: "all 0.15s",
                     }}
                   >
                     {s}
@@ -395,35 +332,24 @@ function DealModal({
           </div>
 
           {/* Next Action */}
-          <div style={{ marginBottom: 20 }}>
+          <div className="mb-5">
             <label
               htmlFor="modal-next-action"
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "var(--text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                display: "block",
-                marginBottom: 6,
-              }}
+              className="block text-[11px] font-semibold uppercase mb-1.5 text-text-secondary tracking-[0.06em]" 
             >
               Next Action
             </label>
             <input
               id="modal-next-action"
+              title="Next Action"
+              placeholder="Schedule follow-up call"
               value={nextAction}
               onChange={(e) => setNextAction(e.target.value)}
+              className="w-full px-2.5 py-2 rounded-lg text-[13px] outline-none box-border"
               style={{
-                width: "100%",
-                padding: "8px 10px",
-                border: "1px solid #D8D8E8",
-                borderRadius: 8,
-                background: "#FAFAFE",
-                outline: "none",
-                fontSize: 13,
+                border: "1px solid var(--input-border)",
+                background: "var(--content-secondary)",
                 color: "var(--text-primary)",
-                boxSizing: "border-box",
               }}
             />
           </div>
@@ -431,89 +357,46 @@ function DealModal({
           {/* Notes */}
           {deal.notes && (
             <div
+              className="mb-5 px-[14px] py-3 rounded-lg"
               style={{
-                marginBottom: 20,
-                padding: "12px 14px",
-                background: "#FFFBEB",
-                borderRadius: 8,
+                background: "var(--badge-warning-bg)",
                 border: "1px solid rgba(245,158,11,0.2)",
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "#92400E",
-                  marginBottom: 4,
-                }}
-              >
+              <div className="text-[11px] font-semibold mb-1 text-[var(--badge-warning-text)]" >
                 Notes
               </div>
-              <div style={{ fontSize: 12, color: "#78350F" }}>{deal.notes}</div>
+              <div className="text-xs text-[#78350F]" >{deal.notes}</div>
             </div>
           )}
 
           {/* Activity Timeline */}
-          <div style={{ marginBottom: 20 }}>
+          <div className="mb-5">
             <div
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: "var(--text-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                marginBottom: 12,
-              }}
+              className="text-[11px] font-semibold uppercase mb-3 text-text-secondary tracking-[0.06em]" 
             >
               Activity Timeline
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {MOCK_ACTIVITIES.map((a, i) => (
-                <div
-                  key={i}
-                  style={{ display: "flex", gap: 12, paddingBottom: 14 }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
+            <div className="flex flex-col">
+              {MOCK_ACTIVITIES.map((a, actIdx) => (
+                <div key={a.time} className="flex gap-3 pb-[14px]">
+                  <div className="flex flex-col items-center">
                     <div
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: "var(--vyne-purple)",
-                        flexShrink: 0,
-                        marginTop: 4,
-                      }}
+                      className="w-2 h-2 rounded-full shrink-0 mt-1 bg-vyne-purple"
                     />
-                    {i < MOCK_ACTIVITIES.length - 1 && (
+                    {actIdx < MOCK_ACTIVITIES.length - 1 && (
                       <div
-                        style={{
-                          width: 1,
-                          flex: 1,
-                          background: "var(--content-border)",
-                          marginTop: 4,
-                        }}
+                        className="w-px flex-1 mt-1 bg-content-border"
                       />
                     )}
                   </div>
                   <div>
                     <div
-                      style={{
-                        fontSize: 12,
-                        color: "var(--text-primary)",
-                        marginBottom: 2,
-                      }}
+                      className="text-xs mb-0.5 text-text-primary"
                     >
                       {a.text}
                     </div>
-                    <div
-                      style={{ fontSize: 10, color: "var(--text-tertiary)" }}
-                    >
+                    <div className="text-[10px] text-text-tertiary">
                       {new Date(a.time).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -529,78 +412,33 @@ function DealModal({
 
         {/* Footer actions */}
         <div
+          className="flex gap-2 items-center"
           style={{
             padding: "14px 22px",
-            borderTop: "1px solid rgba(0,0,0,0.07)",
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
+            borderTop: "1px solid var(--content-border)",
           }}
         >
           <button
             onClick={handleConvert}
-            style={{
-              flex: 1,
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "1px solid #6C47FF",
-              background: "transparent",
-              color: "var(--vyne-purple)",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
+            className="flex-1 px-[14px] py-2 rounded-lg text-xs font-semibold cursor-pointer bg-transparent border-vyne-purple border text-vyne-purple"
           >
             Convert to Order
           </button>
           <button
             onClick={handleWon}
-            style={{
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--status-success)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
+            className="px-[14px] py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold flex items-center gap-[5px] bg-status-success"
           >
             <Check size={13} /> Mark Won
           </button>
           <button
             onClick={handleLost}
-            style={{
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--status-danger)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-            }}
+            className="px-[14px] py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold flex items-center gap-[5px] bg-status-danger"
           >
             <XCircle size={13} /> Mark Lost
           </button>
           <button
             onClick={handleSave}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--vyne-purple)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
+            className="px-4 py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold bg-vyne-purple"
           >
             Save
           </button>
@@ -609,20 +447,10 @@ function DealModal({
 
       {toast && (
         <div
+          className="fixed bottom-7 left-1/2 -translate-x-1/2 text-white px-[18px] py-2.5 rounded-[10px] text-[13px] font-medium z-[400] whitespace-nowrap"
           style={{
-            position: "fixed",
-            bottom: 28,
-            left: "50%",
-            transform: "translateX(-50%)",
             background: "var(--text-primary)",
-            color: "#fff",
-            padding: "10px 18px",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 500,
-            zIndex: 400,
             boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-            whiteSpace: "nowrap",
           }}
         >
           {toast}
@@ -689,20 +517,20 @@ function AddDealModal({
     onClose();
   }
 
+  const fieldInputClass =
+    "w-full px-2.5 py-2 rounded-lg text-[13px] outline-none box-border";
+  const fieldInputStyle: React.CSSProperties = {
+    border: "1px solid var(--input-border)",
+    background: "var(--content-secondary)",
+    color: "var(--text-primary)",
+  };
+
   function field(label: string, id: string, node: React.ReactNode) {
     return (
-      <div style={{ marginBottom: 14 }}>
+      <div className="mb-[14px]">
         <label
           htmlFor={id}
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: "var(--text-secondary)",
-            display: "block",
-            marginBottom: 5,
-            textTransform: "uppercase",
-            letterSpacing: "0.06em",
-          }}
+          className="block text-[11px] font-semibold uppercase mb-[5px] text-text-secondary tracking-[0.06em]" 
         >
           {label}
         </label>
@@ -711,82 +539,41 @@ function AddDealModal({
     );
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "8px 10px",
-    border: "1px solid #D8D8E8",
-    borderRadius: 8,
-    background: "#FAFAFE",
-    outline: "none",
-    fontSize: 13,
-    color: "var(--text-primary)",
-    boxSizing: "border-box",
-  };
-  const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer" };
-
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.40)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 300,
-      }}
+      className="fixed inset-0 flex items-center justify-center z-[300] bg-black/40"
     >
       <div
+        className="rounded-[14px] w-[480px] max-h-[88vh] overflow-hidden flex flex-col"
         style={{
           background: "var(--content-bg)",
-          borderRadius: 14,
-          width: 480,
-          maxHeight: "88vh",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
           boxShadow: "0 24px 64px rgba(0,0,0,0.22)",
         }}
       >
         <div
+          className="flex items-center justify-between"
           style={{
             padding: "18px 22px 14px",
-            borderBottom: "1px solid rgba(0,0,0,0.07)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            borderBottom: "1px solid var(--content-border)",
           }}
         >
           <span
-            style={{
-              fontSize: 15,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-            }}
+            className="text-[15px] font-bold text-text-primary"
           >
             Add New Deal
           </span>
           <button
             onClick={onClose}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "var(--text-tertiary)",
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-            }}
+            aria-label="Close"
+            className="border-0 bg-transparent cursor-pointer p-1 rounded-md flex text-text-tertiary"
           >
             <X size={16} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px" }}>
-          <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
-          >
-            <div style={{ gridColumn: "1 / -1" }}>
+        <div className="flex-1 overflow-y-auto px-[22px] py-[18px]" >
+          <div className="grid grid-cols-2 gap-[14px]">
+            <div className="col-span-2">
               {field(
                 "Company Name",
                 "add-company",
@@ -797,7 +584,8 @@ function AddDealModal({
                     setForm({ ...form, company: e.target.value })
                   }
                   placeholder="Acme Corp"
-                  style={inputStyle}
+                  className={fieldInputClass}
+                  style={fieldInputStyle}
                 />,
               )}
             </div>
@@ -811,7 +599,8 @@ function AddDealModal({
                   setForm({ ...form, contactName: e.target.value })
                 }
                 placeholder="Jane Smith"
-                style={inputStyle}
+                className={fieldInputClass}
+                style={fieldInputStyle}
               />,
             )}
             {field(
@@ -823,7 +612,8 @@ function AddDealModal({
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="jane@company.com"
-                style={inputStyle}
+                className={fieldInputClass}
+                style={fieldInputStyle}
               />,
             )}
             {field(
@@ -835,7 +625,8 @@ function AddDealModal({
                 value={form.value}
                 onChange={(e) => setForm({ ...form, value: e.target.value })}
                 placeholder="50000"
-                style={inputStyle}
+                className={fieldInputClass}
+                style={fieldInputStyle}
               />,
             )}
             {field(
@@ -843,11 +634,13 @@ function AddDealModal({
               "add-stage",
               <select
                 id="add-stage"
+                title="Stage"
                 value={form.stage}
                 onChange={(e) =>
                   setForm({ ...form, stage: e.target.value as Stage })
                 }
-                style={selectStyle}
+                className={`${fieldInputClass} cursor-pointer`}
+                style={fieldInputStyle}
               >
                 {STAGES.map((s) => (
                   <option key={s} value={s}>
@@ -861,11 +654,13 @@ function AddDealModal({
               "add-source",
               <select
                 id="add-source"
+                title="Source"
                 value={form.source}
                 onChange={(e) =>
                   setForm({ ...form, source: e.target.value as Source })
                 }
-                style={selectStyle}
+                className={`${fieldInputClass} cursor-pointer`}
+                style={fieldInputStyle}
               >
                 {SOURCES.map((s) => (
                   <option key={s} value={s}>
@@ -879,9 +674,11 @@ function AddDealModal({
               "add-assignee",
               <select
                 id="add-assignee"
+                title="Assignee"
                 value={form.assignee}
                 onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-                style={selectStyle}
+                className={`${fieldInputClass} cursor-pointer`}
+                style={fieldInputStyle}
               >
                 {ASSIGNEES.map((a) => (
                   <option key={a} value={a}>
@@ -890,7 +687,7 @@ function AddDealModal({
                 ))}
               </select>,
             )}
-            <div style={{ gridColumn: "1 / -1" }}>
+            <div className="col-span-2">
               {field(
                 "Notes",
                 "add-notes",
@@ -900,11 +697,8 @@ function AddDealModal({
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
                   placeholder="Add context about this deal..."
                   rows={3}
-                  style={{
-                    ...inputStyle,
-                    resize: "vertical",
-                    fontFamily: "inherit",
-                  }}
+                  className={`${fieldInputClass} resize-y font-sans`}
+                  style={fieldInputStyle}
                 />,
               )}
             </div>
@@ -912,23 +706,17 @@ function AddDealModal({
         </div>
 
         <div
+          className="flex gap-2 justify-end"
           style={{
             padding: "14px 22px",
-            borderTop: "1px solid rgba(0,0,0,0.07)",
-            display: "flex",
-            gap: 8,
-            justifyContent: "flex-end",
+            borderTop: "1px solid var(--content-border)",
           }}
         >
           <button
             onClick={onClose}
+            className="px-4 py-2 rounded-lg cursor-pointer text-[13px] bg-transparent"
             style={{
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "1px solid #D8D8E8",
-              background: "transparent",
-              cursor: "pointer",
-              fontSize: 13,
+              border: "1px solid var(--input-border)",
               color: "var(--text-secondary)",
             }}
           >
@@ -936,16 +724,7 @@ function AddDealModal({
           </button>
           <button
             onClick={handleAdd}
-            style={{
-              padding: "8px 18px",
-              borderRadius: 8,
-              border: "none",
-              background: "var(--vyne-purple)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
+            className="px-[18px] py-2 rounded-lg border-0 text-white cursor-pointer text-[13px] font-semibold bg-vyne-purple"
           >
             Add Deal
           </button>
@@ -966,9 +745,7 @@ function PipelineTab({
   onAddDeal: (stage: Stage) => void;
 }>) {
   return (
-    <div
-      style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8 }}
-    >
+    <div className="flex gap-3 overflow-x-auto pb-2">
       {STAGES.map((stage) => {
         const stageDeals = deals.filter((d) => d.stage === stage);
         const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
@@ -977,183 +754,94 @@ function PipelineTab({
         return (
           <div
             key={stage}
-            style={{
-              minWidth: 240,
-              maxWidth: 240,
-              flexShrink: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-            }}
+            className="min-w-[240px] max-w-[240px] shrink-0 flex flex-col gap-2"
           >
             {/* Column header */}
             <div
+              className="rounded-[10px] px-3 py-2.5"
               style={{
                 background: "var(--content-bg)",
-                borderRadius: 10,
-                padding: "10px 12px",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 4,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-[7px]">
                   <div
-                    style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: color,
-                    }}
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: color }}
                   />
                   <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
+                    className="text-xs font-bold text-text-primary"
                   >
                     {stage}
                   </span>
                 </div>
                 <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: "var(--text-tertiary)",
-                    background: "#F4F4F8",
-                    padding: "1px 7px",
-                    borderRadius: 20,
-                  }}
+                  className="text-[11px] font-semibold px-[7px] py-px rounded-full bg-[#F4F4F8] text-text-tertiary"
                 >
                   {stageDeals.length}
                 </span>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 600, color }}>
+              <div className="text-xs font-semibold" style={{ color }}>
                 {fmt(stageTotal)}
               </div>
             </div>
 
             {/* Deal cards */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                flex: 1,
-              }}
-            >
+            <div className="flex flex-col gap-2 flex-1">
               {stageDeals.map((deal) => {
                 const days = daysSince(deal.lastActivity);
                 const priority = priorityFromDays(days);
                 const daysColor = priorityColor(priority);
                 const showOrange = priority === "urgent";
+                const priorityWeightClass = priority === "normal" ? "font-normal" : "font-semibold";
 
                 return (
                   <button
                     key={deal.id}
                     onClick={() => onDealClick(deal)}
+                    className="rounded-[10px] cursor-pointer text-left w-full transition-shadow duration-150"
                     style={{
                       background: "var(--content-bg)",
-                      borderRadius: 10,
                       padding: "12px 13px",
                       border: showOrange
                         ? "1px solid rgba(249,115,22,0.3)"
-                        : "1px solid rgba(0,0,0,0.08)",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      width: "100%",
+                        : "1px solid var(--content-border)",
                       boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-                      transition: "box-shadow 0.15s",
                     }}
                   >
                     <div
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "var(--text-primary)",
-                        marginBottom: 3,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
+                      className="text-xs font-bold mb-[3px] truncate text-text-primary"
                     >
                       {deal.company}
                     </div>
                     <div
-                      style={{
-                        fontSize: 11,
-                        color: "var(--text-secondary)",
-                        marginBottom: 8,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
+                      className="text-[11px] mb-2 truncate text-text-secondary"
                     >
                       {deal.contactName}
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
+                    <div className="flex items-center justify-between">
                       <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 700,
-                          color: "var(--text-primary)",
-                        }}
+                        className="text-[13px] font-bold text-text-primary"
                       >
                         {fmt(deal.value)}
                       </span>
                       <span
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          color: probabilityColor(deal.probability),
-                        }}
+                        className="text-[11px] font-semibold"
+                        style={{ color: probabilityColor(deal.probability) }}
                       >
                         {deal.probability}%
                       </span>
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        marginTop: 8,
-                      }}
-                    >
+                    <div className="flex items-center justify-between mt-2">
                       <div
-                        style={{
-                          width: 24,
-                          height: 24,
-                          borderRadius: "50%",
-                          background: "rgba(108,71,255,0.12)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: "var(--vyne-purple)",
-                        }}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]"
                       >
                         {initials(deal.assignee)}
                       </div>
                       <span
-                        style={{
-                          fontSize: 10,
-                          color: daysColor,
-                          fontWeight: priority !== "normal" ? 600 : 400,
-                        }}
+                        className={`text-[10px] ${priorityWeightClass}`}
+                        style={{ color: daysColor }}
                       >
                         {days}d ago
                       </span>
@@ -1166,20 +854,10 @@ function PipelineTab({
             {/* Add deal button */}
             <button
               onClick={() => onAddDeal(stage)}
+              className="w-full py-2 rounded-lg bg-transparent cursor-pointer text-xs flex items-center justify-center gap-[5px] transition-all duration-150"
               style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: 8,
-                border: "1px dashed rgba(0,0,0,0.18)",
-                background: "transparent",
-                cursor: "pointer",
-                fontSize: 12,
+                border: "1px dashed var(--content-border)",
                 color: "var(--text-tertiary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 5,
-                transition: "all 0.15s",
               }}
             >
               <Plus size={12} /> Add Deal
@@ -1244,66 +922,42 @@ function DealsTableTab({
       return sortDir === "asc" ? cmp : -cmp;
     });
 
-  const sortArrow = (key: SortKey) =>
-    sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "";
+  function sortArrow(key: SortKey): string {
+    if (sortKey !== key) return "";
+    return sortDir === "asc" ? " ↑" : " ↓";
+  }
 
-  const thStyle: React.CSSProperties = {
-    padding: "9px 14px",
-    textAlign: "left",
-    fontSize: 10,
-    fontWeight: 600,
-    color: "var(--text-secondary)",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    userSelect: "none",
-  };
+  const thClass =
+    "px-[14px] py-[9px] text-left text-[10px] font-semibold uppercase whitespace-nowrap select-none cursor-pointer text-text-secondary tracking-[0.06em]";
+  const thNoSortClass =
+    "px-[14px] py-[9px] text-left text-[10px] font-semibold uppercase whitespace-nowrap select-none cursor-default text-text-secondary tracking-[0.06em]";
 
   return (
     <div>
       {/* Filters row */}
-      <div
-        style={{
-          display: "flex",
-          gap: 10,
-          marginBottom: 14,
-          alignItems: "center",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="flex gap-[10px] mb-[14px] items-center flex-wrap">
         {/* Search */}
-        <div style={{ position: "relative", flex: 1, minWidth: 180 }}>
+        <div className="relative flex-1 min-w-[180px]">
           <Search
             size={13}
-            style={{
-              position: "absolute",
-              left: 10,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "var(--text-tertiary)",
-            }}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-tertiary"
           />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search deals..."
+            aria-label="Search deals"
+            className="w-full py-[7px] pr-2.5 pl-[30px] rounded-lg outline-none text-xs box-border"
             style={{
-              width: "100%",
-              padding: "7px 10px 7px 30px",
-              border: "1px solid #D8D8E8",
-              borderRadius: 8,
+              border: "1px solid var(--input-border)",
               background: "var(--content-bg)",
-              outline: "none",
-              fontSize: 12,
               color: "var(--text-primary)",
-              boxSizing: "border-box",
             }}
           />
         </div>
 
         {/* Stage filter pills */}
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+        <div className="flex gap-[5px] flex-wrap">
           {(["All", ...STAGES] as Array<Stage | "All">).map((s) => {
             const isActive = stageFilter === s;
             const pillColor =
@@ -1312,22 +966,13 @@ function DealsTableTab({
               <button
                 key={s}
                 onClick={() => setStageFilter(s)}
+                className="px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer transition-all duration-150"
                 style={{
-                  padding: "4px 10px",
-                  borderRadius: 20,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  cursor: "pointer",
                   border: isActive
                     ? `1.5px solid ${pillColor}`
                     : "1.5px solid transparent",
-                  background: isActive
-                    ? s === "All"
-                      ? "rgba(108,71,255,0.1)"
-                      : stageBg(s as Stage)
-                    : "#F4F4F8",
+                  background: pillBg(isActive, s),
                   color: isActive ? pillColor : "var(--text-secondary)",
-                  transition: "all 0.15s",
                 }}
               >
                 {s}
@@ -1340,15 +985,12 @@ function DealsTableTab({
         <select
           value={assigneeFilter}
           onChange={(e) => setAssigneeFilter(e.target.value)}
+          aria-label="Filter by assignee"
+          className="px-2.5 py-1.5 rounded-lg outline-none text-xs cursor-pointer"
           style={{
-            padding: "6px 10px",
-            border: "1px solid #D8D8E8",
-            borderRadius: 8,
+            border: "1px solid var(--input-border)",
             background: "var(--content-bg)",
-            outline: "none",
-            fontSize: 12,
             color: "var(--text-secondary)",
-            cursor: "pointer",
           }}
         >
           <option value="All">All Assignees</option>
@@ -1362,32 +1004,51 @@ function DealsTableTab({
 
       {/* Table */}
       <div
+        className="rounded-[10px] overflow-hidden"
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
-          borderRadius: 10,
-          overflow: "hidden",
+          border: "1px solid var(--content-border)",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="w-full border-collapse">
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
-              <th style={thStyle} onClick={() => toggleSort("company")}>
+            <tr className="bg-[var(--table-header-bg)]">
+              <th
+                className={thClass}
+                onClick={() => toggleSort("company")}
+              >
                 Company{sortArrow("company")}
               </th>
-              <th style={{ ...thStyle, cursor: "default" }}>Contact</th>
-              <th style={thStyle} onClick={() => toggleSort("value")}>
+              <th
+                className={thNoSortClass}
+              >Contact</th>
+              <th
+                className={thClass}
+                onClick={() => toggleSort("value")}
+              >
                 Value{sortArrow("value")}
               </th>
-              <th style={thStyle} onClick={() => toggleSort("stage")}>
+              <th
+                className={thClass}
+                onClick={() => toggleSort("stage")}
+              >
                 Stage{sortArrow("stage")}
               </th>
-              <th style={{ ...thStyle, cursor: "default" }}>Source</th>
-              <th style={{ ...thStyle, cursor: "default" }}>Assignee</th>
-              <th style={thStyle} onClick={() => toggleSort("lastActivity")}>
+              <th
+                className={thNoSortClass}
+              >Source</th>
+              <th
+                className={thNoSortClass}
+              >Assignee</th>
+              <th
+                className={thClass}
+                onClick={() => toggleSort("lastActivity")}
+              >
                 Last Activity{sortArrow("lastActivity")}
               </th>
-              <th style={{ ...thStyle, cursor: "default" }}>Actions</th>
+              <th
+                className={thNoSortClass}
+              >Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -1395,122 +1056,76 @@ function DealsTableTab({
               const days = daysSince(deal.lastActivity);
               const priority = priorityFromDays(days);
               const daysColor = priorityColor(priority);
+              const priorityWeightClass = priority === "normal" ? "font-normal" : "font-semibold";
 
               return (
                 <tr
                   key={deal.id}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  className="border-t border-black/[0.05]"
                   onMouseEnter={(ev) => {
                     (ev.currentTarget as HTMLTableRowElement).style.background =
-                      "#FAFAFE";
+                      "var(--content-secondary)";
                   }}
                   onMouseLeave={(ev) => {
                     (ev.currentTarget as HTMLTableRowElement).style.background =
                       "transparent";
                   }}
                 >
-                  <td style={{ padding: "10px 14px" }}>
+                  <td className="px-[14px] py-[10px]">
                     <button
                       onClick={() => onDealClick(deal)}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "var(--vyne-purple)",
-                        padding: 0,
-                        textAlign: "left",
-                      }}
+                      className="bg-transparent border-0 cursor-pointer text-xs font-bold p-0 text-left text-vyne-purple"
                     >
                       {deal.company}
                     </button>
                   </td>
                   <td
-                    style={{
-                      padding: "10px 14px",
-                      fontSize: 12,
-                      color: "var(--text-secondary)",
-                    }}
+                    className="px-[14px] py-[10px] text-xs text-text-secondary"
                   >
                     {deal.contactName}
                   </td>
                   <td
-                    style={{
-                      padding: "10px 14px",
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                      whiteSpace: "nowrap",
-                    }}
+                    className="px-[14px] py-[10px] text-xs font-bold whitespace-nowrap text-text-primary"
                   >
                     {fmt(deal.value)}
                   </td>
-                  <td style={{ padding: "10px 14px" }}>
+                  <td className="px-[14px] py-[10px]">
                     <StagePill stage={deal.stage} />
                   </td>
                   <td
-                    style={{
-                      padding: "10px 14px",
-                      fontSize: 11,
-                      color: "var(--text-tertiary)",
-                      textTransform: "capitalize",
-                    }}
+                    className="px-[14px] py-[10px] text-[11px] capitalize text-text-tertiary"
                   >
                     {deal.source}
                   </td>
-                  <td style={{ padding: "10px 14px" }}>
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 6 }}
-                    >
+                  <td className="px-[14px] py-[10px]">
+                    <div className="flex items-center gap-1.5">
                       <div
-                        style={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: "50%",
-                          background: "rgba(108,71,255,0.12)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: "var(--vyne-purple)",
-                        }}
+                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]"
                       >
                         {initials(deal.assignee)}
                       </div>
                       <span
-                        style={{ fontSize: 12, color: "var(--text-primary)" }}
+                        className="text-xs text-text-primary"
                       >
                         {deal.assignee}
                       </span>
                     </div>
                   </td>
                   <td
-                    style={{
-                      padding: "10px 14px",
-                      fontSize: 11,
-                      color: daysColor,
-                      fontWeight: priority !== "normal" ? 600 : 400,
-                      whiteSpace: "nowrap",
-                    }}
+                    className={`px-[14px] py-[10px] text-[11px] whitespace-nowrap ${priorityWeightClass}`}
+                    style={{ color: daysColor }}
                   >
                     {days}d ago
                   </td>
-                  <td style={{ padding: "10px 14px" }}>
-                    <div style={{ display: "flex", gap: 5 }}>
+                  <td className="px-[14px] py-[10px]">
+                    <div className="flex gap-[5px]">
                       <button
                         onClick={() => onDealClick(deal)}
                         title="Edit"
+                        className="px-2 py-1 rounded-md bg-transparent cursor-pointer flex items-center"
                         style={{
-                          padding: "4px 8px",
-                          borderRadius: 6,
-                          border: "1px solid rgba(0,0,0,0.12)",
-                          background: "transparent",
-                          cursor: "pointer",
+                          border: "1px solid var(--content-border)",
                           color: "var(--text-secondary)",
-                          display: "flex",
-                          alignItems: "center",
                         }}
                       >
                         <Edit2 size={11} />
@@ -1518,15 +1133,11 @@ function DealsTableTab({
                       <button
                         onClick={() => onMarkWon(deal.id)}
                         title="Mark Won"
+                        className="px-2 py-1 rounded-md cursor-pointer flex items-center"
                         style={{
-                          padding: "4px 8px",
-                          borderRadius: 6,
                           border: "1px solid rgba(34,197,94,0.3)",
                           background: "rgba(34,197,94,0.06)",
-                          cursor: "pointer",
                           color: "var(--status-success)",
-                          display: "flex",
-                          alignItems: "center",
                         }}
                       >
                         <Check size={11} />
@@ -1534,15 +1145,11 @@ function DealsTableTab({
                       <button
                         onClick={() => onMarkLost(deal.id)}
                         title="Mark Lost"
+                        className="px-2 py-1 rounded-md cursor-pointer flex items-center"
                         style={{
-                          padding: "4px 8px",
-                          borderRadius: 6,
                           border: "1px solid rgba(239,68,68,0.3)",
                           background: "rgba(239,68,68,0.06)",
-                          cursor: "pointer",
                           color: "var(--status-danger)",
-                          display: "flex",
-                          alignItems: "center",
                         }}
                       >
                         <XCircle size={11} />
@@ -1556,12 +1163,7 @@ function DealsTableTab({
         </table>
         {filtered.length === 0 && (
           <div
-            style={{
-              padding: "32px",
-              textAlign: "center",
-              fontSize: 13,
-              color: "var(--text-tertiary)",
-            }}
+            className="p-8 text-center text-[13px] text-text-tertiary"
           >
             No deals match your filters.
           </div>
@@ -1600,15 +1202,9 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
     .slice(0, 5);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <div className="flex flex-col gap-[18px]">
       {/* KPI cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 14,
-        }}
-      >
+      <div className="grid grid-cols-3 gap-[14px]">
         {[
           {
             label: "Pipeline Total",
@@ -1634,60 +1230,33 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
         ].map(({ label, value, sub, color, bg }) => (
           <div
             key={label}
+            className="rounded-xl px-5 py-[18px]"
             style={{
               background: "var(--content-bg)",
-              borderRadius: 12,
-              padding: "18px 20px",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
             }}
           >
             <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 9,
-                background: bg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 12,
-              }}
+              className="w-9 h-9 rounded-[9px] flex items-center justify-center mb-3"
+              style={{ background: bg }}
             >
               <div
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: "50%",
-                  background: color,
-                }}
+                className="w-3.5 h-3.5 rounded-full"
+                style={{ background: color }}
               />
             </div>
             <div
-              style={{
-                fontSize: 24,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                letterSpacing: "-0.04em",
-              }}
+              className="text-2xl font-bold text-text-primary tracking-[-0.04em]" 
             >
               {value}
             </div>
             <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                marginTop: 4,
-              }}
+              className="text-xs font-semibold mt-1 text-text-primary"
             >
               {label}
             </div>
             <div
-              style={{
-                fontSize: 11,
-                color: "var(--text-tertiary)",
-                marginTop: 2,
-              }}
+              className="text-[11px] mt-0.5 text-text-tertiary"
             >
               {sub}
             </div>
@@ -1695,89 +1264,56 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-2 gap-[14px]">
         {/* Bar chart by stage */}
         <div
+          className="rounded-xl px-5 py-[18px]"
           style={{
             background: "var(--content-bg)",
-            borderRadius: 12,
-            padding: "18px 20px",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
           }}
         >
           <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              marginBottom: 16,
-            }}
+            className="text-[13px] font-bold mb-4 text-text-primary"
           >
             Pipeline by Stage
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="flex flex-col gap-3">
             {stageData.map(({ stage, total, count }) => {
               const pct = maxBarVal > 0 ? (total / maxBarVal) * 100 : 0;
               return (
                 <div key={stage}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: 5,
-                    }}
-                  >
-                    <div
-                      style={{ display: "flex", alignItems: "center", gap: 7 }}
-                    >
+                  <div className="flex justify-between mb-[5px]">
+                    <div className="flex items-center gap-[7px]">
                       <div
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: "50%",
-                          background: stageColor(stage),
-                        }}
+                        className="w-2 h-2 rounded-full"
+                        style={{ background: stageColor(stage) }}
                       />
                       <span
-                        style={{
-                          fontSize: 12,
-                          color: "var(--text-primary)",
-                          fontWeight: 500,
-                        }}
+                        className="text-xs font-medium text-text-primary"
                       >
                         {stage}
                       </span>
                       <span
-                        style={{ fontSize: 11, color: "var(--text-tertiary)" }}
+                        className="text-[11px] text-text-tertiary"
                       >
                         ({count})
                       </span>
                     </div>
                     <span
-                      style={{
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: "var(--text-primary)",
-                      }}
+                      className="text-xs font-bold text-text-primary"
                     >
                       {fmt(total)}
                     </span>
                   </div>
                   <div
-                    style={{
-                      height: 8,
-                      borderRadius: 4,
-                      background: "#F0F0F8",
-                      overflow: "hidden",
-                    }}
+                    className="h-2 rounded overflow-hidden bg-[#F0F0F8]"
                   >
                     <div
+                      className="h-full rounded transition-[width] duration-[0.6s] ease-in-out"
                       style={{
-                        height: "100%",
                         width: `${pct}%`,
                         background: stageColor(stage),
-                        borderRadius: 4,
-                        transition: "width 0.6s ease",
                       }}
                     />
                   </div>
@@ -1789,76 +1325,44 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
 
         {/* Top deals */}
         <div
+          className="rounded-xl px-5 py-[18px]"
           style={{
             background: "var(--content-bg)",
-            borderRadius: 12,
-            padding: "18px 20px",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
           }}
         >
           <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              marginBottom: 16,
-            }}
+            className="text-[13px] font-bold mb-4 text-text-primary"
           >
             Top Deals by Value
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          <div className="flex flex-col">
             {topDeals.map((deal, i) => (
               <div
                 key={deal.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  padding: "10px 0",
-                  borderTop: i === 0 ? "none" : "1px solid rgba(0,0,0,0.05)",
-                }}
+                className="flex items-center gap-3 py-2.5"
+                style={{ borderTop: i === 0 ? "none" : "1px solid var(--content-border)" }}
               >
                 <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "var(--text-tertiary)",
-                    width: 18,
-                    textAlign: "center",
-                  }}
+                  className="text-xs font-bold w-[18px] text-center text-text-tertiary"
                 >
                   {i + 1}
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                   <div
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
+                    className="text-xs font-bold truncate text-text-primary"
                   >
                     {deal.company}
                   </div>
                   <div
-                    style={{
-                      fontSize: 11,
-                      color: "var(--text-tertiary)",
-                      marginTop: 1,
-                    }}
+                    className="text-[11px] mt-px text-text-tertiary"
                   >
                     {deal.contactName}
                   </div>
                 </div>
-                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div className="text-right shrink-0">
                   <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
+                    className="text-[13px] font-bold text-text-primary"
                   >
                     {fmt(deal.value)}
                   </div>
@@ -1879,6 +1383,17 @@ export default function CRMPage() {
   const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
     "pipeline",
   );
+
+  useEffect(() => {
+    erpApi
+      .listCustomers()
+      .then((r) => {
+        if (r.data?.length) {
+          setDeals(r.data.map(customerToDeal));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [addStage, setAddStage] = useState<Stage | null>(null);
   const [toast, setToast] = useState("");
@@ -1926,72 +1441,39 @@ export default function CRMPage() {
   ).length;
 
   return (
-    <div
-      style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div
+        className="shrink-0"
         style={{
           padding: "14px 20px 0",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
-          flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
+        <div className="flex items-center justify-between mb-3">
           <div>
             <h1
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
+              className="text-base font-bold m-0 text-text-primary"
             >
               CRM Pipeline
             </h1>
             <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-tertiary)",
-                margin: "2px 0 0",
-              }}
+              className="text-xs mt-0.5 mb-0 text-text-tertiary"
             >
               {activeCount} active deals · {fmt(totalPipeline)} pipeline
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div className="flex gap-2 items-center">
             <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "rgba(34,197,94,0.1)",
-                color: "#166534",
-              }}
+              className="text-[11px] px-2 py-[3px] rounded-full bg-status-success/10 text-[var(--badge-success-text)]"
+              
             >
               {deals.filter((d) => d.stage === "Won").length} won
             </span>
             <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "rgba(239,68,68,0.1)",
-                color: "#991B1B",
-              }}
+              className="text-[11px] px-2 py-[3px] rounded-full bg-status-danger/10 text-[var(--badge-danger-text)]"
+              
             >
               {deals.filter((d) => d.stage === "Lost").length} lost
             </span>
@@ -2012,25 +1494,13 @@ export default function CRMPage() {
             />
             <button
               onClick={() => setAddStage("Lead")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "7px 14px",
-                borderRadius: 8,
-                border: "none",
-                background: "var(--vyne-purple)",
-                color: "#fff",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 600,
-              }}
+              className="flex items-center gap-1.5 px-[14px] py-[7px] rounded-lg border-0 text-white cursor-pointer text-xs font-semibold bg-vyne-purple"
             >
               <Plus size={13} /> Add Deal
             </button>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 2 }}>
+        <div className="flex gap-0.5">
           <TabBtn
             label="Pipeline"
             active={tab === "pipeline"}
@@ -2051,12 +1521,10 @@ export default function CRMPage() {
 
       {/* Content */}
       <div
-        className="content-scroll"
+        className="content-scroll flex-1 p-5"
         style={{
-          flex: 1,
           overflowY: tab === "pipeline" ? "hidden" : "auto",
           overflowX: tab === "pipeline" ? "auto" : "hidden",
-          padding: 20,
         }}
       >
         {tab === "pipeline" && (
@@ -2101,21 +1569,10 @@ export default function CRMPage() {
       {/* Toast */}
       {toast && (
         <div
+          className="fixed bottom-7 left-1/2 -translate-x-1/2 text-white px-[18px] py-2.5 rounded-[10px] text-[13px] font-medium z-[400] whitespace-nowrap pointer-events-none"
           style={{
-            position: "fixed",
-            bottom: 28,
-            left: "50%",
-            transform: "translateX(-50%)",
             background: "var(--text-primary)",
-            color: "#fff",
-            padding: "10px 18px",
-            borderRadius: 10,
-            fontSize: 13,
-            fontWeight: 500,
-            zIndex: 400,
             boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-            whiteSpace: "nowrap",
-            pointerEvents: "none",
           }}
         >
           {toast}

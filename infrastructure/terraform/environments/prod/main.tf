@@ -1,0 +1,178 @@
+# ============================================================
+# VYNE — Production Environment
+# Full HA configuration across 3 AZs with deletion protection.
+# ============================================================
+
+terraform {
+  required_version = ">= 1.9.0"
+  required_providers {
+    aws    = { source = "hashicorp/aws",    version = "~> 5.82" }
+    random = { source = "hashicorp/random", version = "~> 3.6"  }
+  }
+  backend "s3" {
+    bucket         = "vyne-terraform-state-YOUR_AWS_ACCOUNT_ID"
+    key            = "vyne/prod/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "vyne-terraform-locks"
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+  default_tags {
+    tags = {
+      Project     = "vyne"
+      Environment = var.environment
+      ManagedBy   = "terraform"
+    }
+  }
+}
+
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}
+
+# ── Networking ────────────────────────────────────────────────
+# Full HA: 3 public + 3 private + 3 isolated subnets; 3 NAT Gateways.
+
+module "networking" {
+  source = "../../modules/networking"
+
+  environment        = var.environment
+  vpc_cidr           = "10.2.0.0/16" # Separate CIDR from dev (10.0) and staging (10.1)
+  availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+  single_nat_gateway = false # HA: one NAT GW per AZ
+}
+
+# ── S3 ────────────────────────────────────────────────────────
+
+module "s3" {
+  source = "../../modules/s3"
+
+  environment          = var.environment
+  account_id           = local.account_id
+  cors_allowed_origins = ["https://${var.app_domain}", "https://www.${var.app_domain}"]
+  log_retention_days   = 365
+}
+
+# ── ECR ───────────────────────────────────────────────────────
+
+module "ecr" {
+  source      = "../../modules/ecr"
+  environment = var.environment
+}
+
+# ── ECS ───────────────────────────────────────────────────────
+
+module "ecs" {
+  source = "../../modules/ecs"
+
+  environment        = var.environment
+  aws_region         = var.aws_region
+  log_retention_days = 90
+}
+
+# ── RDS (Aurora Serverless v2) ────────────────────────────────
+# Prod: deletion protection on, 14-day backups, auto-scale to 32 ACU.
+
+module "rds" {
+  source = "../../modules/rds"
+
+  environment         = var.environment
+  vpc_id              = module.networking.vpc_id
+  isolated_subnet_ids = module.networking.isolated_subnet_ids
+  sg_rds_id           = module.networking.sg_rds_id
+
+  min_capacity          = 2   # Never scales to zero in prod
+  max_capacity          = 32
+  deletion_protection   = true
+  backup_retention_days = 14
+}
+
+# ── Redis (ElastiCache) ───────────────────────────────────────
+# Prod: m7g.large for adequate memory; cluster mode handled by module.
+
+module "redis" {
+  source = "../../modules/redis"
+
+  environment         = var.environment
+  isolated_subnet_ids = module.networking.isolated_subnet_ids
+  sg_redis_id         = module.networking.sg_redis_id
+  node_type           = "cache.m7g.large"
+}
+
+# ── Cognito ───────────────────────────────────────────────────
+
+module "cognito" {
+  source = "../../modules/cognito"
+
+  environment   = var.environment
+  callback_urls = [
+    "https://${var.app_domain}/api/auth/callback/cognito",
+    "https://www.${var.app_domain}/api/auth/callback/cognito",
+  ]
+  logout_urls = [
+    "https://${var.app_domain}",
+    "https://www.${var.app_domain}",
+  ]
+}
+
+# ── SQS + SNS ─────────────────────────────────────────────────
+
+module "sqs_sns" {
+  source      = "../../modules/sqs-sns"
+  environment = var.environment
+}
+
+# ── EventBridge ───────────────────────────────────────────────
+
+module "eventbridge" {
+  source = "../../modules/eventbridge"
+
+  environment             = var.environment
+  erp_queue_arn           = module.sqs_sns.queue_arns["erp"]
+  ai_queue_arn            = module.sqs_sns.queue_arns["ai"]
+  notifications_queue_arn = module.sqs_sns.queue_arns["notifications"]
+}
+
+# ── IAM ───────────────────────────────────────────────────────
+
+module "iam" {
+  source = "../../modules/iam"
+
+  environment = var.environment
+  account_id  = local.account_id
+  github_org  = var.github_org
+  github_repo = var.github_repo
+}
+
+# ── ALB ───────────────────────────────────────────────────────
+
+module "alb" {
+  source = "../../modules/alb"
+
+  environment         = var.environment
+  vpc_id              = module.networking.vpc_id
+  public_subnet_ids   = module.networking.public_subnet_ids
+  sg_alb_id           = module.networking.sg_alb_id
+  acm_certificate_arn = var.acm_certificate_arn
+  logs_bucket         = module.s3.logs_bucket_name
+}
+
+# ── Outputs ───────────────────────────────────────────────────
+
+output "vpc_id"                  { value = module.networking.vpc_id }
+output "cluster_name"           { value = module.ecs.cluster_name }
+output "rds_endpoint"           { value = module.rds.cluster_endpoint }
+output "rds_secret_arn"         { value = module.rds.secret_arn, sensitive = true }
+output "redis_endpoint"         { value = module.redis.primary_endpoint }
+output "cognito_user_pool_id"   { value = module.cognito.user_pool_id }
+output "cognito_client_id"      { value = module.cognito.web_client_id }
+output "ecr_repo_urls"          { value = module.ecr.repository_urls }
+output "alb_dns"                { value = module.alb.alb_dns_name }
+output "event_bus_name"         { value = module.eventbridge.event_bus_name }
+output "files_bucket"           { value = module.s3.files_bucket_name }
+output "github_actions_role_arn" { value = module.iam.github_actions_role_arn }

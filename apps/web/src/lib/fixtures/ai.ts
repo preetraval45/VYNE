@@ -27,6 +27,20 @@ export interface DelayedOrder {
   daysLate: number;
 }
 
+export interface DataTableRow {
+  [key: string]: string | number;
+}
+
+export interface DataTable {
+  title: string;
+  rows: DataTableRow[];
+}
+
+export interface TraceStep {
+  step: string;
+  note: string;
+}
+
 export interface QueryResult {
   query: string;
   answer: string;
@@ -34,6 +48,9 @@ export interface QueryResult {
   sources: string;
   followUps: string[];
   timestamp: string;
+  data_tables?: DataTable[];
+  trace?: TraceStep[];
+  agent?: string;
 }
 
 // ── Mock data ────────────────────────────────────────────────────

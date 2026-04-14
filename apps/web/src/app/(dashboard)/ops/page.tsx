@@ -193,9 +193,9 @@ function FormField({
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  border: "1px solid #D8D8E8",
+  border: "1px solid var(--input-border)",
   borderRadius: 8,
-  background: "#FAFAFE",
+  background: "var(--content-secondary)",
   outline: "none",
   fontSize: 13,
   color: "var(--text-primary)",
@@ -275,7 +275,7 @@ function OverviewTab({
             key={label}
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 10,
               padding: "14px 16px",
             }}
@@ -337,7 +337,7 @@ function OverviewTab({
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             overflow: "hidden",
           }}
@@ -345,7 +345,7 @@ function OverviewTab({
           <div
             style={{
               padding: "14px 16px",
-              borderBottom: "1px solid rgba(0,0,0,0.06)",
+              borderBottom: "1px solid var(--content-border)",
               fontSize: 13,
               fontWeight: 600,
               color: "var(--text-primary)",
@@ -355,7 +355,7 @@ function OverviewTab({
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#F7F7FB" }}>
+              <tr style={{ background: "var(--table-header-bg)" }}>
                 {["Order #", "Customer", "Total", "Status", "Date"].map((h) => (
                   <th
                     key={h}
@@ -378,7 +378,7 @@ function OverviewTab({
               {orders.slice(0, 5).map((o) => (
                 <tr
                   key={o.id}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  style={{ borderTop: "1px solid var(--content-border)" }}
                 >
                   <td
                     style={{
@@ -430,7 +430,7 @@ function OverviewTab({
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             overflow: "hidden",
           }}
@@ -438,7 +438,7 @@ function OverviewTab({
           <div
             style={{
               padding: "14px 16px",
-              borderBottom: "1px solid rgba(0,0,0,0.06)",
+              borderBottom: "1px solid var(--content-border)",
               fontSize: 13,
               fontWeight: 600,
               color: "var(--text-primary)",
@@ -585,7 +585,7 @@ function InventoryTab({
             display: "flex",
             alignItems: "center",
             gap: 7,
-            background: "#F0F0F8",
+            background: "var(--content-secondary)",
             border: "1px solid var(--content-border)",
             borderRadius: 8,
             padding: "6px 10px",
@@ -632,14 +632,14 @@ function InventoryTab({
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {[
                 "SKU",
                 "Product",
@@ -673,10 +673,10 @@ function InventoryTab({
             {filtered.map((p) => (
               <tr
                 key={p.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
-                    "#FAFAFE";
+                    "var(--content-secondary)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
@@ -762,7 +762,7 @@ function InventoryTab({
                       gap: 4,
                       padding: "3px 8px",
                       borderRadius: 6,
-                      border: "1px solid rgba(0,0,0,0.12)",
+                      border: "1px solid var(--content-border)",
                       background: "transparent",
                       cursor: "pointer",
                       fontSize: 11,
@@ -886,7 +886,7 @@ function InventoryTab({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
@@ -924,7 +924,7 @@ function InventoryTab({
           style={{
             marginBottom: 12,
             padding: "10px 14px",
-            background: "#F7F7FB",
+            background: "var(--table-header-bg)",
             borderRadius: 8,
           }}
         >
@@ -973,7 +973,7 @@ function InventoryTab({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
@@ -1093,7 +1093,7 @@ function OrdersTab({
               display: "flex",
               alignItems: "center",
               gap: 7,
-              background: "#F0F0F8",
+              background: "var(--content-secondary)",
               border: "1px solid var(--content-border)",
               borderRadius: 8,
               padding: "5px 10px",
@@ -1138,14 +1138,14 @@ function OrdersTab({
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {[
                 "Order #",
                 "Customer",
@@ -1175,10 +1175,10 @@ function OrdersTab({
             {filtered.map((o) => (
               <tr
                 key={o.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
-                    "#FAFAFE";
+                    "var(--content-secondary)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
@@ -1300,7 +1300,7 @@ function OrdersTab({
                         style={{
                           padding: "3px 8px",
                           borderRadius: 6,
-                          border: "1px solid rgba(0,0,0,0.12)",
+                          border: "1px solid var(--content-border)",
                           background: "transparent",
                           cursor: "pointer",
                           fontSize: 11,
@@ -1372,7 +1372,7 @@ function OrdersTab({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
@@ -1461,14 +1461,14 @@ function SuppliersTab({
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {["Supplier", "Contact", "Email", "Phone", "Status"].map((h) => (
                 <th
                   key={h}
@@ -1491,10 +1491,10 @@ function SuppliersTab({
             {suppliers.map((s) => (
               <tr
                 key={s.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
-                    "#FAFAFE";
+                    "var(--content-secondary)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
@@ -1603,7 +1603,7 @@ function SuppliersTab({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
@@ -1684,14 +1684,14 @@ function ManufacturingTab({
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             overflow: "hidden",
           }}
         >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#F7F7FB" }}>
+              <tr style={{ background: "var(--table-header-bg)" }}>
                 {["Product", "Version", "Components", "Actions"].map((h) => (
                   <th
                     key={h}
@@ -1714,10 +1714,10 @@ function ManufacturingTab({
               {boms.map((b) => (
                 <tr
                   key={b.id}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  style={{ borderTop: "1px solid var(--content-border)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
-                      "#FAFAFE";
+                      "var(--content-secondary)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
@@ -1758,7 +1758,7 @@ function ManufacturingTab({
                       style={{
                         padding: "3px 8px",
                         borderRadius: 6,
-                        border: "1px solid rgba(0,0,0,0.12)",
+                        border: "1px solid var(--content-border)",
                         background: "transparent",
                         cursor: "pointer",
                         fontSize: 11,
@@ -1806,14 +1806,14 @@ function ManufacturingTab({
           <div
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 10,
               overflow: "hidden",
             }}
           >
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr style={{ background: "#F7F7FB" }}>
+                <tr style={{ background: "var(--table-header-bg)" }}>
                   {[
                     "Product",
                     "Qty to Produce",
@@ -1842,11 +1842,11 @@ function ManufacturingTab({
                 {workOrders.map((w) => (
                   <tr
                     key={w.id}
-                    style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                    style={{ borderTop: "1px solid var(--content-border)" }}
                     onMouseEnter={(e) => {
                       (
                         e.currentTarget as HTMLTableRowElement
-                      ).style.background = "#FAFAFE";
+                      ).style.background = "var(--content-secondary)";
                     }}
                     onMouseLeave={(e) => {
                       (
@@ -1947,7 +1947,7 @@ function ManufacturingTab({
                 style={{
                   padding: "8px 16px",
                   borderRadius: 8,
-                  border: "1px solid #D8D8E8",
+                  border: "1px solid var(--input-border)",
                   background: "transparent",
                   cursor: "pointer",
                   fontSize: 13,
@@ -1994,14 +1994,14 @@ function ManufacturingTab({
         </div>
         <div
           style={{
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 8,
             overflow: "hidden",
           }}
         >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#F7F7FB" }}>
+              <tr style={{ background: "var(--table-header-bg)" }}>
                 <th
                   style={{
                     padding: "8px 12px",
@@ -2044,7 +2044,7 @@ function ManufacturingTab({
               {bomDetail?.components?.map((c) => (
                 <tr
                   key={c.componentId}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  style={{ borderTop: "1px solid var(--content-border)" }}
                 >
                   <td
                     style={{
@@ -2139,7 +2139,7 @@ export default function OpsPage() {
       <div
         style={{
           padding: "14px 20px 0",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
         }}

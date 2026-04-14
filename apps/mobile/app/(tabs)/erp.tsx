@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import {
   View,
   Text,
@@ -9,8 +9,12 @@ import {
   SafeAreaView,
   RefreshControl,
   Platform,
+  Modal,
+  Vibration,
+  Alert,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { CameraView, useCameraPermissions } from 'expo-camera'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -70,6 +74,127 @@ const STATUS_CONFIG: Record<StockStatus, { color: string; bg: string; label: str
 const CATEGORY_FILTERS = ['All', 'Electronics', 'Hardware', 'Software'] as const
 type CategoryFilter = (typeof CATEGORY_FILTERS)[number]
 
+// ─── QR Scanner Modal ────────────────────────────────────────────────────────
+
+function QRScanModal({
+  visible,
+  onClose,
+  onScanned,
+}: {
+  visible: boolean
+  onClose: () => void
+  onScanned: (sku: string) => void
+}) {
+  const [permission, requestPermission] = useCameraPermissions()
+  const [scanned, setScanned] = useState(false)
+
+  useEffect(() => {
+    if (visible && !permission?.granted) requestPermission()
+    if (visible) setScanned(false)
+  }, [visible]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleBarCodeScanned({ data }: { type: string; data: string }) {
+    if (scanned) return
+    setScanned(true)
+    Vibration.vibrate(80)
+    onScanned(data)
+  }
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="fullScreen"
+      onRequestClose={onClose}
+    >
+      <View style={scanStyles.container}>
+        <SafeAreaView style={scanStyles.header}>
+          <TouchableOpacity onPress={onClose} style={scanStyles.closeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={scanStyles.headerTitle}>Scan Barcode</Text>
+          <View style={{ width: 40 }} />
+        </SafeAreaView>
+
+        {!permission?.granted ? (
+          <View style={scanStyles.permissionBox}>
+            <Ionicons name="camera-outline" size={56} color="#6C47FF" />
+            <Text style={scanStyles.permissionTitle}>Camera Access Needed</Text>
+            <Text style={scanStyles.permissionSub}>
+              Allow camera access to scan inventory barcodes and QR codes.
+            </Text>
+            <TouchableOpacity style={scanStyles.permissionBtn} onPress={requestPermission}>
+              <Text style={scanStyles.permissionBtnText}>Grant Permission</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <CameraView
+            style={scanStyles.camera}
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['qr', 'ean13', 'ean8', 'code128', 'code39', 'upc_a', 'upc_e', 'datamatrix'],
+            }}
+            onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+          >
+            <View style={scanStyles.overlay}>
+              <View style={scanStyles.topOverlay} />
+              <View style={scanStyles.middleRow}>
+                <View style={scanStyles.sideOverlay} />
+                <View style={scanStyles.viewfinder}>
+                  <View style={[scanStyles.corner, scanStyles.cornerTL]} />
+                  <View style={[scanStyles.corner, scanStyles.cornerTR]} />
+                  <View style={[scanStyles.corner, scanStyles.cornerBL]} />
+                  <View style={[scanStyles.corner, scanStyles.cornerBR]} />
+                  <View style={scanStyles.scanLine} />
+                </View>
+                <View style={scanStyles.sideOverlay} />
+              </View>
+              <View style={scanStyles.bottomOverlay}>
+                <Text style={scanStyles.scanHint}>
+                  {scanned ? '✓ Scanned! Loading product…' : 'Point at a barcode or QR code'}
+                </Text>
+                {scanned && (
+                  <TouchableOpacity style={scanStyles.rescanBtn} onPress={() => setScanned(false)}>
+                    <Text style={scanStyles.rescanBtnText}>Scan Again</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </CameraView>
+        )}
+      </View>
+    </Modal>
+  )
+}
+
+const scanStyles = StyleSheet.create({
+  container:   { flex: 1, backgroundColor: '#000' },
+  header:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 12, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 10 },
+  closeBtn:    { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 16, fontWeight: '700', color: '#fff', letterSpacing: 0.2 },
+  camera:      { flex: 1 },
+  overlay:     { flex: 1 },
+  topOverlay:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+  middleRow:   { flexDirection: 'row', height: 260 },
+  sideOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
+  viewfinder:  { width: 260, height: 260, position: 'relative' },
+  scanLine:    { position: 'absolute', top: '50%', left: 12, right: 12, height: 2, backgroundColor: '#6C47FF', opacity: 0.85, borderRadius: 1 },
+  corner:      { position: 'absolute', width: 24, height: 24, borderColor: '#6C47FF', borderWidth: 3 },
+  cornerTL:    { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 4 },
+  cornerTR:    { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 4 },
+  cornerBL:    { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 4 },
+  cornerBR:    { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 4 },
+  bottomOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', alignItems: 'center', paddingTop: 28, gap: 14 },
+  scanHint:    { fontSize: 14, color: 'rgba(255,255,255,0.8)', fontWeight: '500', textAlign: 'center', paddingHorizontal: 24 },
+  rescanBtn:   { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, backgroundColor: '#6C47FF' },
+  rescanBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  permissionBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 16 },
+  permissionTitle: { fontSize: 20, fontWeight: '700', color: '#fff', textAlign: 'center' },
+  permissionSub: { fontSize: 14, color: 'rgba(255,255,255,0.6)', textAlign: 'center', lineHeight: 20 },
+  permissionBtn: { marginTop: 8, paddingHorizontal: 28, paddingVertical: 12, borderRadius: 12, backgroundColor: '#6C47FF' },
+  permissionBtnText: { fontSize: 14, fontWeight: '700', color: '#fff' },
+})
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function ErpScreen() {
@@ -77,6 +202,8 @@ export default function ErpScreen() {
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('All')
   const [refreshing, setRefreshing] = useState(false)
   const [products, setProducts] = useState(ALL_PRODUCTS)
+  const [scannerVisible, setScannerVisible] = useState(false)
+  const [lastScanned, setLastScanned] = useState<string | null>(null)
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
@@ -85,6 +212,25 @@ export default function ErpScreen() {
       setRefreshing(false)
     }, 1200)
   }, [])
+
+  function handleScanned(sku: string) {
+    setLastScanned(sku)
+    setScannerVisible(false)
+    // Find matching product and jump to it via search
+    const match = ALL_PRODUCTS.find(
+      p => p.sku.toLowerCase() === sku.toLowerCase() || p.name.toLowerCase().includes(sku.toLowerCase())
+    )
+    if (match) {
+      setSearch(match.sku)
+      setActiveCategory('All')
+      Alert.alert('Product Found', `${match.name}\n${match.sku} · ${match.qty} units · ${match.location}`, [
+        { text: 'OK' },
+      ])
+    } else {
+      setSearch(sku)
+      Alert.alert('Not Found', `No product matched "${sku}". Showing search results.`, [{ text: 'OK' }])
+    }
+  }
 
   const filtered = products.filter(p => {
     const matchCat = activeCategory === 'All' || p.category === activeCategory
@@ -100,13 +246,21 @@ export default function ErpScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <QRScanModal
+        visible={scannerVisible}
+        onClose={() => setScannerVisible(false)}
+        onScanned={handleScanned}
+      />
+
       {/* ── Header ── */}
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>Inventory</Text>
-          <Text style={styles.headerSub}>{totalSKUs} SKUs tracked</Text>
+          <Text style={styles.headerSub}>
+            {totalSKUs} SKUs tracked{lastScanned ? ` · Last: ${lastScanned}` : ''}
+          </Text>
         </View>
-        <TouchableOpacity style={styles.scanBtn} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.scanBtn} activeOpacity={0.8} onPress={() => setScannerVisible(true)}>
           <Ionicons name="scan-outline" size={20} color="#6C47FF" />
           <Text style={styles.scanBtnText}>Scan</Text>
         </TouchableOpacity>

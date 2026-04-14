@@ -39,7 +39,7 @@ export function CreateChannelModal({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         style={{
-          background: "#fff",
+          background: "var(--content-bg)",
           borderRadius: 14,
           width: 440,
           padding: 24,
@@ -54,7 +54,7 @@ export function CreateChannelModal({
             marginBottom: 20,
           }}
         >
-          <span style={{ fontSize: 15, fontWeight: 600, color: "#1A1A2E" }}>
+          <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
             Create a channel
           </span>
           <button
@@ -63,7 +63,7 @@ export function CreateChannelModal({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               display: "flex",
               borderRadius: 6,
               padding: 4,
@@ -73,7 +73,7 @@ export function CreateChannelModal({
           </button>
         </div>
 
-        <p style={{ fontSize: 12, color: "#6B6B8A", marginBottom: 16 }}>
+        <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
           Channels are where your team communicates. Best when organized around
           a topic.
         </p>
@@ -84,7 +84,7 @@ export function CreateChannelModal({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               display: "block",
               marginBottom: 5,
               textTransform: "uppercase",
@@ -97,13 +97,13 @@ export function CreateChannelModal({
             style={{
               display: "flex",
               alignItems: "center",
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               borderRadius: 8,
               overflow: "hidden",
-              background: "#FAFAFE",
+              background: "var(--content-secondary)",
             }}
           >
-            <span style={{ padding: "0 10px", color: "#A0A0B8", fontSize: 13 }}>
+            <span style={{ padding: "0 10px", color: "var(--text-tertiary)", fontSize: 13 }}>
               #
             </span>
             <input
@@ -118,12 +118,12 @@ export function CreateChannelModal({
                 background: "transparent",
                 outline: "none",
                 fontSize: 13,
-                color: "#1A1A2E",
+                color: "var(--text-primary)",
               }}
             />
           </div>
           {slug && slug !== name.toLowerCase() && (
-            <p style={{ fontSize: 11, color: "#A0A0B8", marginTop: 4 }}>
+            <p style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 4 }}>
               Channel will be created as #{slug}
             </p>
           )}
@@ -135,7 +135,7 @@ export function CreateChannelModal({
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               display: "block",
               marginBottom: 5,
               textTransform: "uppercase",
@@ -155,12 +155,12 @@ export function CreateChannelModal({
             style={{
               width: "100%",
               padding: "8px 10px",
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               borderRadius: 8,
-              background: "#FAFAFE",
+              background: "var(--content-secondary)",
               outline: "none",
               fontSize: 13,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               boxSizing: "border-box",
             }}
           />
@@ -185,7 +185,7 @@ export function CreateChannelModal({
                 width: 36,
                 height: 20,
                 borderRadius: 10,
-                background: isPrivate ? "#6C47FF" : "#D8D8E8",
+                background: isPrivate ? "var(--vyne-purple)" : "var(--content-border)",
                 position: "relative",
                 cursor: "pointer",
                 transition: "background 0.2s",
@@ -199,7 +199,7 @@ export function CreateChannelModal({
                   width: 16,
                   height: 16,
                   borderRadius: "50%",
-                  background: "#fff",
+                  background: "var(--content-bg)",
                   position: "absolute",
                   top: 2,
                   left: isPrivate ? 18 : 2,
@@ -208,10 +208,10 @@ export function CreateChannelModal({
               />
             </button>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#1A1A2E" }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
                 Make private
               </div>
-              <div style={{ fontSize: 11, color: "#A0A0B8" }}>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                 Only invited members can see this channel
               </div>
             </div>
@@ -224,11 +224,11 @@ export function CreateChannelModal({
             style={{
               padding: "8px 16px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
+              border: "1px solid var(--input-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 13,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
             }}
           >
             Cancel

@@ -34,6 +34,29 @@
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 60px;
 
+  /* ── Input / Form Controls ───────────────────────────────────────── */
+  --input-bg: #FAFAFE;
+  --input-border: #D8D8E8;
+
+  /* ── Table / Card Backgrounds ───────────────────────────────────── */
+  --table-header-bg: #F7F7FB;
+  --border-subtle: rgba(0,0,0,0.08);
+
+  /* ── Semantic Badge Colors ───────────────────────────────────────── */
+  --badge-success-bg: rgba(34,197,94,0.12);
+  --badge-success-text: #166534;
+  --badge-warning-bg: rgba(245,158,11,0.12);
+  --badge-warning-text: #92400E;
+  --badge-danger-bg: rgba(239,68,68,0.1);
+  --badge-danger-text: #991B1B;
+  --badge-info-bg: rgba(59,130,246,0.1);
+  --badge-info-text: #1D4ED8;
+
+  /* ── Alert / Highlight Cards ─────────────────────────────────────── */
+  --alert-purple-bg: rgba(108,71,255,0.08);
+  --alert-purple-border: rgba(108,71,255,0.25);
+  --alert-purple-text: #3730A3;
+
   /* ── 1. Brand Colors ─────────────────────────────────────────────── */
   --vyne-purple: #6C47FF;
   --vyne-purple-light: #8B6BFF;
@@ -138,6 +161,29 @@
   /* Messaging */
   --message-bg-self: #2E2255;
   --message-bg-other: #232340;
+
+  /* Input / Form Controls */
+  --input-bg: #1E1E32;
+  --input-border: rgba(255,255,255,0.12);
+
+  /* Table / Card Backgrounds */
+  --table-header-bg: #13131F;
+  --border-subtle: rgba(255,255,255,0.08);
+
+  /* Semantic Badge Colors */
+  --badge-success-bg: rgba(34,197,94,0.12);
+  --badge-success-text: #4ADE80;
+  --badge-warning-bg: rgba(245,158,11,0.1);
+  --badge-warning-text: #FCD34D;
+  --badge-danger-bg: rgba(239,68,68,0.1);
+  --badge-danger-text: #F87171;
+  --badge-info-bg: rgba(59,130,246,0.1);
+  --badge-info-text: #93C5FD;
+
+  /* Alert / Highlight Cards */
+  --alert-purple-bg: rgba(108,71,255,0.15);
+  --alert-purple-border: rgba(108,71,255,0.35);
+  --alert-purple-text: #A78BFA;
 
   /* Sidebar vars stay the same (already dark) */
   /* Status colors stay the same */

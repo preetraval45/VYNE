@@ -14,13 +14,44 @@ public class OrganizationSettings
     public int FiscalYearStart { get; set; } = 1;
     public string Currency { get; set; } = "USD";
     public OrganizationFeatures Features { get; set; } = new();
+    public OrganizationBranding Branding { get; set; } = new();
 }
 
 public class OrganizationFeatures
 {
-    public bool Erp { get; set; } = true;
-    public bool Observability { get; set; } = true;
+    // Core collaboration
+    public bool Chat { get; set; } = true;
+    public bool Projects { get; set; } = true;
+    public bool Docs { get; set; } = true;
     public bool Ai { get; set; } = true;
+
+    // ERP suite
+    public bool Erp { get; set; } = true;
+    public bool Finance { get; set; } = true;
+    public bool Crm { get; set; } = true;
+    public bool Sales { get; set; } = true;
+    public bool Invoicing { get; set; } = true;
+    public bool Manufacturing { get; set; } = true;
+    public bool Purchase { get; set; } = true;
+
+    // Ops
+    public bool Hr { get; set; } = true;
+    public bool Marketing { get; set; } = true;
+    public bool Maintenance { get; set; } = true;
+    public bool Support { get; set; } = true;
+    public bool Observability { get; set; } = true;
+}
+
+public class OrganizationBranding
+{
+    /// <summary>Hex color for accent (e.g. "#6C47FF"). Null → use VYNE default purple.</summary>
+    public string? AccentColor { get; set; }
+
+    /// <summary>Custom domain for white-label (e.g. "app.acme.com"). Null → vyne.app subdomain.</summary>
+    public string? CustomDomain { get; set; }
+
+    /// <summary>Publicly accessible logo URL (uploaded to S3 or external CDN).</summary>
+    public string? LogoUrl { get; set; }
 }
 
 public class Organization

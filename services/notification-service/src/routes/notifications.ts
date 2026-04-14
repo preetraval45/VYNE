@@ -4,6 +4,7 @@
  *   PUT  /notifications/:id/read     — mark a notification as read
  *   GET  /notifications/unread-count — get unread count
  *   POST /notifications/preferences  — update notification preferences
+ *   POST /notifications/register-device — register Expo push token for user
  */
 
 import type { FastifyInstance, FastifyRequest } from 'fastify';
@@ -18,6 +19,21 @@ import { logger } from '../logger.js';
 // ---------------------------------------------------------------------------
 // Schemas
 // ---------------------------------------------------------------------------
+
+const registerDeviceSchema = z.object({
+  token: z.string().min(1),
+  platform: z.enum(['ios', 'android']),
+  deviceName: z.string().optional(),
+});
+
+// In-memory device token store (keyed by userId → set of tokens).
+// In production this would be persisted to a database table.
+const deviceTokens = new Map<string, Set<string>>();
+
+export function getDeviceTokensForUser(userId: string): string[] {
+  const tokens = deviceTokens.get(userId);
+  return tokens ? Array.from(tokens) : [];
+}
 
 const preferencesSchema = z.object({
   email: z
@@ -78,7 +94,7 @@ export async function notificationRoutes(fastify: FastifyInstance): Promise<void
     '/notifications',
     async (request: FastifyRequest<{ Querystring: { limit?: string } }>, reply) => {
       const user = request.user as JwtUser;
-      const limit = Math.min(parseInt(request.query.limit ?? '50', 10), 200);
+      const limit = Math.min(Number.parseInt(request.query.limit ?? '50', 10), 200);
 
       const notifications = await getNotifications(user.id, limit);
       return reply.send({ notifications, userId: user.id });
@@ -138,6 +154,37 @@ export async function notificationRoutes(fastify: FastifyInstance): Promise<void
         userId: user.id,
         preferences: parsed.data,
       });
+    },
+  );
+
+  // -------------------------------------------------------------------------
+  // POST /notifications/register-device
+  // -------------------------------------------------------------------------
+  fastify.post(
+    '/notifications/register-device',
+    async (request: FastifyRequest<{ Body: unknown }>, reply) => {
+      const user = request.user as JwtUser;
+
+      const parsed = registerDeviceSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(422).send({ error: 'Validation error', issues: parsed.error.issues });
+      }
+
+      const { token, platform, deviceName } = parsed.data;
+
+      if (!deviceTokens.has(user.id)) {
+        deviceTokens.set(user.id, new Set());
+      }
+      deviceTokens.get(user.id)!.add(token);
+
+      logger.info('device_registered', {
+        userId: user.id,
+        platform,
+        deviceName: deviceName ?? 'unknown',
+        tokenPrefix: token.slice(0, 20),
+      });
+
+      return reply.send({ registered: true, token });
     },
   );
 }

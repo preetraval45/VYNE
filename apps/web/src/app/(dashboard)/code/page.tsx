@@ -70,13 +70,13 @@ function DeployBadge({ status }: Readonly<{ status: Deployment["status"] }>) {
     success: {
       label: "Success",
       bg: "#F0FDF4",
-      color: "#166534",
+      color: "var(--badge-success-text)",
       dot: "var(--status-success)",
     },
     failed: {
       label: "Failed",
       bg: "#FEF2F2",
-      color: "#991B1B",
+      color: "var(--badge-danger-text)",
       dot: "var(--status-danger)",
     },
     in_progress: {
@@ -125,7 +125,7 @@ function DeployBadge({ status }: Readonly<{ status: Deployment["status"] }>) {
 
 function PRBadge({ state }: Readonly<{ state: PullRequest["state"] }>) {
   const map: Record<string, { label: string; bg: string; color: string }> = {
-    open: { label: "Open", bg: "#F0FDF4", color: "#166534" },
+    open: { label: "Open", bg: "#F0FDF4", color: "var(--badge-success-text)" },
     merged: { label: "Merged", bg: "#F3F0FF", color: "#5B21B6" },
     closed: { label: "Closed", bg: "#F8F8F8", color: "var(--text-secondary)" },
   };
@@ -151,7 +151,7 @@ function PRBadge({ state }: Readonly<{ state: PullRequest["state"] }>) {
 function EnvBadge({ env }: Readonly<{ env: string }>) {
   const map: Record<string, { bg: string; color: string }> = {
     production: { bg: "rgba(239,68,68,0.1)", color: "#B91C1C" },
-    staging: { bg: "rgba(245,158,11,0.1)", color: "#92400E" },
+    staging: { bg: "rgba(245,158,11,0.1)", color: "var(--badge-warning-text)" },
     dev: { bg: "rgba(59,130,246,0.1)", color: "#1E40AF" },
   };
   const s = map[env] ?? map.dev;
@@ -391,7 +391,7 @@ function OverviewTab({
           <div
             key={label}
             style={{
-              background: "#F7F7FB",
+              background: "var(--table-header-bg)",
               borderRadius: 10,
               padding: "14px 16px",
             }}
@@ -448,7 +448,7 @@ function OverviewTab({
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#FAFAFE" }}>
+              <tr style={{ background: "var(--content-secondary)" }}>
                 {[
                   "Service",
                   "Env",
@@ -588,7 +588,7 @@ function OverviewTab({
                     style={{
                       height: 3,
                       width: 72,
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       borderRadius: 4,
                       overflow: "hidden",
                     }}
@@ -693,7 +693,7 @@ function DeploymentsTab({
               padding: "4px 10px",
               borderRadius: 20,
               fontSize: 12,
-              background: "#F0F0F8",
+              background: "var(--content-secondary)",
               color: "var(--text-secondary)",
               border: "none",
               cursor: "pointer",
@@ -732,7 +732,7 @@ function DeploymentsTab({
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Service",
                 "Env",

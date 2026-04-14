@@ -40,13 +40,13 @@ export default function CreateAutomationModal(
             style={{
               fontSize: 18,
               fontWeight: 700,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               margin: "0 0 6px",
             }}
           >
             New Automation
           </h2>
-          <p style={{ fontSize: 13, color: "#6B6B8A", margin: 0 }}>
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
             Start from a template or build from scratch
           </p>
         </div>
@@ -63,8 +63,8 @@ export default function CreateAutomationModal(
               key={tpl.id}
               onClick={() => onSelect(tpl.id)}
               style={{
-                background: "#fff",
-                border: "1px solid rgba(0,0,0,0.1)",
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 10,
                 padding: "14px 14px",
                 textAlign: "left",
@@ -79,13 +79,13 @@ export default function CreateAutomationModal(
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "#1A1A2E",
+                  color: "var(--text-primary)",
                   lineHeight: 1.3,
                 }}
               >
                 {tpl.label}
               </span>
-              <span style={{ fontSize: 11, color: "#6B6B8A", lineHeight: 1.5 }}>
+              <span style={{ fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.5 }}>
                 {tpl.description}
               </span>
               {tpl.id !== "tpl-custom" && (
@@ -116,7 +116,7 @@ export default function CreateAutomationModal(
                     alignItems: "center",
                     gap: 3,
                     background: "rgba(0,0,0,0.05)",
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                     borderRadius: 20,
                     padding: "2px 7px",
                     fontSize: 9,

@@ -38,10 +38,10 @@ export default function AutomationsList(
     <div
       style={{
         width: 280,
-        borderRight: "1px solid rgba(0,0,0,0.08)",
+        borderRight: "1px solid var(--content-border)",
         display: "flex",
         flexDirection: "column",
-        background: "#FAFAFE",
+        background: "var(--content-secondary)",
         flexShrink: 0,
       }}
     >
@@ -55,7 +55,7 @@ export default function AutomationsList(
               left: 9,
               top: "50%",
               transform: "translateY(-50%)",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
             }}
           />
           <label htmlFor="automation-search" style={{ display: "none" }}>
@@ -71,10 +71,10 @@ export default function AutomationsList(
               width: "100%",
               padding: "7px 9px 7px 28px",
               borderRadius: 8,
-              border: "1px solid rgba(0,0,0,0.1)",
+              border: "1px solid var(--content-border)",
               fontSize: 11,
-              color: "#1A1A2E",
-              background: "#fff",
+              color: "var(--text-primary)",
+              background: "var(--content-bg)",
               outline: "none",
               boxSizing: "border-box",
             }}
@@ -107,7 +107,7 @@ export default function AutomationsList(
                 color: isActive ? "#fff" : "#6B6B8A",
                 border: isActive
                   ? "1px solid #6C47FF"
-                  : "1px solid rgba(0,0,0,0.1)",
+                  : "1px solid var(--content-border)",
                 borderRadius: 6,
                 padding: "4px 4px",
                 fontSize: 10,
@@ -137,7 +137,7 @@ export default function AutomationsList(
             style={{
               padding: "24px 12px",
               textAlign: "center",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               fontSize: 11,
             }}
           >

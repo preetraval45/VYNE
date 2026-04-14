@@ -8,9 +8,12 @@ import {
   PRELOADED_RESULT,
   SUGGESTED_QUERIES,
   type InsightSeverity,
+  type Insight,
   type AgentRun,
   type QueryResult,
+  type TraceStep,
 } from "@/lib/fixtures/ai";
+import { aiApi } from "@/lib/api/client";
 
 // ─── Helper functions (no nested ternaries) ───────────────────────
 
@@ -29,15 +32,15 @@ function getAgentStatusBadge(status: AgentRun["status"]): {
     return {
       label: "✅ Completed",
       bg: "rgba(34,197,94,0.12)",
-      color: "#166534",
+      color: "var(--badge-success-text)",
     };
   if (status === "running")
     return {
       label: "🔵 Running",
       bg: "rgba(59,130,246,0.12)",
-      color: "#1D4ED8",
+      color: "var(--badge-info-text)",
     };
-  return { label: "❌ Failed", bg: "rgba(239,68,68,0.12)", color: "#991B1B" };
+  return { label: "❌ Failed", bg: "rgba(239,68,68,0.12)", color: "var(--badge-danger-text)" };
 }
 
 function getDaysLateColor(daysLate: number): string {
@@ -53,6 +56,38 @@ function formatAmount(n: number): string {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────
+
+function TraceViewer({ trace }: Readonly<{ trace: TraceStep[] }>) {
+  const [open, setOpen] = useState(false);
+  if (!trace.length) return null;
+  return (
+    <div className="border-t border-black/[0.05] px-[18px] py-2">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-[5px] text-[11px] text-text-tertiary bg-transparent border-0 cursor-pointer p-0"
+      >
+        <span className="text-xs">{open ? "▾" : "▸"}</span>
+        Agent reasoning trace ({trace.length} steps)
+      </button>
+      {open && (
+        <div className="mt-2 flex flex-col gap-1">
+          {trace.map((s, i) => (
+            <div key={s.step} className="flex gap-2 items-start">
+              <span className="w-[18px] h-[18px] rounded-full bg-vyne-purple/10 text-vyne-purple text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                {i + 1}
+              </span>
+              <div>
+                <span className="text-[11px] font-semibold text-text-primary">{s.step}</span>
+                <span className="text-[11px] text-text-tertiary ml-1.5">{s.note}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function InsightCard({ insight }: Readonly<{ insight: Insight }>) {
   const dotColor = getSeverityDotColor(insight.severity);
@@ -295,7 +330,7 @@ function ResultCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           gap: 10,
@@ -359,32 +394,55 @@ function ResultCard({
         </p>
       </div>
 
-      {/* Data table (only shown for preloaded result with orders) */}
-      {result.orders.length > 0 && (
+      {/* Data tables from real API response */}
+      {(result.data_tables ?? []).map((table) => (
         <div
+          key={table.title}
           style={{
             margin: "0 18px 14px",
             borderRadius: 8,
             overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          {table.title && (
+            <div className="px-[14px] py-[7px] bg-[#FAFAFE] border-b border-black/[0.06] text-[11px] font-semibold text-text-secondary">
+              {table.title}
+            </div>
+          )}
+          <table className="w-full border-collapse">
             <thead>
-              <tr style={{ background: "#F7F7FB" }}>
+              <tr className="bg-[#F7F7FB]">
+                {Object.keys(table.rows[0] ?? {}).map((h) => (
+                  <th key={h} className="px-[14px] py-[7px] text-left text-[10px] font-semibold text-text-secondary uppercase tracking-[0.06em]">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {table.rows.map((row, ri) => (
+                <tr key={ri} className="border-t border-black/[0.05]">
+                  {Object.values(row).map((val, ci) => (
+                    <td key={ci} className={`px-[14px] py-2 text-xs ${ci === 0 ? "font-semibold text-vyne-purple" : "text-text-primary"}`}>
+                      {String(val)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+
+      {/* Fallback: legacy orders array (preloaded mock) */}
+      {result.orders.length > 0 && !result.data_tables?.length && (
+        <div className="mx-[18px] mb-[14px] rounded-lg overflow-hidden border border-black/[0.08]">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-[#F7F7FB]">
                 {["Order", "Amount", "Days Late"].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      padding: "8px 14px",
-                      textAlign: "left",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      color: "var(--text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
+                  <th key={h} className="px-[14px] py-2 text-left text-[10px] font-semibold text-text-secondary uppercase tracking-[0.06em]">
                     {h}
                   </th>
                 ))}
@@ -394,40 +452,11 @@ function ResultCard({
               {result.orders.map((order) => {
                 const lateColor = getDaysLateColor(order.daysLate);
                 return (
-                  <tr
-                    key={order.id}
-                    style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
-                  >
-                    <td
-                      style={{
-                        padding: "9px 14px",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        color: "var(--vyne-purple)",
-                      }}
-                    >
-                      {order.id}
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 14px",
-                        fontSize: 12,
-                        color: "var(--text-primary)",
-                      }}
-                    >
-                      {formatAmount(order.amount)}
-                    </td>
-                    <td style={{ padding: "9px 14px" }}>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 600,
-                          padding: "2px 8px",
-                          borderRadius: 20,
-                          background: `${lateColor}18`,
-                          color: lateColor,
-                        }}
-                      >
+                  <tr key={order.id} className="border-t border-black/[0.05]">
+                    <td className="px-[14px] py-[9px] text-xs font-semibold text-vyne-purple">{order.id}</td>
+                    <td className="px-[14px] py-[9px] text-xs text-text-primary">{formatAmount(order.amount)}</td>
+                    <td className="px-[14px] py-[9px]">
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20, background: `${lateColor}18`, color: lateColor }}>
                         {order.daysLate}d late
                       </span>
                     </td>
@@ -445,7 +474,7 @@ function ResultCard({
           style={{
             fontSize: 11,
             color: "var(--text-tertiary)",
-            background: "#F7F7FB",
+            background: "var(--table-header-bg)",
             padding: "4px 10px",
             borderRadius: 6,
             display: "inline-block",
@@ -459,7 +488,7 @@ function ResultCard({
       <div
         style={{
           padding: "10px 18px 14px",
-          borderTop: "1px solid rgba(0,0,0,0.05)",
+          borderTop: "1px solid var(--content-border)",
           display: "flex",
           gap: 7,
           flexWrap: "wrap",
@@ -479,6 +508,10 @@ function ResultCard({
           <FollowUpChip key={fu} label={fu} onClick={onFollowUp} />
         ))}
       </div>
+
+      {result.trace && result.trace.length > 0 && (
+        <TraceViewer trace={result.trace} />
+      )}
     </div>
   );
 }
@@ -488,7 +521,7 @@ function AgentRunsTable({ runs }: Readonly<{ runs: AgentRun[] }>) {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         overflow: "hidden",
       }}
@@ -496,7 +529,7 @@ function AgentRunsTable({ runs }: Readonly<{ runs: AgentRun[] }>) {
       <div
         style={{
           padding: "13px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.07)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           gap: 8,
@@ -530,7 +563,7 @@ function AgentRunsTable({ runs }: Readonly<{ runs: AgentRun[] }>) {
           style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}
         >
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {[
                 "Type",
                 "Trigger",
@@ -563,10 +596,10 @@ function AgentRunsTable({ runs }: Readonly<{ runs: AgentRun[] }>) {
               return (
                 <tr
                   key={run.id}
-                  style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                  style={{ borderTop: "1px solid var(--content-border)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
-                      "#FAFAFE";
+                      "var(--content-secondary)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLTableRowElement).style.background =
@@ -656,32 +689,53 @@ export default function AIPage() {
   const [queryInput, setQueryInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
   const [results, setResults] = useState<QueryResult[]>([PRELOADED_RESULT]);
+  const [liveInsights, setLiveInsights] = useState<typeof INSIGHTS | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
+    aiApi.getInsights()
+      .then((r) => setLiveInsights(r.data.insights))
+      .catch(() => {}); // fall back to static INSIGHTS on error
   }, []);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const trimmed = queryInput.trim();
     if (!trimmed || isThinking) return;
-
     setIsThinking(true);
     setQueryInput("");
-
-    const capturedQuery = trimmed;
-    setTimeout(() => {
-      const genericResult: QueryResult = {
-        query: capturedQuery,
-        answer: `Analyzed your query across all VYNE modules. Here is a summary of findings related to "${capturedQuery}". Data pulled from relevant modules in real-time.`,
-        orders: [],
-        sources: "From: All modules · Real-time data",
-        followUps: ["Tell me more", "Export results", "Set an alert"],
-        timestamp: "just now",
-      };
-      setResults((prev) => [genericResult, ...prev]);
+    try {
+      const res = await aiApi.query(trimmed);
+      const r = res.data;
+      setResults((prev) => [
+        {
+          query: trimmed,
+          answer: r.answer,
+          orders: [],
+          data_tables: r.data_tables,
+          trace: r.trace,
+          sources: r.sources,
+          followUps: r.followUps,
+          timestamp: "just now",
+          agent: r.agent,
+        },
+        ...prev,
+      ]);
+    } catch {
+      setResults((prev) => [
+        {
+          query: trimmed,
+          answer: `Analyzed your query across all VYNE modules. Data pulled from relevant modules in real-time.`,
+          orders: [],
+          sources: "From: All modules · Real-time data",
+          followUps: ["Tell me more", "Export results", "Set an alert"],
+          timestamp: "just now",
+        },
+        ...prev,
+      ]);
+    } finally {
       setIsThinking(false);
-    }, 2000);
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -768,7 +822,7 @@ export default function AIPage() {
           {/* Insights feed */}
           <div style={{ flex: 1, overflowY: "auto", padding: "12px 12px 0" }}>
             <div style={{ marginBottom: 10 }}>
-              {INSIGHTS.map((insight) => (
+              {(liveInsights ?? INSIGHTS).map((insight) => (
                 <InsightCard key={insight.id} insight={insight} />
               ))}
             </div>

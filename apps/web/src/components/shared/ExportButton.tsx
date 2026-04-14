@@ -46,7 +46,7 @@ export function ExportButton<T extends Record<string, unknown>>({
         gap: 6,
         padding: "7px 14px",
         borderRadius: 8,
-        border: "1px solid rgba(0,0,0,0.12)",
+        border: "1px solid var(--content-border)",
         background: "transparent",
         color: data.length === 0 ? "#A0A0B8" : "#6B6B8A",
         cursor: data.length === 0 ? "not-allowed" : "pointer",

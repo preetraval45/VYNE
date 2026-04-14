@@ -45,20 +45,20 @@ function fmtRevenue(n: number): string {
 
 function accountStatusConfig(s: AccountStatus): { bg: string; color: string } {
   const map: Record<AccountStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Prospect: { bg: "#EFF6FF", color: "#1E40AF" },
-    Inactive: { bg: "#F4F4F8", color: "#6B6B8A" },
+    Inactive: { bg: "#F4F4F8", color: "var(--text-secondary)" },
   };
   return map[s];
 }
 
 function tagConfig(tag: ContactTag): { bg: string; color: string } {
   const map: Record<ContactTag, { bg: string; color: string }> = {
-    VIP: { bg: "#FEF3C7", color: "#92400E" },
+    VIP: { bg: "#FEF3C7", color: "var(--badge-warning-text)" },
     "Decision Maker": { bg: "#F5F3FF", color: "#5B21B6" },
     Technical: { bg: "#EFF6FF", color: "#1E40AF" },
-    Billing: { bg: "#FEF2F2", color: "#991B1B" },
-    Primary: { bg: "#F0FDF4", color: "#166534" },
+    Billing: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Primary: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
   };
   return map[tag];
 }
@@ -1113,7 +1113,7 @@ function AccountsTab() {
           {
             label: "Active",
             value: String(accounts.filter((a) => a.status === "Active").length),
-            color: "#166534",
+            color: "var(--badge-success-text)",
           },
           {
             label: "Prospects",

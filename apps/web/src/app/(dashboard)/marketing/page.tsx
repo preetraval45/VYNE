@@ -329,8 +329,8 @@ function fmtNum(n: number): string {
 function campaignStatusStyle(s: CampaignStatus): { bg: string; color: string } {
   const map: Record<CampaignStatus, { bg: string; color: string }> = {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
-    Active: { bg: "#F0FDF4", color: "#166534" },
-    Paused: { bg: "#FFFBEB", color: "#92400E" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Paused: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Completed: { bg: "#EFF6FF", color: "#1E40AF" },
   };
   return map[s];
@@ -340,15 +340,15 @@ function channelStyle(c: CampaignChannel): { bg: string; color: string } {
   const map: Record<CampaignChannel, { bg: string; color: string }> = {
     Email: { bg: "#EFF6FF", color: "#1E40AF" },
     Social: { bg: "#F5F3FF", color: "#5B21B6" },
-    PPC: { bg: "#FEF2F2", color: "#991B1B" },
-    Content: { bg: "#F0FDF4", color: "#166534" },
+    PPC: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Content: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
   };
   return map[c];
 }
 
 function emailStatusStyle(s: EmailStatus): { bg: string; color: string } {
   const map: Record<EmailStatus, { bg: string; color: string }> = {
-    Sent: { bg: "#F0FDF4", color: "#166534" },
+    Sent: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Scheduled: { bg: "#EFF6FF", color: "#1E40AF" },
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
   };
@@ -360,7 +360,7 @@ function landingStatusStyle(s: LandingPageStatus): {
   color: string;
 } {
   const map: Record<LandingPageStatus, { bg: string; color: string }> = {
-    Published: { bg: "#F0FDF4", color: "#166534" },
+    Published: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
   };
   return map[s];
@@ -433,7 +433,7 @@ function KPICard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         padding: "16px 18px",
         display: "flex",
@@ -484,7 +484,7 @@ function TableCard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -492,7 +492,7 @@ function TableCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -524,15 +524,15 @@ const thStyle: React.CSSProperties = {
   letterSpacing: "0.04em",
   textAlign: "left",
   whiteSpace: "nowrap",
-  borderBottom: "1px solid rgba(0,0,0,0.06)",
-  background: "#FAFAFE",
+  borderBottom: "1px solid var(--content-border)",
+  background: "var(--content-secondary)",
 };
 
 const tdStyle: React.CSSProperties = {
   padding: "10px 14px",
   fontSize: 12,
   color: "var(--text-primary)",
-  borderBottom: "1px solid rgba(0,0,0,0.04)",
+  borderBottom: "1px solid var(--content-border)",
   whiteSpace: "nowrap",
 };
 
@@ -841,7 +841,7 @@ function CampaignsTab() {
               return (
                 <tr
                   key={c.id}
-                  style={{ borderBottom: "1px solid rgba(0,0,0,0.04)" }}
+                  style={{ borderBottom: "1px solid var(--content-border)" }}
                 >
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{c.name}</td>
                   <td style={tdStyle}>
@@ -1195,7 +1195,7 @@ function SocialMediaTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             padding: "18px",
           }}
@@ -1399,7 +1399,7 @@ function LandingPagesTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             padding: "18px",
           }}
@@ -1508,7 +1508,7 @@ function AnalyticsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             padding: "18px",
           }}
@@ -1537,7 +1537,7 @@ function AnalyticsTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             padding: "18px",
           }}
@@ -1617,7 +1617,7 @@ function AnalyticsTab() {
                     ? "#1E40AF"
                     : cp.cpl <= 50
                       ? "#92400E"
-                      : "#991B1B";
+                      : "var(--badge-danger-text)";
               const effBg =
                 cp.cpl <= 20
                   ? "#F0FDF4"
@@ -1712,7 +1712,7 @@ export default function MarketingPage() {
         style={{
           display: "flex",
           gap: 0,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           paddingLeft: 24,
           background: "var(--content-bg)",
           flexShrink: 0,

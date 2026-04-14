@@ -31,23 +31,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
         position="bottom-right"
         toastOptions={{
           style: {
-            background: "#1C1C2E",
-            color: "#FFFFFF",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "var(--content-bg)",
+            color: "var(--text-primary)",
+            border: "1px solid var(--content-border)",
             borderRadius: "8px",
             fontSize: "14px",
             fontFamily: "var(--font-geist-sans)",
           },
           success: {
             iconTheme: {
-              primary: "#22C55E",
-              secondary: "#1C1C2E",
+              primary: "var(--status-success)" as string,
+              secondary: "var(--content-bg)" as string,
             },
           },
           error: {
             iconTheme: {
-              primary: "#EF4444",
-              secondary: "#1C1C2E",
+              primary: "var(--status-danger)" as string,
+              secondary: "var(--content-bg)" as string,
             },
           },
         }}

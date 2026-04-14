@@ -29,8 +29,8 @@ function ConditionRow(
           display: "flex",
           alignItems: "center",
           gap: 8,
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.1)",
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
           borderRadius: 8,
           padding: "8px 10px",
         }}
@@ -43,10 +43,10 @@ function ConditionRow(
             flex: 2,
             padding: "5px 6px",
             borderRadius: 6,
-            border: "1px solid rgba(0,0,0,0.12)",
+            border: "1px solid var(--content-border)",
             fontSize: 11,
-            color: "#1A1A2E",
-            background: "#FAFAFE",
+            color: "var(--text-primary)",
+            background: "var(--content-secondary)",
           }}
         >
           <option value="">Field</option>
@@ -70,10 +70,10 @@ function ConditionRow(
             flex: 2,
             padding: "5px 6px",
             borderRadius: 6,
-            border: "1px solid rgba(0,0,0,0.12)",
+            border: "1px solid var(--content-border)",
             fontSize: 11,
-            color: "#1A1A2E",
-            background: "#FAFAFE",
+            color: "var(--text-primary)",
+            background: "var(--content-secondary)",
           }}
         >
           {OPERATORS.map((op) => (
@@ -92,10 +92,10 @@ function ConditionRow(
             flex: 2,
             padding: "5px 6px",
             borderRadius: 6,
-            border: "1px solid rgba(0,0,0,0.12)",
+            border: "1px solid var(--content-border)",
             fontSize: 11,
-            color: "#1A1A2E",
-            background: "#FAFAFE",
+            color: "var(--text-primary)",
+            background: "var(--content-secondary)",
           }}
         />
         <button
@@ -182,7 +182,7 @@ export default function ConditionEditor(
           style={{
             fontSize: 12,
             fontWeight: 700,
-            color: "#1A1A2E",
+            color: "var(--text-primary)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}
@@ -192,7 +192,7 @@ export default function ConditionEditor(
             style={{
               fontSize: 10,
               fontWeight: 400,
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               textTransform: "none",
               letterSpacing: 0,
             }}
@@ -210,7 +210,7 @@ export default function ConditionEditor(
               borderRadius: 6,
               padding: "3px 8px",
               fontSize: 11,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -224,12 +224,12 @@ export default function ConditionEditor(
       {conditions.length === 0 && (
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px dashed rgba(0,0,0,0.12)",
             borderRadius: 10,
             padding: "16px",
             textAlign: "center",
-            color: "#A0A0B8",
+            color: "var(--text-tertiary)",
             fontSize: 11,
           }}
         >

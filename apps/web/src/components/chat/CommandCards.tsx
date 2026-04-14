@@ -174,7 +174,7 @@ function InvoiceCard({ args }: Readonly<{ args: string }>) {
           alignItems: "center",
           gap: 8,
           fontSize: 12,
-          color: "#92400E",
+          color: "var(--badge-warning-text)",
         }}
       >
         <span>
@@ -290,7 +290,7 @@ function PollCard({
         }}
       >
         <span style={{ fontSize: 14 }}>📊</span>
-        <span style={{ fontWeight: 600, fontSize: 13, color: "#1A1A2E" }}>
+        <span style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>
           {question}
         </span>
       </div>
@@ -308,7 +308,7 @@ function PollCard({
               padding: "6px 10px",
               borderRadius: 6,
               border: "1px solid #E0E0F0",
-              background: "#fff",
+              background: "var(--content-bg)",
               cursor: msg.pollVoted ? "default" : "pointer",
               textAlign: "left",
             }}
@@ -318,12 +318,12 @@ function PollCard({
                 display: "flex",
                 justifyContent: "space-between",
                 fontSize: 12,
-                color: "#1A1A2E",
+                color: "var(--text-primary)",
                 marginBottom: 4,
               }}
             >
               <span>{opt}</span>
-              <span style={{ color: "#6B6B8A" }}>
+              <span style={{ color: "var(--text-secondary)" }}>
                 {votes[opt] ?? 0} · {pct}%
               </span>
             </div>
@@ -348,7 +348,7 @@ function PollCard({
           </button>
         );
       })}
-      <p style={{ fontSize: 10, color: "#A0A0B8", margin: "6px 0 0" }}>
+      <p style={{ fontSize: 10, color: "var(--text-tertiary)", margin: "6px 0 0" }}>
         {total} votes · Closes in 24h
       </p>
     </div>
@@ -361,7 +361,7 @@ function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
   return (
     <div
       style={{
-        background: "#F8F8FC",
+        background: "var(--content-secondary)",
         border: "1px solid #E8E8F0",
         borderRadius: 8,
         padding: "10px 12px",
@@ -380,7 +380,7 @@ function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
           animation: "cmd-spin 0.8s linear infinite",
         }}
       />
-      <span style={{ fontSize: 12, color: "#6B6B8A" }}>
+      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
         Executing /{cmd}...
       </span>
       <style>{`@keyframes cmd-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
@@ -410,7 +410,7 @@ export function cmdOutput(
   if (msg.cmd === "poll") return <PollCard msg={msg} onVote={onVote} />;
   if (msg.cmd === "summarize") return null;
   return (
-    <span style={{ fontSize: 12, color: "#6B6B8A" }}>
+    <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
       Command /{msg.cmd} executed.
     </span>
   );

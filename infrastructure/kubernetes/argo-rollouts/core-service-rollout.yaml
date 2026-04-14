@@ -1,0 +1,125 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: core-service
+  namespace: vyne
+  labels:
+    app: core-service
+    component: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: core-service
+  template:
+    metadata:
+      labels:
+        app: core-service
+    spec:
+      containers:
+        - name: core-service
+          image: YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/vyne-core-service:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: core-service-secrets
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+  strategy:
+    canary:
+      canaryService: core-service-canary
+      stableService: core-service-stable
+      trafficRouting:
+        alb:
+          ingress: core-service-ingress
+          servicePort: 5000
+      steps:
+        - setWeight: 10
+        - pause:
+            duration: 3m
+        - analysis:
+            templates:
+              - templateName: core-service-health
+        - setWeight: 30
+        - pause:
+            duration: 5m
+        - analysis:
+            templates:
+              - templateName: core-service-health
+        - setWeight: 100
+      autoPromotionEnabled: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-service-stable
+  namespace: vyne
+spec:
+  selector:
+    app: core-service
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-service-canary
+  namespace: vyne
+spec:
+  selector:
+    app: core-service
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: core-service-health
+  namespace: vyne
+spec:
+  args:
+    - name: service-name
+      value: core-service-canary
+  metrics:
+    - name: success-rate
+      interval: 30s
+      successCondition: result[0] >= 0.97
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{job="{{args.service-name}}",code=~"2.."}[2m]))
+            /
+            sum(rate(http_requests_total{job="{{args.service-name}}"}[2m]))
+    - name: db-error-rate
+      interval: 30s
+      successCondition: result[0] <= 0.01   # DB errors ≤ 1%
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(db_errors_total{job="{{args.service-name}}"}[2m]))
+            /
+            sum(rate(db_queries_total{job="{{args.service-name}}"}[2m]))

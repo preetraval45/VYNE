@@ -9,12 +9,12 @@ import type { CustomField, TaxRate } from "@/lib/stores/settings";
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "7px 10px",
-  border: "1px solid #D8D8E8",
+  border: "1px solid var(--input-border)",
   borderRadius: 8,
-  background: "#FAFAFE",
+  background: "var(--content-secondary)",
   outline: "none",
   fontSize: 13,
-  color: "#1A1A2E",
+  color: "var(--text-primary)",
   boxSizing: "border-box",
 };
 const selectStyle: React.CSSProperties = { ...inputStyle };
@@ -26,8 +26,8 @@ function SectionCard({
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         marginBottom: 16,
         overflow: "hidden",
@@ -36,10 +36,10 @@ function SectionCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           {title}
         </span>
       </div>
@@ -63,11 +63,11 @@ function FieldRow({
       }}
     >
       <div style={{ width: 200, flexShrink: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: "#1A1A2E" }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
           {label}
         </div>
         {hint && (
-          <div style={{ fontSize: 11, color: "#A0A0B8", marginTop: 1 }}>
+          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
             {hint}
           </div>
         )}
@@ -94,7 +94,7 @@ function Toggle({
           width: 36,
           height: 20,
           borderRadius: 10,
-          background: checked ? "#6C47FF" : "#D8D8E8",
+          background: checked ? "var(--vyne-purple)" : "var(--content-border)",
           position: "relative",
           cursor: "pointer",
           border: "none",
@@ -108,7 +108,7 @@ function Toggle({
             width: 16,
             height: 16,
             borderRadius: "50%",
-            background: "#fff",
+            background: "var(--content-bg)",
             position: "absolute",
             top: 2,
             left: checked ? 18 : 2,
@@ -116,7 +116,7 @@ function Toggle({
           }}
         />
       </button>
-      {label && <span style={{ fontSize: 12, color: "#1A1A2E" }}>{label}</span>}
+      {label && <span style={{ fontSize: 12, color: "var(--text-primary)" }}>{label}</span>}
     </div>
   );
 }
@@ -319,7 +319,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                     textAlign: "left",
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
                   }}
@@ -333,10 +333,10 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
             {erp.taxRates.map((t) => (
               <tr
                 key={t.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
               >
                 <td
-                  style={{ padding: "9px 0", fontSize: 13, color: "#1A1A2E" }}
+                  style={{ padding: "9px 0", fontSize: 13, color: "var(--text-primary)" }}
                 >
                   {t.name}
                 </td>
@@ -345,7 +345,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                     padding: "9px 12px",
                     fontSize: 13,
                     fontWeight: 500,
-                    color: "#1A1A2E",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {t.rate}%
@@ -371,10 +371,10 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                         fontSize: 11,
                         padding: "2px 8px",
                         borderRadius: 20,
-                        border: "1px solid #D8D8E8",
+                        border: "1px solid var(--input-border)",
                         background: "transparent",
                         cursor: "pointer",
-                        color: "#6B6B8A",
+                        color: "var(--text-secondary)",
                       }}
                     >
                       Set default
@@ -390,7 +390,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                       border: "none",
                       background: "transparent",
                       cursor: "pointer",
-                      color: "#A0A0B8",
+                      color: "var(--text-tertiary)",
                       display: "flex",
                       alignItems: "center",
                     }}
@@ -444,7 +444,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
 
       {/* Custom Fields */}
       <SectionCard title="Custom Fields">
-        <p style={{ fontSize: 12, color: "#6B6B8A", marginBottom: 12 }}>
+        <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
           Add custom attributes to Products, Orders, Customers, or Suppliers.
         </p>
 
@@ -464,7 +464,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                 alignItems: "center",
                 gap: 10,
                 padding: "9px 12px",
-                background: "#F7F7FB",
+                background: "var(--table-header-bg)",
                 borderRadius: 8,
               }}
             >
@@ -474,16 +474,16 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   padding: "2px 6px",
                   borderRadius: 6,
                   background: "#E8E8F0",
-                  color: "#6B6B8A",
+                  color: "var(--text-secondary)",
                   flexShrink: 0,
                 }}
               >
                 {f.entity}
               </span>
-              <span style={{ fontSize: 13, color: "#1A1A2E", flex: 1 }}>
+              <span style={{ fontSize: 13, color: "var(--text-primary)", flex: 1 }}>
                 {f.label}
               </span>
-              <span style={{ fontSize: 11, color: "#A0A0B8" }}>{f.type}</span>
+              <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{f.type}</span>
               <button
                 onClick={() => handleRemoveField(f.id)}
                 style={{
@@ -492,7 +492,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
-                  color: "#A0A0B8",
+                  color: "var(--text-tertiary)",
                   display: "flex",
                   alignItems: "center",
                 }}

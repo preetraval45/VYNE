@@ -190,14 +190,14 @@ export function ChatArea({
           {isDM ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <UserAvatar name={channelName} size={28} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
                 {channelName}
               </span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <Hash size={16} style={{ color: "#6B6B8A" }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
+              <Hash size={16} style={{ color: "var(--text-secondary)" }} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
                 {channelName}
               </span>
               {description && (
@@ -329,7 +329,7 @@ export function ChatArea({
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       flexShrink: 0,
                     }}
                   />
@@ -338,7 +338,7 @@ export function ChatArea({
                       style={{
                         height: 12,
                         width: "20%",
-                        background: "#F0F0F8",
+                        background: "var(--content-secondary)",
                         borderRadius: 4,
                         marginBottom: 6,
                       }}
@@ -347,7 +347,7 @@ export function ChatArea({
                       style={{
                         height: 10,
                         width: "70%",
-                        background: "#F0F0F8",
+                        background: "var(--content-secondary)",
                         borderRadius: 4,
                       }}
                     />

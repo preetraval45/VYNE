@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { CreditCard, Check, ArrowUpRight, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CreditCard, Check, ArrowUpRight, Download, Loader2 } from "lucide-react";
+import { billingApi } from "@/lib/api/client";
 
 // ─── Shared UI ───────────────────────────────────────────────────
 function SectionCard({
@@ -16,8 +17,8 @@ function SectionCard({
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         marginBottom: 16,
         overflow: "hidden",
@@ -26,13 +27,13 @@ function SectionCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           {title}
         </span>
         {action}
@@ -111,6 +112,57 @@ interface BillingSettingsProps {
 // ─── Component ───────────────────────────────────────────────────
 export default function BillingSettings({ onToast }: BillingSettingsProps) {
   const [currentPlan] = useState<PlanTier>("growth");
+  const [upgrading, setUpgrading] = useState<PlanTier | null>(null);
+
+  // Show toast on redirect back from Stripe
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const billing = params.get("billing");
+    if (billing === "success") {
+      onToast("Subscription activated! Your plan has been upgraded.");
+      // Clean the URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("billing");
+      url.searchParams.delete("session_id");
+      window.history.replaceState({}, "", url.toString());
+    } else if (billing === "cancelled") {
+      onToast("Plan upgrade cancelled.");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("billing");
+      window.history.replaceState({}, "", url.toString());
+    } else if (billing === "demo") {
+      onToast("Stripe not configured — add STRIPE_SECRET_KEY to enable payments.");
+      const url = new URL(window.location.href);
+      url.searchParams.delete("billing");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [onToast]);
+
+  async function handleUpgrade(tier: PlanTier) {
+    setUpgrading(tier);
+    try {
+      const res = await billingApi.createCheckout(tier, window.location.origin);
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      }
+    } catch {
+      onToast("Could not start checkout. Please try again.");
+    } finally {
+      setUpgrading(null);
+    }
+  }
+
+  async function handleManagePlan() {
+    try {
+      const res = await billingApi.createPortal(null, window.location.origin);
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+      }
+    } catch {
+      onToast("Could not open billing portal. Please try again.");
+    }
+  }
 
   const usageStats = {
     users: { used: 8, total: 25 },
@@ -135,7 +187,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
             flex: 1,
             height: 6,
             borderRadius: 3,
-            background: "#F0F0F8",
+            background: "var(--content-secondary)",
             overflow: "hidden",
           }}
         >
@@ -152,7 +204,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
         <span
           style={{
             fontSize: 12,
-            color: "#6B6B8A",
+            color: "var(--text-secondary)",
             flexShrink: 0,
             minWidth: 60,
             textAlign: "right",
@@ -182,8 +234,8 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     borderRadius: 10,
                     border: isCurrent
                       ? "2px solid #6C47FF"
-                      : "1px solid rgba(0,0,0,0.08)",
-                    background: isCurrent ? "rgba(108,71,255,0.03)" : "#fff",
+                      : "1px solid var(--content-border)",
+                    background: isCurrent ? "rgba(108,71,255,0.05)" : "var(--content-bg)",
                     position: "relative",
                   }}
                 >
@@ -209,7 +261,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     style={{
                       fontSize: 14,
                       fontWeight: 600,
-                      color: "#1A1A2E",
+                      color: "var(--text-primary)",
                       marginBottom: 4,
                     }}
                   >
@@ -239,35 +291,67 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         size={12}
                         style={{ color: "#16A34A", flexShrink: 0 }}
                       />
-                      <span style={{ fontSize: 12, color: "#6B6B8A" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
                         {f}
                       </span>
                     </div>
                   ))}
-                  {!isCurrent && (
+                  {isCurrent && (
                     <button
-                      onClick={() =>
-                        onToast(`Plan upgrade to ${plan.name} requested`)
-                      }
+                      onClick={handleManagePlan}
                       style={{
                         width: "100%",
                         marginTop: 12,
                         padding: "7px 0",
                         borderRadius: 8,
-                        border: "1px solid #D8D8E8",
-                        background: "#fff",
+                        border: "1px solid var(--input-border)",
+                        background: "var(--content-bg)",
                         cursor: "pointer",
                         fontSize: 12,
                         fontWeight: 500,
-                        color: "#6C47FF",
+                        color: "var(--text-secondary)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         gap: 4,
                       }}
                     >
-                      {tier === "enterprise" ? "Contact Sales" : "Upgrade"}{" "}
-                      <ArrowUpRight size={12} />
+                      Manage Plan <ArrowUpRight size={12} />
+                    </button>
+                  )}
+                  {!isCurrent && (
+                    <button
+                      onClick={() =>
+                        tier === "enterprise"
+                          ? onToast("Contact sales@vyne.ai for Enterprise pricing")
+                          : handleUpgrade(tier)
+                      }
+                      disabled={upgrading === tier}
+                      style={{
+                        width: "100%",
+                        marginTop: 12,
+                        padding: "7px 0",
+                        borderRadius: 8,
+                        border: "1px solid var(--input-border)",
+                        background: "var(--content-bg)",
+                        cursor: upgrading === tier ? "not-allowed" : "pointer",
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: "#6C47FF",
+                        opacity: upgrading === tier ? 0.6 : 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 4,
+                      }}
+                    >
+                      {upgrading === tier ? (
+                        <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                      ) : tier === "enterprise" ? (
+                        <>Contact Sales <ArrowUpRight size={12} /></>
+                      ) : (
+                        <>Upgrade <ArrowUpRight size={12} /></>
+                      )}
                     </button>
                   )}
                 </div>
@@ -288,7 +372,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
                 Team Members
               </span>
             </div>
@@ -302,7 +386,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
                 Storage ({usageStats.storage.unit})
               </span>
             </div>
@@ -316,7 +400,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "#1A1A2E" }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
                 API Calls {usageStats.apiCalls.unit}
               </span>
             </div>
@@ -340,7 +424,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 width: 42,
                 height: 28,
                 borderRadius: 6,
-                background: "#1A1A2E",
+                background: "var(--sidebar-bg)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -349,10 +433,10 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
               <CreditCard size={16} style={{ color: "#fff" }} />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "#1A1A2E" }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
                 Visa ending in 4242
               </div>
-              <div style={{ fontSize: 11, color: "#A0A0B8" }}>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                 Expires 12/2027
               </div>
             </div>
@@ -362,11 +446,11 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
             style={{
               padding: "6px 14px",
               borderRadius: 8,
-              border: "1px solid #D8D8E8",
-              background: "#fff",
+              border: "1px solid var(--input-border)",
+              background: "var(--content-bg)",
               cursor: "pointer",
               fontSize: 12,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
             }}
           >
             Update
@@ -387,7 +471,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     textAlign: "left",
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
                   }}
@@ -401,13 +485,13 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
             {MOCK_INVOICES.map((inv) => (
               <tr
                 key={inv.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
               >
                 <td
                   style={{
                     padding: "10px 0",
                     fontSize: 13,
-                    color: "#1A1A2E",
+                    color: "var(--text-primary)",
                     fontWeight: 500,
                   }}
                 >
@@ -417,7 +501,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                   style={{
                     padding: "10px 12px",
                     fontSize: 12,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                   }}
                 >
                   {new Date(inv.date).toLocaleDateString("en-US", {
@@ -431,7 +515,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     padding: "10px 12px",
                     fontSize: 13,
                     fontWeight: 500,
-                    color: "#1A1A2E",
+                    color: "var(--text-primary)",
                   }}
                 >
                   {inv.amount}
@@ -443,8 +527,8 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       borderRadius: 20,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: "#F0FDF4",
-                      color: "#166534",
+                      background: "var(--badge-success-bg)",
+                      color: "var(--badge-success-text)",
                       textTransform: "capitalize",
                     }}
                   >
@@ -460,7 +544,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       border: "none",
                       background: "transparent",
                       cursor: "pointer",
-                      color: "#A0A0B8",
+                      color: "var(--text-tertiary)",
                       display: "flex",
                       alignItems: "center",
                     }}

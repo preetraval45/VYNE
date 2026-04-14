@@ -60,11 +60,11 @@ export default function RunHistory(
               gridTemplateColumns: "1fr 80px 80px 80px",
               gap: 8,
               padding: "8px 4px",
-              borderBottom: "1px solid rgba(0,0,0,0.06)",
+              borderBottom: "1px solid var(--content-border)",
               alignItems: "center",
             }}
           >
-            <span style={{ fontSize: 11, color: "#6B6B8A" }}>
+            <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
               {formatTimestamp(entry.timestamp)}
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -90,7 +90,7 @@ export default function RunHistory(
             <span
               style={{
                 fontSize: 11,
-                color: "#6B6B8A",
+                color: "var(--text-secondary)",
                 fontVariantNumeric: "tabular-nums",
               }}
             >
@@ -99,7 +99,7 @@ export default function RunHistory(
             <span
               style={{
                 fontSize: 11,
-                color: "#6B6B8A",
+                color: "var(--text-secondary)",
                 fontVariantNumeric: "tabular-nums",
               }}
             >

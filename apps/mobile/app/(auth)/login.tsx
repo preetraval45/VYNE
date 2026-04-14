@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,9 +10,11 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useAuthStore } from "@/lib/stores/auth";
 
 export default function LoginScreen() {
@@ -21,17 +23,60 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [biometricType, setBiometricType] = useState<"fingerprint" | "face" | null>(null);
+  const [biometricLoading, setBiometricLoading] = useState(false);
 
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error, clearError, token } = useAuthStore();
+
+  useEffect(() => {
+    async function checkBiometrics() {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!compatible || !enrolled) return;
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+        setBiometricType("face");
+      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+        setBiometricType("fingerprint");
+      }
+    }
+    checkBiometrics();
+  }, []);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) return;
-
     try {
       await login(email.trim(), password);
       router.replace("/(tabs)/");
     } catch {
-      // Error is already set in the store
+      // error set in store
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    // Only available if already authenticated before (token exists from prior session)
+    if (!token) {
+      Alert.alert(
+        "Sign in first",
+        "Please sign in with your email and password once to enable biometric login.",
+      );
+      return;
+    }
+    setBiometricLoading(true);
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Sign in to Vyne",
+        fallbackLabel: "Use password",
+        disableDeviceFallback: false,
+        cancelLabel: "Cancel",
+      });
+      if (result.success) {
+        router.replace("/(tabs)/");
+      } else if (result.error !== "user_cancel" && result.error !== "system_cancel") {
+        Alert.alert("Authentication Failed", "Biometric authentication was not successful.");
+      }
+    } finally {
+      setBiometricLoading(false);
     }
   };
 
@@ -192,6 +237,32 @@ export default function LoginScreen() {
               <Text style={styles.dividerText}>or</Text>
               <View style={styles.dividerLine} />
             </View>
+
+            {/* Biometric Button */}
+            {biometricType && (
+              <TouchableOpacity
+                style={styles.biometricButton}
+                activeOpacity={0.8}
+                onPress={handleBiometricLogin}
+                disabled={biometricLoading}
+              >
+                {biometricLoading ? (
+                  <ActivityIndicator size="small" color="#6C47FF" />
+                ) : (
+                  <>
+                    <Ionicons
+                      name={biometricType === "face" ? "scan-outline" : "finger-print-outline"}
+                      size={22}
+                      color="#6C47FF"
+                      style={{ marginRight: 10 }}
+                    />
+                    <Text style={styles.biometricButtonText}>
+                      Sign in with {biometricType === "face" ? "Face ID" : "Fingerprint"}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
 
             {/* SSO Button */}
             <TouchableOpacity style={styles.ssoButton} activeOpacity={0.8}>
@@ -401,6 +472,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#9B9BB4",
     marginHorizontal: 14,
+  },
+  biometricButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "rgba(108,71,255,0.3)",
+    borderRadius: 14,
+    height: 54,
+    backgroundColor: "rgba(108,71,255,0.06)",
+    marginBottom: 12,
+  },
+  biometricButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#6C47FF",
   },
   ssoButton: {
     flexDirection: "row",

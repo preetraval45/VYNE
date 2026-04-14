@@ -285,7 +285,7 @@ function ProjectCardLocal({
       transition={{ duration: 0.15 }}
       className="group cursor-pointer rounded-xl p-5 flex flex-col gap-4 transition-all"
       style={{
-        background: "#FFFFFF",
+        background: "var(--content-bg)",
         border: "1px solid var(--content-border)",
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
       }}
@@ -388,7 +388,7 @@ function ProjectCardLocal({
           </div>
           <div
             className="h-1.5 rounded-full overflow-hidden"
-            style={{ background: "#F0F0F8" }}
+            style={{ background: "var(--content-secondary)" }}
           >
             <motion.div
               initial={{ width: 0 }}

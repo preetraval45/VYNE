@@ -11,7 +11,7 @@ function RoleBadge({ role }: Readonly<{ role: string }>) {
   const map: Record<string, { bg: string; color: string }> = {
     admin: { bg: "rgba(108,71,255,0.1)", color: "#6C47FF" },
     member: { bg: "#EFF6FF", color: "#1E40AF" },
-    viewer: { bg: "#F0F0F8", color: "#6B6B8A" },
+    viewer: { bg: "#F0F0F8", color: "var(--text-secondary)" },
   };
   const s = map[role] ?? map.viewer;
   return (
@@ -43,8 +43,8 @@ function SectionCard({
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         marginBottom: 16,
         overflow: "hidden",
@@ -53,13 +53,13 @@ function SectionCard({
       <div
         style={{
           padding: "14px 18px",
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "#1A1A2E" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
           {title}
         </span>
         {action}
@@ -161,7 +161,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                     textAlign: "left",
                     fontSize: 10,
                     fontWeight: 600,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
                   }}
@@ -175,7 +175,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
             {members.map((m) => (
               <tr
                 key={m.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
               >
                 {/* Name */}
                 <td style={{ padding: "10px 0" }}>
@@ -203,7 +203,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                       style={{
                         fontSize: 13,
                         fontWeight: 500,
-                        color: "#1A1A2E",
+                        color: "var(--text-primary)",
                       }}
                     >
                       {m.name}
@@ -216,7 +216,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                   style={{
                     padding: "10px 12px",
                     fontSize: 12,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                   }}
                 >
                   {m.email}
@@ -238,10 +238,10 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                       style={{
                         padding: "3px 8px",
                         borderRadius: 7,
-                        border: "1px solid #D8D8E8",
-                        background: "#fff",
+                        border: "1px solid var(--input-border)",
+                        background: "var(--content-bg)",
                         fontSize: 12,
-                        color: "#1A1A2E",
+                        color: "var(--text-primary)",
                         cursor: "pointer",
                         outline: "none",
                       }}
@@ -258,7 +258,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                   style={{
                     padding: "10px 12px",
                     fontSize: 12,
-                    color: "#6B6B8A",
+                    color: "var(--text-secondary)",
                   }}
                 >
                   {m.joinedAt
@@ -317,11 +317,11 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                           style={{
                             padding: "3px 10px",
                             borderRadius: 6,
-                            border: "1px solid #D8D8E8",
+                            border: "1px solid var(--input-border)",
                             background: "transparent",
                             cursor: "pointer",
                             fontSize: 11,
-                            color: "#6B6B8A",
+                            color: "var(--text-secondary)",
                           }}
                         >
                           Cancel
@@ -336,7 +336,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                           border: "none",
                           background: "transparent",
                           cursor: "pointer",
-                          color: "#A0A0B8",
+                          color: "var(--text-tertiary)",
                           display: "flex",
                           alignItems: "center",
                         }}

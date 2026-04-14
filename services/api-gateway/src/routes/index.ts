@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authenticateJwt } from '../middleware/auth.js';
 import { tenantContext } from '../middleware/tenant.js';
-import { strictLimiter } from '../middleware/rateLimit.js';
+import { strictLimiter, aiLimiter, uploadLimiter } from '../middleware/rateLimit.js';
 import {
   proxyToCore,
   proxyToProjects,
@@ -12,6 +12,8 @@ import {
   proxyMessagesToMessaging,
   proxyToAI,
   proxyToERP,
+  proxyToBilling,
+  proxyToNotifications,
 } from '../proxy/index.js';
 
 const router = Router();
@@ -49,10 +51,20 @@ router.use('/api/search', ...protect, proxySearchToProjects);
 router.use('/api/channels', ...protect, proxyChannelsToMessaging);
 router.use('/api/messages', ...protect, proxyMessagesToMessaging);
 
-// ── AI → ai-service ───────────────────────────────────────────────────────────
-router.use('/api/ai', ...protect, proxyToAI);
+// ── AI → ai-service (rate-limited separately — inference is expensive) ────────
+router.use('/api/ai', ...protect, aiLimiter, proxyToAI);
 
 // ── ERP → erp-service ─────────────────────────────────────────────────────────
 router.use('/api/erp', ...protect, proxyToERP);
+
+// ── Docs file uploads ─────────────────────────────────────────────────────────
+router.post('/api/docs/upload-image', ...protect, uploadLimiter, proxyToCore);
+
+// ── Billing → core-service (Stripe; webhook is public so Stripe can call it) ──
+router.post('/api/billing/webhook', proxyToBilling);
+router.use('/api/billing', ...protect, proxyToBilling);
+
+// ── Notifications → notification-service ──────────────────────────────────────
+router.use('/api/notifications', ...protect, proxyToNotifications);
 
 export default router;

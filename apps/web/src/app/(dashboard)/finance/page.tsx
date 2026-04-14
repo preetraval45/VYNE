@@ -166,7 +166,7 @@ function PLTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           overflow: "hidden",
         }}
@@ -174,7 +174,7 @@ function PLTab() {
         <div
           style={{
             padding: "14px 18px",
-            borderBottom: "1px solid rgba(0,0,0,0.06)",
+            borderBottom: "1px solid var(--content-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -193,7 +193,7 @@ function PLTab() {
             style={{
               padding: "5px 10px",
               borderRadius: 7,
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               background: "transparent",
               cursor: "pointer",
               fontSize: 11,
@@ -212,11 +212,11 @@ function PLTab() {
               <tr
                 key={label}
                 style={{
-                  borderTop: "1px solid rgba(0,0,0,0.04)",
+                  borderTop: "1px solid var(--content-border)",
                   background: highlight
                     ? value >= 0
-                      ? "#F0FDF4"
-                      : "#FEF2F2"
+                      ? "var(--badge-success-bg)"
+                      : "var(--badge-danger-bg)"
                     : "transparent",
                 }}
               >
@@ -243,7 +243,7 @@ function PLTab() {
                       value < 0
                         ? "var(--status-danger)"
                         : highlight
-                          ? "#166534"
+                          ? "var(--badge-success-text)"
                           : "var(--text-primary)",
                   }}
                 >
@@ -299,7 +299,7 @@ function PLTab() {
             key={label}
             style={{
               background: "var(--content-bg)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              border: "1px solid var(--content-border)",
               borderRadius: 10,
               padding: "14px 16px",
             }}
@@ -356,7 +356,7 @@ function PLTab() {
         <div
           style={{
             background: "var(--content-bg)",
-            border: "1px solid rgba(0,0,0,0.08)",
+            border: "1px solid var(--content-border)",
             borderRadius: 10,
             padding: "14px 16px",
           }}
@@ -484,14 +484,14 @@ function JournalTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#F7F7FB" }}>
+            <tr style={{ background: "var(--table-header-bg)" }}>
               {["Entry #", "Description", "Date", "Amount (Dr)", "Status"].map(
                 (h) => (
                   <th
@@ -516,10 +516,10 @@ function JournalTab() {
             {entries.map((e) => (
               <tr
                 key={e.id}
-                style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
                 onMouseEnter={(ev) => {
                   (ev.currentTarget as HTMLTableRowElement).style.background =
-                    "#FAFAFE";
+                    "var(--content-secondary)";
                 }}
                 onMouseLeave={(ev) => {
                   (ev.currentTarget as HTMLTableRowElement).style.background =
@@ -571,8 +571,8 @@ function JournalTab() {
                       borderRadius: 20,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: e.status === "posted" ? "#F0FDF4" : "#FFFBEB",
-                      color: e.status === "posted" ? "#166534" : "#92400E",
+                      background: e.status === "posted" ? "var(--badge-success-bg)" : "var(--badge-warning-bg)",
+                      color: e.status === "posted" ? "var(--badge-success-text)" : "var(--badge-warning-text)",
                     }}
                   >
                     {e.status === "posted" ? "Posted" : "Draft"}
@@ -662,9 +662,9 @@ function JournalTab() {
                 style={{
                   width: "100%",
                   padding: "8px 10px",
-                  border: "1px solid #D8D8E8",
+                  border: "1px solid var(--input-border)",
                   borderRadius: 8,
-                  background: "#FAFAFE",
+                  background: "var(--input-bg)",
                   outline: "none",
                   fontSize: 13,
                   color: "var(--text-primary)",
@@ -698,9 +698,9 @@ function JournalTab() {
                 style={{
                   width: "100%",
                   padding: "8px 10px",
-                  border: "1px solid #D8D8E8",
+                  border: "1px solid var(--input-border)",
                   borderRadius: 8,
-                  background: "#FAFAFE",
+                  background: "var(--input-bg)",
                   outline: "none",
                   fontSize: 13,
                   color: "var(--text-primary)",
@@ -716,7 +716,7 @@ function JournalTab() {
                 style={{
                   padding: "8px 16px",
                   borderRadius: 8,
-                  border: "1px solid #D8D8E8",
+                  border: "1px solid var(--input-border)",
                   background: "transparent",
                   cursor: "pointer",
                   fontSize: 13,
@@ -763,7 +763,7 @@ function AccountsTab() {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -776,8 +776,8 @@ function AccountsTab() {
             <div
               style={{
                 padding: "10px 16px",
-                background: "#F7F7FB",
-                borderTop: "1px solid rgba(0,0,0,0.06)",
+                background: "var(--table-header-bg)",
+                borderTop: "1px solid var(--content-border)",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
@@ -821,7 +821,7 @@ function AccountsTab() {
                   display: "flex",
                   alignItems: "center",
                   padding: "9px 16px 9px 32px",
-                  borderTop: "1px solid rgba(0,0,0,0.04)",
+                  borderTop: "1px solid var(--content-border)",
                 }}
               >
                 <span
@@ -865,9 +865,30 @@ function AccountsTab() {
 // ─── Main page ────────────────────────────────────────────────────
 export default function FinancePage() {
   const [tab, setTab] = useState<"pl" | "journal" | "accounts">("pl");
+  const [liveSummary, setLiveSummary] = useState<{
+    revenue: number;
+    expenses: number;
+  } | null>(null);
 
   const now = new Date();
-  const currentMonth = MOCK_MONTHLY[MOCK_MONTHLY.length - 1];
+
+  useEffect(() => {
+    erpApi
+      .getFinanceSummary(now.getFullYear(), now.getMonth() + 1)
+      .then((r) => {
+        if (r.data) {
+          setLiveSummary({
+            revenue: r.data.revenue,
+            expenses: r.data.expenses,
+          });
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fallback = MOCK_MONTHLY[MOCK_MONTHLY.length - 1];
+  const currentMonth = liveSummary ?? fallback;
   const profit = currentMonth.revenue - currentMonth.expenses;
 
   return (
@@ -883,7 +904,7 @@ export default function FinancePage() {
       <div
         style={{
           padding: "14px 20px 0",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
         }}
@@ -924,8 +945,8 @@ export default function FinancePage() {
                 fontSize: 11,
                 padding: "3px 8px",
                 borderRadius: 20,
-                background: "rgba(34,197,94,0.1)",
-                color: "#166534",
+                background: "var(--badge-success-bg)",
+                color: "var(--badge-success-text)",
               }}
             >
               Revenue {fmt(currentMonth.revenue)}
@@ -935,8 +956,8 @@ export default function FinancePage() {
                 fontSize: 11,
                 padding: "3px 8px",
                 borderRadius: 20,
-                background: "rgba(239,68,68,0.1)",
-                color: "#991B1B",
+                background: "var(--badge-danger-bg)",
+                color: "var(--badge-danger-text)",
               }}
             >
               Expenses {fmt(currentMonth.expenses)}

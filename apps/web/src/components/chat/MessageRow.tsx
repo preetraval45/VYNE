@@ -187,7 +187,7 @@ export function MessageRow({
               top: -4,
               display: "flex",
               gap: 2,
-              background: "#fff",
+              background: "var(--content-bg)",
               border: "1px solid #E8E8F0",
               borderRadius: 8,
               padding: "3px 4px",
@@ -205,7 +205,7 @@ export function MessageRow({
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
-                  color: "#6B6B8A",
+                  color: "var(--text-secondary)",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -237,7 +237,7 @@ export function MessageRow({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#6B6B8A",
+                color: "var(--text-secondary)",
                 display: "flex",
                 alignItems: "center",
               }}
@@ -261,7 +261,7 @@ export function MessageRow({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#6B6B8A",
+                color: "var(--text-secondary)",
                 display: "flex",
                 alignItems: "center",
               }}

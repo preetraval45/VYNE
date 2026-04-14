@@ -445,7 +445,7 @@ function KanbanColumn({
                     <button
                       onClick={onInlineCreateCancel}
                       className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
-                      style={{ color: "#6B6B8A", background: "#F0F0F8" }}
+                      style={{ color: "var(--text-secondary)", background: "var(--content-secondary)" }}
                       aria-label="Cancel creating issue"
                     >
                       Cancel

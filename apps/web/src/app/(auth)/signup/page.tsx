@@ -30,7 +30,7 @@ export default function SignupPage() {
     clearError()
     try {
       await signup(form)
-      router.push('/projects')
+      router.push('/onboarding')
     } catch {
       // error is set in the store
     }

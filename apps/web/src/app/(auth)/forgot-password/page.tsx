@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
                 We sent a reset link to
               </p>
               <p className="text-sm font-medium text-white mb-6">{email}</p>
-              <p className="text-xs text-center" style={{ color: "#6B6B8A" }}>
+              <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
                 Didn&apos;t receive the email? Check your spam folder or{" "}
                 <button
                   onClick={() => {
@@ -213,7 +213,7 @@ export default function ForgotPasswordPage() {
         <Link
           href="/login"
           className="flex items-center justify-center gap-2 text-sm mt-6 transition-colors"
-          style={{ color: "#6B6B8A" }}
+          style={{ color: "var(--text-secondary)" }}
         >
           <ArrowLeft size={14} />
           Back to sign in

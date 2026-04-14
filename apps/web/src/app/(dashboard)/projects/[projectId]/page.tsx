@@ -1747,7 +1747,7 @@ function TaskDetailPanel({
                     <button
                       onClick={() => setShowAddSubtask(false)}
                       className="px-3 py-1 rounded text-xs font-medium"
-                      style={{ background: "#F0F0F8", color: "#6B6B8A" }}
+                      style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
                     >
                       Cancel
                     </button>

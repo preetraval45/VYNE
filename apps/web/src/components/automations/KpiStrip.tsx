@@ -15,8 +15,8 @@ function KpiCard(
   return (
     <div
       style={{
-        background: "#fff",
-        border: "1px solid rgba(0,0,0,0.08)",
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "16px 20px",
         display: "flex",
@@ -39,14 +39,14 @@ function KpiCard(
         {props.icon}
       </div>
       <div>
-        <div style={{ fontSize: 11, color: "#6B6B8A", marginBottom: 2 }}>
+        <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 2 }}>
           {props.label}
         </div>
         <div
           style={{
             fontSize: 22,
             fontWeight: 700,
-            color: "#1A1A2E",
+            color: "var(--text-primary)",
             lineHeight: 1.1,
           }}
         >
@@ -75,11 +75,11 @@ export default function KpiStrip(
     <div
       style={{
         padding: "12px 18px",
-        borderBottom: "1px solid rgba(0,0,0,0.07)",
+        borderBottom: "1px solid var(--content-border)",
         display: "grid",
         gridTemplateColumns: "repeat(3, minmax(0, 220px))",
         gap: 12,
-        background: "#fff",
+        background: "var(--content-bg)",
         flexShrink: 0,
       }}
     >

@@ -69,7 +69,7 @@ export default function AutomationRow(
             style={{
               fontSize: 12,
               fontWeight: 600,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               flex: 1,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -102,7 +102,7 @@ export default function AutomationRow(
           <span
             style={{
               fontSize: 10,
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               fontVariantNumeric: "tabular-nums",
             }}
           >

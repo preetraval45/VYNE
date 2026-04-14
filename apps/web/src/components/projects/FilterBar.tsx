@@ -54,17 +54,17 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
       className="flex items-center gap-2 px-6 py-2.5 overflow-x-auto"
       style={{
         borderBottom: "1px solid #E8E8F0",
-        background: "#FAFAFE",
+        background: "var(--content-secondary)",
       }}
     >
       <SlidersHorizontal
         size={13}
-        style={{ color: "#A0A0B8", flexShrink: 0 }}
+        style={{ color: "var(--text-tertiary)", flexShrink: 0 }}
         aria-hidden="true"
       />
       <span
         className="text-xs font-medium flex-shrink-0"
-        style={{ color: "#6B6B8A" }}
+        style={{ color: "var(--text-secondary)" }}
       >
         Filters{activeCount > 0 ? ` (${activeCount} active)` : ""}:
       </span>

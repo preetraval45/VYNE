@@ -214,9 +214,9 @@ export function MessageComposer({
       <div
         style={{
           position: "relative",
-          border: `1px solid ${isSlash ? "#6C47FF" : "#D8D8E8"}`,
+          border: `1px solid ${isSlash ? "var(--vyne-purple)" : "var(--content-border)"}`,
           borderRadius: 10,
-          background: "#FAFAFE",
+          background: "var(--content-secondary)",
           overflow: "visible",
           transition: "border-color 0.15s",
         }}
@@ -273,7 +273,7 @@ export function MessageComposer({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 display: "flex",
                 alignItems: "center",
               }}
@@ -308,7 +308,7 @@ export function MessageComposer({
             outline: "none",
             resize: "none",
             fontSize: 13,
-            color: "#1A1A2E",
+            color: "var(--text-primary)",
             lineHeight: 1.6,
             fontFamily: "Inter, system-ui",
             maxHeight: 180,
@@ -377,7 +377,7 @@ export function MessageComposer({
                   border: "none",
                   background: "transparent",
                   cursor: "pointer",
-                  color: "#A0A0B8",
+                  color: "var(--text-tertiary)",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
@@ -404,7 +404,7 @@ export function MessageComposer({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 display: "flex",
               }}
               onMouseEnter={(e) => {
@@ -447,7 +447,7 @@ export function MessageComposer({
                     position: "absolute",
                     bottom: "calc(100% + 6px)",
                     left: 0,
-                    background: "#fff",
+                    background: "var(--content-bg)",
                     border: "1px solid #E8E8F0",
                     borderRadius: 8,
                     padding: 6,
@@ -460,7 +460,7 @@ export function MessageComposer({
                     style={{
                       fontSize: 10,
                       fontWeight: 600,
-                      color: "#A0A0B8",
+                      color: "var(--text-tertiary)",
                       textTransform: "uppercase",
                       letterSpacing: "0.06em",
                       margin: "0 4px 5px",
@@ -483,7 +483,7 @@ export function MessageComposer({
                         background: "transparent",
                         cursor: "pointer",
                         fontSize: 12,
-                        color: "#1A1A2E",
+                        color: "var(--text-primary)",
                         textAlign: "left",
                       }}
                       onMouseEnter={(e) => {

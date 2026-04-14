@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Home,
@@ -105,6 +105,8 @@ interface NavItemDef {
   color: string;
   badge?: number;
   subs?: SubItem[];
+  /** Module ID from vyne-modules config. Undefined = always shown. */
+  moduleId?: string;
 }
 
 const NAV_ITEMS: NavItemDef[] = [
@@ -114,6 +116,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Accounts/Contacts",
     href: "/contacts",
     color: "#2C3E50",
+    moduleId: "crm",
     subs: [
       { label: "Accounts", href: "/contacts" },
       { label: "Contacts", href: "/contacts" },
@@ -125,6 +128,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Sales",
     href: "/sales",
     color: "#27AE60",
+    moduleId: "sales",
     subs: [
       { label: "Opportunities", href: "/sales" },
       { label: "Quotations", href: "/sales" },
@@ -139,6 +143,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Purchase",
     href: "/purchase",
     color: "#8E44AD",
+    moduleId: "purchase",
     subs: [
       { label: "Purchase Orders", href: "/purchase" },
       { label: "Vendors", href: "/purchase" },
@@ -153,6 +158,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Manufacturing",
     href: "/manufacturing",
     color: "#D35400",
+    moduleId: "manufacturing",
     subs: [
       { label: "Bill of Materials", href: "/manufacturing" },
       { label: "Manufacturing Orders", href: "/manufacturing" },
@@ -168,6 +174,7 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/chat",
     color: "#3498DB",
     badge: 3,
+    moduleId: "chat",
     subs: [
       { label: "Channels", href: "/chat" },
       { label: "Direct Messages", href: "/chat" },
@@ -180,6 +187,7 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/projects",
     color: "#9B59B6",
     badge: 2,
+    moduleId: "projects",
     subs: [
       { label: "All Projects", href: "/projects" },
       { label: "Issues", href: "/projects" },
@@ -192,6 +200,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Docs",
     href: "/docs",
     color: "#2ECC71",
+    moduleId: "docs",
     subs: [
       { label: "All Documents", href: "/docs" },
       { label: "Recent", href: "/docs" },
@@ -203,6 +212,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Ops / ERP",
     href: "/ops",
     color: "#F39C12",
+    moduleId: "erp",
     subs: [
       { label: "Overview", href: "/ops" },
       { label: "Inventory", href: "/ops" },
@@ -215,6 +225,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Finance",
     href: "/finance",
     color: "#1ABC9C",
+    moduleId: "finance",
     subs: [
       { label: "P&L Statement", href: "/finance" },
       { label: "Journal Entries", href: "/finance" },
@@ -227,6 +238,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "CRM",
     href: "/crm",
     color: "#E67E22",
+    moduleId: "crm",
     subs: [
       { label: "Pipeline", href: "/crm" },
       { label: "Contacts", href: "/crm" },
@@ -239,6 +251,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "HR",
     href: "/hr",
     color: "#3498DB",
+    moduleId: "hr",
     subs: [
       { label: "Employees", href: "/hr" },
       { label: "Leave", href: "/hr" },
@@ -262,6 +275,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Marketing",
     href: "/marketing",
     color: "#E91E63",
+    moduleId: "marketing",
     subs: [
       { label: "Campaigns", href: "/marketing" },
       { label: "Email Marketing", href: "/marketing" },
@@ -301,6 +315,7 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/observe",
     color: "#E74C3C",
     badge: 1,
+    moduleId: "observe",
     subs: [
       { label: "Overview", href: "/observe" },
       { label: "Metrics", href: "/observe" },
@@ -314,6 +329,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "AI Assistant",
     href: "/ai",
     color: "#6C47FF",
+    moduleId: "ai",
     subs: [
       { label: "Insights", href: "/ai" },
       { label: "Ask AI", href: "/ai" },
@@ -336,6 +352,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Invoicing",
     href: "/invoicing",
     color: "#2ECC71",
+    moduleId: "invoicing",
     subs: [
       { label: "Customers", href: "/invoicing" },
       { label: "Invoices", href: "/invoicing" },
@@ -351,6 +368,7 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Maintenance",
     href: "/maintenance",
     color: "#E67E22",
+    moduleId: "maintenance",
     subs: [
       { label: "Equipment", href: "/maintenance" },
       { label: "Requests", href: "/maintenance" },
@@ -839,6 +857,23 @@ export function Sidebar() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showColorPicker, setShowColorPicker] = useState(false);
 
+  // Module visibility — hydrated from onboarding / settings localStorage
+  const [enabledModules, setEnabledModules] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = localStorage.getItem("vyne-modules");
+      if (stored) {
+        setEnabledModules(new Set(JSON.parse(stored) as string[]));
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  // Filter items: keep items with no moduleId (always shown) or enabled module
+  const visibleNavItems = enabledModules === null
+    ? NAV_ITEMS
+    : NAV_ITEMS.filter((item) => !item.moduleId || enabledModules.has(item.moduleId));
+
   const toggleExpand = useCallback((label: string) => {
     setExpandedItems((prev) => {
       const next = new Set(prev);
@@ -963,7 +998,7 @@ export function Sidebar() {
           paddingBottom: 4,
         }}
       >
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavRow
             key={item.label}
             item={item}

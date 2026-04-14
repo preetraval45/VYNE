@@ -14,6 +14,8 @@ const AI_SERVICE_URL =
   process.env['AI_SERVICE_URL'] ?? 'http://ai-service:5004';
 const ERP_SERVICE_URL =
   process.env['ERP_SERVICE_URL'] ?? 'http://erp-service:5005';
+const NOTIFICATION_SERVICE_URL =
+  process.env['NOTIFICATION_SERVICE_URL'] ?? 'http://notification-service:5006';
 
 // ── Shared proxy factory ───────────────────────────────────────────────────────
 
@@ -124,3 +126,13 @@ export const proxyToAI = makeProxy(AI_SERVICE_URL, '/api/ai', 'ai-service');
 
 /** /api/erp/** → erp-service:5005 */
 export const proxyToERP = makeProxy(ERP_SERVICE_URL, '/api/erp', 'erp-service');
+
+/** /api/billing/** → core-service:5001 (Stripe checkout, portal, webhooks) */
+export const proxyToBilling = makeProxy(CORE_SERVICE_URL, '/api/billing', 'core-service');
+
+/** /api/notifications/** → notification-service:5006 */
+export const proxyToNotifications = makeProxy(
+  NOTIFICATION_SERVICE_URL,
+  '/api/notifications',
+  'notification-service',
+);

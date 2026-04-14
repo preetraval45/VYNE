@@ -314,6 +314,65 @@ export const usersApi = {
   listByOrg: () => apiClient.get<import("@/types").User[]>("/api/users"),
 };
 
+// ─── Organizations ───────────────────────────────────────────────
+
+export interface OrgFeatures {
+  chat: boolean; projects: boolean; docs: boolean; ai: boolean;
+  erp: boolean; finance: boolean; crm: boolean; sales: boolean;
+  invoicing: boolean; manufacturing: boolean; purchase: boolean;
+  hr: boolean; marketing: boolean; maintenance: boolean;
+  support: boolean; observability: boolean;
+}
+
+export interface OrgBranding {
+  accentColor?: string;
+  customDomain?: string;
+  logoUrl?: string;
+}
+
+export interface OrgSettings {
+  defaultTimezone: string;
+  fiscalYearStart: number;
+  currency: string;
+  features: OrgFeatures;
+  branding: OrgBranding;
+}
+
+export interface OrgResponse {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl?: string;
+  plan: string;
+  maxMembers: number;
+  settings: OrgSettings;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateOrgPayload {
+  name?: string;
+  logoUrl?: string;
+  settings?: {
+    defaultTimezone?: string;
+    currency?: string;
+    fiscalYearStart?: number;
+    features?: Partial<OrgFeatures>;
+    branding?: Partial<OrgBranding>;
+  };
+}
+
+export const orgsApi = {
+  getCurrent: () =>
+    apiClient.get<{ data: OrgResponse }>("/api/orgs"),
+
+  getById: (id: string) =>
+    apiClient.get<{ data: OrgResponse }>(`/api/orgs/${id}`),
+
+  update: (id: string, payload: UpdateOrgPayload) =>
+    apiClient.patch<{ data: OrgResponse }>(`/api/orgs/${id}`, payload),
+};
+
 // Docs
 export const docsApi = {
   list: () => apiClient.get<import("@/types").Document[]>("/api/docs"),
@@ -691,6 +750,14 @@ export const aiApi = {
       },
       body: JSON.stringify({ message, context }),
     }),
+
+  /** Structured BI query — returns answer + data tables + trace */
+  query: (question: string, context?: Record<string, unknown>) =>
+    apiClient.post<AIQueryResponse>("/api/ai/agents/query", { question, context }),
+
+  /** Auto-generated daily workspace insights */
+  getInsights: () =>
+    apiClient.get<AIInsightsResponse>("/api/ai/agents/insights"),
 };
 
 // ─── Slash Command Executor (calls real APIs) ────────────────────
@@ -798,6 +865,57 @@ export const slashCommandApi = {
       message: `Lead "${name}" assigned to you.`,
     };
   },
+};
+
+// ─── AI API ──────────────────────────────────────────────────────
+
+export interface AITraceStep {
+  step: string;
+  note: string;
+}
+
+export interface AIDataTable {
+  title: string;
+  rows: Record<string, string | number>[];
+}
+
+export interface AIQueryResponse {
+  answer: string;
+  sources: string;
+  followUps: string[];
+  data_tables: AIDataTable[];
+  trace: AITraceStep[];
+  agent: string;
+}
+
+export interface AIInsight {
+  id: string;
+  icon: string;
+  message: string;
+  severity: "red" | "yellow" | "green";
+  href: string;
+}
+
+export interface AIInsightsResponse {
+  insights: AIInsight[];
+  generated_at: string;
+}
+
+// ─── Billing API ─────────────────────────────────────────────────
+export const billingApi = {
+  /** Create a Stripe Checkout session for the given plan tier */
+  createCheckout: (tier: string, returnUrl: string) =>
+    apiClient.post<{ url: string; demo?: boolean }>("/api/billing/checkout", {
+      tier,
+      returnUrl,
+    }),
+
+  /** Create a Stripe Billing Portal session for plan management */
+  createPortal: (customerId: string | null, returnUrl: string) =>
+    apiClient.post<{ url: string; demo?: boolean }>("/api/billing/portal", {
+      customerId,
+      returnUrl,
+    }),
 };
 
 export default apiClient;

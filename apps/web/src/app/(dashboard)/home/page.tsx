@@ -127,7 +127,7 @@ export default function HomePage() {
       <header
         style={{
           height: 44,
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           padding: "0 18px",
@@ -419,8 +419,8 @@ export default function HomePage() {
         <section
           aria-label="Active incident alert"
           style={{
-            background: "#EEEDFE",
-            border: "1px solid #AFA9EC",
+            background: "var(--alert-purple-bg)",
+            border: "1px solid var(--alert-purple-border)",
             borderRadius: 12,
             padding: "14px 16px",
             marginBottom: 16,
@@ -467,7 +467,7 @@ export default function HomePage() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "#3730A3",
+                color: "var(--alert-purple-text)",
                 margin: 0,
               }}
             >
@@ -488,7 +488,7 @@ export default function HomePage() {
               LIVE
             </span>
             <span
-              style={{ marginLeft: "auto", fontSize: 10, color: "#7F77DD" }}
+              style={{ marginLeft: "auto", fontSize: 10, color: "var(--text-tertiary)" }}
             >
               2:14 PM · 7 min ago
             </span>
@@ -496,7 +496,7 @@ export default function HomePage() {
           <p
             style={{
               fontSize: 13,
-              color: "#1E1B4B",
+              color: "var(--text-primary)",
               lineHeight: 1.65,
               marginBottom: 12,
             }}
@@ -514,7 +514,7 @@ export default function HomePage() {
             deployment failed at 2:14 PM due to a missing IAM permission.{" "}
             <strong>47 orders</strong> are currently stuck in
             &quot;processing&quot; — estimated revenue at risk:{" "}
-            <strong style={{ color: "#991B1B" }}>$12,400</strong>.
+            <strong style={{ color: "var(--status-danger)" }}>$12,400</strong>.
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
@@ -536,7 +536,7 @@ export default function HomePage() {
               style={{
                 background: "transparent",
                 color: "var(--text-secondary)",
-                border: "1px solid rgba(0,0,0,0.12)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 8,
                 padding: "4px 10px",
                 fontSize: 11,
@@ -551,7 +551,7 @@ export default function HomePage() {
               style={{
                 background: "transparent",
                 color: "var(--text-secondary)",
-                border: "1px solid rgba(0,0,0,0.12)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 8,
                 padding: "4px 10px",
                 fontSize: 11,
@@ -603,7 +603,7 @@ export default function HomePage() {
               aria-label="Recent activity"
               style={{
                 background: "var(--content-bg)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 12,
                 padding: "16px 18px",
                 marginBottom: 14,
@@ -662,7 +662,7 @@ export default function HomePage() {
               aria-label="Sprint progress"
               style={{
                 background: "var(--content-bg)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 12,
                 padding: "16px 18px",
               }}
@@ -744,7 +744,7 @@ export default function HomePage() {
               aria-label="My focus today"
               style={{
                 background: "var(--content-bg)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 12,
                 padding: "16px 18px",
               }}
@@ -804,7 +804,7 @@ export default function HomePage() {
               aria-label="Ask Vyne AI"
               style={{
                 background: "var(--content-bg)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 12,
                 padding: "16px 18px",
               }}
@@ -821,8 +821,8 @@ export default function HomePage() {
               </h2>
               <div
                 style={{
-                  background: "#F7F7FB",
-                  border: "1px solid rgba(0,0,0,0.08)",
+                  background: "var(--content-secondary)",
+                  border: "1px solid var(--content-border)",
                   borderRadius: 8,
                   padding: "10px 12px",
                   marginBottom: 10,
@@ -845,7 +845,7 @@ export default function HomePage() {
                       key={q}
                       style={{
                         background: "var(--content-bg)",
-                        border: "1px solid rgba(0,0,0,0.08)",
+                        border: "1px solid var(--content-border)",
                         borderRadius: 8,
                         padding: "6px 10px",
                         fontSize: 11,
@@ -882,7 +882,7 @@ export default function HomePage() {
               aria-label="Quick actions"
               style={{
                 background: "var(--content-bg)",
-                border: "1px solid rgba(0,0,0,0.08)",
+                border: "1px solid var(--content-border)",
                 borderRadius: 12,
                 padding: "16px 18px",
               }}
@@ -911,7 +911,7 @@ export default function HomePage() {
                     style={{
                       background: "transparent",
                       color: "var(--text-secondary)",
-                      border: "1px solid rgba(0,0,0,0.12)",
+                      border: "1px solid var(--content-border)",
                       borderRadius: 8,
                       padding: "4px 10px",
                       fontSize: 11,

@@ -46,8 +46,8 @@ function ActionCard(
     <div>
       <div
         style={{
-          background: "#fff",
-          border: "1px solid rgba(0,0,0,0.1)",
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
           padding: 14,
         }}
@@ -84,10 +84,10 @@ function ActionCard(
               flex: 1,
               padding: "5px 8px",
               borderRadius: 7,
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               fontSize: 12,
-              color: "#1A1A2E",
-              background: "#FAFAFE",
+              color: "var(--text-primary)",
+              background: "var(--content-secondary)",
               appearance: "none",
               cursor: "pointer",
             }}
@@ -162,7 +162,7 @@ function ActionCard(
               htmlFor={`action-cfg-${action.id}-${di}`}
               style={{
                 fontSize: 11,
-                color: "#6B6B8A",
+                color: "var(--text-secondary)",
                 marginBottom: 3,
                 display: "block",
               }}
@@ -189,10 +189,10 @@ function ActionCard(
                 width: "100%",
                 padding: "6px 9px",
                 borderRadius: 6,
-                border: "1px solid rgba(0,0,0,0.12)",
+                border: "1px solid var(--content-border)",
                 fontSize: 11,
-                color: "#1A1A2E",
-                background: "#FAFAFE",
+                color: "var(--text-primary)",
+                background: "var(--content-secondary)",
                 boxSizing: "border-box",
               }}
             />
@@ -205,7 +205,7 @@ function ActionCard(
             display: "flex",
             justifyContent: "center",
             margin: "6px 0",
-            color: "#A0A0B8",
+            color: "var(--text-tertiary)",
           }}
         >
           <ArrowDown size={14} />
@@ -269,7 +269,7 @@ export default function ActionConfigurator(
           style={{
             fontSize: 12,
             fontWeight: 700,
-            color: "#1A1A2E",
+            color: "var(--text-primary)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}
@@ -298,12 +298,12 @@ export default function ActionConfigurator(
       {actions.length === 0 && (
         <div
           style={{
-            background: "#fff",
+            background: "var(--content-bg)",
             border: "1px dashed rgba(0,0,0,0.12)",
             borderRadius: 10,
             padding: "24px",
             textAlign: "center",
-            color: "#A0A0B8",
+            color: "var(--text-tertiary)",
             fontSize: 11,
           }}
         >

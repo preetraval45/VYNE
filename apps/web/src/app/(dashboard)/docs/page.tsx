@@ -205,7 +205,7 @@ export default function DocsPage() {
       {/* ── Sidebar / Doc Tree ───────────────────────────────── */}
       <aside
         className="flex flex-col border-r border-[#E8E8F0] flex-shrink-0 overflow-hidden"
-        style={{ width: 220, background: "#FAFAFE" }}
+        style={{ width: 220, background: "var(--content-secondary)" }}
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-3 border-b border-[#E8E8F0]">

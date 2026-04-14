@@ -76,9 +76,9 @@ function fmtDate(iso: string): string {
 function invoiceStatusStyle(s: InvoiceStatus): { bg: string; color: string } {
   const map: Record<InvoiceStatus, { bg: string; color: string }> = {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
-    Sent: { bg: "#FFFBEB", color: "#92400E" },
-    Paid: { bg: "#F0FDF4", color: "#166534" },
-    Overdue: { bg: "#FEF2F2", color: "#991B1B" },
+    Sent: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+    Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
     Cancelled: { bg: "#F0F0F8", color: "#6B7280" },
   };
   return map[s];
@@ -90,7 +90,7 @@ function creditNoteStatusStyle(s: CreditNoteStatus): {
 } {
   const map: Record<CreditNoteStatus, { bg: string; color: string }> = {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
-    Applied: { bg: "#F0FDF4", color: "#166534" },
+    Applied: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Refunded: { bg: "#EFF6FF", color: "#1E40AF" },
   };
   return map[s];
@@ -98,9 +98,9 @@ function creditNoteStatusStyle(s: CreditNoteStatus): {
 
 function paymentStatusStyle(s: PaymentStatus): { bg: string; color: string } {
   const map: Record<PaymentStatus, { bg: string; color: string }> = {
-    Completed: { bg: "#F0FDF4", color: "#166534" },
-    Pending: { bg: "#FFFBEB", color: "#92400E" },
-    Failed: { bg: "#FEF2F2", color: "#991B1B" },
+    Completed: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+    Failed: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
@@ -109,16 +109,16 @@ function billStatusStyle(s: BillStatus): { bg: string; color: string } {
   const map: Record<BillStatus, { bg: string; color: string }> = {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
     Received: { bg: "#EFF6FF", color: "#1E40AF" },
-    Paid: { bg: "#F0FDF4", color: "#166534" },
-    Overdue: { bg: "#FEF2F2", color: "#991B1B" },
+    Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
 
 function refundStatusStyle(s: RefundStatus): { bg: string; color: string } {
   const map: Record<RefundStatus, { bg: string; color: string }> = {
-    Processed: { bg: "#F0FDF4", color: "#166534" },
-    Pending: { bg: "#FFFBEB", color: "#92400E" },
+    Processed: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Cancelled: { bg: "#F0F0F8", color: "#6B7280" },
   };
   return map[s];
@@ -126,7 +126,7 @@ function refundStatusStyle(s: RefundStatus): { bg: string; color: string } {
 
 function customerStatusStyle(s: CustomerStatus): { bg: string; color: string } {
   const map: Record<CustomerStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Inactive: { bg: "#F0F0F8", color: "#6B7280" },
   };
   return map[s];
@@ -134,7 +134,7 @@ function customerStatusStyle(s: CustomerStatus): { bg: string; color: string } {
 
 function vendorStatusStyle(s: VendorStatus): { bg: string; color: string } {
   const map: Record<VendorStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Inactive: { bg: "#F0F0F8", color: "#6B7280" },
   };
   return map[s];
@@ -209,7 +209,7 @@ function KpiCard({
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         padding: "14px 16px",
         flex: 1,
@@ -333,7 +333,7 @@ function ActionBtn({
         width: 28,
         height: 28,
         borderRadius: 6,
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         background: "transparent",
         cursor: "pointer",
         color: color ?? "var(--text-secondary)",
@@ -403,7 +403,7 @@ function FilterBtn({
         borderRadius: 6,
         border: active
           ? "1px solid var(--vyne-purple)"
-          : "1px solid rgba(0,0,0,0.1)",
+          : "1px solid var(--content-border)",
         background: active ? "rgba(108,71,255,0.08)" : "transparent",
         color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
         fontSize: 11,
@@ -467,9 +467,9 @@ function SearchInput({
         style={{
           width: 220,
           padding: "7px 10px 7px 30px",
-          border: "1px solid rgba(0,0,0,0.1)",
+          border: "1px solid var(--content-border)",
           borderRadius: 8,
-          background: "#FAFAFE",
+          background: "var(--content-secondary)",
           outline: "none",
           fontSize: 12,
           color: "var(--text-primary)",
@@ -484,7 +484,7 @@ function TableContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     <div
       style={{
         background: "var(--content-bg)",
-        border: "1px solid rgba(0,0,0,0.08)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -503,9 +503,9 @@ function TableContainer({ children }: Readonly<{ children: React.ReactNode }>) {
 function TableRow({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <tr
-      style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+      style={{ borderTop: "1px solid var(--content-border)" }}
       onMouseEnter={(ev) => {
-        (ev.currentTarget as HTMLTableRowElement).style.background = "#FAFAFE";
+        (ev.currentTarget as HTMLTableRowElement).style.background = "var(--content-secondary)";
       }}
       onMouseLeave={(ev) => {
         (ev.currentTarget as HTMLTableRowElement).style.background =
@@ -620,11 +620,11 @@ const fieldLabelStyle: React.CSSProperties = {
 const fieldInputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
-  border: "1px solid rgba(0,0,0,0.12)",
+  border: "1px solid var(--content-border)",
   borderRadius: 6,
   fontSize: 13,
   outline: "none",
-  background: "#FAFAFE",
+  background: "var(--content-secondary)",
   color: "var(--text-primary)",
   boxSizing: "border-box",
 };
@@ -696,7 +696,7 @@ function ModalActions({
         style={{
           padding: "8px 16px",
           borderRadius: 6,
-          border: "1px solid rgba(0,0,0,0.12)",
+          border: "1px solid var(--content-border)",
           background: "transparent",
           fontSize: 12,
           fontWeight: 500,
@@ -760,7 +760,7 @@ function ConfirmDeleteDialog({
             style={{
               padding: "8px 16px",
               borderRadius: 6,
-              border: "1px solid rgba(0,0,0,0.12)",
+              border: "1px solid var(--content-border)",
               background: "transparent",
               fontSize: 12,
               fontWeight: 500,
@@ -821,7 +821,7 @@ function LineItemsEditor({
       <label style={fieldLabelStyle}>Line Items</label>
       <div
         style={{
-          border: "1px solid rgba(0,0,0,0.08)",
+          border: "1px solid var(--content-border)",
           borderRadius: 8,
           overflow: "hidden",
         }}
@@ -832,7 +832,7 @@ function LineItemsEditor({
             gridTemplateColumns: "1fr 60px 90px 28px",
             gap: 0,
             padding: "6px 8px",
-            background: "#F7F7FB",
+            background: "var(--table-header-bg)",
             fontSize: 10,
             fontWeight: 600,
             color: "var(--text-secondary)",
@@ -853,7 +853,7 @@ function LineItemsEditor({
               gridTemplateColumns: "1fr 60px 90px 28px",
               gap: 4,
               padding: "4px 8px",
-              borderTop: "1px solid rgba(0,0,0,0.05)",
+              borderTop: "1px solid var(--content-border)",
               alignItems: "center",
             }}
           >
@@ -888,7 +888,7 @@ function LineItemsEditor({
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#DC2626",
+                color: "var(--status-danger)",
                 padding: 2,
                 display: "flex",
                 alignItems: "center",
@@ -906,7 +906,7 @@ function LineItemsEditor({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "8px",
-            borderTop: "1px solid rgba(0,0,0,0.05)",
+            borderTop: "1px solid var(--content-border)",
           }}
         >
           <button
@@ -1613,7 +1613,7 @@ function CustomersTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Name"
               sortKey="name"
@@ -1906,7 +1906,7 @@ function InvoicesTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Invoice #"
               sortKey="number"
@@ -2112,7 +2112,7 @@ function CreditNotesTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Credit Note #"
               sortKey="number"
@@ -2307,7 +2307,7 @@ function PaymentsTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Payment #"
               sortKey="number"
@@ -2515,7 +2515,7 @@ function VendorsTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Name"
               sortKey="name"
@@ -2784,7 +2784,7 @@ function BillsTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Bill #"
               sortKey="number"
@@ -2972,7 +2972,7 @@ function RefundsTab() {
 
       <TableContainer>
         <thead>
-          <tr style={{ background: "#F7F7FB" }}>
+          <tr style={{ background: "var(--table-header-bg)" }}>
             <SortHeader
               label="Refund #"
               sortKey="number"
@@ -3138,7 +3138,7 @@ export default function InvoicingPage() {
       <div
         style={{
           padding: "14px 20px 0",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+          borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
         }}
@@ -3179,7 +3179,7 @@ export default function InvoicingPage() {
                 padding: "3px 8px",
                 borderRadius: 20,
                 background: "rgba(34,197,94,0.1)",
-                color: "#166534",
+                color: "var(--badge-success-text)",
               }}
             >
               Revenue {fmt(totalRevenue)}
@@ -3190,7 +3190,7 @@ export default function InvoicingPage() {
                 padding: "3px 8px",
                 borderRadius: 20,
                 background: "rgba(239,68,68,0.1)",
-                color: "#991B1B",
+                color: "var(--badge-danger-text)",
               }}
             >
               Outstanding {fmt(totalOutstanding)}

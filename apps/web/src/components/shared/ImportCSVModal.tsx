@@ -229,7 +229,7 @@ export function ImportCSVModal({
   };
 
   const panelStyle: React.CSSProperties = {
-    background: "#fff",
+    background: "var(--content-bg)",
     borderRadius: 12,
     width: 580,
     maxHeight: "90vh",
@@ -252,11 +252,11 @@ export function ImportCSVModal({
   const ghostBtnStyle: React.CSSProperties = {
     padding: "8px 16px",
     borderRadius: 8,
-    border: "1px solid #D8D8E8",
+    border: "1px solid var(--input-border)",
     background: "transparent",
     cursor: "pointer",
     fontSize: 13,
-    color: "#6B6B8A",
+    color: "var(--text-secondary)",
   };
 
   // ─── Render ─────────────────────────────────────────────────
@@ -273,7 +273,7 @@ export function ImportCSVModal({
             marginBottom: 18,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#1A1A2E" }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
             Import {moduleName}
           </span>
           <button
@@ -282,7 +282,7 @@ export function ImportCSVModal({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               padding: 4,
               borderRadius: 6,
               display: "flex",
@@ -377,12 +377,12 @@ export function ImportCSVModal({
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               style={{
-                border: `2px dashed ${dragOver ? "#6C47FF" : "#D8D8E8"}`,
+                border: `2px dashed ${dragOver ? "var(--vyne-purple)" : "var(--input-border)"}`,
                 borderRadius: 10,
                 padding: "40px 20px",
                 textAlign: "center",
                 cursor: "pointer",
-                background: dragOver ? "rgba(108,71,255,0.04)" : "#FAFAFE",
+                background: dragOver ? "rgba(108,71,255,0.04)" : "var(--content-secondary)",
                 transition: "all 0.15s",
               }}
             >
@@ -407,13 +407,13 @@ export function ImportCSVModal({
                 style={{
                   fontSize: 13,
                   fontWeight: 500,
-                  color: "#1A1A2E",
+                  color: "var(--text-primary)",
                   marginBottom: 4,
                 }}
               >
                 Drag & drop your CSV file here
               </div>
-              <div style={{ fontSize: 12, color: "#A0A0B8" }}>
+              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
                 or click to browse
               </div>
               <input
@@ -444,7 +444,7 @@ export function ImportCSVModal({
         {/* ── Step: Column Mapping ─────────────────────────────── */}
         {step === "mapping" && (
           <>
-            <div style={{ fontSize: 12, color: "#6B6B8A", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
               Map your CSV columns to the expected fields. Required fields are
               marked with *.
             </div>
@@ -467,7 +467,7 @@ export function ImportCSVModal({
                       width: 160,
                       fontSize: 12,
                       fontWeight: 500,
-                      color: "#1A1A2E",
+                      color: "var(--text-primary)",
                     }}
                   >
                     {col.label}
@@ -480,7 +480,7 @@ export function ImportCSVModal({
                     height="14"
                     viewBox="0 0 16 16"
                     fill="none"
-                    style={{ flexShrink: 0, color: "#A0A0B8" }}
+                    style={{ flexShrink: 0, color: "var(--text-tertiary)" }}
                     aria-hidden="true"
                   >
                     <path
@@ -502,11 +502,11 @@ export function ImportCSVModal({
                     style={{
                       flex: 1,
                       padding: "7px 10px",
-                      border: "1px solid #D8D8E8",
+                      border: "1px solid var(--input-border)",
                       borderRadius: 8,
-                      background: "#FAFAFE",
+                      background: "var(--content-secondary)",
                       fontSize: 12,
-                      color: "#1A1A2E",
+                      color: "var(--text-primary)",
                       outline: "none",
                     }}
                   >
@@ -557,7 +557,7 @@ export function ImportCSVModal({
         {/* ── Step: Preview ────────────────────────────────────── */}
         {step === "preview" && (
           <>
-            <div style={{ fontSize: 12, color: "#6B6B8A", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
               Preview of first {Math.min(previewRows.length, 5)} rows (
               {rawResult?.rowCount ?? 0} total)
             </div>
@@ -571,7 +571,7 @@ export function ImportCSVModal({
                 }}
               >
                 <thead>
-                  <tr style={{ background: "#F7F7FB" }}>
+                  <tr style={{ background: "var(--table-header-bg)" }}>
                     {expectedColumns
                       .filter((c) => columnMapping[c.key])
                       .map((col) => (
@@ -582,7 +582,7 @@ export function ImportCSVModal({
                             textAlign: "left",
                             fontSize: 10,
                             fontWeight: 600,
-                            color: "#6B6B8A",
+                            color: "var(--text-secondary)",
                             textTransform: "uppercase",
                             letterSpacing: "0.06em",
                             whiteSpace: "nowrap",
@@ -597,7 +597,7 @@ export function ImportCSVModal({
                   {previewRows.map((row, idx) => (
                     <tr
                       key={idx}
-                      style={{ borderTop: "1px solid rgba(0,0,0,0.05)" }}
+                      style={{ borderTop: "1px solid var(--content-border)" }}
                     >
                       {expectedColumns
                         .filter((c) => columnMapping[c.key])
@@ -606,7 +606,7 @@ export function ImportCSVModal({
                             key={col.key}
                             style={{
                               padding: "8px 12px",
-                              color: "#1A1A2E",
+                              color: "var(--text-primary)",
                               whiteSpace: "nowrap",
                               maxWidth: 180,
                               overflow: "hidden",
@@ -628,7 +628,7 @@ export function ImportCSVModal({
                 style={{
                   marginBottom: 14,
                   padding: 12,
-                  background: "#FEF2F2",
+                  background: "var(--badge-danger-bg)",
                   borderRadius: 8,
                 }}
               >
@@ -636,7 +636,7 @@ export function ImportCSVModal({
                   style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "#991B1B",
+                    color: "var(--badge-danger-text)",
                     marginBottom: 6,
                   }}
                 >
@@ -684,7 +684,7 @@ export function ImportCSVModal({
               style={{
                 fontSize: 13,
                 fontWeight: 500,
-                color: "#1A1A2E",
+                color: "var(--text-primary)",
                 marginBottom: 16,
               }}
             >
@@ -709,7 +709,7 @@ export function ImportCSVModal({
                 }}
               />
             </div>
-            <div style={{ fontSize: 12, color: "#A0A0B8", marginTop: 8 }}>
+            <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 8 }}>
               {importProgress}%
             </div>
           </div>
@@ -751,13 +751,13 @@ export function ImportCSVModal({
               style={{
                 fontSize: 14,
                 fontWeight: 600,
-                color: "#1A1A2E",
+                color: "var(--text-primary)",
                 marginBottom: 4,
               }}
             >
               Import Complete
             </div>
-            <div style={{ fontSize: 12, color: "#6B6B8A", marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
               {rawResult?.rowCount ?? 0} rows imported into {moduleName}
             </div>
 
@@ -768,7 +768,7 @@ export function ImportCSVModal({
                   textAlign: "left",
                   marginBottom: 14,
                   padding: 12,
-                  background: "#FFFBEB",
+                  background: "var(--badge-warning-bg)",
                   borderRadius: 8,
                 }}
               >
@@ -776,7 +776,7 @@ export function ImportCSVModal({
                   style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "#92400E",
+                    color: "var(--badge-warning-text)",
                     marginBottom: 4,
                   }}
                 >
@@ -785,7 +785,7 @@ export function ImportCSVModal({
                 {importErrors.slice(0, 5).map((err, i) => (
                   <div
                     key={i}
-                    style={{ fontSize: 11, color: "#92400E", padding: "2px 0" }}
+                    style={{ fontSize: 11, color: "var(--badge-warning-text)", padding: "2px 0" }}
                   >
                     {err}
                   </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { erpApi } from "@/lib/api/client";
 
 // ── Types ────────────────────────────────────────────────────────
 type MfgTab =
@@ -78,7 +79,7 @@ interface QualityCheck {
 }
 
 // ── Mock Data ────────────────────────────────────────────────────
-const MOCK_BOMS: BillOfMaterials[] = [
+let MOCK_BOMS: BillOfMaterials[] = [
   {
     id: "bom1",
     name: "Widget Assembly A",
@@ -212,7 +213,7 @@ const MOCK_BOMS: BillOfMaterials[] = [
   },
 ];
 
-const MOCK_MOS: ManufacturingOrder[] = [
+let MOCK_MOS: ManufacturingOrder[] = [
   {
     id: "mo1",
     moNumber: "MO-2026-001",
@@ -543,9 +544,9 @@ function fmt(n: number): string {
 
 function bomStatusStyle(s: BOMStatus): { bg: string; color: string } {
   const map: Record<BOMStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
-    Obsolete: { bg: "#FEF2F2", color: "#991B1B" },
+    Obsolete: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
@@ -555,26 +556,26 @@ function moStatusStyle(s: MOStatus): { bg: string; color: string } {
     Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
     Confirmed: { bg: "#EFF6FF", color: "#1E40AF" },
     "In Progress": { bg: "#F5F3FF", color: "#5B21B6" },
-    Done: { bg: "#F0FDF4", color: "#166534" },
-    Cancelled: { bg: "#FEF2F2", color: "#991B1B" },
+    Done: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Cancelled: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
 
 function wcStatusStyle(s: WCStatus): { bg: string; color: string } {
   const map: Record<WCStatus, { bg: string; color: string }> = {
-    Active: { bg: "#F0FDF4", color: "#166534" },
-    Maintenance: { bg: "#FFFBEB", color: "#92400E" },
-    Offline: { bg: "#FEF2F2", color: "#991B1B" },
+    Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Maintenance: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
+    Offline: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
 }
 
 function qcStyle(r: QCResult): { bg: string; color: string } {
   const map: Record<QCResult, { bg: string; color: string }> = {
-    Pass: { bg: "#F0FDF4", color: "#166534" },
-    Fail: { bg: "#FEF2F2", color: "#991B1B" },
-    Pending: { bg: "#FFFBEB", color: "#92400E" },
+    Pass: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
+    Fail: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
   };
   return map[r];
 }
@@ -666,7 +667,7 @@ function KPICard({
   return (
     <div
       style={{
-        background: "#F7F7FB",
+        background: "var(--table-header-bg)",
         borderRadius: 10,
         padding: "14px 16px",
       }}
@@ -893,7 +894,7 @@ function BOMTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "",
                 "BOM Name",
@@ -971,7 +972,7 @@ function BOMTab() {
                       <td colSpan={7} style={{ padding: 0 }}>
                         <div
                           style={{
-                            background: "#FAFAFE",
+                            background: "var(--content-secondary)",
                             padding: "12px 24px 12px 56px",
                             borderBottom: "1px solid var(--content-border)",
                           }}
@@ -1018,7 +1019,7 @@ function BOMTab() {
                                 <tr
                                   key={i}
                                   style={{
-                                    borderBottom: "1px solid rgba(0,0,0,0.04)",
+                                    borderBottom: "1px solid var(--content-border)",
                                   }}
                                 >
                                   <td
@@ -1140,7 +1141,7 @@ function ManufacturingOrdersTab() {
           style={{
             display: "flex",
             gap: 4,
-            background: "#F0F0F8",
+            background: "var(--content-secondary)",
             borderRadius: 8,
             padding: 2,
           }}
@@ -1215,7 +1216,7 @@ function ManufacturingOrdersTab() {
         >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#FAFAFE" }}>
+              <tr style={{ background: "var(--content-secondary)" }}>
                 {[
                   "MO #",
                   "Product",
@@ -1278,7 +1279,7 @@ function ManufacturingOrdersTab() {
                           padding: "2px 8px",
                           borderRadius: 4,
                           fontSize: 11,
-                          background: "#F0F0F8",
+                          background: "var(--content-secondary)",
                           color: "var(--text-secondary)",
                         }}
                       >
@@ -1326,7 +1327,7 @@ function ManufacturingOrdersTab() {
                 style={{
                   minWidth: 240,
                   flex: 1,
-                  background: "#FAFAFE",
+                  background: "var(--content-secondary)",
                   borderRadius: 10,
                   padding: 12,
                 }}
@@ -1346,7 +1347,7 @@ function ManufacturingOrdersTab() {
                       fontWeight: 600,
                       color: "var(--text-tertiary)",
                       padding: "1px 6px",
-                      background: "#F0F0F8",
+                      background: "var(--content-secondary)",
                       borderRadius: 8,
                     }}
                   >
@@ -1495,7 +1496,7 @@ function WorkCentersTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Name",
                 "Code",
@@ -1542,7 +1543,7 @@ function WorkCentersTab() {
                         style={{
                           flex: 1,
                           height: 8,
-                          background: "#F0F0F8",
+                          background: "var(--content-secondary)",
                           borderRadius: 4,
                           overflow: "hidden",
                         }}
@@ -1663,7 +1664,7 @@ function OperationsTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Operation Name",
                 "Work Center",
@@ -1794,7 +1795,7 @@ function QualityControlTab() {
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "#FAFAFE" }}>
+            <tr style={{ background: "var(--content-secondary)" }}>
               {[
                 "Check #",
                 "Product",
@@ -2097,7 +2098,7 @@ function MfgReportsTab() {
                 <div
                   style={{
                     height: 8,
-                    background: "#F0F0F8",
+                    background: "var(--content-secondary)",
                     borderRadius: 4,
                     overflow: "hidden",
                   }}
@@ -2180,7 +2181,7 @@ function MfgReportsTab() {
               <div
                 style={{
                   height: 8,
-                  background: "#F0F0F8",
+                  background: "var(--content-secondary)",
                   borderRadius: 4,
                   overflow: "hidden",
                 }}
@@ -2206,6 +2207,60 @@ function MfgReportsTab() {
 // ── Main Manufacturing Page ──────────────────────────────────────
 export default function ManufacturingPage() {
   const [activeTab, setActiveTab] = useState<MfgTab>("bom");
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    erpApi
+      .listBOMs()
+      .then((r) => {
+        if (r.data?.length) {
+          MOCK_BOMS = r.data.map((b) => ({
+            id: b.id,
+            name: b.productName ?? b.id,
+            product: b.productName ?? b.id,
+            componentsCount: b.components?.length ?? 0,
+            operations: 0,
+            cost: 0,
+            status: "Active" as BOMStatus,
+            components: (b.components ?? []).map((c) => ({
+              name: c.componentName,
+              quantity: c.quantity,
+              unit: c.uom,
+              cost: 0,
+            })),
+          }));
+          setTick((t) => t + 1);
+        }
+      })
+      .catch(() => {});
+    erpApi
+      .listWorkOrders()
+      .then((r) => {
+        if (r.data?.length) {
+          MOCK_MOS = r.data.map((wo) => ({
+            id: wo.id,
+            moNumber: wo.id,
+            product: wo.productName ?? wo.id,
+            quantity: wo.qtyToProduce,
+            bom: wo.bomId ?? "",
+            startDate: wo.scheduledDate ?? new Date().toISOString(),
+            endDate: wo.dueDate ?? new Date().toISOString(),
+            status: (
+              wo.status === "done"
+                ? "Done"
+                : wo.status === "in_progress"
+                  ? "In Progress"
+                  : wo.status === "cancelled"
+                    ? "Cancelled"
+                    : "Draft"
+            ) as MOStatus,
+            assignedTo: "",
+          }));
+          setTick((t) => t + 1);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function renderTab() {
     switch (activeTab) {
