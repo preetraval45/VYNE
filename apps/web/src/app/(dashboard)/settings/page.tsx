@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Settings, Users, Package, Bell, DollarSign } from "lucide-react";
+import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock } from "lucide-react";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import MembersSettings from "@/components/settings/MembersSettings";
 import NotificationsSettings from "@/components/settings/NotificationsSettings";
 import ErpSettings from "@/components/settings/ErpSettings";
 import BillingSettings from "@/components/settings/BillingSettings";
+import DeveloperSettings from "@/components/settings/DeveloperSettings";
+import SecuritySettings from "@/components/settings/SecuritySettings";
+import AuditSettings from "@/components/settings/AuditSettings";
 
 // ─── Tab config ──────────────────────────────────────────────────
 const TABS = [
@@ -15,6 +18,9 @@ const TABS = [
   { id: "notifications", label: "Notifications", icon: <Bell size={14} /> },
   { id: "erp", label: "ERP Config", icon: <Package size={14} /> },
   { id: "billing", label: "Billing", icon: <DollarSign size={14} /> },
+  { id: "security", label: "Security", icon: <Shield size={14} /> },
+  { id: "developer", label: "Developer", icon: <Code size={14} /> },
+  { id: "audit", label: "Audit Log", icon: <FileClock size={14} /> },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -108,6 +114,7 @@ export default function SettingsPage() {
         {TABS.map(({ id, label, icon }) => (
           <button
             key={id}
+            type="button"
             onClick={() => setTab(id)}
             style={{
               width: "100%",
@@ -152,6 +159,9 @@ export default function SettingsPage() {
         )}
         {tab === "erp" && <ErpSettings onToast={showToast} />}
         {tab === "billing" && <BillingSettings onToast={showToast} />}
+        {tab === "security" && <SecuritySettings onToast={showToast} />}
+        {tab === "developer" && <DeveloperSettings onToast={showToast} />}
+        {tab === "audit" && <AuditSettings onToast={showToast} />}
       </div>
 
       {/* Toast */}
