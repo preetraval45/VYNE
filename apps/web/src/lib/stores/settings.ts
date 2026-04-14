@@ -20,6 +20,13 @@ export interface NotificationSettings {
   mentionAlerts: boolean;
   orderAlerts: boolean;
   deployAlerts: boolean;
+  /** Do-not-disturb mode — master toggle */
+  dndEnabled: boolean;
+  /** Scheduled quiet hours in 24h time (e.g. "22:00") */
+  dndStart: string;
+  dndEnd: string;
+  /** Which days DND applies — 0=Sun … 6=Sat */
+  dndDays: number[];
 }
 
 export interface ErpSettings {
@@ -106,6 +113,10 @@ const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   mentionAlerts: true,
   orderAlerts: true,
   deployAlerts: true,
+  dndEnabled: false,
+  dndStart: "22:00",
+  dndEnd: "08:00",
+  dndDays: [0, 1, 2, 3, 4, 5, 6],
 };
 
 const DEFAULT_ERP: ErpSettings = {

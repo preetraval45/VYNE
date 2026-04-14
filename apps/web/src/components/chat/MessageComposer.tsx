@@ -5,6 +5,8 @@ import {
   Send,
   Smile,
   Paperclip,
+  Mic,
+  MonitorUp,
   AtSign,
   X,
   Clock,
@@ -17,6 +19,7 @@ import { SCHEDULE_OPTS, type SlashCmd } from "./constants";
 import { EmojiPicker } from "./EmojiPicker";
 import { SlashCommandMenu } from "./SlashCommandMenu";
 import { AttachmentPreview } from "./AttachmentPreview";
+import { MediaCaptureRecorder, type CapturedMedia } from "./MediaCapture";
 import { useFileUpload, ACCEPTED_EXTENSIONS } from "@/hooks/useFileUpload";
 import type { UploadedFile } from "@/hooks/useFileUpload";
 
@@ -43,8 +46,18 @@ export function MessageComposer({
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [capturing, setCapturing] = useState<"audio" | "video" | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleCaptureComplete(media: CapturedMedia) {
+    const extension = media.kind === "audio" ? "webm" : "webm";
+    const prefix = media.kind === "audio" ? "voice-note" : "screen-recording";
+    const filename = `${prefix}-${Date.now()}.${extension}`;
+    const file = new File([media.blob], filename, { type: media.mimeType });
+    uploadFiles([file]);
+    setCapturing(null);
+  }
 
   const { files, uploads, uploadFiles, removeFile, clearFiles, isUploading } =
     useFileUpload();
@@ -323,6 +336,17 @@ export function MessageComposer({
           onRemove={removeFile}
         />
 
+        {/* Live recording banner */}
+        {capturing && (
+          <div style={{ marginTop: 8 }}>
+            <MediaCaptureRecorder
+              kind={capturing}
+              onComplete={handleCaptureComplete}
+              onCancel={() => setCapturing(null)}
+            />
+          </div>
+        )}
+
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -366,6 +390,58 @@ export function MessageComposer({
               }}
             >
               <Paperclip size={15} />
+            </button>
+            <button
+              type="button"
+              aria-label="Record voice note"
+              onClick={() => setCapturing("audio")}
+              disabled={capturing !== null}
+              style={{
+                padding: "4px 6px",
+                borderRadius: 6,
+                border: "none",
+                background: "transparent",
+                cursor: capturing !== null ? "default" : "pointer",
+                color: "var(--text-tertiary)",
+                display: "flex",
+                opacity: capturing !== null ? 0.4 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (capturing === null) {
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+              }}
+            >
+              <Mic size={15} />
+            </button>
+            <button
+              type="button"
+              aria-label="Record screen"
+              onClick={() => setCapturing("video")}
+              disabled={capturing !== null}
+              style={{
+                padding: "4px 6px",
+                borderRadius: 6,
+                border: "none",
+                background: "transparent",
+                cursor: capturing !== null ? "default" : "pointer",
+                color: "var(--text-tertiary)",
+                display: "flex",
+                opacity: capturing !== null ? 0.4 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (capturing === null) {
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+              }}
+            >
+              <MonitorUp size={15} />
             </button>
             <div style={{ position: "relative" }}>
               <button

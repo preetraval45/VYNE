@@ -449,6 +449,59 @@ export function CommandPalette() {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // ── Cross-module AI search (triggered by leading "?") ───────────
+  interface AiHit {
+    id: string;
+    module: string;
+    title: string;
+    snippet: string;
+    href?: string;
+    score: number;
+    reason: string;
+  }
+  const [aiAnswer, setAiAnswer] = useState<string | null>(null);
+  const [aiHits, setAiHits] = useState<AiHit[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiProvider, setAiProvider] = useState<string | null>(null);
+  const isAiMode = debouncedQuery.startsWith("?");
+
+  useEffect(() => {
+    if (!isAiMode) {
+      setAiAnswer(null);
+      setAiHits([]);
+      return;
+    }
+    const q = debouncedQuery.replace(/^\?+/, "").trim();
+    if (q.length < 3) return;
+    let cancelled = false;
+    setAiLoading(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/ai/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q }),
+        });
+        const data = (await res.json()) as {
+          answer?: string;
+          hits?: AiHit[];
+          provider?: string;
+        };
+        if (cancelled) return;
+        setAiAnswer(data.answer ?? null);
+        setAiHits(data.hits ?? []);
+        setAiProvider(data.provider ?? null);
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setAiLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [debouncedQuery, isAiMode]);
+
   // Load recent searches on mount
   useEffect(() => {
     setRecentSearches(loadRecentSearches());
@@ -999,7 +1052,7 @@ export function CommandPalette() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search everything... or type > for actions"
+                placeholder="Search everything · type > for actions · type ? to ask AI"
                 className="flex-1 bg-transparent text-sm text-white placeholder:text-[#4A4A6A] focus:outline-none"
               />
               {query.length > 0 && (
@@ -1044,8 +1097,159 @@ export function CommandPalette() {
                 Quick Actions Mode
               </div>
             )}
+            {isAiMode && (
+              <div
+                className="flex items-center gap-2 px-4 py-2 text-xs"
+                style={{
+                  background: "rgba(108,71,255,0.12)",
+                  color: "#B8A3FF",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <span style={{ fontSize: 13 }}>✨</span>
+                AI Search Mode
+                {aiLoading ? (
+                  <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)" }}>
+                    Asking Vyne…
+                  </span>
+                ) : aiProvider ? (
+                  <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)" }}>
+                    via {aiProvider}
+                  </span>
+                ) : null}
+              </div>
+            )}
 
-            {/* Results */}
+            {/* AI search results */}
+            {isAiMode && (
+              <div className="max-h-[400px] overflow-y-auto content-scroll">
+                {aiAnswer && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background: "rgba(108,71,255,0.06)",
+                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      color: "#E8E8F0",
+                      fontSize: 13,
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        color: "#B8A3FF",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.07em",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Vyne AI
+                    </div>
+                    {aiAnswer}
+                  </div>
+                )}
+                {aiHits.length === 0 && !aiLoading && (
+                  <div
+                    className="px-4 py-8 text-center text-sm"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {debouncedQuery.replace(/^\?+/, "").trim().length < 3
+                      ? "Type your question — e.g. ?find docs about the April outage"
+                      : "No matches in the demo corpus."}
+                  </div>
+                )}
+                {aiHits.map((hit) => (
+                  <button
+                    key={hit.id}
+                    type="button"
+                    onClick={() => {
+                      if (hit.href) router.push(hit.href);
+                      close();
+                    }}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "10px 16px",
+                      borderTop: "1px solid rgba(255,255,255,0.04)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#E8E8F0",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background =
+                        "rgba(255,255,255,0.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background =
+                        "transparent";
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <span
+                        style={{
+                          padding: "1px 8px",
+                          borderRadius: 4,
+                          background: "rgba(108,71,255,0.18)",
+                          color: "#B8A3FF",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        {hit.module}
+                      </span>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>
+                        {hit.title}
+                      </span>
+                      <span
+                        style={{
+                          marginLeft: "auto",
+                          fontSize: 10,
+                          color: "rgba(255,255,255,0.4)",
+                          fontFamily:
+                            "var(--font-geist-mono), ui-monospace, monospace",
+                        }}
+                      >
+                        {hit.score}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "rgba(255,255,255,0.65)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {hit.snippet}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: "#B8A3FF",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      ✨ {hit.reason}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Results (hidden when AI search mode is active) */}
+            {!isAiMode && (
             <div className="max-h-[400px] overflow-y-auto content-scroll py-2">
               {filteredItems.length === 0 ? (
                 <div
@@ -1074,6 +1278,7 @@ export function CommandPalette() {
                 ))
               )}
             </div>
+            )}
 
             {/* Footer */}
             <div

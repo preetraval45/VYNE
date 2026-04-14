@@ -22,6 +22,9 @@ interface Notification {
   priority: "critical" | "high" | "medium" | "low";
   read: boolean;
   channel?: string;
+  /** AI-explained reason for the priority assignment (set after re-rank). */
+  aiReason?: string;
+  aiScore?: number;
 }
 
 const MOCK_NOTIFICATIONS: Notification[] = [
@@ -110,6 +113,49 @@ interface NotificationPanelProps {
 export function NotificationPanel({ onClose }: NotificationPanelProps) {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [reranking, setReranking] = useState(false);
+  const [rerankProvider, setRerankProvider] = useState<string | null>(null);
+
+  async function aiRerank() {
+    setReranking(true);
+    try {
+      const res = await fetch("/api/ai/rank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: notifications.map((n) => ({
+            id: n.id,
+            text: `${n.title} — ${n.body}`,
+            context: `${n.type} in ${n.channel ?? "DM"}`,
+          })),
+        }),
+      });
+      const data = (await res.json()) as {
+        ranked?: Array<{
+          id: string;
+          priority: "critical" | "high" | "medium" | "low";
+          reason: string;
+          score: number;
+        }>;
+        provider?: string;
+      };
+      if (data.ranked) {
+        const byId = new Map(data.ranked.map((r) => [r.id, r]));
+        setNotifications((prev) =>
+          prev.map((n) => {
+            const r = byId.get(n.id);
+            if (!r) return n;
+            return { ...n, priority: r.priority, aiReason: r.reason, aiScore: r.score };
+          }),
+        );
+      }
+      setRerankProvider(data.provider ?? null);
+    } catch {
+      // swallow — keep existing priorities
+    } finally {
+      setReranking(false);
+    }
+  }
 
   // AI-ranked: sort by priority then time
   const sorted = [...notifications]
@@ -248,9 +294,35 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
           ))}
           <button
             type="button"
-            onClick={markAllRead}
+            onClick={aiRerank}
+            disabled={reranking}
             style={{
               marginLeft: "auto",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 9px",
+              borderRadius: 6,
+              border: "1px solid var(--vyne-purple)",
+              fontSize: 10,
+              fontWeight: 600,
+              cursor: reranking ? "default" : "pointer",
+              background: rerankProvider ? "rgba(108,71,255,0.1)" : "transparent",
+              color: "var(--vyne-purple)",
+              opacity: reranking ? 0.6 : 1,
+            }}
+            title={
+              rerankProvider
+                ? `Last re-ranked via ${rerankProvider}`
+                : "Re-prioritise with Vyne AI"
+            }
+          >
+            {reranking ? "Ranking…" : "✨ AI rank"}
+          </button>
+          <button
+            type="button"
+            onClick={markAllRead}
+            style={{
               padding: "4px 8px",
               borderRadius: 6,
               border: "none",
@@ -374,6 +446,25 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                   >
                     {notif.body}
                   </p>
+                  {notif.aiReason && (
+                    <div
+                      style={{
+                        marginTop: 5,
+                        padding: "3px 8px",
+                        borderRadius: 5,
+                        background: "rgba(108,71,255,0.08)",
+                        border: "1px solid rgba(108,71,255,0.18)",
+                        fontSize: 10,
+                        color: "var(--vyne-purple)",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                      title={`AI score ${notif.aiScore ?? ""}`}
+                    >
+                      ✨ {notif.aiReason}
+                    </div>
+                  )}
                   <div
                     style={{
                       display: "flex",

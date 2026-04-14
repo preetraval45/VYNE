@@ -29,9 +29,21 @@ import {
   History,
   Image as ImageIcon,
   X,
+  Sparkles,
+  PencilRuler,
+  MessageCircle,
+  GitCompare,
 } from "lucide-react";
+import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 import { useUpdateDoc } from "@/hooks/useDocs";
+import { useAuthStore } from "@/lib/stores/auth";
 import type { Document } from "@/types";
+import { useCollab } from "./useCollab";
+import { CollabPresence } from "./CollabPresence";
+import { DiffViewer } from "./DiffViewer";
+import { WhiteboardCanvas } from "./WhiteboardCanvas";
+import { CommentsPanel } from "@/components/shared/CommentsPanel";
 
 const lowlight = createLowlight(common);
 
@@ -77,10 +89,12 @@ function saveVersion(docId: string, title: string, content: string) {
 function VersionHistoryPanel({
   versions,
   onRestore,
+  onCompare,
   onClose,
 }: {
   versions: DocVersion[];
   onRestore: (v: DocVersion) => void;
+  onCompare: (v: DocVersion) => void;
   onClose: () => void;
 }) {
   const [preview, setPreview] = useState<DocVersion | null>(null);
@@ -164,25 +178,52 @@ function VersionHistoryPanel({
         )}
       </div>
 
-      {/* Restore button */}
+      {/* Restore + Compare */}
       {preview && (
-        <div style={{ padding: 12, borderTop: "1px solid #E8E8F0" }}>
+        <div
+          style={{
+            padding: 12,
+            borderTop: "1px solid #E8E8F0",
+            display: "flex",
+            gap: 8,
+          }}
+        >
           <button
             type="button"
-            onClick={() => { onRestore(preview); onClose(); }}
+            onClick={() => onCompare(preview)}
             style={{
-              width: "100%",
+              flex: 1,
+              padding: "8px 0",
+              borderRadius: 8,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-bg)",
+              color: "var(--text-secondary)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Compare
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              onRestore(preview);
+              onClose();
+            }}
+            style={{
+              flex: 1,
               padding: "8px 0",
               borderRadius: 8,
               border: "none",
               background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
               color: "#fff",
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
             }}
           >
-            Restore this version
+            Restore
           </button>
         </div>
       )}
@@ -385,11 +426,29 @@ export function DocEditor({ doc }: DocEditorProps) {
   // ── Version history state ─────────────────────────────────────
   const [showHistory, setShowHistory] = useState(false);
   const [versions, setVersions] = useState<DocVersion[]>(() => loadVersions(doc.id));
+  const [diffVersion, setDiffVersion] = useState<DocVersion | null>(null);
+  const [showComments, setShowComments] = useState(false);
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<{
+    text: string;
+    anchor: number;
+  } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Reload versions when doc changes
   useEffect(() => {
     setVersions(loadVersions(doc.id));
+    setDiffVersion(null);
+    setAiSuggestion(null);
   }, [doc.id]);
+
+  // ── Real-time collaboration (y-webrtc) ────────────────────────
+  const currentUser = useAuthStore((s) => s.user);
+  const { ydoc, provider, users: collabUsers, status: collabStatus } = useCollab({
+    docId: doc.id,
+    userId: currentUser?.id ?? "anon",
+    userName: currentUser?.name ?? "Guest",
+  });
 
   // ── Debounced save ────────────────────────────────────────────
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -430,6 +489,8 @@ export function DocEditor({ doc }: DocEditorProps) {
       StarterKit.configure({
         codeBlock: false, // replaced by CodeBlockLowlight
         heading: { levels: [1, 2, 3] },
+        // Disable StarterKit's history when collab is active — Yjs owns undo/redo
+        undoRedo: false,
       }),
       Placeholder.configure({
         placeholder: ({ node }) => {
@@ -444,6 +505,18 @@ export function DocEditor({ doc }: DocEditorProps) {
       TableHeader,
       TableCell,
       CharacterCount,
+      Collaboration.configure({ document: ydoc }),
+      ...(provider
+        ? [
+            CollaborationCursor.configure({
+              provider,
+              user: {
+                name: currentUser?.name ?? "Guest",
+                color: "#6C47FF",
+              },
+            }),
+          ]
+        : []),
     ],
     content: (() => {
       if (!doc.content) return "";
@@ -500,6 +573,62 @@ export function DocEditor({ doc }: DocEditorProps) {
     editor.commands.setContent(content);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc.id]);
+
+  // ── AI ghost-text suggestion ──────────────────────────────────
+  const requestSuggestion = useCallback(
+    async (mode: "continue" | "improve" | "shorter" | "longer" | "summarise" = "continue") => {
+      if (!editor) return;
+      setAiLoading(true);
+      try {
+        const { from } = editor.state.selection;
+        const contextText = editor.state.doc.textBetween(
+          Math.max(0, from - 600),
+          from,
+          "\n",
+        );
+        const res = await fetch("/api/ai/suggest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ context: contextText || "Start writing…", mode }),
+        });
+        const data = (await res.json()) as { suggestion?: string; error?: string };
+        if (data.suggestion) {
+          setAiSuggestion({ text: data.suggestion, anchor: from });
+        }
+      } catch {
+        // ignore — suggestion just won't appear
+      } finally {
+        setAiLoading(false);
+      }
+    },
+    [editor],
+  );
+
+  const acceptSuggestion = useCallback(() => {
+    if (!editor || !aiSuggestion) return;
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(aiSuggestion.anchor, aiSuggestion.text)
+      .run();
+    setAiSuggestion(null);
+  }, [editor, aiSuggestion]);
+
+  // Dismiss suggestion on Escape, accept on Tab when it's visible
+  useEffect(() => {
+    if (!aiSuggestion) return;
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        acceptSuggestion();
+      }
+      if (e.key === "Escape") {
+        setAiSuggestion(null);
+      }
+    }
+    globalThis.addEventListener("keydown", handler, true);
+    return () => globalThis.removeEventListener("keydown", handler, true);
+  }, [aiSuggestion, acceptSuggestion]);
 
   function handleSlashSelect(item: (typeof SLASH_ITEMS)[0]) {
     if (!editor || slashStartPos.current === null) return;
@@ -625,11 +754,32 @@ export function DocEditor({ doc }: DocEditorProps) {
           <TableIcon size={14} />
         </TB>
 
-        {/* Right side: image upload + history + char count + save indicator */}
+        {/* Right side: AI + whiteboard + comments + image + history + char count + save + presence */}
         <div
           className="ml-auto flex items-center gap-3 text-[11px]"
           style={{ color: "var(--text-tertiary)" }}
         >
+          <TB
+            onClick={() => requestSuggestion("continue")}
+            title="AI: continue writing (Tab to accept)"
+            active={aiLoading || Boolean(aiSuggestion)}
+          >
+            <Sparkles size={14} />
+          </TB>
+          <TB
+            onClick={() => setShowWhiteboard((v) => !v)}
+            title="Insert whiteboard"
+            active={showWhiteboard}
+          >
+            <PencilRuler size={14} />
+          </TB>
+          <TB
+            onClick={() => setShowComments((v) => !v)}
+            title="Comments"
+            active={showComments}
+          >
+            <MessageCircle size={14} />
+          </TB>
           <TB onClick={() => fileInputRef.current?.click()} title="Insert image">
             <ImageIcon size={14} />
           </TB>
@@ -648,6 +798,8 @@ export function DocEditor({ doc }: DocEditorProps) {
           >
             <History size={14} />
           </TB>
+          <div className="w-px h-4 bg-[#E8E8F0]" />
+          <CollabPresence users={collabUsers} status={collabStatus} />
           <div className="w-px h-4 bg-[#E8E8F0]" />
           <span>{charCount.toLocaleString()} chars</span>
           <span>{isSaving ? "Saving…" : "Saved"}</span>
@@ -741,6 +893,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           <VersionHistoryPanel
             versions={versions}
             onClose={() => setShowHistory(false)}
+            onCompare={(v) => setDiffVersion(v)}
             onRestore={(v) => {
               setTitle(v.title);
               try {
@@ -753,7 +906,335 @@ export function DocEditor({ doc }: DocEditorProps) {
             }}
           />
         )}
+
+        {/* AI suggestion ghost-text floating hint */}
+        {aiSuggestion && (
+          <div
+            role="status"
+            style={{
+              position: "absolute",
+              bottom: 24,
+              left: "50%",
+              transform: "translateX(-50%)",
+              maxWidth: 620,
+              padding: "12px 16px",
+              borderRadius: 12,
+              background: "var(--content-bg)",
+              border: "1px solid rgba(108,71,255,0.3)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 10,
+              zIndex: 25,
+            }}
+          >
+            <Sparkles
+              size={14}
+              style={{ color: "var(--vyne-purple)", marginTop: 2, flexShrink: 0 }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--vyne-purple)",
+                  marginBottom: 4,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                AI suggestion — press Tab to accept
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "var(--text-secondary)",
+                  fontStyle: "italic",
+                  lineHeight: 1.5,
+                  wordBreak: "break-word",
+                }}
+              >
+                {aiSuggestion.text}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={acceptSuggestion}
+              style={{
+                padding: "6px 12px",
+                borderRadius: 6,
+                border: "none",
+                background: "var(--vyne-purple)",
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              aria-label="Dismiss suggestion"
+              onClick={() => setAiSuggestion(null)}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                border: "1px solid var(--content-border)",
+                background: "transparent",
+                color: "var(--text-tertiary)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={12} />
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* ── Whiteboard drawer ──────────────────────────────────── */}
+      {showWhiteboard && (
+        <div
+          style={{
+            padding: 16,
+            borderTop: "1px solid var(--content-border)",
+            background: "var(--content-secondary)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <PencilRuler size={13} style={{ color: "var(--vyne-purple)" }} />
+              Whiteboard
+            </span>
+            <button
+              type="button"
+              aria-label="Close whiteboard"
+              onClick={() => setShowWhiteboard(false)}
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 6,
+                border: "none",
+                background: "transparent",
+                color: "var(--text-tertiary)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <X size={13} />
+            </button>
+          </div>
+          <WhiteboardCanvas height={320} />
+        </div>
+      )}
+
+      {/* ── Comments drawer ────────────────────────────────────── */}
+      {showComments && (
+        <div
+          style={{
+            padding: 16,
+            borderTop: "1px solid var(--content-border)",
+            background: "var(--content-secondary)",
+          }}
+        >
+          <CommentsPanel
+            subjectId={`doc:${doc.id}`}
+            label={`Comments on "${title}"`}
+          />
+        </div>
+      )}
+
+      {/* ── Diff viewer modal ──────────────────────────────────── */}
+      {diffVersion && editor && (
+        <div
+          role="dialog"
+          aria-label="Compare versions"
+          aria-modal="true"
+          onClick={() => setDiffVersion(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.55)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            zIndex: 100,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 1100,
+              maxHeight: "90vh",
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              borderRadius: 14,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+            }}
+          >
+            <div
+              style={{
+                padding: "14px 20px",
+                borderBottom: "1px solid var(--content-border)",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <GitCompare size={16} style={{ color: "var(--vyne-purple)" }} />
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
+                Compare versions
+              </span>
+              <button
+                type="button"
+                aria-label="Close"
+                onClick={() => setDiffVersion(null)}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-bg)",
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div style={{ padding: 20, overflow: "auto" }}>
+              <DiffViewer
+                mode="split"
+                left={{
+                  title: diffVersion.title,
+                  content: (() => {
+                    try {
+                      const parsed = JSON.parse(diffVersion.content);
+                      if (parsed?.type === "doc") {
+                        // Extract plain text from TipTap JSON for diffing
+                        return JSON.stringify(parsed);
+                      }
+                      return String(parsed?.text ?? diffVersion.content);
+                    } catch {
+                      return diffVersion.content;
+                    }
+                  })(),
+                  label: `v${diffVersion.id.slice(-6)} · ${new Date(
+                    diffVersion.savedAt,
+                  ).toLocaleString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`,
+                }}
+                right={{
+                  title,
+                  content: JSON.stringify(editor.getJSON()),
+                  label: "Current draft",
+                }}
+              />
+            </div>
+            <div
+              style={{
+                padding: "12px 20px",
+                borderTop: "1px solid var(--content-border)",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setDiffVersion(null)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-bg)",
+                  color: "var(--text-secondary)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!editor) return;
+                  setTitle(diffVersion.title);
+                  try {
+                    const parsed = JSON.parse(diffVersion.content);
+                    editor.commands.setContent(
+                      parsed?.type === "doc" ? parsed : diffVersion.content,
+                    );
+                  } catch {
+                    editor.commands.setContent(diffVersion.content);
+                  }
+                  updateDoc.mutate({
+                    id: doc.id,
+                    data: { title: diffVersion.title, content: diffVersion.content },
+                  });
+                  setDiffVersion(null);
+                  setShowHistory(false);
+                }}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "var(--vyne-purple)",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Restore this version
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TipTap styles */}
       <style>{`

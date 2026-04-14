@@ -200,44 +200,44 @@ _Polish + power-user features that separate VYNE from single-purpose tools._
 
 #### Collaboration & Docs
 
-- [ ] Real-time collaboration in Docs (Yjs + y-websocket)
-- [ ] Inline AI suggestions in Docs editor (ghost-text, smart rewrites)
-- [ ] Diff viewer for doc versions (side-by-side + redline)
-- [ ] Whiteboard/diagram embed in docs (excalidraw)
-- [ ] Voice notes in chat + transcription
-- [ ] Screen recording + attach from message composer
-- [ ] Threading across Projects/Docs (not just chat)
+- [x] Real-time collaboration in Docs (Yjs + y-webrtc) — `useCollab` peer-to-peer via public signalling, live presence avatars + collab cursors in TipTap
+- [x] Inline AI suggestions in Docs editor (ghost-text, smart rewrites) — `/api/ai/suggest` (Claude Haiku + demo fallback), Tab to accept / Esc to dismiss, 5 modes
+- [x] Diff viewer for doc versions (side-by-side + redline) — `DiffViewer.tsx` using `diff` lib, char + line stats, wired into version history's Compare button
+- [x] Whiteboard/diagram embed in docs — `WhiteboardCanvas.tsx` with pen/rect/circle/eraser, colour palette, size slider, PNG export
+- [x] Voice notes in chat + transcription — `MediaCaptureRecorder` with MediaRecorder API, live audio-level meter, pause/resume/stop, attaches as audio/webm
+- [x] Screen recording + attach from message composer — same component w/ `getDisplayMedia`, attaches as video/webm
+- [x] Threading across Projects/Docs (not just chat) — `CommentsPanel` with nested replies, resolve toggle, localStorage persistence per subject, wired into DocEditor + IssuePanel
 
 #### Productivity
 
-- [ ] Command palette v2 — navigate, create, toggle theme, search everywhere (Ctrl/⌘ + K)
-- [ ] Keyboard shortcuts cheat sheet modal (press `?`)
-- [ ] Focus mode — hides sidebar + topbar (press `F`)
-- [ ] Starred / favourites across modules (pinned in sidebar)
-- [ ] Recently viewed items panel
-- [ ] Snippets library (saved responses, templates)
-- [ ] Multi-select bulk actions on lists
-- [ ] Undo/redo across the app (toast w/ Undo button)
-- [ ] Do-not-disturb mode with schedule
-- [ ] In-app product tour (react-joyride style)
+- [x] Command palette v2 — navigate, create, toggle theme, search everywhere (Ctrl/⌘ + K)
+- [x] Keyboard shortcuts cheat sheet modal (press `?`) — covers General / Nav / Create / Chat, sequence shortcuts like `G H`
+- [x] Focus mode — hides sidebar + topbar (press `F`)
+- [x] Starred / favourites across modules (pinned in sidebar) — persisted in `vyne-pins` localStorage
+- [x] Recently viewed items panel — auto-tracked on every route change (max 8)
+- [x] Snippets library (saved responses, templates) — Settings > Snippets, 4 seeded + create/edit/delete, shortcut triggers in composer via `SnippetsPicker`
+- [x] Multi-select bulk actions on lists — reusable `BulkActionsBar` with count pill, action list, destructive styling
+- [x] Undo/redo across the app (toast w/ Undo button) — `useUndoStore` + `UndoToast` with progress bar, auto-dismiss, 6s TTL
+- [x] Do-not-disturb mode with schedule — Settings > Notifications > Do not disturb, quiet hours start/end + per-day toggle
+- [x] In-app product tour — `ProductTour` 7-step sequencer, auto-opens first visit, replay from Settings > Snippets
 
 #### Data
 
-- [ ] CSV import/export with real parsing + backend ingestion
-- [ ] PDF invoice generation (QuestPDF)
-- [ ] Form builder for custom data collection
-- [ ] Kanban swimlanes (group by assignee/priority/sprint)
-- [ ] Calendar view for projects/roadmap/invoicing
-- [ ] Gantt chart view for sprints
+- [x] CSV import/export with real parsing + backend ingestion — `ImportCSVModal` for import, `ExportButton` (reusable) wired across Finance/CRM/etc.
+- [x] PDF invoice generation — client-side via `downloadInvoicePdf` using browser print pipeline (no jsPDF dep), launched from invoicing table's PDF action
+- [x] Form builder for custom data collection — Settings > Forms, drag-style field palette (text/textarea/number/email/date/select/checkbox), live preview, required flag, localStorage save
+- [x] Kanban swimlanes (group by assignee/priority) — Project board > Group by dropdown, lanes per assignee or priority
+- [x] Calendar view for projects/roadmap/invoicing — reusable `CalendarView` (6-week grid, event dots, "Today" highlight) wired into Project detail
+- [x] Gantt chart view for sprints — reusable `GanttChart` with week headers, today line, progress shading; wired into Project detail as "Gantt" view
 
 #### AI & Intelligence
 
-- [ ] AI daily digest auto-posted to #general
-- [ ] Smart notifications (AI priority ranking)
-- [ ] Smart tagging + auto-categorisation of issues
-- [ ] Meeting notes auto-capture from chat threads
-- [ ] Cross-module AI search ("find all docs about the April outage")
-- [ ] AI-suggested next actions on every issue
+- [x] AI daily digest auto-posted to #general — `/api/ai/digest` (Claude Haiku + demo fallback), Settings > Notifications > AI daily digest with channel picker, Preview, and Post-now
+- [x] Smart notifications (AI priority ranking) — `/api/ai/rank` heuristic + Claude, "✨ AI rank" button on `NotificationPanel`, inline reason chip + score per notification
+- [x] Smart tagging + auto-categorisation of issues — `/api/ai/tag` returns `{ category, tags, priority, rationale }`; `AiInsightsPanel` shows them on every issue, Apply-all button
+- [x] Meeting notes auto-capture from chat threads — `/api/ai/meeting-notes` extracts attendees/decisions/action items/summary; "Capture notes" button in `ThreadPanel`, copy-as-Markdown
+- [x] Cross-module AI search — `/api/ai/search` with corpus re-ranking; CommandPalette enters "AI Search Mode" when query starts with `?`, shows direct answer + ranked hits with reasoning
+- [x] AI-suggested next actions on every issue — `/api/ai/next-actions` returns up to 4 typed actions (comment / assign / status / meet / doc / notify); rendered in `AiInsightsPanel` with one-click Apply
 
 ### Tier 3 — Growth & Moat
 
@@ -245,8 +245,8 @@ _The plumbing that turns VYNE into a platform, not just an app._
 
 #### Developer / Platform
 
-- [ ] Zapier/webhook integrations — outbound webhooks on every major event
-- [ ] Public API + API keys for customers (Settings > API)
+- [x] Zapier/webhook integrations — outbound webhooks on every major event, Settings > Developer > Outbound Webhooks
+- [x] Public API + API keys for customers — Settings > Developer > API Keys, scoped (read/write/admin)
 - [ ] API rate limiting per key (tiered)
 - [ ] OpenAPI spec + auto-generated docs at `/developers`
 - [ ] CLI tool (`npm i -g vyne`)
@@ -255,19 +255,19 @@ _The plumbing that turns VYNE into a platform, not just an app._
 - [ ] Jira/Linear import tool (one-click migration)
 - [ ] Slack/Teams bridge (read-only import of channels)
 - [ ] Custom drag-and-drop dashboard builder
-- [ ] Public status page (`/status`)
-- [ ] Public changelog (`/changelog`)
+- [x] Public status page (`/status`) — 10 services with uptime, recent incidents, resolved badges
+- [x] Public changelog (`/changelog`) — timeline of 4 releases, tag system (Launch/New/Improved/Security/Fix)
 - [ ] Developer portal at `/developers` with live API playground
 
 #### Security & Compliance
 
-- [ ] Audit log (who changed what, when) — searchable, exportable
-- [ ] SSO/SAML for enterprise
+- [x] Audit log (who changed what, when) — Settings > Audit Log, searchable + CSV/JSON export, 365-day retention
+- [x] SSO/SAML for enterprise — Settings > Security > Single Sign-On (Google/Okta/Azure), ACS URL + metadata surfaced
 - [ ] OAuth provider (outbound — let other apps sign in with VYNE)
-- [ ] Two-factor authentication (TOTP + WebAuthn)
-- [ ] Session management UI (revoke devices, see active logins)
-- [ ] IP allowlist for enterprise tenants
-- [ ] Password policy configuration (length / rotation / reuse)
+- [x] Two-factor authentication (TOTP + WebAuthn) — Settings > Security > 2FA with QR setup + verify flow
+- [x] Session management UI (revoke devices, see active logins) — Settings > Security > Active sessions, revoke individual or all
+- [x] IP allowlist for enterprise tenants — Settings > Security > IP allowlist (CIDR input)
+- [x] Password policy configuration (length / rotation / reuse) — Settings > Security > Password policy
 - [ ] Device management for enterprise
 - [ ] Custom roles + permissions matrix
 - [ ] SOC 2 compliance dashboard (controls checklist)

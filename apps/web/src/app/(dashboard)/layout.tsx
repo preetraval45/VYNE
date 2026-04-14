@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
+import { UndoToast } from "@/components/layout/UndoToast";
+import { ProductTour } from "@/components/layout/ProductTour";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
@@ -47,6 +49,12 @@ export default function DashboardLayout({
 
       {/* Focus-mode indicator */}
       <FocusModeToast />
+
+      {/* Undo toast */}
+      <UndoToast />
+
+      {/* Product tour (first-run + on-demand via settings) */}
+      <ProductTour />
     </div>
   );
 }

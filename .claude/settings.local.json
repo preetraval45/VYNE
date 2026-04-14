@@ -99,7 +99,11 @@
       "Bash(awk -F: '$2 >= 350 && $2 <= 380 {print}')",
       "Bash(curl -s -o /dev/null -w \"/crm → HTTP %{http_code}\\\\n\" https://vyne.vercel.app/crm)",
       "Bash(curl -s -o /dev/null -w \"/login → HTTP %{http_code}\\\\n\" https://vyne.vercel.app/login)",
-      "Bash(cd \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web/src\" cat lib/stores/ui.ts)"
+      "Bash(cd \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web/src\" cat lib/stores/ui.ts)",
+      "Bash(npx next:*)",
+      "Bash(cd \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web/src\" grep -n \"parseCsv\\\\|exportCsv\\\\|ExportButton\\\\|ImportCSVModal\" components/shared/ExportButton.tsx)",
+      "Bash(cd \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web/src\" grep -n \"IssueKanban\\\\|swimlane\\\\|groupBy\\\\|view.*mode\\\\|ViewMode\" app/\\\\\\(dashboard\\\\\\)/projects/\\\\[projectId\\\\]/page.tsx components/projects/IssueKanban.tsx)",
+      "Bash(cd \"c:/Users/raval/OneDrive - University of North Carolina at Charlotte/Documents/GitHub/VYNE/apps/web\" rm -rf .next npx next build)"
     ]
   }
 }

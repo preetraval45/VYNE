@@ -14,8 +14,10 @@ import {
   Edit2,
   Trash2,
   X,
+  FileDown,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { downloadInvoicePdf, type InvoicePayload } from "@/lib/pdf/invoicePdf";
 import {
   useInvoicingStore,
   type Customer,
@@ -1779,6 +1781,38 @@ function InvoicesTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
 
+  function handleDownloadPdf(inv: Invoice) {
+    const payload: InvoicePayload = {
+      number: inv.number,
+      issueDate: inv.date,
+      dueDate: inv.dueDate,
+      status:
+        inv.status === "Paid"
+          ? "paid"
+          : inv.status === "Sent"
+            ? "sent"
+            : inv.status === "Overdue"
+              ? "overdue"
+              : "draft",
+      customer: {
+        name: inv.customer,
+      },
+      lineItems: inv.items.map((it) => ({
+        description: it.description,
+        quantity: it.qty,
+        unitPrice: it.rate,
+      })),
+      notes: inv.notes,
+      currency: "USD",
+    };
+    downloadInvoicePdf(payload, {
+      name: "VYNE Demo Org",
+      email: "billing@vyne.dev",
+      address: "Charlotte, NC · https://vyne.vercel.app",
+      accentColor: "#6C47FF",
+    });
+  }
+
   const filtered =
     filter === "All"
       ? invoices
@@ -2019,6 +2053,12 @@ function InvoicesTab() {
                         color="var(--vyne-purple)"
                       />
                     )}
+                    <ActionBtn
+                      icon={<FileDown size={12} />}
+                      label="PDF"
+                      onClick={() => handleDownloadPdf(inv)}
+                      color="var(--text-secondary)"
+                    />
                     <ActionBtn
                       icon={<Trash2 size={12} />}
                       label="Delete"

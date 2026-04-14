@@ -8,6 +8,9 @@ import {
   Plus,
   LayoutList,
   Columns3,
+  Calendar as CalendarIcon,
+  GanttChart as GanttIcon,
+  Layers,
   Search,
   X,
   Calendar,
@@ -38,10 +41,13 @@ import {
 } from "@/lib/fixtures/projects";
 import { cn, formatDate } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { CalendarView } from "@/components/shared/CalendarView";
+import { GanttChart } from "@/components/shared/GanttChart";
 
 // ─── Constants ──────────────────────────────────────────────────────
 
-type ViewMode = "list" | "board";
+type ViewMode = "list" | "board" | "calendar" | "gantt";
+type SwimlaneMode = "none" | "assignee" | "priority";
 
 const STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -65,6 +71,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const teamMembers = useTeamMembers();
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
   const [search, setSearch] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showAddTask, setShowAddTask] = useState(false);
@@ -264,7 +271,60 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             icon={<Columns3 size={14} />}
             label="Board"
           />
+          <ViewBtn
+            active={viewMode === "calendar"}
+            onClick={() => setViewMode("calendar")}
+            icon={<CalendarIcon size={14} />}
+            label="Calendar"
+          />
+          <ViewBtn
+            active={viewMode === "gantt"}
+            onClick={() => setViewMode("gantt")}
+            icon={<GanttIcon size={14} />}
+            label="Gantt"
+          />
         </div>
+
+        {/* Swimlane group-by (board-only) */}
+        {viewMode === "board" && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "0 8px",
+              color: "var(--text-tertiary)",
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            <Layers size={12} />
+            Group by
+            <select
+              value={swimlaneMode}
+              onChange={(e) => setSwimlaneMode(e.target.value as SwimlaneMode)}
+              aria-label="Swimlane grouping"
+              style={{
+                padding: "5px 10px",
+                borderRadius: 6,
+                border: "1px solid var(--input-border)",
+                background: "var(--input-bg)",
+                color: "var(--text-primary)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                outline: "none",
+                textTransform: "capitalize",
+              }}
+            >
+              <option value="none">None</option>
+              <option value="assignee">Assignee</option>
+              <option value="priority">Priority</option>
+            </select>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
@@ -308,7 +368,21 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             tasks={filteredTasks}
             projectId={projectId}
             onTaskClick={setSelectedTaskId}
+            swimlaneMode={swimlaneMode}
           />
+        )}
+        {viewMode === "calendar" && (
+          <div style={{ padding: 20 }}>
+            <TaskCalendarView
+              tasks={filteredTasks}
+              onTaskClick={setSelectedTaskId}
+            />
+          </div>
+        )}
+        {viewMode === "gantt" && (
+          <div style={{ padding: 20 }}>
+            <TaskGanttView tasks={filteredTasks} />
+          </div>
         )}
       </div>
 
@@ -581,45 +655,248 @@ function TaskListView({
 
 function TaskBoardView({
   tasks,
-  projectId,
+  projectId: _projectId,
   onTaskClick,
+  swimlaneMode = "none",
 }: {
   tasks: Task[];
   projectId: string;
   onTaskClick: (id: string) => void;
+  swimlaneMode?: "none" | "assignee" | "priority";
 }) {
   const updateTask = useProjectsStore((s) => s.updateTask);
-
-  const columns = STATUS_ORDER.map((status) => ({
-    id: status,
-    meta: TASK_STATUS_META[status],
-    tasks: tasks
-      .filter((t) => t.status === status)
-      .sort((a, b) => a.order - b.order),
-  }));
+  const teamMembers = useTeamMembers();
 
   function handleDrop(taskId: string, newStatus: TaskStatus) {
     updateTask(taskId, { status: newStatus });
     toast.success(`Moved to ${TASK_STATUS_META[newStatus].label}`);
   }
 
+  function buildColumns(subset: Task[]) {
+    return STATUS_ORDER.map((status) => ({
+      id: status,
+      meta: TASK_STATUS_META[status],
+      tasks: subset
+        .filter((t) => t.status === status)
+        .sort((a, b) => a.order - b.order),
+    }));
+  }
+
+  if (swimlaneMode === "none") {
+    const columns = buildColumns(tasks);
+    return (
+      <div
+        className="flex gap-3 h-full overflow-x-auto px-6 py-4"
+        style={{ minWidth: "max-content", alignItems: "flex-start" }}
+      >
+        {columns.map((col) => (
+          <BoardColumn
+            key={col.id}
+            columnId={col.id}
+            meta={col.meta}
+            tasks={col.tasks}
+            onDrop={handleDrop}
+            onTaskClick={onTaskClick}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // Build swimlane groups
+  const lanes: { key: string; label: string; color: string; tasks: Task[] }[] = [];
+  if (swimlaneMode === "assignee") {
+    const byAssignee = new Map<string, Task[]>();
+    for (const t of tasks) {
+      const key = t.assigneeId ?? "_unassigned";
+      const list = byAssignee.get(key) ?? [];
+      list.push(t);
+      byAssignee.set(key, list);
+    }
+    // Unassigned last
+    const keys = Array.from(byAssignee.keys())
+      .filter((k) => k !== "_unassigned")
+      .sort();
+    if (byAssignee.has("_unassigned")) keys.push("_unassigned");
+    for (const k of keys) {
+      const member = teamMembers.find((m) => m.id === k);
+      lanes.push({
+        key: k,
+        label: member?.name ?? (k === "_unassigned" ? "Unassigned" : k),
+        color: member ? "#6C47FF" : "#6B6B8A",
+        tasks: byAssignee.get(k) ?? [],
+      });
+    }
+  } else {
+    // priority
+    const byPriority = new Map<string, Task[]>();
+    for (const t of tasks) {
+      const key = t.priority ?? "medium";
+      const list = byPriority.get(key) ?? [];
+      list.push(t);
+      byPriority.set(key, list);
+    }
+    for (const p of PRIORITY_ORDER) {
+      if (byPriority.has(p)) {
+        lanes.push({
+          key: p,
+          label: p.charAt(0).toUpperCase() + p.slice(1),
+          color:
+            p === "urgent"
+              ? "#EF4444"
+              : p === "high"
+                ? "#F59E0B"
+                : p === "medium"
+                  ? "#3B82F6"
+                  : "#6B7280",
+          tasks: byPriority.get(p) ?? [],
+        });
+      }
+    }
+  }
+
   return (
-    <div
-      className="flex gap-3 h-full overflow-x-auto px-6 py-4"
-      style={{ minWidth: "max-content", alignItems: "flex-start" }}
-    >
-      {columns.map((col) => (
-        <BoardColumn
-          key={col.id}
-          columnId={col.id}
-          meta={col.meta}
-          tasks={col.tasks}
-          onDrop={handleDrop}
-          onTaskClick={onTaskClick}
-        />
+    <div className="flex flex-col gap-6 px-6 py-4">
+      {lanes.map((lane) => (
+        <div key={lane.key}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 8,
+              paddingLeft: 4,
+            }}
+          >
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: lane.color,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.07em",
+                color: "var(--text-primary)",
+              }}
+            >
+              {lane.label}
+            </span>
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                fontWeight: 500,
+              }}
+            >
+              {lane.tasks.length}
+            </span>
+          </div>
+          <div
+            className="flex gap-3 overflow-x-auto"
+            style={{ minWidth: "max-content", alignItems: "flex-start" }}
+          >
+            {buildColumns(lane.tasks).map((col) => (
+              <BoardColumn
+                key={`${lane.key}-${col.id}`}
+                columnId={col.id}
+                meta={col.meta}
+                tasks={col.tasks}
+                onDrop={handleDrop}
+                onTaskClick={onTaskClick}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );
+}
+
+function TaskCalendarView({
+  tasks,
+  onTaskClick,
+}: {
+  tasks: Task[];
+  onTaskClick: (id: string) => void;
+}) {
+  const events = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.dueDate)
+        .map((t) => ({
+          id: t.id,
+          date: t.dueDate!,
+          title: t.title,
+          color:
+            t.priority === "urgent"
+              ? "#EF4444"
+              : t.priority === "high"
+                ? "#F59E0B"
+                : "#6C47FF",
+          meta: `${t.status} · ${t.priority ?? "medium"}`,
+          onClick: () => onTaskClick(t.id),
+        })),
+    [tasks, onTaskClick],
+  );
+
+  return <CalendarView events={events} title="Task calendar" />;
+}
+
+function TaskGanttView({ tasks }: { tasks: Task[] }) {
+  const rows = useMemo(
+    () =>
+      tasks
+        .filter((t) => t.createdAt)
+        .map((t) => ({
+          id: t.id,
+          label: t.title,
+          start: t.createdAt,
+          end: t.dueDate ?? new Date(
+            new Date(t.createdAt).getTime() + 7 * 86_400_000,
+          ).toISOString(),
+          color:
+            t.priority === "urgent"
+              ? "#EF4444"
+              : t.priority === "high"
+                ? "#F59E0B"
+                : t.status === "done"
+                  ? "#22C55E"
+                  : "#6C47FF",
+          progress:
+            t.status === "done"
+              ? 1
+              : t.status === "in_progress" || t.status === "in_review"
+                ? 0.55
+                : 0.1,
+          meta: `${t.status}${t.priority ? ` · ${t.priority}` : ""}`,
+        })),
+    [tasks],
+  );
+
+  if (rows.length === 0) {
+    return (
+      <div
+        style={{
+          padding: 40,
+          textAlign: "center",
+          color: "var(--text-tertiary)",
+          fontSize: 13,
+          border: "1px dashed var(--content-border)",
+          borderRadius: 12,
+        }}
+      >
+        No dated tasks yet — assign due dates to see the timeline.
+      </div>
+    );
+  }
+
+  return <GanttChart rows={rows} title="Sprint timeline" />;
 }
 
 function BoardColumn({

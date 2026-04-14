@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock } from "lucide-react";
+import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock, Zap, FormInput } from "lucide-react";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import MembersSettings from "@/components/settings/MembersSettings";
 import NotificationsSettings from "@/components/settings/NotificationsSettings";
@@ -10,12 +10,16 @@ import BillingSettings from "@/components/settings/BillingSettings";
 import DeveloperSettings from "@/components/settings/DeveloperSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import AuditSettings from "@/components/settings/AuditSettings";
+import SnippetsSettings from "@/components/settings/SnippetsSettings";
+import FormsSettings from "@/components/settings/FormsSettings";
 
 // ─── Tab config ──────────────────────────────────────────────────
 const TABS = [
   { id: "general", label: "General", icon: <Settings size={14} /> },
   { id: "members", label: "Members", icon: <Users size={14} /> },
   { id: "notifications", label: "Notifications", icon: <Bell size={14} /> },
+  { id: "snippets", label: "Snippets", icon: <Zap size={14} /> },
+  { id: "forms", label: "Forms", icon: <FormInput size={14} /> },
   { id: "erp", label: "ERP Config", icon: <Package size={14} /> },
   { id: "billing", label: "Billing", icon: <DollarSign size={14} /> },
   { id: "security", label: "Security", icon: <Shield size={14} /> },
@@ -162,6 +166,8 @@ export default function SettingsPage() {
         {tab === "security" && <SecuritySettings onToast={showToast} />}
         {tab === "developer" && <DeveloperSettings onToast={showToast} />}
         {tab === "audit" && <AuditSettings onToast={showToast} />}
+        {tab === "snippets" && <SnippetsSettings onToast={showToast} />}
+        {tab === "forms" && <FormsSettings onToast={showToast} />}
       </div>
 
       {/* Toast */}

@@ -27,6 +27,8 @@ import {
 } from "@/lib/utils";
 import { issuesApi } from "@/lib/api/client";
 import toast from "react-hot-toast";
+import { CommentsPanel } from "@/components/shared/CommentsPanel";
+import { AiInsightsPanel } from "@/components/projects/AiInsightsPanel";
 
 interface IssuePanelProps {
   issue: Issue;
@@ -195,7 +197,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button aria-label="ExternalLink"
+                <button type="button" aria-label="Open in new tab"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
@@ -211,7 +213,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 >
                   <ExternalLink size={14} />
                 </button>
-                <button aria-label="More options"
+                <button type="button" aria-label="More options"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
@@ -227,7 +229,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 >
                   <MoreHorizontal size={14} />
                 </button>
-                <button aria-label="Close"
+                <button type="button" aria-label="Close"
                   onClick={onClose}
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
@@ -257,6 +259,8 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   onBlur={handleTitleBlur}
+                  aria-label="Issue title"
+                  placeholder="Issue title"
                   className="w-full bg-transparent text-xl font-semibold resize-none focus:outline-none leading-snug"
                   style={{ color: "var(--text-primary)", minHeight: "32px" }}
                   rows={1}
@@ -379,10 +383,39 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 </div>
               </div>
 
+              {/* ─── Vyne AI insights (tagging + next actions) ──── */}
+              <div
+                className="px-5 pt-4 pb-4"
+                style={{ borderTop: "1px solid var(--content-border)" }}
+              >
+                <AiInsightsPanel
+                  issue={{
+                    id: issue.id,
+                    title,
+                    description,
+                    status: issue.status,
+                    priority: issue.priority,
+                    assignee: issue.assignee?.name,
+                    recentComments: localComments
+                      .slice(-3)
+                      .map((c) => c.content),
+                  }}
+                  onApplyTags={(tags) =>
+                    toast.success(
+                      `Applied ${tags.length} tag${tags.length === 1 ? "" : "s"}`,
+                    )
+                  }
+                  onApplyCategory={(c) => toast.success(`Category: ${c}`)}
+                  onAction={(action) =>
+                    toast.success(`Action queued · ${action.label}`)
+                  }
+                />
+              </div>
+
               {/* ─── Comments ──────────────────────────── */}
               <div
                 className="px-5 pt-4 pb-4"
-                style={{ borderTop: "1px solid #F0F0F8" }}
+                style={{ borderTop: "1px solid var(--content-border)" }}
               >
                 <h3
                   className="text-xs font-semibold uppercase tracking-wider mb-4"
@@ -390,6 +423,14 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 >
                   Comments ({localComments.length})
                 </h3>
+
+                {/* Threaded discussion */}
+                <div className="mb-5">
+                  <CommentsPanel
+                    subjectId={`issue:${issue.id}`}
+                    label="Threaded discussion"
+                  />
+                </div>
 
                 {localComments.length > 0 ? (
                   <div className="space-y-4 mb-4">

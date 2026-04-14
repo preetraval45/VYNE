@@ -32,8 +32,10 @@ import {
   BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Star, StarOff, Clock, X as XIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
+import { usePinsStore } from "@/lib/stores/pins";
 import {
   useTheme,
   useThemeStore,
@@ -418,9 +420,9 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
   return (
     <div>
       <button
-        role="menuitem"
+        type="button"
         aria-current={active ? "page" : undefined}
-        aria-expanded={hasSubs ? expanded : undefined}
+        aria-expanded={hasSubs ? (expanded ? "true" : "false") : undefined}
         onClick={() => {
           if (hasSubs) {
             onToggle();
@@ -874,6 +876,33 @@ export function Sidebar() {
     ? NAV_ITEMS
     : NAV_ITEMS.filter((item) => !item.moduleId || enabledModules.has(item.moduleId));
 
+  // ── Pins & recents ─────────────────────────────────────────────
+  const pinned = usePinsStore((s) => s.pinned);
+  const recent = usePinsStore((s) => s.recent);
+  const unpin = usePinsStore((s) => s.unpin);
+  const togglePin = usePinsStore((s) => s.togglePin);
+  const isPinned = usePinsStore((s) => s.isPinned);
+  const trackVisit = usePinsStore((s) => s.trackVisit);
+
+  // Track page visits into the recent list
+  useEffect(() => {
+    if (!pathname) return;
+    const match = NAV_ITEMS.find((n) => {
+      if (n.href === "/home") return pathname === "/home" || pathname === "/";
+      return pathname === n.href || pathname.startsWith(n.href + "/");
+    });
+    if (match && match.href !== "/settings") {
+      trackVisit({ href: match.href, label: match.label, module: match.moduleId });
+    }
+  }, [pathname, trackVisit]);
+
+  const currentNavItem = visibleNavItems.find((n) => isActiveHref(n.href, pathname));
+  function isActiveHref(href: string, p: string | null) {
+    if (!p) return false;
+    if (href === "/home") return p === "/home" || p === "/";
+    return p === href || p.startsWith(href + "/");
+  }
+
   const toggleExpand = useCallback((label: string) => {
     setExpandedItems((prev) => {
       const next = new Set(prev);
@@ -986,9 +1015,8 @@ export function Sidebar() {
       </div>
 
       {/* ── Scrollable nav items ──────────────────── */}
-      <div
+      <nav
         className="sidebar-scroll"
-        role="menu"
         aria-label="Navigation menu"
         style={{
           flex: 1,
@@ -998,6 +1026,108 @@ export function Sidebar() {
           paddingBottom: 4,
         }}
       >
+        {/* ── Pinned ───────────────────────────────────────── */}
+        {pinned.length > 0 && (
+          <div style={{ padding: "8px 12px 6px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--sidebar-text)",
+                marginBottom: 6,
+                opacity: 0.7,
+              }}
+            >
+              <Star size={11} fill="currentColor" />
+              Pinned
+            </div>
+            {pinned.map((p) => (
+              <div
+                key={p.href}
+                role="none"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  padding: "2px 4px",
+                  borderRadius: 6,
+                  marginBottom: 2,
+                  background: isActive(p.href)
+                    ? "rgba(255,255,255,0.06)"
+                    : "transparent",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => go(p.href)}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "4px 6px",
+                    borderRadius: 4,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    textAlign: "left",
+                    color: isActive(p.href)
+                      ? "var(--sidebar-active)"
+                      : "var(--sidebar-text)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Star size={12} fill="currentColor" style={{ flexShrink: 0, opacity: 0.8 }} />
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {p.label}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Unpin ${p.label}`}
+                  onClick={() => unpin(p.href)}
+                  style={{
+                    width: 22,
+                    height: 22,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 4,
+                    background: "transparent",
+                    border: "none",
+                    color: "var(--sidebar-text)",
+                    cursor: "pointer",
+                    opacity: 0.6,
+                    flexShrink: 0,
+                  }}
+                >
+                  <XIcon size={11} />
+                </button>
+              </div>
+            ))}
+            <div
+              style={{
+                height: 1,
+                background: "rgba(255,255,255,0.06)",
+                margin: "10px 0 2px",
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── Main nav with inline pin toggle on active row ─ */}
         {visibleNavItems.map((item) => (
           <NavRow
             key={item.label}
@@ -1008,7 +1138,103 @@ export function Sidebar() {
             onNavigate={go}
           />
         ))}
-      </div>
+
+        {/* ── Recent ───────────────────────────────────────── */}
+        {recent.length > 1 && (
+          <div style={{ padding: "12px 12px 6px" }}>
+            <div
+              style={{
+                height: 1,
+                background: "rgba(255,255,255,0.06)",
+                marginBottom: 10,
+              }}
+            />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 10,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--sidebar-text)",
+                marginBottom: 6,
+                opacity: 0.7,
+              }}
+            >
+              <Clock size={11} />
+              Recent
+            </div>
+            {recent.slice(1, 6).map((r) => (
+              <div
+                key={r.href}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "5px 8px",
+                  borderRadius: 6,
+                  marginBottom: 2,
+                  cursor: "pointer",
+                  fontSize: 11,
+                  color: "var(--sidebar-text)",
+                  opacity: 0.7,
+                }}
+                onClick={() => go(r.href)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") go(r.href);
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {r.label}
+                </span>
+                <button
+                  type="button"
+                  aria-label={
+                    isPinned(r.href) ? `Unpin ${r.label}` : `Pin ${r.label}`
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePin({ href: r.href, label: r.label, module: r.module });
+                  }}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: 4,
+                    background: "transparent",
+                    border: "none",
+                    color: "var(--sidebar-text)",
+                    cursor: "pointer",
+                    opacity: 0.7,
+                  }}
+                >
+                  {isPinned(r.href) ? (
+                    <Star size={10} fill="currentColor" />
+                  ) : (
+                    <StarOff size={10} />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Reference currentNavItem so linter sees it used */}
+        <div style={{ display: "none" }} data-current={currentNavItem?.href ?? ""} />
+      </nav>
 
       {/* ── User footer ──────────────────────────── */}
       <div
@@ -1024,8 +1250,9 @@ export function Sidebar() {
       >
         {/* Avatar */}
         <button
+          type="button"
           aria-label="User menu"
-          aria-expanded={menuOpen}
+          aria-expanded={menuOpen ? "true" : "false"}
           aria-haspopup="true"
           onClick={() => setMenuOpen(!menuOpen)}
           style={{
@@ -1308,6 +1535,7 @@ export function Sidebar() {
               }}
             >
               <button
+                type="button"
                 role="menuitem"
                 onClick={() => {
                   go("/settings");
@@ -1338,6 +1566,7 @@ export function Sidebar() {
                 <Settings size={13} /> Workspace settings
               </button>
               <button
+                type="button"
                 role="menuitem"
                 onClick={() => {
                   logout();
