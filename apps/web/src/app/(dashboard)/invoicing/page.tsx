@@ -1294,6 +1294,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
           <input
             style={fieldInputStyle}
             type="date"
+            aria-label="Payment date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />

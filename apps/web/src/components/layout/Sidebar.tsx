@@ -50,53 +50,35 @@ import {
   type AccentColor,
 } from "@/lib/stores/theme";
 
-// ── Vyne logo (exact SVG from prototype) ──────────────────────────
-function VyneLogo({ size = 20 }: Readonly<{ size?: number }>) {
+// ── Vyne logo — modern pill mark ──────────────────────────────────
+function VyneLogo({ size = 28 }: Readonly<{ size?: number }>) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 36 36"
+      viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
     >
-      <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.12" />
-      <line
-        x1="6"
-        y1="8"
-        x2="18"
-        y2="28"
-        stroke="#8B68FF"
-        strokeWidth="2.2"
+      {/* Rounded square background */}
+      <rect width="32" height="32" rx="9" fill="url(#vyne-grad)" />
+      {/* V letterform — bold, clean strokes */}
+      <path
+        d="M8 9 L16 23 L24 9"
+        stroke="white"
+        strokeWidth="3"
         strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
       />
-      <line
-        x1="30"
-        y1="8"
-        x2="18"
-        y2="28"
-        stroke="#6C47FF"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="6"
-        y1="8"
-        x2="30"
-        y2="8"
-        stroke="#6C47FF"
-        strokeWidth="1"
-        strokeLinecap="round"
-        opacity="0.25"
-      />
-      <circle cx="12" cy="18" r="1.8" fill="#6C47FF" opacity="0.45" />
-      <circle cx="24" cy="18" r="1.8" fill="#6C47FF" opacity="0.45" />
-      <circle cx="6" cy="8" r="3.3" fill="#8B68FF" />
-      <circle cx="30" cy="8" r="3.3" fill="#8B68FF" />
-      <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
-      <circle cx="6" cy="8" r="1.3" fill="white" opacity="0.7" />
-      <circle cx="30" cy="8" r="1.3" fill="white" opacity="0.7" />
-      <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
+      {/* Small accent dot below V */}
+      <circle cx="16" cy="24.5" r="1.5" fill="white" opacity="0.55" />
+      <defs>
+        <linearGradient id="vyne-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7C5CFC" />
+          <stop offset="1" stopColor="#5B3FE0" />
+        </linearGradient>
+      </defs>
     </svg>
   );
 }
@@ -450,39 +432,46 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: 10,
-          padding: "10px 16px",
+          gap: 9,
+          padding: "8px 12px 8px 14px",
           cursor: "pointer",
-          fontSize: 13,
+          fontSize: 12.5,
           fontWeight: active ? 600 : 450,
-          color: "var(--text-primary)",
-          background: getNavRowBg(active, hovered),
+          color: active ? "var(--vyne-purple)" : "var(--text-primary)",
+          background: active
+            ? "rgba(108,71,255,0.09)"
+            : hovered ? "rgba(108,71,255,0.04)" : "transparent",
           border: "none",
           borderLeft: active
-            ? "3px solid var(--vyne-purple)"
-            : "3px solid transparent",
-          transition: "all 0.15s ease",
+            ? "2.5px solid var(--vyne-purple)"
+            : "2.5px solid transparent",
+          borderRadius: "0 8px 8px 0",
+          marginRight: 6,
+          transition: "all 0.12s ease",
           textAlign: "left",
           userSelect: "none",
           position: "relative",
         }}
       >
-        {/* Colored icon circle */}
+        {/* Colored icon tile */}
         <span
           aria-hidden="true"
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 6,
-            background: `rgba(${hexToRgb(item.color)}, 0.12)`,
+            width: 26,
+            height: 26,
+            borderRadius: 7,
+            background: active
+              ? `rgba(${hexToRgb(item.color)}, 0.18)`
+              : `rgba(${hexToRgb(item.color)}, 0.10)`,
             color: item.color,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
+            transition: "background 0.12s",
           }}
         >
-          <Icon size={14} />
+          <Icon size={13} />
         </span>
 
         {/* Label */}
@@ -523,19 +512,15 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
 
       {/* Sub-items dropdown */}
       {hasSubs && expanded && (
-        <div
-          style={{
-            overflow: "hidden",
-            borderLeft: "3px solid transparent",
-          }}
-        >
+        <div style={{ paddingBottom: 2 }}>
           {item.subs!.map((sub) => (
             <button
               key={sub.label}
+              type="button"
               onClick={() => onNavigate(sub.href)}
               onMouseEnter={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
-                  "rgba(108,71,255,0.04)")
+                  "rgba(108,71,255,0.05)")
               }
               onMouseLeave={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
@@ -545,24 +530,27 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
                 width: "100%",
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
-                padding: "7px 16px 7px 50px",
+                gap: 7,
+                padding: "6px 12px 6px 52px",
                 cursor: "pointer",
-                fontSize: 12,
+                fontSize: 11.5,
                 color: "var(--text-secondary)",
                 background: "transparent",
                 border: "none",
                 textAlign: "left",
                 transition: "all 0.12s ease",
+                borderRadius: "0 8px 8px 0",
+                marginRight: 6,
               }}
             >
               <span
                 style={{
-                  width: 4,
-                  height: 4,
+                  width: 3,
+                  height: 3,
                   borderRadius: "50%",
                   background: "var(--text-tertiary)",
                   flexShrink: 0,
+                  opacity: 0.5,
                 }}
               />
               {sub.label}
@@ -965,64 +953,62 @@ export function Sidebar() {
         zIndex: 10,
       }}
     >
-      {/* ── Top gradient bar ──────────────────────── */}
-      <div
-        aria-hidden="true"
-        style={{
-          height: 3,
-          background: "linear-gradient(90deg, #6C47FF, #8B68FF, #B794FF)",
-          flexShrink: 0,
-        }}
-      />
-
-      {/* ── Header: Logo + VYNE + hamburger ───────── */}
+      {/* ── Header: Logo + VYNE + search ───────── */}
       <div
         style={{
-          padding: "12px 16px",
+          padding: "14px 14px 12px",
           display: "flex",
           alignItems: "center",
           gap: 10,
           borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
+          background: "linear-gradient(135deg, rgba(108,71,255,0.06) 0%, transparent 100%)",
         }}
       >
-        <VyneLogo size={20} />
-        <span
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            letterSpacing: "0.04em",
-            flex: 1,
-          }}
-        >
-          VYNE
-        </span>
+        <VyneLogo size={28} />
+        <div style={{ flex: 1 }}>
+          <span
+            style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              letterSpacing: "-0.02em",
+              display: "block",
+              lineHeight: 1.1,
+            }}
+          >
+            VYNE
+          </span>
+          <span style={{ fontSize: 9.5, color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.06em" }}>
+            COMPANY OS
+          </span>
+        </div>
         <button
+          type="button"
           onClick={toggleCommandPalette}
-          aria-label="Open menu"
+          aria-label="Open command palette"
           style={{
-            background: "transparent",
-            border: "none",
+            background: "var(--content-secondary)",
+            border: "1px solid var(--content-border)",
             cursor: "pointer",
             color: "var(--text-tertiary)",
-            padding: 4,
-            borderRadius: 6,
+            padding: "5px 7px",
+            borderRadius: 7,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            transition: "color 0.15s",
+            transition: "all 0.15s",
           }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--text-primary)")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--text-tertiary)")
-          }
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+          }}
         >
-          <Menu size={18} />
+          <Menu size={15} />
         </button>
       </div>
 
@@ -1254,16 +1240,17 @@ export function Sidebar() {
       {/* ── User footer ──────────────────────────── */}
       <div
         style={{
-          padding: "10px 16px",
+          padding: "10px 12px",
           borderTop: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 9,
           flexShrink: 0,
           position: "relative",
+          background: "linear-gradient(135deg, rgba(108,71,255,0.03) 0%, transparent 100%)",
         }}
       >
-        {/* Avatar */}
+        {/* Avatar with ring */}
         <button
           type="button"
           aria-label="User menu"
@@ -1271,21 +1258,31 @@ export function Sidebar() {
           aria-haspopup="true"
           onClick={() => setMenuOpen(!menuOpen)}
           style={{
-            width: 30,
-            height: 30,
+            width: 32,
+            height: 32,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #6C47FF, #9B59B6)",
+            background: "linear-gradient(135deg, #7C5CFC, #9B59B6)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 11,
-            fontWeight: 600,
+            fontWeight: 700,
             color: "#fff",
             flexShrink: 0,
             cursor: "pointer",
-            border: "none",
+            border: "2px solid rgba(108,71,255,0.25)",
             padding: 0,
+            boxShadow: "0 0 0 3px rgba(108,71,255,0.08)",
+            transition: "box-shadow 0.15s",
           }}
+          onMouseEnter={(e) =>
+            ((e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 3px rgba(108,71,255,0.22)")
+          }
+          onMouseLeave={(e) =>
+            ((e.currentTarget as HTMLElement).style.boxShadow =
+              "0 0 0 3px rgba(108,71,255,0.08)")
+          }
         >
           {userInitials}
         </button>
@@ -1300,6 +1297,7 @@ export function Sidebar() {
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
+              lineHeight: 1.3,
             }}
           >
             {userName}
