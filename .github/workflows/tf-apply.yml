@@ -19,13 +19,13 @@ env:
 
 jobs:
   terraform-apply:
-    name: Terraform Apply (${{ env.ENVIRONMENT }})
+    name: Terraform Apply (dev)
     runs-on: ubuntu-latest
-    environment: ${{ env.ENVIRONMENT }}  # Requires manual approval for prod
+    environment: dev
 
     defaults:
       run:
-        working-directory: infrastructure/terraform/environments/${{ env.ENVIRONMENT }}
+        working-directory: infrastructure/terraform/environments/dev
 
     steps:
       - name: Checkout

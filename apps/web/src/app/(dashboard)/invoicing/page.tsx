@@ -1093,6 +1093,7 @@ function InvoiceModal({
           <input
             style={fieldInputStyle}
             type="date"
+            aria-label="Due date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -1176,6 +1177,8 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
             type="number"
             min={0}
             step={0.01}
+            aria-label="Amount"
+            placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
           />
@@ -1268,6 +1271,8 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
             type="number"
             min={0}
             step={0.01}
+            aria-label="Amount"
+            placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
           />
@@ -1459,6 +1464,7 @@ function BillModal({
           <input
             style={fieldInputStyle}
             type="date"
+            aria-label="Due date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -1536,6 +1542,8 @@ function RefundModal({ onClose }: { onClose: () => void }) {
             type="number"
             min={0}
             step={0.01}
+            aria-label="Amount"
+            placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
           />

@@ -20,12 +20,12 @@ env:
 
 jobs:
   terraform-plan:
-    name: Terraform Plan (${{ env.ENVIRONMENT }})
+    name: Terraform Plan (dev)
     runs-on: ubuntu-latest
 
     defaults:
       run:
-        working-directory: infrastructure/terraform/environments/${{ env.ENVIRONMENT }}
+        working-directory: infrastructure/terraform/environments/dev
 
     steps:
       - name: Checkout
