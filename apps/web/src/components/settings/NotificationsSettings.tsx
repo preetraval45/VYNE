@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { Sparkles, Send } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Sparkles, Send, Volume2, Play, SpellCheck } from "lucide-react";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useAuthStore } from "@/lib/stores/auth";
 import type { NotificationSettings as NotifType } from "@/lib/stores/settings";
@@ -672,6 +672,379 @@ export default function NotificationsSettings({
           </button>
         </div>
       </SectionCard>
+
+      <ChannelSoundsCard onToast={onToast} />
+
+      <WritingAssistCard onToast={onToast} />
     </div>
+  );
+}
+
+// ─── Per-channel notification sounds ─────────────────────────
+const SOUND_KEY = "vyne-channel-sounds";
+const SOUNDS: Array<{ id: string; label: string; freq: number; dur: number }> = [
+  { id: "none", label: "Silent", freq: 0, dur: 0 },
+  { id: "chime", label: "Chime", freq: 880, dur: 0.15 },
+  { id: "ping", label: "Ping", freq: 1320, dur: 0.08 },
+  { id: "pop", label: "Pop", freq: 440, dur: 0.05 },
+  { id: "knock", label: "Knock", freq: 220, dur: 0.12 },
+  { id: "bell", label: "Bell", freq: 1600, dur: 0.25 },
+];
+const CHANNELS = [
+  "#general",
+  "#engineering",
+  "#ops-alerts",
+  "#sales-wins",
+  "Direct messages",
+  "@mentions",
+];
+
+function ChannelSoundsCard({
+  onToast,
+}: Readonly<{ onToast: (m: string) => void }>) {
+  const [map, setMap] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    CHANNELS.forEach((c) => (init[c] = c === "@mentions" ? "bell" : "chime"));
+    return init;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(SOUND_KEY);
+      if (raw) setMap((prev) => ({ ...prev, ...JSON.parse(raw) }));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(SOUND_KEY, JSON.stringify(map));
+    } catch {}
+  }, [map]);
+
+  function preview(id: string) {
+    const s = SOUNDS.find((x) => x.id === id);
+    if (!s || s.id === "none") return;
+    try {
+      const Ctx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      const ctx = new Ctx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = s.freq;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + s.dur);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + s.dur);
+    } catch {
+      onToast("Audio preview not supported in this browser");
+    }
+  }
+
+  return (
+    <SectionCard title="Per-channel notification sounds">
+      <p
+        style={{
+          margin: "0 0 12px",
+          fontSize: 12,
+          color: "var(--text-secondary)",
+          lineHeight: 1.5,
+        }}
+      >
+        Tune the sound each channel plays. Use <em>Bell</em> for high-priority
+        channels and <em>Silent</em> for anything noisy.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {CHANNELS.map((ch) => (
+          <div
+            key={ch}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "8px 12px",
+              borderRadius: 8,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-secondary)",
+            }}
+          >
+            <Volume2 size={13} style={{ color: "var(--vyne-purple)" }} />
+            <span
+              style={{
+                flex: 1,
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                fontFamily:
+                  "var(--font-geist-mono), ui-monospace, monospace",
+              }}
+            >
+              {ch}
+            </span>
+            <select
+              value={map[ch] ?? "chime"}
+              onChange={(e) =>
+                setMap((prev) => ({ ...prev, [ch]: e.target.value }))
+              }
+              aria-label={`${ch} sound`}
+              style={{
+                padding: "5px 8px",
+                borderRadius: 6,
+                border: "1px solid var(--input-border)",
+                background: "var(--input-bg)",
+                color: "var(--text-primary)",
+                fontSize: 12,
+                outline: "none",
+                cursor: "pointer",
+              }}
+            >
+              {SOUNDS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => preview(map[ch] ?? "chime")}
+              aria-label={`Preview ${ch} sound`}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                border: "1px solid var(--content-border)",
+                background: "var(--content-bg)",
+                color: "var(--text-secondary)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Play size={11} fill="currentColor" />
+            </button>
+          </div>
+        ))}
+      </div>
+    </SectionCard>
+  );
+}
+
+// ─── Writing assistance (spell/grammar) ─────────────────────
+const WRITE_KEY = "vyne-writing-assist";
+
+interface WritingPrefs {
+  spellCheck: boolean;
+  grammarCheck: boolean;
+  aiRewrite: boolean;
+  language: string;
+}
+
+function WritingAssistCard({
+  onToast,
+}: Readonly<{ onToast: (m: string) => void }>) {
+  const [prefs, setPrefs] = useState<WritingPrefs>({
+    spellCheck: true,
+    grammarCheck: true,
+    aiRewrite: false,
+    language: "en-US",
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = localStorage.getItem(WRITE_KEY);
+      if (raw) setPrefs((prev) => ({ ...prev, ...JSON.parse(raw) }));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(WRITE_KEY, JSON.stringify(prefs));
+      document.documentElement.lang = prefs.language;
+      document.documentElement.setAttribute(
+        "data-spellcheck",
+        prefs.spellCheck ? "on" : "off",
+      );
+    } catch {}
+  }, [prefs]);
+
+  function set<K extends keyof WritingPrefs>(key: K, value: WritingPrefs[K]) {
+    setPrefs((p) => ({ ...p, [key]: value }));
+    onToast(`${String(key)} updated`);
+  }
+
+  return (
+    <SectionCard title="Smart writing assistance">
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <SpellCheck
+                size={13}
+                style={{ color: "var(--vyne-purple)" }}
+              />
+              Spell check in docs + chat
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                marginTop: 1,
+              }}
+            >
+              Red squiggles under misspellings as you type.
+            </div>
+          </div>
+          <Toggle
+            checked={prefs.spellCheck}
+            onChange={() => set("spellCheck", !prefs.spellCheck)}
+            label="Spell check"
+          />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+              }}
+            >
+              Grammar check
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                marginTop: 1,
+              }}
+            >
+              Flags run-on sentences, passive voice, and agreement errors.
+            </div>
+          </div>
+          <Toggle
+            checked={prefs.grammarCheck}
+            onChange={() => set("grammarCheck", !prefs.grammarCheck)}
+            label="Grammar check"
+          />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+              }}
+            >
+              AI rewrite suggestions
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                marginTop: 1,
+              }}
+            >
+              Suggest clearer phrasing via ⌘J while composing.
+            </div>
+          </div>
+          <Toggle
+            checked={prefs.aiRewrite}
+            onChange={() => set("aiRewrite", !prefs.aiRewrite)}
+            label="AI rewrite"
+          />
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+              }}
+            >
+              Language
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                marginTop: 1,
+              }}
+            >
+              Dictionary + grammar rules applied.
+            </div>
+          </div>
+          <select
+            value={prefs.language}
+            onChange={(e) => set("language", e.target.value)}
+            aria-label="Language"
+            style={{
+              padding: "6px 10px",
+              borderRadius: 8,
+              border: "1px solid var(--input-border)",
+              background: "var(--content-secondary)",
+              color: "var(--text-primary)",
+              fontSize: 13,
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Español</option>
+            <option value="fr-FR">Français</option>
+            <option value="de-DE">Deutsch</option>
+            <option value="pt-BR">Português (BR)</option>
+            <option value="ja-JP">日本語</option>
+          </select>
+        </div>
+      </div>
+    </SectionCard>
   );
 }

@@ -1,13 +1,22 @@
+# Core
 fastapi==0.115.11
 uvicorn[standard]==0.34.0
 pydantic==2.10.6
 pydantic-settings==2.8.1
-boto3==1.37.18
-psycopg2-binary==2.9.10
-pgvector==0.4.0
-langgraph==0.3.4
-langchain-aws==0.2.14
-langchain-core==0.3.45
 structlog==25.1.0
 python-jose[cryptography]==3.3.0
 httpx==0.28.1
+
+# Database (Vercel Neon Postgres)
+psycopg2-binary==2.9.10
+
+# AI — Anthropic direct (Vercel) + LangGraph orchestration
+anthropic==0.45.0
+langchain-anthropic==0.3.12
+langchain-core==0.3.45
+langgraph==0.3.4
+
+# Optional: AWS Bedrock (on-prem / ECS only — not required on Vercel)
+# boto3==1.37.18
+# langchain-aws==0.2.14
+# pgvector==0.4.0

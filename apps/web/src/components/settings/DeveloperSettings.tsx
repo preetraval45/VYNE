@@ -64,6 +64,28 @@ function SectionCard({
 }
 
 // ─── Types ───────────────────────────────────────────────────────
+type RateTier = "free" | "starter" | "business" | "enterprise";
+
+const TIER_META: Record<
+  RateTier,
+  { label: string; rps: number; daily: number; color: string }
+> = {
+  free: { label: "Free", rps: 1, daily: 1_000, color: "var(--text-secondary)" },
+  starter: { label: "Starter", rps: 5, daily: 10_000, color: "var(--vyne-purple)" },
+  business: {
+    label: "Business",
+    rps: 25,
+    daily: 100_000,
+    color: "var(--vyne-purple-light)",
+  },
+  enterprise: {
+    label: "Enterprise",
+    rps: 100,
+    daily: 1_000_000,
+    color: "#22C55E",
+  },
+};
+
 interface ApiKey {
   id: string;
   label: string;
@@ -72,6 +94,9 @@ interface ApiKey {
   lastUsed: string;
   scope: "read" | "write" | "admin";
   createdAt: string;
+  tier: RateTier;
+  /** today's request count for the gauge */
+  usedToday: number;
 }
 
 interface WebhookEndpoint {
@@ -92,6 +117,8 @@ const MOCK_KEYS: ApiKey[] = [
     lastUsed: "2 minutes ago",
     scope: "write",
     createdAt: "2026-03-12",
+    tier: "business",
+    usedToday: 42_180,
   },
   {
     id: "key-readonly",
@@ -101,6 +128,8 @@ const MOCK_KEYS: ApiKey[] = [
     lastUsed: "3 hours ago",
     scope: "read",
     createdAt: "2026-02-28",
+    tier: "starter",
+    usedToday: 7_320,
   },
 ];
 
@@ -155,6 +184,7 @@ export default function DeveloperSettings({ onToast }: Props) {
   const [newKeyScope, setNewKeyScope] = useState<"read" | "write" | "admin">(
     "read",
   );
+  const [newKeyTier, setNewKeyTier] = useState<RateTier>("starter");
   const [newWebhookOpen, setNewWebhookOpen] = useState(false);
   const [newWebhookUrl, setNewWebhookUrl] = useState("");
   const [newWebhookEvents, setNewWebhookEvents] = useState<Set<string>>(
@@ -175,13 +205,25 @@ export default function DeveloperSettings({ onToast }: Props) {
       lastUsed: "Never",
       scope: newKeyScope,
       createdAt: new Date().toISOString().slice(0, 10),
+      tier: newKeyTier,
+      usedToday: 0,
     };
     setKeys((prev) => [newKey, ...prev]);
     setShowPlaintextKey(`vyne_live_${random}xxxx${random.slice(0, 12)}`);
     setNewKeyOpen(false);
     setNewKeyLabel("");
     onToast("API key created");
-  }, [newKeyLabel, newKeyScope, onToast]);
+  }, [newKeyLabel, newKeyScope, newKeyTier, onToast]);
+
+  const updateTier = useCallback(
+    (id: string, tier: RateTier) => {
+      setKeys((prev) =>
+        prev.map((k) => (k.id === id ? { ...k, tier } : k)),
+      );
+      onToast(`Tier updated → ${TIER_META[tier].label}`);
+    },
+    [onToast],
+  );
 
   const revokeKey = useCallback(
     (id: string) => {
@@ -330,6 +372,61 @@ export default function DeveloperSettings({ onToast }: Props) {
                 </button>
               ))}
             </div>
+            <div>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: "var(--text-tertiary)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  marginBottom: 6,
+                }}
+              >
+                Rate-limit tier
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {(Object.keys(TIER_META) as RateTier[]).map((t) => {
+                  const m = TIER_META[t];
+                  const active = newKeyTier === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setNewKeyTier(t)}
+                      style={{
+                        padding: "6px 12px",
+                        borderRadius: 8,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        border: `1px solid ${active ? m.color : "var(--content-border)"}`,
+                        background: active
+                          ? `${m.color}15`
+                          : "var(--content-bg)",
+                        color: active ? m.color : "var(--text-secondary)",
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: 1,
+                      }}
+                    >
+                      <span style={{ fontWeight: 700 }}>{m.label}</span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: "var(--text-tertiary)",
+                          fontFamily:
+                            "var(--font-geist-mono), ui-monospace, monospace",
+                        }}
+                      >
+                        {m.rps}/s · {m.daily.toLocaleString()}/d
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
               <button
                 type="button"
@@ -465,7 +562,7 @@ export default function DeveloperSettings({ onToast }: Props) {
               }}
             >
               <Key size={16} style={{ color: "var(--text-tertiary)" }} />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{
                     fontSize: 13,
@@ -482,11 +579,92 @@ export default function DeveloperSettings({ onToast }: Props) {
                     color: "var(--text-tertiary)",
                     fontFamily:
                       "var(--font-geist-mono), ui-monospace, monospace",
+                    marginBottom: 6,
                   }}
                 >
                   {k.prefix}•••••••••{k.suffix} · scope {k.scope} · last used{" "}
                   {k.lastUsed}
                 </div>
+
+                {/* Tier + usage gauge */}
+                {(() => {
+                  const meta = TIER_META[k.tier];
+                  const pct = Math.min(100, (k.usedToday / meta.daily) * 100);
+                  return (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                      }}
+                    >
+                      <select
+                        value={k.tier}
+                        onChange={(e) =>
+                          updateTier(k.id, e.target.value as RateTier)
+                        }
+                        aria-label={`Rate-limit tier for ${k.label}`}
+                        style={{
+                          padding: "3px 8px",
+                          borderRadius: 6,
+                          border: `1px solid ${meta.color}55`,
+                          background: `${meta.color}15`,
+                          color: meta.color,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          outline: "none",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {(Object.keys(TIER_META) as RateTier[]).map((t) => (
+                          <option key={t} value={t}>
+                            {TIER_META[t].label}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: 100,
+                          height: 5,
+                          background: "var(--content-bg)",
+                          borderRadius: 3,
+                          overflow: "hidden",
+                          border: "1px solid var(--content-border)",
+                        }}
+                        aria-label={`Usage ${pct.toFixed(0)}%`}
+                      >
+                        <div
+                          style={{
+                            width: `${pct}%`,
+                            height: "100%",
+                            background:
+                              pct > 90
+                                ? "var(--status-danger)"
+                                : pct > 75
+                                  ? "var(--status-warning)"
+                                  : meta.color,
+                            transition: "width 0.3s",
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          color: "var(--text-tertiary)",
+                          fontFamily:
+                            "var(--font-geist-mono), ui-monospace, monospace",
+                          minWidth: 95,
+                          textAlign: "right",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {k.usedToday.toLocaleString()} / {meta.daily.toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               <button
                 type="button"

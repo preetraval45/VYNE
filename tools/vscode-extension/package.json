@@ -1,0 +1,95 @@
+{
+  "name": "vyne-vscode",
+  "displayName": "VYNE",
+  "description": "View VYNE issues and docs without leaving your editor. Inline issue badges, ⌘P doc search, AI scoped to the active file.",
+  "version": "0.1.0",
+  "publisher": "vyne",
+  "license": "Apache-2.0",
+  "icon": "media/icon.png",
+  "categories": ["Other", "SCM Providers", "AI"],
+  "keywords": ["vyne", "issues", "docs", "ai", "company-os"],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vyne.signIn",
+        "title": "VYNE: Sign in"
+      },
+      {
+        "command": "vyne.signOut",
+        "title": "VYNE: Sign out"
+      },
+      {
+        "command": "vyne.openIssueFromLine",
+        "title": "VYNE: Open issue from line"
+      },
+      {
+        "command": "vyne.searchDocs",
+        "title": "VYNE: Search docs"
+      },
+      {
+        "command": "vyne.askAi",
+        "title": "VYNE: Ask AI about this file"
+      },
+      {
+        "command": "vyne.commitMessageHelper",
+        "title": "VYNE: Suggest commit message"
+      }
+    ],
+    "configuration": {
+      "title": "VYNE",
+      "properties": {
+        "vyne.apiUrl": {
+          "type": "string",
+          "default": "https://api.vyne.dev/v1",
+          "description": "VYNE API base URL"
+        },
+        "vyne.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Personal API key (from Settings → Developer)"
+        },
+        "vyne.showInlineIssueBadges": {
+          "type": "boolean",
+          "default": true,
+          "description": "Render gutter + hover badges next to issue IDs in commits and code comments"
+        }
+      }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "vyne.askAi",
+          "group": "vyne@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "vyne.openIssueFromLine",
+          "group": "vyne@2"
+        }
+      ]
+    }
+  },
+  "activationEvents": ["onStartupFinished"],
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch",
+    "package": "vsce package"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/preet-raval/vyne",
+    "directory": "tools/vscode-extension"
+  },
+  "homepage": "https://vyne.vercel.app/developers"
+}

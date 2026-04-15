@@ -44,6 +44,8 @@ import { CollabPresence } from "./CollabPresence";
 import { DiffViewer } from "./DiffViewer";
 import { WhiteboardCanvas } from "./WhiteboardCanvas";
 import { CommentsPanel } from "@/components/shared/CommentsPanel";
+import { ReactionsBar } from "@/components/shared/ReactionsBar";
+import { PresenceIndicator } from "@/components/shared/PresenceIndicator";
 
 const lowlight = createLowlight(common);
 
@@ -871,6 +873,21 @@ export function DocEditor({ doc }: DocEditorProps) {
               }
             }}
           />
+
+          {/* Presence + reactions row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 18,
+              flexWrap: "wrap",
+            }}
+          >
+            <PresenceIndicator subjectId={`doc:${doc.id}`} verb="editing" />
+            <div style={{ flex: 1 }} />
+            <ReactionsBar subjectId={`doc:${doc.id}`} compact />
+          </div>
 
           {/* TipTap body */}
           <div className="relative">

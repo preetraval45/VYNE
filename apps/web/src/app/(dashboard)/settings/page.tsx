@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock, Zap, FormInput } from "lucide-react";
+import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock, Zap, FormInput, Plug, ScrollText, Sparkles, BarChart3, Smartphone } from "lucide-react";
 import GeneralSettings from "@/components/settings/GeneralSettings";
 import MembersSettings from "@/components/settings/MembersSettings";
 import NotificationsSettings from "@/components/settings/NotificationsSettings";
@@ -12,6 +12,11 @@ import SecuritySettings from "@/components/settings/SecuritySettings";
 import AuditSettings from "@/components/settings/AuditSettings";
 import SnippetsSettings from "@/components/settings/SnippetsSettings";
 import FormsSettings from "@/components/settings/FormsSettings";
+import IntegrationsSettings from "@/components/settings/IntegrationsSettings";
+import ComplianceSettings from "@/components/settings/ComplianceSettings";
+import GrowthSettings from "@/components/settings/GrowthSettings";
+import AnalyticsSettings from "@/components/settings/AnalyticsSettings";
+import MobileSettings from "@/components/settings/MobileSettings";
 
 // ─── Tab config ──────────────────────────────────────────────────
 const TABS = [
@@ -22,7 +27,12 @@ const TABS = [
   { id: "forms", label: "Forms", icon: <FormInput size={14} /> },
   { id: "erp", label: "ERP Config", icon: <Package size={14} /> },
   { id: "billing", label: "Billing", icon: <DollarSign size={14} /> },
+  { id: "integrations", label: "Integrations", icon: <Plug size={14} /> },
+  { id: "growth", label: "Growth", icon: <Sparkles size={14} /> },
+  { id: "analytics", label: "Analytics", icon: <BarChart3 size={14} /> },
+  { id: "mobile", label: "Mobile", icon: <Smartphone size={14} /> },
   { id: "security", label: "Security", icon: <Shield size={14} /> },
+  { id: "compliance", label: "Compliance", icon: <ScrollText size={14} /> },
   { id: "developer", label: "Developer", icon: <Code size={14} /> },
   { id: "audit", label: "Audit Log", icon: <FileClock size={14} /> },
 ] as const;
@@ -168,6 +178,11 @@ export default function SettingsPage() {
         {tab === "audit" && <AuditSettings onToast={showToast} />}
         {tab === "snippets" && <SnippetsSettings onToast={showToast} />}
         {tab === "forms" && <FormsSettings onToast={showToast} />}
+        {tab === "integrations" && <IntegrationsSettings onToast={showToast} />}
+        {tab === "compliance" && <ComplianceSettings onToast={showToast} />}
+        {tab === "growth" && <GrowthSettings onToast={showToast} />}
+        {tab === "analytics" && <AnalyticsSettings onToast={showToast} />}
+        {tab === "mobile" && <MobileSettings onToast={showToast} />}
       </div>
 
       {/* Toast */}

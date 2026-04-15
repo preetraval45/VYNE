@@ -674,6 +674,9 @@ export default function SecuritySettings({ onToast }: Props) {
         )}
       </SectionCard>
 
+      {/* ── Managed devices (enterprise) ───────────────────── */}
+      <ManagedDevicesSection onToast={onToast} />
+
       {/* ── IP allowlist ──────────────────────────────────── */}
       <SectionCard
         title="IP allowlist"
@@ -710,6 +713,324 @@ export default function SecuritySettings({ onToast }: Props) {
       <button aria-label="hidden" style={{ display: "none" }}>
         <KeyRound />
       </button>
+    </div>
+  );
+}
+
+// ─── Managed devices (enterprise MDM-lite) ─────────────────────────
+interface ManagedDevice {
+  id: string;
+  user: string;
+  device: string;
+  os: string;
+  status: "trusted" | "pending" | "blocked";
+  encrypted: boolean;
+  lockEnabled: boolean;
+  lastSeen: string;
+}
+
+const SEED_DEVICES: ManagedDevice[] = [
+  {
+    id: "dev-1",
+    user: "Preet Raval",
+    device: "MacBook Pro 16\" (M3 Max)",
+    os: "macOS 15.3",
+    status: "trusted",
+    encrypted: true,
+    lockEnabled: true,
+    lastSeen: "Active now",
+  },
+  {
+    id: "dev-2",
+    user: "Sarah K.",
+    device: "ThinkPad X1 Carbon",
+    os: "Windows 11 Pro",
+    status: "trusted",
+    encrypted: true,
+    lockEnabled: true,
+    lastSeen: "12 min ago",
+  },
+  {
+    id: "dev-3",
+    user: "Tony M.",
+    device: "Pixel 8 Pro",
+    os: "Android 15",
+    status: "pending",
+    encrypted: true,
+    lockEnabled: false,
+    lastSeen: "3 hours ago",
+  },
+  {
+    id: "dev-4",
+    user: "Preet Raval",
+    device: "iPhone 15 Pro",
+    os: "iOS 18.2",
+    status: "trusted",
+    encrypted: true,
+    lockEnabled: true,
+    lastSeen: "4 hours ago",
+  },
+  {
+    id: "dev-5",
+    user: "Unknown",
+    device: "Linux desktop",
+    os: "Ubuntu 24.04",
+    status: "blocked",
+    encrypted: false,
+    lockEnabled: false,
+    lastSeen: "2 days ago",
+  },
+];
+
+function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
+  const [devices, setDevices] = useState<ManagedDevice[]>(SEED_DEVICES);
+  const [policy, setPolicy] = useState({
+    requireEncryption: true,
+    requireScreenLock: true,
+    blockJailbroken: true,
+    autoApproveDomain: false,
+  });
+
+  function setStatus(id: string, status: ManagedDevice["status"]) {
+    setDevices((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, status } : d)),
+    );
+    onToast(`Device ${status === "trusted" ? "approved" : status === "blocked" ? "blocked" : "set to pending"}`);
+  }
+
+  function wipe(id: string) {
+    setDevices((prev) => prev.filter((d) => d.id !== id));
+    onToast("Remote wipe queued");
+  }
+
+  return (
+    <div
+      style={{
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
+        borderRadius: 10,
+        marginBottom: 16,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          padding: "14px 18px",
+          borderBottom: "1px solid var(--content-border)",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
+          Managed devices
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>
+          Approve devices that connect to your workspace. Optional: enforce
+          encryption + screen lock before granting access.
+        </div>
+      </div>
+
+      <div style={{ padding: "14px 18px" }}>
+        {/* Policy toggles */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 10,
+            marginBottom: 14,
+          }}
+        >
+          {(
+            [
+              ["requireEncryption", "Require disk encryption"],
+              ["requireScreenLock", "Require screen lock"],
+              ["blockJailbroken", "Block rooted/jailbroken devices"],
+              ["autoApproveDomain", "Auto-approve company domain"],
+            ] as const
+          ).map(([key, label]) => (
+            <label
+              key={key}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 12px",
+                borderRadius: 8,
+                border: "1px solid var(--content-border)",
+                background: "var(--content-secondary)",
+                fontSize: 12,
+                color: "var(--text-primary)",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={policy[key]}
+                onChange={(e) =>
+                  setPolicy((p) => ({ ...p, [key]: e.target.checked }))
+                }
+                style={{ accentColor: "#6C47FF" }}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+
+        {/* Device list */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          {devices.map((d) => {
+            const Icon = deviceIcon(d.os.toLowerCase().includes("ios") || d.os.toLowerCase().includes("android") ? "mobile" : "desktop");
+            const statusColor =
+              d.status === "trusted"
+                ? "var(--badge-success-text)"
+                : d.status === "pending"
+                  ? "var(--badge-warning-text)"
+                  : "var(--badge-danger-text)";
+            const statusBg =
+              d.status === "trusted"
+                ? "var(--badge-success-bg)"
+                : d.status === "pending"
+                  ? "var(--badge-warning-bg)"
+                  : "var(--badge-danger-bg)";
+            return (
+              <div
+                key={d.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: 10,
+                  borderRadius: 9,
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-secondary)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: "var(--content-bg)",
+                    color: "var(--vyne-purple)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={15} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 6,
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {d.device}
+                    </span>
+                    <span
+                      style={{
+                        padding: "1px 8px",
+                        borderRadius: 999,
+                        background: statusBg,
+                        color: statusColor,
+                        fontSize: 9,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {d.status}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--text-tertiary)",
+                      marginTop: 1,
+                    }}
+                  >
+                    {d.user} · {d.os} ·{" "}
+                    {d.encrypted ? "🔒 encrypted" : "⚠ not encrypted"} ·{" "}
+                    {d.lockEnabled ? "lock on" : "no lock"} · seen {d.lastSeen}
+                  </div>
+                </div>
+                {d.status !== "trusted" && (
+                  <button
+                    type="button"
+                    onClick={() => setStatus(d.id, "trusted")}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "1px solid var(--badge-success-text)",
+                      background: "transparent",
+                      color: "var(--badge-success-text)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Approve
+                  </button>
+                )}
+                {d.status !== "blocked" && (
+                  <button
+                    type="button"
+                    onClick={() => setStatus(d.id, "blocked")}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "1px solid var(--status-warning)",
+                      background: "transparent",
+                      color: "var(--status-warning)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Block
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => wipe(d.id)}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--status-danger)",
+                    background: "transparent",
+                    color: "var(--status-danger)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Wipe
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

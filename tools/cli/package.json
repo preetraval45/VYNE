@@ -1,0 +1,48 @@
+{
+  "name": "vyne",
+  "version": "0.1.0",
+  "description": "Command-line interface for VYNE — issues, docs, ERP, and AI from your terminal.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "vyne": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "kleur": "^4.1.5",
+    "ora": "^8.0.1",
+    "open": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "vyne",
+    "cli",
+    "company-os",
+    "issues",
+    "docs",
+    "erp",
+    "ai"
+  ],
+  "homepage": "https://vyne.vercel.app/developers",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/preet-raval/vyne",
+    "directory": "tools/cli"
+  }
+}

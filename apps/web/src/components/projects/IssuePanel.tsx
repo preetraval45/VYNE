@@ -29,6 +29,9 @@ import { issuesApi } from "@/lib/api/client";
 import toast from "react-hot-toast";
 import { CommentsPanel } from "@/components/shared/CommentsPanel";
 import { AiInsightsPanel } from "@/components/projects/AiInsightsPanel";
+import { ReactionsBar } from "@/components/shared/ReactionsBar";
+import { PresenceIndicator } from "@/components/shared/PresenceIndicator";
+import { IssueTimeTracker } from "@/components/projects/IssueTimeTracker";
 
 interface IssuePanelProps {
   issue: Issue;
@@ -381,6 +384,37 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                     }}
                   />
                 </div>
+              </div>
+
+              {/* ─── Presence + time tracking + reactions ──────── */}
+              <div
+                className="px-5 pt-4 pb-4"
+                style={{
+                  borderTop: "1px solid var(--content-border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <PresenceIndicator
+                    subjectId={`issue:${issue.id}`}
+                    verb="viewing"
+                  />
+                  <div style={{ flex: 1 }} />
+                  <ReactionsBar subjectId={`issue:${issue.id}`} />
+                </div>
+                <IssueTimeTracker
+                  issueId={issue.id}
+                  issueTitle={issue.title}
+                />
               </div>
 
               {/* ─── Vyne AI insights (tagging + next actions) ──── */}

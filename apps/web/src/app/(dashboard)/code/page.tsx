@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { codeApi } from "@/lib/api/client";
 import type { Deployment, PullRequest, Repository } from "@/types";
 import { MOCK_DEPLOYMENTS, MOCK_PRS, MOCK_REPOS } from "@/lib/fixtures/code";
+import {
+  InlineCodeReview,
+  type DiffFile,
+} from "@/components/code/InlineCodeReview";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function timeAgo(iso: string) {
@@ -964,6 +968,7 @@ function DeploymentsTab({
 function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
   const [filter, setFilter] = useState<string>("open");
   const [search, setSearch] = useState("");
+  const [reviewPr, setReviewPr] = useState<PullRequest | null>(null);
 
   const filtered = prs.filter((p) => {
     const stateOk = filter === "all" || p.state === filter;
@@ -1051,6 +1056,15 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
         {filtered.map((pr, i) => (
           <div
             key={pr.id}
+            role="button"
+            tabIndex={0}
+            onClick={() => setReviewPr(pr)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setReviewPr(pr);
+              }
+            }}
             style={{
               padding: "12px 18px",
               borderBottom:
@@ -1058,6 +1072,7 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
               display: "flex",
               alignItems: "center",
               gap: 14,
+              cursor: "pointer",
             }}
           >
             <div
@@ -1138,6 +1153,10 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
           </div>
         ))}
       </div>
+
+      {reviewPr && (
+        <PRReviewModal pr={reviewPr} onClose={() => setReviewPr(null)} />
+      )}
     </div>
   );
 }
@@ -1521,6 +1540,156 @@ export default function CodePage() {
         )}
         {tab === "prs" && <PullRequestsTab prs={prs} />}
         {tab === "repos" && <RepositoriesTab repos={repos} />}
+      </div>
+    </div>
+  );
+}
+
+// ── PR review modal (inline code review with @mentions) ───────────
+function demoDiffFor(pr: PullRequest): DiffFile[] {
+  return [
+    {
+      path: `${pr.repoName.split("/").pop() ?? "src"}/lib/auth.ts`,
+      lines: [
+        { kind: "hunk", content: `@@ -42,7 +42,9 @@ export async function signIn(...)` },
+        { kind: "ctx", old: 42, new: 42, content: "  const user = await db.user.findUnique({ where: { email } });" },
+        { kind: "ctx", old: 43, new: 43, content: "  if (!user) throw new AuthError('no-such-user');" },
+        { kind: "del", old: 44, content: "  const ok = await bcrypt.compare(pw, user.hash);" },
+        { kind: "add", new: 44, content: "  const ok = await argon2.verify(user.hash, pw);" },
+        { kind: "add", new: 45, content: "  await auditLog.record({ kind: 'signin', userId: user.id });" },
+        { kind: "ctx", old: 45, new: 46, content: "  if (!ok) throw new AuthError('bad-credentials');" },
+        { kind: "ctx", old: 46, new: 47, content: "  return issueSession(user);" },
+        { kind: "ctx", old: 47, new: 48, content: "}" },
+      ],
+    },
+    {
+      path: `${pr.repoName.split("/").pop() ?? "src"}/lib/audit.ts`,
+      lines: [
+        { kind: "hunk", content: `@@ -0,0 +1,12 @@ new file` },
+        { kind: "add", new: 1, content: "import { db } from './db';" },
+        { kind: "add", new: 2, content: "" },
+        { kind: "add", new: 3, content: "export const auditLog = {" },
+        { kind: "add", new: 4, content: "  async record(event: { kind: string; userId: string }) {" },
+        { kind: "add", new: 5, content: "    await db.auditLog.create({ data: { ...event, at: new Date() } });" },
+        { kind: "add", new: 6, content: "  }," },
+        { kind: "add", new: 7, content: "};" },
+      ],
+    },
+  ];
+}
+
+function PRReviewModal({
+  pr,
+  onClose,
+}: Readonly<{ pr: PullRequest; onClose: () => void }>) {
+  const files = demoDiffFor(pr);
+  return (
+    <div
+      role="dialog"
+      aria-label={`Review ${pr.title ?? `PR #${pr.prNumber}`}`}
+      aria-modal="true"
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.55)",
+        zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 20,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 960,
+          maxHeight: "90vh",
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
+          borderRadius: 14,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <header
+          style={{
+            padding: "14px 20px",
+            borderBottom: "1px solid var(--content-border)",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <span
+            style={{
+              padding: "2px 10px",
+              borderRadius: 999,
+              background: "var(--badge-success-bg)",
+              color: "var(--badge-success-text)",
+              fontSize: 10.5,
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+            }}
+          >
+            {pr.state}
+          </span>
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 15,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              flex: 1,
+              minWidth: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {pr.title ?? `PR #${pr.prNumber}`}
+          </h2>
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+              fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+            }}
+          >
+            {pr.repoName} · #{pr.prNumber}
+          </span>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            style={{
+              width: 30,
+              height: 30,
+              border: "1px solid var(--content-border)",
+              borderRadius: 6,
+              background: "var(--content-bg)",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+              fontSize: 16,
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+        </header>
+        <div
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: 18,
+            background: "var(--content-secondary)",
+          }}
+        >
+          <InlineCodeReview subjectId={`pr:${pr.id}`} files={files} />
+        </div>
       </div>
     </div>
   );

@@ -951,6 +951,26 @@ function Footer() {
         </div>
         <span style={{ fontWeight: 600, fontSize: 14, color: '#6B6B8A' }}>VYNE</span>
       </div>
+      <div style={{ display: 'flex', gap: 18 }}>
+        {[
+          { label: 'Developers', href: '/developers' },
+          { label: 'Changelog', href: '/changelog' },
+          { label: 'Status', href: '/status' },
+        ].map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            style={{
+              fontSize: 12,
+              color: '#A0A0B8',
+              fontWeight: 500,
+              textDecoration: 'none',
+            }}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </div>
       <p style={{ fontSize: 13, color: '#4A4A6A' }}>&copy; {new Date().getFullYear()} VYNE. All rights reserved.</p>
     </footer>
   )

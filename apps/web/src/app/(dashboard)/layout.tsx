@@ -6,6 +6,7 @@ import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsMod
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
 import { UndoToast } from "@/components/layout/UndoToast";
 import { ProductTour } from "@/components/layout/ProductTour";
+import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
@@ -55,6 +56,9 @@ export default function DashboardLayout({
 
       {/* Product tour (first-run + on-demand via settings) */}
       <ProductTour />
+
+      {/* Pomodoro timer + Quick-note FAB + Workspace switcher (⌘⇧O) */}
+      <GlobalWidgets />
     </div>
   );
 }

@@ -30,9 +30,16 @@ import {
   Factory,
   Megaphone,
   BarChart3,
+  GraduationCap,
+  LifeBuoy,
+  ShieldAlert,
+  ListChecks,
+  Star,
+  StarOff,
+  Clock,
+  X as XIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Star, StarOff, Clock, X as XIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
 import { usePinsStore } from "@/lib/stores/pins";
@@ -113,6 +120,7 @@ interface NavItemDef {
 
 const NAV_ITEMS: NavItemDef[] = [
   { icon: Home, label: "Home", href: "/home", color: "#E74C3C" },
+  { icon: BarChart3, label: "My Dashboard", href: "/dashboard", color: "#6C47FF" },
   {
     icon: Contact,
     label: "Accounts/Contacts",
@@ -380,6 +388,12 @@ const NAV_ITEMS: NavItemDef[] = [
     ],
   },
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
+  { icon: Clock, label: "Timesheet", href: "/timesheet", color: "#0E9F6E" },
+  { icon: Activity, label: "Activity", href: "/activity", color: "#F59E0B" },
+  { icon: LifeBuoy, label: "Help centre", href: "/help", color: "#2563EB" },
+  { icon: ListChecks, label: "CS playbooks", href: "/playbooks", color: "#6C47FF" },
+  { icon: GraduationCap, label: "Training", href: "/training", color: "#8B6BFF" },
+  { icon: ShieldAlert, label: "DR runbooks", href: "/runbooks", color: "#DC2626" },
   {
     icon: Settings,
     label: "Settings",
@@ -667,16 +681,14 @@ function EmojiStatusLine() {
   }
 
   // Load from localStorage on mount
-  useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("vyne-emoji-status");
-      if (saved) {
-        try {
-          setStatus(JSON.parse(saved));
-        } catch { /* ignore */ }
-      }
-    }
-  });
+  useEffect(() => {
+    if (typeof globalThis.window === "undefined") return;
+    const saved = localStorage.getItem("vyne-emoji-status");
+    if (!saved) return;
+    try {
+      setStatus(JSON.parse(saved));
+    } catch { /* ignore */ }
+  }, []);
 
   return (
     <div style={{ position: "relative" }}>
@@ -862,7 +874,7 @@ export function Sidebar() {
   // Module visibility — hydrated from onboarding / settings localStorage
   const [enabledModules, setEnabledModules] = useState<Set<string> | null>(null);
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof globalThis.window === "undefined") return;
     try {
       const stored = localStorage.getItem("vyne-modules");
       if (stored) {
@@ -1176,28 +1188,31 @@ export function Sidebar() {
                   padding: "5px 8px",
                   borderRadius: 6,
                   marginBottom: 2,
-                  cursor: "pointer",
                   fontSize: 11,
                   color: "var(--sidebar-text)",
                   opacity: 0.7,
                 }}
-                onClick={() => go(r.href)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") go(r.href);
-                }}
-                role="button"
-                tabIndex={0}
               >
-                <span
+                <button
+                  type="button"
+                  onClick={() => go(r.href)}
                   style={{
                     flex: 1,
+                    minWidth: 0,
+                    background: "transparent",
+                    border: "none",
+                    color: "inherit",
+                    cursor: "pointer",
+                    padding: 0,
+                    textAlign: "left",
+                    fontSize: "inherit",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}
                 >
                   {r.label}
-                </span>
+                </button>
                 <button
                   type="button"
                   aria-label={
