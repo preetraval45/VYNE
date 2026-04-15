@@ -1,11 +1,12 @@
 name: Terraform Apply
 
 on:
-  push:
-    paths:
-      - "infrastructure/terraform/**"
-    branches:
-      - main
+  workflow_dispatch:  # manual only — disabled auto-trigger (Phase 1: Vercel, no AWS infra yet)
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
 
 permissions:
   id-token: write
