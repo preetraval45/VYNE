@@ -872,6 +872,8 @@ function LineItemsEditor({
               onChange={(e) =>
                 updateLine(idx, "qty", parseInt(e.target.value) || 0)
               }
+              aria-label="Quantity"
+              placeholder="Qty"
               style={{ ...fieldInputStyle, padding: "5px 6px", fontSize: 12 }}
             />
             <input
@@ -882,6 +884,8 @@ function LineItemsEditor({
               onChange={(e) =>
                 updateLine(idx, "rate", parseFloat(e.target.value) || 0)
               }
+              aria-label="Rate"
+              placeholder="Rate"
               style={{ ...fieldInputStyle, padding: "5px 6px", fontSize: 12 }}
             />
             <button
