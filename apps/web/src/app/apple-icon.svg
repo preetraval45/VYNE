@@ -1,16 +1,14 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="180" height="180" rx="40" fill="url(#abg)"/>
-  <!-- Soft glow bloom -->
-  <path d="M42 51 Q65 98 90 129 Q115 98 138 51" stroke="rgba(255,255,255,0.14)" stroke-width="40" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Main V — curved, elegant -->
-  <path d="M42 51 Q65 98 90 129 Q115 98 138 51" stroke="white" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <!-- Accent dot -->
-  <circle cx="90" cy="138" r="8.5" fill="white" opacity="0.72"/>
+  <rect width="180" height="180" rx="39" fill="url(#abg)"/>
+  <!-- Precise geometric V -->
+  <path d="M39 51 L90 124 L141 51" stroke="white" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Typographic underline accent -->
+  <rect x="76" y="138" width="28" height="8" rx="4" fill="white" opacity="0.65"/>
   <defs>
     <linearGradient id="abg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#C084FC"/>
-      <stop offset="0.48" stop-color="#8B5CF6"/>
-      <stop offset="1" stop-color="#5B21B6"/>
+      <stop stop-color="#1E0A3C"/>
+      <stop offset="0.5" stop-color="#4C1D95"/>
+      <stop offset="1" stop-color="#7C3AED"/>
     </linearGradient>
   </defs>
 </svg>

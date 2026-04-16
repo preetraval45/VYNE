@@ -60,33 +60,24 @@ function VyneLogo({ size = 28 }: Readonly<{ size?: number }>) {
       fill="none"
       aria-hidden="true"
     >
-      {/* Rich multi-stop background */}
-      <rect width="32" height="32" rx="9" fill="url(#vyne-grad)" />
-      {/* Soft glow bloom behind V for depth */}
+      {/* Deep premium gradient background */}
+      <rect width="32" height="32" rx="7" fill="url(#vyne-grad)" />
+      {/* Precise geometric V — sharp technical mark */}
       <path
-        d="M7.5 9 Q11.5 17.5 16 23 Q20.5 17.5 24.5 9"
-        stroke="rgba(255,255,255,0.14)"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      {/* Main V — curved elegant strokes */}
-      <path
-        d="M7.5 9 Q11.5 17.5 16 23 Q20.5 17.5 24.5 9"
+        d="M7 9 L16 22 L25 9"
         stroke="white"
-        strokeWidth="2.8"
+        strokeWidth="3"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
-      {/* Accent dot */}
-      <circle cx="16" cy="24.5" r="1.5" fill="white" opacity="0.72" />
+      {/* Typographic underline accent */}
+      <rect x="13.5" y="24.5" width="5" height="1.5" rx="0.75" fill="white" opacity="0.65" />
       <defs>
         <linearGradient id="vyne-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#C084FC" />
-          <stop offset="0.48" stopColor="#8B5CF6" />
-          <stop offset="1" stopColor="#5B21B6" />
+          <stop stopColor="#1E0A3C" />
+          <stop offset="0.5" stopColor="#4C1D95" />
+          <stop offset="1" stopColor="#7C3AED" />
         </linearGradient>
       </defs>
     </svg>
@@ -609,6 +600,7 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
           const isActive = accent === key;
           return (
             <button
+              type="button"
               key={key}
               title={c.label}
               onClick={() => {
@@ -1317,6 +1309,7 @@ export function Sidebar() {
 
         {/* Settings gear */}
         <button
+          type="button"
           onClick={() => go("/settings")}
           aria-label="Open settings"
           style={{
@@ -1414,6 +1407,7 @@ export function Sidebar() {
           };
           return (
             <button
+              type="button"
               onClick={toggleTheme}
               aria-label={themeLabels[theme] ?? "Toggle theme"}
               title={themeTitles[theme] ?? "Theme"}
@@ -1446,6 +1440,7 @@ export function Sidebar() {
         {/* Color picker button */}
         <div style={{ position: "relative" }}>
           <button
+            type="button"
             onClick={() => setShowColorPicker(!showColorPicker)}
             aria-label="Change accent color"
             title="Accent color"
@@ -1497,6 +1492,7 @@ export function Sidebar() {
 
         {/* Logout button */}
         <button
+          type="button"
           onClick={() => logout()}
           aria-label="Sign out"
           title="Sign out"
@@ -1529,6 +1525,7 @@ export function Sidebar() {
           <>
             {/* Backdrop to close menu */}
             <button
+              type="button"
               aria-label="Close menu"
               tabIndex={-1}
               onClick={() => setMenuOpen(false)}
