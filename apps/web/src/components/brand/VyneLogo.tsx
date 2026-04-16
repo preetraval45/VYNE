@@ -10,9 +10,10 @@ import { useId } from "react";
 //   • Near-black deep-space background
 function VyneMark({ size = 32 }: Readonly<{ size?: number }>) {
   const u = useId().replace(/:/g, "");
-  const bg   = `vbg-${u}`;
-  const vg   = `vg-${u}`;  // aurora gradient (shared across all layers)
-  const dotG = `vd-${u}`;
+  const bg    = `vbg-${u}`;
+  const glow  = `vgl-${u}`;   // coloured radial glow on bg
+  const vg    = `vg-${u}`;    // aurora gradient for the V stroke
+  const dotG  = `vd-${u}`;
 
   return (
     <svg
@@ -26,58 +27,66 @@ function VyneMark({ size = 32 }: Readonly<{ size?: number }>) {
       {/* Deep-space background */}
       <rect width="32" height="32" rx="8" fill={`url(#${bg})`} />
 
-      {/* Layer 3 — wide aura bloom */}
+      {/* Radial colour wash centred on the vertex — visible even at 28 px */}
+      <rect width="32" height="32" rx="8" fill={`url(#${glow})`} />
+
+      {/* Layer 3 — wide colour bloom (high opacity so it shows at small sizes) */}
       <path
         d="M6 8.5 L16 23 L26 8.5"
         stroke={`url(#${vg})`}
-        strokeWidth="11"
+        strokeWidth="10"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
-        opacity="0.11"
+        opacity="0.35"
       />
-      {/* Layer 2 — mid glow */}
+      {/* Layer 2 — tight mid-glow */}
       <path
         d="M6 8.5 L16 23 L26 8.5"
         stroke={`url(#${vg})`}
-        strokeWidth="5.5"
+        strokeWidth="5"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
-        opacity="0.22"
+        opacity="0.55"
       />
-      {/* Layer 1 — crisp core V */}
+      {/* Layer 1 — crisp white core so it pops at any size */}
       <path
         d="M6 8.5 L16 23 L26 8.5"
-        stroke={`url(#${vg})`}
-        strokeWidth="2.8"
+        stroke="white"
+        strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
 
-      {/* Vertex dot — outer halo + bright core */}
-      <circle cx="16" cy="23" r="4.5" fill={`url(#${dotG})`} opacity="0.18" />
-      <circle cx="16" cy="23" r="2.2" fill={`url(#${dotG})`} />
+      {/* Vertex — vivid cyan dot with halo */}
+      <circle cx="16" cy="23" r="5" fill={`url(#${dotG})`} opacity="0.3" />
+      <circle cx="16" cy="23" r="2.4" fill={`url(#${dotG})`} />
 
       <defs>
-        {/* Near-black with ultra-subtle purple undertone */}
         <linearGradient id={bg} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#070010" />
-          <stop offset="1" stopColor="#0F0028" />
+          <stop stopColor="#06000F" />
+          <stop offset="1" stopColor="#110022" />
         </linearGradient>
 
-        {/* Aurora: horizontal sweep so left arm is purple, right arm is cyan */}
+        {/* Radial spotlight centred on vertex — adds visible purple warmth */}
+        <radialGradient id={glow} cx="50%" cy="72%" r="55%" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7C3AED" stopOpacity="0.45" />
+          <stop offset="1"  stopColor="#7C3AED" stopOpacity="0" />
+        </radialGradient>
+
+        {/* Aurora: vivid purple left → indigo centre → electric cyan right */}
         <linearGradient id={vg} x1="6" y1="8.5" x2="26" y2="8.5" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#C084FC" />
-          <stop offset="0.45" stopColor="#818CF8" />
-          <stop offset="1" stopColor="#22D3EE" />
+          <stop stopColor="#A855F7" />
+          <stop offset="0.5"  stopColor="#6366F1" />
+          <stop offset="1"    stopColor="#06B6D4" />
         </linearGradient>
 
-        {/* Cyan-white radial for the vertex dot */}
-        <radialGradient id={dotG} cx="50%" cy="30%" r="60%">
-          <stop stopColor="#E0F9FF" />
-          <stop offset="1" stopColor="#22D3EE" />
+        {/* Bright cyan-white dot */}
+        <radialGradient id={dotG} cx="50%" cy="25%" r="65%">
+          <stop stopColor="#FFFFFF" />
+          <stop offset="1" stopColor="#06B6D4" />
         </radialGradient>
       </defs>
     </svg>

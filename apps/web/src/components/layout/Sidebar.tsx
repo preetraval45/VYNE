@@ -935,7 +935,7 @@ export function Sidebar() {
         }}
       >
         <div style={{ flex: 1 }}>
-          <VyneLogo variant="horizontal" markSize={28} />
+          <VyneLogo variant="horizontal" markSize={32} />
         </div>
         <button
           type="button"
