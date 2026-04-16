@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { cn } from "@/lib/utils";
+import { VyneLogo } from "@/components/brand/VyneLogo";
 
 const PREVIEW_MODULES = [
   { icon: MessageSquare, label: "Messaging", color: "#6C47FF" },
@@ -98,17 +99,7 @@ export default function LoginPage() {
           {/* Logo + Heading */}
           <div className="flex flex-col items-center mb-10">
             <Link href="/" className="mb-5">
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-                  boxShadow: "0 8px 32px rgba(108,71,255,0.4)",
-                }}
-              >
-                <span className="text-white font-bold text-2xl tracking-tight">
-                  V
-                </span>
-              </div>
+              <VyneLogo variant="stacked" markSize={52} className="text-white" />
             </Link>
             <h1 className="text-3xl font-bold text-white tracking-tight">
               Welcome back

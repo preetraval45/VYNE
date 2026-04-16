@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth'
 import { cn } from '@/lib/utils'
+import { VyneLogo } from '@/components/brand/VyneLogo'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -72,12 +73,7 @@ export default function SignupPage() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-            style={{ background: 'linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)' }}
-          >
-            <span className="text-white font-bold text-xl tracking-tight">V</span>
-          </div>
+          <VyneLogo variant="stacked" markSize={48} className="text-white mb-1" />
           <h1 className="text-2xl font-semibold text-white tracking-tight">Create your workspace</h1>
           <p className="text-sm mt-1" style={{ color: '#A0A0B8' }}>
             Get started with VYNE in seconds

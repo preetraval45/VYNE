@@ -49,40 +49,7 @@ import {
   ACCENT_COLORS,
   type AccentColor,
 } from "@/lib/stores/theme";
-
-// ── Vyne logo — modern pill mark ──────────────────────────────────
-function VyneLogo({ size = 28 }: Readonly<{ size?: number }>) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      aria-hidden="true"
-    >
-      {/* Deep premium gradient background */}
-      <rect width="32" height="32" rx="7" fill="url(#vyne-grad)" />
-      {/* Precise geometric V — sharp technical mark */}
-      <path
-        d="M7 9 L16 22 L25 9"
-        stroke="white"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      {/* Typographic underline accent */}
-      <rect x="13.5" y="24.5" width="5" height="1.5" rx="0.75" fill="white" opacity="0.65" />
-      <defs>
-        <linearGradient id="vyne-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#1E0A3C" />
-          <stop offset="0.5" stopColor="#4C1D95" />
-          <stop offset="1" stopColor="#7C3AED" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
+import { VyneLogo } from "@/components/brand/VyneLogo";
 
 // ── Navigation item definition ────────────────────────────────────
 interface SubItem {
@@ -955,7 +922,7 @@ export function Sidebar() {
         zIndex: 10,
       }}
     >
-      {/* ── Header: Logo + VYNE + search ───────── */}
+      {/* ── Header: Logo + search ───────── */}
       <div
         style={{
           padding: "14px 14px 12px",
@@ -967,23 +934,8 @@ export function Sidebar() {
           background: "linear-gradient(135deg, rgba(108,71,255,0.06) 0%, transparent 100%)",
         }}
       >
-        <VyneLogo size={28} />
         <div style={{ flex: 1 }}>
-          <span
-            style={{
-              fontSize: 16,
-              fontWeight: 800,
-              color: "var(--text-primary)",
-              letterSpacing: "-0.02em",
-              display: "block",
-              lineHeight: 1.1,
-            }}
-          >
-            VYNE
-          </span>
-          <span style={{ fontSize: 9.5, color: "var(--text-tertiary)", fontWeight: 500, letterSpacing: "0.06em" }}>
-            COMPANY OS
-          </span>
+          <VyneLogo variant="horizontal" markSize={28} />
         </div>
         <button
           type="button"

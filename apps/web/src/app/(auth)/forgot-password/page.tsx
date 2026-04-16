@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Loader2, Mail } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { cn } from "@/lib/utils";
+import { VyneLogo } from "@/components/brand/VyneLogo";
 
 export default function ForgotPasswordPage() {
   const { forgotPassword, isLoading, error, clearError } = useAuthStore();
@@ -50,16 +51,7 @@ export default function ForgotPasswordPage() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-            style={{
-              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-            }}
-          >
-            <span className="text-white font-bold text-xl tracking-tight">
-              V
-            </span>
-          </div>
+          <VyneLogo variant="stacked" markSize={48} className="text-white mb-1" />
           <h1 className="text-2xl font-semibold text-white tracking-tight">
             {sent ? "Check your email" : "Reset your password"}
           </h1>
