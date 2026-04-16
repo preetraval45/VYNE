@@ -1,0 +1,63 @@
+<svg width="280" height="190" viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Card background -->
+  <rect width="280" height="190" rx="18" fill="#080014"/>
+
+  <!-- ── Icon mark (80×80, horizontally centred) ── -->
+  <g transform="translate(100, 18)">
+    <rect width="80" height="80" rx="18" fill="url(#sibg)"/>
+    <!-- Aura -->
+    <path d="M13 21 L40 57.5 L67 21"
+      stroke="url(#svg)" stroke-width="27.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.11"/>
+    <!-- Mid glow -->
+    <path d="M13 21 L40 57.5 L67 21"
+      stroke="url(#svg)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.22"/>
+    <!-- Core V -->
+    <path d="M13 21 L40 57.5 L67 21"
+      stroke="url(#svg)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <!-- Vertex dot -->
+    <circle cx="40" cy="57.5" r="11" fill="url(#sdg)" opacity="0.18"/>
+    <circle cx="40" cy="57.5" r="5.5" fill="url(#sdg)"/>
+  </g>
+
+  <!-- ── VYNE — aurora gradient, centred ── -->
+  <text
+    x="140" y="130"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-size="40" font-weight="800"
+    letter-spacing="-1"
+    fill="url(#stg)"
+  >VYNE</text>
+
+  <!-- ── AI‑native Company OS — muted, centred ── -->
+  <text
+    x="140" y="158"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
+    font-size="12" font-weight="500"
+    letter-spacing="2.2"
+    fill="rgba(255,255,255,0.38)"
+  >AI-NATIVE COMPANY OS</text>
+
+  <defs>
+    <linearGradient id="sibg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#070010"/>
+      <stop offset="1" stop-color="#0F0028"/>
+    </linearGradient>
+    <linearGradient id="svg" x1="13" y1="21" x2="67" y2="21" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C084FC"/>
+      <stop offset="0.45" stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="sdg" cx="50%" cy="30%" r="60%">
+      <stop stop-color="#E0F9FF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </radialGradient>
+    <!-- Text gradient centred on x=140, spans ~100px for "VYNE" at font-size 40 -->
+    <linearGradient id="stg" x1="90" y1="0" x2="195" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C084FC"/>
+      <stop offset="0.45" stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+</svg>
