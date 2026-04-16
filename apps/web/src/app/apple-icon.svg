@@ -1,29 +1,27 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="180" height="180" rx="45" fill="url(#abg)"/>
-  <rect width="180" height="180" rx="45" fill="url(#aglow)"/>
-  <line x1="39" y1="51" x2="90" y2="124" stroke="url(#aal)" stroke-width="14" stroke-linecap="round"/>
-  <line x1="141" y1="51" x2="90" y2="124" stroke="url(#aar)" stroke-width="14" stroke-linecap="round"/>
-  <circle cx="39" cy="51" r="12" fill="white" opacity="0.45"/>
-  <circle cx="141" cy="51" r="12" fill="white" opacity="0.45"/>
-  <circle cx="90" cy="124" r="31" fill="white" opacity="0.07"/>
-  <circle cx="90" cy="124" r="18" fill="white"/>
+  <rect width="180" height="180" rx="45" fill="url(#bg)"/>
+  <!-- Layer 3: wide aura bloom -->
+  <path d="M34 48 L90 129 L146 48" stroke="url(#vg)" stroke-width="62" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.11"/>
+  <!-- Layer 2: mid glow -->
+  <path d="M34 48 L90 129 L146 48" stroke="url(#vg)" stroke-width="31" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.22"/>
+  <!-- Layer 1: crisp core V -->
+  <path d="M34 48 L90 129 L146 48" stroke="url(#vg)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- Vertex dot halo + core -->
+  <circle cx="90" cy="129" r="25" fill="url(#dg)" opacity="0.18"/>
+  <circle cx="90" cy="129" r="12" fill="url(#dg)"/>
   <defs>
-    <linearGradient id="abg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0D0221"/>
-      <stop offset="0.6" stop-color="#2A0A6B"/>
-      <stop offset="1" stop-color="#5B21B6"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#070010"/>
+      <stop offset="1" stop-color="#0F0028"/>
     </linearGradient>
-    <radialGradient id="aglow" cx="50%" cy="69%" r="46%" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7C3AED" stop-opacity="0.5"/>
-      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    <linearGradient id="vg" x1="34" y1="48" x2="146" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C084FC"/>
+      <stop offset="0.45" stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="dg" cx="50%" cy="30%" r="60%">
+      <stop stop-color="#E0F9FF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
     </radialGradient>
-    <linearGradient id="aal" x1="39" y1="51" x2="90" y2="124" gradientUnits="userSpaceOnUse">
-      <stop stop-color="white" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.88"/>
-    </linearGradient>
-    <linearGradient id="aar" x1="141" y1="51" x2="90" y2="124" gradientUnits="userSpaceOnUse">
-      <stop stop-color="white" stop-opacity="0.3"/>
-      <stop offset="1" stop-color="white" stop-opacity="0.88"/>
-    </linearGradient>
   </defs>
 </svg>

@@ -2,16 +2,17 @@
 
 import { useId } from "react";
 
-// ── Signal Convergence mark ──────────────────────────────────────────
-// Two dimmed source nodes at top, arms that grow brighter as they
-// converge, and a luminous focal dot at the vertex. Deep dark background
-// with a radial glow behind the convergence point.
+// ── Aurora Layers mark ───────────────────────────────────────────────
+// Option A + C fused:
+//   • 3 stacked V layers (wide aura → mid-glow → crisp core) for holographic depth
+//   • Horizontal aurora gradient stroke: purple → indigo → cyan
+//   • Glowing cyan dot at the convergence vertex
+//   • Near-black deep-space background
 function VyneMark({ size = 32 }: Readonly<{ size?: number }>) {
-  const uid = useId().replace(/:/g, "");
-  const bg = `vbg${uid}`;
-  const glow = `vgl${uid}`;
-  const armL = `val${uid}`;
-  const armR = `var${uid}`;
+  const u = useId().replace(/:/g, "");
+  const bg   = `vbg-${u}`;
+  const vg   = `vg-${u}`;  // aurora gradient (shared across all layers)
+  const dotG = `vd-${u}`;
 
   return (
     <svg
@@ -20,53 +21,86 @@ function VyneMark({ size = 32 }: Readonly<{ size?: number }>) {
       viewBox="0 0 32 32"
       fill="none"
       aria-hidden="true"
-      style={{ flexShrink: 0 }}
+      style={{ flexShrink: 0, display: "block" }}
     >
-      {/* Dark deep-purple background */}
+      {/* Deep-space background */}
       <rect width="32" height="32" rx="8" fill={`url(#${bg})`} />
-      {/* Radial glow centred on the convergence point */}
-      <rect width="32" height="32" rx="8" fill={`url(#${glow})`} />
-      {/* V arms — fade from dim at sources to bright at vertex */}
-      <line x1="7" y1="9" x2="16" y2="22" stroke={`url(#${armL})`} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="25" y1="9" x2="16" y2="22" stroke={`url(#${armR})`} strokeWidth="2.5" strokeLinecap="round" />
-      {/* Source nodes */}
-      <circle cx="7" cy="9" r="2.2" fill="white" opacity="0.45" />
-      <circle cx="25" cy="9" r="2.2" fill="white" opacity="0.45" />
-      {/* Convergence node — bright focal point with halo */}
-      <circle cx="16" cy="22" r="5.5" fill="white" opacity="0.07" />
-      <circle cx="16" cy="22" r="3.2" fill="white" />
+
+      {/* Layer 3 — wide aura bloom */}
+      <path
+        d="M6 8.5 L16 23 L26 8.5"
+        stroke={`url(#${vg})`}
+        strokeWidth="11"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.11"
+      />
+      {/* Layer 2 — mid glow */}
+      <path
+        d="M6 8.5 L16 23 L26 8.5"
+        stroke={`url(#${vg})`}
+        strokeWidth="5.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.22"
+      />
+      {/* Layer 1 — crisp core V */}
+      <path
+        d="M6 8.5 L16 23 L26 8.5"
+        stroke={`url(#${vg})`}
+        strokeWidth="2.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+
+      {/* Vertex dot — outer halo + bright core */}
+      <circle cx="16" cy="23" r="4.5" fill={`url(#${dotG})`} opacity="0.18" />
+      <circle cx="16" cy="23" r="2.2" fill={`url(#${dotG})`} />
+
       <defs>
+        {/* Near-black with ultra-subtle purple undertone */}
         <linearGradient id={bg} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#0D0221" />
-          <stop offset="0.6" stopColor="#2A0A6B" />
-          <stop offset="1" stopColor="#5B21B6" />
+          <stop stopColor="#070010" />
+          <stop offset="1" stopColor="#0F0028" />
         </linearGradient>
-        <radialGradient id={glow} cx="50%" cy="69%" r="46%" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#7C3AED" stopOpacity="0.5" />
-          <stop offset="1" stopColor="#7C3AED" stopOpacity="0" />
+
+        {/* Aurora: horizontal sweep so left arm is purple, right arm is cyan */}
+        <linearGradient id={vg} x1="6" y1="8.5" x2="26" y2="8.5" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#C084FC" />
+          <stop offset="0.45" stopColor="#818CF8" />
+          <stop offset="1" stopColor="#22D3EE" />
+        </linearGradient>
+
+        {/* Cyan-white radial for the vertex dot */}
+        <radialGradient id={dotG} cx="50%" cy="30%" r="60%">
+          <stop stopColor="#E0F9FF" />
+          <stop offset="1" stopColor="#22D3EE" />
         </radialGradient>
-        <linearGradient id={armL} x1="7" y1="9" x2="16" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="white" stopOpacity="0.3" />
-          <stop offset="1" stopColor="white" stopOpacity="0.88" />
-        </linearGradient>
-        <linearGradient id={armR} x1="25" y1="9" x2="16" y2="22" gradientUnits="userSpaceOnUse">
-          <stop stopColor="white" stopOpacity="0.3" />
-          <stop offset="1" stopColor="white" stopOpacity="0.88" />
-        </linearGradient>
       </defs>
     </svg>
   );
 }
 
-// ── Public logo component ────────────────────────────────────────────
-interface VyneLogoProps {
+// ── Shared gradient text style ──────────────────────────────────────
+const AURORA_TEXT: React.CSSProperties = {
+  background: "linear-gradient(90deg, #C084FC 0%, #818CF8 50%, #22D3EE 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
+};
+
+// ── Public VyneLogo component ────────────────────────────────────────
+export interface VyneLogoProps {
   /**
-   * mark       — icon only (default)
-   * horizontal — icon + name + tagline on the right  (sidebar header)
-   * stacked    — icon + name + tagline below          (auth/landing)
+   * mark       — icon only          (favicon, loading screens)
+   * horizontal — icon + name right  (sidebar header, nav bars)
+   * stacked    — icon + name below  (auth pages, landing page)
    */
   variant?: "mark" | "horizontal" | "stacked";
-  /** Size of the icon mark in px. Text scales proportionally. */
+  /** Pixel size of the icon mark. Typography scales proportionally. */
   markSize?: number;
   className?: string;
 }
@@ -76,17 +110,19 @@ export function VyneLogo({
   markSize = 32,
   className,
 }: VyneLogoProps) {
+  // ── mark only ─────────────────────────────────────────────────────
   if (variant === "mark") {
     return (
-      <span className={className}>
+      <span className={className} style={{ display: "inline-flex" }}>
         <VyneMark size={markSize} />
       </span>
     );
   }
 
+  // ── horizontal: icon | VYNE / Company OS ──────────────────────────
   if (variant === "horizontal") {
-    const nameSize = Math.round(markSize * 0.53);
-    const tagSize = Math.round(markSize * 0.28);
+    const nameSize = Math.round(markSize * 0.54);
+    const tagSize  = Math.round(markSize * 0.28);
     return (
       <div
         className={`flex items-center ${className ?? ""}`}
@@ -96,11 +132,11 @@ export function VyneLogo({
         <div style={{ lineHeight: 1 }}>
           <div
             style={{
+              ...AURORA_TEXT,
               fontSize: nameSize,
               fontWeight: 800,
               letterSpacing: "-0.025em",
-              color: "var(--text-primary)",
-              lineHeight: 1.1,
+              lineHeight: 1.15,
             }}
           >
             VYNE
@@ -109,9 +145,9 @@ export function VyneLogo({
             style={{
               fontSize: tagSize,
               fontWeight: 500,
-              letterSpacing: "0.08em",
-              color: "var(--text-tertiary)",
-              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              textTransform: "uppercase" as const,
+              color: "rgba(255,255,255,0.38)",
               marginTop: 2,
             }}
           >
@@ -122,18 +158,19 @@ export function VyneLogo({
     );
   }
 
-  // stacked
-  const nameSize = Math.round(markSize * 0.58);
-  const tagSize = Math.round(markSize * 0.27);
+  // ── stacked: icon on top, VYNE + tagline below ────────────────────
+  const nameSize = Math.round(markSize * 0.6);
+  const tagSize  = Math.round(markSize * 0.265);
   return (
     <div
       className={`flex flex-col items-center ${className ?? ""}`}
-      style={{ gap: Math.round(markSize * 0.28) }}
+      style={{ gap: Math.round(markSize * 0.3) }}
     >
       <VyneMark size={markSize} />
       <div style={{ textAlign: "center", lineHeight: 1 }}>
         <div
           style={{
+            ...AURORA_TEXT,
             fontSize: nameSize,
             fontWeight: 800,
             letterSpacing: "-0.02em",
@@ -147,8 +184,8 @@ export function VyneLogo({
             fontSize: tagSize,
             fontWeight: 500,
             letterSpacing: "0.09em",
-            opacity: 0.45,
-            textTransform: "uppercase",
+            textTransform: "uppercase" as const,
+            color: "rgba(255,255,255,0.38)",
             marginTop: Math.round(markSize * 0.1),
           }}
         >
