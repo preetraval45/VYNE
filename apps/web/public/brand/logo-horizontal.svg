@@ -1,43 +1,37 @@
-<svg width="260" height="64" viewBox="0 0 260 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="340" height="64" viewBox="0 0 340 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Card background -->
-  <rect width="260" height="64" rx="14" fill="#080014"/>
+  <rect width="340" height="64" rx="14" fill="#080014"/>
 
   <!-- ── Icon mark (48×48, vertically centred) ── -->
   <g transform="translate(12, 8)">
-    <!-- Icon bg pill -->
     <rect width="48" height="48" rx="12" fill="url(#ibg)"/>
-    <!-- Aura -->
     <path d="M8 12.5 L24 34.5 L40 12.5"
       stroke="url(#ivg)" stroke-width="16.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.11"/>
-    <!-- Mid glow -->
     <path d="M8 12.5 L24 34.5 L40 12.5"
       stroke="url(#ivg)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.22"/>
-    <!-- Core V -->
     <path d="M8 12.5 L24 34.5 L40 12.5"
       stroke="url(#ivg)" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <!-- Vertex dot -->
     <circle cx="24" cy="34.5" r="6.5" fill="url(#idg)" opacity="0.18"/>
     <circle cx="24" cy="34.5" r="3.3" fill="url(#idg)"/>
   </g>
 
-  <!-- ── Wordmark ── -->
-  <!-- VYNE — aurora gradient text -->
+  <!-- VYNE — aurora gradient -->
   <text
-    x="74" y="34"
+    x="74" y="33"
     font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
     font-size="26" font-weight="800"
     letter-spacing="-0.6"
     fill="url(#tg)"
   >VYNE</text>
 
-  <!-- Company OS — muted white -->
+  <!-- Tagline — muted white, sentence case -->
   <text
-    x="75" y="50"
+    x="76" y="50"
     font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
-    font-size="11" font-weight="500"
-    letter-spacing="1.8"
+    font-size="10" font-weight="500"
+    letter-spacing="0.4"
     fill="rgba(255,255,255,0.38)"
-  >WHERE WORK CONVERGES.</text>
+  >Run your company, not your tools.</text>
 
   <defs>
     <linearGradient id="ibg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
@@ -53,7 +47,6 @@
       <stop stop-color="#E0F9FF"/>
       <stop offset="1" stop-color="#22D3EE"/>
     </radialGradient>
-    <!-- Aurora gradient for VYNE text — spans the text width -->
     <linearGradient id="tg" x1="74" y1="0" x2="170" y2="0" gradientUnits="userSpaceOnUse">
       <stop stop-color="#C084FC"/>
       <stop offset="0.45" stop-color="#818CF8"/>
