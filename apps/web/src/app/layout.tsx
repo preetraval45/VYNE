@@ -12,13 +12,8 @@ export const metadata: Metadata = {
   description:
     'VYNE is an AI-native Company Operating System that replaces Slack, Jira, and Notion in one unified workspace.',
   icons: {
-    icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: [
-      { url: '/apple-icon.svg', type: 'image/svg+xml' },
-    ],
-    shortcut: '/icon.svg',
+    icon: [{ url: '/brand/logo-mark.svg', type: 'image/svg+xml' }],
+    shortcut: '/brand/logo-mark.svg',
   },
   openGraph: {
     title: 'VYNE — AI-native Company OS',
