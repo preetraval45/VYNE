@@ -119,7 +119,7 @@ export function VyneLogo({
     );
   }
 
-  // ── horizontal: icon | VYNE / Company OS ──────────────────────────
+  // ── horizontal: icon | VYNE / Where work converges. ──────────────────────────
   if (variant === "horizontal") {
     const nameSize = Math.round(markSize * 0.54);
     const tagSize  = Math.round(markSize * 0.28);
@@ -151,7 +151,7 @@ export function VyneLogo({
               marginTop: 2,
             }}
           >
-            Company OS
+            Where work converges.
           </div>
         </div>
       </div>
@@ -189,7 +189,7 @@ export function VyneLogo({
             marginTop: Math.round(markSize * 0.1),
           }}
         >
-          AI‑native Company OS
+          Where work converges.
         </div>
       </div>
     </div>
