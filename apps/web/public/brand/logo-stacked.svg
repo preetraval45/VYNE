@@ -1,58 +1,44 @@
 <svg width="380" height="195" viewBox="0 0 380 195" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Card background -->
-  <rect width="380" height="195" rx="18" fill="#080014"/>
-
-  <!-- ── Icon mark (80×80, horizontally centred) ── -->
+  <rect width="380" height="195" rx="18" fill="#06000F"/>
   <g transform="translate(150, 18)">
     <rect width="80" height="80" rx="18" fill="url(#sibg)"/>
-    <path d="M13 21 L40 57.5 L67 21"
-      stroke="url(#svg)" stroke-width="27.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.11"/>
-    <path d="M13 21 L40 57.5 L67 21"
-      stroke="url(#svg)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.22"/>
-    <path d="M13 21 L40 57.5 L67 21"
-      stroke="url(#svg)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <circle cx="40" cy="57.5" r="11" fill="url(#sdg)" opacity="0.18"/>
+    <rect width="80" height="80" rx="18" fill="url(#sigl)"/>
+    <path d="M13 21 L40 57.5 L67 21" stroke="url(#svg)" stroke-width="27.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
+    <path d="M13 21 L40 57.5 L67 21" stroke="url(#svg)" stroke-width="14"   stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+    <path d="M13 21 L40 57.5 L67 21" stroke="white"     stroke-width="7"    stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <circle cx="40" cy="57.5" r="11" fill="url(#sdg)" opacity="0.3"/>
     <circle cx="40" cy="57.5" r="5.5" fill="url(#sdg)"/>
   </g>
-
-  <!-- VYNE — aurora gradient, centred -->
-  <text
-    x="190" y="133"
-    text-anchor="middle"
-    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
-    font-size="40" font-weight="800"
-    letter-spacing="-1"
-    fill="url(#stg)"
-  >VYNE</text>
-
-  <!-- Tagline — muted, centred, sentence case -->
-  <text
-    x="190" y="160"
-    text-anchor="middle"
-    font-family="system-ui, -apple-system, 'Segoe UI', sans-serif"
-    font-size="12.5" font-weight="400"
-    letter-spacing="0.3"
-    fill="rgba(255,255,255,0.38)"
-  >Run your company, not your tools.</text>
-
+  <text x="190" y="133" text-anchor="middle"
+    font-family="system-ui,-apple-system,'Segoe UI',sans-serif"
+    font-size="40" font-weight="800" letter-spacing="-1"
+    fill="url(#stg)">VYNE</text>
+  <text x="190" y="160" text-anchor="middle"
+    font-family="system-ui,-apple-system,'Segoe UI',sans-serif"
+    font-size="12.5" font-weight="400" letter-spacing="0.3"
+    fill="rgba(255,255,255,0.42)">Run your company, not your tools.</text>
   <defs>
     <linearGradient id="sibg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#070010"/>
-      <stop offset="1" stop-color="#0F0028"/>
+      <stop stop-color="#06000F"/>
+      <stop offset="1" stop-color="#110022"/>
     </linearGradient>
+    <radialGradient id="sigl" cx="50%" cy="72%" r="55%" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="svg" x1="13" y1="21" x2="67" y2="21" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#C084FC"/>
-      <stop offset="0.45" stop-color="#818CF8"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+      <stop stop-color="#A855F7"/>
+      <stop offset="0.5" stop-color="#6366F1"/>
+      <stop offset="1"   stop-color="#06B6D4"/>
     </linearGradient>
-    <radialGradient id="sdg" cx="50%" cy="30%" r="60%">
-      <stop stop-color="#E0F9FF"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+    <radialGradient id="sdg" cx="50%" cy="25%" r="65%">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#06B6D4"/>
     </radialGradient>
     <linearGradient id="stg" x1="110" y1="0" x2="275" y2="0" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#C084FC"/>
-      <stop offset="0.45" stop-color="#818CF8"/>
-      <stop offset="1" stop-color="#22D3EE"/>
+      <stop stop-color="#A855F7"/>
+      <stop offset="0.5" stop-color="#6366F1"/>
+      <stop offset="1"   stop-color="#06B6D4"/>
     </linearGradient>
   </defs>
 </svg>
