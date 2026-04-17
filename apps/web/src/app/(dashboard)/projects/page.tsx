@@ -660,12 +660,14 @@ function CreateProjectModalLocal({
                     </div>
                     <div className="flex-1">
                       <label
+                        htmlFor="new-project-name"
                         className="block text-xs font-medium mb-1.5"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         Project name *
                       </label>
                       <input
+                        id="new-project-name"
                         type="text"
                         value={form.name}
                         onChange={(e) =>
@@ -687,6 +689,7 @@ function CreateProjectModalLocal({
                   {/* Identifier */}
                   <div>
                     <label
+                      htmlFor="new-project-identifier"
                       className="block text-xs font-medium mb-1.5"
                       style={{ color: "var(--text-secondary)" }}
                     >
@@ -694,7 +697,9 @@ function CreateProjectModalLocal({
                     </label>
                     <div className="flex items-center gap-2">
                       <input
+                        id="new-project-identifier"
                         type="text"
+                        placeholder="PRJ"
                         value={
                           identifierEdited
                             ? form.identifier
@@ -732,12 +737,14 @@ function CreateProjectModalLocal({
                   {/* Description */}
                   <div>
                     <label
+                      htmlFor="new-project-description"
                       className="block text-xs font-medium mb-1.5"
                       style={{ color: "var(--text-secondary)" }}
                     >
                       Description
                     </label>
                     <textarea
+                      id="new-project-description"
                       value={form.description}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, description: e.target.value }))
@@ -962,17 +969,20 @@ function EditProjectModal({
                     </div>
                     <div className="flex-1">
                       <label
+                        htmlFor="edit-project-name"
                         className="block text-xs font-medium mb-1.5"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         Name *
                       </label>
                       <input
+                        id="edit-project-name"
                         type="text"
                         value={form.name}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, name: e.target.value }))
                         }
+                        placeholder="Project name"
                         required
                         autoFocus
                         className={inputClass}

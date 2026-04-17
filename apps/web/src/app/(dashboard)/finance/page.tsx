@@ -21,10 +21,14 @@ import {
 import { ExportButton } from "@/components/shared/ExportButton";
 
 // ─── Helpers ──────────────────────────────────────────────────────
+const CURRENCY = typeof Intl !== "undefined"
+  ? new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })
+  : null;
+
 function fmt(n: number) {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n.toLocaleString()}`;
+  if (n >= 1_000_000) return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000).toFixed(1)}K`;
+  return CURRENCY ? CURRENCY.format(n) : `$${n.toLocaleString()}`;
 }
 
 function TabBtn({

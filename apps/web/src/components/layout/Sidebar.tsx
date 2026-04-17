@@ -821,12 +821,21 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { toggleCommandPalette } = useUIStore();
+  const { toggleCommandPalette, sidebarOpen, setSidebarOpen } = useUIStore();
   const theme = useTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showColorPicker, setShowColorPicker] = useState(false);
+
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      setSidebarOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // Module visibility — hydrated from onboarding / settings localStorage
   const [enabledModules, setEnabledModules] = useState<Set<string> | null>(null);
@@ -908,6 +917,7 @@ export function Sidebar() {
     <nav
       className="sidebar-nav"
       aria-label="Main navigation"
+      data-mobile-open={sidebarOpen ? "true" : "false"}
       style={{
         width: 240,
         minWidth: 240,
