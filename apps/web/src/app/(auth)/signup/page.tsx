@@ -40,16 +40,12 @@ export default function SignupPage() {
   const inputStyle = {
     background: 'rgba(255,255,255,0.06)',
     border: '1px solid rgba(255,255,255,0.1)',
-  }
-
-  const inputFocusStyle = {
-    border: '1px solid #6C47FF',
-    boxShadow: '0 0 0 3px rgba(108,71,255,0.15)',
+    outline: 'none',
   }
 
   const baseInputClass = cn(
-    'w-full px-3.5 py-2.5 rounded-lg text-sm text-white',
-    'placeholder:text-[#4A4A6A] focus:outline-none transition-all duration-150'
+    'auth-input w-full px-3.5 py-2.5 rounded-lg text-sm text-white',
+    'placeholder:text-[#4A4A6A] transition-all duration-150'
   )
 
   return (
@@ -120,11 +116,6 @@ export default function SignupPage() {
                 autoFocus
                 className={baseInputClass}
                 style={inputStyle}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) => {
-                  e.target.style.border = '1px solid rgba(255,255,255,0.1)'
-                  e.target.style.boxShadow = 'none'
-                }}
               />
             </div>
 
@@ -142,11 +133,6 @@ export default function SignupPage() {
                 required
                 className={baseInputClass}
                 style={inputStyle}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) => {
-                  e.target.style.border = '1px solid rgba(255,255,255,0.1)'
-                  e.target.style.boxShadow = 'none'
-                }}
               />
             </div>
 
@@ -165,11 +151,6 @@ export default function SignupPage() {
                 autoComplete="email"
                 className={baseInputClass}
                 style={inputStyle}
-                onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                onBlur={(e) => {
-                  e.target.style.border = '1px solid rgba(255,255,255,0.1)'
-                  e.target.style.boxShadow = 'none'
-                }}
               />
             </div>
 
@@ -190,11 +171,6 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   className={cn(baseInputClass, 'pr-10')}
                   style={inputStyle}
-                  onFocus={(e) => Object.assign(e.target.style, inputFocusStyle)}
-                  onBlur={(e) => {
-                    e.target.style.border = '1px solid rgba(255,255,255,0.1)'
-                    e.target.style.boxShadow = 'none'
-                  }}
                 />
                 <button
                   type="button"

@@ -1,7 +1,7 @@
 "use client";
 
-// v=4 cache-buster — increment whenever the SVG files change
-const V = "?v=4";
+// v=5 cache-buster — increment whenever the SVG files change
+const V = "?v=5";
 
 export interface VyneLogoProps {
   /**

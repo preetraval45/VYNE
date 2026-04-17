@@ -148,22 +148,14 @@ export default function ForgotPasswordPage() {
                     autoFocus
                     required
                     className={cn(
-                      "w-full px-3.5 py-2.5 rounded-lg text-sm text-white",
+                      "auth-input w-full px-3.5 py-2.5 rounded-lg text-sm text-white",
                       "placeholder:text-[#4A4A6A]",
-                      "focus:outline-none transition-all duration-150",
+                      "transition-all duration-150",
                     )}
                     style={{
                       background: "rgba(255,255,255,0.06)",
                       border: "1px solid rgba(255,255,255,0.1)",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.border = "1px solid #6C47FF";
-                      e.target.style.boxShadow =
-                        "0 0 0 3px rgba(108,71,255,0.15)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.border = "1px solid rgba(255,255,255,0.1)";
-                      e.target.style.boxShadow = "none";
+                      outline: "none",
                     }}
                   />
                 </div>

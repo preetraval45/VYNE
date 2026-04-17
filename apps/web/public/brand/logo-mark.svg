@@ -1,27 +1,17 @@
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="120" height="120" rx="28" fill="url(#bg)"/>
-  <rect width="120" height="120" rx="28" fill="url(#glow)"/>
-  <path d="M22 32 L60 86 L98 32" stroke="url(#vg)" stroke-width="37" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.35"/>
-  <path d="M22 32 L60 86 L98 32" stroke="url(#vg)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
-  <path d="M22 32 L60 86 L98 32" stroke="white"    stroke-width="9.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <circle cx="60" cy="86" r="18" fill="url(#dg)" opacity="0.3"/>
+  <path d="M22 32 L60 86 L98 32" stroke="url(#vg)" stroke-width="37" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.18"/>
+  <path d="M22 32 L60 86 L98 32" stroke="url(#vg)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.45"/>
+  <path d="M22 32 L60 86 L98 32" stroke="url(#vg)" stroke-width="9.75" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="60" cy="86" r="18" fill="url(#dg)" opacity="0.2"/>
   <circle cx="60" cy="86" r="9"  fill="url(#dg)"/>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#06000F"/>
-      <stop offset="1" stop-color="#110022"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="50%" cy="72%" r="55%" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7C3AED" stop-opacity="0.45"/>
-      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
-    </radialGradient>
     <linearGradient id="vg" x1="22" y1="32" x2="98" y2="32" gradientUnits="userSpaceOnUse">
       <stop stop-color="#A855F7"/>
       <stop offset="0.5" stop-color="#6366F1"/>
       <stop offset="1"   stop-color="#06B6D4"/>
     </linearGradient>
     <radialGradient id="dg" cx="50%" cy="25%" r="65%">
-      <stop stop-color="#FFFFFF"/>
+      <stop stop-color="#A855F7"/>
       <stop offset="1" stop-color="#06B6D4"/>
     </radialGradient>
   </defs>
