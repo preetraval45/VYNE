@@ -19,6 +19,7 @@ import {
   X,
   Menu,
 } from 'lucide-react'
+import { VyneLogo } from '@/components/brand/VyneLogo'
 
 /* ─── Waitlist Form ──────────────────────────────────────────── */
 function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
@@ -144,25 +145,7 @@ function Nav() {
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #6C47FF, #8B6BFF)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: 16,
-            color: '#fff',
-          }}
-        >
-          V
-        </div>
-        <span style={{ fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: '-0.02em' }}>VYNE</span>
-      </div>
+      <VyneLogo variant="horizontal" markSize={28} />
 
       {/* Desktop links */}
       <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
@@ -932,25 +915,7 @@ function Footer() {
         gap: 16,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 6,
-            background: 'linear-gradient(135deg, #6C47FF, #8B6BFF)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: 12,
-            color: '#fff',
-          }}
-        >
-          V
-        </div>
-        <span style={{ fontWeight: 600, fontSize: 14, color: '#6B6B8A' }}>VYNE</span>
-      </div>
+      <VyneLogo variant="mark" markSize={24} />
       <div style={{ display: 'flex', gap: 18 }}>
         {[
           { label: 'Developers', href: '/developers' },
