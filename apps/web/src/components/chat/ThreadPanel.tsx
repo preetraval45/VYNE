@@ -234,7 +234,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
             <p
               style={{
                 fontSize: 12,
-                color: "#4A4A6A",
+                color: "var(--text-primary)",
                 lineHeight: 1.5,
                 margin: 0,
               }}
@@ -247,7 +247,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           <p
             style={{
               fontSize: 11,
-              color: "#6C47FF",
+              color: "var(--vyne-purple)",
               marginTop: 8,
               paddingLeft: 40,
             }}
