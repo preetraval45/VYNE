@@ -67,7 +67,12 @@ const colorFor: Record<ToastKind, { bg: string; fg: string; border: string }> = 
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mounted, setMounted] = useState(false);
   const timers = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const dismiss = useCallback((id: string) => {
     const t = timers.current.get(id);
@@ -113,7 +118,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      {typeof window !== "undefined" &&
+      {mounted &&
         createPortal(
           <div
             className="fixed bottom-5 right-5 flex flex-col gap-2 pointer-events-none"

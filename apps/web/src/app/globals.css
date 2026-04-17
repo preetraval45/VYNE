@@ -26,81 +26,81 @@
 
 :root {
   /* ── 5. Sidebar ──────────────────────────────────────────────────── */
-  --sidebar-bg: #160F2A;
-  --sidebar-text: #9490B8;
+  --sidebar-bg: #1C1C2E;
+  --sidebar-text: #A0A0B8;
   --sidebar-active: #FFFFFF;
-  --sidebar-hover: #221A3A;
-  --sidebar-accent: #7C5CFF;
+  --sidebar-hover: #2A2A3E;
+  --sidebar-accent: #6C47FF;
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 60px;
 
   /* ── Input / Form Controls ───────────────────────────────────────── */
-  --input-bg: #F5F3FF;
-  --input-border: #C8C4E8;
-  --input-focus-border: #7C5CFF;
-  --input-focus-shadow: 0 0 0 3px rgba(124,92,255,0.15);
+  --input-bg: #FAFAFE;
+  --input-border: #D8D8E8;
+  --input-focus-border: #6C47FF;
+  --input-focus-shadow: 0 0 0 3px rgba(108,71,255,0.15);
 
   /* ── Table / Card Backgrounds ───────────────────────────────────── */
-  --table-header-bg: #EDEBF8;
-  --border-subtle: rgba(108,71,255,0.08);
+  --table-header-bg: #F7F7FB;
+  --border-subtle: rgba(0,0,0,0.08);
 
   /* ── Semantic Badge Colors ───────────────────────────────────────── */
-  --badge-success-bg: rgba(34,197,94,0.1);
-  --badge-success-text: #15803D;
-  --badge-warning-bg: rgba(245,158,11,0.1);
-  --badge-warning-text: #B45309;
+  --badge-success-bg: rgba(34,197,94,0.12);
+  --badge-success-text: #166534;
+  --badge-warning-bg: rgba(245,158,11,0.12);
+  --badge-warning-text: #92400E;
   --badge-danger-bg: rgba(239,68,68,0.1);
-  --badge-danger-text: #B91C1C;
-  --badge-info-bg: rgba(99,102,241,0.1);
-  --badge-info-text: #4338CA;
+  --badge-danger-text: #991B1B;
+  --badge-info-bg: rgba(59,130,246,0.1);
+  --badge-info-text: #1D4ED8;
 
   /* ── Alert / Highlight Cards ─────────────────────────────────────── */
-  --alert-purple-bg: rgba(124,92,255,0.07);
-  --alert-purple-border: rgba(124,92,255,0.22);
-  --alert-purple-text: #4C1D95;
+  --alert-purple-bg: rgba(108,71,255,0.08);
+  --alert-purple-border: rgba(108,71,255,0.25);
+  --alert-purple-text: #3730A3;
 
   /* ── 1. Brand Colors ─────────────────────────────────────────────── */
-  --vyne-purple: #7C5CFF;
-  --vyne-purple-light: #9B80FF;
-  --vyne-purple-dark: #5A3ED4;
+  --vyne-purple: #6C47FF;
+  --vyne-purple-light: #8B6BFF;
+  --vyne-purple-dark: #5235CC;
   --vyne-cyan: #06B6D4;
   --vyne-indigo: #6366F1;
 
   /* ── 2. Surface & Background ─────────────────────────────────────── */
-  --content-bg: #FDFCFF;
-  --content-bg-secondary: #F3F1FB;
-  --content-secondary: #F3F1FB;
-  --content-border: #DDD8F2;
-  --content-border-strong: #C4BEE8;
+  --content-bg: #FFFFFF;
+  --content-bg-secondary: #F8F8FC;
+  --content-secondary: #F8F8FC;
+  --content-border: #E8E8F0;
+  --content-border-strong: #D0D0E0;
 
   /* ── 3. Text Colors ──────────────────────────────────────────────── */
-  --text-primary: #0F0C1E;
-  --text-secondary: #4E4B6A;
-  --text-tertiary: #8E8AA8;
+  --text-primary: #1A1A2E;
+  --text-secondary: #6B6B8A;
+  --text-tertiary: #A0A0B8;
 
   /* On-surface text colors (for light backgrounds) */
-  --on-surface: #0F0C1E;
-  --on-surface-secondary: #4E4B6A;
-  --on-surface-tertiary: #8E8AA8;
+  --on-surface: #1A1A2E;
+  --on-surface-secondary: #6B6B8A;
+  --on-surface-tertiary: #A0A0B8;
 
   /* On-primary text colors (for purple/dark backgrounds) */
   --on-primary: #FFFFFF;
-  --on-primary-secondary: rgba(255,255,255,0.75);
+  --on-primary-secondary: rgba(255,255,255,0.7);
 
   /* On-dark text colors (for dark backgrounds like sidebar) */
   --on-dark: #FFFFFF;
-  --on-dark-secondary: #9490B8;
-  --on-dark-tertiary: #6B6880;
+  --on-dark-secondary: #A0A0B8;
+  --on-dark-tertiary: #6B6B8A;
 
   /* ── 4. Status Colors ────────────────────────────────────────────── */
-  --status-success: #16A34A;
-  --status-warning: #D97706;
-  --status-danger: #DC2626;
-  --status-info: #4F46E5;
+  --status-success: #22C55E;
+  --status-warning: #F59E0B;
+  --status-danger: #EF4444;
+  --status-info: #3B82F6;
 
   /* ── 6. Chat / Messaging ─────────────────────────────────────────── */
-  --message-bg-self: #EBE6FF;
-  --message-bg-other: #F0EFF8;
+  --message-bg-self: #EEE9FF;
+  --message-bg-other: #F4F4F8;
 
   /* ── 7. Typography (responsive) ──────────────────────────────────── */
   --text-xs: clamp(10px, 1.2vw, 11px);
@@ -132,11 +132,11 @@
   --border-radius-xl: 16px;
 
   /* ── 11. Shadows ─────────────────────────────────────────────────── */
-  --shadow-sm: 0 1px 3px rgba(108,71,255,0.07), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(108,71,255,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg: 0 10px 24px rgba(108,71,255,0.1), 0 4px 8px rgba(0,0,0,0.04);
-  --shadow-xl: 0 20px 40px rgba(108,71,255,0.12), 0 8px 16px rgba(0,0,0,0.06);
-  --shadow-panel: 0 0 0 1px rgba(108,71,255,0.1), 0 10px 30px rgba(108,71,255,0.08);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+  --shadow-panel: 0 0 0 1px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.12);
 
   /* ── 12. Transitions ─────────────────────────────────────────────── */
   --transition-fast: 150ms ease;
@@ -149,63 +149,57 @@
   color-scheme: dark;
 
   /* Content */
-  --content-bg: #0E0B1A;
-  --content-bg-secondary: #171428;
-  --content-secondary: #171428;
-  --content-border: #262140;
-  --content-border-strong: #332C55;
+  --content-bg: #1A1A2E;
+  --content-bg-secondary: #232340;
+  --content-secondary: #232340;
+  --content-border: #2E2E4A;
+  --content-border-strong: #3A3A5A;
 
   /* Text */
-  --text-primary: #F0EEFF;
-  --text-secondary: #9490B8;
-  --text-tertiary: #5E5A7A;
+  --text-primary: #E8E8F0;
+  --text-secondary: #A0A0B8;
+  --text-tertiary: #6B6B8A;
 
   /* On-surface (dark theme) */
-  --on-surface: #F0EEFF;
-  --on-surface-secondary: #9490B8;
-  --on-surface-tertiary: #5E5A7A;
+  --on-surface: #E8E8F0;
+  --on-surface-secondary: #A0A0B8;
+  --on-surface-tertiary: #6B6B8A;
 
   /* Messaging */
-  --message-bg-self: #2A1C55;
-  --message-bg-other: #171428;
+  --message-bg-self: #2E2255;
+  --message-bg-other: #232340;
 
   /* Input / Form Controls */
-  --input-bg: #130F22;
-  --input-border: rgba(255,255,255,0.1);
-  --input-focus-border: #9B80FF;
-  --input-focus-shadow: 0 0 0 3px rgba(124,92,255,0.2);
+  --input-bg: #1E1E32;
+  --input-border: rgba(255,255,255,0.12);
+  --input-focus-border: #8B6BFF;
+  --input-focus-shadow: 0 0 0 3px rgba(108,71,255,0.2);
 
   /* Table / Card Backgrounds */
-  --table-header-bg: #0B0916;
-  --border-subtle: rgba(255,255,255,0.06);
+  --table-header-bg: #13131F;
+  --border-subtle: rgba(255,255,255,0.08);
 
   /* Semantic Badge Colors */
-  --badge-success-bg: rgba(34,197,94,0.1);
+  --badge-success-bg: rgba(34,197,94,0.12);
   --badge-success-text: #4ADE80;
   --badge-warning-bg: rgba(245,158,11,0.1);
   --badge-warning-text: #FCD34D;
   --badge-danger-bg: rgba(239,68,68,0.1);
   --badge-danger-text: #F87171;
-  --badge-info-bg: rgba(99,102,241,0.12);
-  --badge-info-text: #A5B4FC;
+  --badge-info-bg: rgba(59,130,246,0.1);
+  --badge-info-text: #93C5FD;
 
   /* Alert / Highlight Cards */
-  --alert-purple-bg: rgba(124,92,255,0.12);
-  --alert-purple-border: rgba(124,92,255,0.3);
-  --alert-purple-text: #C4B5FD;
-
-  /* Status colors (brighter for dark bg) */
-  --status-success: #22C55E;
-  --status-warning: #F59E0B;
-  --status-danger: #EF4444;
-  --status-info: #6366F1;
+  --alert-purple-bg: rgba(108,71,255,0.15);
+  --alert-purple-border: rgba(108,71,255,0.35);
+  --alert-purple-text: #A78BFA;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3);
-  --shadow-lg: 0 10px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.35);
-  --shadow-xl: 0 20px 40px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.4);
-  --shadow-panel: 0 0 0 1px rgba(255,255,255,0.05), 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.25);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.5);
+  --shadow-panel: 0 0 0 1px rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.5);
 }
 
 /* Dark mode — main content & cards */
@@ -222,23 +216,23 @@
 [data-theme="dark"] .dk-card,
 [data-theme="dark"] [class*="card"],
 [data-theme="dark"] .dark-card {
-  background: #141122 !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  background: #17172A !important;
+  border-color: rgba(255,255,255,0.07) !important;
   color: var(--text-primary);
 }
 
 /* Tables */
 [data-theme="dark"] table { background: transparent; }
-[data-theme="dark"] thead tr { background: #0B0916 !important; }
+[data-theme="dark"] thead tr { background: #13131F !important; }
 [data-theme="dark"] tbody tr { border-color: rgba(255,255,255,0.04) !important; }
-[data-theme="dark"] th { color: var(--text-tertiary) !important; border-color: rgba(255,255,255,0.06) !important; }
+[data-theme="dark"] th { color: var(--text-tertiary) !important; border-color: rgba(255,255,255,0.07) !important; }
 [data-theme="dark"] td { color: var(--text-primary) !important; }
 
 /* Inputs in dark mode */
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
-  background: #130F22 !important;
+  background: #1E1E32 !important;
   border-color: rgba(255,255,255,0.1) !important;
   color: var(--text-primary) !important;
 }
@@ -251,19 +245,17 @@
 [data-theme="dark"] [style*="background:#fff"],
 [data-theme="dark"] [style*="background:#FFF"],
 [data-theme="dark"] [style*="background:#FFFFFF"] {
-  background: #141122 !important;
+  background: #17172A !important;
   color: var(--text-primary);
 }
 
 [data-theme="dark"] [style*="background: #F7F7FB"],
 [data-theme="dark"] [style*="background: #FAFAFE"],
 [data-theme="dark"] [style*="background: #F8F8FC"],
-[data-theme="dark"] [style*="background: #F3F1FB"],
 [data-theme="dark"] [style*="background: #F0F0F8"],
 [data-theme="dark"] [style*="background: #FAFAFA"],
-[data-theme="dark"] [style*="background: #F8F8F8"],
-[data-theme="dark"] [style*="background: #FDFCFF"] {
-  background: #0B0916 !important;
+[data-theme="dark"] [style*="background: #F8F8F8"] {
+  background: #13131F !important;
 }
 
 [data-theme="dark"] [style*="color: #1A1A2E"],
@@ -486,30 +478,6 @@ textarea:focus-visible {
   [role="button"] {
     min-height: 44px;
     min-width: 44px;
-  }
-}
-
-/* ─── Mobile: sidebar becomes drawer ──────────────────────────── */
-@media (max-width: 768px) {
-  .sidebar-nav {
-    position: fixed !important;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    z-index: 45;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease-out;
-    box-shadow: var(--shadow-xl);
-  }
-  .sidebar-nav[data-mobile-open="true"] {
-    transform: translateX(0);
-  }
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(2px);
-    z-index: 44;
   }
 }
 
