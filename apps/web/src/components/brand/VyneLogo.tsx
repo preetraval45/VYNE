@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+// v=4 cache-buster — increment whenever the SVG files change
+const V = "?v=4";
 
 export interface VyneLogoProps {
   /**
@@ -11,9 +12,9 @@ export interface VyneLogoProps {
   variant?: "mark" | "horizontal" | "stacked";
   /**
    * Controls rendered size.
-   *   mark       → width & height = markSize
-   *   horizontal → height = markSize (width scales proportionally)
-   *   stacked    → width  = markSize * 4  (height scales proportionally)
+   *   mark       → width & height = markSize px
+   *   horizontal → height = markSize * 1.5 px  (width auto)
+   *   stacked    → width  = markSize * 4 px     (height auto)
    */
   markSize?: number;
   className?: string;
@@ -26,44 +27,42 @@ export function VyneLogo({
 }: VyneLogoProps) {
   if (variant === "mark") {
     return (
-      <Image
-        src="/brand/logo-mark.svg"
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={`/brand/logo-mark.svg${V}`}
         alt="VYNE"
         width={markSize}
         height={markSize}
         className={className}
-        priority
+        style={{ display: "block", flexShrink: 0 }}
       />
     );
   }
 
   if (variant === "horizontal") {
-    // SVG canvas is 340 × 64 → aspect ratio ≈ 5.3 : 1
     const h = Math.round(markSize * 1.5);
-    const w = Math.round(h * (340 / 64));
     return (
-      <Image
-        src="/brand/logo-horizontal.svg"
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={`/brand/logo-horizontal.svg${V}`}
         alt="VYNE — Run your company, not your tools."
-        width={w}
         height={h}
         className={className}
-        priority
+        style={{ display: "block", flexShrink: 0 }}
       />
     );
   }
 
-  // stacked — SVG canvas is 380 × 195 → aspect ratio ≈ 1.95 : 1
+  // stacked
   const w = Math.round(markSize * 4);
-  const h = Math.round(w * (195 / 380));
   return (
-    <Image
-      src="/brand/logo-stacked.svg"
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/brand/logo-stacked.svg${V}`}
       alt="VYNE — Run your company, not your tools."
       width={w}
-      height={h}
       className={className}
-      priority
+      style={{ display: "block", flexShrink: 0 }}
     />
   );
 }
