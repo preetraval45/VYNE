@@ -4,6 +4,7 @@ import type { Module } from "@/types";
 
 interface UIStore {
   sidebarOpen: boolean;
+  sidebarCollapsed: boolean;
   activeModule: Module;
   commandPaletteOpen: boolean;
   shortcutsOpen: boolean;
@@ -13,6 +14,8 @@ interface UIStore {
 
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  toggleSidebarCollapsed: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
   setActiveModule: (module: Module) => void;
   toggleCommandPalette: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
@@ -27,6 +30,7 @@ export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
       sidebarOpen: true,
+      sidebarCollapsed: false,
       activeModule: "projects",
       commandPaletteOpen: false,
       shortcutsOpen: false,
@@ -38,6 +42,12 @@ export const useUIStore = create<UIStore>()(
 
       toggleSidebar: () =>
         set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+
+      toggleSidebarCollapsed: () =>
+        set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+      setSidebarCollapsed: (collapsed: boolean) =>
+        set({ sidebarCollapsed: collapsed }),
 
       setActiveModule: (module: Module) => set({ activeModule: module }),
 

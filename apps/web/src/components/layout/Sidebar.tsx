@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Home,
@@ -38,6 +38,8 @@ import {
   StarOff,
   Clock,
   X as XIcon,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -372,36 +374,51 @@ interface NavRowProps {
   readonly item: NavItemDef;
   readonly active: boolean;
   readonly expanded: boolean;
+  readonly collapsed?: boolean;
   readonly onToggle: () => void;
   readonly onNavigate: (href: string) => void;
 }
 
-function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
+function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigate }: NavRowProps) {
   const [hovered, setHovered] = useState(false);
+  const [flyoutTop, setFlyoutTop] = useState(0);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const Icon = item.icon;
   const hasSubs = item.subs && item.subs.length > 0;
 
+  // When collapsed + hovered, compute absolute top of flyout relative to viewport
+  const handleMouseEnter = () => {
+    setHovered(true);
+    if (collapsed && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setFlyoutTop(rect.top);
+    }
+  };
+
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <button
+        ref={buttonRef}
         type="button"
         aria-current={active ? "page" : undefined}
-        aria-expanded={hasSubs ? (expanded ? "true" : "false") : undefined}
+        aria-expanded={hasSubs && !collapsed ? (expanded ? "true" : "false") : undefined}
+        title={collapsed ? item.label : undefined}
         onClick={() => {
-          if (hasSubs) {
+          if (hasSubs && !collapsed) {
             onToggle();
           } else {
             onNavigate(item.href);
           }
         }}
-        onMouseEnter={() => setHovered(true)}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setHovered(false)}
         style={{
           width: "100%",
           display: "flex",
           alignItems: "center",
-          gap: 9,
-          padding: "8px 12px 8px 14px",
+          justifyContent: collapsed ? "center" : "flex-start",
+          gap: collapsed ? 0 : 9,
+          padding: collapsed ? "8px 0" : "8px 12px 8px 14px",
           cursor: "pointer",
           fontSize: 12.5,
           fontWeight: active ? 600 : 450,
@@ -413,8 +430,8 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
           borderLeft: active
             ? "2.5px solid var(--vyne-purple)"
             : "2.5px solid transparent",
-          borderRadius: "0 8px 8px 0",
-          marginRight: 6,
+          borderRadius: collapsed ? 0 : "0 8px 8px 0",
+          marginRight: collapsed ? 0 : 6,
           transition: "all 0.12s ease",
           textAlign: "left",
           userSelect: "none",
@@ -437,49 +454,76 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
             justifyContent: "center",
             flexShrink: 0,
             transition: "background 0.12s",
+            position: "relative",
           }}
         >
           <Icon size={13} />
+          {/* Collapsed mode badge dot */}
+          {collapsed && item.badge !== undefined && item.badge > 0 && (
+            <span
+              aria-label={`${item.badge} notifications`}
+              style={{
+                position: "absolute",
+                top: -3,
+                right: -3,
+                minWidth: 14,
+                height: 14,
+                padding: "0 3px",
+                borderRadius: 7,
+                background: "var(--vyne-purple)",
+                color: "#fff",
+                fontSize: 9,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+              }}
+            >
+              {item.badge > 9 ? "9+" : item.badge}
+            </span>
+          )}
         </span>
 
-        {/* Label */}
-        <span style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
-
-        {/* Badge */}
-        {item.badge !== undefined && item.badge > 0 && (
-          <span
-            aria-label={`${item.badge} notification${item.badge === 1 ? "" : "s"}`}
-            style={{
-              background: "var(--vyne-purple)",
-              color: "#fff",
-              borderRadius: 10,
-              padding: "1px 6px",
-              fontSize: 10,
-              fontWeight: 600,
-              minWidth: 18,
-              textAlign: "center",
-              lineHeight: "16px",
-            }}
-          >
-            {item.badge}
-          </span>
+        {/* Label, badge, chevron — hidden when collapsed */}
+        {!collapsed && (
+          <>
+            <span style={{ flex: 1, textAlign: "left" }}>{item.label}</span>
+            {item.badge !== undefined && item.badge > 0 && (
+              <span
+                aria-label={`${item.badge} notification${item.badge === 1 ? "" : "s"}`}
+                style={{
+                  background: "var(--vyne-purple)",
+                  color: "#fff",
+                  borderRadius: 10,
+                  padding: "1px 6px",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  minWidth: 18,
+                  textAlign: "center",
+                  lineHeight: "16px",
+                }}
+              >
+                {item.badge}
+              </span>
+            )}
+            <ChevronRight
+              size={14}
+              style={{
+                color: "var(--text-tertiary)",
+                flexShrink: 0,
+                opacity: hovered || active ? 0.8 : 0.4,
+                transition: "all 0.15s ease",
+                transform: expanded ? "rotate(90deg)" : "none",
+                visibility: hasSubs ? "visible" : "hidden",
+              }}
+            />
+          </>
         )}
-
-        {/* Chevron arrow — rotates when expanded */}
-        <ChevronRight
-          size={14}
-          style={{
-            color: "var(--text-tertiary)",
-            flexShrink: 0,
-            opacity: hovered || active ? 0.8 : 0.4,
-            transition: "all 0.15s ease",
-            transform: expanded ? "rotate(90deg)" : "none",
-          }}
-        />
       </button>
 
-      {/* Sub-items dropdown */}
-      {hasSubs && expanded && (
+      {/* Expanded sidebar: sub-items dropdown */}
+      {hasSubs && !collapsed && expanded && (
         <div style={{ paddingBottom: 2 }}>
           {item.subs!.map((sub) => (
             <button
@@ -524,6 +568,129 @@ function NavRow({ item, active, expanded, onToggle, onNavigate }: NavRowProps) {
               {sub.label}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Collapsed sidebar: hover flyout with label + sub-items */}
+      {collapsed && hovered && (
+        <div
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            position: "fixed",
+            left: 60,
+            top: flyoutTop,
+            minWidth: 200,
+            background: "var(--content-bg)",
+            border: "1px solid var(--content-border)",
+            borderRadius: 10,
+            boxShadow: "var(--shadow-lg)",
+            padding: "8px 0",
+            zIndex: 200,
+            pointerEvents: "auto",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => onNavigate(item.href)}
+            style={{
+              width: "100%",
+              padding: "8px 14px",
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              textAlign: "left",
+            }}
+          >
+            <span
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 6,
+                background: `rgba(${hexToRgb(item.color)}, 0.14)`,
+                color: item.color,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Icon size={12} />
+            </span>
+            {item.label}
+            {item.badge !== undefined && item.badge > 0 && (
+              <span
+                style={{
+                  marginLeft: "auto",
+                  background: "var(--vyne-purple)",
+                  color: "#fff",
+                  borderRadius: 10,
+                  padding: "1px 6px",
+                  fontSize: 10,
+                  fontWeight: 600,
+                }}
+              >
+                {item.badge}
+              </span>
+            )}
+          </button>
+          {hasSubs && (
+            <>
+              <div
+                style={{
+                  height: 1,
+                  background: "var(--content-border)",
+                  margin: "4px 0",
+                }}
+              />
+              {item.subs!.map((sub) => (
+                <button
+                  key={sub.label}
+                  type="button"
+                  onClick={() => onNavigate(sub.href)}
+                  onMouseEnter={(e) =>
+                    ((e.currentTarget as HTMLElement).style.background =
+                      "rgba(108,71,255,0.06)")
+                  }
+                  onMouseLeave={(e) =>
+                    ((e.currentTarget as HTMLElement).style.background =
+                      "transparent")
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "6px 14px 6px 42px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 7,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: 12,
+                    color: "var(--text-secondary)",
+                    textAlign: "left",
+                    transition: "background 0.1s",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 3,
+                      height: 3,
+                      borderRadius: "50%",
+                      background: "var(--text-tertiary)",
+                      opacity: 0.5,
+                    }}
+                  />
+                  {sub.label}
+                </button>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
@@ -822,6 +989,8 @@ export function Sidebar() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const { toggleCommandPalette } = useUIStore();
+  const collapsed = useUIStore((s) => s.sidebarCollapsed);
+  const toggleCollapsed = useUIStore((s) => s.toggleSidebarCollapsed);
   const theme = useTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -909,8 +1078,8 @@ export function Sidebar() {
       className="sidebar-nav"
       aria-label="Main navigation"
       style={{
-        width: 240,
-        minWidth: 240,
+        width: collapsed ? 60 : 240,
+        minWidth: collapsed ? 60 : 240,
         background: "var(--content-bg)",
         borderRight: "1px solid var(--content-border)",
         display: "flex",
@@ -920,50 +1089,107 @@ export function Sidebar() {
         flexShrink: 0,
         position: "relative",
         zIndex: 10,
+        transition: "width 0.2s ease, min-width 0.2s ease",
       }}
     >
-      {/* ── Header: Logo + search ───────── */}
+      {/* ── Header: Logo + collapse toggle ───────── */}
       <div
         style={{
-          padding: "14px 14px 12px",
+          padding: collapsed ? "14px 0 12px" : "14px 14px 12px",
           display: "flex",
           alignItems: "center",
+          justifyContent: collapsed ? "center" : "space-between",
           gap: 10,
           borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
           background: "linear-gradient(135deg, rgba(108,71,255,0.06) 0%, transparent 100%)",
         }}
       >
-        <div style={{ flex: 1 }}>
-          <VyneLogo variant="horizontal" markSize={32} />
-        </div>
-        <button
-          type="button"
-          onClick={toggleCommandPalette}
-          aria-label="Open command palette"
-          style={{
-            background: "var(--content-secondary)",
-            border: "1px solid var(--content-border)",
-            cursor: "pointer",
-            color: "var(--text-tertiary)",
-            padding: "5px 7px",
-            borderRadius: 7,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
-            (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
-            (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
-          }}
-        >
-          <Menu size={15} />
-        </button>
+        {collapsed ? (
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label="Expand sidebar"
+            title="Expand sidebar"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              padding: 4,
+              borderRadius: 6,
+              color: "var(--text-secondary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <VyneLogo variant="mark" markSize={28} />
+          </button>
+        ) : (
+          <>
+            <div style={{ flex: 1 }}>
+              <VyneLogo variant="horizontal" markSize={32} />
+            </div>
+            <div style={{ display: "flex", gap: 4 }}>
+              <button
+                type="button"
+                onClick={toggleCommandPalette}
+                aria-label="Open command palette"
+                title="Command palette (⌘K)"
+                style={{
+                  background: "var(--content-secondary)",
+                  border: "1px solid var(--content-border)",
+                  cursor: "pointer",
+                  color: "var(--text-tertiary)",
+                  padding: "5px 7px",
+                  borderRadius: 7,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+                }}
+              >
+                <Menu size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                aria-label="Collapse sidebar"
+                title="Collapse sidebar"
+                style={{
+                  background: "var(--content-secondary)",
+                  border: "1px solid var(--content-border)",
+                  cursor: "pointer",
+                  color: "var(--text-tertiary)",
+                  padding: "5px 7px",
+                  borderRadius: 7,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+                }}
+              >
+                <PanelLeftClose size={15} />
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── Scrollable nav items ──────────────────── */}
@@ -979,7 +1205,7 @@ export function Sidebar() {
         }}
       >
         {/* ── Pinned ───────────────────────────────────────── */}
-        {pinned.length > 0 && (
+        {!collapsed && pinned.length > 0 && (
           <div style={{ padding: "8px 12px 6px" }}>
             <div
               style={{
@@ -1086,13 +1312,14 @@ export function Sidebar() {
             item={item}
             active={isActive(item.href)}
             expanded={expandedItems.has(item.label)}
+            collapsed={collapsed}
             onToggle={() => toggleExpand(item.label)}
             onNavigate={go}
           />
         ))}
 
         {/* ── Recent ───────────────────────────────────────── */}
-        {recent.length > 1 && (
+        {!collapsed && recent.length > 1 && (
           <div style={{ padding: "12px 12px 6px" }}>
             <div
               style={{
@@ -1194,10 +1421,11 @@ export function Sidebar() {
       {/* ── User footer ──────────────────────────── */}
       <div
         style={{
-          padding: "10px 12px",
+          padding: collapsed ? "10px 0" : "10px 12px",
           borderTop: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
+          justifyContent: collapsed ? "center" : "flex-start",
           gap: 9,
           flexShrink: 0,
           position: "relative",
@@ -1241,24 +1469,27 @@ export function Sidebar() {
           {userInitials}
         </button>
 
-        {/* Name + Emoji Status */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--text-primary)",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              lineHeight: 1.3,
-            }}
-          >
-            {userName}
+        {/* Name + Emoji Status — hidden when collapsed */}
+        {!collapsed && (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                lineHeight: 1.3,
+              }}
+            >
+              {userName}
+            </div>
+            <EmojiStatusLine />
           </div>
-          <EmojiStatusLine />
-        </div>
+        )}
 
+        {!collapsed && <>
         {/* Settings gear */}
         <button
           type="button"
@@ -1471,6 +1702,7 @@ export function Sidebar() {
         >
           <LogOut size={16} />
         </button>
+        </>}
 
         {/* User dropdown menu */}
         {menuOpen && (
