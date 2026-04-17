@@ -9,6 +9,7 @@ import { ProductTour } from "@/components/layout/ProductTour";
 import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
+import { ToastProvider } from "@/components/shared/ui";
 import { useUIStore } from "@/lib/stores/ui";
 
 export default function DashboardLayout({
@@ -19,6 +20,7 @@ export default function DashboardLayout({
   const focusMode = useUIStore((s) => s.focusMode);
 
   return (
+    <ToastProvider>
     <div
       className="flex h-screen overflow-hidden"
       style={{ background: "var(--content-bg-secondary)" }}
@@ -60,5 +62,6 @@ export default function DashboardLayout({
       {/* Pomodoro timer + Quick-note FAB + Workspace switcher (⌘⇧O) */}
       <GlobalWidgets />
     </div>
+    </ToastProvider>
   );
 }

@@ -435,6 +435,50 @@ textarea:focus-visible {
   outline: none;
 }
 
+/* Landing waitlist input — autofill override + focus */
+.waitlist-input:focus {
+  border-color: rgba(124,92,255,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(124,92,255,0.15) !important;
+}
+.waitlist-input:-webkit-autofill,
+.waitlist-input:-webkit-autofill:hover,
+.waitlist-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255,255,255,0.08) inset !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ─── Form error shake animation ─────────────────────────────── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.shake-on-error {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97);
+}
+
+/* ─── Spinner ─────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ─── Responsive auth logo ─────────────────────────────────────── */
+.auth-logo {
+  max-width: 100%;
+  height: auto !important;
+}
+@media (max-width: 480px) {
+  .auth-logo { width: 140px !important; }
+}
+
 /* ─── Command Palette ───────────────────────────────────────────── */
 .command-palette-bg {
   background: rgba(28, 28, 46, 0.96);

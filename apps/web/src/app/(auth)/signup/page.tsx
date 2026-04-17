@@ -69,7 +69,7 @@ export default function SignupPage() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <VyneLogo variant="stacked" markSize={48} className="text-white mb-1" />
+          <VyneLogo variant="stacked" markSize={44} className="auth-logo text-white mb-1" />
           <h1 className="text-2xl font-semibold text-white tracking-tight">Create your workspace</h1>
           <p className="text-sm mt-1" style={{ color: '#A0A0B8' }}>
             Get started with VYNE in seconds
@@ -87,9 +87,11 @@ export default function SignupPage() {
         >
           {error && (
             <motion.div
+              key={error}
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-5 px-4 py-3 rounded-lg text-sm"
+              role="alert"
+              className="shake-on-error mb-5 px-4 py-3 rounded-lg text-sm"
               style={{
                 background: 'rgba(239, 68, 68, 0.12)',
                 border: '1px solid rgba(239, 68, 68, 0.25)',

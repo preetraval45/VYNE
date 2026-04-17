@@ -99,7 +99,7 @@ export default function LoginPage() {
           {/* Logo + Heading */}
           <div className="flex flex-col items-center mb-10">
             <Link href="/" className="mb-5">
-              <VyneLogo variant="stacked" markSize={52} className="text-white" />
+              <VyneLogo variant="stacked" markSize={48} className="auth-logo text-white" />
             </Link>
             <h1 className="text-3xl font-bold text-white tracking-tight">
               Welcome back
@@ -124,9 +124,11 @@ export default function LoginPage() {
           >
             {error && (
               <motion.div
+                key={error}
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-5 px-4 py-3 rounded-lg text-sm"
+                role="alert"
+                className="shake-on-error mb-5 px-4 py-3 rounded-lg text-sm"
                 style={{
                   background: "rgba(239, 68, 68, 0.12)",
                   border: "1px solid rgba(239, 68, 68, 0.25)",
@@ -421,9 +423,9 @@ export default function LoginPage() {
             style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
           >
             {[
-              { value: "200+", label: "On waitlist" },
               { value: "15+", label: "Modules" },
               { value: "6", label: "Tools replaced" },
+              { value: "1", label: "Subscription" },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="text-2xl font-bold text-white tracking-tight">
