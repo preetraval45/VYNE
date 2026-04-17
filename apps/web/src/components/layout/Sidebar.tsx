@@ -424,12 +424,15 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
           fontWeight: active ? 600 : 450,
           color: active ? "var(--vyne-purple)" : "var(--text-primary)",
           background: active
-            ? "rgba(108,71,255,0.09)"
-            : hovered ? "rgba(108,71,255,0.04)" : "transparent",
+            ? "var(--aurora-soft)"
+            : hovered ? "rgba(124,92,255,0.05)" : "transparent",
           border: "none",
           borderLeft: active
             ? "2.5px solid var(--vyne-purple)"
             : "2.5px solid transparent",
+          boxShadow: active
+            ? "inset 0 0 0 1px rgba(124,92,255,0.08)"
+            : "none",
           borderRadius: collapsed ? 0 : "0 8px 8px 0",
           marginRight: collapsed ? 0 : 6,
           transition: "all 0.12s ease",

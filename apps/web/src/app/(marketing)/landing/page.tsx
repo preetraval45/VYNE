@@ -5,26 +5,31 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   MessageSquare, FolderKanban, FileText, Package, BarChart3, Bot,
-  Check, Zap, Shield, Globe, ChevronRight, Star, X, Menu,
-  Loader2, Github, Twitter, Linkedin,
+  Check, Zap, Shield, Globe, ArrowRight, Star, X, Menu,
+  Loader2, Github, Twitter, Linkedin, Sparkles,
 } from 'lucide-react'
 import { VyneLogo } from '@/components/brand/VyneLogo'
 
-// ── Brand palette (marketing page is always dark) ─────────────────
+// ── Refined palette — dark-first marketing surface ─────────────────
 const C = {
-  bg:           '#09071A',
-  bgDeep:       '#05040F',
-  bgMid:        '#0D0B20',
-  purple:       '#7C5CFF',
-  purpleLight:  '#9B80FF',
-  purpleDim:    'rgba(124,92,255,0.08)',
-  purpleBorder: 'rgba(124,92,255,0.3)',
-  text:         '#E8E8F0',
-  textSub:      '#9490B8',
-  textMuted:    '#5E5A7A',
-  border:       'rgba(255,255,255,0.06)',
-  success:      '#22C55E',
-  danger:       '#EF4444',
+  bg:          '#07061A',
+  bgDeep:      '#03020C',
+  bgMid:       '#0A081F',
+  surface:     'rgba(255,255,255,0.03)',
+  surfaceHi:   'rgba(255,255,255,0.055)',
+  border:      'rgba(255,255,255,0.06)',
+  borderHi:    'rgba(255,255,255,0.12)',
+  text:        '#F1F0FA',
+  textSub:     '#9E9AB8',
+  textMuted:   '#5C5872',
+  purple:      '#7C5CFF',
+  indigo:      '#6366F1',
+  cyan:        '#06B6D4',
+  success:     '#22C55E',
+  danger:      '#EF4444',
+  aurora:      'linear-gradient(135deg, #7C5CFF 0%, #6366F1 45%, #06B6D4 100%)',
+  auroraSoft:  'linear-gradient(135deg, rgba(124,92,255,0.14), rgba(6,182,212,0.08))',
+  auroraText:  'linear-gradient(135deg, #A78BFA 0%, #818CF8 50%, #22D3EE 100%)',
 } as const
 
 /* ─── Waitlist Form ──────────────────────────────────────────── */
@@ -61,17 +66,18 @@ function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
   if (status === 'success') {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '12px 20px', background: 'rgba(34,197,94,0.1)',
-          border: '1px solid rgba(34,197,94,0.3)', borderRadius: 12,
-          color: C.success, fontWeight: 600,
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+          padding: '14px 20px', borderRadius: 12,
+          background: 'rgba(34,197,94,0.08)',
+          border: '1px solid rgba(34,197,94,0.25)',
+          color: C.success, fontWeight: 500, fontSize: 14,
         }}
       >
-        <Check size={20} />
-        You&apos;re on the list! We&apos;ll be in touch.
+        <Check size={18} strokeWidth={2.5} />
+        You&apos;re on the list — we&apos;ll be in touch.
       </motion.div>
     )
   }
@@ -79,8 +85,8 @@ function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
   const isHero = variant === 'hero'
 
   return (
-    <div style={{ width: '100%', maxWidth: isHero ? 480 : 400 }}>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, width: '100%' }}>
+    <div style={{ width: '100%', maxWidth: isHero ? 460 : 400 }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 6, width: '100%' }}>
         <input
           type="email"
           value={email}
@@ -90,29 +96,29 @@ function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
           required
           className="waitlist-input"
           style={{
-            flex: 1, padding: '14px 18px', borderRadius: 12,
-            border: '1px solid rgba(255,255,255,0.15)',
-            background: isHero ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.06)',
-            color: '#fff', fontSize: 15, outline: 'none', transition: 'border 0.2s',
+            flex: 1, padding: '13px 18px', borderRadius: 12,
+            border: `1px solid ${C.borderHi}`,
+            background: C.surface,
+            color: C.text, fontSize: 14, outline: 'none',
+            letterSpacing: '-0.01em',
+            transition: 'border 0.18s, background 0.18s',
           }}
         />
         <button
           type="submit"
           disabled={status === 'loading'}
+          className="btn-aurora"
           style={{
-            padding: '14px 28px', borderRadius: 12, border: 'none',
-            background: `linear-gradient(135deg, ${C.purple}, ${C.purpleLight})`,
-            color: '#fff', fontWeight: 600, fontSize: 15,
-            cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-            whiteSpace: 'nowrap', transition: 'transform 0.15s, box-shadow 0.15s',
-            boxShadow: '0 4px 15px rgba(124,92,255,0.4)',
+            padding: '13px 24px',
+            fontSize: 14,
             display: 'flex', alignItems: 'center', gap: 8,
-            opacity: status === 'loading' ? 0.8 : 1,
+            whiteSpace: 'nowrap',
+            opacity: status === 'loading' ? 0.85 : 1,
           }}
         >
           {status === 'loading' ? (
-            <><Loader2 size={16} className="animate-spin" />Joining...</>
-          ) : 'Join Waitlist'}
+            <><Loader2 size={15} className="animate-spin" />Joining...</>
+          ) : <>Join waitlist<ArrowRight size={14} /></>}
         </button>
       </form>
       <AnimatePresence>
@@ -121,7 +127,7 @@ function WaitlistForm({ variant = 'hero' }: { variant?: 'hero' | 'footer' }) {
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            style={{ color: C.danger, fontSize: 13, marginTop: 8 }}
+            style={{ color: C.danger, fontSize: 13, marginTop: 10 }}
           >
             {errorMessage || 'Something went wrong'}
           </motion.p>
@@ -139,23 +145,27 @@ function Nav() {
     <nav
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '16px 24px', display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'rgba(9,7,26,0.88)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '14px 28px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: 'rgba(7,6,26,0.72)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.4)',
+        backdropFilter: 'blur(24px) saturate(1.4)',
+        borderBottom: `1px solid ${C.border}`,
       }}
     >
       <VyneLogo variant="horizontal" markSize={28} />
 
-      {/* Desktop links */}
-      <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+      <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
         {([['#features','Features'],['#comparison','Compare'],['#pricing','Pricing']] as const).map(([href, label]) => (
           <a
             key={href}
             href={href}
-            style={{ color: C.textSub, fontSize: 14, fontWeight: 500, transition: 'color 0.2s' }}
-            onMouseEnter={(e) => { (e.target as HTMLAnchorElement).style.color = '#fff' }}
+            style={{
+              color: C.textSub, fontSize: 13.5, fontWeight: 500,
+              letterSpacing: '-0.005em',
+              transition: 'color 0.18s',
+            }}
+            onMouseEnter={(e) => { (e.target as HTMLAnchorElement).style.color = C.text }}
             onMouseLeave={(e) => { (e.target as HTMLAnchorElement).style.color = C.textSub }}
           >
             {label}
@@ -164,28 +174,31 @@ function Nav() {
         <Link
           href="/login"
           style={{
-            padding: '8px 20px', borderRadius: 8,
-            border: `1px solid ${C.purpleBorder}`,
-            color: C.purpleLight, fontSize: 14, fontWeight: 600,
-            transition: 'all 0.2s',
+            padding: '7px 16px', borderRadius: 8,
+            border: `1px solid ${C.borderHi}`,
+            background: C.surface,
+            color: C.text, fontSize: 13, fontWeight: 600,
+            letterSpacing: '-0.005em',
+            transition: 'background 0.18s, border 0.18s',
           }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = C.surfaceHi }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = C.surface }}
         >
-          Sign In
+          Sign in
         </Link>
       </div>
 
-      {/* Mobile menu button */}
       <button
+        type="button"
         className="hide-desktop"
         onClick={() => setMobileOpen(!mobileOpen)}
-        style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: 4 }}
+        style={{ background: 'none', border: 'none', color: C.text, cursor: 'pointer', padding: 4 }}
         aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
         aria-expanded={mobileOpen}
       >
-        {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+        {mobileOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
-      {/* Mobile dropdown with animation */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -197,9 +210,11 @@ function Nav() {
             className="hide-desktop"
             style={{
               position: 'absolute', top: '100%', left: 0, right: 0,
-              background: 'rgba(9,7,26,0.97)', backdropFilter: 'blur(20px)',
-              padding: 24, display: 'flex', flexDirection: 'column', gap: 20,
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(7,6,26,0.96)',
+              WebkitBackdropFilter: 'blur(24px)',
+              backdropFilter: 'blur(24px)',
+              padding: 24, display: 'flex', flexDirection: 'column', gap: 18,
+              borderBottom: `1px solid ${C.border}`,
             }}
           >
             {[['#features','Features'],['#comparison','Compare'],['#pricing','Pricing']].map(([href, label]) => (
@@ -207,9 +222,7 @@ function Nav() {
                 {label}
               </a>
             ))}
-            <Link href="/login" style={{ color: C.purpleLight, fontSize: 16, fontWeight: 600 }}>
-              Sign In
-            </Link>
+            <Link href="/login" style={{ color: C.text, fontSize: 16, fontWeight: 600 }}>Sign in</Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -217,83 +230,115 @@ function Nav() {
   )
 }
 
-/* ─── Hero Section ───────────────────────────────────────────── */
+/* ─── Hero Section — aurora mesh + generous type ──────────────── */
 function Hero() {
   return (
     <section
       style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-        padding: '120px 24px 80px', position: 'relative', overflow: 'hidden',
+        padding: '140px 24px 100px', position: 'relative', overflow: 'hidden',
       }}
     >
-      {/* Background glow */}
+      {/* Aurora mesh — animated halos */}
       <div
+        className="aurora-halo aurora-drift"
+        style={{ width: 700, height: 700, top: '20%', left: '50%', transform: 'translateX(-50%)' }}
+      />
+      <div
+        className="aurora-halo"
         style={{
-          position: 'absolute', top: '25%', left: '50%', transform: 'translate(-50%,-50%)',
-          width: 700, height: 700, borderRadius: '50%', pointerEvents: 'none',
-          background: 'radial-gradient(circle, rgba(124,92,255,0.16) 0%, transparent 70%)',
-          filter: 'blur(40px)',
+          width: 420, height: 420, top: '55%', left: '15%',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.35) 0%, transparent 70%)',
+          opacity: 0.4,
         }}
       />
-      {/* Grid */}
       <div
+        className="aurora-halo"
+        style={{
+          width: 360, height: 360, top: '10%', right: '10%',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)',
+          opacity: 0.35,
+        }}
+      />
+
+      {/* Dotted grid floor */}
+      <div
+        className="grid-bg"
         style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(124,92,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,255,0.03) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-          maskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%)',
+          maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, #000 20%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, #000 20%, transparent 75%)',
         }}
       />
 
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: 800 }}>
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 820 }}>
+        {/* Tag pill */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.05 }}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '6px 16px', borderRadius: 999,
-            border: `1px solid ${C.purpleBorder}`,
-            background: C.purpleDim, color: C.purpleLight,
-            fontSize: 13, fontWeight: 600, marginBottom: 32,
+            padding: '5px 5px 5px 14px', borderRadius: 999,
+            border: `1px solid ${C.borderHi}`, background: C.surface,
+            fontSize: 12.5, fontWeight: 500,
+            color: C.textSub, letterSpacing: '-0.005em',
+            marginBottom: 28,
           }}
         >
-          <Zap size={14} />
-          AI-Native Company OS
+          <Sparkles size={13} style={{ color: '#A78BFA' }} />
+          AI-native company OS
+          <span style={{
+            padding: '2px 9px', borderRadius: 999,
+            background: 'rgba(124,92,255,0.15)',
+            color: '#C4B5FD', fontSize: 11, fontWeight: 600,
+            letterSpacing: '0.02em',
+          }}>
+            v1 · beta
+          </span>
         </motion.div>
 
+        {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.15 }}
           style={{
-            fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: 800,
-            lineHeight: 1.05, letterSpacing: '-0.03em', color: '#fff', marginBottom: 24,
+            fontSize: 'clamp(40px, 6.8vw, 82px)',
+            fontWeight: 700,
+            lineHeight: 1.02,
+            letterSpacing: '-0.035em',
+            color: C.text,
+            marginBottom: 24,
           }}
         >
           One workspace.
           <br />
-          <span style={{ background: `linear-gradient(135deg, ${C.purple}, ${C.purpleLight}, #A78BFA)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Every tool replaced.
-          </span>
+          <span className="aurora-text">Every tool replaced.</span>
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          style={{ fontSize: 'clamp(16px, 2vw, 20px)', lineHeight: 1.6, color: C.textSub, maxWidth: 600, margin: '0 auto 40px' }}
+          transition={{ delay: 0.22 }}
+          style={{
+            fontSize: 'clamp(16px, 1.9vw, 19px)',
+            lineHeight: 1.55,
+            color: C.textSub,
+            maxWidth: 620,
+            margin: '0 auto 44px',
+            letterSpacing: '-0.005em',
+          }}
         >
-          VYNE replaces Slack, Jira, Notion, QuickBooks, and Salesforce with one AI-powered platform.
-          Chat, projects, docs, ERP, and finance — all connected by intelligence.
+          VYNE replaces Slack, Jira, Notion, QuickBooks, and Salesforce with a single AI-powered
+          platform. Chat, projects, docs, ERP, and finance — connected by intelligence.
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           style={{ display: 'flex', justifyContent: 'center' }}
         >
           <WaitlistForm variant="hero" />
@@ -302,32 +347,44 @@ function Hero() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          style={{ marginTop: 24, fontSize: 13, color: C.textMuted }}
+          transition={{ delay: 0.45 }}
+          style={{
+            marginTop: 20, fontSize: 12.5, color: C.textMuted,
+            letterSpacing: '0.01em', fontFeatureSettings: '"ss01"',
+          }}
         >
           Early access · Free tier available · No credit card required
         </motion.p>
 
+        {/* Replaced stack */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 12, marginTop: 48 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.55 }}
+          style={{ marginTop: 56 }}
         >
-          {['Slack', 'Jira', 'Notion', 'QuickBooks', 'Salesforce', 'Datadog'].map((tool) => (
-            <div
-              key={tool}
-              style={{
-                padding: '8px 16px', borderRadius: 8,
-                border: '1px solid rgba(255,255,255,0.08)',
-                background: 'rgba(255,255,255,0.03)',
-                color: C.textMuted, fontSize: 13, fontWeight: 500,
-                textDecoration: 'line-through', textDecorationColor: 'rgba(239,68,68,0.5)',
-              }}
-            >
-              {tool}
-            </div>
-          ))}
+          <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.18em', color: C.textMuted, textTransform: 'uppercase', marginBottom: 16 }}>
+            Replaces
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
+            {['Slack', 'Jira', 'Notion', 'QuickBooks', 'Salesforce', 'Datadog'].map((tool) => (
+              <div
+                key={tool}
+                style={{
+                  padding: '6px 14px', borderRadius: 8,
+                  border: `1px solid ${C.border}`,
+                  background: C.surface,
+                  color: C.textSub, fontSize: 12, fontWeight: 500,
+                  letterSpacing: '-0.005em',
+                  textDecoration: 'line-through',
+                  textDecorationColor: 'rgba(239,68,68,0.45)',
+                  textDecorationThickness: 1.5,
+                }}
+              >
+                {tool}
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>
@@ -336,50 +393,191 @@ function Hero() {
 
 /* ─── Features Grid ──────────────────────────────────────────── */
 const features = [
-  { icon: MessageSquare, title: 'Team Messaging',     desc: 'Channels, DMs, threads, and file sharing. Real-time with AI-powered thread summaries.',       replaces: 'Replaces Slack',       color: '#7C5CFF' },
-  { icon: FolderKanban,  title: 'Project Management', desc: 'Kanban boards, sprints, issue tracking, and roadmaps. Built for engineering teams.',           replaces: 'Replaces Jira',        color: '#6366F1' },
-  { icon: FileText,      title: 'Documents & Wiki',   desc: 'Rich text editor, nested pages, databases, and templates. Search across everything.',          replaces: 'Replaces Notion',      color: '#06B6D4' },
-  { icon: Package,       title: 'ERP & Inventory',    desc: 'Purchase orders, vendors, stock levels, and fulfillment — with real-time alerts.',             replaces: 'Replaces NetSuite',    color: '#F59E0B' },
-  { icon: BarChart3,     title: 'Finance & Invoicing', desc: 'General ledger, invoicing, expenses, and financial reports in one place.',                   replaces: 'Replaces QuickBooks',  color: '#22C55E' },
-  { icon: Bot,           title: 'AI Command Center',  desc: 'Cross-domain intelligence that connects chat, tasks, code, and revenue data.',                 replaces: 'Replaces Datadog',     color: '#EC4899' },
+  { icon: MessageSquare, title: 'Team Messaging',      desc: 'Channels, DMs, threads, and file sharing with AI-powered thread summaries.', replaces: 'Slack',      color: '#7C5CFF' },
+  { icon: FolderKanban,  title: 'Project Management',  desc: 'Kanban boards, sprints, issue tracking, and roadmaps for engineering teams.', replaces: 'Jira',       color: '#6366F1' },
+  { icon: FileText,      title: 'Documents & Wiki',    desc: 'Rich text editor, nested pages, databases, and search across everything.',    replaces: 'Notion',     color: '#06B6D4' },
+  { icon: Package,       title: 'ERP & Inventory',     desc: 'Purchase orders, vendors, stock levels, and fulfillment — real-time alerts.', replaces: 'NetSuite',   color: '#F59E0B' },
+  { icon: BarChart3,     title: 'Finance & Invoicing', desc: 'General ledger, invoicing, expenses, and financial reports in one place.',    replaces: 'QuickBooks', color: '#22C55E' },
+  { icon: Bot,           title: 'AI Command Center',   desc: 'Cross-domain intelligence that connects chat, tasks, code, and revenue data.', replaces: 'Datadog',    color: '#EC4899' },
 ]
 
 function Features() {
   return (
-    <section id="features" style={{ padding: '100px 24px', background: C.bgMid }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-            Six tools. One platform.
-          </h2>
-          <p style={{ fontSize: 17, color: C.textSub, maxWidth: 500, margin: '0 auto' }}>
-            Every module shares the same database, the same AI, and the same context.
-          </p>
-        </div>
+    <section id="features" style={{ padding: '120px 24px', background: C.bgMid, position: 'relative' }}>
+      <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="Modules"
+          title={<>Six tools.<br/><span className="aurora-text">One platform.</span></>}
+          subtitle="Every module shares the same database, the same AI, and the same context."
+        />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 16,
+            marginTop: 56,
+          }}
+        >
           {features.map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 28 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.45, delay: i * 0.07 }}
+              transition={{ duration: 0.45, delay: i * 0.06 }}
               style={{
-                padding: 32, borderRadius: 16,
-                border: '1px solid rgba(255,255,255,0.06)',
-                background: 'rgba(255,255,255,0.02)',
+                padding: 28, borderRadius: 16,
+                border: `1px solid ${C.border}`,
+                background: C.surface,
+                WebkitBackdropFilter: 'blur(10px)',
+                backdropFilter: 'blur(10px)',
+                transition: 'border-color 0.25s, transform 0.25s, background 0.25s',
+              }}
+              whileHover={{
+                y: -4,
+                transition: { duration: 0.2 },
               }}
             >
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${f.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-                <f.icon size={22} color={f.color} />
+              <div style={{
+                width: 40, height: 40, borderRadius: 10,
+                background: `${f.color}1F`,
+                border: `1px solid ${f.color}33`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <f.icon size={20} color={f.color} strokeWidth={2} />
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.6, color: C.textSub, marginBottom: 16 }}>{f.desc}</p>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: f.color, padding: '4px 10px', borderRadius: 6, background: `${f.color}10` }}>
-                <ChevronRight size={12} />
-                {f.replaces}
+              <h3 style={{
+                fontSize: 17, fontWeight: 600, color: C.text,
+                marginBottom: 8, letterSpacing: '-0.015em',
+              }}>
+                {f.title}
+              </h3>
+              <p style={{
+                fontSize: 13.5, lineHeight: 1.55, color: C.textSub,
+                marginBottom: 18, letterSpacing: '-0.005em',
+              }}>
+                {f.desc}
+              </p>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                fontSize: 11, fontWeight: 600, color: f.color,
+                padding: '3px 9px', borderRadius: 5,
+                background: `${f.color}14`,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+              }}>
+                Replaces {f.replaces}
               </span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Section Header component (used across) ────────────────── */
+function SectionHeader({
+  eyebrow, title, subtitle,
+}: {
+  eyebrow: string
+  title: React.ReactNode
+  subtitle: string
+}) {
+  return (
+    <div style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto' }}>
+      <p style={{
+        fontSize: 11, fontWeight: 600, letterSpacing: '0.18em',
+        textTransform: 'uppercase', color: C.textMuted, marginBottom: 14,
+      }}>
+        {eyebrow}
+      </p>
+      <h2 style={{
+        fontSize: 'clamp(30px, 4.5vw, 48px)',
+        fontWeight: 700, lineHeight: 1.08,
+        letterSpacing: '-0.03em', color: C.text,
+        marginBottom: 14,
+      }}>
+        {title}
+      </h2>
+      <p style={{
+        fontSize: 16, lineHeight: 1.55, color: C.textSub,
+        letterSpacing: '-0.005em',
+      }}>
+        {subtitle}
+      </p>
+    </div>
+  )
+}
+
+/* ─── AI Differentiator Section ──────────────────────────────── */
+function AIDifferentiator() {
+  return (
+    <section style={{ padding: '120px 24px', background: `linear-gradient(180deg, ${C.bg}, ${C.bgMid})`, position: 'relative', overflow: 'hidden' }}>
+      <div className="aurora-halo" style={{ width: 700, height: 700, top: '20%', left: '50%', transform: 'translateX(-50%)', opacity: 0.2 }} />
+      <div style={{ maxWidth: 920, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <SectionHeader
+          eyebrow="The AI advantage"
+          title={<>Intelligence that <span className="aurora-text">connects everything</span></>}
+          subtitle="A deploy breaks. VYNE instantly calculates the business impact, alerts the right people, and suggests a fix — because your chat, code, orders, and finance all live in one system."
+        />
+
+        <div
+          style={{
+            marginTop: 56,
+            display: 'inline-block',
+            maxWidth: '100%',
+            padding: '18px 24px',
+            borderRadius: 14,
+            background: C.surface,
+            border: `1px solid ${C.borderHi}`,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 14,
+            color: C.textSub,
+            textAlign: 'left',
+            WebkitBackdropFilter: 'blur(10px)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <span style={{ color: '#22C55E' }}>✓</span> Deployment failed
+          <span style={{ color: C.textMuted, margin: '0 10px' }}>→</span>
+          47 orders stuck
+          <span style={{ color: C.textMuted, margin: '0 10px' }}>→</span>
+          <span style={{ color: '#F87171', fontWeight: 600 }}>$12,400 at risk</span>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
+          gap: 14,
+          marginTop: 56,
+          textAlign: 'left',
+        }}>
+          {[
+            { icon: Zap,    label: 'Cross-domain intelligence', desc: 'AI connects data across every module' },
+            { icon: Shield, label: 'Real slash commands',       desc: '/approve-order actually approves orders' },
+            { icon: Globe,  label: 'Business-aware alerts',     desc: 'Revenue impact, not just error codes' },
+            { icon: Star,   label: 'Agent reasoning',           desc: 'See how the AI reached its conclusion' },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              style={{
+                padding: 22, borderRadius: 14,
+                border: `1px solid ${C.border}`,
+                background: C.surface,
+              }}
+            >
+              <item.icon size={18} style={{ color: '#A78BFA', marginBottom: 12 }} strokeWidth={2} />
+              <h4 style={{ fontSize: 14.5, fontWeight: 600, color: C.text, marginBottom: 5, letterSpacing: '-0.01em' }}>
+                {item.label}
+              </h4>
+              <p style={{ fontSize: 12.5, color: C.textMuted, lineHeight: 1.5 }}>{item.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -402,43 +600,61 @@ const comparisonRows = [
 ]
 
 function CellValue({ value }: { value: boolean | string }) {
-  if (value === true)  return <div style={{ display: 'flex', justifyContent: 'center' }}><Check size={18} color="#22C55E" /></div>
-  if (value === false) return <div style={{ display: 'flex', justifyContent: 'center' }}><X size={18} color="#4A4A6A" /></div>
-  return <span style={{ fontSize: 13, color: C.textSub }}>{value}</span>
+  if (value === true)
+    return <div style={{ display: 'flex', justifyContent: 'center' }}><Check size={16} color={C.success} strokeWidth={2.5} /></div>
+  if (value === false)
+    return <div style={{ display: 'flex', justifyContent: 'center' }}><X size={16} color={C.textMuted} strokeWidth={2} /></div>
+  return <span style={{ fontSize: 13, color: C.textSub, fontFamily: 'var(--font-mono)' }}>{value}</span>
 }
 
 function Comparison() {
   return (
-    <section id="comparison" style={{ padding: '100px 24px', background: `linear-gradient(180deg, ${C.bgMid} 0%, ${C.bg} 100%)` }}>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-            Why pay for six tools?
-          </h2>
-          <p style={{ fontSize: 17, color: C.textSub }}>VYNE gives you everything in one subscription.</p>
-        </div>
-        <div style={{ borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+    <section id="comparison" style={{ padding: '120px 24px', background: C.bg }}>
+      <div style={{ maxWidth: 960, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="Comparison"
+          title={<>Why pay for <span className="aurora-text">six tools?</span></>}
+          subtitle="VYNE gives you everything in one subscription."
+        />
+
+        <div style={{
+          marginTop: 56,
+          borderRadius: 16,
+          border: `1px solid ${C.borderHi}`,
+          overflow: 'hidden',
+          background: C.surface,
+          WebkitBackdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(10px)',
+        }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
-              <tr style={{ background: C.purpleDim, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <th style={{ padding: '14px 20px', textAlign: 'left', color: C.textSub, fontWeight: 600 }}>Feature</th>
-                <th style={{ padding: '14px 16px', textAlign: 'center', color: C.purpleLight, fontWeight: 700, fontSize: 15 }}>VYNE</th>
-                <th style={{ padding: '14px 16px', textAlign: 'center', color: C.textSub, fontWeight: 600 }}>Slack</th>
-                <th style={{ padding: '14px 16px', textAlign: 'center', color: C.textSub, fontWeight: 600 }}>Jira</th>
-                <th style={{ padding: '14px 16px', textAlign: 'center', color: C.textSub, fontWeight: 600 }}>Notion</th>
+              <tr style={{
+                background: 'rgba(124,92,255,0.08)',
+                borderBottom: `1px solid ${C.border}`,
+              }}>
+                <th style={thCell('left')}>Feature</th>
+                <th style={{ ...thCell('center'), color: '#C4B5FD', fontWeight: 700, fontSize: 14 }}>
+                  <span className="aurora-text" style={{ fontWeight: 700 }}>VYNE</span>
+                </th>
+                <th style={thCell('center')}>Slack</th>
+                <th style={thCell('center')}>Jira</th>
+                <th style={thCell('center')}>Notion</th>
               </tr>
             </thead>
             <tbody>
               {comparisonRows.map((row, i) => (
                 <tr
                   key={row.feature}
-                  style={{ borderBottom: i < comparisonRows.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}
+                  style={{
+                    borderBottom: i < comparisonRows.length - 1 ? `1px solid ${C.border}` : 'none',
+                    background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
+                  }}
                 >
-                  <td style={{ padding: '12px 20px', color: C.text, fontWeight: 500 }}>{row.feature}</td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><CellValue value={row.vyne} /></td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><CellValue value={row.slack} /></td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><CellValue value={row.jira} /></td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center' }}><CellValue value={row.notion} /></td>
+                  <td style={tdCell('left', C.text)}>{row.feature}</td>
+                  <td style={tdCell('center')}><CellValue value={row.vyne} /></td>
+                  <td style={tdCell('center')}><CellValue value={row.slack} /></td>
+                  <td style={tdCell('center')}><CellValue value={row.jira} /></td>
+                  <td style={tdCell('center')}><CellValue value={row.notion} /></td>
                 </tr>
               ))}
             </tbody>
@@ -449,79 +665,105 @@ function Comparison() {
   )
 }
 
+const thCell = (align: 'left' | 'center'): React.CSSProperties => ({
+  padding: '14px 20px', textAlign: align, color: C.textSub,
+  fontWeight: 600, fontSize: 11, textTransform: 'uppercase',
+  letterSpacing: '0.1em',
+})
+const tdCell = (align: 'left' | 'center', color?: string): React.CSSProperties => ({
+  padding: '14px 20px', textAlign: align,
+  color: color ?? C.textSub, fontWeight: color ? 500 : 400,
+  letterSpacing: '-0.005em',
+})
+
 /* ─── Pricing ────────────────────────────────────────────────── */
 const plans = [
-  {
-    name: 'Free', price: '$0', period: 'forever',
-    desc: 'For individuals and hobby projects',
+  { name: 'Free', price: '$0', period: 'forever', desc: 'For individuals and hobby projects',
     features: ['1 user', '1 GB storage', '50 AI queries/day', 'All core modules', 'Community support'],
-    cta: 'Get Started Free', highlight: false,
-  },
-  {
-    name: 'Starter', price: '$12', period: '/user/mo',
-    desc: 'For growing teams that need real power',
+    cta: 'Get started', highlight: false },
+  { name: 'Starter', price: '$12', period: '/user/mo', desc: 'For growing teams that need real power',
     features: ['Unlimited users', '50 GB storage', '500 AI queries/day', 'All modules + integrations', 'Email support', 'CSV import/export'],
-    cta: 'Join Waitlist', highlight: true,
-  },
-  {
-    name: 'Business', price: '$24', period: '/user/mo',
-    desc: 'For companies that run on VYNE',
+    cta: 'Join waitlist', highlight: true },
+  { name: 'Business', price: '$24', period: '/user/mo', desc: 'For companies that run on VYNE',
     features: ['Unlimited users', '200 GB storage', 'Unlimited AI queries', 'Custom AI agents', 'Priority support', 'SSO / SAML', 'Audit log'],
-    cta: 'Join Waitlist', highlight: false,
-  },
+    cta: 'Join waitlist', highlight: false },
 ]
 
 function Pricing() {
   return (
-    <section id="pricing" style={{ padding: '100px 24px', background: C.bg }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 64 }}>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-            Simple, transparent pricing
-          </h2>
-          <p style={{ fontSize: 17, color: C.textSub }}>No per-module charges. One price, everything included.</p>
-        </div>
+    <section id="pricing" style={{ padding: '120px 24px', background: C.bgMid, position: 'relative' }}>
+      <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="Pricing"
+          title={<>Simple, transparent <span className="aurora-text">pricing</span></>}
+          subtitle="No per-module charges. One price, everything included."
+        />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24, alignItems: 'start' }}>
+        <div style={{
+          marginTop: 64,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 16,
+          alignItems: 'start',
+        }}>
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 22 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.1 }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className={plan.highlight ? 'gradient-border' : undefined}
               style={{
-                padding: 32, borderRadius: 20, position: 'relative',
-                border: plan.highlight ? `2px solid ${C.purpleBorder}` : '1px solid rgba(255,255,255,0.06)',
-                background: plan.highlight ? `linear-gradient(180deg, ${C.purpleDim} 0%, transparent 100%)` : 'rgba(255,255,255,0.02)',
+                padding: plan.highlight ? 30 : 30,
+                borderRadius: 18, position: 'relative',
+                border: plan.highlight ? 'none' : `1px solid ${C.border}`,
+                background: plan.highlight
+                  ? `linear-gradient(180deg, rgba(124,92,255,0.08) 0%, rgba(124,92,255,0.02) 100%), ${C.bg}`
+                  : C.surface,
               }}
             >
               {plan.highlight && (
-                <div
-                  style={{
-                    position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
-                    padding: '5px 18px', borderRadius: 999,
-                    background: `linear-gradient(135deg, ${C.purple}, ${C.purpleLight})`,
-                    color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em',
-                    boxShadow: '0 4px 12px rgba(124,92,255,0.45)', whiteSpace: 'nowrap',
-                  }}
-                >
-                  ✦ MOST POPULAR
+                <div style={{
+                  position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)',
+                  padding: '5px 14px', borderRadius: 999,
+                  background: 'var(--aurora)',
+                  color: '#fff', fontSize: 11, fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  boxShadow: '0 8px 20px rgba(124,92,255,0.4)',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  <Sparkles size={11} />
+                  MOST POPULAR
                 </div>
               )}
 
-              <h3 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{plan.name}</h3>
-              <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20 }}>{plan.desc}</p>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 4, letterSpacing: '-0.015em' }}>
+                {plan.name}
+              </h3>
+              <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 22, letterSpacing: '-0.005em' }}>
+                {plan.desc}
+              </p>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 24 }}>
-                <span style={{ fontSize: 44, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{plan.price}</span>
-                <span style={{ fontSize: 14, color: C.textMuted }}>{plan.period}</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 26 }}>
+                <span style={{
+                  fontSize: 44, fontWeight: 700, color: C.text,
+                  lineHeight: 1, letterSpacing: '-0.035em',
+                }}>{plan.price}</span>
+                <span style={{ fontSize: 13, color: C.textMuted, marginLeft: 4 }}>{plan.period}</span>
               </div>
 
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <ul style={{
+                listStyle: 'none', padding: 0,
+                margin: '0 0 28px',
+                display: 'flex', flexDirection: 'column', gap: 11,
+              }}>
                 {plan.features.map((feat) => (
-                  <li key={feat} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: C.textSub }}>
-                    <Check size={16} color={C.success} />
+                  <li key={feat} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    fontSize: 13.5, color: C.textSub, letterSpacing: '-0.005em',
+                  }}>
+                    <Check size={14} color={C.success} strokeWidth={2.5} />
                     {feat}
                   </li>
                 ))}
@@ -530,12 +772,17 @@ function Pricing() {
               <a
                 href="#waitlist"
                 aria-label={`${plan.cta} — ${plan.name} plan`}
-                style={{
-                  display: 'block', textAlign: 'center', padding: '12px 24px',
-                  borderRadius: 10, fontWeight: 600, fontSize: 14, transition: 'all 0.2s',
-                  ...(plan.highlight
-                    ? { background: `linear-gradient(135deg, ${C.purple}, ${C.purpleLight})`, color: '#fff', border: 'none', boxShadow: '0 4px 15px rgba(124,92,255,0.3)' }
-                    : { background: 'transparent', color: C.purpleLight, border: `1px solid ${C.purpleBorder}` }),
+                className={plan.highlight ? 'btn-aurora' : undefined}
+                style={plan.highlight ? {
+                  display: 'block', textAlign: 'center', padding: '11px 20px', fontSize: 14,
+                } : {
+                  display: 'block', textAlign: 'center', padding: '11px 20px',
+                  borderRadius: 10, fontWeight: 600, fontSize: 13.5,
+                  background: C.surface,
+                  color: C.text,
+                  border: `1px solid ${C.borderHi}`,
+                  transition: 'all 0.2s',
+                  letterSpacing: '-0.005em',
                 }}
               >
                 {plan.cta}
@@ -548,68 +795,27 @@ function Pricing() {
   )
 }
 
-/* ─── AI Differentiator Section ──────────────────────────────── */
-function AIDifferentiator() {
-  return (
-    <section style={{ padding: '100px 24px', background: `linear-gradient(180deg, ${C.bg}, ${C.bgMid})` }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, border: `1px solid ${C.purpleBorder}`, background: C.purpleDim, color: C.purpleLight, fontSize: 13, fontWeight: 600, marginBottom: 32 }}>
-          <Bot size={14} />
-          The AI Advantage
-        </div>
-
-        <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 20, lineHeight: 1.2 }}>
-          &ldquo;Deployment failed &rarr; 47 orders stuck &rarr;{' '}
-          <span style={{ color: C.danger }}>$12,400 at risk&rdquo;</span>
-        </h2>
-        <p style={{ fontSize: 17, lineHeight: 1.7, color: C.textSub, maxWidth: 650, margin: '0 auto 40px' }}>
-          VYNE&apos;s AI sees across every module. When a deploy breaks, it instantly calculates the
-          business impact, alerts the right people, and suggests a fix — because your chat, code,
-          orders, and finance all live in the same system.
-        </p>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, textAlign: 'left' }}>
-          {[
-            { icon: Zap,    label: 'Cross-domain intelligence', desc: 'AI connects data across every module' },
-            { icon: Shield, label: 'Real slash commands',       desc: '/approve-order actually approves orders' },
-            { icon: Globe,  label: 'Business-aware alerts',     desc: 'Revenue impact, not just error codes' },
-            { icon: Star,   label: 'Agent reasoning',           desc: 'See exactly how AI reached its conclusion' },
-          ].map((item, i) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              style={{ padding: 24, borderRadius: 14, border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
-            >
-              <item.icon size={20} color={C.purpleLight} style={{ marginBottom: 12 }} />
-              <h4 style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 6 }}>{item.label}</h4>
-              <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ─── CTA / Waitlist Footer ──────────────────────────────────── */
+/* ─── CTA Footer ──────────────────────────────────────────────── */
 function CTAFooter() {
   return (
     <section
       id="waitlist"
       style={{
-        padding: '100px 24px',
-        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(124,92,255,0.15), transparent 70%), ${C.bg}`,
-        textAlign: 'center',
+        padding: '120px 24px',
+        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(124,92,255,0.22), transparent 70%), ${C.bg}`,
+        textAlign: 'center', position: 'relative', overflow: 'hidden',
       }}
     >
-      <div style={{ maxWidth: 600, margin: '0 auto' }}>
-        <h2 style={{ fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-          Ready to replace your stack?
+      <div className="aurora-halo" style={{ width: 600, height: 600, bottom: -200, left: '50%', transform: 'translateX(-50%)', opacity: 0.3 }} />
+      <div style={{ maxWidth: 620, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <h2 style={{
+          fontSize: 'clamp(30px, 4.5vw, 48px)',
+          fontWeight: 700, lineHeight: 1.1,
+          letterSpacing: '-0.03em', color: C.text, marginBottom: 16,
+        }}>
+          Ready to replace <span className="aurora-text">your stack?</span>
         </h2>
-        <p style={{ fontSize: 17, color: C.textSub, marginBottom: 40 }}>
+        <p style={{ fontSize: 16, color: C.textSub, marginBottom: 40, letterSpacing: '-0.005em' }}>
           Join the waitlist and be among the first to run your company on VYNE.
         </p>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -623,25 +829,49 @@ function CTAFooter() {
 /* ─── Footer ─────────────────────────────────────────────────── */
 function Footer() {
   const socials = [
-    { href: 'https://github.com/preetraval45/VYNE', label: 'GitHub',   Icon: Github   },
-    { href: 'https://twitter.com/vyneapp',          label: 'Twitter',  Icon: Twitter  },
-    { href: 'https://linkedin.com/company/vyne-app',label: 'LinkedIn', Icon: Linkedin },
+    { href: 'https://github.com/preetraval45/VYNE',  label: 'GitHub',   Icon: Github   },
+    { href: 'https://twitter.com/vyneapp',           label: 'Twitter',  Icon: Twitter  },
+    { href: 'https://linkedin.com/company/vyne-app', label: 'LinkedIn', Icon: Linkedin },
   ]
 
   return (
-    <footer style={{ padding: '40px 24px', background: C.bgDeep, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 20 }}>
-        <VyneLogo variant="mark" markSize={24} />
+    <footer style={{
+      padding: '44px 24px 32px',
+      background: C.bgDeep,
+      borderTop: `1px solid ${C.border}`,
+    }}>
+      <div style={{
+        maxWidth: 1120, margin: '0 auto',
+        display: 'flex', flexWrap: 'wrap',
+        justifyContent: 'space-between', alignItems: 'center', gap: 24,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <VyneLogo variant="mark" markSize={24} />
+          <span style={{ fontSize: 13, color: C.textMuted, letterSpacing: '-0.005em' }}>
+            Run your company, not your tools.
+          </span>
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {[{ label: 'Developers', href: '/developers' }, { label: 'Changelog', href: '/changelog' }, { label: 'Status', href: '/status' }].map((l) => (
-            <Link key={l.href} href={l.href} style={{ fontSize: 12, color: C.textSub, fontWeight: 500 }}>
+          {[
+            { label: 'Developers', href: '/developers' },
+            { label: 'Changelog', href: '/changelog' },
+            { label: 'Status', href: '/status' },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              style={{
+                fontSize: 12.5, color: C.textSub, fontWeight: 500,
+                letterSpacing: '-0.005em',
+              }}
+            >
               {l.label}
             </Link>
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {socials.map(({ href, label, Icon }) => (
             <a
               key={label}
@@ -649,16 +879,29 @@ function Footer() {
               aria-label={label}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: C.textMuted, transition: 'color 0.2s' }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.textSub }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = C.textMuted }}
+              style={{
+                width: 32, height: 32, borderRadius: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: C.textMuted,
+                border: `1px solid ${C.border}`,
+                background: C.surface,
+                transition: 'color 0.18s, border 0.18s',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = C.text;
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = C.borderHi;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.color = C.textMuted;
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = C.border;
+              }}
             >
-              <Icon size={16} />
+              <Icon size={14} />
             </a>
           ))}
         </div>
 
-        <p style={{ fontSize: 12, color: C.textMuted }}>
+        <p style={{ fontSize: 12, color: C.textMuted, letterSpacing: '-0.005em' }}>
           &copy; {new Date().getFullYear()} VYNE. All rights reserved.
         </p>
       </div>
@@ -666,10 +909,14 @@ function Footer() {
   )
 }
 
-/* ─── Page ───────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div style={{ background: C.bg, minHeight: '100vh', color: '#fff' }}>
+    <div style={{
+      background: C.bg,
+      minHeight: '100vh',
+      color: C.text,
+      fontFamily: 'var(--font-display)',
+    }}>
       <Nav />
       <Hero />
       <Features />

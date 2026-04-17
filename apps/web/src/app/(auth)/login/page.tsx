@@ -76,17 +76,34 @@ export default function LoginPage() {
       className="min-h-screen w-full flex"
       style={{
         background:
-          "linear-gradient(135deg, #0A0A1A 0%, #15152A 50%, #0A0A1A 100%)",
+          "linear-gradient(135deg, #07061A 0%, #0D0B24 50%, #07061A 100%)",
+        fontFamily: "var(--font-display)",
       }}
     >
       {/* ─── Left: Login Form ───────────────────────────────────────── */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
-        {/* Ambient glow */}
+        {/* Aurora halos */}
         <div
           aria-hidden="true"
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full opacity-20 pointer-events-none"
+          className="aurora-halo aurora-drift"
+          style={{ width: 720, height: 720, top: '10%', left: '50%', transform: 'translateX(-50%)' }}
+        />
+        <div
+          aria-hidden="true"
+          className="aurora-halo"
           style={{
-            background: "radial-gradient(circle, #6C47FF 0%, transparent 70%)",
+            width: 360, height: 360, bottom: '5%', right: '10%',
+            background: 'radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)',
+            opacity: 0.35,
+          }}
+        />
+        {/* Dotted grid */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 grid-bg pointer-events-none"
+          style={{
+            maskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
           }}
         />
 
@@ -101,26 +118,33 @@ export default function LoginPage() {
             <Link href="/" className="mb-5">
               <VyneLogo variant="stacked" markSize={48} className="auth-logo text-white" />
             </Link>
-            <h1 className="text-3xl font-bold text-white tracking-tight">
+            <h1
+              className="text-white"
+              style={{
+                fontSize: 30,
+                fontWeight: 700,
+                letterSpacing: '-0.03em',
+                lineHeight: 1.15,
+              }}
+            >
               Welcome back
             </h1>
             <p
-              className="text-sm mt-2"
-              style={{ color: "rgba(255,255,255,0.5)" }}
+              className="mt-2"
+              style={{
+                color: "rgba(255,255,255,0.55)",
+                fontSize: 14,
+                letterSpacing: '-0.005em',
+              }}
             >
               Sign in to your VYNE workspace
             </p>
           </div>
 
-          {/* Card */}
+          {/* Card — glass + gradient hairline */}
           <div
-            className="rounded-2xl p-8"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-            }}
+            className="glass-panel"
+            style={{ padding: 32 }}
           >
             {error && (
               <motion.div
@@ -227,19 +251,13 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isLoading}
                 className={cn(
-                  "w-full py-3 rounded-lg text-sm font-semibold text-white",
+                  "btn-aurora w-full mt-2",
                   "flex items-center justify-center gap-2",
-                  "transition-all duration-150 mt-2",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "hover:scale-[1.01] active:scale-[0.99]",
+                  "disabled:opacity-60 disabled:cursor-not-allowed",
                 )}
                 style={{
-                  background: isLoading
-                    ? "#5235CC"
-                    : "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-                  boxShadow: isLoading
-                    ? "none"
-                    : "0 8px 24px rgba(108,71,255,0.4)",
+                  padding: '12px 20px',
+                  fontSize: 14,
                 }}
               >
                 {isLoading ? (

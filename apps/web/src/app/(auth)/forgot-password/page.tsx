@@ -27,21 +27,26 @@ export default function ForgotPasswordPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4"
+      className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 50%, #0F0F1E 100%)",
+          "linear-gradient(135deg, #07061A 0%, #0D0B24 50%, #07061A 100%)",
+        fontFamily: "var(--font-display)",
       }}
     >
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10"
-          style={{
-            background: "radial-gradient(circle, #6C47FF 0%, transparent 70%)",
-          }}
-        />
-      </div>
+      <div
+        aria-hidden="true"
+        className="aurora-halo aurora-drift"
+        style={{ width: 620, height: 620, top: '15%', left: '50%', transform: 'translateX(-50%)' }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 grid-bg pointer-events-none"
+        style={{
+          maskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
+        }}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -62,15 +67,8 @@ export default function ForgotPasswordPage() {
           </p>
         </div>
 
-        {/* Card */}
-        <div
-          className="rounded-2xl p-8"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            backdropFilter: "blur(20px)",
-          }}
-        >
+        {/* Card — glass */}
+        <div className="glass-panel" style={{ padding: 32 }}>
           {sent ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -167,19 +165,11 @@ export default function ForgotPasswordPage() {
                   type="submit"
                   disabled={isLoading || !email}
                   className={cn(
-                    "w-full py-2.5 rounded-lg text-sm font-semibold text-white",
+                    "btn-aurora w-full mt-2",
                     "flex items-center justify-center gap-2",
-                    "transition-all duration-150 mt-2",
-                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    "disabled:opacity-60 disabled:cursor-not-allowed",
                   )}
-                  style={{
-                    background: isLoading
-                      ? "#5235CC"
-                      : "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-                    boxShadow: isLoading
-                      ? "none"
-                      : "0 4px 14px rgba(108,71,255,0.35)",
-                  }}
+                  style={{ padding: '11px 18px', fontSize: 14 }}
                 >
                   {isLoading ? (
                     <>

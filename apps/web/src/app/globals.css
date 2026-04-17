@@ -142,6 +142,35 @@
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
+
+  /* ── 14. Refined aesthetic tokens (additive — don't replace above) ── */
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Aurora — brand gradient used sparingly on CTAs / active states */
+  --aurora: linear-gradient(135deg, #7C5CFF 0%, #6366F1 45%, #06B6D4 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(124,92,255,0.14) 0%, rgba(99,102,241,0.10) 45%, rgba(6,182,212,0.08) 100%);
+  --aurora-text: linear-gradient(135deg, #A78BFA 0%, #818CF8 50%, #22D3EE 100%);
+
+  /* Glass surfaces */
+  --glass-bg: rgba(255,255,255,0.68);
+  --glass-border: rgba(20,20,40,0.08);
+  --glass-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 8px 24px rgba(20,20,40,0.06);
+
+  /* Premium radius + shadow */
+  --radius-card: 14px;
+  --radius-button: 10px;
+  --radius-pill: 999px;
+  --shadow-glow: 0 0 24px rgba(124,92,255,0.28);
+  --shadow-premium: 0 8px 30px rgba(20,20,40,0.08), 0 2px 6px rgba(20,20,40,0.05);
+
+  /* Typography details */
+  --tracking-tight: -0.015em;
+  --tracking-tighter: -0.025em;
+  --tracking-tightest: -0.035em;
+
+  /* Dotted grid overlay for hero-style sections */
+  --grid-dot: radial-gradient(circle, rgba(124,92,255,0.08) 1px, transparent 1px);
 }
 
 /* ─── 13. Dark Theme Overrides ─────────────────────────────────────── */
@@ -200,6 +229,14 @@
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
   --shadow-xl: 0 20px 25px rgba(0,0,0,0.5);
   --shadow-panel: 0 0 0 1px rgba(255,255,255,0.06), 0 10px 30px rgba(0,0,0,0.5);
+
+  /* Refined aesthetic — dark overrides */
+  --glass-bg: rgba(255,255,255,0.04);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 8px 30px rgba(0,0,0,0.4);
+  --aurora-soft: linear-gradient(135deg, rgba(124,92,255,0.18) 0%, rgba(99,102,241,0.12) 45%, rgba(6,182,212,0.10) 100%);
+  --shadow-premium: 0 8px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.35);
+  --grid-dot: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
 }
 
 /* Dark mode — main content & cards */
@@ -460,6 +497,100 @@ textarea:focus-visible {
 }
 .animate-spin {
   animation: spin 1s linear infinite;
+}
+
+/* ─── Premium utility classes (refined aesthetic) ────────────── */
+
+/* Aurora gradient text */
+.aurora-text {
+  background: var(--aurora-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Aurora button — primary CTA */
+.btn-aurora {
+  position: relative;
+  background: var(--aurora);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius-button);
+  padding: 10px 20px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  box-shadow: 0 6px 20px rgba(124,92,255,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  cursor: pointer;
+}
+.btn-aurora:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(124,92,255,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  filter: brightness(1.05);
+}
+.btn-aurora:active { transform: translateY(0); }
+
+/* Glass panel — frosted translucent card */
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  backdrop-filter: blur(20px) saturate(1.2);
+  border-radius: var(--radius-card);
+}
+
+/* Gradient hairline border — for active/featured cards */
+.gradient-border {
+  position: relative;
+  border-radius: var(--radius-card);
+  background: var(--content-bg);
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--aurora);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Dotted-grid background overlay */
+.grid-bg {
+  background-image: var(--grid-dot);
+  background-size: 22px 22px;
+}
+
+/* Aurora glow halo — for hero sections */
+.aurora-halo {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  background: radial-gradient(circle, rgba(124,92,255,0.45) 0%, rgba(6,182,212,0.18) 40%, transparent 70%);
+}
+
+/* Slowly-floating shimmer overlay */
+@keyframes aurora-drift {
+  0%   { transform: translate(-10%, -5%) rotate(0deg); }
+  50%  { transform: translate(10%, 5%) rotate(180deg); }
+  100% { transform: translate(-10%, -5%) rotate(360deg); }
+}
+.aurora-drift {
+  animation: aurora-drift 24s linear infinite;
+}
+
+/* Refined body rendering */
+body {
+  letter-spacing: -0.005em;
+  font-feature-settings: 'cv02','cv03','cv04','cv11';
 }
 
 /* ─── Responsive auth logo ─────────────────────────────────────── */
