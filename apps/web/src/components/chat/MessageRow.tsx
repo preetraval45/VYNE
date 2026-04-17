@@ -65,7 +65,7 @@ export function MessageRow({
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: isCurrentUser ? "#6C47FF" : "#1A1A2E",
+                color: isCurrentUser ? "var(--vyne-purple)" : "var(--text-primary)",
               }}
             >
               {msg.author.name}
@@ -80,7 +80,7 @@ export function MessageRow({
           <p
             style={{
               fontSize: 13,
-              color: "#2D2D4E",
+              color: "var(--text-primary)",
               lineHeight: 1.6,
               margin: 0,
               wordBreak: "break-word",

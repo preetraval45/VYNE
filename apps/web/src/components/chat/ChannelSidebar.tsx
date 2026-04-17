@@ -173,9 +173,9 @@ export function ChannelSidebar({
               >
                 {filteredChannels.map((ch) => {
                   const isActive = selectedId === ch.id && !isDM;
-                  let chColor = "#6B6B8A";
-                  if (isActive) chColor = "#6C47FF";
-                  else if (ch.unreadCount) chColor = "#1A1A2E";
+                  let chColor = "var(--text-secondary)";
+                  if (isActive) chColor = "var(--vyne-purple)";
+                  else if (ch.unreadCount) chColor = "var(--text-primary)";
                   return (
                     <button
                       key={ch.id}
@@ -324,9 +324,9 @@ export function ChannelSidebar({
               >
                 {filteredDMs.map((dm) => {
                   const isActive = selectedId === dm.id && isDM;
-                  let dmColor = "#6B6B8A";
-                  if (isActive) dmColor = "#6C47FF";
-                  else if (dm.unreadCount) dmColor = "#1A1A2E";
+                  let dmColor = "var(--text-secondary)";
+                  if (isActive) dmColor = "var(--vyne-purple)";
+                  else if (dm.unreadCount) dmColor = "var(--text-primary)";
                   return (
                     <button
                       key={dm.id}
