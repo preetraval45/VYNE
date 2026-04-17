@@ -106,6 +106,7 @@ export default function ProjectsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search projects..."
+              aria-label="Search projects"
               className="flex-1 bg-transparent text-sm focus:outline-none"
               style={{ color: "var(--text-primary)" }}
             />
@@ -765,6 +766,8 @@ function CreateProjectModalLocal({
                         <button
                           key={color}
                           type="button"
+                          aria-label={`Select ${color} color`}
+                          aria-pressed={form.color === color}
                           onClick={() => setForm((f) => ({ ...f, color }))}
                           className="w-7 h-7 rounded-full transition-all"
                           style={{
@@ -983,16 +986,19 @@ function EditProjectModal({
                   </div>
                   <div>
                     <label
+                      htmlFor="edit-project-description"
                       className="block text-xs font-medium mb-1.5"
                       style={{ color: "var(--text-secondary)" }}
                     >
                       Description
                     </label>
                     <textarea
+                      id="edit-project-description"
                       value={form.description}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, description: e.target.value }))
                       }
+                      placeholder="What is this project about?"
                       rows={3}
                       className={cn(inputClass, "resize-none")}
                       style={{
@@ -1014,6 +1020,8 @@ function EditProjectModal({
                         <button
                           key={color}
                           type="button"
+                          aria-label={`Select ${color} color`}
+                          aria-pressed={form.color === color}
                           onClick={() => setForm((f) => ({ ...f, color }))}
                           className="w-7 h-7 rounded-full transition-all"
                           style={{
