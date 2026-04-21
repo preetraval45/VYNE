@@ -21,6 +21,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     items: [
       { keys: ["?"], action: "Show this cheat sheet" },
       { keys: ["Ctrl", "K"], action: "Open command palette" },
+      { keys: ["Ctrl", "⇧", "F"], action: "Global search (find anything)" },
       { keys: ["/"], action: "Focus in-page search" },
       { keys: ["C"], action: "Create in current module" },
       { keys: ["F"], action: "Toggle focus mode" },
