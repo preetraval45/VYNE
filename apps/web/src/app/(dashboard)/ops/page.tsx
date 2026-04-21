@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Package,
   Plus,
@@ -503,6 +504,7 @@ function InventoryTab({
   products: ERPProduct[];
   setProducts: (p: ERPProduct[]) => void;
 }>) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [addOpen, setAddOpen] = useState(false);
@@ -609,7 +611,7 @@ function InventoryTab({
           />
         </div>
         <button
-          onClick={() => setAddOpen(true)}
+          onClick={() => router.push("/ops/products/new")}
           style={{
             display: "flex",
             alignItems: "center",
@@ -1008,6 +1010,7 @@ function OrdersTab({
   orders,
   setOrders,
 }: Readonly<{ orders: ERPOrder[]; setOrders: (o: ERPOrder[]) => void }>) {
+  const router = useRouter();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
@@ -1115,7 +1118,7 @@ function OrdersTab({
             />
           </div>
           <button
-            onClick={() => setNewOpen(true)}
+            onClick={() => router.push("/ops/orders/new")}
             style={{
               display: "flex",
               alignItems: "center",
@@ -1413,6 +1416,7 @@ function SuppliersTab({
   suppliers: ERPSupplier[];
   setSuppliers: (s: ERPSupplier[]) => void;
 }>) {
+  const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -1439,7 +1443,7 @@ function SuppliersTab({
         }}
       >
         <button
-          onClick={() => setAddOpen(true)}
+          onClick={() => router.push("/ops/suppliers/new")}
           style={{
             display: "flex",
             alignItems: "center",
@@ -1646,6 +1650,7 @@ function ManufacturingTab({
   workOrders: ERPWorkOrder[];
   setWorkOrders: (w: ERPWorkOrder[]) => void;
 }>) {
+  const router = useRouter();
   const [subTab, setSubTab] = useState<"boms" | "work-orders">("boms");
   const [bomDetail, setBomDetail] = useState<ERPBOM | null>(null);
   const [newWOOpen, setNewWOOpen] = useState(false);
@@ -1785,7 +1790,7 @@ function ManufacturingTab({
             }}
           >
             <button
-              onClick={() => setNewWOOpen(true)}
+              onClick={() => router.push("/ops/work-orders/new")}
               style={{
                 display: "flex",
                 alignItems: "center",
