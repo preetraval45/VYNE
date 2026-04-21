@@ -74,16 +74,34 @@ export function FormPageLayout({
   }, [dirty, router, backHref]);
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--content-bg-secondary)" }}>
+    <div
+      className="flex flex-col h-full"
+      style={{ background: "var(--content-bg-secondary)", position: "relative", overflow: "hidden" }}
+    >
+      {/* Ambient floating auras (behind everything) */}
+      <div
+        aria-hidden="true"
+        className="page-aura page-aura--purple page-aura--float-1"
+        style={{ width: 520, height: 520, top: "-10%", right: "-10%" }}
+      />
+      <div
+        aria-hidden="true"
+        className="page-aura page-aura--cyan page-aura--float-2"
+        style={{ width: 420, height: 420, bottom: "-15%", left: "-10%" }}
+      />
+
       {/* ── Header ─────────────────────────────────────────────── */}
       <header
+        className="surface-frosted"
         style={{
           position: "sticky",
           top: 0,
           zIndex: 20,
-          background: "var(--content-bg)",
-          borderBottom: "1px solid var(--content-border)",
           padding: "16px 28px",
+          borderRadius: 0,
+          borderLeft: 0,
+          borderRight: 0,
+          borderTop: 0,
         }}
       >
         {/* Breadcrumbs row */}
@@ -101,12 +119,25 @@ export function FormPageLayout({
           >
             <Link
               href={backHref}
+              className="ring-focus"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 4,
+                padding: "3px 8px",
+                marginLeft: -8,
+                borderRadius: 6,
                 color: "var(--text-secondary)",
                 letterSpacing: "-0.005em",
+                transition: "background 0.15s var(--ease-out-quart), color 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
               }}
             >
               <ArrowLeft size={13} />
@@ -163,8 +194,8 @@ export function FormPageLayout({
 
       {/* ── Body ───────────────────────────────────────────────── */}
       <div
-        className="flex-1 overflow-auto content-scroll"
-        style={{ padding: "28px" }}
+        className="flex-1 overflow-auto content-scroll slide-up-fade"
+        style={{ padding: "28px", position: "relative", zIndex: 1 }}
       >
         <div
           className={cn("mx-auto", aside ? "form-page-grid" : "")}
@@ -197,17 +228,21 @@ export function FormPageLayout({
 
       {/* ── Sticky footer ──────────────────────────────────────── */}
       <div
+        className="surface-frosted"
         style={{
           position: "sticky",
           bottom: 0,
           zIndex: 20,
-          background: "var(--content-bg)",
-          borderTop: "1px solid var(--content-border)",
           padding: "14px 28px",
           display: "flex",
           alignItems: "center",
           justifyContent: "flex-end",
           gap: 8,
+          borderRadius: 0,
+          borderLeft: 0,
+          borderRight: 0,
+          borderBottom: 0,
+          boxShadow: "var(--elev-2)",
         }}
       >
         {footer}
@@ -229,16 +264,11 @@ export function FormSection({
 }) {
   return (
     <section
-      style={{
-        background: "var(--content-bg)",
-        border: "1px solid var(--content-border)",
-        borderRadius: 14,
-        padding: 24,
-        marginBottom: 16,
-      }}
+      className="surface-elevated"
+      style={{ padding: 24, marginBottom: 16 }}
     >
       {(title || description) && (
-        <header style={{ marginBottom: 18 }}>
+        <header className={title ? "section-header" : ""} style={{ marginBottom: title ? 18 : 0 }}>
           {title && (
             <h2
               style={{
@@ -256,7 +286,7 @@ export function FormSection({
               style={{
                 fontSize: 12.5,
                 color: "var(--text-tertiary)",
-                marginTop: 2,
+                marginTop: 3,
                 letterSpacing: "-0.005em",
               }}
             >
@@ -352,9 +382,10 @@ export function FormFooterButtons({
       <button
         type="button"
         onClick={onCancel}
+        className="ring-focus"
         style={{
           padding: "9px 16px",
-          borderRadius: 8,
+          borderRadius: 10,
           fontSize: 13,
           fontWeight: 500,
           background: "var(--content-secondary)",
@@ -362,37 +393,57 @@ export function FormFooterButtons({
           border: "1px solid var(--content-border)",
           cursor: "pointer",
           letterSpacing: "-0.005em",
+          transition: "background 0.15s var(--ease-out-quart), border-color 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "var(--content-bg)";
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border-strong)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+          (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
         }}
       >
         Cancel
       </button>
-      <button
-        type="submit"
-        form={primaryForm}
-        disabled={primaryDisabled || primaryLoading}
-        style={{
-          padding: "9px 18px",
-          borderRadius: 8,
-          fontSize: 13,
-          fontWeight: 600,
-          color: "#fff",
-          background: danger
-            ? "var(--status-danger)"
-            : "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-          border: "none",
-          cursor: primaryDisabled || primaryLoading ? "not-allowed" : "pointer",
-          opacity: primaryDisabled || primaryLoading ? 0.6 : 1,
-          boxShadow: danger ? "none" : "0 2px 8px rgba(108,71,255,0.3)",
-          letterSpacing: "-0.005em",
-          minWidth: 100,
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-        }}
-      >
-        {primaryLoading ? "Saving…" : primaryLabel}
-      </button>
+      {danger ? (
+        <button
+          type="submit"
+          form={primaryForm}
+          disabled={primaryDisabled || primaryLoading}
+          className="ring-focus"
+          style={{
+            padding: "9px 18px",
+            borderRadius: 10,
+            fontSize: 13,
+            fontWeight: 600,
+            color: "#fff",
+            background: "var(--status-danger)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            cursor: primaryDisabled || primaryLoading ? "not-allowed" : "pointer",
+            opacity: primaryDisabled || primaryLoading ? 0.55 : 1,
+            letterSpacing: "-0.005em",
+            minWidth: 100,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            boxShadow: "var(--elev-2), inset 0 1px 0 rgba(255,255,255,0.2)",
+          }}
+        >
+          {primaryLoading ? "Saving…" : primaryLabel}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          form={primaryForm}
+          disabled={primaryDisabled || primaryLoading}
+          className="btn-primary-plus ring-focus"
+          style={{ minWidth: 100 }}
+        >
+          {primaryLoading ? "Saving…" : primaryLabel}
+        </button>
+      )}
     </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ExportButton } from "@/components/shared/ExportButton";
 import {
   EMPLOYEES,
@@ -501,7 +502,7 @@ function LeaveBalanceBar({
 
 // ─── Employees tab ────────────────────────────────────────────────
 function EmployeesTab() {
-  const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
+  const router = useRouter();
 
   return (
     <div style={{ padding: 20 }}>
@@ -515,7 +516,7 @@ function EmployeesTab() {
         {EMPLOYEES.map((emp) => (
           <button
             key={emp.id}
-            onClick={() => setSelectedEmp(emp)}
+            onClick={() => router.push(`/hr/employees/${emp.id}`)}
             style={{
               background: "var(--content-bg)",
               border: "1px solid var(--content-border)",
@@ -576,10 +577,6 @@ function EmployeesTab() {
           </button>
         ))}
       </div>
-
-      {selectedEmp !== null && (
-        <EmployeeModal emp={selectedEmp} onClose={() => setSelectedEmp(null)} />
-      )}
     </div>
   );
 }
