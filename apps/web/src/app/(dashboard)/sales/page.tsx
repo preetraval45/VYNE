@@ -948,14 +948,16 @@ function DealModal({
               />
             </div>
             <div>
-              <label style={labelStyle}>Probability (%)</label>
+              <label htmlFor="opp-probability" style={labelStyle}>Probability (%)</label>
               <input
+                id="opp-probability"
                 style={inputStyle}
                 type="number"
                 min={0}
                 max={100}
                 value={probability}
                 onChange={(e) => setProbability(e.target.value)}
+                placeholder="50"
               />
             </div>
           </div>
@@ -981,8 +983,10 @@ function DealModal({
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Expected Close</label>
+              <label htmlFor="opp-expected-close" style={labelStyle}>Expected Close</label>
               <input
+                id="opp-expected-close"
+                aria-label="Expected close date"
                 style={inputStyle}
                 type="date"
                 value={expectedClose}
@@ -1120,8 +1124,10 @@ function QuotationModal({
             />
           </div>
           <div>
-            <label style={labelStyle}>Expiry Date</label>
+            <label htmlFor="quote-expiry" style={labelStyle}>Expiry Date</label>
             <input
+              id="quote-expiry"
+              aria-label="Quote expiry date"
               style={inputStyle}
               type="date"
               value={expiry}

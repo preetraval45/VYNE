@@ -806,6 +806,7 @@ function ApprovalsTab({
           >
             <input
               type="checkbox"
+              aria-label={`Select expense: ${e.description}`}
               checked={selected.has(e.id)}
               onChange={() => toggleSelect(e.id)}
               style={{
