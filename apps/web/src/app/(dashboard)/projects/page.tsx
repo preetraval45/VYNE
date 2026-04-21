@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -10,6 +9,7 @@ import {
   Pencil,
   Trash2,
   Users,
+  ArrowRight,
 } from "lucide-react";
 import {
   useProjects,
@@ -20,12 +20,21 @@ import type { ProjectDetail } from "@/lib/stores/projects";
 import { useDebounce } from "@/hooks/useDebounce";
 import { formatDate } from "@/lib/utils";
 import { STATUS_META } from "@/types";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
-export default function ProjectsPage() {
+function ProjectsPageInner() {
   const projects = useProjects();
-  const router = useRouter();
+  const detail = useDetailParam();
+  const selectedProject = detail.id
+    ? projects.find((p) => p.id === detail.id)
+    : undefined;
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
 
@@ -159,7 +168,7 @@ export default function ProjectsPage() {
                 >
                   <ProjectCardLocal
                     project={project}
-                    onNavigate={() => router.push(`/projects/${project.id}`)}
+                    onNavigate={() => detail.open(project.id)}
                   />
                 </motion.div>
               ))}
@@ -167,7 +176,323 @@ export default function ProjectsPage() {
           </motion.div>
         )}
       </div>
+
+      {/* Slide-in detail panel */}
+      <ProjectDetailPanel project={selectedProject} onClose={detail.close} />
     </div>
+  );
+}
+
+export default function ProjectsPage() {
+  // Wrap in Suspense because useDetailParam() consumes useSearchParams()
+  return (
+    <Suspense fallback={null}>
+      <ProjectsPageInner />
+    </Suspense>
+  );
+}
+
+// ─── Slide-in detail panel ────────────────────────────────────────
+
+function ProjectDetailPanel({
+  project,
+  onClose,
+}: {
+  project: ProjectDetail | undefined;
+  onClose: () => void;
+}) {
+  const tasks = useProjectsStore((s) =>
+    project ? s.tasks.filter((t) => t.projectId === project.id) : [],
+  );
+  const members = useTeamMembers();
+
+  const lead = project && members.find((m) => m.id === project.leadId);
+  const totalTasks = tasks.length;
+  const doneTasks = tasks.filter((t) => t.status === "done").length;
+  const inProgressTasks = tasks.filter((t) => t.status === "in_progress").length;
+  const blockedTasks = tasks.filter((t) => t.status === "blocked").length;
+  const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+  const recentTasks = [...tasks]
+    .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
+    .slice(0, 5);
+
+  return (
+    <DetailPanel
+      open={!!project}
+      onClose={onClose}
+      title={project?.name ?? ""}
+      subtitle={
+        project
+          ? `${project.identifier ?? "PRJ"} · ${totalTasks} task${totalTasks === 1 ? "" : "s"}`
+          : undefined
+      }
+      fullPageHref={project ? `/projects/${project.id}` : undefined}
+      badge={
+        project && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "3px 10px",
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: `${project.color}1E`,
+              color: project.color,
+              border: `1px solid ${project.color}30`,
+            }}
+          >
+            <span style={{ fontSize: 13 }}>{project.icon ?? "📋"}</span>
+            {project.status === "archived" ? "Archived" : "Active"}
+          </span>
+        )
+      }
+      headerActions={
+        project && (
+          <>
+            <Link
+              href={`/projects/${project.id}/edit`}
+              title="Edit project"
+              aria-label="Edit project"
+              style={iconBtn}
+            >
+              <Pencil size={14} />
+            </Link>
+            <Link
+              href={`/projects/${project.id}/delete`}
+              title="Delete project"
+              aria-label="Delete project"
+              style={{
+                ...iconBtn,
+                color: "var(--status-danger)",
+                borderColor: "rgba(239,68,68,0.25)",
+              }}
+            >
+              <Trash2 size={14} />
+            </Link>
+          </>
+        )
+      }
+    >
+      {!project ? null : (
+        <>
+          {project.description && (
+            <DetailSection title="About">
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: "var(--text-secondary)",
+                  letterSpacing: "-0.005em",
+                  margin: 0,
+                }}
+              >
+                {project.description}
+              </p>
+            </DetailSection>
+          )}
+
+          <DetailSection title="Progress">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontSize: 12,
+                color: "var(--text-tertiary)",
+              }}
+            >
+              <span>
+                {doneTasks} of {totalTasks} done
+              </span>
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                  fontSize: 18,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {progress}%
+              </span>
+            </div>
+            <div
+              style={{
+                height: 6,
+                borderRadius: 4,
+                background: "var(--content-secondary)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progress}%`,
+                  background: `linear-gradient(90deg, ${project.color} 0%, ${project.color}CC 100%)`,
+                  transition: "width 0.4s var(--ease-out-quart)",
+                }}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+              {inProgressTasks > 0 && (
+                <Pill
+                  label={`${inProgressTasks} in progress`}
+                  color={STATUS_META.in_progress.color}
+                  bg={STATUS_META.in_progress.bgColor}
+                />
+              )}
+              {blockedTasks > 0 && (
+                <Pill
+                  label={`${blockedTasks} blocked`}
+                  color="#EF4444"
+                  bg="#FEF2F2"
+                />
+              )}
+            </div>
+          </DetailSection>
+
+          <DetailSection title="Details">
+            <DetailRow label="Identifier" value={project.identifier ?? "—"} mono />
+            <DetailRow
+              label="Lead"
+              value={
+                lead ? (
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 6,
+                        background: lead.color,
+                        color: "#fff",
+                        fontSize: 9,
+                        fontWeight: 700,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {lead.initials}
+                    </span>
+                    {lead.name}
+                  </span>
+                ) : (
+                  <span style={{ color: "var(--text-tertiary)" }}>Unassigned</span>
+                )
+              }
+            />
+            <DetailRow
+              label="Created"
+              value={project.createdAt ? formatDate(project.createdAt) : "—"}
+            />
+          </DetailSection>
+
+          {recentTasks.length > 0 && (
+            <DetailSection title={`Recent tasks · ${recentTasks.length}`}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {recentTasks.map((t) => {
+                  const meta = STATUS_META[t.status as keyof typeof STATUS_META];
+                  return (
+                    <div
+                      key={t.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 10,
+                        padding: "6px 8px",
+                        borderRadius: 8,
+                        background: "var(--content-secondary)",
+                      }}
+                    >
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: meta?.color ?? "var(--text-tertiary)",
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 12.5,
+                          color: "var(--text-primary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          flex: 1,
+                        }}
+                      >
+                        {t.title}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </DetailSection>
+          )}
+
+          <Link
+            href={`/projects/${project.id}`}
+            onClick={onClose}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              padding: "9px 14px",
+              borderRadius: 10,
+              background: "var(--content-secondary)",
+              color: "var(--text-primary)",
+              fontSize: 13,
+              fontWeight: 500,
+              border: "1px solid var(--content-border)",
+              letterSpacing: "-0.005em",
+            }}
+          >
+            Open full project page
+            <ArrowRight size={13} />
+          </Link>
+        </>
+      )}
+    </DetailPanel>
+  );
+}
+
+const iconBtn: React.CSSProperties = {
+  width: 28,
+  height: 28,
+  borderRadius: 7,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--text-secondary)",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "background 0.15s, color 0.15s",
+};
+
+function Pill({ label, color, bg }: { label: string; color: string; bg: string }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        fontSize: 11,
+        fontWeight: 500,
+        padding: "2px 8px",
+        borderRadius: 999,
+        background: bg,
+        color,
+      }}
+    >
+      <span style={{ width: 5, height: 5, borderRadius: "50%", background: color }} />
+      {label}
+    </span>
   );
 }
 

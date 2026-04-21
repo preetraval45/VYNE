@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, ArrowRight } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
@@ -13,6 +13,12 @@ import {
   type Stage,
   type Deal,
 } from "@/lib/fixtures/crm";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 
 // ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
@@ -790,11 +796,13 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────
-export default function CRMPage() {
+function CRMPageInner() {
   const router = useRouter();
   const deals = useCRMStore((s) => s.deals);
   const setDeals = useCRMStore((s) => s.setDeals);
   const updateDealInStore = useCRMStore((s) => s.updateDeal);
+  const detail = useDetailParam();
+  const selectedDeal = detail.id ? deals.find((d) => d.id === detail.id) : undefined;
 
   const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
     "pipeline",
@@ -819,7 +827,7 @@ export default function CRMPage() {
   }
 
   function openDeal(deal: Deal) {
-    router.push(`/crm/deals/${deal.id}`);
+    detail.open(deal.id);
   }
 
   function handleMarkWon(id: string) {
@@ -958,6 +966,193 @@ export default function CRMPage() {
           {toast}
         </div>
       )}
+
+      {/* Slide-in detail panel */}
+      <DealDetailPanel deal={selectedDeal} onClose={detail.close} />
     </div>
+  );
+}
+
+export default function CRMPage() {
+  return (
+    <Suspense fallback={null}>
+      <CRMPageInner />
+    </Suspense>
+  );
+}
+
+// ─── Slide-in detail panel ────────────────────────────────────────
+
+function stageBgDetail(stage: string): string {
+  const map: Record<string, string> = {
+    Lead: "rgba(148,144,184,0.15)",
+    Qualified: "rgba(59,130,246,0.15)",
+    Proposal: "rgba(245,158,11,0.15)",
+    Negotiation: "rgba(139,92,246,0.15)",
+    Won: "rgba(34,197,94,0.15)",
+    Lost: "rgba(239,68,68,0.15)",
+  };
+  return map[stage] ?? "rgba(148,144,184,0.15)";
+}
+function stageColorDetail(stage: string): string {
+  const map: Record<string, string> = {
+    Lead: "var(--text-secondary)",
+    Qualified: "var(--status-info)",
+    Proposal: "var(--status-warning)",
+    Negotiation: "#8B5CF6",
+    Won: "var(--status-success)",
+    Lost: "var(--status-danger)",
+  };
+  return map[stage] ?? "var(--text-secondary)";
+}
+
+function DealDetailPanel({
+  deal,
+  onClose,
+}: {
+  deal: Deal | undefined;
+  onClose: () => void;
+}) {
+  const weighted = deal ? Math.round((deal.value * deal.probability) / 100) : 0;
+
+  return (
+    <DetailPanel
+      open={!!deal}
+      onClose={onClose}
+      title={deal?.company ?? ""}
+      subtitle={
+        deal
+          ? `${deal.contactName}${deal.email ? ` · ${deal.email}` : ""}`
+          : undefined
+      }
+      fullPageHref={deal ? `/crm/deals/${deal.id}` : undefined}
+      badge={
+        deal && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "3px 10px",
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: stageBgDetail(deal.stage),
+              color: stageColorDetail(deal.stage),
+            }}
+          >
+            {deal.stage}
+          </span>
+        )
+      }
+      headerActions={
+        deal && (
+          <Link
+            href={`/crm/deals/${deal.id}/edit`}
+            title="Edit deal"
+            aria-label="Edit deal"
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 7,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-bg)",
+              color: "var(--text-secondary)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Pencil size={14} />
+          </Link>
+        )
+      }
+    >
+      {!deal ? null : (
+        <>
+          <DetailSection title="Deal value">
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                  }}
+                >
+                  ${deal.value.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                  {deal.probability}% probability
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div
+                  className="text-aurora"
+                  style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.015em" }}
+                >
+                  ${weighted.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                  Weighted
+                </div>
+              </div>
+            </div>
+          </DetailSection>
+
+          <DetailSection title="Details">
+            <DetailRow label="Contact" value={deal.contactName} />
+            <DetailRow label="Email" value={deal.email || "—"} mono={!!deal.email} />
+            <DetailRow label="Source" value={deal.source} />
+            <DetailRow label="Assignee" value={deal.assignee} />
+            {deal.nextAction && <DetailRow label="Next action" value={deal.nextAction} />}
+            <DetailRow
+              label="Last activity"
+              value={new Date(deal.lastActivity).toLocaleDateString()}
+            />
+          </DetailSection>
+
+          {deal.notes && (
+            <DetailSection title="Notes">
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: "var(--text-secondary)",
+                  letterSpacing: "-0.005em",
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {deal.notes}
+              </p>
+            </DetailSection>
+          )}
+
+          <Link
+            href={`/crm/deals/${deal.id}`}
+            onClick={onClose}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
+              padding: "9px 14px",
+              borderRadius: 10,
+              background: "var(--content-secondary)",
+              color: "var(--text-primary)",
+              fontSize: 13,
+              fontWeight: 500,
+              border: "1px solid var(--content-border)",
+              letterSpacing: "-0.005em",
+            }}
+          >
+            Open full deal page
+            <ArrowRight size={13} />
+          </Link>
+        </>
+      )}
+    </DetailPanel>
   );
 }
