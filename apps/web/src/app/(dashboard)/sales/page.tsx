@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   Search,
@@ -1449,6 +1450,7 @@ function ProductModal({
 
 // ─── Opportunities Tab (Kanban) ──────────────────────────────────
 function OpportunitiesTab() {
+  const router = useRouter();
   const deals = useSalesStore((s) => s.deals);
   const addDeal = useSalesStore((s) => s.addDeal);
   const updateDeal = useSalesStore((s) => s.updateDeal);
@@ -1575,10 +1577,7 @@ function OpportunitiesTab() {
           />
           <NewButton
             label="New Deal"
-            onClick={() => {
-              setEditingDeal(null);
-              setShowModal(true);
-            }}
+            onClick={() => router.push("/sales/opportunities/new")}
           />
         </div>
       </div>
@@ -1903,6 +1902,7 @@ function OpportunitiesTab() {
 
 // ─── Quotations Tab ──────────────────────────────────────────────
 function QuotationsTab() {
+  const router = useRouter();
   const quotes = useSalesStore((s) => s.quotations);
   const addQuotation = useSalesStore((s) => s.addQuotation);
   const deleteQuotation = useSalesStore((s) => s.deleteQuotation);
@@ -1973,7 +1973,7 @@ function QuotationsTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="New Quote" onClick={() => setShowModal(true)} />
+          <NewButton label="New Quote" onClick={() => router.push("/sales/quotes/new")} />
         </div>
       </div>
 
@@ -2131,6 +2131,7 @@ function QuotationsTab() {
 
 // ─── Sales Orders Tab ────────────────────────────────────────────
 function SalesOrdersTab() {
+  const router = useRouter();
   const orders = useSalesStore((s) => s.salesOrders);
   const addSalesOrder = useSalesStore((s) => s.addSalesOrder);
   const deleteSalesOrder = useSalesStore((s) => s.deleteSalesOrder);
@@ -2198,7 +2199,7 @@ function SalesOrdersTab() {
               { key: "tracking", header: "Tracking" },
             ]}
           />
-          <NewButton label="New Order" onClick={() => setShowModal(true)} />
+          <NewButton label="New Order" onClick={() => router.push("/sales/orders/new")} />
         </div>
       </div>
 
@@ -2331,6 +2332,7 @@ function SalesOrdersTab() {
 
 // ─── Products Tab ────────────────────────────────────────────────
 function ProductsTab() {
+  const router = useRouter();
   const products = useSalesStore((s) => s.products);
   const addProduct = useSalesStore((s) => s.addProduct);
   const updateProduct = useSalesStore((s) => s.updateProduct);
@@ -2405,10 +2407,7 @@ function ProductsTab() {
           />
           <NewButton
             label="Add Product"
-            onClick={() => {
-              setEditingProduct(null);
-              setShowModal(true);
-            }}
+            onClick={() => router.push("/sales/products/new")}
           />
         </div>
       </div>
