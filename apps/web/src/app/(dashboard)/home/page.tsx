@@ -11,6 +11,7 @@ import {
 } from "@/lib/fixtures/home";
 import { VisuallyHidden } from "@/components/shared/VisuallyHidden";
 import { useAuthStore } from "@/lib/stores/auth";
+import { VyneLogo } from "@/components/brand/VyneLogo";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -149,37 +150,7 @@ export default function HomePage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 36 36"
-            fill="none"
-            aria-hidden="true"
-          >
-            <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.12" />
-            <line
-              x1="6"
-              y1="8"
-              x2="18"
-              y2="28"
-              stroke="#8B68FF"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <line
-              x1="30"
-              y1="8"
-              x2="18"
-              y2="28"
-              stroke="#6C47FF"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            />
-            <circle cx="6" cy="8" r="3.3" fill="#8B68FF" />
-            <circle cx="30" cy="8" r="3.3" fill="#8B68FF" />
-            <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
-            <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
-          </svg>
+          <VyneLogo variant="mark" markSize={20} />
           <h1
             style={{
               fontSize: 13,
@@ -446,35 +417,7 @@ export default function HomePage() {
               marginBottom: 10,
             }}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 36 36"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.15" />
-              <line
-                x1="6"
-                y1="8"
-                x2="18"
-                y2="28"
-                stroke="#8B68FF"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              <line
-                x1="30"
-                y1="8"
-                x2="18"
-                y2="28"
-                stroke="#6C47FF"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
-              <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
-            </svg>
+            <VyneLogo variant="mark" markSize={20} />
             <h2
               style={{
                 fontSize: 12,

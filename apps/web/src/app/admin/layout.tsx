@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { VyneLogo } from "@/components/brand/VyneLogo";
 
 // ── Admin nav item ──────────────────────────────────────────────
 function AdminNavItem({
@@ -71,35 +72,9 @@ function AdminNavItem({
   );
 }
 
-// ── Vyne Admin Logo ─────────────────────────────────────────────
+// ── Vyne Admin Logo (uses the shared VyneLogo mark) ────────────
 function VyneAdminLogo() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 36 36" fill="none">
-      <circle cx="18" cy="21" r="12" fill="#6C47FF" opacity="0.15" />
-      <line
-        x1="6"
-        y1="8"
-        x2="18"
-        y2="28"
-        stroke="#8B68FF"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <line
-        x1="30"
-        y1="8"
-        x2="18"
-        y2="28"
-        stroke="#6C47FF"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <circle cx="6" cy="8" r="3.3" fill="#8B68FF" />
-      <circle cx="30" cy="8" r="3.3" fill="#8B68FF" />
-      <circle cx="18" cy="28" r="5.2" fill="#6C47FF" />
-      <circle cx="18" cy="28" r="2" fill="white" opacity="0.65" />
-    </svg>
-  );
+  return <VyneLogo variant="mark" markSize={24} />;
 }
 
 export default function AdminLayout({
