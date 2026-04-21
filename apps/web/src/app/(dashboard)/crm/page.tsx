@@ -2,14 +2,15 @@
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { Plus, Pencil, ArrowRight } from "lucide-react";
+import { Plus, Pencil, ArrowRight, Trash2, Target, XCircle as XCircleIcon, CheckCircle2 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
 import {
   STAGES,
+  ASSIGNEES,
   MOCK_ACTIVITIES,
   type Stage,
   type Deal,
@@ -21,6 +22,14 @@ import {
   useDetailParam,
 } from "@/components/shared/DetailPanel";
 import { EditableCell } from "@/components/shared/EditableCell";
+import { SavedViewsBar, type SavedView } from "@/components/shared/SavedViews";
+import {
+  useMultiSelect,
+  Checkbox,
+  HeaderCheckbox,
+  MultiSelectBar,
+  BulkActionBtn,
+} from "@/components/shared/MultiSelect";
 
 // ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
@@ -293,6 +302,13 @@ function PipelineTab({
 type SortKey = "company" | "value" | "stage" | "lastActivity";
 type SortDir = "asc" | "desc";
 
+const BUILT_IN_DEAL_VIEWS: SavedView[] = [
+  { id: "won", name: "Won deals", query: "stage=Won", icon: "🏆", builtIn: true },
+  { id: "negotiation", name: "In negotiation", query: "stage=Negotiation", icon: "🤝", builtIn: true },
+  { id: "qualified", name: "Qualified", query: "stage=Qualified", icon: "✅", builtIn: true },
+  { id: "lost", name: "Lost", query: "stage=Lost", icon: "❌", builtIn: true },
+];
+
 function DealsTableTab({
   deals,
   onDealClick,
@@ -304,10 +320,26 @@ function DealsTableTab({
   onMarkWon: (id: string) => void;
   onMarkLost: (id: string) => void;
 }>) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const updateDeal = useCRMStore((s) => s.updateDeal);
+  const deleteDeal = useCRMStore((s) => s.deleteDeal);
+
+  // Local state for typing-sensitive fields; other filters sync to URL
   const [search, setSearch] = useState("");
-  const [stageFilter, setStageFilter] = useState<Stage | "All">("All");
-  const [assigneeFilter, setAssigneeFilter] = useState<string>("All");
+
+  const stageFilter = (searchParams?.get("stage") as Stage | null) ?? "All";
+  const assigneeFilter = searchParams?.get("assignee") ?? "All";
+
+  function setParam(key: string, value: string | "All") {
+    const next = new URLSearchParams(searchParams?.toString() ?? "");
+    if (value === "All") next.delete(key);
+    else next.set(key, value);
+    const qs = next.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
+
   const [sortKey, setSortKey] = useState<SortKey>("value");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
@@ -319,6 +351,9 @@ function DealsTableTab({
       setSortDir("desc");
     }
   }
+
+  // Multi-select
+  const selection = useMultiSelect();
 
   const filtered = deals
     .filter((d) => {
@@ -353,8 +388,54 @@ function DealsTableTab({
   const thNoSortClass =
     "px-[14px] py-[9px] text-left text-[10px] font-semibold uppercase whitespace-nowrap select-none cursor-default text-text-secondary tracking-[0.06em]";
 
+  const visibleIds = filtered.map((d) => d.id);
+
+  function bulkMarkWon() {
+    for (const id of selection.selected) onMarkWon(id);
+    toast.success(`Marked ${selection.size} deal${selection.size === 1 ? "" : "s"} won`);
+    selection.clear();
+  }
+
+  function bulkMarkLost() {
+    for (const id of selection.selected) onMarkLost(id);
+    toast.success(`Marked ${selection.size} deal${selection.size === 1 ? "" : "s"} lost`);
+    selection.clear();
+  }
+
+  function bulkDelete() {
+    const n = selection.size;
+    if (!confirm(`Delete ${n} deal${n === 1 ? "" : "s"}? This cannot be undone.`)) return;
+    for (const id of selection.selected) deleteDeal(id);
+    toast.success(`Deleted ${n} deal${n === 1 ? "" : "s"}`);
+    selection.clear();
+  }
+
   return (
     <div>
+      {/* Saved views */}
+      <SavedViewsBar
+        storageKey="crm-deals"
+        builtIns={BUILT_IN_DEAL_VIEWS}
+        style={{ marginBottom: 14 }}
+        trailing={
+          <ExportButton
+            data={filtered as unknown as Record<string, unknown>[]}
+            filename="vyne-deals-filtered"
+            columns={[
+              { key: "company", header: "Company" },
+              { key: "contactName", header: "Contact" },
+              { key: "email", header: "Email" },
+              { key: "stage", header: "Stage" },
+              { key: "value", header: "Value" },
+              { key: "probability", header: "Probability %" },
+              { key: "assignee", header: "Assignee" },
+              { key: "source", header: "Source" },
+              { key: "nextAction", header: "Next Action" },
+            ]}
+          />
+        }
+      />
+
       {/* Filters row */}
       <div className="flex gap-[10px] mb-[14px] items-center flex-wrap">
         {/* Search */}
@@ -386,7 +467,7 @@ function DealsTableTab({
             return (
               <button
                 key={s}
-                onClick={() => setStageFilter(s)}
+                onClick={() => setParam("stage", s as Stage | "All")}
                 className="px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer transition-all duration-150"
                 style={{
                   border: isActive
@@ -405,7 +486,7 @@ function DealsTableTab({
         {/* Assignee filter */}
         <select
           value={assigneeFilter}
-          onChange={(e) => setAssigneeFilter(e.target.value)}
+          onChange={(e) => setParam("assignee", e.target.value)}
           aria-label="Filter by assignee"
           className="px-2.5 py-1.5 rounded-lg outline-none text-xs cursor-pointer"
           style={{
@@ -434,6 +515,12 @@ function DealsTableTab({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[var(--table-header-bg)]">
+              <th className={thNoSortClass} style={{ width: 36, paddingRight: 0 }}>
+                <HeaderCheckbox
+                  state={selection.allState(visibleIds)}
+                  onChange={() => selection.toggleAll(visibleIds)}
+                />
+              </th>
               <th
                 className={thClass}
                 onClick={() => toggleSort("company")}
@@ -483,15 +570,31 @@ function DealsTableTab({
                 <tr
                   key={deal.id}
                   className="border-t border-black/[0.05]"
+                  style={{
+                    background: selection.has(deal.id)
+                      ? "rgba(108,71,255,0.04)"
+                      : undefined,
+                  }}
                   onMouseEnter={(ev) => {
-                    (ev.currentTarget as HTMLTableRowElement).style.background =
-                      "var(--content-secondary)";
+                    if (!selection.has(deal.id)) {
+                      (ev.currentTarget as HTMLTableRowElement).style.background =
+                        "var(--content-secondary)";
+                    }
                   }}
                   onMouseLeave={(ev) => {
-                    (ev.currentTarget as HTMLTableRowElement).style.background =
-                      "transparent";
+                    if (!selection.has(deal.id)) {
+                      (ev.currentTarget as HTMLTableRowElement).style.background =
+                        "transparent";
+                    }
                   }}
                 >
+                  <td className="px-[14px] py-[10px]" style={{ width: 36, paddingRight: 0 }}>
+                    <Checkbox
+                      checked={selection.has(deal.id)}
+                      onChange={() => selection.toggle(deal.id)}
+                      label={`Select ${deal.company}`}
+                    />
+                  </td>
                   <td className="px-[14px] py-[10px]">
                     <span
                       className="flex items-center gap-1.5 text-xs font-bold text-vyne-purple"
@@ -638,6 +741,26 @@ function DealsTableTab({
           </div>
         )}
       </div>
+
+      {/* Floating bulk-actions bar */}
+      <MultiSelectBar count={selection.size} onClear={selection.clear}>
+        <BulkActionBtn
+          icon={<CheckCircle2 size={13} />}
+          label="Mark Won"
+          onClick={bulkMarkWon}
+        />
+        <BulkActionBtn
+          icon={<XCircleIcon size={13} />}
+          label="Mark Lost"
+          onClick={bulkMarkLost}
+        />
+        <BulkActionBtn
+          icon={<Trash2 size={13} />}
+          label="Delete"
+          onClick={bulkDelete}
+          danger
+        />
+      </MultiSelectBar>
     </div>
   );
 }
