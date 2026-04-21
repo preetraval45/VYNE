@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Plus,
@@ -1570,6 +1571,7 @@ function RefundModal({ onClose }: { onClose: () => void }) {
 
 // ─── Tab: Customers ───────────────────────────────────────────────
 function CustomersTab() {
+  const router = useRouter();
   const { customers, deleteCustomer } = useInvoicingStore();
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<
@@ -1621,7 +1623,7 @@ function CustomersTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Customer"
-            onClick={() => setModal({ type: "create" })}
+            onClick={() => router.push("/invoicing/customers/new")}
           />
         </div>
       </div>
@@ -1786,6 +1788,7 @@ function CustomersTab() {
 
 // ─── Tab: Invoices ────────────────────────────────────────────────
 function InvoicesTab() {
+  const router = useRouter();
   const { invoices, markAsPaid, sendInvoice, deleteInvoice } =
     useInvoicingStore();
   const [filter, setFilter] = useState<"All" | InvoiceStatus>("All");
@@ -1946,7 +1949,7 @@ function InvoicesTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Invoice"
-            onClick={() => setModal({ type: "create" })}
+            onClick={() => router.push("/invoicing/invoices/new")}
           />
         </div>
       </div>
@@ -2510,6 +2513,7 @@ function PaymentsTab() {
 
 // ─── Tab: Vendors ─────────────────────────────────────────────────
 function VendorsTab() {
+  const router = useRouter();
   const { vendors, deleteVendor } = useInvoicingStore();
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<
@@ -2561,7 +2565,7 @@ function VendorsTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Vendor"
-            onClick={() => setModal({ type: "create" })}
+            onClick={() => router.push("/invoicing/vendors/new")}
           />
         </div>
       </div>
@@ -2711,6 +2715,7 @@ function VendorsTab() {
 
 // ─── Tab: Bills ───────────────────────────────────────────────────
 function BillsTab() {
+  const router = useRouter();
   const { bills, markBillPaid, deleteBill } = useInvoicingStore();
   const [filter, setFilter] = useState<"All" | BillStatus>("All");
   const [modal, setModal] = useState<
@@ -2830,7 +2835,7 @@ function BillsTab() {
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Bill"
-            onClick={() => setModal({ type: "create" })}
+            onClick={() => router.push("/invoicing/bills/new")}
           />
         </div>
       </div>
