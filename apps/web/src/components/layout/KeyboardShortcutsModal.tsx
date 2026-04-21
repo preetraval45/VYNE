@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { X, Keyboard } from "lucide-react";
 import { useUIStore } from "@/lib/stores/ui";
 
@@ -21,31 +21,49 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     items: [
       { keys: ["?"], action: "Show this cheat sheet" },
       { keys: ["Ctrl", "K"], action: "Open command palette" },
+      { keys: ["/"], action: "Focus in-page search" },
+      { keys: ["C"], action: "Create in current module" },
       { keys: ["F"], action: "Toggle focus mode" },
       { keys: ["Ctrl", "B"], action: "Toggle sidebar" },
       { keys: ["Esc"], action: "Close modals / overlays" },
     ],
   },
   {
-    title: "Navigation",
+    title: "Go to…",
     items: [
-      { keys: ["G", "H"], action: "Go to Home" },
-      { keys: ["G", "P"], action: "Go to Projects" },
-      { keys: ["G", "C"], action: "Go to Chat" },
-      { keys: ["G", "D"], action: "Go to Docs" },
-      { keys: ["G", "O"], action: "Go to ERP / Operations" },
-      { keys: ["G", "F"], action: "Go to Finance" },
-      { keys: ["G", "A"], action: "Go to AI Dashboard" },
-      { keys: ["G", "S"], action: "Go to Settings" },
+      { keys: ["G", "H"], action: "Home" },
+      { keys: ["G", "P"], action: "Projects" },
+      { keys: ["G", "C"], action: "Chat" },
+      { keys: ["G", "D"], action: "Docs" },
+      { keys: ["G", "O"], action: "Ops / ERP" },
+      { keys: ["G", "F"], action: "Finance" },
+      { keys: ["G", "I"], action: "Invoicing" },
+      { keys: ["G", "R"], action: "CRM" },
+      { keys: ["G", "S"], action: "Sales" },
+      { keys: ["G", "E"], action: "Expenses" },
+      { keys: ["G", "M"], action: "HR (Members)" },
+      { keys: ["G", "N"], action: "Contacts" },
+      { keys: ["G", "A"], action: "AI" },
+      { keys: ["G", "B"], action: "Roadmap" },
+      { keys: ["G", ","], action: "Settings" },
     ],
   },
   {
-    title: "Create",
+    title: "Create…",
     items: [
-      { keys: ["C", "I"], action: "Create new issue" },
-      { keys: ["C", "D"], action: "Create new doc" },
-      { keys: ["C", "M"], action: "Post a message" },
-      { keys: ["C", "O"], action: "Create new order" },
+      { keys: ["C"], action: "Primary create for current page" },
+      { keys: ["C", "P"], action: "Project" },
+      { keys: ["C", "D"], action: "CRM deal" },
+      { keys: ["C", "I"], action: "Invoice" },
+      { keys: ["C", "B"], action: "Bill" },
+      { keys: ["C", "E"], action: "Expense" },
+      { keys: ["C", "J"], action: "Journal entry" },
+      { keys: ["C", "C"], action: "Channel" },
+      { keys: ["C", "Q"], action: "Quote" },
+      { keys: ["C", "O"], action: "Ops order" },
+      { keys: ["C", "A"], action: "Contact account" },
+      { keys: ["C", "N"], action: "Contact person" },
+      { keys: ["C", "R"], action: "Feature request" },
     ],
   },
   {
@@ -60,6 +78,33 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
 ];
+
+/**
+ * Given the current pathname, returns the URL that "c" alone should
+ * navigate to for a context-aware create action. Returns null if no
+ * sensible default exists on this page (in which case we fall back to
+ * opening the command palette).
+ */
+function primaryCreateForPath(path: string | null): string | null {
+  if (!path) return null;
+  const routes: Array<[RegExp, string]> = [
+    [/^\/projects(\/|$)/, "/projects/new"],
+    [/^\/crm(\/|$)/, "/crm/deals/new"],
+    [/^\/finance(\/|$)/, "/finance/journal/new"],
+    [/^\/contacts(\/|$)/, "/contacts/people/new"],
+    [/^\/expenses(\/|$)/, "/expenses/new"],
+    [/^\/sales(\/|$)/, "/sales/opportunities/new"],
+    [/^\/invoicing(\/|$)/, "/invoicing/invoices/new"],
+    [/^\/ops(\/|$)/, "/ops/orders/new"],
+    [/^\/hr(\/|$)/, "/hr"],
+    [/^\/chat(\/|$)/, "/chat/new"],
+    [/^\/roadmap(\/|$)/, "/roadmap/request"],
+  ];
+  for (const [re, target] of routes) {
+    if (re.test(path)) return target;
+  }
+  return null;
+}
 
 function KeyBadge({ keyText }: { keyText: string }) {
   return (
@@ -86,14 +131,50 @@ function KeyBadge({ keyText }: { keyText: string }) {
   );
 }
 
+// Sequence target tables — hoisted so the effect deps stay stable.
+const GO_ROUTES: Record<string, string> = {
+  h: "/home",
+  p: "/projects",
+  c: "/chat",
+  d: "/docs",
+  o: "/ops",
+  f: "/finance",
+  i: "/invoicing",
+  r: "/crm",
+  s: "/sales",
+  e: "/expenses",
+  m: "/hr",
+  n: "/contacts",
+  a: "/ai",
+  b: "/roadmap",
+  ",": "/settings",
+};
+
+const CREATE_ROUTES: Record<string, string> = {
+  p: "/projects/new",
+  d: "/crm/deals/new",
+  i: "/invoicing/invoices/new",
+  b: "/invoicing/bills/new",
+  e: "/expenses/new",
+  j: "/finance/journal/new",
+  c: "/chat/new",
+  q: "/sales/quotes/new",
+  o: "/ops/orders/new",
+  a: "/contacts/accounts/new",
+  n: "/contacts/people/new",
+  r: "/roadmap/request",
+};
+
 export function KeyboardShortcutsModal() {
   const router = useRouter();
+  const pathname = usePathname();
   const shortcutsOpen = useUIStore((s) => s.shortcutsOpen);
   const setShortcutsOpen = useUIStore((s) => s.setShortcutsOpen);
   const toggleShortcuts = useUIStore((s) => s.toggleShortcuts);
   const toggleFocusMode = useUIStore((s) => s.toggleFocusMode);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
+  const commandPaletteOpen = useUIStore((s) => s.commandPaletteOpen);
 
   // Global key bindings
   useEffect(() => {
@@ -108,19 +189,57 @@ export function KeyboardShortcutsModal() {
       return false;
     }
 
+    /** Find a prominent search/filter input on the current page. */
+    function focusInPageSearch(): boolean {
+      const selectors = [
+        'input[type="search"]',
+        'input[aria-label*="Search" i]',
+        'input[placeholder*="Search" i]',
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector<HTMLInputElement>(sel);
+        if (el) {
+          el.focus();
+          el.select?.();
+          return true;
+        }
+      }
+      return false;
+    }
+
     function handler(e: KeyboardEvent) {
-      // Always listen for Escape inside the modal
+      // Always allow Escape to close the shortcuts modal, even from within inputs
       if (e.key === "Escape" && shortcutsOpen) {
         setShortcutsOpen(false);
         return;
       }
 
-      if (isTypingTarget(e.target)) return;
+      // Ignore all hotkeys while typing — except the palette opener (Ctrl/⌘+K)
+      if (isTypingTarget(e.target)) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+          e.preventDefault();
+          setCommandPaletteOpen(!commandPaletteOpen);
+        }
+        return;
+      }
 
       // "?" — show shortcuts
       if (e.key === "?" || (e.shiftKey && e.key === "/")) {
         e.preventDefault();
         toggleShortcuts();
+        return;
+      }
+
+      // "/" — focus in-page search. Falls back to command palette.
+      if (e.key === "/" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const focused = focusInPageSearch();
+        if (focused) {
+          e.preventDefault();
+          return;
+        }
+        // no search on this page → open the palette instead
+        e.preventDefault();
+        setCommandPaletteOpen(true);
         return;
       }
 
@@ -141,56 +260,61 @@ export function KeyboardShortcutsModal() {
       // Sequence shortcuts (G + x, C + x)
       const now = Date.now();
       if (lastKey && now - lastKeyAt < 1200) {
-        const seq = `${lastKey}${e.key.toLowerCase()}`;
-        const routes: Record<string, string> = {
-          gh: "/home",
-          gp: "/projects",
-          gc: "/chat",
-          gd: "/docs",
-          go: "/ops",
-          gf: "/finance",
-          ga: "/ai",
-          gs: "/settings",
-        };
-        const creates: Record<string, () => void> = {
-          ci: () => router.push("/projects?new=1"),
-          cd: () => router.push("/docs?new=1"),
-          cm: () => router.push("/chat"),
-          co: () => router.push("/ops?tab=orders&new=1"),
-          ck: () => setCommandPaletteOpen(true),
-        };
-        if (routes[seq]) {
+        const second = e.key.toLowerCase();
+        if (lastKey === "g" && GO_ROUTES[second]) {
           e.preventDefault();
-          router.push(routes[seq]);
+          router.push(GO_ROUTES[second]);
           lastKey = null;
           return;
         }
-        if (creates[seq]) {
+        if (lastKey === "c" && CREATE_ROUTES[second]) {
           e.preventDefault();
-          creates[seq]();
+          router.push(CREATE_ROUTES[second]);
           lastKey = null;
           return;
         }
-      }
-
-      if (["g", "c"].includes(e.key.toLowerCase()) && !e.ctrlKey && !e.metaKey) {
-        lastKey = e.key.toLowerCase();
-        lastKeyAt = now;
-      } else {
         lastKey = null;
       }
+
+      // Arm a sequence key…
+      if (["g", "c"].includes(e.key.toLowerCase()) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        lastKey = e.key.toLowerCase();
+        lastKeyAt = now;
+
+        // If C isn't followed by a second key within 500 ms, treat it as a
+        // standalone context-aware create shortcut.
+        if (lastKey === "c") {
+          const armedAt = now;
+          window.setTimeout(() => {
+            if (lastKey === "c" && lastKeyAt === armedAt) {
+              lastKey = null;
+              const target = primaryCreateForPath(pathname);
+              if (target) {
+                router.push(target);
+              } else {
+                setCommandPaletteOpen(true);
+              }
+            }
+          }, 500);
+        }
+        return;
+      }
+
+      lastKey = null;
     }
 
     globalThis.addEventListener("keydown", handler);
     return () => globalThis.removeEventListener("keydown", handler);
   }, [
     shortcutsOpen,
+    commandPaletteOpen,
     setShortcutsOpen,
     toggleShortcuts,
     toggleFocusMode,
     toggleSidebar,
     setCommandPaletteOpen,
     router,
+    pathname,
   ]);
 
   if (!shortcutsOpen) return null;
