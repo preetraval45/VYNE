@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { Plus, Pencil, ArrowRight } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
@@ -506,7 +507,10 @@ function DealsTableTab({
                       </button>
                       <EditableCell
                         value={deal.company}
-                        onSave={(v) => updateDeal(deal.id, { company: v })}
+                        onSave={(v) => {
+                          updateDeal(deal.id, { company: v });
+                          toast.success(`Renamed to "${v}"`);
+                        }}
                         label="Company"
                         style={{ color: "var(--vyne-purple)", fontWeight: 700 }}
                       />
@@ -517,7 +521,10 @@ function DealsTableTab({
                   >
                     <EditableCell
                       value={deal.contactName}
-                      onSave={(v) => updateDeal(deal.id, { contactName: v })}
+                      onSave={(v) => {
+                        updateDeal(deal.id, { contactName: v });
+                        toast.success("Contact updated");
+                      }}
                       label="Contact name"
                     />
                   </td>
@@ -526,7 +533,11 @@ function DealsTableTab({
                   >
                     <EditableCell
                       value={deal.value}
-                      onSave={(v) => updateDeal(deal.id, { value: Number(v) || 0 })}
+                      onSave={(v) => {
+                        const n = Number(v) || 0;
+                        updateDeal(deal.id, { value: n });
+                        toast.success(`Value updated to ${fmt(n)}`);
+                      }}
                       type="number"
                       label="Deal value"
                       validate={(s) => {
@@ -540,7 +551,10 @@ function DealsTableTab({
                   <td className="px-[14px] py-[10px]">
                     <EditableCell
                       value={deal.stage}
-                      onSave={(v) => updateDeal(deal.id, { stage: v as Stage })}
+                      onSave={(v) => {
+                        updateDeal(deal.id, { stage: v as Stage });
+                        toast.success(`Moved to ${v}`);
+                      }}
                       type="select"
                       label="Stage"
                       options={STAGES.map((s) => ({ value: s, label: s }))}

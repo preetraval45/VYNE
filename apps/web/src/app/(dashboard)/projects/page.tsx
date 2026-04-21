@@ -27,6 +27,7 @@ import {
   useDetailParam,
 } from "@/components/shared/DetailPanel";
 import { EditableCell } from "@/components/shared/EditableCell";
+import toast from "react-hot-toast";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
@@ -574,7 +575,9 @@ function ProjectCardLocal({
                 value={project.name}
                 onSave={(v) => {
                   const next = String(v).trim();
-                  if (next) updateProject(project.id, { name: next });
+                  if (!next) return;
+                  updateProject(project.id, { name: next });
+                  toast.success(`Renamed to "${next}"`);
                 }}
                 label="Project name"
                 validate={(s) => (s.trim() ? null : "Name required")}

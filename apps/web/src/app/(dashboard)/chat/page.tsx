@@ -9,10 +9,11 @@ import type { MsgMessage } from "@/lib/api/client";
 import { ChannelSidebar } from "@/components/chat/ChannelSidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
 import { ThreadPanel } from "@/components/chat/ThreadPanel";
+import { SkeletonList } from "@/components/shared/Skeleton";
 
 export default function ChatPage() {
   const router = useRouter();
-  const { channels, dms } = useChannels();
+  const { channels, dms, loading } = useChannels();
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [isDM, setIsDM] = useState(false);
   const [threadMsg, setThreadMsg] = useState<MsgMessage | null>(null);
@@ -39,15 +40,28 @@ export default function ChatPage() {
         background: "var(--content-bg)",
       }}
     >
-      {/* ── Channel sidebar ─────────────────────────────── */}
-      <ChannelSidebar
-        channels={channels}
-        dms={dms}
-        selectedId={selectedId}
-        isDM={isDM}
-        onSelectChannel={selectChannel}
-        onCreateChannel={() => router.push("/chat/new")}
-      />
+      {/* ── Channel sidebar (or skeleton while loading) ───────── */}
+      {loading && channels.length === 0 ? (
+        <div
+          style={{
+            width: 260,
+            borderRight: "1px solid var(--content-border)",
+            padding: 14,
+            background: "var(--content-bg)",
+          }}
+        >
+          <SkeletonList items={6} avatarSize={20} />
+        </div>
+      ) : (
+        <ChannelSidebar
+          channels={channels}
+          dms={dms}
+          selectedId={selectedId}
+          isDM={isDM}
+          onSelectChannel={selectChannel}
+          onCreateChannel={() => router.push("/chat/new")}
+        />
+      )}
 
       {/* ── Main area ─────────────────────────────────── */}
       {selectedId ? (
