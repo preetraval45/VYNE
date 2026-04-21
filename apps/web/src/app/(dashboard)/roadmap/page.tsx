@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Calendar, Columns3, List, Plus, Search } from "lucide-react";
 import toast from "react-hot-toast";
 import { TimelineView } from "@/components/roadmap/TimelineView";
@@ -154,6 +155,7 @@ function StatCard({
 
 // ── Main page ───────────────────────────────────────────────────
 export default function RoadmapPage() {
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>("timeline");
   const [moduleFilter, setModuleFilter] = useState<Module | "All">("All");
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | "all">(
@@ -251,7 +253,7 @@ export default function RoadmapPage() {
             </p>
           </div>
           <button
-            onClick={() => setShowRequestModal(true)}
+            onClick={() => router.push("/roadmap/request")}
             style={{
               display: "flex",
               alignItems: "center",

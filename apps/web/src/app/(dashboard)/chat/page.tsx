@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { MessageSquare } from "lucide-react";
 import { useChannels } from "@/hooks/useMessages";
@@ -8,14 +9,13 @@ import type { MsgMessage } from "@/lib/api/client";
 import { ChannelSidebar } from "@/components/chat/ChannelSidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
 import { ThreadPanel } from "@/components/chat/ThreadPanel";
-import { CreateChannelModal } from "@/components/chat/CreateChannelModal";
 
 export default function ChatPage() {
-  const { channels, dms, createChannel } = useChannels();
+  const router = useRouter();
+  const { channels, dms } = useChannels();
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [isDM, setIsDM] = useState(false);
   const [threadMsg, setThreadMsg] = useState<MsgMessage | null>(null);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const channelName = isDM
     ? (dms.find((d) => d.id === selectedId)?.participant.name ?? "")
@@ -46,7 +46,7 @@ export default function ChatPage() {
         selectedId={selectedId}
         isDM={isDM}
         onSelectChannel={selectChannel}
-        onCreateChannel={() => setCreateModalOpen(true)}
+        onCreateChannel={() => router.push("/chat/new")}
       />
 
       {/* ── Main area ─────────────────────────────────── */}
@@ -113,15 +113,6 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Create channel modal */}
-      <AnimatePresence>
-        {createModalOpen && (
-          <CreateChannelModal
-            onClose={() => setCreateModalOpen(false)}
-            onCreate={(name, desc, priv) => createChannel(name, desc, priv)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
