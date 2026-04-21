@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   TrendingUp,
   TrendingDown,
   DollarSign,
   FileText,
   Plus,
-  X,
   ChevronUp,
   ChevronDown,
 } from "lucide-react";
@@ -18,6 +18,7 @@ import {
   MOCK_JOURNAL,
   MOCK_ACCOUNTS,
 } from "@/lib/fixtures/finance";
+import { useFinanceStore } from "@/lib/stores/finance";
 import { ExportButton } from "@/components/shared/ExportButton";
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -431,30 +432,17 @@ function PLTab() {
 
 // ─── Journal Entries tab ──────────────────────────────────────────
 function JournalTab() {
-  const [entries, setEntries] = useState<ERPJournalEntry[]>(MOCK_JOURNAL);
-  const [newOpen, setNewOpen] = useState(false);
-  const [form, setForm] = useState({ description: "", totalDebits: "" });
+  const entries = useFinanceStore((s) => s.journalEntries);
+  const setEntries = useFinanceStore((s) => s.setJournalEntries);
 
   useEffect(() => {
     erpApi
       .listJournalEntries()
-      .then((r) => setEntries(r.data))
+      .then((r) => {
+        if (r.data?.length) setEntries(r.data);
+      })
       .catch(() => {});
-  }, []);
-
-  function createEntry() {
-    const entry: ERPJournalEntry = {
-      id: `j${Date.now()}`,
-      entryNumber: `JE-${String(entries.length + 1).padStart(3, "0")}`,
-      description: form.description,
-      postingDate: new Date().toISOString(),
-      status: "draft",
-      totalDebits: Number.parseFloat(form.totalDebits) || 0,
-    };
-    setEntries([entry, ...entries]);
-    setNewOpen(false);
-    setForm({ description: "", totalDebits: "" });
-  }
+  }, [setEntries]);
 
   return (
     <div>
@@ -465,8 +453,8 @@ function JournalTab() {
           marginBottom: 14,
         }}
       >
-        <button
-          onClick={() => setNewOpen(true)}
+        <Link
+          href="/finance/journal/new"
           style={{
             display: "flex",
             alignItems: "center",
@@ -482,7 +470,7 @@ function JournalTab() {
           }}
         >
           <Plus size={13} /> New Entry
-        </button>
+        </Link>
       </div>
 
       <div
@@ -588,168 +576,6 @@ function JournalTab() {
         </table>
       </div>
 
-      {newOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.35)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 200,
-          }}
-        >
-          <div
-            style={{
-              background: "var(--content-bg)",
-              borderRadius: 12,
-              width: 420,
-              padding: 24,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 18,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                }}
-              >
-                New Journal Entry
-              </span>
-              <button
-                type="button"
-                aria-label="Close"
-                onClick={() => setNewOpen(false)}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "pointer",
-                  color: "var(--text-tertiary)",
-                  padding: 4,
-                  borderRadius: 6,
-                  display: "flex",
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <label
-                htmlFor="je-desc"
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                  display: "block",
-                  marginBottom: 5,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                Description
-              </label>
-              <input
-                id="je-desc"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                placeholder="Sales revenue batch"
-                style={{
-                  width: "100%",
-                  padding: "8px 10px",
-                  border: "1px solid var(--input-border)",
-                  borderRadius: 8,
-                  background: "var(--input-bg)",
-                  outline: "none",
-                  fontSize: 13,
-                  color: "var(--text-primary)",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label
-                htmlFor="je-amount"
-                style={{
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: "var(--text-secondary)",
-                  display: "block",
-                  marginBottom: 5,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                }}
-              >
-                Total Debits ($)
-              </label>
-              <input
-                id="je-amount"
-                type="number"
-                value={form.totalDebits}
-                onChange={(e) =>
-                  setForm({ ...form, totalDebits: e.target.value })
-                }
-                placeholder="10000"
-                style={{
-                  width: "100%",
-                  padding: "8px 10px",
-                  border: "1px solid var(--input-border)",
-                  borderRadius: 8,
-                  background: "var(--input-bg)",
-                  outline: "none",
-                  fontSize: 13,
-                  color: "var(--text-primary)",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
-            <div
-              style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}
-            >
-              <button
-                onClick={() => setNewOpen(false)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "1px solid var(--input-border)",
-                  background: "transparent",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  color: "var(--text-secondary)",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={createEntry}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "var(--vyne-purple)",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  fontWeight: 500,
-                }}
-              >
-                Create Entry
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

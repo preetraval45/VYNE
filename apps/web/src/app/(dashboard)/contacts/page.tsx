@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Upload, X, Pencil, Trash2 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
@@ -1002,6 +1003,7 @@ function ContactModal({
 
 // ─── Accounts Tab ────────────────────────────────────────────────
 function AccountsTab() {
+  const router = useRouter();
   const accounts = useContactsStore((s) => s.accounts);
   const addAccount = useContactsStore((s) => s.addAccount);
   const updateAccount = useContactsStore((s) => s.updateAccount);
@@ -1094,10 +1096,7 @@ function AccountsTab() {
           />
           <NewButton
             label="New Account"
-            onClick={() => {
-              setEditingAccount(null);
-              setShowModal(true);
-            }}
+            onClick={() => router.push("/contacts/accounts/new")}
           />
         </div>
       </div>
@@ -1272,10 +1271,7 @@ function AccountsTab() {
                           <IconBtn
                             icon={<Pencil size={13} />}
                             title="Edit"
-                            onClick={() => {
-                              setEditingAccount(account);
-                              setShowModal(true);
-                            }}
+                            onClick={() => router.push(`/contacts/accounts/${account.id}/edit`)}
                           />
                           <IconBtn
                             icon={<Trash2 size={13} />}
@@ -1329,6 +1325,7 @@ function AccountsTab() {
 
 // ─── Contacts Tab ────────────────────────────────────────────────
 function ContactsTabContent() {
+  const router = useRouter();
   const contacts = useContactsStore((s) => s.contacts);
   const accounts = useContactsStore((s) => s.accounts);
   const addContact = useContactsStore((s) => s.addContact);
@@ -1426,10 +1423,7 @@ function ContactsTabContent() {
           />
           <NewButton
             label="New Contact"
-            onClick={() => {
-              setEditingContact(null);
-              setShowModal(true);
-            }}
+            onClick={() => router.push("/contacts/people/new")}
           />
         </div>
       </div>
@@ -1553,10 +1547,7 @@ function ContactsTabContent() {
                         <IconBtn
                           icon={<Pencil size={13} />}
                           title="Edit"
-                          onClick={() => {
-                            setEditingContact(contact);
-                            setShowModal(true);
-                          }}
+                          onClick={() => router.push(`/contacts/people/${contact.id}/edit`)}
                         />
                         <IconBtn
                           icon={<Trash2 size={13} />}

@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, X, Search, Edit2, Check, XCircle } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
+import { useCRMStore } from "@/lib/stores/crm";
 import {
-  INITIAL_DEALS,
   STAGES,
-  ASSIGNEES,
-  SOURCES,
   MOCK_ACTIVITIES,
   type Stage,
-  type Source,
   type Deal,
 } from "@/lib/fixtures/crm";
 
@@ -144,593 +143,6 @@ function StagePill({ stage }: Readonly<{ stage: Stage }>) {
     >
       {stage}
     </span>
-  );
-}
-
-// ─── Deal Detail Modal ────────────────────────────────────────────
-function DealModal({
-  deal,
-  onClose,
-  onUpdate,
-}: Readonly<{
-  deal: Deal;
-  onClose: () => void;
-  onUpdate: (updated: Deal) => void;
-}>) {
-  const [stage, setStage] = useState<Stage>(deal.stage);
-  const [nextAction, setNextAction] = useState(deal.nextAction);
-  const [toast, setToast] = useState("");
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(""), 3000);
-  }
-
-  function handleConvert() {
-    showToast("Order created in Ops module");
-  }
-
-  function handleWon() {
-    onUpdate({ ...deal, stage: "Won", probability: 100 });
-    onClose();
-  }
-
-  function handleLost() {
-    onUpdate({ ...deal, stage: "Lost", probability: 0 });
-    onClose();
-  }
-
-  function handleSave() {
-    onUpdate({ ...deal, stage, nextAction });
-    onClose();
-  }
-
-  const days = daysSince(deal.lastActivity);
-  const priority = priorityFromDays(days);
-  const actColor = priorityColor(priority);
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center z-[300] bg-black/40"
-    >
-      <div
-        className="rounded-[14px] w-[580px] max-h-[88vh] overflow-hidden flex flex-col"
-        style={{
-          background: "var(--content-bg)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.22)",
-        }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-start justify-between"
-          style={{
-            padding: "18px 22px 14px",
-            borderBottom: "1px solid var(--content-border)",
-          }}
-        >
-          <div>
-            <div
-              className="text-base font-bold mb-1 text-text-primary"
-            >
-              {deal.company}
-            </div>
-            <div className="text-xs text-text-secondary">
-              {deal.contactName} · {deal.email}
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="border-0 bg-transparent cursor-pointer p-1 rounded-md flex text-text-tertiary"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-[22px] py-[18px]" >
-          {/* Value + Probability */}
-          <div className="flex gap-4 mb-5">
-            <div
-              className="flex-1 rounded-[10px] border"
-              style={{
-                background: "var(--content-secondary)",
-                padding: "14px 16px",
-                border: "1px solid var(--content-border)",
-              }}
-            >
-              <div
-                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
-              >
-                Deal Value
-              </div>
-              <div
-                className="text-[22px] font-bold text-text-primary tracking-[-0.03em]" 
-              >
-                {fmt(deal.value)}
-              </div>
-            </div>
-            <div
-              className="flex-1 rounded-[10px]"
-              style={{
-                background: "var(--content-secondary)",
-                padding: "14px 16px",
-                border: "1px solid var(--content-border)",
-              }}
-            >
-              <div
-                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
-              >
-                Probability
-              </div>
-              <div
-                className="text-[22px] font-bold"
-                style={{ color: probabilityColor(deal.probability), letterSpacing: "-0.03em" }}
-              >
-                {deal.probability}%
-              </div>
-              <div
-                className="mt-2 h-[6px] rounded-full overflow-hidden bg-content-border"
-              >
-                <div
-                  className="h-full rounded-full transition-[width] duration-[0.4s]"
-                  style={{
-                    width: `${deal.probability}%`,
-                    background: probabilityColor(deal.probability),
-                  }}
-                />
-              </div>
-            </div>
-            <div
-              className="flex-1 rounded-[10px]"
-              style={{
-                background: "var(--content-secondary)",
-                padding: "14px 16px",
-                border: "1px solid var(--content-border)",
-              }}
-            >
-              <div
-                className="text-[11px] font-semibold uppercase mb-1 text-text-tertiary tracking-[0.06em]" 
-              >
-                Last Activity
-              </div>
-              <div className="text-sm font-semibold" style={{ color: actColor }}>
-                {days}d ago
-              </div>
-              <div className="text-[11px] mt-0.5 text-text-tertiary">
-                Source: {deal.source}
-              </div>
-            </div>
-          </div>
-
-          {/* Stage selector */}
-          <div className="mb-5">
-            <div
-              className="text-[11px] font-semibold uppercase mb-2.5 text-text-secondary tracking-[0.06em]" 
-            >
-              Stage
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {STAGES.map((s) => {
-                const isActive = stage === s;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => setStage(s)}
-                    className="px-3 py-[5px] rounded-full text-xs font-semibold cursor-pointer transition-all duration-150"
-                    style={{
-                      border: isActive
-                        ? `2px solid ${stageColor(s)}`
-                        : "2px solid transparent",
-                      background: isActive ? stageBg(s) : "#F4F4F8",
-                      color: isActive ? stageColor(s) : "var(--text-secondary)",
-                    }}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Next Action */}
-          <div className="mb-5">
-            <label
-              htmlFor="modal-next-action"
-              className="block text-[11px] font-semibold uppercase mb-1.5 text-text-secondary tracking-[0.06em]" 
-            >
-              Next Action
-            </label>
-            <input
-              id="modal-next-action"
-              title="Next Action"
-              placeholder="Schedule follow-up call"
-              value={nextAction}
-              onChange={(e) => setNextAction(e.target.value)}
-              className="w-full px-2.5 py-2 rounded-lg text-[13px] outline-none box-border"
-              style={{
-                border: "1px solid var(--input-border)",
-                background: "var(--content-secondary)",
-                color: "var(--text-primary)",
-              }}
-            />
-          </div>
-
-          {/* Notes */}
-          {deal.notes && (
-            <div
-              className="mb-5 px-[14px] py-3 rounded-lg"
-              style={{
-                background: "var(--badge-warning-bg)",
-                border: "1px solid rgba(245,158,11,0.2)",
-              }}
-            >
-              <div className="text-[11px] font-semibold mb-1 text-[var(--badge-warning-text)]" >
-                Notes
-              </div>
-              <div className="text-xs text-[#78350F]" >{deal.notes}</div>
-            </div>
-          )}
-
-          {/* Activity Timeline */}
-          <div className="mb-5">
-            <div
-              className="text-[11px] font-semibold uppercase mb-3 text-text-secondary tracking-[0.06em]" 
-            >
-              Activity Timeline
-            </div>
-            <div className="flex flex-col">
-              {MOCK_ACTIVITIES.map((a, actIdx) => (
-                <div key={a.time} className="flex gap-3 pb-[14px]">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0 mt-1 bg-vyne-purple"
-                    />
-                    {actIdx < MOCK_ACTIVITIES.length - 1 && (
-                      <div
-                        className="w-px flex-1 mt-1 bg-content-border"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <div
-                      className="text-xs mb-0.5 text-text-primary"
-                    >
-                      {a.text}
-                    </div>
-                    <div className="text-[10px] text-text-tertiary">
-                      {new Date(a.time).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer actions */}
-        <div
-          className="flex gap-2 items-center"
-          style={{
-            padding: "14px 22px",
-            borderTop: "1px solid var(--content-border)",
-          }}
-        >
-          <button
-            onClick={handleConvert}
-            className="flex-1 px-[14px] py-2 rounded-lg text-xs font-semibold cursor-pointer bg-transparent border-vyne-purple border text-vyne-purple"
-          >
-            Convert to Order
-          </button>
-          <button
-            onClick={handleWon}
-            className="px-[14px] py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold flex items-center gap-[5px] bg-status-success"
-          >
-            <Check size={13} /> Mark Won
-          </button>
-          <button
-            onClick={handleLost}
-            className="px-[14px] py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold flex items-center gap-[5px] bg-status-danger"
-          >
-            <XCircle size={13} /> Mark Lost
-          </button>
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 rounded-lg border-0 text-white cursor-pointer text-xs font-semibold bg-vyne-purple"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-
-      {toast && (
-        <div
-          className="fixed bottom-7 left-1/2 -translate-x-1/2 text-white px-[18px] py-2.5 rounded-[10px] text-[13px] font-medium z-[400] whitespace-nowrap"
-          style={{
-            background: "var(--text-primary)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-          }}
-        >
-          {toast}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Add Deal Modal ───────────────────────────────────────────────
-interface AddDealForm {
-  company: string;
-  contactName: string;
-  email: string;
-  value: string;
-  stage: Stage;
-  source: Source;
-  assignee: string;
-  notes: string;
-}
-
-const EMPTY_FORM: AddDealForm = {
-  company: "",
-  contactName: "",
-  email: "",
-  value: "",
-  stage: "Lead",
-  source: "website",
-  assignee: "Alex",
-  notes: "",
-};
-
-function AddDealModal({
-  defaultStage,
-  onClose,
-  onAdd,
-}: Readonly<{
-  defaultStage: Stage;
-  onClose: () => void;
-  onAdd: (deal: Deal) => void;
-}>) {
-  const [form, setForm] = useState<AddDealForm>({
-    ...EMPTY_FORM,
-    stage: defaultStage,
-  });
-
-  function handleAdd() {
-    if (!form.company || !form.contactName) return;
-    const deal: Deal = {
-      id: `d${Date.now()}`,
-      company: form.company,
-      contactName: form.contactName,
-      email: form.email,
-      stage: form.stage,
-      value: Number.parseInt(form.value, 10) || 0,
-      probability: 15,
-      assignee: form.assignee,
-      lastActivity: new Date().toISOString(),
-      nextAction: "",
-      source: form.source,
-      notes: form.notes,
-    };
-    onAdd(deal);
-    onClose();
-  }
-
-  const fieldInputClass =
-    "w-full px-2.5 py-2 rounded-lg text-[13px] outline-none box-border";
-  const fieldInputStyle: React.CSSProperties = {
-    border: "1px solid var(--input-border)",
-    background: "var(--content-secondary)",
-    color: "var(--text-primary)",
-  };
-
-  function field(label: string, id: string, node: React.ReactNode) {
-    return (
-      <div className="mb-[14px]">
-        <label
-          htmlFor={id}
-          className="block text-[11px] font-semibold uppercase mb-[5px] text-text-secondary tracking-[0.06em]" 
-        >
-          {label}
-        </label>
-        {node}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="fixed inset-0 flex items-center justify-center z-[300] bg-black/40"
-    >
-      <div
-        className="rounded-[14px] w-[480px] max-h-[88vh] overflow-hidden flex flex-col"
-        style={{
-          background: "var(--content-bg)",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.22)",
-        }}
-      >
-        <div
-          className="flex items-center justify-between"
-          style={{
-            padding: "18px 22px 14px",
-            borderBottom: "1px solid var(--content-border)",
-          }}
-        >
-          <span
-            className="text-[15px] font-bold text-text-primary"
-          >
-            Add New Deal
-          </span>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="border-0 bg-transparent cursor-pointer p-1 rounded-md flex text-text-tertiary"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-[22px] py-[18px]" >
-          <div className="grid grid-cols-2 gap-[14px]">
-            <div className="col-span-2">
-              {field(
-                "Company Name",
-                "add-company",
-                <input
-                  id="add-company"
-                  value={form.company}
-                  onChange={(e) =>
-                    setForm({ ...form, company: e.target.value })
-                  }
-                  placeholder="Acme Corp"
-                  className={fieldInputClass}
-                  style={fieldInputStyle}
-                />,
-              )}
-            </div>
-            {field(
-              "Contact Name",
-              "add-contact",
-              <input
-                id="add-contact"
-                value={form.contactName}
-                onChange={(e) =>
-                  setForm({ ...form, contactName: e.target.value })
-                }
-                placeholder="Jane Smith"
-                className={fieldInputClass}
-                style={fieldInputStyle}
-              />,
-            )}
-            {field(
-              "Email",
-              "add-email",
-              <input
-                id="add-email"
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="jane@company.com"
-                className={fieldInputClass}
-                style={fieldInputStyle}
-              />,
-            )}
-            {field(
-              "Deal Value ($)",
-              "add-value",
-              <input
-                id="add-value"
-                type="number"
-                value={form.value}
-                onChange={(e) => setForm({ ...form, value: e.target.value })}
-                placeholder="50000"
-                className={fieldInputClass}
-                style={fieldInputStyle}
-              />,
-            )}
-            {field(
-              "Stage",
-              "add-stage",
-              <select aria-label="Select option"
-                id="add-stage"
-                title="Stage"
-                value={form.stage}
-                onChange={(e) =>
-                  setForm({ ...form, stage: e.target.value as Stage })
-                }
-                className={`${fieldInputClass} cursor-pointer`}
-                style={fieldInputStyle}
-              >
-                {STAGES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>,
-            )}
-            {field(
-              "Source",
-              "add-source",
-              <select aria-label="Select option"
-                id="add-source"
-                title="Source"
-                value={form.source}
-                onChange={(e) =>
-                  setForm({ ...form, source: e.target.value as Source })
-                }
-                className={`${fieldInputClass} cursor-pointer`}
-                style={fieldInputStyle}
-              >
-                {SOURCES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>,
-            )}
-            {field(
-              "Assignee",
-              "add-assignee",
-              <select aria-label="Select option"
-                id="add-assignee"
-                title="Assignee"
-                value={form.assignee}
-                onChange={(e) => setForm({ ...form, assignee: e.target.value })}
-                className={`${fieldInputClass} cursor-pointer`}
-                style={fieldInputStyle}
-              >
-                {ASSIGNEES.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>,
-            )}
-            <div className="col-span-2">
-              {field(
-                "Notes",
-                "add-notes",
-                <textarea
-                  id="add-notes"
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Add context about this deal..."
-                  rows={3}
-                  className={`${fieldInputClass} resize-y font-sans`}
-                  style={fieldInputStyle}
-                />,
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div
-          className="flex gap-2 justify-end"
-          style={{
-            padding: "14px 22px",
-            borderTop: "1px solid var(--content-border)",
-          }}
-        >
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg cursor-pointer text-[13px] bg-transparent"
-            style={{
-              border: "1px solid var(--input-border)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleAdd}
-            className="px-[18px] py-2 rounded-lg border-0 text-white cursor-pointer text-[13px] font-semibold bg-vyne-purple"
-          >
-            Add Deal
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -1379,7 +791,11 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
 
 // ─── Main Page ────────────────────────────────────────────────────
 export default function CRMPage() {
-  const [deals, setDeals] = useState<Deal[]>(INITIAL_DEALS);
+  const router = useRouter();
+  const deals = useCRMStore((s) => s.deals);
+  const setDeals = useCRMStore((s) => s.setDeals);
+  const updateDealInStore = useCRMStore((s) => s.updateDeal);
+
   const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
     "pipeline",
   );
@@ -1393,9 +809,8 @@ export default function CRMPage() {
         }
       })
       .catch(() => {});
-  }, []);
-  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
-  const [addStage, setAddStage] = useState<Stage | null>(null);
+  }, [setDeals]);
+
   const [toast, setToast] = useState("");
 
   function showToast(msg: string) {
@@ -1403,32 +818,18 @@ export default function CRMPage() {
     setTimeout(() => setToast(""), 3000);
   }
 
-  function handleUpdateDeal(updated: Deal) {
-    setDeals((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
-    showToast(`Deal updated: ${updated.company}`);
-  }
-
-  function handleAddDeal(deal: Deal) {
-    setDeals((prev) => [deal, ...prev]);
-    showToast(`Deal added: ${deal.company}`);
+  function openDeal(deal: Deal) {
+    router.push(`/crm/deals/${deal.id}`);
   }
 
   function handleMarkWon(id: string) {
-    setDeals((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, stage: "Won", probability: 100 } : d,
-      ),
-    );
+    updateDealInStore(id, { stage: "Won", probability: 100 });
     const deal = deals.find((d) => d.id === id);
     showToast(`Marked Won: ${deal?.company ?? ""}`);
   }
 
   function handleMarkLost(id: string) {
-    setDeals((prev) =>
-      prev.map((d) =>
-        d.id === id ? { ...d, stage: "Lost", probability: 0 } : d,
-      ),
-    );
+    updateDealInStore(id, { stage: "Lost", probability: 0 });
     const deal = deals.find((d) => d.id === id);
     showToast(`Marked Lost: ${deal?.company ?? ""}`);
   }
@@ -1492,12 +893,12 @@ export default function CRMPage() {
                 { key: "nextAction", header: "Next Action" },
               ]}
             />
-            <button
-              onClick={() => setAddStage("Lead")}
+            <Link
+              href="/crm/deals/new"
               className="flex items-center gap-1.5 px-[14px] py-[7px] rounded-lg border-0 text-white cursor-pointer text-xs font-semibold bg-vyne-purple"
             >
               <Plus size={13} /> Add Deal
-            </button>
+            </Link>
           </div>
         </div>
         <div className="flex gap-0.5">
@@ -1530,41 +931,20 @@ export default function CRMPage() {
         {tab === "pipeline" && (
           <PipelineTab
             deals={deals}
-            onDealClick={setSelectedDeal}
-            onAddDeal={setAddStage}
+            onDealClick={openDeal}
+            onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
           />
         )}
         {tab === "table" && (
           <DealsTableTab
             deals={deals}
-            onDealClick={setSelectedDeal}
+            onDealClick={openDeal}
             onMarkWon={handleMarkWon}
             onMarkLost={handleMarkLost}
           />
         )}
         {tab === "forecasting" && <ForecastingTab deals={deals} />}
       </div>
-
-      {/* Deal Detail Modal */}
-      {selectedDeal !== null && (
-        <DealModal
-          deal={selectedDeal}
-          onClose={() => setSelectedDeal(null)}
-          onUpdate={(updated) => {
-            handleUpdateDeal(updated);
-            setSelectedDeal(null);
-          }}
-        />
-      )}
-
-      {/* Add Deal Modal */}
-      {addStage !== null && (
-        <AddDealModal
-          defaultStage={addStage}
-          onClose={() => setAddStage(null)}
-          onAdd={handleAddDeal}
-        />
-      )}
 
       {/* Toast */}
       {toast && (

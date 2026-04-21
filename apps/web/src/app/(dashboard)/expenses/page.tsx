@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
-  MOCK_EXPENSES,
   CATEGORY_LIMITS,
   type Expense,
   type ExpenseStatus,
   type ExpenseCategory,
 } from "@/lib/fixtures/expenses";
+import { useExpensesStore } from "@/lib/stores/expenses";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function statusConfig(s: ExpenseStatus): {
@@ -326,8 +327,8 @@ function MyExpensesTab({
           marginBottom: 12,
         }}
       >
-        <button
-          onClick={() => setShowModal(true)}
+        <Link
+          href="/expenses/new"
           style={{
             padding: "8px 16px",
             background: "var(--vyne-purple)",
@@ -340,7 +341,7 @@ function MyExpensesTab({
           }}
         >
           + New Expense
-        </button>
+        </Link>
       </div>
 
       <div
@@ -1239,30 +1240,26 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
 // ── Main Page ─────────────────────────────────────────────────────
 export default function ExpensesPage() {
   const [tab, setTab] = useState<"mine" | "approvals" | "reports">("mine");
-  const [expenses, setExpenses] = useState<Expense[]>(MOCK_EXPENSES);
+  const expenses = useExpensesStore((s) => s.expenses);
+  const addExpense = useExpensesStore((s) => s.addExpense);
+  const updateExpense = useExpensesStore((s) => s.updateExpense);
 
   const pendingCount = expenses.filter((e) => e.status === "submitted").length;
 
   function handleAdd(e: Omit<Expense, "id">) {
-    setExpenses((prev) => [{ ...e, id: `exp-${Date.now()}` }, ...prev]);
+    addExpense(e);
   }
 
   function handleSubmit(id: string) {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "submitted" } : e)),
-    );
+    updateExpense(id, { status: "submitted" });
   }
 
   function handleApprove(id: string) {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "approved" } : e)),
-    );
+    updateExpense(id, { status: "approved" });
   }
 
   function handleReject(id: string) {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "rejected" } : e)),
-    );
+    updateExpense(id, { status: "rejected" });
   }
 
   return (
