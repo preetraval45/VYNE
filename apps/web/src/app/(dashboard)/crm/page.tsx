@@ -19,6 +19,7 @@ import {
   DetailRow,
   useDetailParam,
 } from "@/components/shared/DetailPanel";
+import { EditableCell } from "@/components/shared/EditableCell";
 
 // ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
@@ -302,6 +303,7 @@ function DealsTableTab({
   onMarkWon: (id: string) => void;
   onMarkLost: (id: string) => void;
 }>) {
+  const updateDeal = useCRMStore((s) => s.updateDeal);
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<Stage | "All">("All");
   const [assigneeFilter, setAssigneeFilter] = useState<string>("All");
@@ -490,25 +492,60 @@ function DealsTableTab({
                   }}
                 >
                   <td className="px-[14px] py-[10px]">
-                    <button
-                      onClick={() => onDealClick(deal)}
-                      className="bg-transparent border-0 cursor-pointer text-xs font-bold p-0 text-left text-vyne-purple"
+                    <span
+                      className="flex items-center gap-1.5 text-xs font-bold text-vyne-purple"
+                      title="Click to open · Double-click to edit"
                     >
-                      {deal.company}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => onDealClick(deal)}
+                        className="bg-transparent border-0 cursor-pointer p-0 text-left text-vyne-purple"
+                        aria-label={`Open ${deal.company}`}
+                      >
+                        ↗
+                      </button>
+                      <EditableCell
+                        value={deal.company}
+                        onSave={(v) => updateDeal(deal.id, { company: v })}
+                        label="Company"
+                        style={{ color: "var(--vyne-purple)", fontWeight: 700 }}
+                      />
+                    </span>
                   </td>
                   <td
                     className="px-[14px] py-[10px] text-xs text-text-secondary"
                   >
-                    {deal.contactName}
+                    <EditableCell
+                      value={deal.contactName}
+                      onSave={(v) => updateDeal(deal.id, { contactName: v })}
+                      label="Contact name"
+                    />
                   </td>
                   <td
                     className="px-[14px] py-[10px] text-xs font-bold whitespace-nowrap text-text-primary"
                   >
-                    {fmt(deal.value)}
+                    <EditableCell
+                      value={deal.value}
+                      onSave={(v) => updateDeal(deal.id, { value: Number(v) || 0 })}
+                      type="number"
+                      label="Deal value"
+                      validate={(s) => {
+                        const n = Number(s);
+                        if (!Number.isFinite(n) || n < 0) return "Must be ≥ 0";
+                      }}
+                      render={(v) => fmt(Number(v))}
+                      style={{ fontWeight: 700 }}
+                    />
                   </td>
                   <td className="px-[14px] py-[10px]">
-                    <StagePill stage={deal.stage} />
+                    <EditableCell
+                      value={deal.stage}
+                      onSave={(v) => updateDeal(deal.id, { stage: v as Stage })}
+                      type="select"
+                      label="Stage"
+                      options={STAGES.map((s) => ({ value: s, label: s }))}
+                      render={(v) => <StagePill stage={v as Stage} />}
+                    />
                   </td>
                   <td
                     className="px-[14px] py-[10px] text-[11px] capitalize text-text-tertiary"

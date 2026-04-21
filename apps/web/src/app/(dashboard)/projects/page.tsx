@@ -26,6 +26,7 @@ import {
   DetailRow,
   useDetailParam,
 } from "@/components/shared/DetailPanel";
+import { EditableCell } from "@/components/shared/EditableCell";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
@@ -508,6 +509,7 @@ function ProjectCardLocal({
   const tasks = useProjectsStore((s) =>
     s.tasks.filter((t) => t.projectId === project.id),
   );
+  const updateProject = useProjectsStore((s) => s.updateProject);
   const members = useTeamMembers();
 
   const totalTasks = tasks.length;
@@ -565,8 +567,18 @@ function ProjectCardLocal({
             <h3
               className="font-semibold truncate leading-tight group-hover:text-[#6C47FF] transition-colors"
               style={{ color: "var(--text-primary)", fontSize: "15px" }}
+              title="Double-click to rename"
+              onClick={(e) => e.stopPropagation()}
             >
-              {project.name}
+              <EditableCell
+                value={project.name}
+                onSave={(v) => {
+                  const next = String(v).trim();
+                  if (next) updateProject(project.id, { name: next });
+                }}
+                label="Project name"
+                validate={(s) => (s.trim() ? null : "Name required")}
+              />
             </h3>
             <span
               className="text-xs font-mono font-medium"
