@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Suspense, useState, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 import {
   Search,
   Plus,
@@ -503,10 +510,20 @@ function TableContainer({ children }: Readonly<{ children: React.ReactNode }>) {
   );
 }
 
-function TableRow({ children }: Readonly<{ children: React.ReactNode }>) {
+function TableRow({
+  children,
+  onClick,
+}: Readonly<{
+  children: React.ReactNode;
+  onClick?: () => void;
+}>) {
   return (
     <tr
-      style={{ borderTop: "1px solid var(--content-border)" }}
+      onClick={onClick}
+      style={{
+        borderTop: "1px solid var(--content-border)",
+        cursor: onClick ? "pointer" : undefined,
+      }}
       onMouseEnter={(ev) => {
         (ev.currentTarget as HTMLTableRowElement).style.background = "var(--content-secondary)";
       }}
@@ -1791,6 +1808,10 @@ function InvoicesTab() {
   const router = useRouter();
   const { invoices, markAsPaid, sendInvoice, deleteInvoice } =
     useInvoicingStore();
+  const invoiceDetail = useDetailParam("invoice");
+  const selectedInvoice = invoiceDetail.id
+    ? invoices.find((i) => i.id === invoiceDetail.id)
+    : undefined;
   const [filter, setFilter] = useState<"All" | InvoiceStatus>("All");
   const [modal, setModal] = useState<
     { type: "create" } | { type: "edit"; invoice: Invoice } | null
@@ -2018,7 +2039,7 @@ function InvoicesTab() {
           {sorted.map((inv) => {
             const st = invoiceStatusStyle(inv.status);
             return (
-              <TableRow key={inv.id}>
+              <TableRow key={inv.id} onClick={() => invoiceDetail.open(inv.id)}>
                 <Td bold color="var(--vyne-purple)">
                   {inv.number}
                 </Td>
@@ -2031,6 +2052,7 @@ function InvoicesTab() {
                 </Td>
                 <Td align="center">
                   <div
+                    onClick={(e) => e.stopPropagation()}
                     style={{
                       display: "flex",
                       gap: 4,
@@ -2120,7 +2142,128 @@ function InvoicesTab() {
           onCancel={() => setDeleteTarget(null)}
         />
       )}
+
+      {/* Slide-in invoice detail panel */}
+      <InvoiceDetailPanel invoice={selectedInvoice} onClose={invoiceDetail.close} />
     </div>
+  );
+}
+
+function InvoiceDetailPanel({
+  invoice,
+  onClose,
+}: {
+  invoice: Invoice | undefined;
+  onClose: () => void;
+}) {
+  const st = invoice ? invoiceStatusStyle(invoice.status) : { bg: "", color: "" };
+  return (
+    <DetailPanel
+      open={!!invoice}
+      onClose={onClose}
+      title={invoice?.number ?? ""}
+      subtitle={invoice ? `${invoice.customer} · due ${fmtDate(invoice.dueDate)}` : undefined}
+      badge={
+        invoice && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "3px 10px",
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: st.bg,
+              color: st.color,
+            }}
+          >
+            {invoice.status}
+          </span>
+        )
+      }
+    >
+      {!invoice ? null : (
+        <>
+          <DetailSection title="Amount">
+            <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+              {fmtFull(invoice.amount)}
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+              {invoice.items.length} line item{invoice.items.length === 1 ? "" : "s"}
+            </div>
+          </DetailSection>
+
+          <DetailSection title="Details">
+            <DetailRow label="Number" value={invoice.number} mono />
+            <DetailRow label="Customer" value={invoice.customer} />
+            <DetailRow label="Issue date" value={fmtDate(invoice.date)} />
+            <DetailRow label="Due date" value={fmtDate(invoice.dueDate)} />
+          </DetailSection>
+
+          {invoice.items.length > 0 && (
+            <DetailSection title="Line items">
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {invoice.items.slice(0, 6).map((li, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto",
+                      gap: 10,
+                      padding: "6px 8px",
+                      borderRadius: 8,
+                      background: "var(--content-secondary)",
+                      fontSize: 12.5,
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          color: "var(--text-primary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {li.description}
+                      </div>
+                      <div style={{ color: "var(--text-tertiary)", fontSize: 11 }}>
+                        {li.qty} × {fmtFull(li.rate)}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {fmtFull(li.qty * li.rate)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {invoice.notes && (
+            <DetailSection title="Notes">
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: "var(--text-secondary)",
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {invoice.notes}
+              </p>
+            </DetailSection>
+          )}
+        </>
+      )}
+    </DetailPanel>
   );
 }
 
@@ -3174,6 +3317,14 @@ function RefundsTab() {
 
 // ─── Main Page ────────────────────────────────────────────────────
 export default function InvoicingPage() {
+  return (
+    <Suspense fallback={null}>
+      <InvoicingPageInner />
+    </Suspense>
+  );
+}
+
+function InvoicingPageInner() {
   const [tab, setTab] = useState<Tab>("invoices");
   const { customers, invoices, bills } = useInvoicingStore();
 

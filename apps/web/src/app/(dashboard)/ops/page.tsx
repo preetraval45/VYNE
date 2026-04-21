@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 import {
   Package,
   Plus,
@@ -505,6 +511,10 @@ function InventoryTab({
   setProducts: (p: ERPProduct[]) => void;
 }>) {
   const router = useRouter();
+  const productDetail = useDetailParam("product");
+  const selectedProduct = productDetail.id
+    ? products.find((p) => p.id === productDetail.id)
+    : undefined;
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [addOpen, setAddOpen] = useState(false);
@@ -675,7 +685,11 @@ function InventoryTab({
             {filtered.map((p) => (
               <tr
                 key={p.id}
-                style={{ borderTop: "1px solid var(--content-border)" }}
+                onClick={() => productDetail.open(p.id)}
+                style={{
+                  borderTop: "1px solid var(--content-border)",
+                  cursor: "pointer",
+                }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
                     "var(--content-secondary)";
@@ -755,7 +769,7 @@ function InventoryTab({
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={p.status ?? "in_stock"} />
                 </td>
-                <td style={{ padding: "10px 14px" }}>
+                <td style={{ padding: "10px 14px" }} onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setAdjustOpen(p)}
                     style={{
@@ -1001,7 +1015,66 @@ function InventoryTab({
           </button>
         </div>
       </Modal>
+
+      {/* Slide-in product detail panel */}
+      <ProductDetailPanel product={selectedProduct} onClose={productDetail.close} />
     </div>
+  );
+}
+
+function ProductDetailPanel({
+  product,
+  onClose,
+}: {
+  product: ERPProduct | undefined;
+  onClose: () => void;
+}) {
+  if (!product) {
+    return <DetailPanel open={false} onClose={onClose} title="" />;
+  }
+  const margin =
+    product.price > 0 && product.costPrice > 0
+      ? Math.round(((product.price - product.costPrice) / product.price) * 100)
+      : 0;
+  return (
+    <DetailPanel
+      open
+      onClose={onClose}
+      title={product.name}
+      subtitle={product.categoryName ?? "Uncategorized"}
+      badge={<StatusBadge status={product.status ?? "in_stock"} />}
+    >
+      <DetailSection title="Margin">
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+          <div>
+            <div className="text-aurora" style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
+              {margin}%
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+              Gross margin
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+              ${(product.price - product.costPrice).toFixed(2)}
+            </div>
+            <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+              Per unit
+            </div>
+          </div>
+        </div>
+      </DetailSection>
+
+      <DetailSection title="Pricing & stock">
+        <DetailRow label="SKU" value={product.sku} mono />
+        <DetailRow label="Sell price" value={`$${product.price.toFixed(2)}`} />
+        <DetailRow label="Cost price" value={`$${product.costPrice.toFixed(2)}`} />
+        <DetailRow
+          label="Stock"
+          value={`${product.stockQty.toLocaleString()} ${product.uom ?? "each"}`}
+        />
+      </DetailSection>
+    </DetailPanel>
   );
 }
 
@@ -2092,6 +2165,14 @@ function ManufacturingTab({
 
 // ─── Main page ────────────────────────────────────────────────────
 export default function OpsPage() {
+  return (
+    <Suspense fallback={null}>
+      <OpsPageInner />
+    </Suspense>
+  );
+}
+
+function OpsPageInner() {
   const [tab, setTab] = useState<
     "overview" | "inventory" | "orders" | "suppliers" | "manufacturing"
   >("overview");

@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 import {
   Plus,
   Search,
@@ -1456,6 +1463,8 @@ function OpportunitiesTab() {
   const updateDeal = useSalesStore((s) => s.updateDeal);
   const deleteDeal = useSalesStore((s) => s.deleteDeal);
   const moveDealStage = useSalesStore((s) => s.moveDealStage);
+  const dealDetail = useDetailParam("opp");
+  const selectedDeal = dealDetail.id ? deals.find((d) => d.id === dealDetail.id) : undefined;
 
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("");
@@ -1686,6 +1695,7 @@ function OpportunitiesTab() {
                   stageOpps.map((opp) => (
                     <div
                       key={opp.id}
+                      onClick={() => dealDetail.open(opp.id)}
                       style={{
                         padding: "12px 14px",
                         borderRadius: 8,
@@ -1724,7 +1734,10 @@ function OpportunitiesTab() {
                         >
                           {opp.name}
                         </div>
-                        <div style={{ display: "flex", gap: 2 }}>
+                        <div
+                          style={{ display: "flex", gap: 2 }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <IconBtn
                             icon={<Pencil size={11} />}
                             title="Edit"
@@ -1833,6 +1846,7 @@ function OpportunitiesTab() {
                       {opp.stage !== "Closed Won" &&
                         opp.stage !== "Closed Lost" && (
                           <div
+                            onClick={(e) => e.stopPropagation()}
                             style={{
                               display: "flex",
                               gap: 4,
@@ -1896,7 +1910,80 @@ function OpportunitiesTab() {
         }}
         onCancel={() => setDeleteId(null)}
       />
+
+      {/* Slide-in opportunity detail panel */}
+      <OpportunityDetailPanel deal={selectedDeal} onClose={dealDetail.close} />
     </div>
+  );
+}
+
+function OpportunityDetailPanel({
+  deal,
+  onClose,
+}: {
+  deal: Opportunity | undefined;
+  onClose: () => void;
+}) {
+  const weighted = deal ? Math.round((deal.value * deal.probability) / 100) : 0;
+  const sc = deal ? stageConfig(deal.stage) : { bg: "", color: "" };
+  return (
+    <DetailPanel
+      open={!!deal}
+      onClose={onClose}
+      title={deal?.name ?? ""}
+      subtitle={deal ? `${deal.company}${deal.contact ? ` · ${deal.contact}` : ""}` : undefined}
+      badge={
+        deal && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "3px 10px",
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: sc.bg,
+              color: sc.color,
+            }}
+          >
+            {deal.stage}
+          </span>
+        )
+      }
+    >
+      {!deal ? null : (
+        <>
+          <DetailSection title="Value">
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+                  ${deal.value.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                  {deal.probability}% probability
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="text-aurora" style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.015em" }}>
+                  ${weighted.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                  Weighted
+                </div>
+              </div>
+            </div>
+          </DetailSection>
+
+          <DetailSection title="Details">
+            <DetailRow label="Company" value={deal.company} />
+            <DetailRow label="Contact" value={deal.contact || "—"} />
+            <DetailRow label="Assignee" value={deal.assignee} />
+            <DetailRow label="Expected close" value={deal.expectedClose || "—"} />
+            <DetailRow label="Created" value={new Date(deal.createdAt).toLocaleDateString()} />
+          </DetailSection>
+        </>
+      )}
+    </DetailPanel>
   );
 }
 
@@ -3236,6 +3323,14 @@ function ReportsTab() {
 
 // ─── Main Page ───────────────────────────────────────────────────
 export default function SalesPage() {
+  return (
+    <Suspense fallback={null}>
+      <SalesPageInner />
+    </Suspense>
+  );
+}
+
+function SalesPageInner() {
   const [activeTab, setActiveTab] = useState<SalesTab>("opportunities");
   const deals = useSalesStore((s) => s.deals);
   const salesOrders = useSalesStore((s) => s.salesOrders);

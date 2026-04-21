@@ -1,10 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { Suspense, useState, useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Upload, X, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Upload, X, Pencil, Trash2, ArrowRight } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
+import {
+  DetailPanel,
+  DetailSection,
+  DetailRow,
+  useDetailParam,
+} from "@/components/shared/DetailPanel";
 import {
   useContactsStore,
   type Account,
@@ -1005,9 +1012,14 @@ function ContactModal({
 function AccountsTab() {
   const router = useRouter();
   const accounts = useContactsStore((s) => s.accounts);
+  const contacts = useContactsStore((s) => s.contacts);
   const addAccount = useContactsStore((s) => s.addAccount);
   const updateAccount = useContactsStore((s) => s.updateAccount);
   const deleteAccount = useContactsStore((s) => s.deleteAccount);
+  const accountDetail = useDetailParam("account");
+  const selectedAccount = accountDetail.id
+    ? accounts.find((a) => a.id === accountDetail.id)
+    : undefined;
 
   const [search, setSearch] = useState("");
   const [industryFilter, setIndustryFilter] = useState("");
@@ -1208,6 +1220,7 @@ function AccountsTab() {
                   return (
                     <tr
                       key={account.id}
+                      onClick={() => accountDetail.open(account.id)}
                       style={{
                         transition: "background 0.1s",
                         cursor: "pointer",
@@ -1267,7 +1280,10 @@ function AccountsTab() {
                         <StatusBadge status={account.status} config={sc} />
                       </Td>
                       <Td>
-                        <div style={{ display: "flex", gap: 4 }}>
+                        <div
+                          style={{ display: "flex", gap: 4 }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <IconBtn
                             icon={<Pencil size={13} />}
                             title="Edit"
@@ -1289,6 +1305,13 @@ function AccountsTab() {
           </table>
         </div>
       </div>
+
+      {/* Slide-in account detail panel */}
+      <AccountDetailPanel
+        account={selectedAccount}
+        contacts={contacts.filter((c) => c.accountId === (selectedAccount?.id ?? ""))}
+        onClose={accountDetail.close}
+      />
 
       {/* Account Modal */}
       <AccountModal
@@ -1331,6 +1354,10 @@ function ContactsTabContent() {
   const addContact = useContactsStore((s) => s.addContact);
   const updateContact = useContactsStore((s) => s.updateContact);
   const deleteContact = useContactsStore((s) => s.deleteContact);
+  const contactDetail = useDetailParam("contact");
+  const selectedContact = contactDetail.id
+    ? contacts.find((c) => c.id === contactDetail.id)
+    : undefined;
 
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
@@ -1471,6 +1498,7 @@ function ContactsTabContent() {
                 filtered.map((contact) => (
                   <tr
                     key={contact.id}
+                    onClick={() => contactDetail.open(contact.id)}
                     style={{ transition: "background 0.1s", cursor: "pointer" }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLElement).style.background =
@@ -1543,7 +1571,10 @@ function ContactsTabContent() {
                       </div>
                     </Td>
                     <Td>
-                      <div style={{ display: "flex", gap: 4 }}>
+                      <div
+                        style={{ display: "flex", gap: 4 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <IconBtn
                           icon={<Pencil size={13} />}
                           title="Edit"
@@ -1564,6 +1595,13 @@ function ContactsTabContent() {
           </table>
         </div>
       </div>
+
+      {/* Slide-in contact detail panel */}
+      <ContactDetailPanel
+        contact={selectedContact}
+        account={accounts.find((a) => a.id === (selectedContact?.accountId ?? ""))}
+        onClose={contactDetail.close}
+      />
 
       {/* Contact Modal */}
       <ContactModal
@@ -2136,6 +2174,14 @@ function ImportTab() {
 
 // ─── Main Page ───────────────────────────────────────────────────
 export default function ContactsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactsPageInner />
+    </Suspense>
+  );
+}
+
+function ContactsPageInner() {
   const [activeTab, setActiveTab] = useState<ContactsTab>("accounts");
   const accounts = useContactsStore((s) => s.accounts);
   const contacts = useContactsStore((s) => s.contacts);
@@ -2249,5 +2295,236 @@ export default function ContactsPage() {
         {activeTab === "import" && <ImportTab />}
       </div>
     </div>
+  );
+}
+
+// ─── Slide-in detail panels ────────────────────────────────────────
+
+const iconBtnStyle: React.CSSProperties = {
+  width: 28,
+  height: 28,
+  borderRadius: 7,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--text-secondary)",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+function AccountDetailPanel({
+  account,
+  contacts,
+  onClose,
+}: {
+  account: Account | undefined;
+  contacts: Contact[];
+  onClose: () => void;
+}) {
+  const sc = account ? accountStatusConfig(account.status) : { bg: "", color: "" };
+  return (
+    <DetailPanel
+      open={!!account}
+      onClose={onClose}
+      title={account?.name ?? ""}
+      subtitle={account ? `${account.industry} · ${account.employees.toLocaleString()} employees` : undefined}
+      badge={
+        account && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "3px 10px",
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 600,
+              background: sc.bg,
+              color: sc.color,
+            }}
+          >
+            {account.status}
+          </span>
+        )
+      }
+      headerActions={
+        account && (
+          <Link
+            href={`/contacts/accounts/${account.id}/edit`}
+            title="Edit account"
+            aria-label="Edit account"
+            style={iconBtnStyle}
+          >
+            <Pencil size={14} />
+          </Link>
+        )
+      }
+    >
+      {!account ? null : (
+        <>
+          <DetailSection title="Revenue & size">
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+              <div>
+                <div style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+                  {fmtRevenue(account.revenue)}
+                </div>
+                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                  Annual revenue
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="text-aurora" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>
+                  {account.employees.toLocaleString()}
+                </div>
+                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                  Employees
+                </div>
+              </div>
+            </div>
+          </DetailSection>
+
+          <DetailSection title="Details">
+            <DetailRow label="Industry" value={account.industry} />
+            <DetailRow label="Website" value={account.website || "—"} mono={!!account.website} />
+            <DetailRow label="Phone" value={account.phone || "—"} />
+            <DetailRow
+              label="Owner"
+              value={account.owner || <span style={{ color: "var(--text-tertiary)" }}>Unassigned</span>}
+            />
+          </DetailSection>
+
+          {contacts.length > 0 && (
+            <DetailSection title={`People · ${contacts.length}`}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {contacts.slice(0, 5).map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/contacts?contact=${c.id}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "6px 8px",
+                      borderRadius: 8,
+                      background: "var(--content-secondary)",
+                    }}
+                  >
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width: 24, height: 24, borderRadius: "50%",
+                        background: "rgba(108,71,255,0.12)",
+                        color: "var(--vyne-purple)",
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 10, fontWeight: 700, flexShrink: 0,
+                      }}
+                    >
+                      {c.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                    </span>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {c.name}
+                      </div>
+                      {c.title && (
+                        <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{c.title}</div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+        </>
+      )}
+    </DetailPanel>
+  );
+}
+
+function ContactDetailPanel({
+  contact,
+  account,
+  onClose,
+}: {
+  contact: Contact | undefined;
+  account: Account | undefined;
+  onClose: () => void;
+}) {
+  return (
+    <DetailPanel
+      open={!!contact}
+      onClose={onClose}
+      title={contact?.name ?? ""}
+      subtitle={contact ? [contact.title, contact.company].filter(Boolean).join(" · ") : undefined}
+      headerActions={
+        contact && (
+          <Link
+            href={`/contacts/people/${contact.id}/edit`}
+            title="Edit contact"
+            aria-label="Edit contact"
+            style={iconBtnStyle}
+          >
+            <Pencil size={14} />
+          </Link>
+        )
+      }
+    >
+      {!contact ? null : (
+        <>
+          <DetailSection title="Contact">
+            <DetailRow label="Email" value={contact.email || "—"} mono={!!contact.email} />
+            <DetailRow label="Phone" value={contact.phone || "—"} />
+            <DetailRow label="Department" value={contact.department || "—"} />
+            <DetailRow label="Last contact" value={daysSinceStr(contact.lastContact)} />
+          </DetailSection>
+
+          {account && (
+            <DetailSection title="Account">
+              <Link
+                href={`/contacts?account=${account.id}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 10px",
+                  borderRadius: 8,
+                  background: "var(--content-secondary)",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 28, height: 28, borderRadius: 8,
+                    background: "rgba(108,71,255,0.08)",
+                    color: "var(--vyne-purple)",
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 10, fontWeight: 700, flexShrink: 0,
+                  }}
+                >
+                  {account.name.slice(0, 2).toUpperCase()}
+                </span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {account.name}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+                    {account.industry} {"·"} {fmtRevenue(account.revenue)}
+                  </div>
+                </div>
+                <ArrowRight size={13} style={{ color: "var(--text-tertiary)" }} />
+              </Link>
+            </DetailSection>
+          )}
+
+          {contact.tags.length > 0 && (
+            <DetailSection title="Tags">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {contact.tags.map((tag) => (
+                  <TagPill key={tag} tag={tag} />
+                ))}
+              </div>
+            </DetailSection>
+          )}
+        </>
+      )}
+    </DetailPanel>
   );
 }
