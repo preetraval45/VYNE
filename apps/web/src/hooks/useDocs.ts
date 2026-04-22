@@ -1,16 +1,26 @@
 "use client";
 
+import { useMemo } from "react";
 import {
-  useQuery,
   useMutation,
   useQueryClient,
-  type UseQueryResult,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import { docsApi } from "@/lib/api/client";
+import { useDocsStore } from "@/lib/stores/docs";
 import type { Document } from "@/types";
 
-// ─── Query Keys ──────────────────────────────────────────────────
+/* ───────────────────────────────────────────────────────────────
+ * Backed by a local Zustand store (see lib/stores/docs.ts) so that
+ * "Add page" and friends actually persist on the static-frontend
+ * Vercel deployment, where the previous HTTP-backed docsApi was
+ * pointing at a backend that doesn't exist.
+ *
+ * The mutation hooks keep the @tanstack/react-query MutationResult
+ * shape so the page-level call sites (mutate / mutateAsync / status
+ * flags) keep working unchanged.
+ * ─────────────────────────────────────────────────────────────── */
+
+// ─── Query Keys (kept for back-compat with any existing consumers) ──
 export const docKeys = {
   all: ["docs"] as const,
   lists: () => [...docKeys.all, "list"] as const,
@@ -21,46 +31,45 @@ export const docKeys = {
   search: (q: string) => [...docKeys.all, "search", q] as const,
 };
 
-// ─── useDocs — root documents ─────────────────────────────────────
-export function useDocs(): UseQueryResult<Document[], Error> {
-  return useQuery({
-    queryKey: docKeys.list(),
-    queryFn: async () => {
-      try {
-        const response = await docsApi.list();
-        return response.data;
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 30_000,
-  });
+interface QueryShape<T> {
+  data: T | undefined;
+  isLoading: boolean;
+  isError: false;
+  error: null;
+  refetch: () => void;
 }
 
-// ─── useDoc — single document with content ────────────────────────
-export function useDoc(id: string): UseQueryResult<Document, Error> {
-  return useQuery({
-    queryKey: docKeys.detail(id),
-    queryFn: async () => {
-      const response = await docsApi.get(id);
-      return response.data;
-    },
-    enabled: !!id,
-    staleTime: 15_000,
-  });
+function ok<T>(data: T): QueryShape<T> {
+  return {
+    data,
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: () => {},
+  };
+}
+
+// ─── useDocs — all documents ──────────────────────────────────────
+export function useDocs(): QueryShape<Document[]> {
+  const docs = useDocsStore((s) => s.docs);
+  return ok(docs);
+}
+
+// ─── useDoc — single document ─────────────────────────────────────
+export function useDoc(id: string): QueryShape<Document | undefined> {
+  const docs = useDocsStore((s) => s.docs);
+  const doc = useMemo(() => docs.find((d) => d.id === id), [docs, id]);
+  return ok(doc);
 }
 
 // ─── useDocChildren ───────────────────────────────────────────────
-export function useDocChildren(id: string): UseQueryResult<Document[], Error> {
-  return useQuery({
-    queryKey: docKeys.children(id),
-    queryFn: async () => {
-      const response = await docsApi.getChildren(id);
-      return response.data;
-    },
-    enabled: !!id,
-    staleTime: 30_000,
-  });
+export function useDocChildren(id: string): QueryShape<Document[]> {
+  const docs = useDocsStore((s) => s.docs);
+  const children = useMemo(
+    () => docs.filter((d) => d.parentId === id),
+    [docs, id],
+  );
+  return ok(children);
 }
 
 // ─── useCreateDoc ─────────────────────────────────────────────────
@@ -77,25 +86,22 @@ export function useCreateDoc(): UseMutationResult<
   CreateDocInput
 > {
   const queryClient = useQueryClient();
+  const add = useDocsStore((s) => s.add);
 
   return useMutation({
     mutationFn: async (data: CreateDocInput) => {
-      const response = await docsApi.create(data);
-      return response.data;
+      // Tiny artificial delay so any spinner UI flashes naturally.
+      await new Promise((r) => setTimeout(r, 50));
+      return add({
+        title: data.title,
+        parentId: data.parentId ?? null,
+        icon: data.icon,
+        content: data.content,
+      });
     },
     onSuccess: (newDoc) => {
-      // Seed detail cache
       queryClient.setQueryData(docKeys.detail(newDoc.id), newDoc);
-
-      if (newDoc.parentId) {
-        // Invalidate children of parent
-        queryClient.invalidateQueries({
-          queryKey: docKeys.children(newDoc.parentId),
-        });
-      } else {
-        // Invalidate root list
-        queryClient.invalidateQueries({ queryKey: docKeys.lists() });
-      }
+      queryClient.invalidateQueries({ queryKey: docKeys.all });
     },
   });
 }
@@ -112,24 +118,15 @@ export function useUpdateDoc(): UseMutationResult<
   UpdateDocInput
 > {
   const queryClient = useQueryClient();
+  const update = useDocsStore((s) => s.update);
+  const docs = useDocsStore((s) => s.docs);
 
   return useMutation({
     mutationFn: async ({ id, data }: UpdateDocInput) => {
-      const response = await docsApi.update(id, data);
-      return response.data;
-    },
-    onMutate: async ({ id, data }) => {
-      await queryClient.cancelQueries({ queryKey: docKeys.detail(id) });
-      const previous = queryClient.getQueryData<Document>(docKeys.detail(id));
-      queryClient.setQueryData<Document>(docKeys.detail(id), (old) =>
-        old ? { ...old, ...data } : old,
-      );
-      return { previous };
-    },
-    onError: (_err, { id }, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(docKeys.detail(id), context.previous);
-      }
+      update(id, data);
+      const next = docs.find((d) => d.id === id);
+      if (!next) throw new Error("Document not found");
+      return { ...next, ...data, updatedAt: new Date().toISOString() };
     },
     onSettled: (_data, _err, { id }) => {
       queryClient.invalidateQueries({ queryKey: docKeys.detail(id) });
@@ -141,29 +138,30 @@ export function useUpdateDoc(): UseMutationResult<
 // ─── useDeleteDoc ─────────────────────────────────────────────────
 export function useDeleteDoc(): UseMutationResult<void, Error, string> {
   const queryClient = useQueryClient();
+  const remove = useDocsStore((s) => s.remove);
 
   return useMutation({
     mutationFn: async (id: string) => {
-      await docsApi.delete(id);
+      remove(id);
     },
     onSuccess: (_data, id) => {
       queryClient.removeQueries({ queryKey: docKeys.detail(id) });
-      queryClient.invalidateQueries({ queryKey: docKeys.lists() });
-      // Also invalidate all children caches since tree changes
       queryClient.invalidateQueries({ queryKey: docKeys.all });
     },
   });
 }
 
 // ─── useDocSearch ─────────────────────────────────────────────────
-export function useDocSearch(q: string): UseQueryResult<Document[], Error> {
-  return useQuery({
-    queryKey: docKeys.search(q),
-    queryFn: async () => {
-      const response = await docsApi.search(q);
-      return response.data;
-    },
-    enabled: q.length >= 2,
-    staleTime: 10_000,
-  });
+export function useDocSearch(q: string): QueryShape<Document[]> {
+  const docs = useDocsStore((s) => s.docs);
+  const matches = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (needle.length < 2) return [];
+    return docs.filter(
+      (d) =>
+        d.title.toLowerCase().includes(needle) ||
+        (d.content ?? "").toLowerCase().includes(needle),
+    );
+  }, [docs, q]);
+  return ok(matches);
 }
