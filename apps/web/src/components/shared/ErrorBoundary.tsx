@@ -10,25 +10,46 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   readonly hasError: boolean
   readonly error: Error | null
+  readonly componentStack: string | null
 }
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false, error: null, componentStack: null }
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { hasError: true, error, componentStack: null }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error('[VYNE ErrorBoundary] Caught error:', error)
     console.error('[VYNE ErrorBoundary] Component stack:', errorInfo.componentStack)
+    this.setState({ componentStack: errorInfo.componentStack ?? null })
   }
 
   handleReset = (): void => {
-    this.setState({ hasError: false, error: null })
+    this.setState({ hasError: false, error: null, componentStack: null })
+  }
+
+  handleReload = (): void => {
+    if (typeof window !== 'undefined') window.location.reload()
+  }
+
+  handleCopy = async (): Promise<void> => {
+    if (typeof window === 'undefined') return
+    const payload = [
+      `URL: ${window.location.href}`,
+      `Error: ${this.state.error?.message ?? '(no message)'}`,
+      `Stack:\n${this.state.error?.stack ?? '(no stack)'}`,
+      `Component stack:${this.state.componentStack ?? '(none)'}`,
+    ].join('\n\n')
+    try {
+      await navigator.clipboard.writeText(payload)
+    } catch {
+      /* clipboard may be blocked — ignore */
+    }
   }
 
   render(): React.ReactNode {
@@ -84,49 +105,90 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
         {/* Error details (dev-friendly) */}
         {this.state.error && (
           <pre
-            className="text-xs mb-6 px-4 py-3 rounded-xl max-w-lg w-full overflow-auto"
+            className="text-xs mb-4 px-4 py-3 rounded-xl max-w-xl w-full overflow-auto"
             style={{
               background: 'var(--content-secondary)',
               border: '1px solid var(--content-border)',
               color: 'var(--text-tertiary)',
+              maxHeight: 220,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              textAlign: 'left',
             }}
           >
+            <strong style={{ color: 'var(--text-secondary)' }}>
+              {typeof window !== 'undefined' ? window.location.pathname + window.location.search : ''}
+            </strong>
+            {'\n'}
             {this.state.error.message}
+            {this.state.error.stack ? `\n\n${this.state.error.stack}` : ''}
+            {this.state.componentStack ? `\n\nComponent stack:${this.state.componentStack}` : ''}
           </pre>
         )}
 
-        <button
-          onClick={this.handleReset}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-fast"
-          style={{
-            background: 'var(--vyne-purple)',
-            color: '#FFFFFF',
-            border: 'none',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--vyne-purple-light)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--vyne-purple)'
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={this.handleReset}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-fast"
+            style={{
+              background: 'var(--vyne-purple)',
+              color: '#FFFFFF',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--vyne-purple-light)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--vyne-purple)'
+            }}
           >
-            <polyline points="23 4 23 10 17 10" />
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-          </svg>
-          Try again
-        </button>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Try again
+          </button>
+
+          <button
+            type="button"
+            onClick={this.handleReload}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-fast"
+            style={{
+              background: 'var(--content-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--content-border)',
+              cursor: 'pointer',
+            }}
+          >
+            Reload page
+          </button>
+
+          <button
+            type="button"
+            onClick={this.handleCopy}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-fast"
+            style={{
+              background: 'var(--content-bg)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--content-border)',
+              cursor: 'pointer',
+            }}
+          >
+            Copy details
+          </button>
+        </div>
       </div>
     )
   }
