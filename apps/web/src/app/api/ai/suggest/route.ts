@@ -33,8 +33,13 @@ async function callClaude(context: string, mode: SuggestionMode): Promise<string
   const key = process.env.ANTHROPIC_API_KEY
   if (!key) return null
 
+  // Same system prompt across all modes — so prompt caching kicks in.
+  const system = `You are a writing assistant inside VYNE Docs.
+Help the user continue, sharpen, expand, or summarise their text.
+Match their voice. Return only the new text, no preamble or quotes.`
+
   const instruction: Record<SuggestionMode, string> = {
-    continue: `Continue the following writing naturally, in the same voice, ~2 sentences:\n\n${context}`,
+    continue: `Continue this writing naturally in the same voice, ~2 sentences:\n\n${context}`,
     improve: `Rewrite this passage to be clearer and more concise, preserving meaning:\n\n${context}`,
     shorter: `Rewrite this passage in one short sentence:\n\n${context}`,
     longer: `Expand on this with 2-3 additional sentences of supporting detail:\n\n${context}`,
@@ -50,8 +55,9 @@ async function callClaude(context: string, mode: SuggestionMode): Promise<string
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-latest',
-        max_tokens: 256,
+        model: 'claude-sonnet-4-6',
+        max_tokens: 360,
+        system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: instruction[mode] }],
       }),
     })

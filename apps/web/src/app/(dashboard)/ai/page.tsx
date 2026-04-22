@@ -352,7 +352,7 @@ export default function AIPage() {
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/5 pointer-events-none" />
           <div className="absolute -bottom-5 right-20 w-20 h-20 rounded-full bg-white/[0.03] pointer-events-none" />
 
-          <div className="relative flex items-center gap-3">
+          <div className="relative flex items-center gap-3 w-full">
             {/* Mobile: open sidebar */}
             <button
               type="button"
@@ -373,6 +373,12 @@ export default function AIPage() {
                 Natural language queries across all your business data
               </p>
             </div>
+            <Link
+              href="/ai/chat"
+              className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-colors border border-white/15"
+            >
+              💬 Chat with Vyne
+            </Link>
           </div>
         </div>
 
