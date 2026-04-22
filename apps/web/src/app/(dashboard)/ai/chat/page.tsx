@@ -25,19 +25,26 @@ export default function AgentChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-scroll to latest
+  // Auto-scroll to latest. rAF batches and avoids any layout-trigger
+  // race against React commits.
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    const el = scrollRef.current;
+    if (!el) return;
+    const id = requestAnimationFrame(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+    return () => cancelAnimationFrame(id);
   }, [messages]);
 
   // Auto-resize textarea
   useEffect(() => {
     const ta = taRef.current;
     if (!ta) return;
-    ta.style.height = "0";
-    ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
+    const id = requestAnimationFrame(() => {
+      ta.style.height = "0";
+      ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
+    });
+    return () => cancelAnimationFrame(id);
   }, [input]);
 
   async function send(content: string) {
