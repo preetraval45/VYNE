@@ -32,6 +32,7 @@ import {
 import { formatRelativeTime } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageHeader, Pill } from "@/components/shared/Kit";
 import {
   MOCK_PRODUCTS,
   MOCK_ORDERS,
@@ -2221,68 +2222,18 @@ function OpsPageInner() {
         overflow: "hidden",
       }}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: "14px 20px 0",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
-            >
-              Operations
-            </h1>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-tertiary)",
-                margin: "2px 0 0",
-              }}
-            >
-              ERP · Inventory · Manufacturing · Orders
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {[
-              {
-                label: `${products.filter((p) => p.status !== "in_stock").length} low stock`,
-                color: "var(--status-warning)",
-              },
-              {
-                label: `${orders.filter((o) => o.status === "confirmed").length} pending orders`,
-                color: "var(--status-info)",
-              },
-            ].map(({ label, color }) => (
-              <span
-                key={label}
-                style={{
-                  fontSize: 11,
-                  padding: "3px 8px",
-                  borderRadius: 20,
-                  background: `${color}18`,
-                  color,
-                }}
-              >
-                {label}
-              </span>
-            ))}
+      <PageHeader
+        icon={<Package size={16} />}
+        title="Operations"
+        subtitle="ERP · Inventory · Manufacturing · Orders"
+        actions={
+          <>
+            <Pill tone="warn" dot>
+              {products.filter((p) => p.status !== "in_stock").length} low stock
+            </Pill>
+            <Pill tone="info" dot>
+              {orders.filter((o) => o.status === "confirmed").length} pending
+            </Pill>
             <ExportButton
               data={
                 tab === "orders"
@@ -2310,9 +2261,17 @@ function OpsPageInner() {
                     ]
               }
             />
-          </div>
-        </div>
-
+          </>
+        }
+      />
+      <div
+        style={{
+          padding: "8px 20px 0",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+          flexShrink: 0,
+        }}
+      >
         {/* Tab bar */}
         <div style={{ display: "flex", gap: 2 }}>
           {tabs.map(({ id, label, icon }) => (

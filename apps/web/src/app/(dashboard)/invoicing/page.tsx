@@ -4,6 +4,7 @@ import { Suspense, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { PageHeader, Pill } from "@/components/shared/Kit";
 import {
   DetailPanel,
   DetailSection,
@@ -3347,71 +3348,29 @@ function InvoicingPageInner() {
         overflow: "hidden",
       }}
     >
-      {/* Header */}
+      <PageHeader
+        icon={<FileText size={16} />}
+        title="Invoicing"
+        subtitle="Invoices, bills, payments & customers"
+        actions={
+          <>
+            <Pill tone="success" dot>
+              Revenue {fmt(totalRevenue)}
+            </Pill>
+            <Pill tone="danger" dot>
+              Outstanding {fmt(totalOutstanding)}
+            </Pill>
+          </>
+        }
+      />
       <div
         style={{
-          padding: "14px 20px 0",
+          padding: "8px 20px 0",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
-            >
-              Invoicing
-            </h1>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-tertiary)",
-                margin: "2px 0 0",
-              }}
-            >
-              Manage invoices, bills, payments & customers
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "rgba(34,197,94,0.1)",
-                color: "var(--badge-success-text)",
-              }}
-            >
-              Revenue {fmt(totalRevenue)}
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "rgba(239,68,68,0.1)",
-                color: "var(--badge-danger-text)",
-              }}
-            >
-              Outstanding {fmt(totalOutstanding)}
-            </span>
-          </div>
-        </div>
-
-        {/* Tab Bar */}
         <div
           style={{
             display: "flex",

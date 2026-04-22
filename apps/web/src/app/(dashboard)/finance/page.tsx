@@ -20,6 +20,7 @@ import {
 } from "@/lib/fixtures/finance";
 import { useFinanceStore } from "@/lib/stores/finance";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageHeader, Pill } from "@/components/shared/Kit";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const CURRENCY = typeof Intl !== "undefined"
@@ -732,68 +733,14 @@ export default function FinancePage() {
         overflow: "hidden",
       }}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: "14px 20px 0",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <div>
-            <h1
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
-            >
-              Finance
-            </h1>
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-tertiary)",
-                margin: "2px 0 0",
-              }}
-            >
-              {MONTHS[now.getMonth()]} {now.getFullYear()} · Profit:{" "}
-              {fmt(profit)}
-            </p>
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "var(--badge-success-bg)",
-                color: "var(--badge-success-text)",
-              }}
-            >
-              Revenue {fmt(currentMonth.revenue)}
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 8px",
-                borderRadius: 20,
-                background: "var(--badge-danger-bg)",
-                color: "var(--badge-danger-text)",
-              }}
-            >
-              Expenses {fmt(currentMonth.expenses)}
-            </span>
+      <PageHeader
+        icon={<DollarSign size={16} />}
+        title="Finance"
+        subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} · Profit ${fmt(profit)}`}
+        actions={
+          <>
+            <Pill tone="success" dot>Revenue {fmt(currentMonth.revenue)}</Pill>
+            <Pill tone="danger" dot>Expenses {fmt(currentMonth.expenses)}</Pill>
             <ExportButton
               data={MOCK_JOURNAL as unknown as Record<string, unknown>[]}
               filename="vyne-journal-entries"
@@ -805,8 +752,17 @@ export default function FinancePage() {
                 { key: "totalDebits", header: "Total Debits" },
               ]}
             />
-          </div>
-        </div>
+          </>
+        }
+      />
+      <div
+        style={{
+          padding: "8px 20px 0",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+          flexShrink: 0,
+        }}
+      >
         <div style={{ display: "flex", gap: 2 }}>
           <TabBtn
             label="P&L Statement"

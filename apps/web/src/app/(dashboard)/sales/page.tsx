@@ -24,6 +24,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageHeader } from "@/components/shared/Kit";
 import {
   useSalesStore,
   type Opportunity,
@@ -3337,53 +3338,11 @@ function SalesPageInner() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Header */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "16px 24px",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              padding: 6,
-              borderRadius: 8,
-              background: "rgba(108,71,255,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <ShoppingCart size={18} style={{ color: "var(--vyne-purple)" }} />
-          </div>
-          <div>
-            <h1
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
-            >
-              Sales
-            </h1>
-            <p
-              style={{ fontSize: 12, color: "var(--text-tertiary)", margin: 0 }}
-            >
-              {deals.length} opportunities, {salesOrders.length} orders
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        icon={<ShoppingCart size={16} />}
+        title="Sales"
+        subtitle={`${deals.length} opportunities · ${salesOrders.length} orders`}
+      />
 
       {/* Tabs */}
       <div

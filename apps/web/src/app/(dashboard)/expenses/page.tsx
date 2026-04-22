@@ -9,6 +9,8 @@ import {
   type ExpenseCategory,
 } from "@/lib/fixtures/expenses";
 import { useExpensesStore } from "@/lib/stores/expenses";
+import { PageHeader, Pill } from "@/components/shared/Kit";
+import { Receipt } from "lucide-react";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function statusConfig(s: ExpenseStatus): {
@@ -1273,56 +1275,18 @@ export default function ExpensesPage() {
         background: "var(--content-bg)",
       }}
     >
-      {/* Header */}
-      <div
-        style={{
-          padding: "16px 24px",
-          borderBottom: "1px solid var(--content-border)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexShrink: 0,
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: "var(--text-primary)",
-              margin: 0,
-              letterSpacing: "-0.02em",
-            }}
-          >
-            Expense Reports
-          </h1>
-          <p
-            style={{
-              fontSize: 12,
-              color: "var(--text-tertiary)",
-              margin: "2px 0 0",
-            }}
-          >
-            Submit, approve, and track company expenses
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {pendingCount > 0 && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                padding: "3px 8px",
-                borderRadius: 6,
-                background: "rgba(245,158,11,0.1)",
-                color: "var(--badge-warning-text)",
-              }}
-            >
+      <PageHeader
+        icon={<Receipt size={16} />}
+        title="Expense Reports"
+        subtitle="Submit, approve, and track company expenses"
+        actions={
+          pendingCount > 0 ? (
+            <Pill tone="warn" dot>
               {pendingCount} pending approval
-            </span>
-          )}
-        </div>
-      </div>
+            </Pill>
+          ) : null
+        }
+      />
 
       {/* Tabs */}
       <div

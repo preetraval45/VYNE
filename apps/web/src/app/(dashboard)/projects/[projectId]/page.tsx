@@ -1359,6 +1359,7 @@ function AddTaskModal({
                       </label>
                       <input
                         type="date"
+                        aria-label="Start date"
                         value={form.startDate}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, startDate: e.target.value }))
@@ -1373,6 +1374,7 @@ function AddTaskModal({
                       </label>
                       <input
                         type="date"
+                        aria-label="Due date"
                         value={form.dueDate}
                         onChange={(e) =>
                           setForm((f) => ({ ...f, dueDate: e.target.value }))
@@ -1685,6 +1687,8 @@ function TaskDetailPanel({
             {/* Title - editable */}
             <textarea
               ref={titleRef}
+              aria-label="Task title"
+              placeholder="Task title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={handleTitleBlur}
@@ -1767,6 +1771,7 @@ function TaskDetailPanel({
               <PropRow icon={<Calendar size={13} />} label="Start date">
                 <input
                   type="date"
+                  aria-label="Task start date"
                   value={task.startDate ? task.startDate.slice(0, 10) : ""}
                   onChange={(e) => handleStartDateChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
@@ -1782,6 +1787,7 @@ function TaskDetailPanel({
               <PropRow icon={<Calendar size={13} />} label="Due date">
                 <input
                   type="date"
+                  aria-label="Task due date"
                   value={task.dueDate ? task.dueDate.slice(0, 10) : ""}
                   onChange={(e) => handleDueDateChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
@@ -2049,6 +2055,7 @@ function TaskDetailPanel({
                     </select>
                     <input
                       type="date"
+                      aria-label="Subtask due date"
                       value={newSubtaskDue}
                       onChange={(e) => setNewSubtaskDue(e.target.value)}
                       className="text-xs px-2 py-1 rounded focus:outline-none"

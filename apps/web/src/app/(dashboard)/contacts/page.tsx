@@ -3,8 +3,9 @@
 import { Suspense, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Upload, X, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Search, Upload, X, Pencil, Trash2, ArrowRight, Users } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageHeader } from "@/components/shared/Kit";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
 import {
   DetailPanel,
@@ -2188,75 +2189,11 @@ function ContactsPageInner() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Header */}
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "16px 24px",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div
-            style={{
-              padding: 6,
-              borderRadius: 8,
-              background: "rgba(108,71,255,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"
-                stroke="var(--vyne-purple)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle
-                cx="9"
-                cy="7"
-                r="4"
-                stroke="var(--vyne-purple)"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
-                stroke="var(--vyne-purple)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <div>
-            <h1
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                color: "var(--text-primary)",
-                margin: 0,
-              }}
-            >
-              Accounts & Contacts
-            </h1>
-            <p
-              style={{ fontSize: 12, color: "var(--text-tertiary)", margin: 0 }}
-            >
-              {accounts.length} accounts, {contacts.length} contacts
-            </p>
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        icon={<Users size={16} />}
+        title="Accounts & Contacts"
+        subtitle={`${accounts.length} accounts · ${contacts.length} contacts`}
+      />
 
       {/* Tabs */}
       <div
