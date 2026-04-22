@@ -5,11 +5,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   LayoutGrid,
+  List,
   Search,
   Pencil,
   Trash2,
   Users,
   ArrowRight,
+  Clock,
 } from "lucide-react";
 import {
   useProjects,
@@ -27,100 +29,118 @@ import {
   useDetailParam,
 } from "@/components/shared/DetailPanel";
 import { EditableCell } from "@/components/shared/EditableCell";
+import {
+  Board,
+  BoardColumn,
+  BoardCard,
+  PageHeader,
+  PrimaryLink,
+  ViewToggle,
+  type Tone,
+} from "@/components/shared/Kit";
 import toast from "react-hot-toast";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
+// Status column definitions — Odoo-style board stages.
+const PROJECT_STAGES = [
+  { id: "active" as const, label: "Active", tone: "info" as Tone },
+  { id: "paused" as const, label: "On Hold", tone: "warn" as Tone },
+  { id: "completed" as const, label: "Completed", tone: "success" as Tone },
+];
+
+function formatShortDate(iso: string | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const yy = d.getFullYear();
+  return `${mm}/${dd}/${yy}`;
+}
+
 function ProjectsPageInner() {
   const projects = useProjects();
+  const allTasks = useProjectsStore((s) => s.tasks);
   const detail = useDetailParam();
   const selectedProject = detail.id
     ? projects.find((p) => p.id === detail.id)
     : undefined;
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"board" | "list">("board");
   const debouncedSearch = useDebounce(search, 300);
 
-  const filtered = projects.filter((p) =>
-    p.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+  const filtered = useMemo(
+    () =>
+      projects.filter((p) =>
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      ),
+    [projects, debouncedSearch],
   );
+
+  const projectsByStage = useMemo(() => {
+    const map = new Map<string, ProjectDetail[]>();
+    for (const stage of PROJECT_STAGES) map.set(stage.id, []);
+    for (const p of filtered) {
+      const bucket = map.get(p.status) ?? map.get("active");
+      bucket?.push(p);
+    }
+    return map;
+  }, [filtered]);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <header
-        className="flex items-center justify-between px-6 py-4 flex-shrink-0"
-        style={{
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="p-1.5 rounded-lg"
-            style={{ background: "rgba(108,71,255,0.08)" }}
-          >
-            <LayoutGrid size={18} style={{ color: "var(--vyne-purple)" }} />
-          </div>
-          <div>
-            <h1
-              className="text-lg font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Projects
-            </h1>
-            <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-              {projects.length} project{projects.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-            style={{
-              background: "var(--content-secondary)",
-              border: "1px solid var(--content-border)",
-              width: "220px",
-            }}
-          >
-            <Search size={14} style={{ color: "var(--text-tertiary)" }} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search projects..."
-              aria-label="Search projects"
-              className="flex-1 bg-transparent text-sm focus:outline-none"
-              style={{ color: "var(--text-primary)" }}
+      <PageHeader
+        icon={<LayoutGrid size={16} />}
+        title="Projects"
+        subtitle={`${projects.length} project${projects.length !== 1 ? "s" : ""}`}
+        actions={
+          <>
+            <ViewToggle
+              value={view}
+              onChange={setView}
+              options={[
+                { value: "board", label: "Board", icon: <LayoutGrid size={14} /> },
+                { value: "list", label: "List", icon: <List size={14} /> },
+              ]}
             />
-          </div>
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+              style={{
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
+                width: 220,
+              }}
+            >
+              <Search size={14} style={{ color: "var(--text-tertiary)" }} />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search projects..."
+                aria-label="Search projects"
+                className="flex-1 bg-transparent text-sm focus:outline-none"
+                style={{ color: "var(--text-primary)" }}
+              />
+            </div>
+            <PrimaryLink href="/projects/new">
+              <Plus size={14} /> New
+            </PrimaryLink>
+          </>
+        }
+      />
 
-          <Link
-            href="/projects/new"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-semibold text-white transition-all"
-            style={{
-              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-              boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
-            }}
-          >
-            <Plus size={16} />
-            New Project
-          </Link>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto content-scroll px-6 py-6">
+      <div
+        className="flex-1 overflow-auto content-scroll"
+        style={{ padding: "18px 20px 24px", background: "var(--content-bg-secondary)" }}
+      >
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "rgba(108,71,255,0.08)" }}
+              style={{ background: "var(--content-secondary)" }}
             >
-              <LayoutGrid size={28} style={{ color: "var(--vyne-purple)" }} />
+              <LayoutGrid size={28} style={{ color: "var(--text-tertiary)" }} />
             </div>
             <h3
               className="font-semibold text-lg mb-2"
@@ -128,28 +148,79 @@ function ProjectsPageInner() {
             >
               {search ? "No projects found" : "No projects yet"}
             </h3>
-            <p
-              className="text-sm mb-6 max-w-xs"
-              style={{ color: "var(--text-tertiary)" }}
-            >
+            <p className="text-sm mb-6 max-w-xs" style={{ color: "var(--text-tertiary)" }}>
               {search
                 ? `No projects match "${search}"`
                 : "Create your first project to start tracking work with your team"}
             </p>
             {!search && (
-              <Link
-                href="/projects/new"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-                }}
-              >
-                <Plus size={16} />
-                Create first project
-              </Link>
+              <PrimaryLink href="/projects/new">
+                <Plus size={14} /> Create first project
+              </PrimaryLink>
             )}
           </div>
+        ) : view === "board" ? (
+          <Board>
+            {PROJECT_STAGES.map((stage) => {
+              const stageProjects = projectsByStage.get(stage.id) ?? [];
+              return (
+                <BoardColumn
+                  key={stage.id}
+                  title={stage.label}
+                  count={stageProjects.length}
+                  accent={stage.tone}
+                  addHref="/projects/new"
+                >
+                  {stageProjects.map((project) => {
+                    const pTasks = allTasks.filter((t) => t.projectId === project.id);
+                    const done = pTasks.filter((t) => t.status === "done").length;
+                    const dueDates = pTasks
+                      .map((t) => t.dueDate)
+                      .filter((d): d is string => !!d)
+                      .sort();
+                    const range =
+                      dueDates.length > 0
+                        ? {
+                            from: formatShortDate(project.createdAt),
+                            to: formatShortDate(dueDates[dueDates.length - 1]),
+                          }
+                        : undefined;
+                    return (
+                      <BoardCard
+                        key={project.id}
+                        title={project.name}
+                        onClick={() => detail.open(project.id)}
+                        dateRange={range}
+                        tag={{
+                          label: project.identifier ?? "Project",
+                          tone: stage.tone,
+                        }}
+                        footer={
+                          <>
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
+                                fontSize: 12,
+                                color: "var(--text-tertiary)",
+                              }}
+                            >
+                              <Clock size={12} />
+                              {pTasks.length > 0
+                                ? `${done}/${pTasks.length} tasks`
+                                : "No tasks"}
+                            </span>
+                            <AssigneeDot project={project} />
+                          </>
+                        }
+                      />
+                    );
+                  })}
+                </BoardColumn>
+              );
+            })}
+          </Board>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
@@ -182,6 +253,51 @@ function ProjectsPageInner() {
       {/* Slide-in detail panel */}
       <ProjectDetailPanel project={selectedProject} onClose={detail.close} />
     </div>
+  );
+}
+
+function AssigneeDot({ project }: { project: ProjectDetail }) {
+  const members = useTeamMembers();
+  const lead = members.find((m) => m.id === project.leadId);
+  if (!lead) {
+    return (
+      <span
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: "50%",
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "var(--text-tertiary)",
+        }}
+      >
+        <Users size={11} />
+      </span>
+    );
+  }
+  return (
+    <span
+      title={lead.name}
+      style={{
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        background: lead.color,
+        color: "#fff",
+        fontSize: 10,
+        fontWeight: 700,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        border: "2px solid var(--content-bg)",
+        boxShadow: "0 0 0 1px var(--content-border)",
+      }}
+    >
+      {lead.initials}
+    </span>
   );
 }
 
