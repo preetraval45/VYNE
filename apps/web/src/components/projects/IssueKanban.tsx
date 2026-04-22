@@ -394,7 +394,7 @@ function KanbanColumn({
                 <div
                   className="p-2.5 rounded-lg"
                   style={{
-                    background: "#FFFFFF",
+                    background: "var(--content-bg)",
                     border: "1px solid #6C47FF",
                     boxShadow: "0 0 0 3px rgba(108,71,255,0.08)",
                   }}

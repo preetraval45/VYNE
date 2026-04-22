@@ -654,7 +654,7 @@ function TaskListView({
                         key={tag}
                         className="text-xs px-1.5 py-0.5 rounded font-medium"
                         style={{
-                          background: "#F0F0F8",
+                          background: "var(--content-secondary)",
                           color: "var(--text-secondary)",
                         }}
                       >
@@ -1040,7 +1040,7 @@ function BoardCard({
       onClick={() => onTaskClick(task.id)}
       className="group p-3 rounded-lg cursor-pointer select-none"
       style={{
-        background: "#FFFFFF",
+        background: "var(--content-bg)",
         border: "1px solid #E8E8F0",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
       }}
@@ -1076,7 +1076,7 @@ function BoardCard({
             <span
               key={tag}
               className="text-xs px-1.5 py-0.5 rounded font-medium"
-              style={{ background: "#F0F0F8", color: "var(--text-secondary)" }}
+              style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
             >
               {tag}
             </span>
@@ -1637,7 +1637,7 @@ function TaskDetailPanel({
           <div className="flex items-center gap-2">
             <span
               className="text-xs font-mono font-semibold px-2 py-0.5 rounded"
-              style={{ background: "#F0F0F8", color: "var(--text-secondary)" }}
+              style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
             >
               {task.key}
             </span>
@@ -1733,7 +1733,7 @@ function TaskDetailPanel({
                   }
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
                   style={{
-                    background: "#F8F8FC",
+                    background: "var(--content-secondary)",
                     color: TASK_PRIORITY_META[task.priority].color,
                     border: "none",
                   }}
@@ -1753,7 +1753,7 @@ function TaskDetailPanel({
                   onChange={(e) => handleAssigneeChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
                   style={{
-                    background: "#F8F8FC",
+                    background: "var(--content-secondary)",
                     color: "var(--text-primary)",
                     border: "none",
                   }}
@@ -1776,7 +1776,7 @@ function TaskDetailPanel({
                   onChange={(e) => handleStartDateChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
                   style={{
-                    background: "#F8F8FC",
+                    background: "var(--content-secondary)",
                     color: "var(--text-primary)",
                     border: "none",
                   }}
@@ -1816,7 +1816,7 @@ function TaskDetailPanel({
                   placeholder="0"
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none w-20"
                   style={{
-                    background: "#F8F8FC",
+                    background: "var(--content-secondary)",
                     color: "var(--text-primary)",
                     border: "none",
                   }}
@@ -1831,7 +1831,7 @@ function TaskDetailPanel({
                       key={tag}
                       className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
                       style={{
-                        background: "#F0F0F8",
+                        background: "var(--content-secondary)",
                         color: "var(--text-secondary)",
                       }}
                     >
@@ -1880,7 +1880,7 @@ function TaskDetailPanel({
                 rows={5}
                 className="w-full p-3 rounded-lg text-sm resize-none focus:outline-none transition-all placeholder:text-[#C0C0D8]"
                 style={{
-                  background: "#F8F8FC",
+                  background: "var(--content-secondary)",
                   border: "1px solid var(--content-border)",
                   color: "var(--text-primary)",
                   lineHeight: "1.6",
@@ -2022,7 +2022,7 @@ function TaskDetailPanel({
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-2 p-3 rounded-lg"
                   style={{
-                    background: "#F8F8FC",
+                    background: "var(--content-secondary)",
                     border: "1px solid var(--content-border)",
                   }}
                 >

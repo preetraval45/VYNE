@@ -222,7 +222,7 @@ function DocAttachment({
         gap: 10,
         padding: "10px 14px",
         borderRadius: 8,
-        background: "#F8F8FC",
+        background: "var(--content-secondary)",
         border: "1px solid #E8E8F0",
         cursor: "pointer",
         maxWidth: 300,

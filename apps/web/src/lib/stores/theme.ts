@@ -65,7 +65,7 @@ interface ThemeStore {
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: "system",
+      theme: "dark",
       accent: "purple",
 
       setTheme: (theme: ThemeMode) => set({ theme }),

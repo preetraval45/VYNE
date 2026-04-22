@@ -2592,7 +2592,7 @@ function ProductsTab() {
                             borderRadius: 6,
                             fontSize: 11,
                             fontWeight: 500,
-                            background: "#F4F4F8",
+                            background: "var(--content-secondary)",
                             color: "var(--text-secondary)",
                           }}
                         >

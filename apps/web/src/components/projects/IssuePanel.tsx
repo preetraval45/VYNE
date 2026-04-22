@@ -185,7 +185,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 <span
                   className="text-xs font-mono font-semibold px-2 py-0.5 rounded"
                   style={{
-                    background: "#F0F0F8",
+                    background: "var(--content-secondary)",
                     color: "var(--text-secondary)",
                   }}
                 >

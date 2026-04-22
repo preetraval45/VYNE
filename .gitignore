@@ -146,3 +146,5 @@ lcov.info
 .cache/
 tmp/
 temp/
+
+.vercel

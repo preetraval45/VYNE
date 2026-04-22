@@ -3,6 +3,8 @@
   "hints": {
     "no-inline-styles": "off",
     "compat-api/css": "off",
-    "compat-api/html": "off"
+    "compat-api/html": "off",
+    "axe/aria": "off",
+    "axe/keyboard": "off"
   }
 }

@@ -100,7 +100,7 @@ export function ChannelSidebar({
             display: "flex",
             alignItems: "center",
             gap: 7,
-            background: "#F0F0F8",
+            background: "var(--content-secondary)",
             border: "1px solid #E8E8F0",
             borderRadius: 8,
             padding: "5px 10px",

@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
-import { Plus, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
  * VYNE design-system kit — small, opinionated primitives so every
@@ -428,8 +428,9 @@ export function BoardColumn({
   count,
   accent = "neutral",
   progress,
-  onAdd,
-  addHref,
+  // onAdd / addHref kept for backwards compat with existing call sites
+  // but the per-column "+" affordance was removed by request — column
+  // headers stay clean; users add via the page-level "New" CTA.
   children,
 }: {
   title: string;
@@ -442,63 +443,6 @@ export function BoardColumn({
   children: ReactNode;
 }) {
   const t = TONE_TOKENS[accent];
-  const addButton = (() => {
-    const sharedStyle: CSSProperties = {
-      width: 22,
-      height: 22,
-      borderRadius: 6,
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "transparent",
-      color: "var(--text-tertiary)",
-      border: "1px solid var(--content-border)",
-      cursor: "pointer",
-      lineHeight: 1,
-      textDecoration: "none",
-      transition: "color 0.12s, border-color 0.12s, background 0.12s",
-    };
-    const onEnter = (e: React.MouseEvent<HTMLElement>) => {
-      const el = e.currentTarget as HTMLElement;
-      el.style.color = "var(--vyne-purple)";
-      el.style.borderColor = "var(--vyne-purple)";
-      el.style.background = "rgba(91, 91, 214, 0.06)";
-    };
-    const onLeave = (e: React.MouseEvent<HTMLElement>) => {
-      const el = e.currentTarget as HTMLElement;
-      el.style.color = "var(--text-tertiary)";
-      el.style.borderColor = "var(--content-border)";
-      el.style.background = "transparent";
-    };
-    if (addHref) {
-      return (
-        <Link
-          href={addHref}
-          style={sharedStyle}
-          aria-label={`Add ${title}`}
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-        >
-          <Plus size={12} />
-        </Link>
-      );
-    }
-    if (onAdd) {
-      return (
-        <button
-          type="button"
-          onClick={onAdd}
-          style={sharedStyle}
-          aria-label={`Add ${title}`}
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-        >
-          <Plus size={12} />
-        </button>
-      );
-    }
-    return null;
-  })();
 
   return (
     <div
@@ -534,7 +478,18 @@ export function BoardColumn({
           >
             {title}
           </h3>
-          {addButton}
+          {typeof count === "number" && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: "var(--text-tertiary)",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {count}
+            </span>
+          )}
         </div>
         <div
           style={{
@@ -555,18 +510,6 @@ export function BoardColumn({
             />
           )}
         </div>
-        {typeof count === "number" && (
-          <div
-            style={{
-              fontSize: 12,
-              color: "var(--text-tertiary)",
-              marginTop: 4,
-              fontVariantNumeric: "tabular-nums",
-            }}
-          >
-            {count}
-          </div>
-        )}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {children}

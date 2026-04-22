@@ -198,12 +198,12 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Content — Linear/Notion-style true cool-dark, not blue-black */
-  --content-bg: #0E0E10;
-  --content-bg-secondary: #141417;
-  --content-secondary: #1A1A1E;
-  --content-border: #26262B;
-  --content-border-strong: #34343B;
+  /* Content — true black hero, layered surfaces above */
+  --content-bg: #000000;
+  --content-bg-secondary: #0A0A0C;
+  --content-secondary: #131317;
+  --content-border: #1F1F25;
+  --content-border-strong: #2C2C33;
 
   /* Text */
   --text-primary: #F4F4F7;

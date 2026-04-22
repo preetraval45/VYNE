@@ -38,7 +38,7 @@ const SEED: Integration[] = [
     blurb:
       "Auto-link issues ↔ PRs, surface deploy status from Actions, sync labels both ways.",
     icon: Github,
-    color: "#1A1A2E",
+    color: "var(--text-primary)",
     status: "available",
   },
   {
