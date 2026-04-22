@@ -1,22 +1,43 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock, Zap, FormInput, Plug, ScrollText, Sparkles, BarChart3, Smartphone } from "lucide-react";
-import GeneralSettings from "@/components/settings/GeneralSettings";
-import MembersSettings from "@/components/settings/MembersSettings";
-import NotificationsSettings from "@/components/settings/NotificationsSettings";
-import ErpSettings from "@/components/settings/ErpSettings";
-import BillingSettings from "@/components/settings/BillingSettings";
-import DeveloperSettings from "@/components/settings/DeveloperSettings";
-import SecuritySettings from "@/components/settings/SecuritySettings";
-import AuditSettings from "@/components/settings/AuditSettings";
-import SnippetsSettings from "@/components/settings/SnippetsSettings";
-import FormsSettings from "@/components/settings/FormsSettings";
-import IntegrationsSettings from "@/components/settings/IntegrationsSettings";
-import ComplianceSettings from "@/components/settings/ComplianceSettings";
-import GrowthSettings from "@/components/settings/GrowthSettings";
-import AnalyticsSettings from "@/components/settings/AnalyticsSettings";
-import MobileSettings from "@/components/settings/MobileSettings";
+
+// Settings page was a 228KB single chunk because it imported all 15 panels
+// eagerly. Each panel is its own tab — the user sees exactly one at a time —
+// so every panel lazy-loads its own chunk on first selection.
+const panelLoading = () => (
+  <div
+    style={{
+      padding: 40,
+      textAlign: "center",
+      color: "var(--text-tertiary)",
+      fontSize: 13,
+    }}
+  >
+    Loading…
+  </div>
+);
+const lazyPanel = (
+  loader: () => Promise<{ default: React.ComponentType<{ onToast: (msg: string) => void }> }>,
+) => dynamic(loader, { ssr: false, loading: panelLoading });
+
+const GeneralSettings = lazyPanel(() => import("@/components/settings/GeneralSettings"));
+const MembersSettings = lazyPanel(() => import("@/components/settings/MembersSettings"));
+const NotificationsSettings = lazyPanel(() => import("@/components/settings/NotificationsSettings"));
+const ErpSettings = lazyPanel(() => import("@/components/settings/ErpSettings"));
+const BillingSettings = lazyPanel(() => import("@/components/settings/BillingSettings"));
+const DeveloperSettings = lazyPanel(() => import("@/components/settings/DeveloperSettings"));
+const SecuritySettings = lazyPanel(() => import("@/components/settings/SecuritySettings"));
+const AuditSettings = lazyPanel(() => import("@/components/settings/AuditSettings"));
+const SnippetsSettings = lazyPanel(() => import("@/components/settings/SnippetsSettings"));
+const FormsSettings = lazyPanel(() => import("@/components/settings/FormsSettings"));
+const IntegrationsSettings = lazyPanel(() => import("@/components/settings/IntegrationsSettings"));
+const ComplianceSettings = lazyPanel(() => import("@/components/settings/ComplianceSettings"));
+const GrowthSettings = lazyPanel(() => import("@/components/settings/GrowthSettings"));
+const AnalyticsSettings = lazyPanel(() => import("@/components/settings/AnalyticsSettings"));
+const MobileSettings = lazyPanel(() => import("@/components/settings/MobileSettings"));
 
 // ─── Tab config ──────────────────────────────────────────────────
 const TABS = [
