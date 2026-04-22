@@ -23,11 +23,8 @@ import {
   ChevronRight,
   Menu,
   FileSpreadsheet,
-  Wrench,
   Contact,
   TrendingUp,
-  ShoppingCart,
-  Factory,
   Megaphone,
   BarChart3,
   GraduationCap,
@@ -100,36 +97,9 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Reports", href: "/sales" },
     ],
   },
-  {
-    icon: ShoppingCart,
-    label: "Purchase",
-    href: "/purchase",
-    color: "#8E44AD",
-    moduleId: "purchase",
-    subs: [
-      { label: "Purchase Orders", href: "/purchase" },
-      { label: "Vendors", href: "/purchase" },
-      { label: "Products", href: "/purchase" },
-      { label: "Receipts", href: "/purchase" },
-      { label: "Bills", href: "/purchase" },
-      { label: "Reports", href: "/purchase" },
-    ],
-  },
-  {
-    icon: Factory,
-    label: "Manufacturing",
-    href: "/manufacturing",
-    color: "#D35400",
-    moduleId: "manufacturing",
-    subs: [
-      { label: "Bill of Materials", href: "/manufacturing" },
-      { label: "Manufacturing Orders", href: "/manufacturing" },
-      { label: "Work Centers", href: "/manufacturing" },
-      { label: "Operations", href: "/manufacturing" },
-      { label: "Quality Control", href: "/manufacturing" },
-      { label: "Reports", href: "/manufacturing" },
-    ],
-  },
+  // /purchase and /manufacturing are demo-only mockups that duplicate
+  // /invoicing (bills/vendors) and /ops (BOMs/work-orders/products).
+  // Hidden from nav to reduce clutter; routes remain live for deep links.
   {
     icon: MessageSquare,
     label: "Chat",
@@ -325,20 +295,8 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Refunds", href: "/invoicing" },
     ],
   },
-  {
-    icon: Wrench,
-    label: "Maintenance",
-    href: "/maintenance",
-    color: "#E67E22",
-    moduleId: "maintenance",
-    subs: [
-      { label: "Equipment", href: "/maintenance" },
-      { label: "Requests", href: "/maintenance" },
-      { label: "Preventive", href: "/maintenance" },
-      { label: "Work Orders", href: "/maintenance" },
-      { label: "Parts & Inventory", href: "/maintenance" },
-    ],
-  },
+  // /maintenance is demo-only and overlaps with /ops work-orders — hidden
+  // from nav but route remains live.
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
   { icon: Clock, label: "Timesheet", href: "/timesheet", color: "#0E9F6E" },
   { icon: Activity, label: "Activity", href: "/activity", color: "#F59E0B" },
