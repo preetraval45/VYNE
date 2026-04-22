@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   const real = await callClaudeJson<DigestResponse>(
     'You are the daily digest writer for VYNE — punchy, factual, no fluff.',
     userPrompt,
-    { maxTokens: 600, quality: 'balanced' },
+    { maxTokens: 600 },
   )
 
   return NextResponse.json({
