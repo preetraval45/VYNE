@@ -32,6 +32,12 @@ import {
   useTeamMembers,
 } from "@/lib/stores/projects";
 import {
+  Pill,
+  PrimaryLink,
+  ViewToggle,
+  type Tone,
+} from "@/components/shared/Kit";
+import {
   TASK_STATUS_META,
   TASK_PRIORITY_META,
   getMember,
@@ -125,71 +131,91 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
 
   const members = project.memberIds.map((id) => getMember(id)).filter(Boolean);
 
+  const statusTone: Tone =
+    project.status === "completed"
+      ? "success"
+      : project.status === "paused"
+        ? "warn"
+        : "info";
+  const statusLabel =
+    project.status === "completed"
+      ? "Completed"
+      : project.status === "paused"
+        ? "On hold"
+        : "Active";
+
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: "var(--content-bg)" }}
+      style={{ background: "var(--content-bg-secondary)" }}
     >
-      {/* Project Header */}
+      {/* Project Header — muted, Odoo/Linear-adjacent */}
       <header
-        className="px-6 py-4 flex-shrink-0"
+        className="px-6 pt-5 pb-4 flex-shrink-0"
         style={{
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
         }}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <Link
-              href="/projects"
-              className="p-1.5 rounded-lg transition-colors mt-0.5"
-              style={{ color: "var(--text-tertiary)" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "var(--content-secondary)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "transparent";
+        <div className="flex items-center gap-2 mb-3" style={{ fontSize: 12 }}>
+          <Link
+            href="/projects"
+            className="inline-flex items-center gap-1"
+            style={{ color: "var(--text-tertiary)", textDecoration: "none" }}
+          >
+            <ArrowLeft size={12} />
+            Projects
+          </Link>
+          <span style={{ color: "var(--text-tertiary)" }}>/</span>
+          <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+            {project.identifier}
+          </span>
+        </div>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3 min-w-0">
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+              style={{
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
               }}
             >
-              <ArrowLeft size={16} />
-            </Link>
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
-                style={{ background: project.color + "18" }}
-              >
-                {project.icon}
+              {project.icon}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.015em",
+                    margin: 0,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {project.name}
+                </h1>
+                <Pill tone={statusTone} dot>
+                  {statusLabel}
+                </Pill>
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1
-                    className="text-lg font-semibold"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {project.name}
-                  </h1>
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-md font-mono font-semibold"
-                    style={{
-                      background: "#F0F0F8",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    {project.identifier}
-                  </span>
-                </div>
+              {project.description && (
                 <p
-                  className="text-xs mt-0.5"
-                  style={{ color: "var(--text-tertiary)" }}
+                  style={{
+                    fontSize: 13,
+                    color: "var(--text-tertiary)",
+                    margin: "4px 0 0",
+                    lineHeight: 1.5,
+                    maxWidth: 720,
+                  }}
                 >
                   {project.description}
                 </p>
-              </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-4 flex-shrink-0">
             <div className="flex -space-x-2">
               {members.slice(0, 5).map(
                 (member) =>
@@ -208,39 +234,60 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                   ),
               )}
             </div>
-            <div
-              className="flex items-center gap-3"
-              style={{ minWidth: "140px" }}
-            >
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span
-                    className="text-xs"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    {tasks.length} tasks
-                  </span>
-                  <span
-                    className="text-xs font-semibold"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {progress}%
-                  </span>
-                </div>
-                <div
-                  className="h-1.5 rounded-full overflow-hidden"
-                  style={{ background: "#F0F0F8" }}
+            <div style={{ minWidth: 160 }}>
+              <div
+                className="flex items-center justify-between"
+                style={{ marginBottom: 4 }}
+              >
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "var(--text-tertiary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    fontWeight: 500,
+                  }}
                 >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="h-full rounded-full"
-                    style={{
-                      background: `linear-gradient(90deg, ${project.color} 0%, ${project.color}CC 100%)`,
-                    }}
-                  />
-                </div>
+                  Progress
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {progress}%
+                </span>
+              </div>
+              <div
+                style={{
+                  height: 5,
+                  borderRadius: 999,
+                  background: "var(--content-secondary)",
+                  overflow: "hidden",
+                }}
+              >
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                  style={{
+                    height: "100%",
+                    background: "var(--vyne-purple)",
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-tertiary)",
+                  marginTop: 4,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {tasks.filter((t) => t.status === "done").length} of {tasks.length} tasks
               </div>
             </div>
           </div>
@@ -249,111 +296,107 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
 
       {/* Toolbar */}
       <div
-        className="flex items-center justify-between px-6 py-2.5 flex-shrink-0"
+        className="flex items-center justify-between px-6 py-3 flex-shrink-0 flex-wrap gap-2"
         style={{
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
         }}
       >
-        <div
-          className="flex items-center gap-0.5 p-0.5 rounded-lg"
-          style={{ background: "var(--content-secondary)" }}
-        >
-          <ViewBtn
-            active={viewMode === "list"}
-            onClick={() => setViewMode("list")}
-            icon={<LayoutList size={14} />}
-            label="List"
+        <div className="flex items-center gap-3">
+          <ViewToggle
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: "list", label: "List", icon: <LayoutList size={14} /> },
+              { value: "board", label: "Board", icon: <Columns3 size={14} /> },
+              { value: "calendar", label: "Calendar", icon: <CalendarIcon size={14} /> },
+              { value: "gantt", label: "Gantt", icon: <GanttIcon size={14} /> },
+            ]}
           />
-          <ViewBtn
-            active={viewMode === "board"}
-            onClick={() => setViewMode("board")}
-            icon={<Columns3 size={14} />}
-            label="Board"
-          />
-          <ViewBtn
-            active={viewMode === "calendar"}
-            onClick={() => setViewMode("calendar")}
-            icon={<CalendarIcon size={14} />}
-            label="Calendar"
-          />
-          <ViewBtn
-            active={viewMode === "gantt"}
-            onClick={() => setViewMode("gantt")}
-            icon={<GanttIcon size={14} />}
-            label="Gantt"
-          />
-        </div>
-
-        {/* Swimlane group-by (board-only) */}
-        {viewMode === "board" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "0 8px",
-              color: "var(--text-tertiary)",
-              fontSize: 11,
-              fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-            }}
-          >
-            <Layers size={12} />
-            Group by
-            <select
-              value={swimlaneMode}
-              onChange={(e) => setSwimlaneMode(e.target.value as SwimlaneMode)}
-              aria-label="Swimlane grouping"
+          {viewMode === "board" && (
+            <div
               style={{
-                padding: "5px 10px",
-                borderRadius: 6,
-                border: "1px solid var(--input-border)",
-                background: "var(--input-bg)",
-                color: "var(--text-primary)",
-                fontSize: 11,
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-                textTransform: "capitalize",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                color: "var(--text-tertiary)",
               }}
             >
-              <option value="none">None</option>
-              <option value="assignee">Assignee</option>
-              <option value="priority">Priority</option>
-            </select>
-          </div>
-        )}
+              <Layers size={12} />
+              <span>Group by</span>
+              <select
+                value={swimlaneMode}
+                onChange={(e) => setSwimlaneMode(e.target.value as SwimlaneMode)}
+                aria-label="Swimlane grouping"
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-bg)",
+                  color: "var(--text-primary)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                <option value="none">None</option>
+                <option value="assignee">Assignee</option>
+                <option value="priority">Priority</option>
+              </select>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
             style={{
               background: "var(--content-secondary)",
               border: "1px solid var(--content-border)",
-              width: "200px",
+              width: 220,
+              height: 32,
             }}
           >
             <Search size={13} style={{ color: "var(--text-tertiary)" }} />
             <input
-              type="text"
+              type="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks..."
-              className="flex-1 bg-transparent text-xs focus:outline-none"
+              aria-label="Search tasks"
+              className="flex-1 bg-transparent text-sm focus:outline-none"
               style={{ color: "var(--text-primary)" }}
             />
           </div>
           <button
+            type="button"
             onClick={() => setShowAddTask(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white transition-all"
             style={{
-              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-              boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              height: 32,
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "#fff",
+              background: "var(--vyne-purple)",
+              border: "none",
+              cursor: "pointer",
+              transition: "background 0.12s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.background =
+                "var(--vyne-purple-light, #8B6BFF)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.background = "var(--vyne-purple)";
             }}
           >
             <Plus size={14} />
-            Add Task
+            New task
           </button>
         </div>
       </div>

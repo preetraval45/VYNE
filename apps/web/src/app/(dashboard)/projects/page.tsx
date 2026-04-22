@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -60,8 +61,11 @@ function formatShortDate(iso: string | undefined): string {
 }
 
 function ProjectsPageInner() {
+  const router = useRouter();
   const projects = useProjects();
   const allTasks = useProjectsStore((s) => s.tasks);
+  // DetailPanel is kept around for the List view's existing behavior,
+  // but primary Board clicks now navigate directly to the full page.
   const detail = useDetailParam();
   const selectedProject = detail.id
     ? projects.find((p) => p.id === detail.id)
@@ -189,7 +193,7 @@ function ProjectsPageInner() {
                       <BoardCard
                         key={project.id}
                         title={project.name}
-                        onClick={() => detail.open(project.id)}
+                        href={`/projects/${project.id}`}
                         dateRange={range}
                         tag={{
                           label: project.identifier ?? "Project",
@@ -241,7 +245,7 @@ function ProjectsPageInner() {
                 >
                   <ProjectCardLocal
                     project={project}
-                    onNavigate={() => detail.open(project.id)}
+                    onNavigate={() => router.push(`/projects/${project.id}`)}
                   />
                 </motion.div>
               ))}
