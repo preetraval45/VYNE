@@ -2,7 +2,6 @@
 
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
-import { GlobalSearch } from "@/components/layout/GlobalSearch";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
 import { UndoToast } from "@/components/layout/UndoToast";
@@ -45,9 +44,6 @@ export default function DashboardLayout({
 
       {/* Global Command Palette */}
       <CommandPalette />
-
-      {/* Global Search (⌘⇧F) */}
-      <GlobalSearch />
 
       {/* Global Keyboard Shortcuts Modal */}
       <KeyboardShortcutsModal />
