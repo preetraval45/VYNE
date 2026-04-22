@@ -3,6 +3,7 @@
 import { Suspense, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   DetailPanel,
   DetailSection,
@@ -2071,7 +2072,10 @@ function InvoicesTab() {
                       <ActionBtn
                         icon={<Send size={12} />}
                         label="Resend"
-                        onClick={() => {}}
+                        onClick={() => {
+                          sendInvoice(inv.id);
+                          toast.success(`Resent ${inv.number} to ${inv.customer}`);
+                        }}
                         color="#1E40AF"
                       />
                     )}

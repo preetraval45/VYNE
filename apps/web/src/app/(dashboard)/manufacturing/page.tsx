@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi } from "@/lib/api/client";
 
@@ -760,22 +761,31 @@ function SearchInput({
 function NewButton({
   label,
   onClick,
-}: Readonly<{ label: string; onClick: () => void }>) {
+  href,
+}: Readonly<{ label: string; onClick?: () => void; href?: string }>) {
+  const sharedStyle: React.CSSProperties = {
+    padding: "7px 14px",
+    background: "var(--vyne-purple)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+  };
+  if (href) {
+    return (
+      <Link href={href} style={sharedStyle}>
+        + {label}
+      </Link>
+    );
+  }
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: "7px 14px",
-        background: "var(--vyne-purple)",
-        color: "#fff",
-        border: "none",
-        borderRadius: 8,
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
-    >
+    <button type="button" onClick={onClick} style={sharedStyle}>
       + {label}
     </button>
   );
@@ -880,7 +890,7 @@ function BOMTab() {
               { key: "status" as never, header: "Status" },
             ]}
           />
-          <NewButton label="New BOM" onClick={() => {}} />
+          <NewButton label="New BOM" href="/ops/boms/new" />
         </div>
       </div>
 
@@ -1201,7 +1211,7 @@ function ManufacturingOrdersTab() {
               { key: "assignedTo" as never, header: "Assigned To" },
             ]}
           />
-          <NewButton label="New MO" onClick={() => {}} />
+          <NewButton label="New MO" href="/ops/work-orders/new" />
         </div>
       </div>
 
@@ -1482,7 +1492,7 @@ function WorkCentersTab() {
               { key: "status" as never, header: "Status" },
             ]}
           />
-          <NewButton label="New Work Center" onClick={() => {}} />
+          <NewButton label="New Work Center" href="/ops/products/new" />
         </div>
       </div>
 
@@ -1650,7 +1660,7 @@ function OperationsTab() {
               { key: "laborCost" as never, header: "Labor Cost" },
             ]}
           />
-          <NewButton label="New Operation" onClick={() => {}} />
+          <NewButton label="New Operation" href="/ops/work-orders/new" />
         </div>
       </div>
 
@@ -1781,7 +1791,7 @@ function QualityControlTab() {
               { key: "result" as never, header: "Result" },
             ]}
           />
-          <NewButton label="New QC Check" onClick={() => {}} />
+          <NewButton label="New QC Check" href="/ops/work-orders/new" />
         </div>
       </div>
 

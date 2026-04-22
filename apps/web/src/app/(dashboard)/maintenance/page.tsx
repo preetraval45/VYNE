@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Wrench,
   Plus,
@@ -963,36 +964,57 @@ function FilterSelect({
 function AddButton({
   label,
   onClick,
-}: Readonly<{ label: string; onClick: () => void }>) {
+  href,
+}: Readonly<{ label: string; onClick?: () => void; href?: string }>) {
+  const sharedStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "7px 14px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    fontSize: 13,
+    fontWeight: 600,
+    color: "#fff",
+    background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+    boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+    transition: "all 0.15s",
+    whiteSpace: "nowrap" as const,
+    textDecoration: "none",
+  };
+  const onEnter = (e: React.MouseEvent<HTMLElement>) => {
+    (e.currentTarget as HTMLElement).style.boxShadow =
+      "0 4px 14px rgba(108,71,255,0.45)";
+    (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+  };
+  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+    (e.currentTarget as HTMLElement).style.boxShadow =
+      "0 2px 8px rgba(108,71,255,0.3)";
+    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+  };
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        style={sharedStyle}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+      >
+        <Plus size={14} />
+        {label}
+      </Link>
+    );
+  }
+
   return (
     <button
+      type="button"
       onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "7px 14px",
-        borderRadius: 8,
-        border: "none",
-        cursor: "pointer",
-        fontSize: 13,
-        fontWeight: 600,
-        color: "#fff",
-        background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-        boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
-        transition: "all 0.15s",
-        whiteSpace: "nowrap",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 4px 14px rgba(108,71,255,0.45)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 8px rgba(108,71,255,0.3)";
-        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-      }}
+      style={sharedStyle}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
     >
       <Plus size={14} />
       {label}
@@ -1064,7 +1086,7 @@ function EquipmentTab() {
             { key: "Next Service" as never, header: "Next Service" },
           ]}
         />
-        <AddButton label="Add Equipment" onClick={() => {}} />
+        <AddButton label="Add Equipment" href="/ops/products/new" />
       </div>
 
       {/* Table */}
@@ -1211,7 +1233,7 @@ function RequestsTab() {
             { key: "Deadline" as never, header: "Deadline" },
           ]}
         />
-        <AddButton label="New Request" onClick={() => {}} />
+        <AddButton label="New Request" href="/ops/work-orders/new" />
       </div>
 
       {/* Table */}
@@ -1339,7 +1361,7 @@ function PreventiveTab() {
             { key: "Status" as never, header: "Status" },
           ]}
         />
-        <AddButton label="New Schedule" onClick={() => {}} />
+        <AddButton label="New Schedule" href="/ops/work-orders/new" />
       </div>
 
       {/* Table */}
@@ -1480,7 +1502,7 @@ function WorkOrdersTab() {
             { key: "Status" as never, header: "Status" },
           ]}
         />
-        <AddButton label="Create Work Order" onClick={() => {}} />
+        <AddButton label="Create Work Order" href="/ops/work-orders/new" />
       </div>
 
       {/* Table */}
@@ -1644,7 +1666,7 @@ function PartsTab() {
             { key: "Status" as never, header: "Status" },
           ]}
         />
-        <AddButton label="Add Part" onClick={() => {}} />
+        <AddButton label="Add Part" href="/ops/products/new" />
       </div>
 
       {/* Table */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi } from "@/lib/api/client";
 
@@ -745,22 +746,31 @@ function SearchInput({
 function NewButton({
   label,
   onClick,
-}: Readonly<{ label: string; onClick: () => void }>) {
+  href,
+}: Readonly<{ label: string; onClick?: () => void; href?: string }>) {
+  const sharedStyle: React.CSSProperties = {
+    padding: "7px 14px",
+    background: "var(--vyne-purple)",
+    color: "#fff",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+  };
+  if (href) {
+    return (
+      <Link href={href} style={sharedStyle}>
+        + {label}
+      </Link>
+    );
+  }
   return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: "7px 14px",
-        background: "var(--vyne-purple)",
-        color: "#fff",
-        border: "none",
-        borderRadius: 8,
-        fontSize: 12,
-        fontWeight: 500,
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
-    >
+    <button type="button" onClick={onClick} style={sharedStyle}>
       + {label}
     </button>
   );
@@ -910,7 +920,7 @@ function PurchaseOrdersTab() {
               { key: "status" as never, header: "Status" },
             ]}
           />
-          <NewButton label="New PO" onClick={() => {}} />
+          <NewButton label="New PO" href="/invoicing/bills/new" />
         </div>
       </div>
 
@@ -1049,7 +1059,7 @@ function VendorsTab() {
               { key: "status" as never, header: "Status" },
             ]}
           />
-          <NewButton label="New Vendor" onClick={() => {}} />
+          <NewButton label="New Vendor" href="/invoicing/vendors/new" />
         </div>
       </div>
 
@@ -1196,7 +1206,7 @@ function ProductsTab() {
               { key: "unitCost" as never, header: "Unit Cost" },
             ]}
           />
-          <NewButton label="New Product" onClick={() => {}} />
+          <NewButton label="New Product" href="/ops/products/new" />
         </div>
       </div>
 
@@ -1335,7 +1345,7 @@ function ReceiptsTab() {
               { key: "qualityCheck" as never, header: "QC Result" },
             ]}
           />
-          <NewButton label="New Receipt" onClick={() => {}} />
+          <NewButton label="New Receipt" href="/invoicing/bills/new" />
         </div>
       </div>
 
@@ -1482,7 +1492,7 @@ function BillsTab() {
               { key: "status" as never, header: "Status" },
             ]}
           />
-          <NewButton label="New Bill" onClick={() => {}} />
+          <NewButton label="New Bill" href="/invoicing/bills/new" />
         </div>
       </div>
 
