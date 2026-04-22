@@ -4,8 +4,9 @@ import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Plus, Pencil, ArrowRight } from "lucide-react";
+import { Plus, Pencil, ArrowRight, TrendingUp } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageHeader, Pill, PrimaryLink, type Tone } from "@/components/shared/Kit";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
 import {
@@ -143,14 +144,22 @@ function TabBtn({
   );
 }
 
+// Stage → semantic tone map. Keeps pill colors muted and consistent
+// instead of each stage shouting its own candy-bright hex.
+const STAGE_TONE: Record<Stage, Tone> = {
+  Lead: "neutral",
+  Qualified: "info",
+  Proposal: "purple",
+  Negotiation: "warn",
+  Won: "success",
+  Lost: "danger",
+};
+
 function StagePill({ stage }: Readonly<{ stage: Stage }>) {
   return (
-    <span
-      className="px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap"
-      style={{ background: stageBg(stage), color: stageColor(stage) }}
-    >
+    <Pill tone={STAGE_TONE[stage]} dot>
       {stage}
-    </span>
+    </Pill>
   );
 }
 
@@ -169,14 +178,13 @@ function PipelineTab({
       {STAGES.map((stage) => {
         const stageDeals = deals.filter((d) => d.stage === stage);
         const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
-        const color = stageColor(stage);
 
         return (
           <div
             key={stage}
-            className="min-w-[240px] max-w-[240px] shrink-0 flex flex-col gap-2"
+            className="min-w-[260px] max-w-[260px] shrink-0 flex flex-col gap-2"
           >
-            {/* Column header */}
+            {/* Column header — muted, uses kit Pill tone */}
             <div
               className="rounded-[10px] px-3 py-2.5"
               style={{
@@ -184,25 +192,29 @@ function PipelineTab({
                 border: "1px solid var(--content-border)",
               }}
             >
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-[7px]">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: color }}
-                  />
-                  <span
-                    className="text-xs font-bold text-text-primary"
-                  >
-                    {stage}
-                  </span>
-                </div>
+              <div className="flex items-center justify-between">
+                <StagePill stage={stage} />
                 <span
-                  className="text-[11px] font-semibold px-[7px] py-px rounded-full bg-[#F4F4F8] text-text-tertiary"
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "var(--text-tertiary)",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
                 >
                   {stageDeals.length}
                 </span>
               </div>
-              <div className="text-xs font-semibold" style={{ color }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  letterSpacing: "-0.01em",
+                  marginTop: 6,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
                 {fmt(stageTotal)}
               </div>
             </div>
@@ -902,41 +914,18 @@ function CRMPageInner() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Header */}
-      <div
-        className="shrink-0"
-        style={{
-          padding: "14px 20px 0",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1
-              className="text-base font-bold m-0 text-text-primary"
-            >
-              CRM Pipeline
-            </h1>
-            <p
-              className="text-xs mt-0.5 mb-0 text-text-tertiary"
-            >
-              {activeCount} active deals · {fmt(totalPipeline)} pipeline
-            </p>
-          </div>
-          <div className="flex gap-2 items-center">
-            <span
-              className="text-[11px] px-2 py-[3px] rounded-full bg-status-success/10 text-[var(--badge-success-text)]"
-              
-            >
+      <PageHeader
+        icon={<TrendingUp size={16} />}
+        title="CRM Pipeline"
+        subtitle={`${activeCount} active · ${fmt(totalPipeline)} pipeline`}
+        actions={
+          <>
+            <Pill tone="success" dot>
               {deals.filter((d) => d.stage === "Won").length} won
-            </span>
-            <span
-              className="text-[11px] px-2 py-[3px] rounded-full bg-status-danger/10 text-[var(--badge-danger-text)]"
-              
-            >
+            </Pill>
+            <Pill tone="danger" dot>
               {deals.filter((d) => d.stage === "Lost").length} lost
-            </span>
+            </Pill>
             <ExportButton
               data={deals as unknown as Record<string, unknown>[]}
               filename="vyne-deals"
@@ -952,14 +941,20 @@ function CRMPageInner() {
                 { key: "nextAction", header: "Next Action" },
               ]}
             />
-            <Link
-              href="/crm/deals/new"
-              className="flex items-center gap-1.5 px-[14px] py-[7px] rounded-lg border-0 text-white cursor-pointer text-xs font-semibold bg-vyne-purple"
-            >
-              <Plus size={13} /> Add Deal
-            </Link>
-          </div>
-        </div>
+            <PrimaryLink href="/crm/deals/new">
+              <Plus size={13} /> New deal
+            </PrimaryLink>
+          </>
+        }
+      />
+      <div
+        className="shrink-0"
+        style={{
+          padding: "8px 20px 0",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+        }}
+      >
         <div className="flex gap-0.5">
           <TabBtn
             label="Pipeline"
