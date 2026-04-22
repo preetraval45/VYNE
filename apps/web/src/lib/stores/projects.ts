@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
@@ -253,8 +254,14 @@ export const useProjects = () => useProjectsStore((s) => s.projects);
 export const useProject = (id: string) =>
   useProjectsStore((s) => s.projects.find((p) => p.id === id));
 
-export const useProjectTasks = (projectId: string) =>
-  useProjectsStore((s) => s.tasks.filter((t) => t.projectId === projectId));
+// IMPORTANT: select the stable `tasks` array first, then derive with useMemo.
+// Returning `s.tasks.filter(...)` directly produces a new array per call,
+// which trips React 19's useSyncExternalStore consistency check
+// (Minified React error #185 — Maximum update depth exceeded).
+export const useProjectTasks = (projectId: string) => {
+  const tasks = useProjectsStore((s) => s.tasks);
+  return useMemo(() => tasks.filter((t) => t.projectId === projectId), [tasks, projectId]);
+};
 
 export const useTask = (taskId: string) =>
   useProjectsStore((s) => s.tasks.find((t) => t.id === taskId));

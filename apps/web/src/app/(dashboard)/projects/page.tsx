@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -203,8 +203,13 @@ function ProjectDetailPanel({
   project: ProjectDetail | undefined;
   onClose: () => void;
 }) {
-  const tasks = useProjectsStore((s) =>
-    project ? s.tasks.filter((t) => t.projectId === project.id) : [],
+  // Select stable references; derive filtered list with useMemo to keep
+  // the snapshot stable across renders (otherwise React 19 + zustand
+  // throws "Maximum update depth exceeded" — see useSyncExternalStore).
+  const allTasks = useProjectsStore((s) => s.tasks);
+  const tasks = useMemo(
+    () => (project ? allTasks.filter((t) => t.projectId === project.id) : []),
+    [allTasks, project],
   );
   const members = useTeamMembers();
 
@@ -507,8 +512,10 @@ function ProjectCardLocal({
   project: ProjectDetail;
   onNavigate: () => void;
 }) {
-  const tasks = useProjectsStore((s) =>
-    s.tasks.filter((t) => t.projectId === project.id),
+  const allTasks = useProjectsStore((s) => s.tasks);
+  const tasks = useMemo(
+    () => allTasks.filter((t) => t.projectId === project.id),
+    [allTasks, project.id],
   );
   const updateProject = useProjectsStore((s) => s.updateProject);
   const members = useTeamMembers();

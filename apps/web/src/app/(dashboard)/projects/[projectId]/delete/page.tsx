@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -27,8 +27,10 @@ export default function DeleteProjectPage() {
 
   const project = useProjectsStore((s) => s.projects.find((p) => p.id === projectId));
   const deleteProject = useProjectsStore((s) => s.deleteProject);
-  const tasks = useProjectsStore((s) =>
-    s.tasks.filter((t) => t.projectId === projectId),
+  const allTasks = useProjectsStore((s) => s.tasks);
+  const tasks = useMemo(
+    () => allTasks.filter((t) => t.projectId === projectId),
+    [allTasks, projectId],
   );
 
   const [confirm, setConfirm] = useState("");
