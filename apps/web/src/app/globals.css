@@ -59,44 +59,65 @@
   --alert-purple-border: rgba(108,71,255,0.25);
   --alert-purple-text: #3730A3;
 
-  /* ── 1. Brand Colors ─────────────────────────────────────────────── */
-  --vyne-purple: #6C47FF;
-  --vyne-purple-light: #8B6BFF;
-  --vyne-purple-dark: #5235CC;
-  --vyne-cyan: #06B6D4;
-  --vyne-indigo: #6366F1;
+  /* ───────────────────────────────────────────────────────────────
+   * Color system — Linear/Vercel-inspired, 2026 refresh.
+   *
+   *  - Neutral gray is 90% of the UI; color only draws attention to
+   *    primary action and semantic status.
+   *  - Accent is a single refined indigo (#5B5BD6) — no more candy purple.
+   *  - Status colors are the deeper, less saturated shade of each
+   *    Tailwind palette; pills use a 8-10% tint with a subtle ring.
+   *  - Shadows are 1px hairlines + a single soft diffuse, never puffy.
+   * ─────────────────────────────────────────────────────────────── */
 
-  /* ── 2. Surface & Background ─────────────────────────────────────── */
-  --content-bg: #FFFFFF;
-  --content-bg-secondary: #F8F8FC;
-  --content-secondary: #F8F8FC;
-  --content-border: #E8E8F0;
-  --content-border-strong: #D0D0E0;
+  /* 9-step neutral scale (cool gray with a faint violet undertone) */
+  --gray-0:  #FFFFFF;
+  --gray-50: #FAFAFB;
+  --gray-100: #F4F4F7;
+  --gray-200: #E6E6EC;
+  --gray-300: #D4D4DC;
+  --gray-400: #A1A1AE;
+  --gray-500: #71717D;
+  --gray-600: #52525B;
+  --gray-700: #3F3F46;
+  --gray-800: #27272D;
+  --gray-900: #18181B;
+  --gray-950: #0B0B0E;
 
-  /* ── 3. Text Colors ──────────────────────────────────────────────── */
-  --text-primary: #1A1A2E;
-  --text-secondary: #6B6B8A;
-  --text-tertiary: #A0A0B8;
+  /* ── 1. Accent (brand) — single refined indigo ───────────────── */
+  --vyne-purple: #5B5BD6;
+  --vyne-purple-light: #7470E0;
+  --vyne-purple-dark: #4341B8;
+  /* Alias kept for legacy call-sites — will migrate over time */
+  --vyne-cyan: #5B5BD6;
+  --vyne-indigo: #5B5BD6;
 
-  /* On-surface text colors (for light backgrounds) */
-  --on-surface: #1A1A2E;
-  --on-surface-secondary: #6B6B8A;
-  --on-surface-tertiary: #A0A0B8;
+  /* ── 2. Surface & Background ─────────────────────────────────── */
+  --content-bg: var(--gray-0);
+  --content-bg-secondary: var(--gray-50);
+  --content-secondary: var(--gray-100);
+  --content-border: var(--gray-200);
+  --content-border-strong: var(--gray-300);
 
-  /* On-primary text colors (for purple/dark backgrounds) */
+  /* ── 3. Text ─────────────────────────────────────────────────── */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-tertiary: var(--gray-500);
+
+  --on-surface: var(--gray-900);
+  --on-surface-secondary: var(--gray-600);
+  --on-surface-tertiary: var(--gray-500);
   --on-primary: #FFFFFF;
-  --on-primary-secondary: rgba(255,255,255,0.7);
+  --on-primary-secondary: rgba(255,255,255,0.72);
+  --on-dark: var(--gray-50);
+  --on-dark-secondary: var(--gray-400);
+  --on-dark-tertiary: var(--gray-500);
 
-  /* On-dark text colors (for dark backgrounds like sidebar) */
-  --on-dark: #FFFFFF;
-  --on-dark-secondary: #A0A0B8;
-  --on-dark-tertiary: #6B6B8A;
-
-  /* ── 4. Status Colors ────────────────────────────────────────────── */
-  --status-success: #22C55E;
-  --status-warning: #F59E0B;
-  --status-danger: #EF4444;
-  --status-info: #3B82F6;
+  /* ── 4. Semantic status (deep, not candy) ────────────────────── */
+  --status-success: #0F9D58;
+  --status-warning: #D97706;
+  --status-danger:  #DC2626;
+  --status-info:    #2563EB;
 
   /* ── 6. Chat / Messaging ─────────────────────────────────────────── */
   --message-bg-self: #EEE9FF;
@@ -131,12 +152,12 @@
   --border-radius-lg: 12px;
   --border-radius-xl: 16px;
 
-  /* ── 11. Shadows ─────────────────────────────────────────────────── */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-  --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
-  --shadow-panel: 0 0 0 1px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.12);
+  /* ── 11. Shadows — hairline + gentle diffuse, never puffy ─────── */
+  --shadow-sm: 0 1px 0 rgba(16, 24, 40, 0.04), 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 1px 0 rgba(16, 24, 40, 0.04), 0 4px 12px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 1px 0 rgba(16, 24, 40, 0.05), 0 8px 24px rgba(16, 24, 40, 0.08);
+  --shadow-xl: 0 2px 0 rgba(16, 24, 40, 0.06), 0 16px 40px rgba(16, 24, 40, 0.10);
+  --shadow-panel: 0 0 0 1px rgba(16, 24, 40, 0.06), 0 12px 32px rgba(16, 24, 40, 0.10);
 
   /* ── 12. Transitions ─────────────────────────────────────────────── */
   --transition-fast: 150ms ease;
@@ -147,22 +168,22 @@
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
-  /* Aurora — brand gradient used sparingly on CTAs / active states */
-  --aurora: linear-gradient(135deg, #7C5CFF 0%, #6366F1 45%, #06B6D4 100%);
-  --aurora-soft: linear-gradient(135deg, rgba(124,92,255,0.14) 0%, rgba(99,102,241,0.10) 45%, rgba(6,182,212,0.08) 100%);
-  --aurora-text: linear-gradient(135deg, #A78BFA 0%, #818CF8 50%, #22D3EE 100%);
+  /* Aurora — retained for backwards compat, retuned to indigo family */
+  --aurora: linear-gradient(135deg, #5B5BD6 0%, #4341B8 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(91,91,214,0.08) 0%, rgba(67,65,184,0.06) 100%);
+  --aurora-text: linear-gradient(135deg, #6366F1 0%, #4341B8 100%);
 
   /* Glass surfaces */
-  --glass-bg: rgba(255,255,255,0.68);
-  --glass-border: rgba(20,20,40,0.08);
-  --glass-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 8px 24px rgba(20,20,40,0.06);
+  --glass-bg: rgba(255,255,255,0.72);
+  --glass-border: rgba(16,24,40,0.06);
+  --glass-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 24px rgba(16,24,40,0.05);
 
   /* Premium radius + shadow */
-  --radius-card: 14px;
-  --radius-button: 10px;
+  --radius-card: 10px;
+  --radius-button: 8px;
   --radius-pill: 999px;
-  --shadow-glow: 0 0 24px rgba(124,92,255,0.28);
-  --shadow-premium: 0 8px 30px rgba(20,20,40,0.08), 0 2px 6px rgba(20,20,40,0.05);
+  --shadow-glow: 0 0 0 3px rgba(91,91,214,0.18);
+  --shadow-premium: 0 1px 0 rgba(16,24,40,0.05), 0 8px 24px rgba(16,24,40,0.06);
 
   /* Typography details */
   --tracking-tight: -0.015em;
@@ -177,22 +198,22 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Content */
-  --content-bg: #1A1A2E;
-  --content-bg-secondary: #232340;
-  --content-secondary: #232340;
-  --content-border: #2E2E4A;
-  --content-border-strong: #3A3A5A;
+  /* Content — Linear/Notion-style true cool-dark, not blue-black */
+  --content-bg: #0E0E10;
+  --content-bg-secondary: #141417;
+  --content-secondary: #1A1A1E;
+  --content-border: #26262B;
+  --content-border-strong: #34343B;
 
   /* Text */
-  --text-primary: #E8E8F0;
-  --text-secondary: #A0A0B8;
-  --text-tertiary: #6B6B8A;
+  --text-primary: #F4F4F7;
+  --text-secondary: #A1A1AE;
+  --text-tertiary: #71717D;
 
   /* On-surface (dark theme) */
-  --on-surface: #E8E8F0;
-  --on-surface-secondary: #A0A0B8;
-  --on-surface-tertiary: #6B6B8A;
+  --on-surface: #F4F4F7;
+  --on-surface-secondary: #A1A1AE;
+  --on-surface-tertiary: #71717D;
 
   /* Messaging */
   --message-bg-self: #2E2255;
@@ -339,10 +360,19 @@ body {
 body {
   color: var(--text-primary);
   background: var(--content-bg);
-  font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-geist-sans), 'Inter', ui-sans-serif, system-ui,
+    -apple-system, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv11' on, 'ss03' on, 'ss04' on, 'ss05' on;
+  letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
+
+/* Premium type rhythm — matches Linear / Vercel / Attio heading tracking */
+h1 { letter-spacing: -0.024em; }
+h2 { letter-spacing: -0.018em; }
+h3, h4 { letter-spacing: -0.012em; }
 
 a {
   color: inherit;

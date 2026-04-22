@@ -399,7 +399,7 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
           position: "relative",
         }}
       >
-        {/* Colored icon tile */}
+        {/* Monochrome icon tile — accent only when active */}
         <span
           aria-hidden="true"
           style={{
@@ -407,14 +407,16 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
             height: 26,
             borderRadius: 7,
             background: active
-              ? `rgba(${hexToRgb(item.color)}, 0.18)`
-              : `rgba(${hexToRgb(item.color)}, 0.10)`,
-            color: item.color,
+              ? "rgba(91, 91, 214, 0.12)"
+              : "transparent",
+            color: active
+              ? "var(--vyne-purple)"
+              : "var(--text-tertiary)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            transition: "background 0.12s",
+            transition: "background 0.12s, color 0.12s",
             position: "relative",
           }}
         >
@@ -574,8 +576,8 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
                 width: 22,
                 height: 22,
                 borderRadius: 6,
-                background: `rgba(${hexToRgb(item.color)}, 0.14)`,
-                color: item.color,
+                background: "transparent",
+                color: "var(--text-tertiary)",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",

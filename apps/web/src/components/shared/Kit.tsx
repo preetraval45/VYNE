@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
+import { Plus, Clock } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
  * VYNE design-system kit — small, opinionated primitives so every
@@ -27,29 +28,29 @@ const TONE_TOKENS: Record<Tone, { fg: string; bg: string; ring: string }> = {
     ring: "var(--content-border)",
   },
   purple: {
-    fg: "#6C47FF",
-    bg: "rgba(108, 71, 255, 0.08)",
-    ring: "rgba(108, 71, 255, 0.22)",
+    fg: "#5B5BD6",
+    bg: "rgba(91, 91, 214, 0.07)",
+    ring: "rgba(91, 91, 214, 0.18)",
   },
   success: {
-    fg: "#059669",
-    bg: "rgba(16, 185, 129, 0.08)",
-    ring: "rgba(16, 185, 129, 0.22)",
+    fg: "#0F9D58",
+    bg: "rgba(15, 157, 88, 0.07)",
+    ring: "rgba(15, 157, 88, 0.18)",
   },
   warn: {
-    fg: "#B45309",
-    bg: "rgba(245, 158, 11, 0.10)",
-    ring: "rgba(245, 158, 11, 0.25)",
+    fg: "#C2410C",
+    bg: "rgba(217, 119, 6, 0.08)",
+    ring: "rgba(217, 119, 6, 0.22)",
   },
   danger: {
     fg: "#B91C1C",
-    bg: "rgba(239, 68, 68, 0.08)",
-    ring: "rgba(239, 68, 68, 0.22)",
+    bg: "rgba(220, 38, 38, 0.07)",
+    ring: "rgba(220, 38, 38, 0.18)",
   },
   info: {
-    fg: "#1D4ED8",
-    bg: "rgba(59, 130, 246, 0.08)",
-    ring: "rgba(59, 130, 246, 0.22)",
+    fg: "#1E40AF",
+    bg: "rgba(37, 99, 235, 0.07)",
+    ring: "rgba(37, 99, 235, 0.18)",
   },
 };
 
@@ -201,19 +202,23 @@ export function PrimaryLink({
         display: "inline-flex",
         alignItems: "center",
         gap: 6,
-        padding: "6px 12px",
-        height: 32,
-        borderRadius: 8,
+        padding: "0 12px",
+        height: 30,
+        borderRadius: 7,
         fontSize: 13,
         fontWeight: 500,
+        letterSpacing: "-0.005em",
         color: "#fff",
         background: "var(--vyne-purple)",
         textDecoration: "none",
-        transition: "background 0.12s",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 0 rgba(16,24,40,0.08)",
+        border: "1px solid rgba(67,65,184,0.6)",
+        transition: "background 0.12s, transform 0.08s",
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.background =
-          "var(--vyne-purple-light, #8B6BFF)";
+          "var(--vyne-purple-dark, #4341B8)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "var(--vyne-purple)";
@@ -439,25 +444,42 @@ export function BoardColumn({
   const t = TONE_TOKENS[accent];
   const addButton = (() => {
     const sharedStyle: CSSProperties = {
-      width: 26,
-      height: 26,
-      borderRadius: 999,
+      width: 22,
+      height: 22,
+      borderRadius: 6,
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(255, 132, 94, 0.14)",
-      color: "#FF7849",
-      border: "none",
+      background: "transparent",
+      color: "var(--text-tertiary)",
+      border: "1px solid var(--content-border)",
       cursor: "pointer",
-      fontSize: 16,
-      fontWeight: 400,
       lineHeight: 1,
       textDecoration: "none",
+      transition: "color 0.12s, border-color 0.12s, background 0.12s",
+    };
+    const onEnter = (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.currentTarget as HTMLElement;
+      el.style.color = "var(--vyne-purple)";
+      el.style.borderColor = "var(--vyne-purple)";
+      el.style.background = "rgba(91, 91, 214, 0.06)";
+    };
+    const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+      const el = e.currentTarget as HTMLElement;
+      el.style.color = "var(--text-tertiary)";
+      el.style.borderColor = "var(--content-border)";
+      el.style.background = "transparent";
     };
     if (addHref) {
       return (
-        <Link href={addHref} style={sharedStyle} aria-label={`Add ${title}`}>
-          +
+        <Link
+          href={addHref}
+          style={sharedStyle}
+          aria-label={`Add ${title}`}
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
+        >
+          <Plus size={12} />
         </Link>
       );
     }
@@ -468,8 +490,10 @@ export function BoardColumn({
           onClick={onAdd}
           style={sharedStyle}
           aria-label={`Add ${title}`}
+          onMouseEnter={onEnter}
+          onMouseLeave={onLeave}
         >
-          +
+          <Plus size={12} />
         </button>
       );
     }
@@ -638,11 +662,11 @@ export function BoardCard({
             marginBottom: 8,
           }}
         >
-          <span aria-hidden="true">🕒</span>
+          <Clock size={11} />
           <span style={{ fontVariantNumeric: "tabular-nums" }}>
             {dateRange.from}
           </span>
-          <span>→</span>
+          <span aria-hidden="true" style={{ opacity: 0.6 }}>→</span>
           <span style={{ fontVariantNumeric: "tabular-nums" }}>
             {dateRange.to}
           </span>
