@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { FileText, Clock, Search, X } from "lucide-react";
 import {
   useDocs,
@@ -12,8 +13,31 @@ import {
 } from "@/hooks/useDocs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { DocTree } from "@/components/docs/DocTree";
-import { DocEditor } from "@/components/docs/DocEditor";
 import { formatDistanceToNow } from "date-fns";
+
+// Lazy-load the Tiptap + lowlight + yjs stack (≈600KB) so the rest of
+// the dashboard doesn't pay for it. Editor only mounts once a doc is
+// selected, which is exactly when users want to wait for it.
+const DocEditor = dynamic(
+  () => import("@/components/docs/DocEditor").then((m) => m.DocEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          color: "var(--text-tertiary)",
+          fontSize: 13,
+        }}
+      >
+        Loading editor…
+      </div>
+    ),
+  },
+);
 
 // ── Recent Docs Grid ──────────────────────────────────────────────
 function RecentDocsGrid({
