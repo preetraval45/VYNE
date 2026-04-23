@@ -31,8 +31,8 @@
   --sidebar-active: #FFFFFF;
   --sidebar-hover: #2A2A3E;
   --sidebar-accent: #06B6D4;
-  --sidebar-width: 240px;
-  --sidebar-collapsed-width: 60px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 64px;
 
   /* ── Input / Form Controls ───────────────────────────────────────── */
   --input-bg: #FAFAFB;
@@ -112,10 +112,10 @@
   --content-border: var(--gray-200);
   --content-border-strong: var(--gray-300);
 
-  /* ── 3. Text ─────────────────────────────────────────────────── */
+  /* ── 3. Text (bumped contrast for age-friendly readability) ────── */
   --text-primary: var(--gray-900);
-  --text-secondary: var(--gray-600);
-  --text-tertiary: var(--gray-500);
+  --text-secondary: var(--gray-700);
+  --text-tertiary: var(--gray-600);
 
   --on-surface: var(--gray-900);
   --on-surface-secondary: var(--gray-600);
@@ -136,15 +136,15 @@
   --message-bg-self: #EEE9FF;
   --message-bg-other: #F4F4F8;
 
-  /* ── 7. Typography (responsive) ──────────────────────────────────── */
-  --text-xs: clamp(10px, 1.2vw, 11px);
-  --text-sm: clamp(11px, 1.4vw, 13px);
-  --text-base: clamp(13px, 1.5vw, 14px);
-  --text-md: clamp(14px, 1.6vw, 15px);
-  --text-lg: clamp(15px, 1.8vw, 17px);
-  --text-xl: clamp(17px, 2vw, 20px);
-  --text-2xl: clamp(20px, 2.5vw, 24px);
-  --text-3xl: clamp(24px, 3vw, 30px);
+  /* ── 7. Typography (responsive, readable for all ages) ──────────── */
+  --text-xs: clamp(12px, 1.2vw, 13px);
+  --text-sm: clamp(13px, 1.4vw, 14px);
+  --text-base: clamp(14px, 1.5vw, 16px);
+  --text-md: clamp(15px, 1.6vw, 17px);
+  --text-lg: clamp(17px, 1.8vw, 19px);
+  --text-xl: clamp(19px, 2vw, 22px);
+  --text-2xl: clamp(22px, 2.5vw, 26px);
+  --text-3xl: clamp(26px, 3vw, 32px);
 
   /* ── 8. Spacing (responsive) ─────────────────────────────────────── */
   --space-xs: clamp(4px, 0.5vw, 6px);
@@ -218,10 +218,10 @@
   --content-border: #23232A;
   --content-border-strong: #2F2F38;
 
-  /* Text — 3-step scale mirrors light theme contrast ratios */
-  --text-primary: #F5F5F7;
-  --text-secondary: #B4B4BE;
-  --text-tertiary: #8B8B96;
+  /* Text — higher contrast dark theme (age-friendly) */
+  --text-primary: #FAFAFB;
+  --text-secondary: #C8C8D4;
+  --text-tertiary: #9EA0AE;
 
   /* On-surface (dark theme) */
   --on-surface: var(--text-primary);
@@ -376,6 +376,8 @@ body {
   font-family: var(--font-geist-sans), 'Inter', ui-sans-serif, system-ui,
     -apple-system, 'Segoe UI', sans-serif;
   font-feature-settings: 'cv11' on, 'ss03' on, 'ss04' on, 'ss05' on;
+  font-size: 15px;
+  line-height: 1.55;
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -684,6 +686,24 @@ body {
     min-height: 44px;
     min-width: 44px;
   }
+}
+
+/* ─── Age-friendly defaults: larger primary CTAs ──────────────── */
+.btn-aurora,
+.btn-teal,
+.btn-primary-plus {
+  min-height: 40px;
+  font-size: 15px;
+  padding: 11px 22px;
+  line-height: 1.2;
+}
+
+/* Larger base font for form controls */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+textarea {
+  font-size: 15px !important;
+  line-height: 1.5;
 }
 
 /* ─── Modal overflow safeguard on narrow viewports ────────────── */

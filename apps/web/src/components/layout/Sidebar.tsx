@@ -375,11 +375,11 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
           display: "flex",
           alignItems: "center",
           justifyContent: collapsed ? "center" : "flex-start",
-          gap: collapsed ? 0 : 9,
-          padding: collapsed ? "8px 0" : "8px 12px 8px 14px",
+          gap: collapsed ? 0 : 10,
+          padding: collapsed ? "10px 0" : "10px 14px 10px 16px",
           cursor: "pointer",
-          fontSize: 12.5,
-          fontWeight: active ? 600 : 450,
+          fontSize: 14,
+          fontWeight: active ? 600 : 500,
           color: active ? "var(--vyne-teal)" : "var(--text-primary)",
           background: active
             ? "linear-gradient(90deg, rgba(6,182,212,0.14), rgba(6,182,212,0.04) 70%, transparent)"
@@ -403,15 +403,15 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
         <span
           aria-hidden="true"
           style={{
-            width: 26,
-            height: 26,
-            borderRadius: 7,
+            width: 30,
+            height: 30,
+            borderRadius: 8,
             background: active
-              ? "rgba(6, 182, 212, 0.12)"
+              ? "rgba(6, 182, 212, 0.14)"
               : "transparent",
             color: active
-              ? "var(--vyne-purple)"
-              : "var(--text-tertiary)",
+              ? "var(--vyne-teal)"
+              : "var(--text-secondary)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -420,7 +420,7 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
             position: "relative",
           }}
         >
-          <Icon size={13} />
+          <Icon size={16} />
           {/* Collapsed mode badge dot */}
           {collapsed && item.badge !== undefined && item.badge > 0 && (
             <span
@@ -1041,8 +1041,8 @@ export function Sidebar() {
       className="sidebar-nav"
       aria-label="Main navigation"
       style={{
-        width: collapsed ? 60 : 240,
-        minWidth: collapsed ? 60 : 240,
+        width: collapsed ? 64 : 260,
+        minWidth: collapsed ? 64 : 260,
         background: "var(--content-bg)",
         borderRight: "1px solid var(--content-border)",
         display: "flex",
@@ -1730,7 +1730,7 @@ export function Sidebar() {
                     "transparent")
                 }
               >
-                <Settings size={13} /> Workspace settings
+                <Settings size={15} /> Workspace settings
               </button>
               <button
                 type="button"
@@ -1761,7 +1761,7 @@ export function Sidebar() {
                     "transparent")
                 }
               >
-                <LogOut size={13} /> Sign out
+                <LogOut size={15} /> Sign out
               </button>
             </div>
           </>
