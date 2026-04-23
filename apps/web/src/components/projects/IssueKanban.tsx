@@ -338,6 +338,7 @@ function KanbanColumn({
           </span>
         </div>
         <button
+          type="button"
           onClick={onAddIssue}
           className="p-1 rounded-lg transition-colors"
           style={{ color: "var(--text-tertiary)" }}
@@ -382,14 +383,17 @@ function KanbanColumn({
             ))}
           </AnimatePresence>
 
-          {/* Inline Create */}
+          {/* Inline Create — rendered as <li> so the parent <ul> stays
+              semantic (axe/structure/list: list elements must only directly
+              contain <li>, <script> or <template>). */}
           <AnimatePresence>
             {showInlineCreate && (
-              <motion.div
+              <motion.li
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.15 }}
+                style={{ listStyle: "none" }}
               >
                 <div
                   className="p-2.5 rounded-lg"
@@ -427,6 +431,7 @@ function KanbanColumn({
                   />
                   <div className="flex items-center gap-2 mt-2">
                     <button
+                      type="button"
                       onClick={() => onInlineCreateSubmit(inlineCreate.title)}
                       disabled={!inlineCreate.title.trim() || isCreating}
                       className="flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
@@ -443,6 +448,7 @@ function KanbanColumn({
                       Create
                     </button>
                     <button
+                      type="button"
                       onClick={onInlineCreateCancel}
                       className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
                       style={{ color: "var(--text-secondary)", background: "var(--content-secondary)" }}
@@ -459,7 +465,7 @@ function KanbanColumn({
                     </span>
                   </div>
                 </div>
-              </motion.div>
+              </motion.li>
             )}
           </AnimatePresence>
         </ul>
@@ -468,6 +474,7 @@ function KanbanColumn({
       {/* Add issue button at bottom */}
       {!showInlineCreate && (
         <button
+          type="button"
           onClick={onAddIssue}
           className="flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-medium transition-colors rounded-b-xl"
           style={{ color: "var(--text-tertiary)" }}

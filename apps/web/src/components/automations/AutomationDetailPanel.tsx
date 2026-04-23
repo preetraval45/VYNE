@@ -426,6 +426,8 @@ export default function AutomationDetailPanel(
               <input
                 id="automation-name-input"
                 type="text"
+                aria-label="Automation name"
+                placeholder="Automation name"
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
                 onKeyDown={(e) => {
