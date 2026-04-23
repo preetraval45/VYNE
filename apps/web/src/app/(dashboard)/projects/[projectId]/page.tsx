@@ -80,7 +80,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const teamMembers = useTeamMembers();
   const updateProject = useProjectsStore((s) => s.updateProject);
 
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
   const [search, setSearch] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);

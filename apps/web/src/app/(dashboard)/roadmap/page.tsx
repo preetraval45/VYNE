@@ -156,7 +156,7 @@ function StatCard({
 // ── Main page ───────────────────────────────────────────────────
 export default function RoadmapPage() {
   const router = useRouter();
-  const [view, setView] = useState<ViewMode>("timeline");
+  const [view, setView] = useState<ViewMode>("kanban");
   const [moduleFilter, setModuleFilter] = useState<Module | "All">("All");
   const [statusFilter, setStatusFilter] = useState<RoadmapStatus | "all">(
     "all",

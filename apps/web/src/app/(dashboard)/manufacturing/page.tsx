@@ -1106,7 +1106,7 @@ function BOMTab() {
 function ManufacturingOrdersTab() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("kanban");
 
   const filtered = MOCK_MOS.filter((mo) => {
     const matchSearch =
