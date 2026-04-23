@@ -17,7 +17,7 @@ export function SkipToContent() {
         left: -9999,
         zIndex: 9999,
         padding: "12px 24px",
-        background: "#6C47FF",
+        background: "#06B6D4",
         color: "#FFFFFF",
         fontSize: 14,
         fontWeight: 600,

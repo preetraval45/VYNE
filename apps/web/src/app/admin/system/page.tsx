@@ -286,7 +286,7 @@ function ServiceCard({
       onMouseLeave={() => setHovered(false)}
       style={{
         background: "#13131F",
-        border: `1px solid ${hovered ? "rgba(108,71,255,0.2)" : "rgba(255,255,255,0.08)"}`,
+        border: `1px solid ${hovered ? "rgba(6, 182, 212,0.2)" : "rgba(255,255,255,0.08)"}`,
         borderRadius: 14,
         overflow: "hidden",
         transition: "all 0.2s",
@@ -906,8 +906,8 @@ export default function SystemHealthPage() {
                         borderRadius: 20,
                         fontSize: 10,
                         fontWeight: 600,
-                        background: "rgba(108,71,255,0.12)",
-                        color: "#A78BFA",
+                        background: "rgba(6, 182, 212,0.12)",
+                        color: "#67E8F9",
                       }}
                     >
                       x{log.count}

@@ -71,7 +71,7 @@ export default function FeatureRequestPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 8,
-                background: "rgba(108,71,255,0.12)",
+                background: "rgba(6, 182, 212,0.12)",
                 color: "var(--vyne-purple)",
                 display: "flex",
                 alignItems: "center",

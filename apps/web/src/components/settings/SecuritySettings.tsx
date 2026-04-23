@@ -234,7 +234,7 @@ export default function SecuritySettings({ onToast }: Props) {
                 onChange={(e) =>
                   setPolicy((p) => ({ ...p, [key]: e.target.checked }))
                 }
-                style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#6C47FF" }}
+                style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#06B6D4" }}
               />
             </label>
           ))}
@@ -505,7 +505,7 @@ export default function SecuritySettings({ onToast }: Props) {
                 border: `1.5px solid ${ssoProvider === p ? "var(--vyne-purple)" : "var(--content-border)"}`,
                 background:
                   ssoProvider === p
-                    ? "rgba(108,71,255,0.06)"
+                    ? "rgba(6, 182, 212,0.06)"
                     : "var(--content-bg)",
                 color: "var(--text-primary)",
                 fontSize: 13,
@@ -560,7 +560,7 @@ export default function SecuritySettings({ onToast }: Props) {
                     ? "1.5px solid var(--vyne-purple)"
                     : "1px solid var(--content-border)",
                   background: s.current
-                    ? "rgba(108,71,255,0.05)"
+                    ? "rgba(6, 182, 212,0.05)"
                     : "var(--content-secondary)",
                 }}
               >
@@ -873,7 +873,7 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
                 onChange={(e) =>
                   setPolicy((p) => ({ ...p, [key]: e.target.checked }))
                 }
-                style={{ accentColor: "#6C47FF" }}
+                style={{ accentColor: "#06B6D4" }}
               />
               {label}
             </label>

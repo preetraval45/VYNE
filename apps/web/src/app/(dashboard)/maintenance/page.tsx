@@ -977,20 +977,20 @@ function AddButton({
     fontSize: 13,
     fontWeight: 600,
     color: "#fff",
-    background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-    boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+    background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+    boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
     transition: "all 0.15s",
     whiteSpace: "nowrap" as const,
     textDecoration: "none",
   };
   const onEnter = (e: React.MouseEvent<HTMLElement>) => {
     (e.currentTarget as HTMLElement).style.boxShadow =
-      "0 4px 14px rgba(108,71,255,0.45)";
+      "0 4px 14px rgba(6, 182, 212,0.45)";
     (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
   };
   const onLeave = (e: React.MouseEvent<HTMLElement>) => {
     (e.currentTarget as HTMLElement).style.boxShadow =
-      "0 2px 8px rgba(108,71,255,0.3)";
+      "0 2px 8px rgba(6, 182, 212,0.3)";
     (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
   };
 
@@ -1123,7 +1123,7 @@ function EquipmentTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={eq.category}
-                      bg="rgba(108,71,255,0.08)"
+                      bg="rgba(6, 182, 212,0.08)"
                       color="var(--vyne-purple)"
                     />
                   </td>
@@ -1454,8 +1454,8 @@ function WorkOrdersTab() {
           alignItems: "center",
           gap: 10,
           padding: "12px 16px",
-          background: "rgba(108,71,255,0.04)",
-          borderColor: "rgba(108,71,255,0.15)",
+          background: "rgba(6, 182, 212,0.04)",
+          borderColor: "rgba(6, 182, 212,0.15)",
         }}
       >
         <Calendar
@@ -1720,7 +1720,7 @@ function PartsTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={p.category}
-                      bg="rgba(108,71,255,0.08)"
+                      bg="rgba(6, 182, 212,0.08)"
                       color="var(--vyne-purple)"
                     />
                   </td>
@@ -1799,7 +1799,7 @@ export default function MaintenancePage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(108,71,255,0.08)" }}
+            style={{ background: "rgba(6, 182, 212,0.08)" }}
           >
             <Wrench size={18} style={{ color: "var(--vyne-purple)" }} />
           </div>
@@ -1832,7 +1832,7 @@ export default function MaintenancePage() {
             label="Total Equipment"
             value={totalEquipment}
             icon={<Settings2 size={20} />}
-            accent="#6C47FF"
+            accent="#06B6D4"
           />
           <KPICard
             label="Active Requests"

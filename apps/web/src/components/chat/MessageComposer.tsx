@@ -200,8 +200,8 @@ export function MessageComposer({
             gap: 6,
             marginBottom: 6,
             fontSize: 11,
-            color: "#6C47FF",
-            background: "rgba(108,71,255,0.08)",
+            color: "#06B6D4",
+            background: "rgba(6, 182, 212,0.08)",
             padding: "4px 10px",
             borderRadius: 6,
           }}
@@ -215,7 +215,7 @@ export function MessageComposer({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#6C47FF",
+              color: "#06B6D4",
               display: "flex",
               padding: 0,
             }}
@@ -292,7 +292,7 @@ export function MessageComposer({
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-                (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
@@ -376,13 +376,13 @@ export function MessageComposer({
                 borderRadius: 6,
                 border: "none",
                 background:
-                  files.length > 0 ? "rgba(108,71,255,0.1)" : "transparent",
+                  files.length > 0 ? "rgba(6, 182, 212,0.1)" : "transparent",
                 cursor: "pointer",
-                color: files.length > 0 ? "#6C47FF" : "#A0A0B8",
+                color: files.length > 0 ? "#06B6D4" : "#A0A0B8",
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
                 if (files.length === 0)
@@ -457,7 +457,7 @@ export function MessageComposer({
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
@@ -484,7 +484,7 @@ export function MessageComposer({
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
@@ -501,14 +501,14 @@ export function MessageComposer({
                   borderRadius: 6,
                   border: "none",
                   background: scheduleOpen
-                    ? "rgba(108,71,255,0.1)"
+                    ? "rgba(6, 182, 212,0.1)"
                     : "transparent",
                   cursor: "pointer",
-                  color: scheduleOpen ? "#6C47FF" : "#A0A0B8",
+                  color: scheduleOpen ? "#06B6D4" : "#A0A0B8",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
                   if (!scheduleOpen)
@@ -587,7 +587,7 @@ export function MessageComposer({
               borderRadius: 7,
               border: "none",
               cursor: canSend ? "pointer" : "default",
-              background: canSend ? "#6C47FF" : "#E8E8F0",
+              background: canSend ? "#06B6D4" : "#E8E8F0",
               color: canSend ? "#fff" : "#A0A0B8",
               display: "flex",
               alignItems: "center",

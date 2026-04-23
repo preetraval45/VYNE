@@ -183,7 +183,7 @@ function InvoiceCard({ args }: Readonly<{ args: string }>) {
         <button
           style={{
             fontSize: 11,
-            color: "#6C47FF",
+            color: "#06B6D4",
             background: "transparent",
             border: "none",
             cursor: "pointer",
@@ -339,7 +339,7 @@ function PollCard({
                 style={{
                   height: "100%",
                   width: `${pct}%`,
-                  background: "#6C47FF",
+                  background: "#06B6D4",
                   borderRadius: 2,
                   transition: "width 0.3s",
                 }}
@@ -374,7 +374,7 @@ function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
         style={{
           width: 14,
           height: 14,
-          border: "2px solid #6C47FF",
+          border: "2px solid #06B6D4",
           borderTop: "2px solid transparent",
           borderRadius: "50%",
           animation: "cmd-spin 0.8s linear infinite",

@@ -44,8 +44,8 @@ function ViewToggleButton({
         border: "none",
         fontSize: 12,
         fontWeight: active ? 600 : 400,
-        background: active ? "rgba(108,71,255,0.1)" : "transparent",
-        color: active ? "#6C47FF" : "var(--text-secondary, #6B6B8A)",
+        background: active ? "rgba(6, 182, 212,0.1)" : "transparent",
+        color: active ? "#06B6D4" : "var(--text-secondary, #6B6B8A)",
         cursor: "pointer",
         transition: "all 0.15s ease",
       }}
@@ -76,7 +76,7 @@ function FilterPill({
         borderRadius: 20,
         fontSize: 11,
         fontWeight: active ? 600 : 400,
-        background: active ? "#6C47FF" : "var(--content-secondary, #F8F8FC)",
+        background: active ? "#06B6D4" : "var(--content-secondary, #F8F8FC)",
         color: active ? "#fff" : "var(--text-secondary, #6B6B8A)",
         border: "none",
         cursor: "pointer",
@@ -217,7 +217,7 @@ export default function RoadmapPage() {
       <div
         style={{
           background:
-            "linear-gradient(135deg, #6C47FF 0%, #8B5CF6 50%, #7C3AED 100%)",
+            "linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #7C3AED 100%)",
           padding: "20px 28px 18px",
           flexShrink: 0,
         }}
@@ -467,7 +467,7 @@ export default function RoadmapPage() {
         >
           <span>
             Showing{" "}
-            <strong style={{ color: "#6C47FF" }}>{filtered.length}</strong> of{" "}
+            <strong style={{ color: "#06B6D4" }}>{filtered.length}</strong> of{" "}
             {FEATURES.length} features
           </span>
           <button
@@ -481,7 +481,7 @@ export default function RoadmapPage() {
               border: "none",
               cursor: "pointer",
               fontSize: 11,
-              color: "#6C47FF",
+              color: "#06B6D4",
               fontWeight: 500,
               padding: 0,
               textDecoration: "underline",

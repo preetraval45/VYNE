@@ -245,7 +245,7 @@ export function CreateChannelModal({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: slug ? "#6C47FF" : "#E8E8F0",
+              background: slug ? "#06B6D4" : "#E8E8F0",
               color: slug ? "#fff" : "#A0A0B8",
               cursor: slug ? "pointer" : "default",
               fontSize: 13,

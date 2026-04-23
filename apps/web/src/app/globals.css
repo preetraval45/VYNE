@@ -30,7 +30,7 @@
   --sidebar-text: #A0A0B8;
   --sidebar-active: #FFFFFF;
   --sidebar-hover: #2A2A3E;
-  --sidebar-accent: #6C47FF;
+  --sidebar-accent: #06B6D4;
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 60px;
 
@@ -55,9 +55,9 @@
   --badge-info-text: #1D4ED8;
 
   /* ── Alert / Highlight Cards ─────────────────────────────────────── */
-  --alert-purple-bg: rgba(108,71,255,0.08);
-  --alert-purple-border: rgba(108,71,255,0.25);
-  --alert-purple-text: #3730A3;
+  --alert-purple-bg: rgba(6,182,212,0.08);
+  --alert-purple-border: rgba(6,182,212,0.28);
+  --alert-purple-text: #0E7490;
 
   /* ───────────────────────────────────────────────────────────────
    * Color system — Linear/Vercel-inspired, 2026 refresh.
@@ -84,11 +84,7 @@
   --gray-900: #18181B;
   --gray-950: #0B0B0E;
 
-  /* ── 1. Accent (brand) — indigo + teal duotone ───────────────── */
-  --vyne-purple: #5B5BD6;
-  --vyne-purple-light: #7470E0;
-  --vyne-purple-dark: #4341B8;
-  /* Teal scale — used for secondary accents, success states, data viz */
+  /* ── 1. Accent (brand) — unified teal palette ─────────────────── */
   --teal-50:   #ECFEFF;
   --teal-100:  #CFFAFE;
   --teal-200:  #A5F3FC;
@@ -102,9 +98,12 @@
   --vyne-teal:        var(--teal-500);
   --vyne-teal-soft:   rgba(6,182,212,0.12);
   --vyne-teal-ring:   rgba(6,182,212,0.25);
-  /* Alias kept for legacy call-sites */
-  --vyne-cyan: var(--teal-500);
-  --vyne-indigo: #5B5BD6;
+  /* Primary aliases — every call-site now resolves to teal */
+  --vyne-purple:       var(--teal-600);
+  --vyne-purple-light: var(--teal-400);
+  --vyne-purple-dark:  var(--teal-800);
+  --vyne-cyan:         var(--teal-500);
+  --vyne-indigo:       var(--teal-600);
 
   /* ── 2. Surface & Background ─────────────────────────────────── */
   --content-bg: var(--gray-0);
@@ -182,10 +181,10 @@
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
 
-  /* Aurora — retained for backwards compat, retuned to indigo family */
-  --aurora: linear-gradient(135deg, #5B5BD6 0%, #4341B8 100%);
-  --aurora-soft: linear-gradient(135deg, rgba(91,91,214,0.08) 0%, rgba(67,65,184,0.06) 100%);
-  --aurora-text: linear-gradient(135deg, #6366F1 0%, #4341B8 100%);
+  /* Aurora — unified teal family (light theme) */
+  --aurora: linear-gradient(135deg, #06B6D4 0%, #0E7490 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(6,182,212,0.10) 0%, rgba(14,116,144,0.06) 100%);
+  --aurora-text: linear-gradient(135deg, #0891B2 0%, #0E7490 100%);
 
   /* Glass surfaces */
   --glass-bg: rgba(255,255,255,0.72);
@@ -205,7 +204,7 @@
   --tracking-tightest: -0.035em;
 
   /* Dotted grid overlay for hero-style sections */
-  --grid-dot: radial-gradient(circle, rgba(124,92,255,0.08) 1px, transparent 1px);
+  --grid-dot: radial-gradient(circle, rgba(6,182,212,0.08) 1px, transparent 1px);
 }
 
 /* ─── 13. Dark Theme Overrides ─────────────────────────────────────── */
@@ -254,9 +253,9 @@
   --badge-info-text: #93C5FD;
 
   /* Alert / Highlight Cards */
-  --alert-purple-bg: rgba(108,71,255,0.15);
-  --alert-purple-border: rgba(108,71,255,0.35);
-  --alert-purple-text: #A78BFA;
+  --alert-purple-bg: rgba(6,182,212,0.15);
+  --alert-purple-border: rgba(6,182,212,0.35);
+  --alert-purple-text: #67E8F9;
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
@@ -269,7 +268,7 @@
   --glass-bg: rgba(255,255,255,0.04);
   --glass-border: rgba(255,255,255,0.08);
   --glass-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 8px 30px rgba(0,0,0,0.4);
-  --aurora-soft: linear-gradient(135deg, rgba(124,92,255,0.18) 0%, rgba(99,102,241,0.12) 45%, rgba(6,182,212,0.10) 100%);
+  --aurora-soft: linear-gradient(135deg, rgba(34,211,238,0.16) 0%, rgba(6,182,212,0.12) 45%, rgba(14,116,144,0.10) 100%);
   --shadow-premium: 0 8px 30px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.35);
   --grid-dot: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
 }
@@ -381,6 +380,37 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* ─── Smooth theme transition — aci-nexus style ────────────────── */
+html,
+body,
+main,
+nav,
+aside,
+section,
+article,
+header,
+footer,
+.glass-panel,
+.surface-elevated,
+.surface-interactive,
+.surface-frosted,
+[class*="card"],
+.dk-card,
+.dark-card {
+  transition:
+    background-color 280ms cubic-bezier(0.25, 1, 0.5, 1),
+    border-color 280ms cubic-bezier(0.25, 1, 0.5, 1),
+    color 220ms cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 280ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  html, body, main, nav, aside, section, article, header, footer,
+  .glass-panel, .surface-elevated, .surface-interactive, .surface-frosted,
+  [class*="card"], .dk-card, .dark-card {
+    transition: none;
+  }
 }
 
 /* Premium type rhythm — matches Linear / Vercel / Attio heading tracking */
@@ -510,8 +540,8 @@ textarea:focus-visible {
 
 /* Landing waitlist input — autofill override + focus */
 .waitlist-input:focus {
-  border-color: rgba(124,92,255,0.5) !important;
-  box-shadow: 0 0 0 3px rgba(124,92,255,0.15) !important;
+  border-color: rgba(6,182,212,0.5) !important;
+  box-shadow: 0 0 0 3px rgba(6,182,212,0.15) !important;
 }
 .waitlist-input:-webkit-autofill,
 .waitlist-input:-webkit-autofill:hover,
@@ -564,13 +594,13 @@ textarea:focus-visible {
   padding: 10px 20px;
   font-weight: 600;
   letter-spacing: var(--tracking-tight);
-  box-shadow: 0 6px 20px rgba(124,92,255,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
+  box-shadow: 0 6px 20px rgba(6,182,212,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset;
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
   cursor: pointer;
 }
 .btn-aurora:hover {
   transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(124,92,255,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
+  box-shadow: 0 10px 30px rgba(6,182,212,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
   filter: brightness(1.05);
 }
 .btn-aurora:active { transform: translateY(0); }
@@ -618,7 +648,7 @@ textarea:focus-visible {
   border-radius: 50%;
   filter: blur(60px);
   opacity: 0.55;
-  background: radial-gradient(circle, rgba(124,92,255,0.45) 0%, rgba(6,182,212,0.18) 40%, transparent 70%);
+  background: radial-gradient(circle, rgba(6,182,212,0.45) 0%, rgba(34,211,238,0.18) 40%, transparent 70%);
 }
 
 /* Slowly-floating shimmer overlay */
@@ -710,19 +740,19 @@ body {
 
 :root {
   /* Layered elevation — premium soft shadows with subtle purple tint */
-  --elev-1: 0 1px 2px rgba(20, 14, 48, 0.04), 0 1px 3px rgba(108, 71, 255, 0.04);
-  --elev-2: 0 4px 6px -1px rgba(20, 14, 48, 0.06), 0 2px 4px -1px rgba(108, 71, 255, 0.05);
-  --elev-3: 0 10px 20px -3px rgba(20, 14, 48, 0.08), 0 4px 8px -2px rgba(108, 71, 255, 0.06);
-  --elev-4: 0 20px 40px -8px rgba(20, 14, 48, 0.12), 0 8px 16px -4px rgba(108, 71, 255, 0.08);
-  --elev-5: 0 30px 60px -12px rgba(20, 14, 48, 0.18), 0 12px 24px -8px rgba(108, 71, 255, 0.10);
+  --elev-1: 0 1px 2px rgba(6, 64, 78, 0.04), 0 1px 3px rgba(6, 182, 212, 0.04);
+  --elev-2: 0 4px 6px -1px rgba(6, 64, 78, 0.06), 0 2px 4px -1px rgba(6, 182, 212, 0.05);
+  --elev-3: 0 10px 20px -3px rgba(6, 64, 78, 0.08), 0 4px 8px -2px rgba(6, 182, 212, 0.06);
+  --elev-4: 0 20px 40px -8px rgba(6, 64, 78, 0.12), 0 8px 16px -4px rgba(6, 182, 212, 0.08);
+  --elev-5: 0 30px 60px -12px rgba(6, 64, 78, 0.18), 0 12px 24px -8px rgba(6, 182, 212, 0.10);
 
   /* Glow rings — for hover/focus states on premium surfaces */
-  --glow-purple:     0 0 0 1px rgba(108, 71, 255, 0.14), 0 0 24px rgba(108, 71, 255, 0.18);
-  --glow-purple-hi:  0 0 0 1px rgba(108, 71, 255, 0.28), 0 0 32px rgba(108, 71, 255, 0.26);
+  --glow-purple:     0 0 0 1px rgba(6, 182, 212, 0.14), 0 0 24px rgba(6, 182, 212, 0.18);
+  --glow-purple-hi:  0 0 0 1px rgba(6, 182, 212, 0.28), 0 0 32px rgba(6, 182, 212, 0.26);
   --glow-cyan:       0 0 0 1px rgba(6, 182, 212, 0.14), 0 0 24px rgba(6, 182, 212, 0.18);
 
   /* Focused surface — a clean elevation + gradient hairline */
-  --surface-hairline: linear-gradient(135deg, rgba(108,71,255,0.45), rgba(6,182,212,0.35));
+  --surface-hairline: linear-gradient(135deg, rgba(6,182,212,0.45), rgba(14,116,144,0.35));
 
   /* Inner highlight — gives cards a subtle 3D feel */
   --inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -739,8 +769,8 @@ body {
   --elev-4: 0 20px 40px -8px rgba(0, 0, 0, 0.55), 0 8px 16px -4px rgba(0, 0, 0, 0.4);
   --elev-5: 0 30px 60px -12px rgba(0, 0, 0, 0.65), 0 12px 24px -8px rgba(0, 0, 0, 0.5);
 
-  --glow-purple:    0 0 0 1px rgba(155, 128, 255, 0.22), 0 0 28px rgba(108, 71, 255, 0.28);
-  --glow-purple-hi: 0 0 0 1px rgba(155, 128, 255, 0.4), 0 0 40px rgba(108, 71, 255, 0.4);
+  --glow-purple:    0 0 0 1px rgba(103, 232, 249, 0.22), 0 0 28px rgba(6, 182, 212, 0.28);
+  --glow-purple-hi: 0 0 0 1px rgba(103, 232, 249, 0.4), 0 0 40px rgba(6, 182, 212, 0.4);
   --inner-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -813,13 +843,13 @@ body {
   z-index: 0;
 }
 .page-aura--purple {
-  background: radial-gradient(circle, rgba(108, 71, 255, 0.14), transparent 70%);
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.14), transparent 70%);
 }
 .page-aura--cyan {
   background: radial-gradient(circle, rgba(6, 182, 212, 0.10), transparent 70%);
 }
 [data-theme="dark"] .page-aura--purple {
-  background: radial-gradient(circle, rgba(124, 92, 255, 0.22), transparent 70%);
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.22), transparent 70%);
 }
 [data-theme="dark"] .page-aura--cyan {
   background: radial-gradient(circle, rgba(6, 182, 212, 0.18), transparent 70%);
@@ -859,7 +889,7 @@ body {
   letter-spacing: -0.005em;
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: linear-gradient(135deg, #7C5CFF 0%, #6366F1 55%, #5B43E8 100%);
+  background: linear-gradient(135deg, #22D3EE 0%, #06B6D4 55%, #0E7490 100%);
   box-shadow: var(--elev-2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   cursor: pointer;
   transition: transform 0.15s var(--ease-out-quart), box-shadow 0.2s var(--ease-out-quart), filter 0.2s;
@@ -888,7 +918,7 @@ body {
 /* ─── Ring focus — gentler than hard outline ──────────────────── */
 .ring-focus:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.22), 0 0 0 1px var(--vyne-purple);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.22), 0 0 0 1px var(--vyne-purple);
   border-radius: var(--border-radius-md);
 }
 

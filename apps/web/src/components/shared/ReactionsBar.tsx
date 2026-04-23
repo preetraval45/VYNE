@@ -150,7 +150,7 @@ export function ReactionsBar({
               borderRadius: 999,
               border: `1px solid ${mine ? "var(--vyne-purple)" : "var(--content-border)"}`,
               background: mine
-                ? "rgba(108,71,255,0.12)"
+                ? "rgba(6, 182, 212,0.12)"
                 : "var(--content-secondary)",
               fontSize: 12,
               fontWeight: 500,

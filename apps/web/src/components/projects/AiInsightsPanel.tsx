@@ -404,7 +404,7 @@ export function AiInsightsPanel({
                       width: 26,
                       height: 26,
                       borderRadius: 7,
-                      background: "rgba(108,71,255,0.1)",
+                      background: "rgba(6, 182, 212,0.1)",
                       color: "var(--vyne-purple)",
                       display: "inline-flex",
                       alignItems: "center",

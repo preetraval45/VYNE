@@ -146,7 +146,7 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: "8px 20px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+  background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
   color: "#fff",
   cursor: "pointer",
   fontSize: 12,
@@ -213,7 +213,7 @@ function TabBtn({
             fontSize: 10,
             padding: "1px 6px",
             borderRadius: 10,
-            background: active ? "rgba(108,71,255,0.12)" : "#F0F0F8",
+            background: active ? "rgba(6, 182, 212,0.12)" : "#F0F0F8",
             color: active ? "var(--vyne-purple)" : "var(--text-tertiary)",
             fontWeight: 600,
           }}
@@ -384,23 +384,23 @@ function NewButton({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+        background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 600,
-        boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+        boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 4px 14px rgba(108,71,255,0.45)";
+          "0 4px 14px rgba(6, 182, 212,0.45)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 8px rgba(108,71,255,0.3)";
+          "0 2px 8px rgba(6, 182, 212,0.3)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
       }}
     >
@@ -1248,7 +1248,7 @@ function AccountsTab() {
                               width: 30,
                               height: 30,
                               borderRadius: 8,
-                              background: "rgba(108,71,255,0.08)",
+                              background: "rgba(6, 182, 212,0.08)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -1523,7 +1523,7 @@ function ContactsTabContent() {
                             width: 30,
                             height: 30,
                             borderRadius: "50%",
-                            background: "rgba(108,71,255,0.10)",
+                            background: "rgba(6, 182, 212,0.10)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -1703,7 +1703,7 @@ function ImportTab() {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "rgba(108,71,255,0.08)",
+                background: "rgba(6, 182, 212,0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1764,13 +1764,13 @@ function ImportTab() {
                   fontSize: 10,
                   fontWeight: 500,
                   background: col.required
-                    ? "rgba(108,71,255,0.08)"
+                    ? "rgba(6, 182, 212,0.08)"
                     : "#F4F4F8",
                   color: col.required
                     ? "var(--vyne-purple)"
                     : "var(--text-tertiary)",
                   border: col.required
-                    ? "1px solid rgba(108,71,255,0.2)"
+                    ? "1px solid rgba(6, 182, 212,0.2)"
                     : "1px solid transparent",
                 }}
               >
@@ -1833,7 +1833,7 @@ function ImportTab() {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "rgba(108,71,255,0.08)",
+                background: "rgba(6, 182, 212,0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1894,13 +1894,13 @@ function ImportTab() {
                   fontSize: 10,
                   fontWeight: 500,
                   background: col.required
-                    ? "rgba(108,71,255,0.08)"
+                    ? "rgba(6, 182, 212,0.08)"
                     : "#F4F4F8",
                   color: col.required
                     ? "var(--vyne-purple)"
                     : "var(--text-tertiary)",
                   border: col.required
-                    ? "1px solid rgba(108,71,255,0.2)"
+                    ? "1px solid rgba(6, 182, 212,0.2)"
                     : "1px solid transparent",
                 }}
               >
@@ -1992,7 +1992,7 @@ function ImportTab() {
             textAlign: "center",
             cursor: "pointer",
             background: dragOver
-              ? "rgba(108,71,255,0.04)"
+              ? "rgba(6, 182, 212,0.04)"
               : "var(--content-secondary)",
             transition: "all 0.15s",
           }}
@@ -2004,7 +2004,7 @@ function ImportTab() {
             fill="none"
             style={{ margin: "0 auto 14px", display: "block" }}
           >
-            <rect width="40" height="40" rx="10" fill="rgba(108,71,255,0.08)" />
+            <rect width="40" height="40" rx="10" fill="rgba(6, 182, 212,0.08)" />
             <path
               d="M13 27v2a1 1 0 001 1h12a1 1 0 001-1v-2M20 12v12M16 16l4-4 4 4"
               stroke={dragOver ? "var(--vyne-purple)" : "var(--text-tertiary)"}
@@ -2349,7 +2349,7 @@ function AccountDetailPanel({
                       aria-hidden="true"
                       style={{
                         width: 24, height: 24, borderRadius: "50%",
-                        background: "rgba(108,71,255,0.12)",
+                        background: "rgba(6, 182, 212,0.12)",
                         color: "var(--vyne-purple)",
                         display: "inline-flex", alignItems: "center", justifyContent: "center",
                         fontSize: 10, fontWeight: 700, flexShrink: 0,
@@ -2430,7 +2430,7 @@ function ContactDetailPanel({
                   aria-hidden="true"
                   style={{
                     width: 28, height: 28, borderRadius: 8,
-                    background: "rgba(108,71,255,0.08)",
+                    background: "rgba(6, 182, 212,0.08)",
                     color: "var(--vyne-purple)",
                     display: "inline-flex", alignItems: "center", justifyContent: "center",
                     fontSize: 10, fontWeight: 700, flexShrink: 0,

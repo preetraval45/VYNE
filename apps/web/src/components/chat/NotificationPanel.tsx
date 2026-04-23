@@ -240,8 +240,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             <span
               style={{
                 fontSize: 10,
-                color: "#6C47FF",
-                background: "rgba(108,71,255,0.1)",
+                color: "#06B6D4",
+                background: "rgba(6, 182, 212,0.1)",
                 padding: "2px 6px",
                 borderRadius: 4,
                 fontWeight: 600,
@@ -283,9 +283,9 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                 cursor: "pointer",
                 background:
                   filter === f
-                    ? "rgba(108,71,255,0.1)"
+                    ? "rgba(6, 182, 212,0.1)"
                     : "transparent",
-                color: filter === f ? "#6C47FF" : "var(--text-tertiary, #A0A0B8)",
+                color: filter === f ? "#06B6D4" : "var(--text-tertiary, #A0A0B8)",
                 textTransform: "capitalize",
               }}
             >
@@ -307,7 +307,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               fontSize: 10,
               fontWeight: 600,
               cursor: reranking ? "default" : "pointer",
-              background: rerankProvider ? "rgba(108,71,255,0.1)" : "transparent",
+              background: rerankProvider ? "rgba(6, 182, 212,0.1)" : "transparent",
               color: "var(--vyne-purple)",
               opacity: reranking ? 0.6 : 1,
             }}
@@ -452,8 +452,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                         marginTop: 5,
                         padding: "3px 8px",
                         borderRadius: 5,
-                        background: "rgba(108,71,255,0.08)",
-                        border: "1px solid rgba(108,71,255,0.18)",
+                        background: "rgba(6, 182, 212,0.08)",
+                        border: "1px solid rgba(6, 182, 212,0.18)",
                         fontSize: 10,
                         color: "var(--vyne-purple)",
                         display: "inline-flex",
@@ -485,7 +485,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                       <span
                         style={{
                           fontSize: 10,
-                          color: "#6C47FF",
+                          color: "#06B6D4",
                           fontWeight: 500,
                         }}
                       >

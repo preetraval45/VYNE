@@ -155,7 +155,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
   const [saved, setSaved] = useState(false);
 
   // ─── Branding state ───────────────────────────────────────────
-  const [accentColor, setAccentColor] = useState("#6C47FF");
+  const [accentColor, setAccentColor] = useState("#06B6D4");
   const [customDomain, setCustomDomain] = useState("");
   const [brandingSaved, setBrandingSaved] = useState(false);
   const [brandingSaving, setBrandingSaving] = useState(false);
@@ -472,7 +472,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
             <input
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              placeholder="#6C47FF"
+              placeholder="#06B6D4"
               style={{ ...inputStyle, maxWidth: 120 }}
               aria-label="Accent color hex"
             />
@@ -508,7 +508,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               padding: "8px 18px",
               borderRadius: 8,
               border: "none",
-              background: brandingSaved ? "#16A34A" : "#6C47FF",
+              background: brandingSaved ? "#16A34A" : "#06B6D4",
               color: "#fff",
               cursor: brandingSaving ? "default" : "pointer",
               fontSize: 13,
@@ -554,8 +554,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
                     justifyContent: "space-between",
                     padding: "8px 12px",
                     borderRadius: 8,
-                    background: enabledModules.has(mod.id) ? "rgba(108,71,255,0.07)" : "var(--content-secondary)",
-                    border: `1px solid ${enabledModules.has(mod.id) ? "rgba(108,71,255,0.25)" : "var(--content-border)"}`,
+                    background: enabledModules.has(mod.id) ? "rgba(6, 182, 212,0.07)" : "var(--content-secondary)",
+                    border: `1px solid ${enabledModules.has(mod.id) ? "rgba(6, 182, 212,0.25)" : "var(--content-border)"}`,
                   }}
                 >
                   <span style={{ fontSize: 13, color: "var(--text-primary)" }}>{mod.label}</span>
@@ -589,7 +589,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               padding: "8px 18px",
               borderRadius: 8,
               border: "none",
-              background: modulesSaved ? "#16A34A" : "#6C47FF",
+              background: modulesSaved ? "#16A34A" : "#06B6D4",
               color: "#fff",
               cursor: modulesSaving ? "default" : "pointer",
               fontSize: 13,

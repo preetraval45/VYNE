@@ -693,7 +693,7 @@ function ProjectCardLocal({
           </div>
           <div className="min-w-0">
             <h3
-              className="font-semibold truncate leading-tight group-hover:text-[#6C47FF] transition-colors"
+              className="font-semibold truncate leading-tight group-hover:text-[#06B6D4] transition-colors"
               style={{ color: "var(--text-primary)", fontSize: "15px" }}
               title="Double-click to rename"
               onClick={(e) => e.stopPropagation()}
@@ -731,8 +731,8 @@ function ProjectCardLocal({
             className="p-1.5 rounded-lg transition-colors"
             style={{ color: "var(--text-tertiary)" }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#F0EDFF";
-              (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+              (e.currentTarget as HTMLElement).style.background = "#CFFAFE";
+              (e.currentTarget as HTMLElement).style.color = "#06B6D4";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";

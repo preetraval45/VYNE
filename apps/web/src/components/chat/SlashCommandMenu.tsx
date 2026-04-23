@@ -88,7 +88,7 @@ export function SlashCommandMenu({
             cursor: "pointer",
             textAlign: "left",
             background:
-              i === activeIdx ? "rgba(108,71,255,0.08)" : "transparent",
+              i === activeIdx ? "rgba(6, 182, 212,0.08)" : "transparent",
           }}
         >
           <span style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</span>
@@ -112,8 +112,8 @@ export function SlashCommandMenu({
                   marginLeft: "auto",
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#6C47FF",
-                  background: "rgba(108,71,255,0.1)",
+                  color: "#06B6D4",
+                  background: "rgba(6, 182, 212,0.1)",
                   padding: "1px 6px",
                   borderRadius: 4,
                 }}

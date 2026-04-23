@@ -416,7 +416,7 @@ function FilterBtn({
         border: active
           ? "1px solid var(--vyne-purple)"
           : "1px solid var(--content-border)",
-        background: active ? "rgba(108,71,255,0.08)" : "transparent",
+        background: active ? "rgba(6, 182, 212,0.08)" : "transparent",
         color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
         fontSize: 11,
         fontWeight: 500,
@@ -1848,7 +1848,7 @@ function InvoicesTab() {
       name: "VYNE Demo Org",
       email: "billing@vyne.dev",
       address: "Charlotte, NC · https://vyne.vercel.app",
-      accentColor: "#6C47FF",
+      accentColor: "#06B6D4",
     });
   }
 
@@ -1897,7 +1897,7 @@ function InvoicesTab() {
           label="Total Invoiced"
           value={fmt(totalInvoiced)}
           icon={<FileText size={16} style={{ color: "var(--vyne-purple)" }} />}
-          iconBg="rgba(108,71,255,0.08)"
+          iconBg="rgba(6, 182, 212,0.08)"
           delta={`${counts.Paid + counts.Sent + counts.Draft + (counts.Overdue ?? 0)} invoices total`}
           deltaUp
         />
@@ -2596,7 +2596,7 @@ function PaymentsTab() {
                       borderRadius: 6,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: "rgba(108,71,255,0.06)",
+                      background: "rgba(6, 182, 212,0.06)",
                       color: "var(--vyne-purple)",
                     }}
                   >
@@ -2914,7 +2914,7 @@ function BillsTab() {
           label="Total Billed"
           value={fmt(totalBilled)}
           icon={<FileText size={16} style={{ color: "var(--vyne-purple)" }} />}
-          iconBg="rgba(108,71,255,0.08)"
+          iconBg="rgba(6, 182, 212,0.08)"
         />
         <KpiCard
           label="Paid"

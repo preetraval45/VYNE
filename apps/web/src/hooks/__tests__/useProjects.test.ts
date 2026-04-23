@@ -43,7 +43,7 @@ const mockProjects: Project[] = [
     name: "VYNE Platform",
     identifier: "VYNE",
     description: "The main platform",
-    color: "#6C47FF",
+    color: "#06B6D4",
     memberIds: ["user-1"],
     issueCounts: {
       backlog: 5,
@@ -247,7 +247,7 @@ describe("useProjects", () => {
         result.current.mutateAsync({
           name: "VYNE Platform",
           identifier: "VYNE",
-          color: "#6C47FF",
+          color: "#06B6D4",
         }),
       ).rejects.toThrow("Identifier already taken");
 

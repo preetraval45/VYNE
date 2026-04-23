@@ -495,7 +495,7 @@ function DropSlot({
         border: dragging
           ? `2px dashed ${over ? "var(--vyne-purple)" : "var(--content-border)"}`
           : "2px dashed transparent",
-        background: over ? "rgba(108,71,255,0.08)" : "transparent",
+        background: over ? "rgba(6, 182, 212,0.08)" : "transparent",
         transition: "background 0.1s, border-color 0.1s",
         pointerEvents: dragging ? "auto" : "none",
       }}
@@ -724,7 +724,7 @@ function RevenueChart() {
               height: `${(v / max) * 100}%`,
               minHeight: 12,
               background:
-                "linear-gradient(180deg, #6C47FF, rgba(108,71,255,0.4))",
+                "linear-gradient(180deg, #06B6D4, rgba(6, 182, 212,0.4))",
               borderRadius: "4px 4px 0 0",
             }}
           />
@@ -917,7 +917,7 @@ function AiSummary() {
 
 function TeamPresence() {
   const team = [
-    { name: "Preet", status: "online", color: "#6C47FF" },
+    { name: "Preet", status: "online", color: "#06B6D4" },
     { name: "Sarah", status: "online", color: "#22C55E" },
     { name: "Tony", status: "away", color: "#F59E0B" },
     { name: "Maya", status: "online", color: "#EC4899" },

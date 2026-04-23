@@ -357,7 +357,7 @@ function RequestRateChart({
             style={{
               flex: 1,
               height: animated ? `${Math.round((val / max) * 100)}%` : "0%",
-              background: "linear-gradient(to top, #6C47FF, #9B7DFF)",
+              background: "linear-gradient(to top, #06B6D4, #9B7DFF)",
               borderRadius: "2px 2px 0 0",
               minHeight: 2,
               transition: `height 0.6s ease ${(idx * 25).toString()}ms`,
@@ -663,7 +663,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
                     style={{
                       width: 2,
                       flex: 1,
-                      background: "rgba(108,71,255,0.15)",
+                      background: "rgba(6, 182, 212,0.15)",
                       minHeight: 14,
                       marginTop: 2,
                     }}
@@ -1098,7 +1098,7 @@ function LogsTab() {
             type="checkbox"
             checked={autoRefresh}
             onChange={(e) => setAutoRefresh(e.target.checked)}
-            style={{ accentColor: "#6C47FF", cursor: "pointer" }}
+            style={{ accentColor: "#06B6D4", cursor: "pointer" }}
           />
           <span>Auto-refresh</span>
         </label>
@@ -1659,7 +1659,7 @@ export default function ObservePage() {
               width: 28,
               height: 28,
               borderRadius: 8,
-              background: "linear-gradient(135deg,#6C47FF,#9B7DFF)",
+              background: "linear-gradient(135deg,#06B6D4,#9B7DFF)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1961,7 +1961,7 @@ export default function ObservePage() {
                   cursor: "pointer",
                   borderBottom:
                     activeTab === tab.id
-                      ? "2px solid #6C47FF"
+                      ? "2px solid #06B6D4"
                       : "2px solid transparent",
                   color:
                     activeTab === tab.id

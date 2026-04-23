@@ -373,9 +373,9 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                       lineHeight: "1.6",
                     }}
                     onFocus={(e) => {
-                      e.target.style.border = "1px solid #6C47FF";
+                      e.target.style.border = "1px solid #06B6D4";
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(108,71,255,0.08)";
+                        "0 0 0 3px rgba(6, 182, 212,0.08)";
                     }}
                     onBlur={(e) => {
                       handleDescriptionBlur();
@@ -482,7 +482,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                             style={{
                               background: comment.author
                                 ? stringToColor(comment.author.name)
-                                : "#6C47FF",
+                                : "#06B6D4",
                             }}
                           >
                             {comment.author

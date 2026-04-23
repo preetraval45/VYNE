@@ -227,7 +227,7 @@ export default function EditContactPage() {
                     fontWeight: 500,
                     cursor: "pointer",
                     border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                    background: active ? "rgba(108,71,255,0.08)" : "transparent",
+                    background: active ? "rgba(6, 182, 212,0.08)" : "transparent",
                     color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
                     transition: "all 0.15s",
                   }}

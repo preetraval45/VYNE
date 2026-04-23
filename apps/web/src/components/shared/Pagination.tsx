@@ -79,13 +79,13 @@ function PaginationStyles() {
 }
 
 .vyne-pagination__btn:focus-visible {
-  outline: 2px solid var(--accent-primary, #6C47FF);
+  outline: 2px solid var(--accent-primary, #06B6D4);
   outline-offset: 1px;
 }
 
 .vyne-pagination__btn--active {
-  background: var(--accent-primary, #6C47FF);
-  border-color: var(--accent-primary, #6C47FF);
+  background: var(--accent-primary, #06B6D4);
+  border-color: var(--accent-primary, #06B6D4);
   color: #FFFFFF;
   cursor: default;
 }
@@ -125,7 +125,7 @@ function PaginationStyles() {
 }
 
 .vyne-pagination__size-select:focus-visible {
-  outline: 2px solid var(--accent-primary, #6C47FF);
+  outline: 2px solid var(--accent-primary, #06B6D4);
   outline-offset: 1px;
 }
 

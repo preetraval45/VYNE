@@ -305,7 +305,7 @@ export const PRIORITY_META: Record<
 };
 
 export const PROJECT_COLORS = [
-  "#6C47FF",
+  "#06B6D4",
   "#3B82F6",
   "#22C55E",
   "#F59E0B",

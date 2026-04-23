@@ -641,7 +641,7 @@ const TOP_CUSTOMERS = [
 ];
 
 const SALES_BY_CATEGORY = [
-  { category: "SaaS Licenses", revenue: 82000, color: "#6C47FF" },
+  { category: "SaaS Licenses", revenue: 82000, color: "#06B6D4" },
   { category: "Professional Services", revenue: 45000, color: "#3498DB" },
   { category: "Hardware", revenue: 32000, color: "#2ECC71" },
   { category: "Support Plans", revenue: 18000, color: "#F39C12" },
@@ -649,11 +649,11 @@ const SALES_BY_CATEGORY = [
 ];
 
 const PIPELINE_FUNNEL = [
-  { label: "Leads", value: 1240, color: "rgba(108,71,255,0.6)" },
-  { label: "Qualified", value: 680, color: "rgba(108,71,255,0.7)" },
-  { label: "Proposal", value: 320, color: "rgba(108,71,255,0.8)" },
-  { label: "Negotiation", value: 145, color: "rgba(108,71,255,0.9)" },
-  { label: "Won", value: 78, color: "#6C47FF" },
+  { label: "Leads", value: 1240, color: "rgba(6, 182, 212,0.6)" },
+  { label: "Qualified", value: 680, color: "rgba(6, 182, 212,0.7)" },
+  { label: "Proposal", value: 320, color: "rgba(6, 182, 212,0.8)" },
+  { label: "Negotiation", value: 145, color: "rgba(6, 182, 212,0.9)" },
+  { label: "Won", value: 78, color: "#06B6D4" },
 ];
 
 // Financial data
@@ -709,7 +709,7 @@ const AR_AGING = [
 
 // Operations data
 const INVENTORY_CATEGORIES = [
-  { category: "Raw Materials", value: 245000, turnover: 6.2, color: "#6C47FF" },
+  { category: "Raw Materials", value: 245000, turnover: 6.2, color: "#06B6D4" },
   {
     category: "Work in Progress",
     value: 128000,
@@ -774,7 +774,7 @@ const MFG_OUTPUT = [
 
 // HR data
 const DEPT_HEADCOUNT = [
-  { dept: "Engineering", count: 42, color: "#6C47FF" },
+  { dept: "Engineering", count: 42, color: "#06B6D4" },
   { dept: "Sales", count: 28, color: "#E74C3C" },
   { dept: "Product", count: 15, color: "#9B59B6" },
   { dept: "Operations", count: 18, color: "#F39C12" },
@@ -784,7 +784,7 @@ const DEPT_HEADCOUNT = [
 ];
 
 const LEAVE_UTIL = [
-  { type: "Annual Leave", used: 68, total: 100, color: "#6C47FF" },
+  { type: "Annual Leave", used: 68, total: 100, color: "#06B6D4" },
   { type: "Sick Leave", used: 22, total: 40, color: "#E74C3C" },
   { type: "Personal Days", used: 8, total: 15, color: "#F39C12" },
   { type: "Parental Leave", used: 3, total: 5, color: "#3498DB" },
@@ -799,11 +799,11 @@ const PAYROLL_SUMMARY = [
 ];
 
 const HIRING_PIPELINE = [
-  { stage: "Applications", count: 245, color: "rgba(108,71,255,0.5)" },
-  { stage: "Screening", count: 120, color: "rgba(108,71,255,0.6)" },
-  { stage: "Interview", count: 48, color: "rgba(108,71,255,0.75)" },
-  { stage: "Offer", count: 12, color: "rgba(108,71,255,0.9)" },
-  { stage: "Hired", count: 8, color: "#6C47FF" },
+  { stage: "Applications", count: 245, color: "rgba(6, 182, 212,0.5)" },
+  { stage: "Screening", count: 120, color: "rgba(6, 182, 212,0.6)" },
+  { stage: "Interview", count: 48, color: "rgba(6, 182, 212,0.75)" },
+  { stage: "Offer", count: 12, color: "rgba(6, 182, 212,0.9)" },
+  { stage: "Hired", count: 8, color: "#06B6D4" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1861,7 +1861,7 @@ function CustomReportsTab() {
               width: 36,
               height: 36,
               borderRadius: 8,
-              background: "rgba(108,71,255,0.08)",
+              background: "rgba(6, 182, 212,0.08)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1970,23 +1970,23 @@ function CustomReportsTab() {
               padding: "10px 24px",
               borderRadius: 8,
               border: "none",
-              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+              background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
               color: "#fff",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+              boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
               transition: "all 0.15s",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 4px 14px rgba(108,71,255,0.45)";
+                "0 4px 14px rgba(6, 182, 212,0.45)";
               (e.currentTarget as HTMLElement).style.transform =
                 "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 2px 8px rgba(108,71,255,0.3)";
+                "0 2px 8px rgba(6, 182, 212,0.3)";
               (e.currentTarget as HTMLElement).style.transform =
                 "translateY(0)";
             }}
@@ -2015,7 +2015,7 @@ function CustomReportsTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "2px dashed rgba(108,71,255,0.2)",
+          border: "2px dashed rgba(6, 182, 212,0.2)",
           borderRadius: 12,
           padding: "48px 24px",
           display: "flex",
@@ -2030,7 +2030,7 @@ function CustomReportsTab() {
             width: 64,
             height: 64,
             borderRadius: 16,
-            background: "rgba(108,71,255,0.08)",
+            background: "rgba(6, 182, 212,0.08)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2064,7 +2064,7 @@ function CustomReportsTab() {
         </span>
         <Badge
           label="Coming Soon"
-          bg="rgba(108,71,255,0.1)"
+          bg="rgba(6, 182, 212,0.1)"
           color="var(--vyne-purple)"
         />
 
@@ -2206,7 +2206,7 @@ export default function ReportingPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(108,71,255,0.08)" }}
+            style={{ background: "rgba(6, 182, 212,0.08)" }}
           >
             <BarChart3 size={18} style={{ color: "var(--vyne-purple)" }} />
           </div>

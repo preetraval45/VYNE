@@ -27,7 +27,7 @@ function fmtNetPay(emp: Employee): number {
 // ─── Department chip ──────────────────────────────────────────────
 function DeptChip({ dept }: Readonly<{ dept: Department }>) {
   const colors: Record<Department, { bg: string; color: string }> = {
-    Engineering: { bg: "rgba(108,71,255,0.12)", color: "#8B68FF" },
+    Engineering: { bg: "rgba(6, 182, 212,0.12)", color: "#8B68FF" },
     Product: { bg: "rgba(155,89,182,0.12)", color: "#A855F7" },
     Sales: { bg: "rgba(239,68,68,0.1)", color: "var(--status-danger)" },
     Finance: { bg: "rgba(59,130,246,0.1)", color: "var(--status-info)" },
@@ -301,7 +301,7 @@ function EmployeeModal({
                 label="Vacation"
                 remaining={emp.vacationBalance}
                 total={15}
-                color="#6C47FF"
+                color="#06B6D4"
               />
               <LeaveBalanceBar
                 label="Sick"
@@ -531,7 +531,7 @@ function EmployeesTab() {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                "0 4px 20px rgba(108,71,255,0.12)";
+                "0 4px 20px rgba(6, 182, 212,0.12)";
               (e.currentTarget as HTMLButtonElement).style.transform =
                 "translateY(-2px)";
             }}
@@ -708,7 +708,7 @@ function leaveRequestBackground(status: LeaveRequestStatus): string {
 }
 
 function leaveTypeBadgeBackground(type: string): string {
-  if (type === "Vacation") return "rgba(108,71,255,0.1)";
+  if (type === "Vacation") return "rgba(6, 182, 212,0.1)";
   if (type === "Sick") return "rgba(239,68,68,0.1)";
   return "rgba(245,158,11,0.1)";
 }

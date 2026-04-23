@@ -46,7 +46,7 @@ export default function EmbedWidgetPage({ params }: PageProps) {
             width: 22,
             height: 22,
             borderRadius: 5,
-            background: "linear-gradient(135deg,#6C47FF,#8B6BFF)",
+            background: "linear-gradient(135deg,#06B6D4,#22D3EE)",
             color: "#fff",
             fontWeight: 800,
             fontSize: 11,
@@ -80,7 +80,7 @@ export default function EmbedWidgetPage({ params }: PageProps) {
           href="https://vyne.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "#6C47FF", fontWeight: 600 }}
+          style={{ color: "#06B6D4", fontWeight: 600 }}
         >
           VYNE
         </a>
@@ -255,7 +255,7 @@ function AiChatWidget() {
         style={{
           fontSize: 10,
           fontWeight: 700,
-          color: "#6C47FF",
+          color: "#06B6D4",
           textTransform: "uppercase",
           letterSpacing: "0.07em",
           marginBottom: 8,

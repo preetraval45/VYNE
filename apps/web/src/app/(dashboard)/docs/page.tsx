@@ -55,7 +55,7 @@ function RecentDocsGrid({
   if (docs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
-        <div className="w-14 h-14 rounded-2xl bg-[#F0EDFF] flex items-center justify-center">
+        <div className="w-14 h-14 rounded-2xl bg-[#CFFAFE] flex items-center justify-center">
           <FileText size={24} style={{ color: "var(--vyne-purple)" }} />
         </div>
         <p className="text-[15px] font-semibold text-[#1A1A2E]">
@@ -74,10 +74,10 @@ function RecentDocsGrid({
         <button
           key={doc.id}
           onClick={() => onSelect(doc.id)}
-          className="group flex flex-col gap-2 p-4 rounded-xl border border-[#E8E8F0] bg-white hover:border-[#6C47FF] hover:shadow-vyne-sm transition-all text-left"
+          className="group flex flex-col gap-2 p-4 rounded-xl border border-[#E8E8F0] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
         >
           <span className="text-2xl leading-none">{doc.icon ?? "📄"}</span>
-          <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-2 group-hover:text-[#6C47FF] transition-colors">
+          <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-2 group-hover:text-[#06B6D4] transition-colors">
             {doc.title}
           </span>
           <span className="text-[11px] text-[#A0A0B8] mt-auto">
@@ -109,7 +109,7 @@ function SearchResults({
         </h2>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[12px] text-[#A0A0B8] hover:text-[#6C47FF] transition-colors"
+          className="flex items-center gap-1 text-[12px] text-[#A0A0B8] hover:text-[#06B6D4] transition-colors"
         >
           <X size={13} />
           Clear
@@ -130,7 +130,7 @@ function SearchResults({
               onSelect(doc.id);
               onClear();
             }}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E8F0] bg-white hover:border-[#6C47FF] hover:shadow-vyne-sm transition-all text-left"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E8F0] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
           >
             <span className="text-lg">{doc.icon ?? "📄"}</span>
             <div>
@@ -158,7 +158,7 @@ function ActiveDocPanel({ id }: { id: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="w-5 h-5 border-2 border-[#6C47FF] border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-[#06B6D4] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -242,7 +242,7 @@ export default function DocsPage() {
           <div className="relative flex items-center">
             <Search size={12} className="absolute left-2.5 text-[#A0A0B8]" />
             <input
-              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-white border border-[#E8E8F0] rounded-md outline-none focus:border-[#6C47FF] transition-colors"
+              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-white border border-[#E8E8F0] rounded-md outline-none focus:border-[#06B6D4] transition-colors"
               placeholder="Search docs…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -254,7 +254,7 @@ export default function DocsPage() {
         <div className="flex-1 overflow-y-auto px-1 py-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-4 h-4 border-2 border-[#6C47FF] border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[#06B6D4] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : (
             <DocTree

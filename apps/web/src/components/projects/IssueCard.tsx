@@ -55,9 +55,9 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
             isSortableDragging && "opacity-40",
           )}
           style={{
-            background: isSortableDragging ? "#F0EDFF" : "#FFFFFF",
+            background: isSortableDragging ? "#CFFAFE" : "#FFFFFF",
             border: isSortableDragging
-              ? "1px solid #6C47FF"
+              ? "1px solid #06B6D4"
               : "1px solid #E8E8F0",
             boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
           }}
@@ -86,7 +86,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
                 </span>
               </div>
               <p
-                className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-[#6C47FF] transition-colors"
+                className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-[#06B6D4] transition-colors"
                 style={{ color: "var(--text-primary)" }}
               >
                 {issue.title}

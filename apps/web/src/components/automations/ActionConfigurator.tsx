@@ -280,12 +280,12 @@ export default function ActionConfigurator(
           onClick={onAdd}
           style={{
             marginLeft: "auto",
-            background: "rgba(108,71,255,0.08)",
-            border: "1px solid rgba(108,71,255,0.2)",
+            background: "rgba(6, 182, 212,0.08)",
+            border: "1px solid rgba(6, 182, 212,0.2)",
             borderRadius: 6,
             padding: "3px 8px",
             fontSize: 11,
-            color: "#6C47FF",
+            color: "#06B6D4",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",

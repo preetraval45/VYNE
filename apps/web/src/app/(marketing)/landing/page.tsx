@@ -10,26 +10,26 @@ import {
 } from 'lucide-react'
 import { VyneLogo } from '@/components/brand/VyneLogo'
 
-// ── Refined palette — dark-first marketing surface ─────────────────
+// ── Unified teal palette — dark-first marketing surface ───────────
 const C = {
-  bg:          '#07061A',
-  bgDeep:      '#03020C',
-  bgMid:       '#0A081F',
+  bg:          '#05161A',
+  bgDeep:      '#020A0C',
+  bgMid:       '#07191E',
   surface:     'rgba(255,255,255,0.03)',
   surfaceHi:   'rgba(255,255,255,0.055)',
   border:      'rgba(255,255,255,0.06)',
   borderHi:    'rgba(255,255,255,0.12)',
-  text:        '#F1F0FA',
-  textSub:     '#9E9AB8',
-  textMuted:   '#5C5872',
-  purple:      '#7C5CFF',
-  indigo:      '#6366F1',
-  cyan:        '#06B6D4',
+  text:        '#EAFBFD',
+  textSub:     '#8FB2BA',
+  textMuted:   '#5A7880',
+  purple:      '#06B6D4',
+  indigo:      '#0891B2',
+  cyan:        '#22D3EE',
   success:     '#22C55E',
   danger:      '#EF4444',
-  aurora:      'linear-gradient(135deg, #7C5CFF 0%, #6366F1 45%, #06B6D4 100%)',
-  auroraSoft:  'linear-gradient(135deg, rgba(124,92,255,0.14), rgba(6,182,212,0.08))',
-  auroraText:  'linear-gradient(135deg, #A78BFA 0%, #818CF8 50%, #22D3EE 100%)',
+  aurora:      'linear-gradient(135deg, #22D3EE 0%, #06B6D4 45%, #0E7490 100%)',
+  auroraSoft:  'linear-gradient(135deg, rgba(34,211,238,0.14), rgba(6,182,212,0.08))',
+  auroraText:  'linear-gradient(135deg, #67E8F9 0%, #22D3EE 50%, #06B6D4 100%)',
 } as const
 
 /* ─── Waitlist Form ──────────────────────────────────────────── */
@@ -257,7 +257,7 @@ function Hero() {
         className="aurora-halo"
         style={{
           width: 360, height: 360, top: '10%', right: '10%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(14,116,144,0.35) 0%, transparent 70%)',
           opacity: 0.35,
         }}
       />
@@ -287,12 +287,12 @@ function Hero() {
             marginBottom: 28,
           }}
         >
-          <Sparkles size={13} style={{ color: '#A78BFA' }} />
+          <Sparkles size={13} style={{ color: '#67E8F9' }} />
           AI-native company OS
           <span style={{
             padding: '2px 9px', borderRadius: 999,
-            background: 'rgba(124,92,255,0.15)',
-            color: '#C4B5FD', fontSize: 11, fontWeight: 600,
+            background: 'rgba(6,182,212,0.18)',
+            color: '#A5F3FC', fontSize: 11, fontWeight: 600,
             letterSpacing: '0.02em',
           }}>
             v1 · beta
@@ -393,8 +393,8 @@ function Hero() {
 
 /* ─── Features Grid ──────────────────────────────────────────── */
 const features = [
-  { icon: MessageSquare, title: 'Team Messaging',      desc: 'Channels, DMs, threads, and file sharing with AI-powered thread summaries.', replaces: 'Slack',      color: '#7C5CFF' },
-  { icon: FolderKanban,  title: 'Project Management',  desc: 'Kanban boards, sprints, issue tracking, and roadmaps for engineering teams.', replaces: 'Jira',       color: '#6366F1' },
+  { icon: MessageSquare, title: 'Team Messaging',      desc: 'Channels, DMs, threads, and file sharing with AI-powered thread summaries.', replaces: 'Slack',      color: '#06B6D4' },
+  { icon: FolderKanban,  title: 'Project Management',  desc: 'Kanban boards, sprints, issue tracking, and roadmaps for engineering teams.', replaces: 'Jira',       color: '#0891B2' },
   { icon: FileText,      title: 'Documents & Wiki',    desc: 'Rich text editor, nested pages, databases, and search across everything.',    replaces: 'Notion',     color: '#06B6D4' },
   { icon: Package,       title: 'ERP & Inventory',     desc: 'Purchase orders, vendors, stock levels, and fulfillment — real-time alerts.', replaces: 'NetSuite',   color: '#F59E0B' },
   { icon: BarChart3,     title: 'Finance & Invoicing', desc: 'General ledger, invoicing, expenses, and financial reports in one place.',    replaces: 'QuickBooks', color: '#22C55E' },
@@ -573,7 +573,7 @@ function AIDifferentiator() {
                 background: C.surface,
               }}
             >
-              <item.icon size={18} style={{ color: '#A78BFA', marginBottom: 12 }} strokeWidth={2} />
+              <item.icon size={18} style={{ color: '#67E8F9', marginBottom: 12 }} strokeWidth={2} />
               <h4 style={{ fontSize: 14.5, fontWeight: 600, color: C.text, marginBottom: 5, letterSpacing: '-0.01em' }}>
                 {item.label}
               </h4>
@@ -629,11 +629,11 @@ function Comparison() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
             <thead>
               <tr style={{
-                background: 'rgba(124,92,255,0.08)',
+                background: 'rgba(6,182,212,0.08)',
                 borderBottom: `1px solid ${C.border}`,
               }}>
                 <th style={thCell('left')}>Feature</th>
-                <th style={{ ...thCell('center'), color: '#C4B5FD', fontWeight: 700, fontSize: 14 }}>
+                <th style={{ ...thCell('center'), color: '#A5F3FC', fontWeight: 700, fontSize: 14 }}>
                   <span className="aurora-text" style={{ fontWeight: 700 }}>VYNE</span>
                 </th>
                 <th style={thCell('center')}>Slack</th>
@@ -728,7 +728,7 @@ function Pricing() {
                 borderRadius: 18, position: 'relative',
                 border: plan.highlight ? 'none' : `1px solid ${tealAccent ? 'rgba(6,182,212,0.25)' : C.border}`,
                 background: plan.highlight
-                  ? `linear-gradient(180deg, rgba(124,92,255,0.08) 0%, rgba(124,92,255,0.02) 100%), ${C.bg}`
+                  ? `linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(6,182,212,0.02) 100%), ${C.bg}`
                   : tealAccent
                   ? `linear-gradient(180deg, rgba(6,182,212,0.06) 0%, rgba(6,182,212,0.01) 100%), ${C.surface}`
                   : C.surface,
@@ -741,7 +741,7 @@ function Pricing() {
                   background: 'var(--aurora)',
                   color: '#fff', fontSize: 11, fontWeight: 700,
                   letterSpacing: '0.08em',
-                  boxShadow: '0 8px 20px rgba(124,92,255,0.4)',
+                  boxShadow: '0 8px 20px rgba(6,182,212,0.4)',
                   display: 'flex', alignItems: 'center', gap: 6,
                 }}>
                   <Sparkles size={11} />
@@ -961,7 +961,7 @@ function CTAFooter() {
       id="waitlist"
       style={{
         padding: '120px 24px',
-        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(124,92,255,0.22), transparent 70%), ${C.bg}`,
+        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(6,182,212,0.22), transparent 70%), ${C.bg}`,
         textAlign: 'center', position: 'relative', overflow: 'hidden',
       }}
     >

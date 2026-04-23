@@ -292,7 +292,7 @@ export default function GrowthSettings({ onToast }: Props) {
             type="checkbox"
             checked={state.hideVyneBranding}
             onChange={(e) => update("hideVyneBranding", e.target.checked)}
-            style={{ accentColor: "#6C47FF" }}
+            style={{ accentColor: "#06B6D4" }}
           />
           Hide &ldquo;Powered by VYNE&rdquo; on customer-facing pages
         </label>
@@ -623,7 +623,7 @@ export default function GrowthSettings({ onToast }: Props) {
             type="checkbox"
             checked={state.npsEnabled}
             onChange={(e) => update("npsEnabled", e.target.checked)}
-            style={{ accentColor: "#6C47FF" }}
+            style={{ accentColor: "#06B6D4" }}
           />
           Enable NPS prompts
         </label>
@@ -636,7 +636,7 @@ export default function GrowthSettings({ onToast }: Props) {
             value={state.npsCadenceDays}
             onChange={(e) => update("npsCadenceDays", Number(e.target.value))}
             aria-label="Survey cadence"
-            style={{ width: "100%", accentColor: "#6C47FF" }}
+            style={{ width: "100%", accentColor: "#06B6D4" }}
           />
         </Field>
       </Card>
@@ -775,7 +775,7 @@ export default function GrowthSettings({ onToast }: Props) {
                     value={f.rollout}
                     onChange={(e) => setRollout(idx, Number(e.target.value))}
                     aria-label={`Rollout for ${f.name}`}
-                    style={{ width: 110, accentColor: "#6C47FF" }}
+                    style={{ width: 110, accentColor: "#06B6D4" }}
                   />
                   <span
                     style={{

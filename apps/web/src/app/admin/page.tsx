@@ -93,7 +93,7 @@ function planColor(plan: Plan): { bg: string; color: string } {
     return { bg: "rgba(59,130,246,0.12)", color: "#60A5FA" };
   if (plan === "Growth")
     return { bg: "rgba(34,197,94,0.12)", color: "#4ADE80" };
-  return { bg: "rgba(108,71,255,0.12)", color: "#A78BFA" };
+  return { bg: "rgba(6, 182, 212,0.12)", color: "#67E8F9" };
 }
 
 // ─── KPI Card ─────────────────────────────────────────────────────
@@ -210,7 +210,7 @@ function RevenueChart({ data }: Readonly<{ data: typeof REVENUE_DATA }>) {
           style={{
             fontSize: 22,
             fontWeight: 700,
-            color: "#6C47FF",
+            color: "#06B6D4",
             letterSpacing: "-0.03em",
           }}
         >
@@ -231,9 +231,9 @@ function RevenueChart({ data }: Readonly<{ data: typeof REVENUE_DATA }>) {
           const isHovered = hoveredIdx === i;
           const isLast = i === data.length - 1;
 
-          let barBg = "rgba(108,71,255,0.25)";
-          if (isLast) barBg = "linear-gradient(180deg, #8B68FF, #6C47FF)";
-          else if (isHovered) barBg = "rgba(108,71,255,0.5)";
+          let barBg = "rgba(6, 182, 212,0.25)";
+          if (isLast) barBg = "linear-gradient(180deg, #8B68FF, #06B6D4)";
+          else if (isHovered) barBg = "rgba(6, 182, 212,0.5)";
 
           return (
             <figure
@@ -281,7 +281,7 @@ function RevenueChart({ data }: Readonly<{ data: typeof REVENUE_DATA }>) {
               <span
                 style={{
                   fontSize: 10,
-                  color: isLast ? "#A78BFA" : "#6060A0",
+                  color: isLast ? "#67E8F9" : "#6060A0",
                   fontWeight: isLast ? 600 : 400,
                 }}
               >
@@ -326,8 +326,8 @@ function RecentSignups({
           onClick={() => router.push("/admin/tenants")}
           style={{
             border: "none",
-            background: "rgba(108,71,255,0.12)",
-            color: "#A78BFA",
+            background: "rgba(6, 182, 212,0.12)",
+            color: "#67E8F9",
             fontSize: 11,
             fontWeight: 600,
             padding: "4px 10px",
@@ -444,8 +444,8 @@ function SystemHealthSummary({
           onClick={() => router.push("/admin/system")}
           style={{
             border: "none",
-            background: "rgba(108,71,255,0.12)",
-            color: "#A78BFA",
+            background: "rgba(6, 182, 212,0.12)",
+            color: "#67E8F9",
             fontSize: 11,
             fontWeight: 600,
             padding: "4px 10px",
@@ -615,7 +615,7 @@ export default function AdminDashboardPage() {
           value="6"
           change="2 new this month"
           changePositive
-          accent="#6C47FF"
+          accent="#06B6D4"
         />
         <KPICard
           label="Total Users"

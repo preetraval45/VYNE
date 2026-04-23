@@ -64,7 +64,7 @@ function SortHeader({
         cursor: "pointer",
         fontSize: 11,
         fontWeight: 600,
-        color: isActive ? "#6C47FF" : "var(--text-secondary, #6B6B8A)",
+        color: isActive ? "#06B6D4" : "var(--text-secondary, #6B6B8A)",
         textTransform: "uppercase",
         letterSpacing: "0.05em",
         padding: 0,
@@ -304,7 +304,7 @@ export function ListView({ features }: ListViewProps) {
                       textAlign: "right",
                       fontWeight: 600,
                       fontSize: 13,
-                      color: "#6C47FF",
+                      color: "#06B6D4",
                     }}
                   >
                     {f.votes}

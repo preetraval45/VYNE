@@ -93,13 +93,13 @@ export default function AutomationsPage() {
               width: 22,
               height: 22,
               borderRadius: 6,
-              background: "rgba(108,71,255,0.12)",
+              background: "rgba(6, 182, 212,0.12)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Zap size={12} color="#6C47FF" />
+            <Zap size={12} color="#06B6D4" />
           </div>
           <span
             style={{

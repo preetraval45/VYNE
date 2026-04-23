@@ -209,7 +209,7 @@ export default function NewJournalEntryPage() {
                   border: `1.5px solid ${form.status === s ? "var(--vyne-purple)" : "var(--content-border)"}`,
                   background:
                     form.status === s
-                      ? "rgba(108,71,255,0.06)"
+                      ? "rgba(6, 182, 212,0.06)"
                       : "var(--content-bg)",
                   color:
                     form.status === s

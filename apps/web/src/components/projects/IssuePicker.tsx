@@ -291,7 +291,7 @@ export function AssigneePicker({ value, users, onChange, compact = false }: Assi
                   style={{ borderColor: '#D1D1E0' }}
                 />
                 <span>Unassigned</span>
-                {!value && <Check size={12} style={{ color: '#6C47FF', marginLeft: 'auto' }} />}
+                {!value && <Check size={12} style={{ color: '#06B6D4', marginLeft: 'auto' }} />}
               </button>
             </Popover.Close>
 
@@ -332,7 +332,7 @@ export function AssigneePicker({ value, users, onChange, compact = false }: Assi
                     >
                       {user.name}
                     </span>
-                    {isSelected && <Check size={12} style={{ color: '#6C47FF' }} />}
+                    {isSelected && <Check size={12} style={{ color: '#06B6D4' }} />}
                   </button>
                 </Popover.Close>
               )

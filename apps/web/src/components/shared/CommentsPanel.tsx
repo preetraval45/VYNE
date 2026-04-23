@@ -54,7 +54,7 @@ function relative(iso: string): string {
 
 function avatarColor(id: string): string {
   const colors = [
-    "#6C47FF",
+    "#06B6D4",
     "#22C55E",
     "#F59E0B",
     "#EF4444",
@@ -273,7 +273,7 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
               gap: 8,
               padding: "4px 8px",
               borderRadius: 6,
-              background: "rgba(108,71,255,0.08)",
+              background: "rgba(6, 182, 212,0.08)",
               fontSize: 11,
               color: "var(--text-secondary)",
             }}

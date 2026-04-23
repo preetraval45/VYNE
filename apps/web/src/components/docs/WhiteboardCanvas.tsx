@@ -29,7 +29,7 @@ type Stroke =
       y2: number;
     };
 
-const COLORS = ["#6C47FF", "#22C55E", "#F59E0B", "#EF4444", "#3B82F6", "#EC4899", "#1A1A2E"];
+const COLORS = ["#06B6D4", "#22C55E", "#F59E0B", "#EF4444", "#3B82F6", "#EC4899", "#1A1A2E"];
 
 interface Props {
   initialStrokes?: Stroke[];
@@ -43,7 +43,7 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const [strokes, setStrokes] = useState<Stroke[]>(initialStrokes ?? []);
   const [tool, setTool] = useState<Tool>("pen");
-  const [color, setColor] = useState("#6C47FF");
+  const [color, setColor] = useState("#06B6D4");
   const [size, setSize] = useState(3);
 
   const redraw = useCallback(() => {
@@ -210,7 +210,7 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
               borderRadius: 6,
               border: "none",
               cursor: "pointer",
-              background: tool === t ? "rgba(108,71,255,0.12)" : "transparent",
+              background: tool === t ? "rgba(6, 182, 212,0.12)" : "transparent",
               color: tool === t ? "var(--vyne-purple)" : "var(--text-secondary)",
             }}
           >
@@ -253,7 +253,7 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
           value={size}
           onChange={(e) => setSize(Number(e.target.value))}
           aria-label="Brush size"
-          style={{ width: 80, accentColor: "#6C47FF" }}
+          style={{ width: 80, accentColor: "#06B6D4" }}
         />
 
         <div style={{ flex: 1 }} />

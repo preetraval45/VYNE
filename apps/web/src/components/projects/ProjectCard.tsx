@@ -56,7 +56,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
           <div className="min-w-0">
             <h3
-              className="font-semibold truncate leading-tight group-hover:text-[#6C47FF] transition-colors"
+              className="font-semibold truncate leading-tight group-hover:text-[#06B6D4] transition-colors"
               style={{ color: "var(--text-primary)", fontSize: "15px" }}
             >
               {project.name}

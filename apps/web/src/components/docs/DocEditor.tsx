@@ -159,11 +159,11 @@ function VersionHistoryPanel({
                 gap: 2,
                 padding: "10px 16px",
                 borderBottom: "1px solid #F4F4F8",
-                background: preview?.id === v.id ? "rgba(108,71,255,0.04)" : "transparent",
+                background: preview?.id === v.id ? "rgba(6, 182, 212,0.04)" : "transparent",
                 border: "none",
                 cursor: "pointer",
                 textAlign: "left",
-                borderLeft: preview?.id === v.id ? "3px solid #6C47FF" : "3px solid transparent",
+                borderLeft: preview?.id === v.id ? "3px solid #06B6D4" : "3px solid transparent",
               }}
             >
               <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
@@ -218,7 +218,7 @@ function VersionHistoryPanel({
               padding: "8px 0",
               borderRadius: 8,
               border: "none",
-              background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+              background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -359,7 +359,7 @@ function SlashMenu({
           <span
             className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
             style={{
-              background: i === active ? "rgba(108,71,255,0.12)" : "#F4F4F8",
+              background: i === active ? "rgba(6, 182, 212,0.12)" : "#F4F4F8",
               color: i === active ? "var(--vyne-purple)" : "var(--text-secondary)",
             }}
           >
@@ -394,7 +394,7 @@ function TB({
       }}
       className="w-7 h-7 flex items-center justify-center rounded transition-colors"
       style={{
-        background: active ? "rgba(108,71,255,0.1)" : undefined,
+        background: active ? "rgba(6, 182, 212,0.1)" : undefined,
         color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
       }}
       onMouseEnter={(e) => {
@@ -514,7 +514,7 @@ export function DocEditor({ doc }: DocEditorProps) {
               provider,
               user: {
                 name: currentUser?.name ?? "Guest",
-                color: "#6C47FF",
+                color: "#06B6D4",
               },
             }),
           ]
@@ -937,7 +937,7 @@ export function DocEditor({ doc }: DocEditorProps) {
               padding: "12px 16px",
               borderRadius: 12,
               background: "var(--content-bg)",
-              border: "1px solid rgba(108,71,255,0.3)",
+              border: "1px solid rgba(6, 182, 212,0.3)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
               display: "flex",
               alignItems: "flex-start",
@@ -1335,7 +1335,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           color: var(--text-primary);
         }
         .tiptap-editor .ProseMirror table .selectedCell {
-          background: rgba(108,71,255,0.06);
+          background: rgba(6, 182, 212,0.06);
         }
         .tiptap-editor .ProseMirror .is-empty::before {
           content: attr(data-placeholder);
@@ -1352,7 +1352,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           display: block;
         }
         .tiptap-editor .ProseMirror img.ProseMirror-selectednode {
-          outline: 2px solid #6C47FF;
+          outline: 2px solid #06B6D4;
           outline-offset: 2px;
         }
       `}</style>

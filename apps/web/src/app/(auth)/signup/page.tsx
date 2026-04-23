@@ -212,11 +212,11 @@ export default function SignupPage() {
 
           <p className="text-xs text-center mt-5" style={{ color: '#6B6B8A' }}>
             By signing up, you agree to our{' '}
-            <Link href="/terms" className="underline" style={{ color: '#8B6BFF' }}>
+            <Link href="/terms" className="underline" style={{ color: '#22D3EE' }}>
               Terms
             </Link>{' '}
             and{' '}
-            <Link href="/privacy" className="underline" style={{ color: '#8B6BFF' }}>
+            <Link href="/privacy" className="underline" style={{ color: '#22D3EE' }}>
               Privacy Policy
             </Link>
           </p>

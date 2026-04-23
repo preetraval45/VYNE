@@ -305,12 +305,12 @@ export function FormBuilder({ initialSchema, onSave }: Props) {
             padding: "10px 14px",
             borderRadius: 10,
             border: "none",
-            background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+            background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
-            boxShadow: "0 4px 14px rgba(108,71,255,0.25)",
+            boxShadow: "0 4px 14px rgba(6, 182, 212,0.25)",
           }}
         >
           <Save size={13} />
@@ -515,7 +515,7 @@ function FieldRow({
           type="checkbox"
           checked={field.required ?? false}
           onChange={(e) => onUpdate({ required: e.target.checked })}
-          style={{ accentColor: "#6C47FF" }}
+          style={{ accentColor: "#06B6D4" }}
         />
         Required
       </label>
@@ -628,7 +628,7 @@ function renderInput(
             onChange={(e) =>
               setValues((v) => ({ ...v, [f.id]: e.target.checked }))
             }
-            style={{ accentColor: "#6C47FF" }}
+            style={{ accentColor: "#06B6D4" }}
           />
           {f.placeholder ?? "Yes"}
         </label>

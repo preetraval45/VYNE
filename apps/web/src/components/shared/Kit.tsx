@@ -29,8 +29,8 @@ const TONE_TOKENS: Record<Tone, { fg: string; bg: string; ring: string }> = {
   },
   purple: {
     fg: "#5B5BD6",
-    bg: "rgba(91, 91, 214, 0.07)",
-    ring: "rgba(91, 91, 214, 0.18)",
+    bg: "rgba(6, 182, 212, 0.07)",
+    ring: "rgba(6, 182, 212, 0.18)",
   },
   success: {
     fg: "#0F9D58",

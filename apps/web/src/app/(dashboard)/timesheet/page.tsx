@@ -260,7 +260,7 @@ export default function TimesheetPage() {
                   borderRadius: 7,
                   border: "none",
                   background: active
-                    ? "rgba(108,71,255,0.1)"
+                    ? "rgba(6, 182, 212,0.1)"
                     : "transparent",
                   color: active
                     ? "var(--vyne-purple)"

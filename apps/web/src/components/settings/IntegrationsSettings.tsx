@@ -411,7 +411,7 @@ export default function IntegrationsSettings({ onToast }: Props) {
                           : prev,
                       )
                     }
-                    style={{ accentColor: "#6C47FF", width: 16, height: 16 }}
+                    style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
                   />
                   {label}
                 </label>
@@ -454,7 +454,7 @@ export default function IntegrationsSettings({ onToast }: Props) {
                     width: `${importRun.progress ?? 0}%`,
                     height: "100%",
                     background:
-                      "linear-gradient(90deg, #6C47FF, #8B6BFF)",
+                      "linear-gradient(90deg, #06B6D4, #22D3EE)",
                     transition: "width 0.2s",
                   }}
                 />
@@ -1141,7 +1141,7 @@ function EmailToIssueSection({
             type="checkbox"
             checked={stripSignatures}
             onChange={(e) => setStripSignatures(e.target.checked)}
-            style={{ accentColor: "#6C47FF", width: 16, height: 16 }}
+            style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
           />
           <span>
             <strong>Strip email signatures</strong> from the issue body — keeps
@@ -1153,7 +1153,7 @@ function EmailToIssueSection({
             type="checkbox"
             checked={threadReplies}
             onChange={(e) => setThreadReplies(e.target.checked)}
-            style={{ accentColor: "#6C47FF", width: 16, height: 16 }}
+            style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
           />
           <span>
             <strong>Thread replies</strong> to the same issue — uses In-Reply-To
@@ -1381,7 +1381,7 @@ function CalendarSyncSection({
                     border: `1.5px solid ${conn.direction === v ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background:
                       conn.direction === v
-                        ? "rgba(108,71,255,0.05)"
+                        ? "rgba(6, 182, 212,0.05)"
                         : "var(--content-bg)",
                     color: "var(--text-primary)",
                     fontSize: 12,
@@ -1400,7 +1400,7 @@ function CalendarSyncSection({
               type="checkbox"
               checked={conn.showBusy}
               onChange={(e) => update({ showBusy: e.target.checked })}
-              style={{ accentColor: "#6C47FF", width: 16, height: 16 }}
+              style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
             />
             <span>
               <strong>Show busy status</strong> in VYNE based on calendar events
@@ -1412,7 +1412,7 @@ function CalendarSyncSection({
               type="checkbox"
               checked={conn.importInvites}
               onChange={(e) => update({ importInvites: e.target.checked })}
-              style={{ accentColor: "#6C47FF", width: 16, height: 16 }}
+              style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
             />
             <span>
               <strong>Import meeting invites</strong> as VYNE events with

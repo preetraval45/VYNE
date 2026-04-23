@@ -812,7 +812,7 @@ function ApprovalsTab({
               checked={selected.has(e.id)}
               onChange={() => toggleSelect(e.id)}
               style={{
-                accentColor: "#6C47FF",
+                accentColor: "#06B6D4",
                 width: 15,
                 height: 15,
                 cursor: "pointer",
@@ -824,7 +824,7 @@ function ApprovalsTab({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg,#6C47FF,#9B59B6)",
+                background: "linear-gradient(135deg,#06B6D4,#9B59B6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1088,7 +1088,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
               fontSize: 12,
               color: "var(--vyne-purple)",
               background: "none",
-              border: "1px solid rgba(108,71,255,0.3)",
+              border: "1px solid rgba(6, 182, 212,0.3)",
               borderRadius: 6,
               padding: "3px 10px",
               cursor: "pointer",
@@ -1132,7 +1132,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                   background:
                     month === "Mar"
                       ? "var(--vyne-purple)"
-                      : "rgba(108,71,255,0.2)",
+                      : "rgba(6, 182, 212,0.2)",
                   borderRadius: "4px 4px 0 0",
                   height: `${(amount / maxMonthly) * 90}px`,
                   transition: "height 0.4s",

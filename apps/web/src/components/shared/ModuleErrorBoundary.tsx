@@ -17,7 +17,7 @@ function ModuleErrorFallback({ moduleName, onReset }: Readonly<{ moduleName: str
       {/* Error icon */}
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-        style={{ background: 'rgba(108, 71, 255, 0.08)' }}
+        style={{ background: 'rgba(6, 182, 212, 0.08)' }}
       >
         <svg
           width="28"

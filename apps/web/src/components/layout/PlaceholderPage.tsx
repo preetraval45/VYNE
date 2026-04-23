@@ -31,7 +31,7 @@ export function PlaceholderPage({ icon, title, description }: PlaceholderPagePro
         >
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center mb-5 mx-auto"
-            style={{ background: 'rgba(108,71,255,0.08)' }}
+            style={{ background: 'rgba(6, 182, 212,0.08)' }}
           >
             {icon}
           </div>
@@ -45,12 +45,12 @@ export function PlaceholderPage({ icon, title, description }: PlaceholderPagePro
           <div
             className="mt-8 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
             style={{
-              background: 'rgba(108,71,255,0.08)',
-              border: '1px solid rgba(108,71,255,0.15)',
-              color: '#6C47FF',
+              background: 'rgba(6, 182, 212,0.08)',
+              border: '1px solid rgba(6, 182, 212,0.15)',
+              color: '#06B6D4',
             }}
           >
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#6C47FF' }} />
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#06B6D4' }} />
             In development
           </div>
         </motion.div>

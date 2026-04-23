@@ -121,13 +121,13 @@ function ConditionRow(
           <button
             onClick={onToggleLogic}
             style={{
-              background: "rgba(108,71,255,0.1)",
-              border: "1px solid rgba(108,71,255,0.2)",
+              background: "rgba(6, 182, 212,0.1)",
+              border: "1px solid rgba(6, 182, 212,0.2)",
               borderRadius: 12,
               padding: "2px 10px",
               fontSize: 10,
               fontWeight: 700,
-              color: "#6C47FF",
+              color: "#06B6D4",
               cursor: "pointer",
               letterSpacing: "0.05em",
             }}

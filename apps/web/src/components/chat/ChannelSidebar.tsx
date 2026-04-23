@@ -85,7 +85,7 @@ export function ChannelSidebar({
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-              (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+              (e.currentTarget as HTMLElement).style.color = "#06B6D4";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -230,7 +230,7 @@ export function ChannelSidebar({
                       {(ch.unreadCount ?? 0) > 0 && (
                         <span
                           style={{
-                            background: isActive ? "#6C47FF" : "#E8E8F0",
+                            background: isActive ? "#06B6D4" : "#E8E8F0",
                             color: isActive ? "#fff" : "#6B6B8A",
                             borderRadius: 10,
                             padding: "0 5px",
@@ -264,7 +264,7 @@ export function ChannelSidebar({
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "#F0F0F8";
-                    (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                    (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
@@ -382,7 +382,7 @@ export function ChannelSidebar({
                       {(dm.unreadCount ?? 0) > 0 && (
                         <span
                           style={{
-                            background: "#6C47FF",
+                            background: "#06B6D4",
                             color: "#fff",
                             borderRadius: 10,
                             padding: "0 5px",
@@ -415,7 +415,7 @@ export function ChannelSidebar({
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "#F0F0F8";
-                    (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                    (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =

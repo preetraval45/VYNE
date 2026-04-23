@@ -104,7 +104,7 @@ export function PresenceIndicator({
               width: 20,
               height: 20,
               borderRadius: "50%",
-              background: u.color ?? "#6C47FF",
+              background: u.color ?? "#06B6D4",
               border: "2px solid var(--content-bg)",
               display: "flex",
               alignItems: "center",

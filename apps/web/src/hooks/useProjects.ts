@@ -17,7 +17,7 @@ const DEMO_PROJECTS: Project[] = [
     name: "Vyne Platform",
     identifier: "VYNE",
     description: "Core platform development",
-    color: "#6C47FF",
+    color: "#06B6D4",
     icon: "🚀",
     status: "active",
     leadId: "1",

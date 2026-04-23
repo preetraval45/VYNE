@@ -77,7 +77,7 @@ export const PRIORITY_CONFIG: Record<
 
 export const MODULE_COLORS: Record<Module, string> = {
   Chat: "#3B82F6",
-  Projects: "#6C47FF",
+  Projects: "#06B6D4",
   Docs: "#EC4899",
   ERP: "#10B981",
   AI: "#F59E0B",

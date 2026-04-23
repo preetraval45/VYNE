@@ -87,7 +87,7 @@ function InsightCard({ insight }: { insight: Insight }) {
 
 function ResultCard({ result, onFollowUp }: { result: QueryResult; onFollowUp: (q: string) => void }) {
   return (
-    <div className="rounded-2xl border border-vyne-purple/15 bg-content-bg overflow-hidden shadow-[0_2px_20px_rgba(108,71,255,0.08)]">
+    <div className="rounded-2xl border border-vyne-purple/15 bg-content-bg overflow-hidden shadow-[0_2px_20px_rgba(6, 182, 212,0.08)]">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-content-border bg-gradient-to-r from-vyne-purple/5 to-purple-500/[0.02]">
         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-vyne-purple to-purple-500 flex items-center justify-center shrink-0">
@@ -205,7 +205,7 @@ function ResultCard({ result, onFollowUp }: { result: QueryResult; onFollowUp: (
 
 function ThinkingIndicator() {
   return (
-    <div className="flex items-center gap-3 p-4 rounded-2xl bg-content-bg border border-vyne-purple/15 shadow-[0_2px_12px_rgba(108,71,255,0.06)]">
+    <div className="flex items-center gap-3 p-4 rounded-2xl bg-content-bg border border-vyne-purple/15 shadow-[0_2px_12px_rgba(6, 182, 212,0.06)]">
       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-vyne-purple to-purple-500 flex items-center justify-center shrink-0 animate-spin">
         <span className="text-sm">✨</span>
       </div>
@@ -380,7 +380,7 @@ export default function AIPage() {
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
 
           {/* Query bar */}
-          <div className="bg-content-bg rounded-2xl border border-vyne-purple/18 shadow-[0_4px_24px_rgba(108,71,255,0.09)] p-4 mb-5">
+          <div className="bg-content-bg rounded-2xl border border-vyne-purple/18 shadow-[0_4px_24px_rgba(6, 182, 212,0.09)] p-4 mb-5">
             <div className="flex gap-3 items-center mb-3.5">
               <span className="text-lg shrink-0">✨</span>
               <label htmlFor="ai-query" className="sr-only">Ask Vyne AI a question</label>

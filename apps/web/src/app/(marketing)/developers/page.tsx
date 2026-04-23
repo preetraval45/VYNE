@@ -269,7 +269,7 @@ export default function DevelopersPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -295,9 +295,9 @@ export default function DevelopersPage() {
               gap: 8,
               padding: "5px 12px",
               borderRadius: 999,
-              background: "rgba(108,71,255,0.1)",
-              border: "1px solid rgba(108,71,255,0.25)",
-              color: "#B8A3FF",
+              background: "rgba(6, 182, 212,0.1)",
+              border: "1px solid rgba(6, 182, 212,0.25)",
+              color: "#67E8F9",
               fontSize: 12,
               fontWeight: 600,
               marginBottom: 18,
@@ -351,7 +351,7 @@ export default function DevelopersPage() {
                 textDecoration: "none",
               }}
             >
-              <Play size={18} style={{ color: "#8B6BFF", marginBottom: 8 }} />
+              <Play size={18} style={{ color: "#22D3EE", marginBottom: 8 }} />
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>
                 API playground
               </div>
@@ -488,11 +488,11 @@ export default function DevelopersPage() {
                           padding: "8px 14px",
                           textAlign: "left",
                           background: active
-                            ? "rgba(108,71,255,0.15)"
+                            ? "rgba(6, 182, 212,0.15)"
                             : "transparent",
                           border: "none",
                           borderLeft: active
-                            ? "3px solid #6C47FF"
+                            ? "3px solid #06B6D4"
                             : "3px solid transparent",
                           color: active ? "#fff" : "rgba(255,255,255,0.65)",
                           cursor: "pointer",
@@ -511,7 +511,7 @@ export default function DevelopersPage() {
                               op.method === "GET"
                                 ? "#4ADE80"
                                 : op.method === "POST"
-                                  ? "#8B6BFF"
+                                  ? "#22D3EE"
                                   : op.method === "PATCH"
                                     ? "#FCD34D"
                                     : "#F87171",
@@ -519,7 +519,7 @@ export default function DevelopersPage() {
                               op.method === "GET"
                                 ? "rgba(34,197,94,0.15)"
                                 : op.method === "POST"
-                                  ? "rgba(108,71,255,0.18)"
+                                  ? "rgba(6, 182, 212,0.18)"
                                   : op.method === "PATCH"
                                     ? "rgba(245,158,11,0.18)"
                                     : "rgba(239,68,68,0.18)",
@@ -563,9 +563,9 @@ export default function DevelopersPage() {
                           background:
                             selectedOp.method === "GET"
                               ? "rgba(34,197,94,0.18)"
-                              : "rgba(108,71,255,0.2)",
+                              : "rgba(6, 182, 212,0.2)",
                           color:
-                            selectedOp.method === "GET" ? "#4ADE80" : "#B8A3FF",
+                            selectedOp.method === "GET" ? "#4ADE80" : "#67E8F9",
                           fontFamily:
                             "var(--font-geist-mono), ui-monospace, monospace",
                           fontSize: 11,
@@ -673,12 +673,12 @@ export default function DevelopersPage() {
                       borderRadius: 9,
                       border: "none",
                       background:
-                        "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+                        "linear-gradient(135deg, #06B6D4, #22D3EE)",
                       color: "#fff",
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: running ? "default" : "pointer",
-                      boxShadow: "0 4px 14px rgba(108,71,255,0.3)",
+                      boxShadow: "0 4px 14px rgba(6, 182, 212,0.3)",
                       opacity: running ? 0.7 : 1,
                     }}
                   >
@@ -721,7 +721,7 @@ export default function DevelopersPage() {
               href="/api/openapi"
               style={{
                 marginLeft: 12,
-                color: "#B8A3FF",
+                color: "#67E8F9",
                 fontWeight: 600,
                 textDecoration: "underline",
               }}
@@ -990,7 +990,7 @@ https://marketplace.visualstudio.com/items?itemName=vyne.vyne-vscode
         VYNE Developers · Spec served from{" "}
         <Link
           href="/api/openapi"
-          style={{ color: "#B8A3FF", textDecoration: "underline" }}
+          style={{ color: "#67E8F9", textDecoration: "underline" }}
         >
           /api/openapi
         </Link>

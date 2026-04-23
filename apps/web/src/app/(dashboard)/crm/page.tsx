@@ -109,7 +109,7 @@ function daysSince(isoDate: string): number {
 
 function pillBg(isActive: boolean, s: Stage | "All"): string {
   if (!isActive) return "#F4F4F8";
-  if (s === "All") return "rgba(108,71,255,0.1)";
+  if (s === "All") return "rgba(6, 182, 212,0.1)";
   return stageBg(s);
 }
 
@@ -692,7 +692,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
             value: fmt(totalPipeline),
             sub: "active deals excl. lost",
             color: "var(--vyne-purple)",
-            bg: "rgba(108,71,255,0.08)",
+            bg: "rgba(6, 182, 212,0.08)",
           },
           {
             label: "Expected Close (This Month)",

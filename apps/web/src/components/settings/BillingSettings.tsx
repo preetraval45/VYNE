@@ -172,7 +172,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
 
   function usageBar(used: number, total: number) {
     const pct = Math.min((used / total) * 100, 100);
-    const color = pct > 85 ? "#EF4444" : pct > 60 ? "#F59E0B" : "#6C47FF";
+    const color = pct > 85 ? "#EF4444" : pct > 60 ? "#F59E0B" : "#06B6D4";
     return (
       <div
         style={{
@@ -233,9 +233,9 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     padding: 16,
                     borderRadius: 10,
                     border: isCurrent
-                      ? "2px solid #6C47FF"
+                      ? "2px solid #06B6D4"
                       : "1px solid var(--content-border)",
-                    background: isCurrent ? "rgba(108,71,255,0.05)" : "var(--content-bg)",
+                    background: isCurrent ? "rgba(6, 182, 212,0.05)" : "var(--content-bg)",
                     position: "relative",
                   }}
                 >
@@ -247,7 +247,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         right: 12,
                         padding: "2px 10px",
                         borderRadius: "0 0 8px 8px",
-                        background: "#6C47FF",
+                        background: "#06B6D4",
                         color: "#fff",
                         fontSize: 10,
                         fontWeight: 600,
@@ -271,7 +271,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     style={{
                       fontSize: 20,
                       fontWeight: 700,
-                      color: "#6C47FF",
+                      color: "#06B6D4",
                       marginBottom: 12,
                     }}
                   >
@@ -337,7 +337,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         cursor: upgrading === tier ? "not-allowed" : "pointer",
                         fontSize: 12,
                         fontWeight: 500,
-                        color: "#6C47FF",
+                        color: "#06B6D4",
                         opacity: upgrading === tier ? 0.6 : 1,
                         display: "flex",
                         alignItems: "center",
@@ -549,7 +549,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       alignItems: "center",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                      (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
@@ -727,7 +727,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                   borderRadius: 8,
                   border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
                   background: active
-                    ? "rgba(108,71,255,0.08)"
+                    ? "rgba(6, 182, 212,0.08)"
                     : "var(--content-bg)",
                   color: active
                     ? "var(--vyne-purple)"
@@ -1237,7 +1237,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                   setAnomalyAlertThreshold(Number(e.target.value))
                 }
                 aria-label="Alert threshold"
-                style={{ width: "100%", accentColor: "#6C47FF" }}
+                style={{ width: "100%", accentColor: "#06B6D4" }}
               />
             </div>
 

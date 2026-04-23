@@ -184,7 +184,7 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: "8px 20px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+  background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
   color: "#fff",
   cursor: "pointer",
   fontSize: 12,
@@ -397,23 +397,23 @@ function NewButton({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+        background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 600,
-        boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+        boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 4px 14px rgba(108,71,255,0.45)";
+          "0 4px 14px rgba(6, 182, 212,0.45)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 8px rgba(108,71,255,0.3)";
+          "0 2px 8px rgba(6, 182, 212,0.3)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
       }}
     >
@@ -1521,7 +1521,7 @@ function OpportunitiesTab() {
           label="Total Pipeline"
           value={fmt(totalPipeline)}
           icon={<Target size={18} />}
-          color="#6C47FF"
+          color="#06B6D4"
         />
         <KpiCard
           label="Weighted Pipeline"
@@ -1813,7 +1813,7 @@ function OpportunitiesTab() {
                               width: 20,
                               height: 20,
                               borderRadius: "50%",
-                              background: "rgba(108,71,255,0.10)",
+                              background: "rgba(6, 182, 212,0.10)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2568,7 +2568,7 @@ function ProductsTab() {
                               width: 30,
                               height: 30,
                               borderRadius: 8,
-                              background: "rgba(108,71,255,0.08)",
+                              background: "rgba(6, 182, 212,0.08)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2805,7 +2805,7 @@ function CustomersTab() {
                               width: 30,
                               height: 30,
                               borderRadius: "50%",
-                              background: "rgba(108,71,255,0.10)",
+                              background: "rgba(6, 182, 212,0.10)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2921,7 +2921,7 @@ function ReportsTab() {
           label="Avg Deal Size"
           value={fmt(avgDealSize)}
           icon={<TrendingUp size={18} />}
-          color="#6C47FF"
+          color="#06B6D4"
         />
         <KpiCard
           label="Win Rate"
@@ -3028,8 +3028,8 @@ function ReportsTab() {
                     borderRadius: "6px 6px 2px 2px",
                     background:
                       i === MONTHLY_REVENUE.length - 1
-                        ? "linear-gradient(180deg, #6C47FF 0%, #8B6BFF 100%)"
-                        : "rgba(108,71,255,0.20)",
+                        ? "linear-gradient(180deg, #06B6D4 0%, #22D3EE 100%)"
+                        : "rgba(6, 182, 212,0.20)",
                     transition: "height 0.3s ease",
                     position: "relative",
                   }}
@@ -3289,7 +3289,7 @@ function ReportsTab() {
                             width: 28,
                             height: 28,
                             borderRadius: "50%",
-                            background: "rgba(108,71,255,0.10)",
+                            background: "rgba(6, 182, 212,0.10)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

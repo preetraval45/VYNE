@@ -37,14 +37,14 @@ function EmptyState() {
           width: 56,
           height: 56,
           borderRadius: 16,
-          background: "rgba(108,71,255,0.08)",
+          background: "rgba(6, 182, 212,0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 14,
         }}
       >
-        <Zap size={26} color="#6C47FF" strokeWidth={1.5} />
+        <Zap size={26} color="#06B6D4" strokeWidth={1.5} />
       </div>
       <div
         style={{
@@ -437,7 +437,7 @@ export default function AutomationDetailPanel(
                   fontSize: 15,
                   fontWeight: 600,
                   color: "var(--text-primary)",
-                  border: "1px solid #6C47FF",
+                  border: "1px solid #06B6D4",
                   borderRadius: 7,
                   padding: "4px 8px",
                   background: "var(--content-secondary)",
@@ -447,7 +447,7 @@ export default function AutomationDetailPanel(
               <button aria-label="Confirm"
                 onClick={handleNameSave}
                 style={{
-                  background: "#6C47FF",
+                  background: "#06B6D4",
                   border: "none",
                   borderRadius: 6,
                   padding: "4px 7px",
@@ -566,9 +566,9 @@ export default function AutomationDetailPanel(
                 padding: "10px 14px",
                 fontSize: 12,
                 fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#6C47FF" : "#6B6B8A",
+                color: isActive ? "#06B6D4" : "#6B6B8A",
                 borderBottom: isActive
-                  ? "2px solid #6C47FF"
+                  ? "2px solid #06B6D4"
                   : "2px solid transparent",
                 cursor: "pointer",
                 transition: "all 0.1s",

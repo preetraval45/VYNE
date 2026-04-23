@@ -105,7 +105,7 @@ export function SnippetsPicker({ query, onSelect, onClose }: Props) {
             cursor: "pointer",
             textAlign: "left",
             background:
-              i === activeIdx ? "rgba(108,71,255,0.08)" : "transparent",
+              i === activeIdx ? "rgba(6, 182, 212,0.08)" : "transparent",
           }}
         >
           <div
@@ -122,7 +122,7 @@ export function SnippetsPicker({ query, onSelect, onClose }: Props) {
               style={{
                 padding: "1px 6px",
                 borderRadius: 4,
-                background: "rgba(108,71,255,0.12)",
+                background: "rgba(6, 182, 212,0.12)",
                 color: "var(--vyne-purple)",
                 fontSize: 10,
                 fontFamily:

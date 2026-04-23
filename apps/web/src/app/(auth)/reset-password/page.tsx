@@ -96,7 +96,7 @@ function ResetPasswordForm() {
         <Link
           href="/forgot-password"
           className="text-sm font-medium transition-colors"
-          style={{ color: "#8B6BFF" }}
+          style={{ color: "#22D3EE" }}
         >
           Request new reset link
         </Link>
@@ -130,7 +130,7 @@ function ResetPasswordForm() {
           <Loader2
             size={18}
             className="animate-spin"
-            style={{ color: "#6C47FF" }}
+            style={{ color: "#06B6D4" }}
           />
         </div>
       </motion.div>
@@ -189,8 +189,8 @@ function ResetPasswordForm() {
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
               onFocus={(e) => {
-                e.target.style.border = "1px solid #6C47FF";
-                e.target.style.boxShadow = "0 0 0 3px rgba(108,71,255,0.15)";
+                e.target.style.border = "1px solid #06B6D4";
+                e.target.style.boxShadow = "0 0 0 3px rgba(6, 182, 212,0.15)";
               }}
               onBlur={(e) => {
                 e.target.style.border = "1px solid rgba(255,255,255,0.1)";
@@ -281,8 +281,8 @@ function ResetPasswordForm() {
                     : "1px solid rgba(255,255,255,0.1)",
               }}
               onFocus={(e) => {
-                e.target.style.border = "1px solid #6C47FF";
-                e.target.style.boxShadow = "0 0 0 3px rgba(108,71,255,0.15)";
+                e.target.style.border = "1px solid #06B6D4";
+                e.target.style.boxShadow = "0 0 0 3px rgba(6, 182, 212,0.15)";
               }}
               onBlur={(e) => {
                 e.target.style.border =
@@ -322,8 +322,8 @@ function ResetPasswordForm() {
           style={{
             background: isLoading
               ? "#5235CC"
-              : "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-            boxShadow: isLoading ? "none" : "0 4px 14px rgba(108,71,255,0.35)",
+              : "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+            boxShadow: isLoading ? "none" : "0 4px 14px rgba(6, 182, 212,0.35)",
           }}
         >
           {isLoading ? (
@@ -354,7 +354,7 @@ export default function ResetPasswordPage() {
         <div
           className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-10"
           style={{
-            background: "radial-gradient(circle, #6C47FF 0%, transparent 70%)",
+            background: "radial-gradient(circle, #06B6D4 0%, transparent 70%)",
           }}
         />
       </div>
@@ -370,7 +370,7 @@ export default function ResetPasswordPage() {
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
             style={{
-              background: "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+              background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
             }}
           >
             <span className="text-white font-bold text-xl tracking-tight">
@@ -400,7 +400,7 @@ export default function ResetPasswordPage() {
                 <Loader2
                   size={24}
                   className="animate-spin"
-                  style={{ color: "#6C47FF" }}
+                  style={{ color: "#06B6D4" }}
                 />
               </div>
             }
@@ -415,7 +415,7 @@ export default function ResetPasswordPage() {
           <Link
             href="/login"
             className="font-medium transition-colors"
-            style={{ color: "#8B6BFF" }}
+            style={{ color: "#22D3EE" }}
           >
             Sign in
           </Link>

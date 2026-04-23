@@ -69,7 +69,7 @@ interface NavItemDef {
 
 const NAV_ITEMS: NavItemDef[] = [
   { icon: Home, label: "Home", href: "/home", color: "#E74C3C" },
-  { icon: BarChart3, label: "My Dashboard", href: "/dashboard", color: "#6C47FF" },
+  { icon: BarChart3, label: "My Dashboard", href: "/dashboard", color: "#06B6D4" },
   {
     icon: Contact,
     label: "Accounts/Contacts",
@@ -260,7 +260,7 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: Brain,
     label: "AI Assistant",
     href: "/ai",
-    color: "#6C47FF",
+    color: "#06B6D4",
     moduleId: "ai",
     subs: [
       { label: "Insights", href: "/ai" },
@@ -301,8 +301,8 @@ const NAV_ITEMS: NavItemDef[] = [
   { icon: Clock, label: "Timesheet", href: "/timesheet", color: "#0E9F6E" },
   { icon: Activity, label: "Activity", href: "/activity", color: "#F59E0B" },
   { icon: LifeBuoy, label: "Help centre", href: "/help", color: "#2563EB" },
-  { icon: ListChecks, label: "CS playbooks", href: "/playbooks", color: "#6C47FF" },
-  { icon: GraduationCap, label: "Training", href: "/training", color: "#8B6BFF" },
+  { icon: ListChecks, label: "CS playbooks", href: "/playbooks", color: "#06B6D4" },
+  { icon: GraduationCap, label: "Training", href: "/training", color: "#22D3EE" },
   { icon: ShieldAlert, label: "DR runbooks", href: "/runbooks", color: "#DC2626" },
   {
     icon: Settings,
@@ -322,8 +322,8 @@ const NAV_ITEMS: NavItemDef[] = [
 
 // ── Helper: compute nav row background ────────────────────────────
 function getNavRowBg(active: boolean, hovered: boolean): string {
-  if (active) return "rgba(108,71,255,0.08)";
-  if (hovered) return "rgba(108,71,255,0.04)";
+  if (active) return "rgba(6, 182, 212,0.08)";
+  if (hovered) return "rgba(6, 182, 212,0.04)";
   return "transparent";
 }
 
@@ -380,16 +380,16 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
           cursor: "pointer",
           fontSize: 12.5,
           fontWeight: active ? 600 : 450,
-          color: active ? "var(--vyne-purple)" : "var(--text-primary)",
+          color: active ? "var(--vyne-teal)" : "var(--text-primary)",
           background: active
-            ? "var(--aurora-soft)"
-            : hovered ? "rgba(124,92,255,0.05)" : "transparent",
+            ? "linear-gradient(90deg, rgba(6,182,212,0.14), rgba(6,182,212,0.04) 70%, transparent)"
+            : hovered ? "rgba(6,182,212,0.06)" : "transparent",
           border: "none",
           borderLeft: active
-            ? "2.5px solid var(--vyne-purple)"
+            ? "2.5px solid var(--vyne-teal)"
             : "2.5px solid transparent",
           boxShadow: active
-            ? "inset 0 0 0 1px rgba(124,92,255,0.08)"
+            ? "inset 0 0 0 1px rgba(6,182,212,0.12)"
             : "none",
           borderRadius: collapsed ? 0 : "0 8px 8px 0",
           marginRight: collapsed ? 0 : 6,
@@ -407,7 +407,7 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
             height: 26,
             borderRadius: 7,
             background: active
-              ? "rgba(91, 91, 214, 0.12)"
+              ? "rgba(6, 182, 212, 0.12)"
               : "transparent",
             color: active
               ? "var(--vyne-purple)"
@@ -495,7 +495,7 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
               onClick={() => onNavigate(sub.href)}
               onMouseEnter={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
-                  "rgba(108,71,255,0.05)")
+                  "rgba(6, 182, 212,0.05)")
               }
               onMouseLeave={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
@@ -619,7 +619,7 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
                   onClick={() => onNavigate(sub.href)}
                   onMouseEnter={(e) =>
                     ((e.currentTarget as HTMLElement).style.background =
-                      "rgba(108,71,255,0.06)")
+                      "rgba(6, 182, 212,0.06)")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLElement).style.background =
@@ -858,7 +858,7 @@ function EmojiStatusLine() {
                 border: "none",
                 background:
                   status?.text === p.text
-                    ? "rgba(108,71,255,0.08)"
+                    ? "rgba(6, 182, 212,0.08)"
                     : "transparent",
                 cursor: "pointer",
                 fontSize: 12,
@@ -1065,7 +1065,7 @@ export function Sidebar() {
           gap: 10,
           borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
-          background: "linear-gradient(135deg, rgba(108,71,255,0.06) 0%, transparent 100%)",
+          background: "linear-gradient(135deg, rgba(6, 182, 212,0.06) 0%, transparent 100%)",
         }}
       >
         {collapsed ? (
@@ -1392,7 +1392,7 @@ export function Sidebar() {
           gap: 9,
           flexShrink: 0,
           position: "relative",
-          background: "linear-gradient(135deg, rgba(108,71,255,0.03) 0%, transparent 100%)",
+          background: "linear-gradient(135deg, rgba(6, 182, 212,0.03) 0%, transparent 100%)",
         }}
       >
         {/* Avatar with ring */}
@@ -1415,18 +1415,18 @@ export function Sidebar() {
             color: "#fff",
             flexShrink: 0,
             cursor: "pointer",
-            border: "2px solid rgba(108,71,255,0.25)",
+            border: "2px solid rgba(6, 182, 212,0.25)",
             padding: 0,
-            boxShadow: "0 0 0 3px rgba(108,71,255,0.08)",
+            boxShadow: "0 0 0 3px rgba(6, 182, 212,0.08)",
             transition: "box-shadow 0.15s",
           }}
           onMouseEnter={(e) =>
             ((e.currentTarget as HTMLElement).style.boxShadow =
-              "0 0 0 3px rgba(108,71,255,0.22)")
+              "0 0 0 3px rgba(6, 182, 212,0.22)")
           }
           onMouseLeave={(e) =>
             ((e.currentTarget as HTMLElement).style.boxShadow =
-              "0 0 0 3px rgba(108,71,255,0.08)")
+              "0 0 0 3px rgba(6, 182, 212,0.08)")
           }
         >
           {userInitials}
@@ -1723,7 +1723,7 @@ export function Sidebar() {
                 }}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLElement).style.background =
-                    "rgba(108,71,255,0.06)")
+                    "rgba(6, 182, 212,0.06)")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLElement).style.background =

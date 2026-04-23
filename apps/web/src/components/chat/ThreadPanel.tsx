@@ -163,7 +163,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
             padding: "5px 12px",
             borderRadius: 7,
             border: "1px solid var(--vyne-purple)",
-            background: notes ? "rgba(108,71,255,0.08)" : "transparent",
+            background: notes ? "rgba(6, 182, 212,0.08)" : "transparent",
             color: "var(--vyne-purple)",
             fontSize: 11,
             fontWeight: 600,

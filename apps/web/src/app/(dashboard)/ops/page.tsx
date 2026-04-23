@@ -243,7 +243,7 @@ function OverviewTab({
             label: "Total Products",
             value: products.length.toString(),
             sub: `${inStock} in stock`,
-            bg: "rgba(108,71,255,0.08)",
+            bg: "rgba(6, 182, 212,0.08)",
           },
           {
             icon: (
@@ -2291,7 +2291,7 @@ function OpsPageInner() {
                 color:
                   tab === id ? "var(--vyne-purple)" : "var(--text-secondary)",
                 borderBottom:
-                  tab === id ? "2px solid #6C47FF" : "2px solid transparent",
+                  tab === id ? "2px solid #06B6D4" : "2px solid transparent",
                 transition: "all 0.15s",
               }}
             >

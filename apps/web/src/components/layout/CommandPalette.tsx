@@ -397,13 +397,13 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
         "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left",
       )}
       style={{
-        background: isSelected ? "rgba(108,71,255,0.15)" : "transparent",
+        background: isSelected ? "rgba(6, 182, 212,0.15)" : "transparent",
         color: isSelected ? "#FFFFFF" : "#A0A0B8",
       }}
     >
       <span
         className="flex-shrink-0"
-        style={{ color: isSelected ? "#8B6BFF" : "#6B6B8A" }}
+        style={{ color: isSelected ? "#22D3EE" : "#6B6B8A" }}
       >
         {item.icon}
       </span>
@@ -421,7 +421,7 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
       {item.badge && (
         <span
           className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded"
-          style={{ background: "rgba(108,71,255,0.15)", color: "#8B6BFF" }}
+          style={{ background: "rgba(6, 182, 212,0.15)", color: "#22D3EE" }}
         >
           {item.badge}
         </span>
@@ -1152,7 +1152,7 @@ export function CommandPalette() {
               background: "var(--content-bg, #1C1C2E)",
               border: "1px solid rgba(255,255,255,0.1)",
               boxShadow:
-                "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(108,71,255,0.15)",
+                "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(6, 182, 212,0.15)",
             }}
           >
             {/* Search input */}
@@ -1205,8 +1205,8 @@ export function CommandPalette() {
               <div
                 className="flex items-center gap-2 px-4 py-2 text-xs"
                 style={{
-                  background: "rgba(108,71,255,0.08)",
-                  color: "#8B6BFF",
+                  background: "rgba(6, 182, 212,0.08)",
+                  color: "#22D3EE",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}
               >
@@ -1218,8 +1218,8 @@ export function CommandPalette() {
               <div
                 className="flex items-center gap-2 px-4 py-2 text-xs"
                 style={{
-                  background: "rgba(108,71,255,0.12)",
-                  color: "#B8A3FF",
+                  background: "rgba(6, 182, 212,0.12)",
+                  color: "#67E8F9",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}
               >
@@ -1244,7 +1244,7 @@ export function CommandPalette() {
                   <div
                     style={{
                       padding: "12px 16px",
-                      background: "rgba(108,71,255,0.06)",
+                      background: "rgba(6, 182, 212,0.06)",
                       borderBottom: "1px solid rgba(255,255,255,0.05)",
                       color: "#E8E8F0",
                       fontSize: 13,
@@ -1255,7 +1255,7 @@ export function CommandPalette() {
                       style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: "#B8A3FF",
+                        color: "#67E8F9",
                         textTransform: "uppercase",
                         letterSpacing: "0.07em",
                         marginBottom: 4,
@@ -1317,8 +1317,8 @@ export function CommandPalette() {
                         style={{
                           padding: "1px 8px",
                           borderRadius: 4,
-                          background: "rgba(108,71,255,0.18)",
-                          color: "#B8A3FF",
+                          background: "rgba(6, 182, 212,0.18)",
+                          color: "#67E8F9",
                           fontSize: 10,
                           fontWeight: 700,
                           textTransform: "uppercase",
@@ -1354,7 +1354,7 @@ export function CommandPalette() {
                     <div
                       style={{
                         fontSize: 10,
-                        color: "#B8A3FF",
+                        color: "#67E8F9",
                         fontStyle: "italic",
                       }}
                     >

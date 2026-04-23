@@ -323,7 +323,7 @@ export default function DeveloperSettings({ onToast }: Props) {
               marginBottom: 14,
               borderRadius: 10,
               border: "1px dashed var(--vyne-purple)",
-              background: "rgba(108,71,255,0.05)",
+              background: "rgba(6, 182, 212,0.05)",
               display: "flex",
               flexDirection: "column",
               gap: 10,
@@ -358,7 +358,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                     border: `1px solid ${newKeyScope === s ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background:
                       newKeyScope === s
-                        ? "rgba(108,71,255,0.1)"
+                        ? "rgba(6, 182, 212,0.1)"
                         : "var(--content-bg)",
                     color:
                       newKeyScope === s
@@ -722,7 +722,7 @@ export default function DeveloperSettings({ onToast }: Props) {
               marginBottom: 14,
               borderRadius: 10,
               border: "1px dashed var(--vyne-purple)",
-              background: "rgba(108,71,255,0.05)",
+              background: "rgba(6, 182, 212,0.05)",
               display: "flex",
               flexDirection: "column",
               gap: 12,
@@ -782,7 +782,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                           "var(--font-geist-mono), ui-monospace, monospace",
                         border: `1px solid ${checked ? "var(--vyne-purple)" : "var(--content-border)"}`,
                         background: checked
-                          ? "rgba(108,71,255,0.12)"
+                          ? "rgba(6, 182, 212,0.12)"
                           : "var(--content-bg)",
                         color: checked
                           ? "var(--vyne-purple)"

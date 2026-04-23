@@ -1218,7 +1218,7 @@ function SocialMediaTab() {
                 label={p.platform}
                 value={p.followers}
                 max={Math.max(...MOCK_SOCIAL.map((s) => s.followers))}
-                color={platformColors[p.platform] ?? "#6C47FF"}
+                color={platformColors[p.platform] ?? "#06B6D4"}
               />
             ))}
           </div>
@@ -1238,7 +1238,7 @@ function SocialMediaTab() {
               segments={MOCK_SOCIAL.map((p) => ({
                 label: p.platform,
                 value: p.impressions,
-                color: platformColors[p.platform] ?? "#6C47FF",
+                color: platformColors[p.platform] ?? "#06B6D4",
               }))}
               size={100}
             />
@@ -1560,7 +1560,7 @@ function AnalyticsTab() {
                 label={cp.channel}
                 value={cp.leads}
                 max={Math.max(...channelPerf.map((x) => x.leads))}
-                color={channelColors[cp.channel] ?? "#6C47FF"}
+                color={channelColors[cp.channel] ?? "#06B6D4"}
               />
             ))}
           </div>
@@ -1580,7 +1580,7 @@ function AnalyticsTab() {
               segments={channelPerf.map((cp) => ({
                 label: cp.channel,
                 value: cp.spent,
-                color: channelColors[cp.channel] ?? "#6C47FF",
+                color: channelColors[cp.channel] ?? "#06B6D4",
               }))}
               size={90}
             />
@@ -1689,7 +1689,7 @@ export default function MarketingPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(108,71,255,0.08)" }}
+            style={{ background: "rgba(6, 182, 212,0.08)" }}
           >
             <Megaphone size={18} style={{ color: "var(--vyne-purple)" }} />
           </div>

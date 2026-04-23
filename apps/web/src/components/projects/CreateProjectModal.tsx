@@ -240,9 +240,9 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                           color: "var(--text-primary)",
                         }}
                         onFocus={(e) => {
-                          e.target.style.border = "1px solid #6C47FF";
+                          e.target.style.border = "1px solid #06B6D4";
                           e.target.style.boxShadow =
-                            "0 0 0 3px rgba(108,71,255,0.08)";
+                            "0 0 0 3px rgba(6, 182, 212,0.08)";
                         }}
                         onBlur={(e) => {
                           e.target.style.border = "1px solid #E8E8F0";
@@ -285,9 +285,9 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                           color: "var(--text-primary)",
                         }}
                         onFocus={(e) => {
-                          e.target.style.border = "1px solid #6C47FF";
+                          e.target.style.border = "1px solid #06B6D4";
                           e.target.style.boxShadow =
-                            "0 0 0 3px rgba(108,71,255,0.08)";
+                            "0 0 0 3px rgba(6, 182, 212,0.08)";
                         }}
                         onBlur={(e) => {
                           e.target.style.border = "1px solid #E8E8F0";
@@ -330,9 +330,9 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                         color: "var(--text-primary)",
                       }}
                       onFocus={(e) => {
-                        e.target.style.border = "1px solid #6C47FF";
+                        e.target.style.border = "1px solid #06B6D4";
                         e.target.style.boxShadow =
-                          "0 0 0 3px rgba(108,71,255,0.08)";
+                          "0 0 0 3px rgba(6, 182, 212,0.08)";
                       }}
                       onBlur={(e) => {
                         e.target.style.border = "1px solid #E8E8F0";
@@ -401,8 +401,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                       className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         background:
-                          "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
-                        boxShadow: "0 2px 8px rgba(108,71,255,0.3)",
+                          "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+                        boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
                       }}
                     >
                       {createProject.isPending ? (

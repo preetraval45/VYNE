@@ -395,8 +395,8 @@ function KanbanColumn({
                   className="p-2.5 rounded-lg"
                   style={{
                     background: "var(--content-bg)",
-                    border: "1px solid #6C47FF",
-                    boxShadow: "0 0 0 3px rgba(108,71,255,0.08)",
+                    border: "1px solid #06B6D4",
+                    boxShadow: "0 0 0 3px rgba(6, 182, 212,0.08)",
                   }}
                 >
                   <label
@@ -473,7 +473,7 @@ function KanbanColumn({
           style={{ color: "var(--text-tertiary)" }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-            (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+            (e.currentTarget as HTMLElement).style.color = "#06B6D4";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "transparent";

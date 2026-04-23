@@ -103,10 +103,10 @@ export default function AutomationsList(
               onClick={() => onFilterChange(tab.key)}
               style={{
                 flex: 1,
-                background: isActive ? "#6C47FF" : "transparent",
+                background: isActive ? "#06B6D4" : "transparent",
                 color: isActive ? "#fff" : "#6B6B8A",
                 border: isActive
-                  ? "1px solid #6C47FF"
+                  ? "1px solid #06B6D4"
                   : "1px solid var(--content-border)",
                 borderRadius: 6,
                 padding: "4px 4px",

@@ -368,7 +368,7 @@ export function KeyboardShortcutsModal() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: "rgba(108,71,255,0.1)",
+              background: "rgba(6, 182, 212,0.1)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

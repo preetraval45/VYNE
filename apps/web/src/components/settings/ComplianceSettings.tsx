@@ -621,7 +621,7 @@ export default function ComplianceSettings({ onToast }: Props) {
                   borderRadius: 10,
                   border: `1.5px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
                   background: active
-                    ? "rgba(108,71,255,0.05)"
+                    ? "rgba(6, 182, 212,0.05)"
                     : "var(--content-bg)",
                   color: "var(--text-primary)",
                   fontSize: 13,

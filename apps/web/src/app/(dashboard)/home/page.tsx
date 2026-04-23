@@ -200,7 +200,7 @@ export default function HomePage() {
               width: 22,
               height: 22,
               borderRadius: "50%",
-              background: "linear-gradient(135deg,#6C47FF,#9B59B6)",
+              background: "linear-gradient(135deg,#06B6D4,#9B59B6)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -292,7 +292,7 @@ export default function HomePage() {
                 color: "#E74C3C",
                 href: "/observe",
               },
-              { label: "AI", icon: "🧠", color: "#6C47FF", href: "/ai" },
+              { label: "AI", icon: "🧠", color: "#06B6D4", href: "/ai" },
               {
                 label: "Automations",
                 icon: "⚡",
@@ -354,7 +354,7 @@ export default function HomePage() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
-                    `rgba(${mod.color === "#6C47FF" ? "108,71,255" : "0,0,0"}, 0.04)`;
+                    `rgba(${mod.color === "#06B6D4" ? "108,71,255" : "0,0,0"}, 0.04)`;
                   (e.currentTarget as HTMLElement).style.borderColor =
                     mod.color;
                   (e.currentTarget as HTMLElement).style.transform =
@@ -434,7 +434,7 @@ export default function HomePage() {
                 fontSize: 9,
                 fontWeight: 600,
                 color: "var(--vyne-purple)",
-                background: "rgba(108,71,255,0.12)",
+                background: "rgba(6, 182, 212,0.12)",
                 padding: "2px 6px",
                 borderRadius: 4,
                 letterSpacing: "0.05em",
@@ -458,7 +458,7 @@ export default function HomePage() {
           >
             <code
               style={{
-                background: "rgba(108,71,255,0.12)",
+                background: "rgba(6, 182, 212,0.12)",
                 padding: "1px 5px",
                 borderRadius: 4,
                 fontSize: 12,
@@ -667,7 +667,7 @@ export default function HomePage() {
                   WebkitAppearance: "none",
                   border: "none",
                   background: "var(--content-bg-secondary)",
-                  accentColor: "#6C47FF",
+                  accentColor: "#06B6D4",
                 }}
               />
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -729,7 +729,7 @@ export default function HomePage() {
                       aria-label={task}
                       style={{
                         marginTop: 2,
-                        accentColor: "#6C47FF",
+                        accentColor: "#06B6D4",
                         cursor: "pointer",
                       }}
                     />

@@ -58,7 +58,7 @@ export const EMPLOYEES: Employee[] = [
     phone: "+1 (416) 555-0101",
     slack: "@preet",
     reportsTo: "\u2014",
-    avatarGradient: "linear-gradient(135deg,#6C47FF,#9B59B6)",
+    avatarGradient: "linear-gradient(135deg,#06B6D4,#9B59B6)",
     baseSalary: 180000,
     hoursThisMonth: 160,
     deductions: 4200,

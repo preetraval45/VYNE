@@ -79,11 +79,11 @@ export default function ForgotPasswordPage() {
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
                 style={{
-                  background: "rgba(108, 71, 255, 0.15)",
-                  border: "1px solid rgba(108, 71, 255, 0.3)",
+                  background: "rgba(6, 182, 212, 0.15)",
+                  border: "1px solid rgba(6, 182, 212, 0.3)",
                 }}
               >
-                <Mail size={28} style={{ color: "#8B6BFF" }} />
+                <Mail size={28} style={{ color: "#22D3EE" }} />
               </div>
               <p
                 className="text-sm text-center mb-1"
@@ -100,7 +100,7 @@ export default function ForgotPasswordPage() {
                     clearError();
                   }}
                   className="font-medium underline transition-colors"
-                  style={{ color: "#8B6BFF" }}
+                  style={{ color: "#22D3EE" }}
                 >
                   try again
                 </button>

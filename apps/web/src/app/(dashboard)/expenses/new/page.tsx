@@ -236,7 +236,7 @@ export default function NewExpensePage() {
                   padding: "12px 14px",
                   borderRadius: 10,
                   border: `1.5px solid ${form.submitNow === opt.value ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                  background: form.submitNow === opt.value ? "rgba(108,71,255,0.06)" : "var(--content-bg)",
+                  background: form.submitNow === opt.value ? "rgba(6, 182, 212,0.06)" : "var(--content-bg)",
                   color: form.submitNow === opt.value ? "var(--vyne-purple)" : "var(--text-primary)",
                   cursor: "pointer",
                   fontSize: 13,

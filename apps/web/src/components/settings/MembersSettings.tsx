@@ -9,7 +9,7 @@ import InviteMemberModal from "./InviteMemberModal";
 // ─── Helpers ─────────────────────────────────────────────────────
 function RoleBadge({ role }: Readonly<{ role: string }>) {
   const map: Record<string, { bg: string; color: string }> = {
-    admin: { bg: "rgba(108,71,255,0.1)", color: "#6C47FF" },
+    admin: { bg: "rgba(6, 182, 212,0.1)", color: "#06B6D4" },
     member: { bg: "#EFF6FF", color: "#1E40AF" },
     viewer: { bg: "#F0F0F8", color: "var(--text-secondary)" },
   };
@@ -139,7 +139,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
               padding: "5px 12px",
               borderRadius: 7,
               border: "none",
-              background: "#6C47FF",
+              background: "#06B6D4",
               color: "#fff",
               cursor: "pointer",
               fontSize: 12,
@@ -603,7 +603,7 @@ function RolesMatrix({ onToast }: { onToast: (m: string) => void }) {
           style={{
             padding: 14,
             borderBottom: "1px solid var(--content-border)",
-            background: "rgba(108,71,255,0.04)",
+            background: "rgba(6, 182, 212,0.04)",
             display: "flex",
             flexDirection: "column",
             gap: 10,
@@ -888,7 +888,7 @@ function RolesGroup({
                     borderRadius: 5,
                     border: `1px solid ${has ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background: has
-                      ? "rgba(108,71,255,0.15)"
+                      ? "rgba(6, 182, 212,0.15)"
                       : "var(--content-bg)",
                     color: has ? "var(--vyne-purple)" : "var(--text-tertiary)",
                     fontSize: 12,

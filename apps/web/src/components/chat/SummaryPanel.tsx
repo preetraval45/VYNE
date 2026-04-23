@@ -177,7 +177,7 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
         background: "var(--content-bg, #fff)",
         border: "1px solid #E0D5FF",
         borderRadius: 12,
-        boxShadow: "0 8px 32px rgba(108,71,255,0.15)",
+        boxShadow: "0 8px 32px rgba(6, 182, 212,0.15)",
         padding: 16,
         maxHeight: 340,
         overflowY: "auto",
@@ -193,15 +193,15 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <Sparkles size={15} style={{ color: "#6C47FF" }} />
+          <Sparkles size={15} style={{ color: "#06B6D4" }} />
           <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary, #1A1A2E)" }}>
             AI Thread Summary
           </span>
           <span
             style={{
               fontSize: 10,
-              color: "#6C47FF",
-              background: "rgba(108,71,255,0.1)",
+              color: "#06B6D4",
+              background: "rgba(6, 182, 212,0.1)",
               padding: "1px 6px",
               borderRadius: 4,
               fontWeight: 600,
@@ -248,7 +248,7 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
       {/* Loading state */}
       {state === "loading" && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0" }}>
-          <Loader2 size={16} style={{ color: "#6C47FF", animation: "spin 1s linear infinite" }} />
+          <Loader2 size={16} style={{ color: "#06B6D4", animation: "spin 1s linear infinite" }} />
           <span style={{ fontSize: 12, color: "var(--text-secondary, #6B6B8A)" }}>
             Analyzing conversation...
           </span>

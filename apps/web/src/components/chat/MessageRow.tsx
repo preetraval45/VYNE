@@ -113,12 +113,12 @@ export function MessageRow({
                   fontSize: 12,
                   cursor: "pointer",
                   background: r.userReacted
-                    ? "rgba(108,71,255,0.1)"
+                    ? "rgba(6, 182, 212,0.1)"
                     : "#F0F0F8",
                   border: r.userReacted
-                    ? "1px solid rgba(108,71,255,0.35)"
+                    ? "1px solid rgba(6, 182, 212,0.35)"
                     : "1px solid #E8E8F0",
-                  color: r.userReacted ? "#6C47FF" : "#6B6B8A",
+                  color: r.userReacted ? "#06B6D4" : "#6B6B8A",
                 }}
               >
                 {r.emoji} <span style={{ fontWeight: 600 }}>{r.count}</span>
@@ -155,13 +155,13 @@ export function MessageRow({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#6C47FF",
+              color: "#06B6D4",
               fontSize: 11,
               fontWeight: 500,
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background =
-                "rgba(108,71,255,0.07)";
+                "rgba(6, 182, 212,0.07)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -211,7 +211,7 @@ export function MessageRow({
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
-                  (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
@@ -243,7 +243,7 @@ export function MessageRow({
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
-                (e.currentTarget as HTMLElement).style.color = "#6C47FF";
+                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =

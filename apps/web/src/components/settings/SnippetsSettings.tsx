@@ -144,7 +144,7 @@ export default function SnippetsSettings({ onToast }: Props) {
             style={{
               padding: 16,
               borderBottom: "1px solid var(--content-border)",
-              background: "rgba(108,71,255,0.04)",
+              background: "rgba(6, 182, 212,0.04)",
               display: "flex",
               flexDirection: "column",
               gap: 10,
@@ -307,7 +307,7 @@ export default function SnippetsSettings({ onToast }: Props) {
                 style={{
                   padding: "3px 10px",
                   borderRadius: 6,
-                  background: "rgba(108,71,255,0.12)",
+                  background: "rgba(6, 182, 212,0.12)",
                   color: "var(--vyne-purple)",
                   fontSize: 11,
                   fontWeight: 600,

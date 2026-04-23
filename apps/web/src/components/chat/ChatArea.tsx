@@ -218,13 +218,13 @@ export function ChatArea({
                 padding: "5px 9px",
                 borderRadius: 7,
                 border: summaryOpen
-                  ? "1px solid rgba(108,71,255,0.4)"
+                  ? "1px solid rgba(6, 182, 212,0.4)"
                   : "1px solid transparent",
                 background: summaryOpen
-                  ? "rgba(108,71,255,0.08)"
+                  ? "rgba(6, 182, 212,0.08)"
                   : "transparent",
                 cursor: "pointer",
-                color: summaryOpen ? "#6C47FF" : "#A0A0B8",
+                color: summaryOpen ? "#06B6D4" : "#A0A0B8",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
@@ -379,14 +379,14 @@ export function ChatArea({
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      background: "rgba(108,71,255,0.12)",
+                      background: "rgba(6, 182, 212,0.12)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                   >
-                    <Zap size={16} style={{ color: "#6C47FF" }} />
+                    <Zap size={16} style={{ color: "#06B6D4" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
@@ -401,7 +401,7 @@ export function ChatArea({
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: "#6C47FF",
+                          color: "#06B6D4",
                         }}
                       >
                         VYNE Bot

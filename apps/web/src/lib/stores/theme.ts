@@ -16,8 +16,8 @@ export const ACCENT_COLORS: Record<
   { primary: string; light: string; dark: string; label: string }
 > = {
   purple: {
-    primary: "#6C47FF",
-    light: "#8B6BFF",
+    primary: "#06B6D4",
+    light: "#22D3EE",
     dark: "#5235CC",
     label: "Purple",
   },
@@ -47,7 +47,7 @@ export const ACCENT_COLORS: Record<
     label: "Green",
   },
   indigo: {
-    primary: "#6366F1",
+    primary: "#0891B2",
     light: "#818CF8",
     dark: "#4F46E5",
     label: "Indigo",

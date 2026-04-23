@@ -58,7 +58,7 @@ function InfiniteScrollStyles() {
   width: 20px;
   height: 20px;
   border: 2px solid var(--content-border, #E0E0EC);
-  border-top-color: var(--accent-primary, #6C47FF);
+  border-top-color: var(--accent-primary, #06B6D4);
   border-radius: 50%;
   animation: vyneSpinnerRotate 0.7s linear infinite;
 }
@@ -96,7 +96,7 @@ function InfiniteScrollStyles() {
 }
 
 .vyne-infinite-scroll__load-more-btn:focus-visible {
-  outline: 2px solid var(--accent-primary, #6C47FF);
+  outline: 2px solid var(--accent-primary, #06B6D4);
   outline-offset: 1px;
 }
 

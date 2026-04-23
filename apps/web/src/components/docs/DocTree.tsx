@@ -105,7 +105,7 @@ export function DocTree({
               className="group flex items-center gap-1 py-[3px] px-1 rounded-md cursor-pointer select-none"
               style={{
                 paddingLeft,
-                background: isActive ? 'rgba(108,71,255,0.08)' : undefined,
+                background: isActive ? 'rgba(6, 182, 212,0.08)' : undefined,
               }}
               onClick={() => onSelect(doc.id)}
             >
@@ -140,7 +140,7 @@ export function DocTree({
               {renamingId === doc.id ? (
                 <input
                   ref={renameRef}
-                  className="flex-1 min-w-0 text-[13px] bg-white border border-[#6C47FF] rounded px-1 py-0 outline-none"
+                  className="flex-1 min-w-0 text-[13px] bg-white border border-[#06B6D4] rounded px-1 py-0 outline-none"
                   value={renameValue}
                   onChange={(e) => setRenameValue(e.target.value)}
                   onBlur={handleRenameCommit}
@@ -199,7 +199,7 @@ export function DocTree({
       {/* New Page button at root level */}
       {depth === 0 && (
         <button
-          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[#A0A0B8] hover:text-[#6C47FF] hover:bg-[rgba(108,71,255,0.06)] transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[#A0A0B8] hover:text-[#06B6D4] hover:bg-[rgba(6, 182, 212,0.06)] transition-colors"
           onClick={onCreateRoot}
         >
           <Plus size={14} />

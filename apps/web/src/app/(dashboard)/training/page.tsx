@@ -154,7 +154,7 @@ export default function TrainingPage() {
             display: "grid",
             placeItems: "center",
             background:
-              "linear-gradient(135deg, rgba(108,71,255,0.18), rgba(139,107,255,0.12))",
+              "linear-gradient(135deg, rgba(6, 182, 212,0.18), rgba(139,107,255,0.12))",
             color: "var(--vyne-purple)",
             flexShrink: 0,
           }}
@@ -241,7 +241,7 @@ export default function TrainingPage() {
             padding: 16,
             borderRadius: 12,
             background:
-              "linear-gradient(135deg, rgba(108,71,255,0.08), rgba(139,107,255,0.04))",
+              "linear-gradient(135deg, rgba(6, 182, 212,0.08), rgba(139,107,255,0.04))",
             border: "1px solid var(--content-border)",
             display: "flex",
             gap: 16,

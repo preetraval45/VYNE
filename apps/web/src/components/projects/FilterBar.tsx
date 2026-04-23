@@ -102,12 +102,12 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
         <button
           onClick={clearAll}
           className="ml-1 text-xs font-medium transition-colors flex-shrink-0"
-          style={{ color: "#6C47FF" }}
+          style={{ color: "#06B6D4" }}
           onMouseEnter={(e) =>
             ((e.currentTarget as HTMLElement).style.color = "#5235CC")
           }
           onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.color = "#6C47FF")
+            ((e.currentTarget as HTMLElement).style.color = "#06B6D4")
           }
           aria-label="Clear all filters"
         >

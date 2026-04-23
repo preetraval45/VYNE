@@ -41,7 +41,7 @@ interface RevenueMonth {
 const PLAN_TIERS: PlanTier[] = [
   { plan: "Starter", tenants: 2, totalMrr: 198, color: "#3B82F6" },
   { plan: "Growth", tenants: 2, totalMrr: 1320, color: "#22C55E" },
-  { plan: "Enterprise", tenants: 2, totalMrr: 5600, color: "#6C47FF" },
+  { plan: "Enterprise", tenants: 2, totalMrr: 5600, color: "#06B6D4" },
 ];
 
 const RENEWALS: Renewal[] = [
@@ -121,7 +121,7 @@ function planColor(plan: Plan): { bg: string; color: string } {
     return { bg: "rgba(59,130,246,0.12)", color: "#60A5FA" };
   if (plan === "Growth")
     return { bg: "rgba(34,197,94,0.12)", color: "#4ADE80" };
-  return { bg: "rgba(108,71,255,0.12)", color: "#A78BFA" };
+  return { bg: "rgba(6, 182, 212,0.12)", color: "#67E8F9" };
 }
 
 // ─── KPI Card ─────────────────────────────────────────────────────
@@ -143,7 +143,7 @@ function BillingKPI({
       onMouseLeave={() => setHovered(false)}
       style={{
         background: "#13131F",
-        border: `1px solid ${hovered ? "rgba(108,71,255,0.3)" : "rgba(255,255,255,0.08)"}`,
+        border: `1px solid ${hovered ? "rgba(6, 182, 212,0.3)" : "rgba(255,255,255,0.08)"}`,
         borderRadius: 14,
         padding: "20px 22px",
         transition: "all 0.2s",
@@ -229,7 +229,7 @@ function RevenueTrendChart({
         </div>
         <div style={{ display: "flex", gap: 14 }}>
           {[
-            { label: "Enterprise", color: "#6C47FF" },
+            { label: "Enterprise", color: "#06B6D4" },
             { label: "Growth", color: "#22C55E" },
             { label: "Starter", color: "#3B82F6" },
           ].map((l) => (
@@ -313,7 +313,7 @@ function RevenueTrendChart({
                 <div
                   style={{
                     height: enterpriseH,
-                    background: "#6C47FF",
+                    background: "#06B6D4",
                     transition: "height 0.3s",
                   }}
                 />
@@ -389,7 +389,7 @@ export default function BillingPage() {
           label="Total MRR"
           value={`$${totalMrr.toLocaleString()}`}
           sub="monthly recurring revenue"
-          accent="#6C47FF"
+          accent="#06B6D4"
         />
         <BillingKPI
           label="ARR"
@@ -529,13 +529,13 @@ export default function BillingPage() {
               }}
             >
               <span style={{ fontSize: 12, color: "#9090B0" }}>Total MRR</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#6C47FF" }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#06B6D4" }}>
                 ${totalMrr.toLocaleString()}
               </span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontSize: 12, color: "#9090B0" }}>ARR</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#6C47FF" }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#06B6D4" }}>
                 ${arr.toLocaleString()}
               </span>
             </div>
@@ -777,9 +777,9 @@ export default function BillingPage() {
                       style={{
                         padding: "4px 12px",
                         borderRadius: 6,
-                        border: "1px solid rgba(108,71,255,0.3)",
-                        background: "rgba(108,71,255,0.1)",
-                        color: "#A78BFA",
+                        border: "1px solid rgba(6, 182, 212,0.3)",
+                        background: "rgba(6, 182, 212,0.1)",
+                        color: "#67E8F9",
                         fontSize: 11,
                         fontWeight: 600,
                         cursor: "pointer",
@@ -803,13 +803,13 @@ export default function BillingPage() {
             position: "fixed",
             bottom: 24,
             right: 24,
-            background: "#6C47FF",
+            background: "#06B6D4",
             color: "#fff",
             padding: "10px 18px",
             borderRadius: 8,
             fontSize: 13,
             fontWeight: 600,
-            boxShadow: "0 8px 24px rgba(108,71,255,0.3)",
+            boxShadow: "0 8px 24px rgba(6, 182, 212,0.3)",
             zIndex: 400,
           }}
         >

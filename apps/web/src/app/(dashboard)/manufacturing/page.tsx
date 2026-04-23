@@ -628,7 +628,7 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(108,71,255,0.12)" : "#F0F0F8",
+            background: active ? "rgba(6, 182, 212,0.12)" : "#F0F0F8",
             color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
           }}
         >
@@ -957,7 +957,7 @@ function BOMTab() {
                           padding: "2px 8px",
                           borderRadius: 4,
                           fontSize: 11,
-                          background: "rgba(108,71,255,0.08)",
+                          background: "rgba(6, 182, 212,0.08)",
                           color: "var(--vyne-purple)",
                           fontWeight: 600,
                         }}
@@ -1698,7 +1698,7 @@ function OperationsTab() {
                       padding: "2px 8px",
                       borderRadius: 4,
                       fontSize: 11,
-                      background: "rgba(108,71,255,0.08)",
+                      background: "rgba(6, 182, 212,0.08)",
                       color: "var(--vyne-purple)",
                     }}
                   >

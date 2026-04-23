@@ -44,13 +44,13 @@ interface ModuleOption {
 
 /* ─── Available Modules ──────────────────────────────────────── */
 const modules: ModuleOption[] = [
-  { id: 'chat', name: 'Messaging', desc: 'Team chat, channels, DMs', icon: MessageSquare, color: '#6C47FF', recommended: true },
+  { id: 'chat', name: 'Messaging', desc: 'Team chat, channels, DMs', icon: MessageSquare, color: '#06B6D4', recommended: true },
   { id: 'projects', name: 'Projects', desc: 'Kanban, sprints, issues', icon: FolderKanban, color: '#3B82F6', recommended: true },
   { id: 'docs', name: 'Documents', desc: 'Wiki, notes, knowledge base', icon: FileText, color: '#22C55E', recommended: true },
   { id: 'erp', name: 'ERP / Inventory', desc: 'Stock, orders, suppliers', icon: Package, color: '#F59E0B' },
   { id: 'finance', name: 'Finance', desc: 'Accounting, P&L, expenses', icon: BarChart3, color: '#EF4444' },
   { id: 'crm', name: 'CRM', desc: 'Pipeline, deals, customers', icon: UserCircle, color: '#8B5CF6' },
-  { id: 'ai', name: 'AI Assistant', desc: 'Smart alerts, AI agents', icon: Bot, color: '#8B6BFF', recommended: true },
+  { id: 'ai', name: 'AI Assistant', desc: 'Smart alerts, AI agents', icon: Bot, color: '#22D3EE', recommended: true },
   { id: 'sales', name: 'Sales', desc: 'Quotes, orders, opportunities', icon: ShoppingCart, color: '#06B6D4' },
   { id: 'marketing', name: 'Marketing', desc: 'Campaigns, analytics', icon: Megaphone, color: '#EC4899' },
   { id: 'manufacturing', name: 'Manufacturing', desc: 'BOM, work orders', icon: Factory, color: '#F97316' },
@@ -80,7 +80,7 @@ function Confetti() {
   const [pieces, setPieces] = useState<Array<{ id: number; x: number; delay: number; color: string; size: number }>>([])
 
   useEffect(() => {
-    const colors = ['#6C47FF', '#8B6BFF', '#22C55E', '#F59E0B', '#3B82F6', '#EF4444', '#EC4899']
+    const colors = ['#06B6D4', '#22D3EE', '#22C55E', '#F59E0B', '#3B82F6', '#EF4444', '#EC4899']
     const newPieces = Array.from({ length: 60 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -136,14 +136,14 @@ function StepCompany({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(108,71,255,0.1)',
+            background: 'rgba(6, 182, 212,0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Building2 size={28} color="#6C47FF" />
+          <Building2 size={28} color="#06B6D4" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Tell us about your company
@@ -220,9 +220,9 @@ function StepCompany({
                 style={{
                   padding: '10px 18px',
                   borderRadius: 10,
-                  border: `1.5px solid ${data.size === size ? '#6C47FF' : 'var(--content-border)'}`,
-                  background: data.size === size ? 'rgba(108,71,255,0.08)' : 'var(--content-bg)',
-                  color: data.size === size ? '#6C47FF' : 'var(--text-primary)',
+                  border: `1.5px solid ${data.size === size ? '#06B6D4' : 'var(--content-border)'}`,
+                  background: data.size === size ? 'rgba(6, 182, 212,0.08)' : 'var(--content-bg)',
+                  color: data.size === size ? '#06B6D4' : 'var(--text-primary)',
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -254,14 +254,14 @@ function StepModules({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(108,71,255,0.1)',
+            background: 'rgba(6, 182, 212,0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Sparkles size={28} color="#6C47FF" />
+          <Sparkles size={28} color="#06B6D4" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Choose your modules
@@ -339,8 +339,8 @@ function StepModules({
                       style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: '#6C47FF',
-                        background: 'rgba(108,71,255,0.1)',
+                        color: '#06B6D4',
+                        background: 'rgba(6, 182, 212,0.1)',
                         padding: '2px 6px',
                         borderRadius: 4,
                       }}
@@ -380,14 +380,14 @@ function StepInvite({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(108,71,255,0.1)',
+            background: 'rgba(6, 182, 212,0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Users size={28} color="#6C47FF" />
+          <Users size={28} color="#06B6D4" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Invite your team
@@ -493,12 +493,12 @@ function StepDone({ companyName }: { companyName: string }) {
           width: 72,
           height: 72,
           borderRadius: 20,
-          background: 'linear-gradient(135deg, #6C47FF, #8B6BFF)',
+          background: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 24px',
-          boxShadow: '0 8px 30px rgba(108,71,255,0.3)',
+          boxShadow: '0 8px 30px rgba(6, 182, 212,0.3)',
         }}
       >
         <PartyPopper size={36} color="#fff" />
@@ -639,7 +639,7 @@ export default function OnboardingPage() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: 'linear-gradient(135deg, #6C47FF, #8B6BFF)',
+              background: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -662,7 +662,7 @@ export default function OnboardingPage() {
                   width: 28,
                   height: 28,
                   borderRadius: 8,
-                  background: i <= step ? '#6C47FF' : 'var(--content-secondary)',
+                  background: i <= step ? '#06B6D4' : 'var(--content-secondary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -681,7 +681,7 @@ export default function OnboardingPage() {
                     width: 24,
                     height: 2,
                     borderRadius: 1,
-                    background: i < step ? '#6C47FF' : 'var(--content-border)',
+                    background: i < step ? '#06B6D4' : 'var(--content-border)',
                     transition: 'background 0.3s',
                   }}
                 />
@@ -759,13 +759,13 @@ export default function OnboardingPage() {
             padding: '10px 24px',
             borderRadius: 10,
             border: 'none',
-            background: (canAdvance() && !isSaving) ? 'linear-gradient(135deg, #6C47FF, #8B6BFF)' : 'var(--content-secondary)',
+            background: (canAdvance() && !isSaving) ? 'linear-gradient(135deg, #06B6D4, #22D3EE)' : 'var(--content-secondary)',
             color: (canAdvance() && !isSaving) ? '#fff' : 'var(--text-tertiary)',
             fontSize: 14,
             fontWeight: 600,
             cursor: (canAdvance() && !isSaving) ? 'pointer' : 'default',
             transition: 'all 0.2s',
-            boxShadow: (canAdvance() && !isSaving) ? '0 4px 12px rgba(108,71,255,0.3)' : 'none',
+            boxShadow: (canAdvance() && !isSaving) ? '0 4px 12px rgba(6, 182, 212,0.3)' : 'none',
           }}
         >
           {isSaving ? (

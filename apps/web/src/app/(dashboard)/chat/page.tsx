@@ -101,7 +101,7 @@ export default function ChatPage() {
               width: 64,
               height: 64,
               borderRadius: 20,
-              background: "rgba(108,71,255,0.08)",
+              background: "rgba(6, 182, 212,0.08)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

@@ -372,7 +372,7 @@ function PomodoroWidget() {
                   type="checkbox"
                   checked={settings.soundOn}
                   onChange={(e) => updateSettings({ soundOn: e.target.checked })}
-                  style={{ accentColor: "#6C47FF" }}
+                  style={{ accentColor: "#06B6D4" }}
                 />
                 Play chime on phase change
               </label>
@@ -468,7 +468,7 @@ function ctrlBtn(color: string): React.CSSProperties {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 4px 14px rgba(108,71,255,0.3)",
+    boxShadow: "0 4px 14px rgba(6, 182, 212,0.3)",
   };
 }
 
@@ -591,14 +591,14 @@ function QuickNoteFab() {
           width: 50,
           height: 50,
           borderRadius: "50%",
-          background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+          background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
           color: "#fff",
           border: "none",
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(108,71,255,0.4)",
+          boxShadow: "0 8px 24px rgba(6, 182, 212,0.4)",
         }}
       >
         <StickyNote size={20} />
@@ -778,7 +778,7 @@ function QuickNoteFab() {
                     borderRadius: 8,
                     border: `1px solid ${n.pinned ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background: n.pinned
-                      ? "rgba(108,71,255,0.05)"
+                      ? "rgba(6, 182, 212,0.05)"
                       : "var(--content-secondary)",
                     display: "flex",
                     gap: 8,
@@ -971,7 +971,7 @@ function WorkspaceSwitcherTrigger() {
             gap: 10,
           }}
         >
-          <Building2 size={15} style={{ color: "#B8A3FF" }} />
+          <Building2 size={15} style={{ color: "#67E8F9" }} />
           <span style={{ fontSize: 13, fontWeight: 700, flex: 1 }}>
             Switch workspace
           </span>
@@ -1086,7 +1086,7 @@ function WorkspaceSwitcherTrigger() {
                   padding: "10px 12px",
                   borderRadius: 8,
                   background:
-                    i === activeIdx ? "rgba(108,71,255,0.18)" : "transparent",
+                    i === activeIdx ? "rgba(6, 182, 212,0.18)" : "transparent",
                   border: "none",
                   color: "#fff",
                   cursor: "pointer",
@@ -1173,7 +1173,7 @@ function WorkspaceSwitcherTrigger() {
 
 function colorFor(id: string): string {
   const colors = [
-    "#6C47FF",
+    "#06B6D4",
     "#22C55E",
     "#F59E0B",
     "#EF4444",

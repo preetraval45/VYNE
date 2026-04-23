@@ -42,7 +42,7 @@ const CATEGORY_STYLE: Record<
   auth: { label: "Auth", color: "#3B82F6", icon: Shield },
   billing: { label: "Billing", color: "#22C55E", icon: DollarSign },
   orders: { label: "Orders", color: "#F59E0B", icon: Package },
-  projects: { label: "Projects", color: "#6C47FF", icon: FileText },
+  projects: { label: "Projects", color: "#06B6D4", icon: FileText },
   members: { label: "Members", color: "#8B5CF6", icon: User },
   security: { label: "Security", color: "#EF4444", icon: Shield },
   api: { label: "API", color: "#64748B", icon: FileText },

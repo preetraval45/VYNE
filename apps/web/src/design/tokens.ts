@@ -12,10 +12,10 @@
  */
 
 export const brand = {
-  purple:      '#7C5CFF',
+  purple:      '#06B6D4',
   purpleLight: '#9B80FF',
   purpleDark:  '#5A3ED4',
-  indigo:      '#6366F1',
+  indigo:      '#0891B2',
   cyan:        '#06B6D4',
   magenta:     '#EC4899',
 } as const;
@@ -24,7 +24,7 @@ export const status = {
   success: '#22C55E',
   warning: '#F59E0B',
   danger:  '#EF4444',
-  info:    '#6366F1',
+  info:    '#0891B2',
 } as const;
 
 /** Semantic aliases */
@@ -46,8 +46,8 @@ export const marketing = {
   textSub:      '#9490B8',
   textMuted:    '#5E5A7A',
   border:       'rgba(255,255,255,0.06)',
-  purpleDim:    'rgba(124,92,255,0.08)',
-  purpleBorder: 'rgba(124,92,255,0.3)',
+  purpleDim:    'rgba(6, 182, 212,0.08)',
+  purpleBorder: 'rgba(6, 182, 212,0.3)',
 } as const;
 
 /** Generates a rgba() string from a hex color + alpha (0-1). */
@@ -69,11 +69,11 @@ export const radius = {
 } as const;
 
 export const shadow = {
-  sm:    '0 1px 3px rgba(108,71,255,0.07), 0 1px 2px rgba(0,0,0,0.04)',
-  md:    '0 4px 12px rgba(108,71,255,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-  lg:    '0 10px 24px rgba(108,71,255,0.1), 0 4px 8px rgba(0,0,0,0.04)',
-  xl:    '0 20px 40px rgba(108,71,255,0.12), 0 8px 16px rgba(0,0,0,0.06)',
-  panel: '0 0 0 1px rgba(108,71,255,0.1), 0 10px 30px rgba(108,71,255,0.08)',
+  sm:    '0 1px 3px rgba(6, 182, 212,0.07), 0 1px 2px rgba(0,0,0,0.04)',
+  md:    '0 4px 12px rgba(6, 182, 212,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+  lg:    '0 10px 24px rgba(6, 182, 212,0.1), 0 4px 8px rgba(0,0,0,0.04)',
+  xl:    '0 20px 40px rgba(6, 182, 212,0.12), 0 8px 16px rgba(0,0,0,0.06)',
+  panel: '0 0 0 1px rgba(6, 182, 212,0.1), 0 10px 30px rgba(6, 182, 212,0.08)',
 } as const;
 
 export const z = {

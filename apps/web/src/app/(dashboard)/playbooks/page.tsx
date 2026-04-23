@@ -36,7 +36,7 @@ interface Playbook {
 
 const CHANNEL_META: Record<PlaybookStep["channel"], { label: string; color: string }> = {
   email: { label: "Email", color: "#F59E0B" },
-  "in-app": { label: "In-app", color: "#6C47FF" },
+  "in-app": { label: "In-app", color: "#06B6D4" },
   slack: { label: "Slack", color: "#E01E5A" },
   task: { label: "Task", color: "#22C55E" },
   ai: { label: "AI nudge", color: "#EC4899" },
@@ -215,7 +215,7 @@ export default function PlaybooksPage() {
                     borderRadius: 10,
                     border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background: active
-                      ? "rgba(108,71,255,0.08)"
+                      ? "rgba(6, 182, 212,0.08)"
                       : "var(--content-bg)",
                     color: "var(--text-primary)",
                     cursor: "pointer",

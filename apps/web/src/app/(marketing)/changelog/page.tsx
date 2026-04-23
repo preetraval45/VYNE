@@ -18,8 +18,8 @@ const TAG_STYLE: Record<
 > = {
   launch: {
     label: "Launch",
-    bg: "rgba(108,71,255,0.15)",
-    color: "#A78BFA",
+    bg: "rgba(6, 182, 212,0.15)",
+    color: "#67E8F9",
     icon: Rocket,
   },
   feature: {
@@ -218,7 +218,7 @@ export default function ChangelogPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #6C47FF, #8B6BFF)",
+                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -244,9 +244,9 @@ export default function ChangelogPage() {
               gap: 8,
               padding: "6px 14px",
               borderRadius: 999,
-              background: "rgba(108,71,255,0.1)",
-              border: "1px solid rgba(108,71,255,0.25)",
-              color: "#B8A3FF",
+              background: "rgba(6, 182, 212,0.1)",
+              border: "1px solid rgba(6, 182, 212,0.25)",
+              color: "#67E8F9",
               fontSize: 12,
               fontWeight: 600,
               marginBottom: 20,

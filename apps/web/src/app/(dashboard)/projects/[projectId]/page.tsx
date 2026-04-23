@@ -120,7 +120,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         <Link
           href="/projects"
           className="flex items-center gap-1.5 text-sm font-medium"
-          style={{ color: "#6C47FF" }}
+          style={{ color: "#06B6D4" }}
         >
           <ArrowLeft size={14} />
           Back to projects
@@ -389,7 +389,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background =
-                "var(--vyne-purple-light, #8B6BFF)";
+                "var(--vyne-purple-light, #22D3EE)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "var(--vyne-purple)";
@@ -566,7 +566,7 @@ function TaskListView({
                 </td>
                 <td className="px-3 py-2.5" style={{ maxWidth: "320px" }}>
                   <span
-                    className="text-sm font-medium truncate block group-hover:text-[#6C47FF] transition-colors"
+                    className="text-sm font-medium truncate block group-hover:text-[#06B6D4] transition-colors"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {task.title}
@@ -766,7 +766,7 @@ function TaskBoardView({
       lanes.push({
         key: k,
         label: member?.name ?? (k === "_unassigned" ? "Unassigned" : k),
-        color: member ? "#6C47FF" : "#6B6B8A",
+        color: member ? "#06B6D4" : "#6B6B8A",
         tasks: byAssignee.get(k) ?? [],
       });
     }
@@ -881,7 +881,7 @@ function TaskCalendarView({
               ? "#EF4444"
               : t.priority === "high"
                 ? "#F59E0B"
-                : "#6C47FF",
+                : "#06B6D4",
           meta: `${t.status} · ${t.priority ?? "medium"}`,
           onClick: () => onTaskClick(t.id),
         })),
@@ -910,7 +910,7 @@ function TaskGanttView({ tasks }: { tasks: Task[] }) {
                 ? "#F59E0B"
                 : t.status === "done"
                   ? "#22C55E"
-                  : "#6C47FF",
+                  : "#06B6D4",
           progress:
             t.status === "done"
               ? 1
@@ -1063,7 +1063,7 @@ function BoardCard({
             </span>
           </div>
           <p
-            className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-[#6C47FF] transition-colors"
+            className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-[#06B6D4] transition-colors"
             style={{ color: "var(--text-primary)" }}
           >
             {task.title}
@@ -1445,7 +1445,7 @@ function AddTaskModal({
                       className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50"
                       style={{
                         background:
-                          "linear-gradient(135deg, #6C47FF 0%, #8B6BFF 100%)",
+                          "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
                       }}
                     >
                       Create task
@@ -1886,8 +1886,8 @@ function TaskDetailPanel({
                   lineHeight: "1.6",
                 }}
                 onFocus={(e) => {
-                  e.target.style.border = "1px solid #6C47FF";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(108,71,255,0.08)";
+                  e.target.style.border = "1px solid #06B6D4";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(6, 182, 212,0.08)";
                 }}
               />
             </div>
@@ -1908,7 +1908,7 @@ function TaskDetailPanel({
               <button
                 onClick={() => setShowAddSubtask(!showAddSubtask)}
                 className="text-xs font-medium flex items-center gap-1 transition-colors"
-                style={{ color: "#6C47FF" }}
+                style={{ color: "#06B6D4" }}
               >
                 <Plus size={12} /> Add
               </button>
@@ -2067,7 +2067,7 @@ function TaskDetailPanel({
                       onClick={handleAddSubtask}
                       disabled={!newSubtaskTitle.trim()}
                       className="px-3 py-1 rounded text-xs font-semibold text-white disabled:opacity-50"
-                      style={{ background: "#6C47FF" }}
+                      style={{ background: "#06B6D4" }}
                     >
                       Add
                     </button>
@@ -2104,7 +2104,7 @@ function TaskDetailPanel({
                     <div key={comment.id} className="flex gap-3">
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
-                        style={{ background: author?.color ?? "#6C47FF" }}
+                        style={{ background: author?.color ?? "#06B6D4" }}
                       >
                         {author?.initials ?? "?"}
                       </div>

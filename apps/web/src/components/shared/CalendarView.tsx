@@ -239,7 +239,7 @@ export function CalendarView({ events, initialMonth, title }: Props) {
                 display: "flex",
                 flexDirection: "column",
                 gap: 3,
-                background: isToday ? "rgba(108,71,255,0.05)" : "transparent",
+                background: isToday ? "rgba(6, 182, 212,0.05)" : "transparent",
                 minHeight: 88,
               }}
             >
@@ -276,7 +276,7 @@ export function CalendarView({ events, initialMonth, title }: Props) {
                     border: "none",
                     background: e.color
                       ? `${e.color}22`
-                      : "rgba(108,71,255,0.12)",
+                      : "rgba(6, 182, 212,0.12)",
                     color: e.color ?? "var(--vyne-purple)",
                     fontSize: 10,
                     fontWeight: 600,

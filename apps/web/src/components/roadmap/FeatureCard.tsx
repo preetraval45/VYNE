@@ -31,7 +31,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
       }}
       onClick={() => setExpanded(!expanded)}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 2px 8px rgba(108,71,255,0.1)";
+        e.currentTarget.style.boxShadow = "0 2px 8px rgba(6, 182, 212,0.1)";
         e.currentTarget.style.borderColor = "#DDD6FE";
       }}
       onMouseLeave={(e) => {
@@ -168,8 +168,8 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
                     fontWeight: 500,
                     padding: "2px 6px",
                     borderRadius: 4,
-                    background: "rgba(108,71,255,0.08)",
-                    color: "#6C47FF",
+                    background: "rgba(6, 182, 212,0.08)",
+                    color: "#06B6D4",
                   }}
                 >
                   {issue}

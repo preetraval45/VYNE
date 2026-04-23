@@ -41,7 +41,7 @@ export const RECENT_ACTIVITY: ActivityItemData[] = [
     time: '1 hour ago \u00b7 Code',
   },
   {
-    avatar: 'AI', name: 'Vyne AI', avatarBg: 'linear-gradient(135deg,#6C47FF,#9B59B6)',
+    avatar: 'AI', name: 'Vyne AI', avatarBg: 'linear-gradient(135deg,#06B6D4,#9B59B6)',
     action: '<strong>Vyne AI</strong> flagged <strong>PWR-003</strong> stock critical',
     time: '2 hours ago \u00b7 Inventory \u00b7 38 units left',
   },

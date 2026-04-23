@@ -22,12 +22,12 @@ import { cn } from "@/lib/utils";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 
 const PREVIEW_MODULES = [
-  { icon: MessageSquare, label: "Messaging", color: "#6C47FF" },
+  { icon: MessageSquare, label: "Messaging", color: "#06B6D4" },
   { icon: FolderKanban, label: "Projects", color: "#3B82F6" },
   { icon: FileText, label: "Docs", color: "#22C55E" },
   { icon: Package, label: "ERP", color: "#F59E0B" },
   { icon: BarChart3, label: "Finance", color: "#EF4444" },
-  { icon: Bot, label: "AI Agents", color: "#8B6BFF" },
+  { icon: Bot, label: "AI Agents", color: "#22D3EE" },
 ];
 
 export default function LoginPage() {
@@ -207,7 +207,7 @@ export default function LoginPage() {
                   <Link
                     href="/forgot-password"
                     className="text-xs transition-colors hover:underline"
-                    style={{ color: "#8B6BFF" }}
+                    style={{ color: "#22D3EE" }}
                   >
                     Forgot password?
                   </Link>
@@ -320,7 +320,7 @@ export default function LoginPage() {
             <Link
               href="/signup"
               className="font-medium transition-colors hover:underline"
-              style={{ color: "#B8A3FF" }}
+              style={{ color: "#67E8F9" }}
             >
               Create workspace
             </Link>
@@ -333,7 +333,7 @@ export default function LoginPage() {
         className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden"
         style={{
           background:
-            "radial-gradient(ellipse at top right, rgba(108,71,255,0.2) 0%, transparent 50%), linear-gradient(135deg, #15152A 0%, #0F0F20 100%)",
+            "radial-gradient(ellipse at top right, rgba(6,182,212,0.2) 0%, transparent 50%), linear-gradient(135deg, #15152A 0%, #0F0F20 100%)",
           borderLeft: "1px solid rgba(255,255,255,0.05)",
         }}
       >
@@ -343,7 +343,7 @@ export default function LoginPage() {
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(108,71,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(108,71,255,0.08) 1px, transparent 1px)",
+              "linear-gradient(rgba(6,182,212,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.08) 1px, transparent 1px)",
             backgroundSize: "48px 48px",
             maskImage:
               "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
@@ -362,14 +362,14 @@ export default function LoginPage() {
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{
-              background: "rgba(108,71,255,0.1)",
-              border: "1px solid rgba(108,71,255,0.25)",
+              background: "rgba(6,182,212,0.1)",
+              border: "1px solid rgba(6,182,212,0.25)",
             }}
           >
-            <Zap size={12} style={{ color: "#8B6BFF" }} />
+            <Zap size={12} style={{ color: "#22D3EE" }} />
             <span
               className="text-xs font-semibold tracking-wide"
-              style={{ color: "#B8A3FF" }}
+              style={{ color: "#67E8F9" }}
             >
               AI-Native Company OS
             </span>
@@ -384,7 +384,7 @@ export default function LoginPage() {
             <span
               style={{
                 background:
-                  "linear-gradient(135deg, #6C47FF, #8B6BFF, #A78BFA)",
+                  "linear-gradient(135deg, #06B6D4, #22D3EE, #67E8F9)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",

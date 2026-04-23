@@ -341,7 +341,7 @@ export default function HelpCentrePage() {
           }}
         >
           {[
-            { label: "Ask AI", desc: "Type `?` in ⌘K", icon: Zap, href: "/ai", color: "#6C47FF" },
+            { label: "Ask AI", desc: "Type `?` in ⌘K", icon: Zap, href: "/ai", color: "#06B6D4" },
             { label: "Docs", desc: "Long-form guides", icon: BookOpen, href: "/docs", color: "#22C55E" },
             { label: "Community", desc: "#help in chat", icon: MessageCircle, href: "/chat", color: "#3B82F6" },
             { label: "Email us", desc: "support@vyne.dev", icon: Mail, href: "mailto:support@vyne.dev", color: "#F59E0B" },

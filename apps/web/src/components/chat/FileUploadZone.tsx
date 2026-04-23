@@ -78,9 +78,9 @@ export function FileUploadZone({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background: "rgba(108, 71, 255, 0.06)",
+              background: "rgba(6, 182, 212, 0.06)",
               backdropFilter: "blur(2px)",
-              border: "2px dashed #6C47FF",
+              border: "2px dashed #06B6D4",
               borderRadius: 12,
               pointerEvents: "none",
             }}
@@ -102,20 +102,20 @@ export function FileUploadZone({
                   width: 56,
                   height: 56,
                   borderRadius: 16,
-                  background: "rgba(108, 71, 255, 0.12)",
+                  background: "rgba(6, 182, 212, 0.12)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Upload size={24} style={{ color: "#6C47FF" }} />
+                <Upload size={24} style={{ color: "#06B6D4" }} />
               </div>
               <div style={{ textAlign: "center" }}>
                 <p
                   style={{
                     fontSize: 15,
                     fontWeight: 600,
-                    color: "#6C47FF",
+                    color: "#06B6D4",
                     margin: 0,
                     marginBottom: 4,
                   }}

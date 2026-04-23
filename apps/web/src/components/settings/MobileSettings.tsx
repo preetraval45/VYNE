@@ -277,7 +277,7 @@ export default function MobileSettings({ onToast }: Props) {
                     padding: "5px 12px",
                     borderRadius: 999,
                     border: `1px solid ${on ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                    background: on ? "rgba(108,71,255,0.1)" : "var(--content-bg)",
+                    background: on ? "rgba(6, 182, 212,0.1)" : "var(--content-bg)",
                     color: on ? "var(--vyne-purple)" : "var(--text-secondary)",
                     fontSize: 11,
                     fontWeight: 600,
@@ -425,7 +425,7 @@ export default function MobileSettings({ onToast }: Props) {
               value={state.offlineCacheMb}
               onChange={(e) => update("offlineCacheMb", Number(e.target.value))}
               aria-label="Cache budget"
-              style={{ flex: 1, accentColor: "#6C47FF" }}
+              style={{ flex: 1, accentColor: "#06B6D4" }}
             />
             <span
               style={{
@@ -465,7 +465,7 @@ export default function MobileSettings({ onToast }: Props) {
                     borderRadius: 9,
                     border: `1.5px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
                     background: active
-                      ? "rgba(108,71,255,0.05)"
+                      ? "rgba(6, 182, 212,0.05)"
                       : "var(--content-bg)",
                     color: "var(--text-primary)",
                     fontSize: 12,
@@ -516,7 +516,7 @@ export default function MobileSettings({ onToast }: Props) {
                   padding: "5px 12px",
                   borderRadius: 999,
                   border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                  background: active ? "rgba(108,71,255,0.1)" : "var(--content-bg)",
+                  background: active ? "rgba(6, 182, 212,0.1)" : "var(--content-bg)",
                   color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
                   fontSize: 11,
                   fontWeight: 600,
@@ -894,7 +894,7 @@ function QrScannerModal({
                 style={{
                   position: "absolute",
                   inset: "20%",
-                  border: "2px solid rgba(108,71,255,0.85)",
+                  border: "2px solid rgba(6, 182, 212,0.85)",
                   borderRadius: 18,
                   boxShadow: "0 0 0 9999px rgba(0,0,0,0.45)",
                   pointerEvents: "none",

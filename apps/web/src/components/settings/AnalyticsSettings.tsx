@@ -180,7 +180,7 @@ export default function AnalyticsSettings({ onToast }: Props) {
   // Cohort heat-map cell colour
   function cell(value: number) {
     const pct = value / 100;
-    return `rgba(108,71,255,${0.1 + pct * 0.55})`;
+    return `rgba(6, 182, 212,${0.1 + pct * 0.55})`;
   }
 
   // Aggregates for customer health
@@ -245,7 +245,7 @@ export default function AnalyticsSettings({ onToast }: Props) {
                       width: `${pct}%`,
                       height: "100%",
                       background:
-                        "linear-gradient(90deg, var(--vyne-purple), #8B6BFF)",
+                        "linear-gradient(90deg, var(--vyne-purple), #22D3EE)",
                     }}
                   />
                 </div>
