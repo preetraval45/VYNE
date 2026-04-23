@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Clock, CheckSquare, Square, Search, X, ListTree } from "lucide-react";
+import { Clock, CheckSquare, Square, Search, X, ListTree, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects, useProjectsStore } from "@/lib/stores/projects";
 import type { Subtask, Task } from "@/lib/fixtures/projects";
 import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
+import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type Filter = "open" | "done" | "all";
 
@@ -15,8 +17,10 @@ export default function SubtasksKanbanPage() {
   const projects = useProjects();
   const allTasks = useProjectsStore((s) => s.tasks);
   const toggleSubtask = useProjectsStore((s) => s.toggleSubtask);
+  const addSubtask = useProjectsStore((s) => s.addSubtask);
   const [filter, setFilter] = useState<Filter>("open");
   const [search, setSearch] = useState("");
+  const [showCreate, setShowCreate] = useState(false);
 
   // Flatten subtasks with parent info
   const rows = useMemo(() => {
@@ -33,6 +37,22 @@ export default function SubtasksKanbanPage() {
     return list;
   }, [allTasks, filter, search]);
 
+  const kpis = useMemo(() => {
+    let total = 0;
+    let done = 0;
+    let overdue = 0;
+    const now = Date.now();
+    for (const t of allTasks) {
+      for (const s of t.subtasks) {
+        total += 1;
+        if (s.done) done += 1;
+        if (!s.done && t.dueDate && new Date(t.dueDate).getTime() < now) overdue += 1;
+      }
+    }
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { total, done, pct, overdue };
+  }, [allTasks]);
+
   // Group by parent task
   const groupedByTask = useMemo(() => {
     const map = new Map<string, { parent: Task; subs: Subtask[] }>();
@@ -47,6 +67,14 @@ export default function SubtasksKanbanPage() {
   return (
     <div className="flex flex-col h-full">
       <ProjectsSubNav />
+      <ProjectsStatsStrip
+        items={[
+          { label: "Total", value: kpis.total, hint: "All subtasks" },
+          { label: "Done", value: `${kpis.pct}%`, tone: "success", hint: `${kpis.done} completed` },
+          { label: "Open", value: kpis.total - kpis.done, tone: "teal", hint: "Still to do" },
+          { label: "Overdue", value: kpis.overdue, tone: kpis.overdue > 0 ? "danger" : "default", hint: "Parent past due" },
+        ]}
+      />
       <PageHeader
         icon={<ListTree size={16} />}
         title="Sub Tasks"
@@ -116,6 +144,16 @@ export default function SubtasksKanbanPage() {
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="btn-teal"
+              aria-label="Create new subtask"
+              style={{ height: 34 }}
+              disabled={allTasks.length === 0}
+            >
+              <Plus size={14} /> New subtask
+            </button>
           </>
         }
       />
@@ -280,6 +318,175 @@ export default function SubtasksKanbanPage() {
           </div>
         )}
       </div>
+
+      <NewSubtaskQuickModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        tasks={allTasks}
+        projects={projects}
+        onCreate={(taskId, title) => {
+          addSubtask(taskId, {
+            title,
+            done: false,
+            assigneeId: null,
+            dueDate: null,
+          });
+          const parent = allTasks.find((t) => t.id === taskId);
+          toast.success(`Subtask added to ${parent?.title ?? "task"}`);
+          setShowCreate(false);
+        }}
+      />
     </div>
   );
 }
+
+function NewSubtaskQuickModal({
+  open,
+  onClose,
+  tasks,
+  projects,
+  onCreate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  tasks: Task[];
+  projects: ReturnType<typeof useProjects>;
+  onCreate: (taskId: string, title: string) => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
+  const [taskId, setTaskId] = useState("");
+  const [title, setTitle] = useState("");
+
+  if (!open) return null;
+  const effectiveTaskId = taskId || tasks[0]?.id || "";
+
+  return (
+    <div
+      role="presentation"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 200,
+        padding: 20,
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create new subtask"
+        tabIndex={-1}
+        style={{
+          background: "var(--content-bg)",
+          borderRadius: 14,
+          width: "100%",
+          maxWidth: 480,
+          padding: 22,
+          boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
+          border: "1px solid var(--content-border)",
+          outline: "none",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
+            New subtask
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-secondary)",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            <X size={13} />
+          </button>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!title.trim() || !effectiveTaskId) return;
+            onCreate(effectiveTaskId, title.trim());
+            setTitle("");
+          }}
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        >
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Parent task</span>
+            <select
+              value={effectiveTaskId}
+              onChange={(e) => setTaskId(e.target.value)}
+              aria-label="Parent task"
+              style={stInput}
+            >
+              {tasks.map((t) => {
+                const p = projects.find((pr) => pr.id === t.projectId);
+                return (
+                  <option key={t.id} value={t.id}>
+                    {p?.name ? `${p.name} · ` : ""}{t.key} — {t.title}
+                  </option>
+                );
+              })}
+            </select>
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Title</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+              placeholder="e.g. Draft the API spec"
+              style={stInput}
+              required
+            />
+          </label>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <button type="button" onClick={onClose} style={stCancelBtn}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-teal" disabled={!title.trim()}>
+              Create subtask
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const stInput: React.CSSProperties = {
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--text-primary)",
+  fontSize: 14,
+  outline: "none",
+};
+
+const stCancelBtn: React.CSSProperties = {
+  padding: "9px 16px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "transparent",
+  color: "var(--text-secondary)",
+  fontSize: 13.5,
+  fontWeight: 600,
+  cursor: "pointer",
+};

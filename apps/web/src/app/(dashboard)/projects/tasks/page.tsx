@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Star, Clock, CheckSquare, Search, X, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects, useProjectsStore } from "@/lib/stores/projects";
 import { TASK_STATUS_META, getMember, type Task } from "@/lib/fixtures/projects";
 import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
+import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type Filter = "open" | "done" | "all";
 
@@ -15,9 +17,11 @@ export default function TasksKanbanPage() {
   const projects = useProjects();
   const allTasks = useProjectsStore((s) => s.tasks);
   const updateTask = useProjectsStore((s) => s.updateTask);
+  const addTask = useProjectsStore((s) => s.addTask);
   const [filter, setFilter] = useState<Filter>("open");
   const [search, setSearch] = useState("");
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   const visibleTasks = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -43,6 +47,17 @@ export default function TasksKanbanPage() {
 
   const totalFiltered = visibleTasks.length;
 
+  const kpis = useMemo(() => {
+    const total = allTasks.length;
+    const done = allTasks.filter((t) => t.status === "done").length;
+    const inProgress = allTasks.filter((t) => t.status === "in_progress").length;
+    const overdue = allTasks.filter(
+      (t) => t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
+    ).length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { total, done, inProgress, overdue, pct };
+  }, [allTasks]);
+
   function onDropToProject(e: React.DragEvent, projectId: string) {
     e.preventDefault();
     setDragOverProjectId(null);
@@ -59,6 +74,14 @@ export default function TasksKanbanPage() {
   return (
     <div className="flex flex-col h-full">
       <ProjectsSubNav />
+      <ProjectsStatsStrip
+        items={[
+          { label: "Total", value: kpis.total, hint: "All tasks" },
+          { label: "In progress", value: kpis.inProgress, tone: "teal", hint: "Active now" },
+          { label: "Done", value: `${kpis.pct}%`, tone: "success", hint: `${kpis.done} complete` },
+          { label: "Overdue", value: kpis.overdue, tone: kpis.overdue > 0 ? "danger" : "default", hint: "Past due date" },
+        ]}
+      />
       <PageHeader
         icon={<CheckSquare size={16} />}
         title="All Tasks"
@@ -135,6 +158,15 @@ export default function TasksKanbanPage() {
                 </button>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => setShowCreate(true)}
+              className="btn-teal"
+              aria-label="Create new task"
+              style={{ height: 34 }}
+            >
+              <Plus size={14} /> New task
+            </button>
           </>
         }
       />
@@ -282,9 +314,180 @@ export default function TasksKanbanPage() {
           </div>
         )}
       </div>
+
+      <NewTaskQuickModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        projects={projects}
+        onCreate={(projectId, title) => {
+          addTask(projectId, {
+            title,
+            description: "",
+            status: "todo",
+            priority: "medium",
+            assigneeId: null,
+            startDate: null,
+            dueDate: null,
+            estimatedHours: null,
+            timeSpent: null,
+            tags: [],
+            subtasks: [],
+            comments: [],
+          });
+          const name = projects.find((p) => p.id === projectId)?.name ?? "project";
+          toast.success(`Task added to ${name}`);
+          setShowCreate(false);
+        }}
+      />
     </div>
   );
 }
+
+function NewTaskQuickModal({
+  open,
+  onClose,
+  projects,
+  onCreate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  projects: ReturnType<typeof useProjects>;
+  onCreate: (projectId: string, title: string) => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
+  const [projectId, setProjectId] = useState("");
+  const [title, setTitle] = useState("");
+
+  if (!open) return null;
+  const effectiveProjectId = projectId || projects[0]?.id || "";
+
+  return (
+    <div
+      role="presentation"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 200,
+        padding: 20,
+      }}
+    >
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create new task"
+        tabIndex={-1}
+        style={{
+          background: "var(--content-bg)",
+          borderRadius: 14,
+          width: "100%",
+          maxWidth: 480,
+          padding: 22,
+          boxShadow: "0 30px 80px rgba(0,0,0,0.35)",
+          border: "1px solid var(--content-border)",
+          outline: "none",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
+            New task
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-secondary)",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            <X size={13} />
+          </button>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!title.trim() || !effectiveProjectId) return;
+            onCreate(effectiveProjectId, title.trim());
+            setTitle("");
+          }}
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        >
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Project</span>
+            <select
+              value={effectiveProjectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              aria-label="Project"
+              style={inputStyle}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.icon ?? "📋"} {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Title</span>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              autoFocus
+              placeholder="Short, action-oriented title"
+              style={inputStyle}
+              required
+            />
+          </label>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <button type="button" onClick={onClose} style={cancelBtn}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-teal" disabled={!title.trim()}>
+              Create task
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "10px 12px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--text-primary)",
+  fontSize: 14,
+  outline: "none",
+};
+
+const cancelBtn: React.CSSProperties = {
+  padding: "9px 16px",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "transparent",
+  color: "var(--text-secondary)",
+  fontSize: 13.5,
+  fontWeight: 600,
+  cursor: "pointer",
+};
 
 function TaskCard({ task }: { task: Task }) {
   const assignee = task.assigneeId ? getMember(task.assigneeId) : undefined;

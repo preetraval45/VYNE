@@ -4,15 +4,33 @@ import Link from "next/link";
 import { Users, Folder } from "lucide-react";
 import { useProjects, useTeamMembers } from "@/lib/stores/projects";
 import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
+import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
 
 export default function TeamsPage() {
   const projects = useProjects();
   const members = useTeamMembers();
 
+  const leads = members.filter((m) => projects.some((p) => p.leadId === m.id)).length;
+  const assignedCount = members.filter((m) => projects.some((p) => p.memberIds.includes(m.id))).length;
+  const avgPerMember =
+    members.length > 0
+      ? Math.round(
+          (projects.reduce((acc, p) => acc + p.memberIds.length, 0) / members.length) * 10,
+        ) / 10
+      : 0;
+
   return (
     <div className="flex flex-col h-full">
       <ProjectsSubNav />
+      <ProjectsStatsStrip
+        items={[
+          { label: "Members", value: members.length, tone: "teal", hint: "Total teammates" },
+          { label: "Leads", value: leads, tone: "default", hint: "Project owners" },
+          { label: "Assigned", value: assignedCount, hint: "On a project" },
+          { label: "Avg / member", value: avgPerMember, hint: "Projects per person" },
+        ]}
+      />
       <PageHeader
         icon={<Users size={16} />}
         title="Teams"
