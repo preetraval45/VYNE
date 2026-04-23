@@ -465,15 +465,25 @@ export function BoardColumn({
     ? {
         onDragOver: (e: React.DragEvent) => {
           e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          e.currentTarget.setAttribute("data-drag-over", "true");
+        },
+        onDragEnter: (e: React.DragEvent) => {
+          e.preventDefault();
           e.currentTarget.setAttribute("data-drag-over", "true");
         },
         onDragLeave: (e: React.DragEvent) => {
-          e.currentTarget.removeAttribute("data-drag-over");
+          // Only clear when we actually leave the column (not a child)
+          const related = e.relatedTarget as Node | null;
+          if (!related || !(e.currentTarget as Node).contains(related)) {
+            e.currentTarget.removeAttribute("data-drag-over");
+          }
         },
         onDrop: (e: React.DragEvent) => {
           e.preventDefault();
           e.currentTarget.removeAttribute("data-drag-over");
-          const id = e.dataTransfer.getData("text/kit-item-id");
+          const raw = e.dataTransfer.getData("text/plain");
+          const id = raw.startsWith("kit-item:") ? raw.slice(9) : "";
           if (id) onDropItem(id);
         },
       }
@@ -583,7 +593,10 @@ export function BoardCard({
     ? {
         draggable: true,
         onDragStart: (e: React.DragEvent) => {
-          e.dataTransfer.setData("text/kit-item-id", dragId);
+          // text/plain is the one MIME type all browsers accept without
+          // permissions. Prefix-tag the payload so unrelated drops (e.g.
+          // pasted URLs) don't get mistaken for a Kit item.
+          e.dataTransfer.setData("text/plain", `kit-item:${dragId}`);
           e.dataTransfer.effectAllowed = "move";
         },
       }

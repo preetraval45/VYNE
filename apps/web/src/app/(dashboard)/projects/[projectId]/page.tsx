@@ -23,7 +23,9 @@ import {
   Square,
   Trash2,
   Send,
+  SlidersHorizontal,
 } from "lucide-react";
+import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import Link from "next/link";
 import {
   useProjectsStore,
@@ -85,6 +87,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const [search, setSearch] = useState("");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showAddTask, setShowAddTask] = useState(false);
+  const [showSchemaEditor, setShowSchemaEditor] = useState(false);
 
   const selectedTask = useMemo(
     () => tasks.find((t) => t.id === selectedTaskId) ?? null,
@@ -432,6 +435,29 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           </div>
           <button
             type="button"
+            onClick={() => setShowSchemaEditor(true)}
+            aria-label="Customize fields and statuses"
+            title="Customize fields and statuses"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              height: 32,
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "var(--text-secondary)",
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+              cursor: "pointer",
+            }}
+          >
+            <SlidersHorizontal size={13} />
+            Edit fields
+          </button>
+          <button
+            type="button"
             onClick={() => setShowAddTask(true)}
             style={{
               display: "inline-flex",
@@ -503,6 +529,14 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         open={showAddTask}
         onClose={() => setShowAddTask(false)}
         projectId={projectId}
+      />
+
+      {/* Custom fields + statuses editor */}
+      <FieldSchemaEditor
+        moduleId="projects"
+        open={showSchemaEditor}
+        onClose={() => setShowSchemaEditor(false)}
+        title={`Customize ${project.name} fields`}
       />
     </div>
   );
