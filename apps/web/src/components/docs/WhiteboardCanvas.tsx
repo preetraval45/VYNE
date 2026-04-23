@@ -134,16 +134,19 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
         };
         return [...prev.slice(0, -1), updated];
       }
-      const updated: Stroke = {
-        tool: last.tool,
-        color: last.color,
-        size: last.size,
-        x1: last.x1,
-        y1: last.y1,
-        x2: p.x,
-        y2: p.y,
-      };
-      return [...prev.slice(0, -1), updated];
+      if (last.tool === "rect" || last.tool === "circle") {
+        const updated: Stroke = {
+          tool: last.tool,
+          color: last.color,
+          size: last.size,
+          x1: last.x1,
+          y1: last.y1,
+          x2: p.x,
+          y2: p.y,
+        };
+        return [...prev.slice(0, -1), updated];
+      }
+      return prev;
     });
   }
 

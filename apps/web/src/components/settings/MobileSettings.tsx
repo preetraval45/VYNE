@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Camera,
   X,
+  type LucideIcon,
 } from "lucide-react";
 
 interface Props {
@@ -604,6 +605,65 @@ export default function MobileSettings({ onToast }: Props) {
         </div>
       </Card>
     </div>
+  );
+}
+
+function Card({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      style={{
+        background: "var(--content-bg)",
+        border: "1px solid var(--content-border)",
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 16,
+      }}
+    >
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 12,
+        }}
+      >
+        <span
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            background: "var(--content-secondary)",
+            color: "var(--vyne-teal)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={16} />
+        </span>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 14,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {title}
+        </h3>
+      </header>
+      {children}
+    </section>
   );
 }
 

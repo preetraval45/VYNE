@@ -308,9 +308,9 @@ function KanbanColumn({
         width: "272px",
         minWidth: "272px",
         background: isOver ? bgColor : "var(--content-bg-secondary)",
-        ringColor: color,
+        ["--tw-ring-color" as string]: color,
         border: isOver ? `1px solid ${color}40` : "1px solid transparent",
-      }}
+      } as React.CSSProperties}
     >
       {/* Column Header */}
       <div

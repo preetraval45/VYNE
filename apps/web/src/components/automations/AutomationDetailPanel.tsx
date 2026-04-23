@@ -147,14 +147,14 @@ export default function AutomationDetailPanel(
         tpl.triggerType === ""
           ? "No trigger set"
           : getTriggerLabel(tpl.triggerType),
-      triggerConfig: { ...tpl.triggerConfig },
+      triggerConfig: { ...tpl.triggerConfig } as Record<string, string>,
       conditions: [],
       conditionLogic: "AND",
       actions: tpl.actions.map((a) => ({
         ...a,
         id: generateId(),
         config: { ...a.config },
-      })),
+      })) as Automation["actions"],
       runCount: 0,
       lastRun: "",
       history: [],

@@ -1031,7 +1031,7 @@ function ProductDetailPanel({
   onClose: () => void;
 }) {
   if (!product) {
-    return <DetailPanel open={false} onClose={onClose} title="" />;
+    return <DetailPanel open={false} onClose={onClose} title=""><></></DetailPanel>;
   }
   const margin =
     product.price > 0 && product.costPrice > 0

@@ -4,7 +4,7 @@ import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Plus, Pencil, ArrowRight, TrendingUp } from "lucide-react";
+import { Plus, Pencil, ArrowRight, TrendingUp, Search, Edit2, Check, XCircle } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader, Pill, PrimaryLink, type Tone } from "@/components/shared/Kit";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
@@ -143,6 +143,10 @@ function TabBtn({
     </button>
   );
 }
+
+// Deal-owners used in the assignee filter. Derived from fixture seed data —
+// keep in sync with whichever names appear on `deal.assignee` below.
+const ASSIGNEES = ["Alex", "Jamie", "Morgan", "Sam", "Taylor"] as const;
 
 // Stage → semantic tone map. Keeps pill colors muted and consistent
 // instead of each stage shouting its own candy-bright hex.

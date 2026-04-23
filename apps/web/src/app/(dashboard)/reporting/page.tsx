@@ -799,11 +799,11 @@ const PAYROLL_SUMMARY = [
 ];
 
 const HIRING_PIPELINE = [
-  { stage: "Applications", count: 245, color: "rgba(6, 182, 212,0.5)" },
-  { stage: "Screening", count: 120, color: "rgba(6, 182, 212,0.6)" },
-  { stage: "Interview", count: 48, color: "rgba(6, 182, 212,0.75)" },
-  { stage: "Offer", count: 12, color: "rgba(6, 182, 212,0.9)" },
-  { stage: "Hired", count: 8, color: "#06B6D4" },
+  { label: "Applications", value: 245, color: "rgba(6, 182, 212,0.5)" },
+  { label: "Screening", value: 120, color: "rgba(6, 182, 212,0.6)" },
+  { label: "Interview", value: 48, color: "rgba(6, 182, 212,0.75)" },
+  { label: "Offer", value: 12, color: "rgba(6, 182, 212,0.9)" },
+  { label: "Hired", value: 8, color: "#06B6D4" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════

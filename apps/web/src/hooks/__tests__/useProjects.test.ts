@@ -116,7 +116,7 @@ describe("useProjects", () => {
     it("should handle API returning data directly (no nested data wrapper)", async () => {
       const { projectsApi } = await import("@/lib/api/client");
       vi.mocked(projectsApi.list).mockResolvedValueOnce({
-        data: mockProjects,
+        data: { data: mockProjects },
         status: 200,
         statusText: "OK",
         headers: {},

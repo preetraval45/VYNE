@@ -1,6 +1,6 @@
 import type { Deployment, PullRequest, Repository } from "@/types";
 
-export const IS_DEMO_MODE = !process.env.NEXT_PUBLIC_API_URL;
+// IS_DEMO_MODE is re-exported from ./home to avoid duplicate exports
 
 // ── Mock Deployments ──────────────────────────────────────────────
 export const MOCK_DEPLOYMENTS: Deployment[] = [

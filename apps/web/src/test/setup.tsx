@@ -1,5 +1,7 @@
+/// <reference types="vitest/globals" />
 import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import type { ReactNode } from "react";
+import { vi, beforeAll, afterAll } from "vitest";
 
 // ─── Mock next/navigation ───────────────────────────────────────
 const mockPush = vi.fn();
@@ -81,8 +83,9 @@ vi.mock("framer-motion", () => ({
             layoutId,
             ...domProps
           } = rest;
-          const Component = prop as keyof JSX.IntrinsicElements;
-          return <Component {...domProps}>{children}</Component>;
+          const Component = prop as keyof React.JSX.IntrinsicElements;
+          const Tag = Component as unknown as React.ElementType;
+          return <Tag {...domProps}>{children as ReactNode}</Tag>;
         };
       },
     },

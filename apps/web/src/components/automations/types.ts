@@ -55,12 +55,13 @@ export interface Automation {
 }
 
 // ─── Lookup tables & mock data — re-exported from central fixtures ────────────
-export {
+import {
   TRIGGER_GROUPS,
   ACTION_GROUPS,
   TRIGGER_CONFIG_FIELDS,
   INITIAL_AUTOMATIONS,
 } from "@/lib/fixtures/automations";
+export { TRIGGER_GROUPS, ACTION_GROUPS, TRIGGER_CONFIG_FIELDS, INITIAL_AUTOMATIONS };
 
 export const ACTION_CONFIG_FIELDS: Record<
   string,

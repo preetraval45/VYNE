@@ -83,8 +83,12 @@ export const useThemeStore = create<ThemeStore>()(
       name: "vyne-theme",
       version: 2,
       migrate: (persistedState) => {
+        const prev = (persistedState ?? {}) as Partial<{
+          theme: ThemeMode;
+          accent: AccentColor;
+        }>;
         return {
-          ...(persistedState as Partial<ThemeStore>),
+          theme: prev.theme ?? "dark",
           accent: "purple" as AccentColor,
         };
       },

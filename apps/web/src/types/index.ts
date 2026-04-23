@@ -20,17 +20,20 @@ export interface Organization {
 // ─── Projects ───────────────────────────────────────────────────
 export interface Project {
   id: string;
-  orgId: string;
+  orgId?: string;
   name: string;
   identifier: string;
   description?: string;
   color: string;
   icon?: string;
+  status?: "active" | "paused" | "completed" | "archived";
   leadId?: string;
   lead?: User;
-  memberIds: string[];
+  memberIds?: string[];
   members?: User[];
-  issueCounts: {
+  issueCount?: number;
+  memberCount?: number;
+  issueCounts?: {
     backlog: number;
     todo: number;
     inProgress: number;
@@ -39,7 +42,7 @@ export interface Project {
     total: number;
   };
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 // ─── Issues ─────────────────────────────────────────────────────
@@ -60,20 +63,23 @@ export interface Issue {
   id: string;
   projectId: string;
   project?: Project;
-  identifier: string;
+  identifier?: string;
+  /** Short key like VYNE-42 — optional alias used by some fixture flows */
+  key?: string;
   title: string;
   description?: string;
   status: IssueStatus;
   priority: IssuePriority;
-  assigneeId?: string;
+  assigneeId?: string | null;
   assignee?: User;
-  reporterId: string;
+  assigneeName?: string;
+  reporterId?: string;
   reporter?: User;
-  labels: Label[];
+  labels?: Label[];
   dueDate?: string;
   estimate?: number;
   order: number;
-  comments: Comment[];
+  comments?: Comment[];
   createdAt: string;
   updatedAt: string;
 }

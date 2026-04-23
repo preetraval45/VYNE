@@ -141,7 +141,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
               )}
 
               {/* Comments */}
-              {issue.comments?.length > 0 && (
+              {issue.comments && issue.comments.length > 0 && (
                 <span
                   className="flex items-center gap-1 text-xs"
                   style={{ color: "var(--text-tertiary)" }}

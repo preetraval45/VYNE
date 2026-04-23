@@ -1,6 +1,6 @@
 import type { ERPJournalEntry } from '@/lib/api/client'
 
-export const IS_DEMO_MODE = !process.env.NEXT_PUBLIC_API_URL
+// IS_DEMO_MODE is re-exported from ./home to avoid duplicate exports
 
 // ── Months ────────────────────────────────────────────────────────
 export const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']

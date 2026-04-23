@@ -380,7 +380,7 @@ function ProjectDetailPanel({
             }}
           >
             <span style={{ fontSize: 13 }}>{project.icon ?? "📋"}</span>
-            {project.status === "archived" ? "Archived" : "Active"}
+            {project.status === "completed" ? "Completed" : project.status === "paused" ? "On Hold" : "Active"}
           </span>
         )
       }
@@ -816,10 +816,11 @@ function ProjectCardLocal({
 
       {/* Status Pills */}
       <div className="flex flex-wrap gap-1.5" onClick={onNavigate}>
-        {statusEntries.map(({ count, label, ...rest }) => {
-          if (count === 0) return null;
-          const color = "meta" in rest ? rest.meta.color : rest.color;
-          const bgColor = "meta" in rest ? rest.meta.bgColor : rest.bgColor;
+        {statusEntries.map((entry) => {
+          if (entry.count === 0) return null;
+          const color = "meta" in entry && entry.meta ? entry.meta.color : entry.color ?? "var(--text-secondary)";
+          const bgColor = "meta" in entry && entry.meta ? entry.meta.bgColor : entry.bgColor ?? "var(--content-secondary)";
+          const { count, label } = entry;
           return (
             <span
               key={label}

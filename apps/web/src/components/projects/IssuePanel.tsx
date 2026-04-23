@@ -319,7 +319,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                     </PropertyRow>
                   )}
 
-                  {issue.labels?.length > 0 && (
+                  {issue.labels && issue.labels.length > 0 && (
                     <PropertyRow icon={<Tag size={13} />} label="Labels">
                       <div className="flex flex-wrap gap-1">
                         {issue.labels.map((label) => (

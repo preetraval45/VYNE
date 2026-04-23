@@ -255,7 +255,7 @@ function useCursorPagination<T>(
     fetchNextPage,
     pageSize,
     setPageSize,
-    query,
+    query: query as unknown as UseCursorPaginationResult<T>["query"],
   };
 }
 

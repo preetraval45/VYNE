@@ -1,4 +1,4 @@
-export const IS_DEMO_MODE = !process.env.NEXT_PUBLIC_API_URL;
+// IS_DEMO_MODE is re-exported from ./home to avoid duplicate exports
 
 // ── Types ────────────────────────────────────────────────────────
 export type ExpenseStatus =

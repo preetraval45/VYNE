@@ -126,6 +126,7 @@ describe("LoginPage", () => {
           createdAt: "2026-01-01T00:00:00.000Z",
         },
         token: "jwt-123",
+        refreshToken: "refresh-123",
       },
       status: 200,
       statusText: "OK",
