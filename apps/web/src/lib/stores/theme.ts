@@ -81,6 +81,13 @@ export const useThemeStore = create<ThemeStore>()(
     }),
     {
       name: "vyne-theme",
+      version: 2,
+      migrate: (persistedState) => {
+        return {
+          ...(persistedState as Partial<ThemeStore>),
+          accent: "purple" as AccentColor,
+        };
+      },
       partialize: (state) => ({ theme: state.theme, accent: state.accent }),
     },
   ),

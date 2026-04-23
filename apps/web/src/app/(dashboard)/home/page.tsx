@@ -200,7 +200,7 @@ export default function HomePage() {
               width: 22,
               height: 22,
               borderRadius: "50%",
-              background: "linear-gradient(135deg,#06B6D4,#9B59B6)",
+              background: "linear-gradient(135deg,#06B6D4,#0891B2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -237,7 +237,7 @@ export default function HomePage() {
             }}
           >
             {[
-              { label: "Home", icon: "🏠", color: "#E74C3C", href: "/home" },
+              { label: "Home", icon: "🏠", color: "#06B6D4", href: "/home" },
               {
                 label: "Contacts",
                 icon: "📇",
@@ -261,7 +261,7 @@ export default function HomePage() {
               {
                 label: "Projects",
                 icon: "📋",
-                color: "#9B59B6",
+                color: "#0891B2",
                 href: "/projects",
               },
               { label: "Docs", icon: "📄", color: "#2ECC71", href: "/docs" },
@@ -289,7 +289,7 @@ export default function HomePage() {
               {
                 label: "Observe",
                 icon: "📊",
-                color: "#E74C3C",
+                color: "#06B6D4",
                 href: "/observe",
               },
               { label: "AI", icon: "🧠", color: "#06B6D4", href: "/ai" },

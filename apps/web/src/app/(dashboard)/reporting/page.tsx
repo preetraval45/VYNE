@@ -645,7 +645,7 @@ const SALES_BY_CATEGORY = [
   { category: "Professional Services", revenue: 45000, color: "#3498DB" },
   { category: "Hardware", revenue: 32000, color: "#2ECC71" },
   { category: "Support Plans", revenue: 18000, color: "#F39C12" },
-  { category: "Training", revenue: 8000, color: "#E74C3C" },
+  { category: "Training", revenue: 8000, color: "#06B6D4" },
 ];
 
 const PIPELINE_FUNNEL = [
@@ -775,8 +775,8 @@ const MFG_OUTPUT = [
 // HR data
 const DEPT_HEADCOUNT = [
   { dept: "Engineering", count: 42, color: "#06B6D4" },
-  { dept: "Sales", count: 28, color: "#E74C3C" },
-  { dept: "Product", count: 15, color: "#9B59B6" },
+  { dept: "Sales", count: 28, color: "#06B6D4" },
+  { dept: "Product", count: 15, color: "#0891B2" },
   { dept: "Operations", count: 18, color: "#F39C12" },
   { dept: "Finance", count: 12, color: "#3498DB" },
   { dept: "HR", count: 8, color: "#2ECC71" },
@@ -785,7 +785,7 @@ const DEPT_HEADCOUNT = [
 
 const LEAVE_UTIL = [
   { type: "Annual Leave", used: 68, total: 100, color: "#06B6D4" },
-  { type: "Sick Leave", used: 22, total: 40, color: "#E74C3C" },
+  { type: "Sick Leave", used: 22, total: 40, color: "#06B6D4" },
   { type: "Personal Days", used: 8, total: 15, color: "#F39C12" },
   { type: "Parental Leave", used: 3, total: 5, color: "#3498DB" },
 ];

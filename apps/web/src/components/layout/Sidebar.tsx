@@ -68,7 +68,7 @@ interface NavItemDef {
 }
 
 const NAV_ITEMS: NavItemDef[] = [
-  { icon: Home, label: "Home", href: "/home", color: "#E74C3C" },
+  { icon: Home, label: "Home", href: "/home", color: "#06B6D4" },
   { icon: BarChart3, label: "My Dashboard", href: "/dashboard", color: "#06B6D4" },
   {
     icon: Contact,
@@ -117,7 +117,7 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: FolderKanban,
     label: "Projects",
     href: "/projects",
-    color: "#9B59B6",
+    color: "#0891B2",
     badge: 2,
     moduleId: "projects",
     subs: [
@@ -245,7 +245,7 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: Activity,
     label: "Observe",
     href: "/observe",
-    color: "#E74C3C",
+    color: "#06B6D4",
     badge: 1,
     moduleId: "observe",
     subs: [
@@ -1406,7 +1406,7 @@ export function Sidebar() {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #7C5CFC, #9B59B6)",
+            background: "linear-gradient(135deg, #7C5CFC, #0891B2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
