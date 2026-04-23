@@ -18,8 +18,8 @@ export const ACCENT_COLORS: Record<
   purple: {
     primary: "#06B6D4",
     light: "#22D3EE",
-    dark: "#5235CC",
-    label: "Purple",
+    dark: "#0E7490",
+    label: "Teal",
   },
   blue: {
     primary: "#3B82F6",
@@ -48,9 +48,9 @@ export const ACCENT_COLORS: Record<
   },
   indigo: {
     primary: "#0891B2",
-    light: "#818CF8",
-    dark: "#4F46E5",
-    label: "Indigo",
+    light: "#67E8F9",
+    dark: "#155E75",
+    label: "Deep teal",
   },
 };
 
