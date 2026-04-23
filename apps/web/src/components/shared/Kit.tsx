@@ -747,3 +747,259 @@ export function ViewToggle<V extends string>({
     </div>
   );
 }
+
+/* ─── PipelineBreadcrumb ───────────────────────────────────────
+ * Odoo-style clickable arrow-chevron stages for record detail pages.
+ * Reusable across Projects, Maintenance, CRM, MRP, HR, etc.
+ * Click a stage to advance the record; supports a subtle meta label
+ * per-stage ("24d", "1M") to show time-in-stage.
+ * ─────────────────────────────────────────────────────────────── */
+
+export interface PipelineStage {
+  id: string;
+  label: string;
+  meta?: string;
+  tone?: Tone;
+}
+
+export function PipelineBreadcrumb({
+  stages,
+  activeId,
+  onSelect,
+}: {
+  stages: PipelineStage[];
+  activeId: string;
+  onSelect?: (id: string) => void;
+}) {
+  const activeIdx = Math.max(0, stages.findIndex((s) => s.id === activeId));
+
+  return (
+    <nav
+      aria-label="Record pipeline"
+      style={{
+        display: "flex",
+        alignItems: "stretch",
+        overflowX: "auto",
+        scrollbarWidth: "thin",
+        gap: 0,
+        padding: "8px 0",
+      }}
+    >
+      {stages.map((stage, i) => {
+        const isActive = i === activeIdx;
+        const isPast = i < activeIdx;
+        const isFuture = i > activeIdx;
+        const t = stage.tone ? TONE_TOKENS[stage.tone] : TONE_TOKENS.purple;
+
+        return (
+          <button
+            key={stage.id}
+            type="button"
+            onClick={() => onSelect?.(stage.id)}
+            aria-current={isActive ? "step" : undefined}
+            style={{
+              position: "relative",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "9px 22px 9px 26px",
+              marginLeft: i === 0 ? 0 : -12,
+              minHeight: 36,
+              fontSize: 13.5,
+              fontWeight: isActive ? 600 : 500,
+              letterSpacing: "-0.005em",
+              color: isActive
+                ? "#fff"
+                : isPast
+                  ? t.fg
+                  : "var(--text-tertiary)",
+              background: isActive
+                ? "var(--vyne-teal)"
+                : isPast
+                  ? t.bg
+                  : "var(--content-secondary)",
+              border: `1px solid ${
+                isActive
+                  ? "var(--vyne-teal)"
+                  : isPast
+                    ? t.ring
+                    : "var(--content-border)"
+              }`,
+              cursor: onSelect ? "pointer" : "default",
+              transition: "all 0.15s var(--ease-out-quart)",
+              // chevron shape
+              clipPath:
+                i === 0
+                  ? "polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%)"
+                  : i === stages.length - 1
+                    ? "polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%)"
+                    : "polygon(14px 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 14px 100%, 0 50%)",
+              whiteSpace: "nowrap",
+              zIndex: isActive ? 2 : isPast ? 1 : 0,
+            }}
+            onMouseEnter={(e) => {
+              if (!isActive && onSelect) {
+                (e.currentTarget as HTMLElement).style.filter = "brightness(1.05)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.filter = "";
+            }}
+          >
+            <span>{stage.label}</span>
+            {stage.meta && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  opacity: 0.7,
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {stage.meta}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+/* ─── ModuleRecordHeader ─────────────────────────────────────── */
+
+export function ModuleRecordHeader({
+  breadcrumbs,
+  title,
+  subtitle,
+  tabs,
+  activeTabId,
+  onTabChange,
+  stages,
+  activeStageId,
+  onStageChange,
+  actions,
+}: {
+  breadcrumbs?: Array<{ label: string; href?: string }>;
+  title: string;
+  subtitle?: string;
+  tabs?: Array<{ id: string; label: string; count?: number | string }>;
+  activeTabId?: string;
+  onTabChange?: (id: string) => void;
+  stages?: PipelineStage[];
+  activeStageId?: string;
+  onStageChange?: (id: string) => void;
+  actions?: ReactNode;
+}) {
+  return (
+    <header
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        padding: "16px 24px 0",
+        borderBottom: "1px solid var(--content-border)",
+        background: "var(--content-bg)",
+      }}
+    >
+      {breadcrumbs && breadcrumbs.length > 0 && (
+        <nav
+          aria-label="Breadcrumb"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--text-tertiary)",
+          }}
+        >
+          {breadcrumbs.map((b, i) => (
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              {b.href ? (
+                <Link href={b.href} style={{ color: "var(--text-secondary)" }}>
+                  {b.label}
+                </Link>
+              ) : (
+                <span>{b.label}</span>
+              )}
+              {i < breadcrumbs.length - 1 && <span style={{ opacity: 0.5 }}>/</span>}
+            </span>
+          ))}
+        </nav>
+      )}
+
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", margin: 0 }}>
+            {title}
+          </h1>
+          {subtitle && (
+            <p style={{ fontSize: 13.5, color: "var(--text-secondary)", margin: "4px 0 0", letterSpacing: "-0.005em" }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {actions && <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>{actions}</div>}
+      </div>
+
+      {tabs && tabs.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {tabs.map((t) => {
+            const active = t.id === activeTabId;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => onTabChange?.(t.id)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  letterSpacing: "-0.005em",
+                  color: active ? "var(--vyne-teal)" : "var(--text-secondary)",
+                  background: "transparent",
+                  border: "none",
+                  borderBottom: active ? "2px solid var(--vyne-teal)" : "2px solid transparent",
+                  marginBottom: -1,
+                  cursor: "pointer",
+                  transition: "color 0.15s, border-color 0.15s",
+                }}
+              >
+                {t.label}
+                {t.count !== undefined && t.count !== null && t.count !== "" && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: active ? "var(--vyne-teal)" : "var(--text-tertiary)",
+                      background: active ? "rgba(6,182,212,0.12)" : "var(--content-secondary)",
+                      padding: "2px 7px",
+                      borderRadius: 999,
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {t.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {stages && stages.length > 0 && activeStageId && (
+        <PipelineBreadcrumb
+          stages={stages}
+          activeId={activeStageId}
+          onSelect={onStageChange}
+        />
+      )}
+    </header>
+  );
+}

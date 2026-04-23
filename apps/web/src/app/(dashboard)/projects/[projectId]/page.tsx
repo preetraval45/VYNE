@@ -30,12 +30,15 @@ import {
   useProject,
   useProjectTasks,
   useTeamMembers,
+  type ProjectDetail,
 } from "@/lib/stores/projects";
 import {
   Pill,
   PrimaryLink,
   ViewToggle,
+  PipelineBreadcrumb,
   type Tone,
+  type PipelineStage,
 } from "@/components/shared/Kit";
 import {
   TASK_STATUS_META,
@@ -75,6 +78,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const project = useProject(projectId);
   const tasks = useProjectTasks(projectId);
   const teamMembers = useTeamMembers();
+  const updateProject = useProjectsStore((s) => s.updateProject);
 
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
@@ -293,6 +297,63 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           </div>
         </div>
       </header>
+
+      {/* Pipeline stages — Odoo/ERPNext style */}
+      <div
+        className="px-6 flex-shrink-0"
+        style={{
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+        }}
+      >
+        {(() => {
+          const stages: PipelineStage[] = [
+            { id: "active", label: "Active", tone: "info" },
+            { id: "paused", label: "On Hold", tone: "warn" },
+            { id: "completed", label: "Completed", tone: "success" },
+          ];
+          const counts = {
+            todo: tasks.filter((t) => t.status === "todo").length,
+            in_progress: tasks.filter((t) => t.status === "in_progress").length,
+            in_review: tasks.filter((t) => t.status === "in_review").length,
+            done: tasks.filter((t) => t.status === "done").length,
+            blocked: tasks.filter((t) => t.status === "blocked").length,
+          };
+          const taskStages: PipelineStage[] = [
+            { id: "todo", label: "Todo", meta: String(counts.todo), tone: "neutral" },
+            { id: "in_progress", label: "In Progress", meta: String(counts.in_progress), tone: "info" },
+            { id: "in_review", label: "In Review", meta: String(counts.in_review), tone: "warn" },
+            { id: "done", label: "Done", meta: String(counts.done), tone: "success" },
+            { id: "blocked", label: "Blocked", meta: String(counts.blocked), tone: "danger" },
+          ];
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingTop: 10, paddingBottom: 6 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)" }}>
+                Project status
+              </div>
+              <PipelineBreadcrumb
+                stages={stages}
+                activeId={project.status}
+                onSelect={(id) => {
+                  updateProject(project.id, { status: id as ProjectDetail["status"] });
+                }}
+              />
+              <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)", marginTop: 4 }}>
+                Task pipeline · drag cards between columns
+              </div>
+              <PipelineBreadcrumb
+                stages={taskStages}
+                activeId={
+                  counts.in_progress > 0 ? "in_progress" :
+                  counts.in_review > 0 ? "in_review" :
+                  counts.todo > 0 ? "todo" :
+                  counts.blocked > 0 ? "blocked" : "done"
+                }
+              />
+            </div>
+          );
+        })()}
+      </div>
 
       {/* Toolbar */}
       <div
