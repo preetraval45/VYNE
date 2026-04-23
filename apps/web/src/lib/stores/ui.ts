@@ -30,7 +30,7 @@ export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
       sidebarOpen: true,
-      sidebarCollapsed: false,
+      sidebarCollapsed: true,
       activeModule: "projects",
       commandPaletteOpen: false,
       shortcutsOpen: false,

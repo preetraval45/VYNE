@@ -15,8 +15,6 @@ import { useProjectsStore } from "@/lib/stores/projects";
 import { cn } from "@/lib/utils";
 import { PROJECT_COLORS } from "@/types";
 
-const EMOJI_OPTIONS = ["📋","🚀","⚡","🔥","💎","🛠️","🎯","🌟","🔬","🎨","🏗️","🤖"];
-
 const inputClass = "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150";
 const inputStyle: React.CSSProperties = {
   background: "var(--content-secondary)",
@@ -36,7 +34,6 @@ export default function EditProjectPage() {
     name: project?.name ?? "",
     description: project?.description ?? "",
     color: project?.color ?? PROJECT_COLORS[0],
-    icon: project?.icon ?? "📋",
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -67,8 +64,7 @@ export default function EditProjectPage() {
   const dirty =
     form.name !== project.name ||
     form.description !== project.description ||
-    form.color !== project.color ||
-    form.icon !== project.icon;
+    form.color !== project.color;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,7 +74,6 @@ export default function EditProjectPage() {
       name: form.name.trim(),
       description: form.description.trim(),
       color: form.color,
-      icon: form.icon,
     });
     toast.success(`Project "${form.name}" updated`);
     router.push(`/projects/${projectId}`);
@@ -127,38 +122,8 @@ export default function EditProjectPage() {
     >
       <form id="edit-project-form" onSubmit={handleSubmit}>
         <FormSection title="Basics">
-          <div style={{ display: "flex", gap: 14 }}>
+          <div>
             <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--text-secondary)", marginBottom: 6 }}>
-                Icon
-              </label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, padding: 4, borderRadius: 10, border: "1px solid var(--content-border)", background: "var(--content-secondary)", width: 156 }}>
-                {EMOJI_OPTIONS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    aria-label={`Use ${emoji} icon`}
-                    aria-pressed={form.icon === emoji}
-                    onClick={() => setForm((f) => ({ ...f, icon: emoji }))}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 18,
-                      borderRadius: 7,
-                      background: form.icon === emoji ? form.color + "24" : "transparent",
-                      border: form.icon === emoji ? `1px solid ${form.color}40` : "1px solid transparent",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={{ flex: 1 }}>
               <FormField label="Project name" htmlFor="edit-project-name" required>
                 <input
                   id="edit-project-name"
@@ -173,10 +138,12 @@ export default function EditProjectPage() {
               </FormField>
 
               <div style={{ marginTop: 14 }}>
-                <FormField label="Identifier" hint="Identifier is locked after project creation.">
+                <FormField label="Identifier" htmlFor="edit-project-id" hint="Identifier is locked after project creation.">
                   <input
+                    id="edit-project-id"
                     type="text"
                     value={project.identifier}
+                    placeholder="PRJ"
                     disabled
                     className={cn(inputClass, "font-mono w-32 text-center")}
                     style={{ ...inputStyle, opacity: 0.7, cursor: "not-allowed" }}

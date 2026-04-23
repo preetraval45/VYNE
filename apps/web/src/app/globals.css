@@ -35,10 +35,10 @@
   --sidebar-collapsed-width: 60px;
 
   /* ── Input / Form Controls ───────────────────────────────────────── */
-  --input-bg: #FAFAFE;
-  --input-border: #D8D8E8;
-  --input-focus-border: #6C47FF;
-  --input-focus-shadow: 0 0 0 3px rgba(108,71,255,0.15);
+  --input-bg: #FAFAFB;
+  --input-border: #E4E4EA;
+  --input-focus-border: #5B5BD6;
+  --input-focus-shadow: 0 0 0 3px rgba(91,91,214,0.15);
 
   /* ── Table / Card Backgrounds ───────────────────────────────────── */
   --table-header-bg: #F7F7FB;
@@ -84,12 +84,26 @@
   --gray-900: #18181B;
   --gray-950: #0B0B0E;
 
-  /* ── 1. Accent (brand) — single refined indigo ───────────────── */
+  /* ── 1. Accent (brand) — indigo + teal duotone ───────────────── */
   --vyne-purple: #5B5BD6;
   --vyne-purple-light: #7470E0;
   --vyne-purple-dark: #4341B8;
-  /* Alias kept for legacy call-sites — will migrate over time */
-  --vyne-cyan: #5B5BD6;
+  /* Teal scale — used for secondary accents, success states, data viz */
+  --teal-50:   #ECFEFF;
+  --teal-100:  #CFFAFE;
+  --teal-200:  #A5F3FC;
+  --teal-300:  #67E8F9;
+  --teal-400:  #22D3EE;
+  --teal-500:  #06B6D4;
+  --teal-600:  #0891B2;
+  --teal-700:  #0E7490;
+  --teal-800:  #155E75;
+  --teal-900:  #164E63;
+  --vyne-teal:        var(--teal-500);
+  --vyne-teal-soft:   rgba(6,182,212,0.12);
+  --vyne-teal-ring:   rgba(6,182,212,0.25);
+  /* Alias kept for legacy call-sites */
+  --vyne-cyan: var(--teal-500);
   --vyne-indigo: #5B5BD6;
 
   /* ── 2. Surface & Background ─────────────────────────────────── */
@@ -198,36 +212,36 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Content — true black hero, layered surfaces above */
-  --content-bg: #000000;
-  --content-bg-secondary: #0A0A0C;
-  --content-secondary: #131317;
-  --content-border: #1F1F25;
-  --content-border-strong: #2C2C33;
+  /* Content — layered near-black surfaces that mirror the light palette */
+  --content-bg: #0B0B0F;
+  --content-bg-secondary: #111116;
+  --content-secondary: #17171D;
+  --content-border: #23232A;
+  --content-border-strong: #2F2F38;
 
-  /* Text */
-  --text-primary: #F4F4F7;
-  --text-secondary: #A1A1AE;
-  --text-tertiary: #71717D;
+  /* Text — 3-step scale mirrors light theme contrast ratios */
+  --text-primary: #F5F5F7;
+  --text-secondary: #B4B4BE;
+  --text-tertiary: #8B8B96;
 
   /* On-surface (dark theme) */
-  --on-surface: #F4F4F7;
-  --on-surface-secondary: #A1A1AE;
-  --on-surface-tertiary: #71717D;
+  --on-surface: var(--text-primary);
+  --on-surface-secondary: var(--text-secondary);
+  --on-surface-tertiary: var(--text-tertiary);
 
   /* Messaging */
-  --message-bg-self: #2E2255;
-  --message-bg-other: #232340;
+  --message-bg-self: #2A2558;
+  --message-bg-other: #1E1E2C;
 
-  /* Input / Form Controls */
-  --input-bg: #1E1E32;
-  --input-border: rgba(255,255,255,0.12);
-  --input-focus-border: #8B6BFF;
-  --input-focus-shadow: 0 0 0 3px rgba(108,71,255,0.2);
+  /* Input / Form Controls — use brand accent consistently */
+  --input-bg: #17171D;
+  --input-border: rgba(255,255,255,0.10);
+  --input-focus-border: var(--vyne-purple);
+  --input-focus-shadow: 0 0 0 3px rgba(91,91,214,0.22);
 
   /* Table / Card Backgrounds */
-  --table-header-bg: #13131F;
-  --border-subtle: rgba(255,255,255,0.08);
+  --table-header-bg: #13131A;
+  --border-subtle: rgba(255,255,255,0.07);
 
   /* Semantic Badge Colors */
   --badge-success-bg: rgba(34,197,94,0.12);
@@ -274,24 +288,24 @@
 [data-theme="dark"] .dk-card,
 [data-theme="dark"] [class*="card"],
 [data-theme="dark"] .dark-card {
-  background: #17172A !important;
-  border-color: rgba(255,255,255,0.07) !important;
+  background: var(--content-secondary) !important;
+  border-color: var(--content-border) !important;
   color: var(--text-primary);
 }
 
 /* Tables */
 [data-theme="dark"] table { background: transparent; }
-[data-theme="dark"] thead tr { background: #13131F !important; }
-[data-theme="dark"] tbody tr { border-color: rgba(255,255,255,0.04) !important; }
-[data-theme="dark"] th { color: var(--text-tertiary) !important; border-color: rgba(255,255,255,0.07) !important; }
+[data-theme="dark"] thead tr { background: var(--table-header-bg) !important; }
+[data-theme="dark"] tbody tr { border-color: var(--content-border) !important; }
+[data-theme="dark"] th { color: var(--text-tertiary) !important; border-color: var(--content-border) !important; }
 [data-theme="dark"] td { color: var(--text-primary) !important; }
 
 /* Inputs in dark mode */
 [data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
-  background: #1E1E32 !important;
-  border-color: rgba(255,255,255,0.1) !important;
+  background: var(--input-bg) !important;
+  border-color: var(--input-border) !important;
   color: var(--text-primary) !important;
 }
 
@@ -303,7 +317,7 @@
 [data-theme="dark"] [style*="background:#fff"],
 [data-theme="dark"] [style*="background:#FFF"],
 [data-theme="dark"] [style*="background:#FFFFFF"] {
-  background: #17172A !important;
+  background: var(--content-secondary) !important;
   color: var(--text-primary);
 }
 
@@ -313,7 +327,7 @@
 [data-theme="dark"] [style*="background: #F0F0F8"],
 [data-theme="dark"] [style*="background: #FAFAFA"],
 [data-theme="dark"] [style*="background: #F8F8F8"] {
-  background: #13131F !important;
+  background: var(--content-bg-secondary) !important;
 }
 
 [data-theme="dark"] [style*="color: #1A1A2E"],
@@ -891,6 +905,57 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 .slide-up-fade { animation: slide-up-fade 0.4s var(--ease-out-quart) both; }
+
+/* ─── Teal accent utilities (additive) ───────────────────────── */
+.accent-teal         { color: var(--vyne-teal); }
+.bg-accent-teal      { background: var(--vyne-teal); color: #fff; }
+.bg-accent-teal-soft { background: var(--vyne-teal-soft); color: var(--teal-700); }
+[data-theme="dark"] .bg-accent-teal-soft { color: var(--teal-300); }
+
+.badge-teal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--vyne-teal-soft);
+  color: var(--teal-700);
+  border: 1px solid var(--vyne-teal-ring);
+}
+[data-theme="dark"] .badge-teal { color: var(--teal-300); }
+
+.btn-teal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-button);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(135deg, var(--teal-500) 0%, var(--teal-600) 100%);
+  box-shadow: 0 6px 18px rgba(6,182,212,0.28), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.15s var(--ease-out-quart), box-shadow 0.2s var(--ease-out-quart), filter 0.2s;
+  cursor: pointer;
+}
+.btn-teal:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(6,182,212,0.38), inset 0 1px 0 rgba(255,255,255,0.25);
+  filter: brightness(1.04);
+}
+.btn-teal:active { transform: translateY(0); }
+
+.divider-teal-gradient {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--teal-400), transparent);
+  opacity: 0.55;
+}
 
 /* ─── Pulse dot — "live" indicator ────────────────────────────── */
 @keyframes pulse-dot {

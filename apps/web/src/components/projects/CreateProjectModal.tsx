@@ -9,21 +9,6 @@ import { cn, generateIdentifier } from "@/lib/utils";
 import { PROJECT_COLORS } from "@/types";
 import toast from "react-hot-toast";
 
-const EMOJI_OPTIONS = [
-  "📋",
-  "🚀",
-  "⚡",
-  "🔥",
-  "💎",
-  "🛠️",
-  "🎯",
-  "🌟",
-  "🔬",
-  "🎨",
-  "🏗️",
-  "🤖",
-];
-
 interface CreateProjectModalProps {
   open: boolean;
   onClose: () => void;
@@ -227,68 +212,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-                  {/* Icon + Name row */}
+                  {/* Name */}
                   <div className="flex gap-3">
-                    {/* Icon picker */}
-                    <div>
-                      <label
-                        className="block text-xs font-medium mb-1.5"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        Icon
-                      </label>
-                      <div className="relative group">
-                        <div
-                          className="w-[52px] h-[42px] rounded-lg flex items-center justify-center text-xl cursor-pointer transition-colors"
-                          style={{
-                            background: form.color + "18",
-                            border: "1px solid " + form.color + "40",
-                          }}
-                          role="img"
-                          aria-label={`Project icon: ${form.icon}`}
-                        >
-                          {form.icon}
-                        </div>
-                        {/* Emoji dropdown on hover */}
-                        <div
-                          className="absolute top-full left-0 mt-1 p-2 rounded-xl z-10 hidden group-hover:grid"
-                          role="listbox"
-                          aria-label="Choose project icon"
-                          style={{
-                            background: "var(--content-bg)",
-                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                            border: "1px solid var(--content-border)",
-                            gridTemplateColumns: "repeat(4, 1fr)",
-                            gap: "4px",
-                            width: "160px",
-                          }}
-                        >
-                          {EMOJI_OPTIONS.map((emoji) => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              role="option"
-                              aria-selected={form.icon === emoji}
-                              aria-label={`Icon ${emoji}`}
-                              onClick={() =>
-                                setForm((f) => ({ ...f, icon: emoji }))
-                              }
-                              className="w-8 h-8 flex items-center justify-center rounded-lg text-base transition-colors hover:bg-[#F8F8FC]"
-                              style={{
-                                background:
-                                  form.icon === emoji
-                                    ? "#F0EDFF"
-                                    : "transparent",
-                              }}
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Name */}
                     <div className="flex-1">
                       <label
                         htmlFor="project-name"

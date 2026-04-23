@@ -289,7 +289,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Demo button */}
+            {/* Demo button — teal accent */}
             <button
               type="button"
               onClick={enterDemo}
@@ -300,13 +300,14 @@ export default function LoginPage() {
                 "hover:scale-[1.01] active:scale-[0.99]",
               )}
               style={{
-                background: "rgba(108,71,255,0.08)",
-                border: "1px solid rgba(108,71,255,0.3)",
-                color: "#B8A3FF",
+                background: "linear-gradient(135deg, rgba(6,182,212,0.10), rgba(6,182,212,0.04))",
+                border: "1px solid rgba(6,182,212,0.35)",
+                color: "#67E8F9",
+                boxShadow: "0 0 0 1px rgba(6,182,212,0.05) inset",
               }}
             >
               <Sparkles size={15} />
-              Try Instant Demo
+              Try instant demo — no signup
             </button>
           </div>
 

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   MessageSquare, FolderKanban, FileText, Package, BarChart3, Bot,
   Check, Zap, Shield, Globe, ArrowRight, Star, X, Menu,
-  Loader2, Github, Twitter, Linkedin, Sparkles,
+  Loader2, Github, Twitter, Linkedin, Sparkles, Plus, Minus,
 } from 'lucide-react'
 import { VyneLogo } from '@/components/brand/VyneLogo'
 
@@ -156,7 +156,7 @@ function Nav() {
       <VyneLogo variant="horizontal" markSize={28} />
 
       <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
-        {([['#features','Features'],['#comparison','Compare'],['#pricing','Pricing']] as const).map(([href, label]) => (
+        {([['#features','Features'],['#comparison','Compare'],['#pricing','Pricing'],['#faq','FAQ']] as const).map(([href, label]) => (
           <a
             key={href}
             href={href}
@@ -217,7 +217,7 @@ function Nav() {
               borderBottom: `1px solid ${C.border}`,
             }}
           >
-            {[['#features','Features'],['#comparison','Compare'],['#pricing','Pricing']].map(([href, label]) => (
+            {[['#features','Features'],['#comparison','Compare'],['#pricing','Pricing'],['#faq','FAQ']].map(([href, label]) => (
               <a key={href} href={href} onClick={() => setMobileOpen(false)} style={{ color: C.textSub, fontSize: 16 }}>
                 {label}
               </a>
@@ -677,16 +677,23 @@ const tdCell = (align: 'left' | 'center', color?: string): React.CSSProperties =
 })
 
 /* ─── Pricing ────────────────────────────────────────────────── */
-const plans = [
+type Plan = {
+  name: string; price: string; period: string; desc: string; features: string[]; cta: string;
+  highlight?: boolean; accent?: 'purple' | 'teal';
+}
+const plans: Plan[] = [
   { name: 'Free', price: '$0', period: 'forever', desc: 'For individuals and hobby projects',
     features: ['1 user', '1 GB storage', '50 AI queries/day', 'All core modules', 'Community support'],
-    cta: 'Get started', highlight: false },
+    cta: 'Get started' },
   { name: 'Starter', price: '$12', period: '/user/mo', desc: 'For growing teams that need real power',
     features: ['Unlimited users', '50 GB storage', '500 AI queries/day', 'All modules + integrations', 'Email support', 'CSV import/export'],
-    cta: 'Join waitlist', highlight: true },
+    cta: 'Join waitlist', highlight: true, accent: 'purple' },
   { name: 'Business', price: '$24', period: '/user/mo', desc: 'For companies that run on VYNE',
     features: ['Unlimited users', '200 GB storage', 'Unlimited AI queries', 'Custom AI agents', 'Priority support', 'SSO / SAML', 'Audit log'],
-    cta: 'Join waitlist', highlight: false },
+    cta: 'Join waitlist', accent: 'teal' },
+  { name: 'Enterprise', price: 'Custom', period: 'contact sales', desc: 'For regulated + global organizations',
+    features: ['Dedicated success manager', 'Private cloud / on-prem', 'SOC 2 Type II + HIPAA', 'Custom data residency', '99.99% uptime SLA', 'SAML + SCIM provisioning', 'Advanced audit + eDiscovery'],
+    cta: 'Contact sales' },
 ]
 
 function Pricing() {
@@ -702,11 +709,13 @@ function Pricing() {
         <div style={{
           marginTop: 64,
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 16,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: 14,
           alignItems: 'start',
         }}>
-          {plans.map((plan, i) => (
+          {plans.map((plan, i) => {
+            const tealAccent = plan.accent === 'teal'
+            return (
             <motion.div
               key={plan.name}
               initial={{ opacity: 0, y: 22 }}
@@ -715,11 +724,13 @@ function Pricing() {
               transition={{ duration: 0.4, delay: i * 0.08 }}
               className={plan.highlight ? 'gradient-border' : undefined}
               style={{
-                padding: plan.highlight ? 30 : 30,
+                padding: 28,
                 borderRadius: 18, position: 'relative',
-                border: plan.highlight ? 'none' : `1px solid ${C.border}`,
+                border: plan.highlight ? 'none' : `1px solid ${tealAccent ? 'rgba(6,182,212,0.25)' : C.border}`,
                 background: plan.highlight
                   ? `linear-gradient(180deg, rgba(124,92,255,0.08) 0%, rgba(124,92,255,0.02) 100%), ${C.bg}`
+                  : tealAccent
+                  ? `linear-gradient(180deg, rgba(6,182,212,0.06) 0%, rgba(6,182,212,0.01) 100%), ${C.surface}`
                   : C.surface,
               }}
             >
@@ -735,6 +746,18 @@ function Pricing() {
                 }}>
                   <Sparkles size={11} />
                   MOST POPULAR
+                </div>
+              )}
+              {tealAccent && (
+                <div style={{
+                  position: 'absolute', top: -11, right: 18,
+                  padding: '4px 10px', borderRadius: 999,
+                  background: 'linear-gradient(135deg, #06B6D4, #0891B2)',
+                  color: '#fff', fontSize: 10, fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  boxShadow: '0 6px 16px rgba(6,182,212,0.35)',
+                }}>
+                  SCALE
                 </div>
               )}
 
@@ -772,8 +795,10 @@ function Pricing() {
               <a
                 href="#waitlist"
                 aria-label={`${plan.cta} — ${plan.name} plan`}
-                className={plan.highlight ? 'btn-aurora' : undefined}
+                className={plan.highlight ? 'btn-aurora' : tealAccent ? 'btn-teal' : undefined}
                 style={plan.highlight ? {
+                  display: 'block', textAlign: 'center', padding: '11px 20px', fontSize: 14,
+                } : tealAccent ? {
                   display: 'block', textAlign: 'center', padding: '11px 20px', fontSize: 14,
                 } : {
                   display: 'block', textAlign: 'center', padding: '11px 20px',
@@ -788,6 +813,140 @@ function Pricing() {
                 {plan.cta}
               </a>
             </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Trust bar ──────────────────────────────────────────────── */
+function TrustBar() {
+  const stats = [
+    { label: 'Modules', value: '15+', hint: 'Chat · Projects · ERP · CRM · more' },
+    { label: 'Uptime SLA', value: '99.99%', hint: 'Enterprise tier' },
+    { label: 'Response time', value: '< 150ms', hint: 'p95 global edge' },
+    { label: 'Data residency', value: 'US · EU · AP', hint: 'Choose your region' },
+  ]
+  return (
+    <section style={{ padding: '48px 24px', background: C.bgDeep, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 18,
+        }}>
+          {stats.map((s) => (
+            <div key={s.label} style={{ textAlign: 'left' }}>
+              <div style={{
+                fontSize: 10.5, fontWeight: 600, letterSpacing: '0.18em',
+                textTransform: 'uppercase', color: '#22D3EE', marginBottom: 8,
+              }}>
+                {s.label}
+              </div>
+              <div style={{
+                fontSize: 26, fontWeight: 700, color: C.text,
+                letterSpacing: '-0.02em', marginBottom: 4,
+                fontFeatureSettings: '"tnum"',
+              }}>
+                {s.value}
+              </div>
+              <div style={{ fontSize: 12, color: C.textMuted, letterSpacing: '-0.005em' }}>
+                {s.hint}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── FAQ ────────────────────────────────────────────────────── */
+const faqs = [
+  { q: 'Is VYNE actually ready for production?',
+    a: 'We are in beta. Core modules (chat, projects, docs, auth) are wired to real backends; ERP, finance, and CRM still render sample data in demo mode. Early-access customers are onboarded with a dedicated setup call.' },
+  { q: 'Do I have to migrate everything at once?',
+    a: 'No. VYNE imports from Slack, Notion, Jira, QuickBooks, Stripe, and Google Workspace — you can roll out one module at a time and keep your existing tools running in parallel.' },
+  { q: 'How is my data secured?',
+    a: 'Row-level tenant isolation in Postgres, encryption at rest (AES-256) and in transit (TLS 1.3), SOC 2 Type II in progress, and optional private-cloud deployment on Enterprise.' },
+  { q: 'What about the AI — where does my data go?',
+    a: 'Your prompts and embeddings are processed on AWS Bedrock in your chosen region. No training on your data, ever. Enterprise customers can bring their own model key or use on-prem inference.' },
+  { q: 'Can I export my data if I leave?',
+    a: 'Yes — one-click export to CSV/JSON for every module, plus a full Postgres dump for Business and Enterprise plans. No lock-in.' },
+  { q: 'How does pricing work at scale?',
+    a: 'Per-user pricing is transparent up to 500 seats. Above that, Enterprise pricing includes volume discounts, custom usage limits, and annual commits.' },
+]
+
+function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
+  const [open, setOpen] = useState(index === 0)
+  return (
+    <div style={{
+      borderRadius: 14,
+      border: `1px solid ${open ? 'rgba(6,182,212,0.35)' : C.border}`,
+      background: open ? 'rgba(6,182,212,0.04)' : C.surface,
+      overflow: 'hidden',
+      transition: 'border-color 0.25s, background 0.25s',
+    }}>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        style={{
+          width: '100%', padding: '18px 22px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'transparent', border: 'none', cursor: 'pointer',
+          color: C.text, fontSize: 15, fontWeight: 500, letterSpacing: '-0.01em',
+          textAlign: 'left',
+        }}
+      >
+        <span>{q}</span>
+        <span style={{
+          width: 28, height: 28, borderRadius: 8,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: open ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
+          color: open ? '#22D3EE' : C.textSub,
+          flexShrink: 0, marginLeft: 16,
+          transition: 'background 0.2s, color 0.2s',
+        }}>
+          {open ? <Minus size={15} /> : <Plus size={15} />}
+        </span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              padding: '0 22px 20px', fontSize: 14, lineHeight: 1.6,
+              color: C.textSub, letterSpacing: '-0.005em',
+            }}>
+              {a}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+function FAQ() {
+  return (
+    <section id="faq" style={{ padding: '120px 24px', background: C.bg }}>
+      <div style={{ maxWidth: 820, margin: '0 auto' }}>
+        <SectionHeader
+          eyebrow="FAQ"
+          title={<>Common <span className="aurora-text">questions</span></>}
+          subtitle="Everything you wanted to ask before signing up."
+        />
+        <div style={{ marginTop: 56, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {faqs.map((f, i) => (
+            <FAQItem key={f.q} q={f.q} a={f.a} index={i} />
           ))}
         </div>
       </div>
@@ -919,10 +1078,12 @@ export default function LandingPage() {
     }}>
       <Nav />
       <Hero />
+      <TrustBar />
       <Features />
       <AIDifferentiator />
       <Comparison />
       <Pricing />
+      <FAQ />
       <CTAFooter />
       <Footer />
     </div>

@@ -13,8 +13,6 @@ import { useProjectsStore } from "@/lib/stores/projects";
 import { cn, generateIdentifier } from "@/lib/utils";
 import { PROJECT_COLORS } from "@/types";
 
-const EMOJI_OPTIONS = ["📋","🚀","⚡","🔥","💎","🛠️","🎯","🌟","🔬","🎨","🏗️","🤖"];
-
 const inputClass = "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
 const inputStyle: React.CSSProperties = {
   background: "var(--content-secondary)",
@@ -31,7 +29,6 @@ export default function NewProjectPage() {
     identifier: "",
     description: "",
     color: PROJECT_COLORS[0],
-    icon: "📋",
   });
   const [identifierEdited, setIdentifierEdited] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +53,7 @@ export default function NewProjectPage() {
       identifier: (effectiveIdentifier || generateIdentifier(form.name)).toUpperCase(),
       description: form.description.trim(),
       color: form.color,
-      icon: form.icon,
+      icon: "📋",
       status: "active",
       memberIds: ["u1"],
       leadId: "u1",
@@ -109,17 +106,12 @@ export default function NewProjectPage() {
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: form.color + "18",
-                border: `1px solid ${form.color}40`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 20,
+                background: form.color,
                 flexShrink: 0,
+                boxShadow: `0 4px 12px ${form.color}40`,
               }}
-            >
-              {form.icon}
-            </div>
+            />
+
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {form.name || "Project name"}
@@ -136,42 +128,9 @@ export default function NewProjectPage() {
       }
     >
       <form id="new-project-form" onSubmit={handleSubmit}>
-        <FormSection title="Basics" description="Name, icon, and what this project is about.">
-          {/* Icon + Name */}
-          <div style={{ display: "flex", gap: 14 }}>
-            <div>
-              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: "var(--text-secondary)", marginBottom: 6, letterSpacing: "-0.005em" }}>
-                Icon
-              </label>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 4, padding: 4, borderRadius: 10, border: "1px solid var(--content-border)", background: "var(--content-secondary)", width: 156 }}>
-                {EMOJI_OPTIONS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    aria-label={`Use ${emoji} icon`}
-                    aria-pressed={form.icon === emoji}
-                    onClick={() => setForm((f) => ({ ...f, icon: emoji }))}
-                    style={{
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: 18,
-                      borderRadius: 7,
-                      background: form.icon === emoji ? form.color + "24" : "transparent",
-                      border: form.icon === emoji ? `1px solid ${form.color}40` : "1px solid transparent",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ flex: 1 }}>
-              <FormField label="Project name" htmlFor="new-project-name" required>
+        <FormSection title="Basics" description="Name and what this project is about.">
+          <div>
+            <FormField label="Project name" htmlFor="new-project-name" required>
                 <input
                   id="new-project-name"
                   type="text"
@@ -209,7 +168,6 @@ export default function NewProjectPage() {
                   />
                 </FormField>
               </div>
-            </div>
           </div>
         </FormSection>
 

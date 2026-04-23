@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Check } from 'lucide-react'
 import { useAuthStore } from '@/lib/stores/auth'
 import { cn } from '@/lib/utils'
 import { VyneLogo } from '@/components/brand/VyneLogo'
@@ -222,10 +222,32 @@ export default function SignupPage() {
           </p>
         </div>
 
+        {/* Trust bullets — teal accent */}
+        <ul className="mt-6 space-y-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          {[
+            'Free forever — no credit card required',
+            'All 15+ modules included from day one',
+            'Your data, your tenant — SOC 2 in progress',
+          ].map((item) => (
+            <li key={item} className="flex items-center gap-2 text-xs">
+              <span style={{
+                width: 18, height: 18, borderRadius: 999,
+                background: 'rgba(6,182,212,0.15)',
+                border: '1px solid rgba(6,182,212,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}>
+                <Check size={11} color="#22D3EE" strokeWidth={3} />
+              </span>
+              {item}
+            </li>
+          ))}
+        </ul>
+
         {/* Sign in link */}
         <p className="text-center text-sm mt-6" style={{ color: '#6B6B8A' }}>
           Already have a workspace?{' '}
-          <Link href="/login" className="font-medium" style={{ color: '#8B6BFF' }}>
+          <Link href="/login" className="font-medium" style={{ color: '#67E8F9' }}>
             Sign in
           </Link>
         </p>
