@@ -26,6 +26,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
+import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import Link from "next/link";
 import {
   useProjectsStore,
@@ -156,6 +157,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
       className="flex flex-col h-full"
       style={{ background: "var(--content-bg-secondary)" }}
     >
+      <ProjectsSubNav />
       {/* Project Header — muted, Odoo/Linear-adjacent */}
       <header
         className="px-6 pt-5 pb-4 flex-shrink-0"
@@ -1073,7 +1075,8 @@ function BoardColumn({
       onDrop={(e) => {
         e.preventDefault();
         setDragOver(false);
-        const taskId = e.dataTransfer.getData("taskId");
+        const raw = e.dataTransfer.getData("text/plain");
+        const taskId = raw.startsWith("task:") ? raw.slice(5) : e.dataTransfer.getData("taskId");
         if (taskId) onDrop(taskId, columnId);
       }}
     >
@@ -1141,7 +1144,8 @@ function BoardCard({
     <motion.div
       draggable
       onDragStart={(e: any) => {
-        e.dataTransfer?.setData("taskId", task.id);
+        e.dataTransfer?.setData("text/plain", `task:${task.id}`);
+        if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
       }}
       whileHover={{ boxShadow: "0 8px 24px rgba(6,182,212,0.12)", y: -2, borderColor: "#06B6D4" }}
       transition={{ duration: 0.15 }}
