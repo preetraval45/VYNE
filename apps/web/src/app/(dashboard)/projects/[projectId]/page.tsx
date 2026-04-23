@@ -960,17 +960,15 @@ function BoardColumn({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl transition-colors",
+        "flex flex-col rounded-xl transition-all",
         dragOver && "ring-2",
       )}
       style={{
-        width: "272px",
-        minWidth: "272px",
-        background: dragOver ? meta.bgColor : "#F8F8FC",
-        ringColor: meta.color,
-        border: dragOver
-          ? `1px solid ${meta.color}40`
-          : "1px solid transparent",
+        width: "288px",
+        minWidth: "288px",
+        background: dragOver ? meta.bgColor : "var(--content-secondary)",
+        border: `1px solid ${dragOver ? `${meta.color}60` : "var(--content-border)"}`,
+        boxShadow: dragOver ? `0 8px 24px ${meta.color}20` : "none",
       }}
       onDragOver={(e) => {
         e.preventDefault();
@@ -986,23 +984,38 @@ function BoardColumn({
     >
       {/* Column Header */}
       <div
-        className="flex items-center justify-between px-3.5 py-3 rounded-t-xl"
-        style={{ borderBottom: `2px solid ${meta.color}30` }}
+        className="flex items-center justify-between px-4 py-3.5 rounded-t-xl"
+        style={{
+          borderBottom: `1px solid var(--content-border)`,
+          borderTop: `3px solid ${meta.color}`,
+        }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span
             className="w-2.5 h-2.5 rounded-full"
-            style={{ background: meta.color }}
+            style={{
+              background: meta.color,
+              boxShadow: `0 0 0 3px ${meta.color}25`,
+            }}
           />
           <span
-            className="text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
+            className="font-semibold"
+            style={{
+              color: "var(--text-primary)",
+              fontSize: 14,
+              letterSpacing: "-0.01em",
+            }}
           >
             {meta.label}
           </span>
           <span
-            className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: meta.bgColor, color: meta.color }}
+            className="font-semibold px-2 py-0.5 rounded-full"
+            style={{
+              background: meta.bgColor,
+              color: meta.color,
+              fontSize: 11,
+              fontVariantNumeric: "tabular-nums",
+            }}
           >
             {tasks.length}
           </span>
@@ -1035,14 +1048,14 @@ function BoardCard({
       onDragStart={(e: any) => {
         e.dataTransfer?.setData("taskId", task.id);
       }}
-      whileHover={{ boxShadow: "0 4px 12px rgba(0,0,0,0.1)", y: -1 }}
-      transition={{ duration: 0.12 }}
+      whileHover={{ boxShadow: "0 8px 24px rgba(6,182,212,0.12)", y: -2, borderColor: "#06B6D4" }}
+      transition={{ duration: 0.15 }}
       onClick={() => onTaskClick(task.id)}
-      className="group p-3 rounded-lg cursor-pointer select-none"
+      className="group p-3.5 rounded-xl cursor-pointer select-none"
       style={{
         background: "var(--content-bg)",
-        border: "1px solid #E8E8F0",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+        border: "1px solid var(--content-border)",
+        boxShadow: "var(--elev-1)",
       }}
     >
       <div className="flex items-start gap-2 mb-2">
@@ -1115,7 +1128,7 @@ function BoardCard({
           ) : (
             <div
               className="w-5 h-5 rounded-full border-2 border-dashed"
-              style={{ borderColor: "#E0E0F0" }}
+              style={{ borderColor: "var(--content-border)" }}
             />
           )}
         </div>
@@ -1666,7 +1679,7 @@ function TaskDetailPanel({
               className="p-1.5 rounded-lg transition-colors"
               style={{ color: "var(--text-tertiary)" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#F8F8FC";
+                (e.currentTarget as HTMLElement).style.background = "var(--content-bg-secondary)";
                 (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
               }}
               onMouseLeave={(e) => {
@@ -1795,7 +1808,7 @@ function TaskDetailPanel({
                     background:
                       task.dueDate && new Date(task.dueDate) < new Date()
                         ? "#FEF2F2"
-                        : "#F8F8FC",
+                        : "var(--content-bg-secondary)",
                     color:
                       task.dueDate && new Date(task.dueDate) < new Date()
                         ? "#EF4444"
@@ -1927,7 +1940,7 @@ function TaskDetailPanel({
                       className="flex items-center gap-2 group rounded-lg px-2 py-1.5 transition-colors"
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
-                          "#F8F8FC";
+                          "var(--content-bg-secondary)";
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background =

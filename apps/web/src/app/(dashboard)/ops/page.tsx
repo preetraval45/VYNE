@@ -46,7 +46,7 @@ import {
 function StatusBadge({ status }: Readonly<{ status: string }>) {
   const s = STATUS_MAP[status as StatusKey] ?? {
     label: status,
-    bg: "#F0F0F8",
+    bg: "var(--content-secondary)",
     color: "var(--text-secondary)",
   };
   return (
@@ -87,7 +87,7 @@ function TabBtn({
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)
@@ -1155,7 +1155,7 @@ function OrdersTab({
                 cursor: "pointer",
                 fontSize: 11,
                 fontWeight: 500,
-                background: filter === s ? "var(--vyne-purple)" : "#F0F0F8",
+                background: filter === s ? "var(--vyne-purple)" : "var(--content-secondary)",
                 color: filter === s ? "#fff" : "var(--text-secondary)",
                 textTransform: "capitalize",
               }}

@@ -328,7 +328,7 @@ function fmtNum(n: number): string {
 // ─── Status / Channel badges ──────────────────────────────────────
 function campaignStatusStyle(s: CampaignStatus): { bg: string; color: string } {
   const map: Record<CampaignStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Paused: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Completed: { bg: "#EFF6FF", color: "#1E40AF" },
@@ -350,7 +350,7 @@ function emailStatusStyle(s: EmailStatus): { bg: string; color: string } {
   const map: Record<EmailStatus, { bg: string; color: string }> = {
     Sent: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Scheduled: { bg: "#EFF6FF", color: "#1E40AF" },
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
   };
   return map[s];
 }
@@ -361,7 +361,7 @@ function landingStatusStyle(s: LandingPageStatus): {
 } {
   const map: Record<LandingPageStatus, { bg: string; color: string }> = {
     Published: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
   };
   return map[s];
 }

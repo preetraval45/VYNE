@@ -546,7 +546,7 @@ function fmt(n: number): string {
 function bomStatusStyle(s: BOMStatus): { bg: string; color: string } {
   const map: Record<BOMStatus, { bg: string; color: string }> = {
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Obsolete: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
   };
   return map[s];
@@ -554,7 +554,7 @@ function bomStatusStyle(s: BOMStatus): { bg: string; color: string } {
 
 function moStatusStyle(s: MOStatus): { bg: string; color: string } {
   const map: Record<MOStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Confirmed: { bg: "#EFF6FF", color: "#1E40AF" },
     "In Progress": { bg: "#F5F3FF", color: "#5B21B6" },
     Done: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
@@ -628,7 +628,7 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "#F0F0F8",
+            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
           }}
         >

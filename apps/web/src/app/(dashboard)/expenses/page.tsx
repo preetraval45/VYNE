@@ -22,7 +22,7 @@ function statusConfig(s: ExpenseStatus): {
     ExpenseStatus,
     { label: string; bg: string; color: string }
   > = {
-    draft: { label: "Draft", bg: "#F0F0F8", color: "var(--text-secondary)" },
+    draft: { label: "Draft", bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     submitted: { label: "Submitted", bg: "#EFF6FF", color: "#1E40AF" },
     approved: { label: "Approved", bg: "#F0FDF4", color: "var(--badge-success-text)" },
     rejected: { label: "Rejected", bg: "#FEF2F2", color: "var(--badge-danger-text)" },
@@ -116,7 +116,7 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(255,255,255,0.25)" : "#F0F0F8",
+            background: active ? "rgba(255,255,255,0.25)" : "var(--content-secondary)",
             color: active ? "#fff" : "var(--text-secondary)",
           }}
         >

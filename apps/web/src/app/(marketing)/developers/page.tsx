@@ -94,7 +94,7 @@ function Highlighted({ children }: { children: string }) {
         borderRadius: 10,
         background: "#0F0F20",
         border: "1px solid rgba(255,255,255,0.06)",
-        color: "#E8E8F0",
+        color: "var(--content-border)",
         fontSize: 12,
         lineHeight: 1.55,
         fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
@@ -224,7 +224,7 @@ export default function DevelopersPage() {
       style={{
         minHeight: "100vh",
         background: "linear-gradient(180deg, #0A0A1A 0%, #0F0F20 100%)",
-        color: "#E8E8F0",
+        color: "var(--content-border)",
       }}
     >
       {/* Header */}

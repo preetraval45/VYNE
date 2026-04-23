@@ -73,7 +73,7 @@ function getLevelBg(level: LogLevel): string {
   if (level === "info") {
     return "#EFF6FF";
   }
-  return "#F0F0F8";
+  return "var(--content-secondary)";
 }
 
 function getSeverityColor(severity: AlertSeverity): string {
@@ -1007,7 +1007,7 @@ function LogsTab() {
                 fontWeight: 500,
                 border: "none",
                 cursor: "pointer",
-                background: filter === f ? "var(--vyne-purple)" : "#F0F0F8",
+                background: filter === f ? "var(--vyne-purple)" : "var(--content-secondary)",
                 color: filter === f ? "#fff" : "var(--text-secondary)",
               }}
             >

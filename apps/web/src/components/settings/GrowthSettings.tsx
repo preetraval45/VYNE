@@ -398,7 +398,7 @@ export default function GrowthSettings({ onToast }: Props) {
               padding: 14,
               borderRadius: 9,
               background: "var(--sidebar-bg)",
-              color: "#E8E8F0",
+              color: "var(--content-border)",
               fontSize: 11,
               fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
               overflowX: "auto",

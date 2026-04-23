@@ -128,7 +128,7 @@ function StatsWidget() {
             padding: 14,
             borderRadius: 10,
             border: "1px solid #E8E8F0",
-            background: "#FAFAFE",
+            background: "var(--content-bg-secondary)",
           }}
         >
           <div style={{ fontSize: 11, color: "#6B6B8A" }}>{s.label}</div>
@@ -304,7 +304,7 @@ function DocsSearchWidget() {
           fontSize: 11,
           color: "#6B6B8A",
           padding: 8,
-          background: "#FAFAFE",
+          background: "var(--content-bg-secondary)",
           borderRadius: 6,
         }}
       >

@@ -213,7 +213,7 @@ function TabBtn({
             fontSize: 10,
             padding: "1px 6px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "#F0F0F8",
+            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-tertiary)",
             fontWeight: 600,
           }}

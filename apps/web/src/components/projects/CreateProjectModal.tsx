@@ -194,7 +194,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                       aria-label="Close dialog"
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
-                          "#F8F8FC";
+                          "var(--content-bg-secondary)";
                         (e.currentTarget as HTMLElement).style.color =
                           "#1A1A2E";
                       }}

@@ -286,7 +286,7 @@ export const STATUS_META: Record<
   IssueStatus,
   { label: string; color: string; bgColor: string }
 > = {
-  backlog: { label: "Backlog", color: "#A0A0B8", bgColor: "#F0F0F8" },
+  backlog: { label: "Backlog", color: "#A0A0B8", bgColor: "var(--content-secondary)" },
   todo: { label: "Todo", color: "#6B6B8A", bgColor: "#EBEBF5" },
   in_progress: { label: "In Progress", color: "#3B82F6", bgColor: "#EFF6FF" },
   in_review: { label: "In Review", color: "#F59E0B", bgColor: "#FFFBEB" },

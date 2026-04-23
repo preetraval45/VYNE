@@ -473,7 +473,7 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   fontSize: 11,
                   padding: "2px 6px",
                   borderRadius: 6,
-                  background: "#E8E8F0",
+                  background: "var(--content-border)",
                   color: "var(--text-secondary)",
                   flexShrink: 0,
                 }}

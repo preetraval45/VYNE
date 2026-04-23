@@ -148,7 +148,7 @@ export default function StatusPage() {
       style={{
         minHeight: "100vh",
         background: "linear-gradient(180deg, #0A0A1A 0%, #0F0F20 100%)",
-        color: "#E8E8F0",
+        color: "var(--content-border)",
       }}
     >
       {/* Header */}

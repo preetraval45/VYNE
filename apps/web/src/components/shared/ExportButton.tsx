@@ -58,7 +58,7 @@ export function ExportButton<T extends Record<string, unknown>>({
       }}
       onMouseEnter={(e) => {
         if (data.length > 0) {
-          (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
           (e.currentTarget as HTMLElement).style.borderColor =
             "rgba(0,0,0,0.18)";
         }

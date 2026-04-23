@@ -1074,7 +1074,7 @@ function SalesTab() {
                 SMB: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
               };
               const seg = segColors[c.segment] ?? {
-                bg: "#F0F0F8",
+                bg: "var(--content-secondary)",
                 color: "var(--text-secondary)",
               };
               return (
@@ -1490,7 +1490,7 @@ function OperationsTab() {
                 C: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
               };
               const rc = ratingColors[s.rating] ?? {
-                bg: "#F0F0F8",
+                bg: "var(--content-secondary)",
                 color: "var(--text-secondary)",
               };
               return (

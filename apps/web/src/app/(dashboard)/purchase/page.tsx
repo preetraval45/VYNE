@@ -526,7 +526,7 @@ function fmt(n: number): string {
 
 function poStatusStyle(s: POStatus): { bg: string; color: string } {
   const map: Record<POStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Sent: { bg: "#EFF6FF", color: "#1E40AF" },
     Confirmed: { bg: "#F5F3FF", color: "#5B21B6" },
     Received: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
@@ -555,7 +555,7 @@ function qcStyle(r: QCResult): { bg: string; color: string } {
 
 function billStatusStyle(s: BillStatus): { bg: string; color: string } {
   const map: Record<BillStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Received: { bg: "#EFF6FF", color: "#1E40AF" },
     Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
@@ -613,7 +613,7 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "#F0F0F8",
+            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
           }}
         >

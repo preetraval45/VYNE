@@ -230,12 +230,12 @@ function DocAttachment({
         transition: "background 0.15s, border-color 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+        (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
         (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "#F8F8FC";
-        (e.currentTarget as HTMLElement).style.borderColor = "#E8E8F0";
+        (e.currentTarget as HTMLElement).style.background = "var(--content-bg-secondary)";
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
       }}
     >
       <div

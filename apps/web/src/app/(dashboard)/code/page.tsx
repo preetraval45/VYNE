@@ -40,7 +40,7 @@ function statusFilterLabel(s: string): string {
 function prIconBg(state: PullRequest["state"]): string {
   if (state === "merged") return "#F3F0FF";
   if (state === "open") return "#F0FDF4";
-  return "#F0F0F8";
+  return "var(--content-secondary)";
 }
 
 function prIconSymbol(state: PullRequest["state"]): string {
@@ -214,7 +214,7 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(255,255,255,0.25)" : "#F0F0F8",
+            background: active ? "rgba(255,255,255,0.25)" : "var(--content-secondary)",
             color: active ? "#fff" : "var(--text-secondary)",
           }}
         >
@@ -680,7 +680,7 @@ function DeploymentsTab({
                   borderRadius: 20,
                   fontSize: 12,
                   fontWeight: filter === s ? 600 : 400,
-                  background: filter === s ? "var(--vyne-purple)" : "#F0F0F8",
+                  background: filter === s ? "var(--vyne-purple)" : "var(--content-secondary)",
                   color: filter === s ? "#fff" : "var(--text-secondary)",
                   border: "none",
                   cursor: "pointer",
@@ -1007,7 +1007,7 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
                 borderRadius: 20,
                 fontSize: 12,
                 fontWeight: filter === v ? 600 : 400,
-                background: filter === v ? "var(--vyne-purple)" : "#F0F0F8",
+                background: filter === v ? "var(--vyne-purple)" : "var(--content-secondary)",
                 color: filter === v ? "#fff" : "var(--text-secondary)",
                 border: "none",
                 cursor: "pointer",

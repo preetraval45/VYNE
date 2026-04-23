@@ -1246,7 +1246,7 @@ export function CommandPalette() {
                       padding: "12px 16px",
                       background: "rgba(6, 182, 212,0.06)",
                       borderBottom: "1px solid rgba(255,255,255,0.05)",
-                      color: "#E8E8F0",
+                      color: "var(--content-border)",
                       fontSize: 13,
                       lineHeight: 1.55,
                     }}
@@ -1292,7 +1292,7 @@ export function CommandPalette() {
                       background: "transparent",
                       border: "none",
                       cursor: "pointer",
-                      color: "#E8E8F0",
+                      color: "var(--content-border)",
                       display: "flex",
                       flexDirection: "column",
                       gap: 4,

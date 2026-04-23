@@ -11,7 +11,7 @@ function RoleBadge({ role }: Readonly<{ role: string }>) {
   const map: Record<string, { bg: string; color: string }> = {
     admin: { bg: "rgba(6, 182, 212,0.1)", color: "#06B6D4" },
     member: { bg: "#EFF6FF", color: "#1E40AF" },
-    viewer: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    viewer: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
   };
   const s = map[role] ?? map.viewer;
   return (

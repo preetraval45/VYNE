@@ -42,7 +42,7 @@ export const marketing = {
   bg:           '#09071A',
   bgDeep:       '#05040F',
   bgMid:        '#0D0B20',
-  text:         '#E8E8F0',
+  text:         'var(--content-border)',
   textSub:      '#9490B8',
   textMuted:    '#5E5A7A',
   border:       'rgba(255,255,255,0.06)',

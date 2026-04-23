@@ -172,7 +172,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
               ) : (
                 <div
                   className="w-5 h-5 rounded-full border-2 border-dashed"
-                  style={{ borderColor: "#E0E0F0" }}
+                  style={{ borderColor: "var(--content-border)" }}
                 />
               )}
             </div>

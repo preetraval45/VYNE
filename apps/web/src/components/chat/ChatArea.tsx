@@ -202,7 +202,7 @@ export function ChatArea({
               </span>
               {description && (
                 <>
-                  <span style={{ color: "#E8E8F0", margin: "0 4px" }}>|</span>
+                  <span style={{ color: "var(--content-border)", margin: "0 4px" }}>|</span>
                   <span style={{ fontSize: 12, color: "#A0A0B8" }}>
                     {description}
                   </span>

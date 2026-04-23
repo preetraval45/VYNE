@@ -47,7 +47,7 @@ export function EmojiPicker({ onPick, onClose }: EmojiPickerProps) {
             lineHeight: 1,
           }}
           onMouseEnter={(ev) => {
-            (ev.currentTarget as HTMLElement).style.background = "#F0F0F8";
+            (ev.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
           }}
           onMouseLeave={(ev) => {
             (ev.currentTarget as HTMLElement).style.background = "transparent";

@@ -114,7 +114,7 @@ export function MessageRow({
                   cursor: "pointer",
                   background: r.userReacted
                     ? "rgba(6, 182, 212,0.1)"
-                    : "#F0F0F8",
+                    : "var(--content-secondary)",
                   border: r.userReacted
                     ? "1px solid rgba(6, 182, 212,0.35)"
                     : "1px solid #E8E8F0",
@@ -210,7 +210,7 @@ export function MessageRow({
                   alignItems: "center",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+                  (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
                   (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
@@ -242,7 +242,7 @@ export function MessageRow({
                 alignItems: "center",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
                 (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
@@ -266,7 +266,7 @@ export function MessageRow({
                 alignItems: "center",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =

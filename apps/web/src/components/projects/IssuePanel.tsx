@@ -205,7 +205,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
-                      "#F8F8FC";
+                      "var(--content-bg-secondary)";
                     (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
                   }}
                   onMouseLeave={(e) => {
@@ -221,7 +221,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
-                      "#F8F8FC";
+                      "var(--content-bg-secondary)";
                     (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
                   }}
                   onMouseLeave={(e) => {
@@ -238,7 +238,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
-                      "#F8F8FC";
+                      "var(--content-bg-secondary)";
                     (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
                   }}
                   onMouseLeave={(e) => {
@@ -307,7 +307,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                           background:
                             new Date(issue.dueDate) < new Date()
                               ? "#FEF2F2"
-                              : "#F8F8FC",
+                              : "var(--content-bg-secondary)",
                           color:
                             new Date(issue.dueDate) < new Date()
                               ? "#EF4444"

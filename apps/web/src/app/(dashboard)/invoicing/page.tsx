@@ -87,11 +87,11 @@ function fmtDate(iso: string): string {
 // ─── Status Badge Configs ─────────────────────────────────────────
 function invoiceStatusStyle(s: InvoiceStatus): { bg: string; color: string } {
   const map: Record<InvoiceStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Sent: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
-    Cancelled: { bg: "#F0F0F8", color: "#6B7280" },
+    Cancelled: { bg: "var(--content-secondary)", color: "#6B7280" },
   };
   return map[s];
 }
@@ -101,7 +101,7 @@ function creditNoteStatusStyle(s: CreditNoteStatus): {
   color: string;
 } {
   const map: Record<CreditNoteStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Applied: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Refunded: { bg: "#EFF6FF", color: "#1E40AF" },
   };
@@ -119,7 +119,7 @@ function paymentStatusStyle(s: PaymentStatus): { bg: string; color: string } {
 
 function billStatusStyle(s: BillStatus): { bg: string; color: string } {
   const map: Record<BillStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
     Received: { bg: "#EFF6FF", color: "#1E40AF" },
     Paid: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Overdue: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
@@ -131,7 +131,7 @@ function refundStatusStyle(s: RefundStatus): { bg: string; color: string } {
   const map: Record<RefundStatus, { bg: string; color: string }> = {
     Processed: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Pending: { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
-    Cancelled: { bg: "#F0F0F8", color: "#6B7280" },
+    Cancelled: { bg: "var(--content-secondary)", color: "#6B7280" },
   };
   return map[s];
 }
@@ -139,7 +139,7 @@ function refundStatusStyle(s: RefundStatus): { bg: string; color: string } {
 function customerStatusStyle(s: CustomerStatus): { bg: string; color: string } {
   const map: Record<CustomerStatus, { bg: string; color: string }> = {
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Inactive: { bg: "#F0F0F8", color: "#6B7280" },
+    Inactive: { bg: "var(--content-secondary)", color: "#6B7280" },
   };
   return map[s];
 }
@@ -147,7 +147,7 @@ function customerStatusStyle(s: CustomerStatus): { bg: string; color: string } {
 function vendorStatusStyle(s: VendorStatus): { bg: string; color: string } {
   const map: Record<VendorStatus, { bg: string; color: string }> = {
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Inactive: { bg: "#F0F0F8", color: "#6B7280" },
+    Inactive: { bg: "var(--content-secondary)", color: "#6B7280" },
   };
   return map[s];
 }
@@ -352,7 +352,7 @@ function ActionBtn({
         transition: "all 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+        (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "transparent";

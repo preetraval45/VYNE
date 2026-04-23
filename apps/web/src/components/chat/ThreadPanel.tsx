@@ -194,7 +194,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
             display: "flex",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+            (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "transparent";

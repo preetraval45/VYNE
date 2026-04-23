@@ -594,7 +594,7 @@ const equipmentStatusStyle: Record<
   Operational: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
   "Under Maintenance": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
   Broken: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
-  Retired: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+  Retired: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
 };
 
 const priorityDotColor: Record<RequestPriority, string> = {
@@ -609,7 +609,7 @@ const requestStatusStyle: Record<RequestStatus, { bg: string; color: string }> =
     New: { bg: "#EFF6FF", color: "#1E40AF" },
     "In Progress": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Done: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Cancelled: { bg: "#F0F0F8", color: "var(--text-secondary)" },
+    Cancelled: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
   };
 
 const frequencyBadgeStyle: Record<PMFrequency, { bg: string; color: string }> =
@@ -625,7 +625,7 @@ const woStatusStyle: Record<WOStatus, { bg: string; color: string }> = {
   Scheduled: { bg: "#EFF6FF", color: "#1E40AF" },
   "In Progress": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
   Completed: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-  "On Hold": { bg: "#F0F0F8", color: "var(--text-secondary)" },
+  "On Hold": { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
 };
 
 const partStatusStyle: Record<PartStatus, { bg: string; color: string }> = {
@@ -740,7 +740,7 @@ function TabBtn({
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)
@@ -1417,7 +1417,7 @@ function PreventiveTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={p.status}
-                      bg={p.status === "Active" ? "#F0FDF4" : "#F0F0F8"}
+                      bg={p.status === "Active" ? "#F0FDF4" : "var(--content-secondary)"}
                       color={p.status === "Active" ? "#166534" : "#6B6B8A"}
                     />
                   </td>

@@ -169,7 +169,7 @@ export default function SettingsPage() {
             }}
             onMouseEnter={(e) => {
               if (tab !== id)
-                (e.currentTarget as HTMLElement).style.background = "#F0F0F8";
+                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
             }}
             onMouseLeave={(e) => {
               if (tab !== id)

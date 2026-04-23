@@ -564,7 +564,7 @@ export function MessageComposer({
                       }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
-                          "#F0F0F8";
+                          "var(--content-secondary)";
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
@@ -587,7 +587,7 @@ export function MessageComposer({
               borderRadius: 7,
               border: "none",
               cursor: canSend ? "pointer" : "default",
-              background: canSend ? "#06B6D4" : "#E8E8F0",
+              background: canSend ? "#06B6D4" : "var(--content-border)",
               color: canSend ? "#fff" : "#A0A0B8",
               display: "flex",
               alignItems: "center",

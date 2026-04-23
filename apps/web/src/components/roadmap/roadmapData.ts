@@ -51,10 +51,10 @@ export const STATUS_CONFIG: Record<
   },
   planned: {
     label: "Planned",
-    bg: "#F8F8FC",
+    bg: "var(--content-bg-secondary)",
     color: "#6B6B8A",
     dot: "#A0A0B8",
-    borderColor: "#E8E8F0",
+    borderColor: "var(--content-border)",
   },
   "under-consideration": {
     label: "Under Consideration",

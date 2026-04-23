@@ -307,7 +307,7 @@ function KanbanColumn({
       style={{
         width: "272px",
         minWidth: "272px",
-        background: isOver ? bgColor : "#F8F8FC",
+        background: isOver ? bgColor : "var(--content-bg-secondary)",
         ringColor: color,
         border: isOver ? `1px solid ${color}40` : "1px solid transparent",
       }}

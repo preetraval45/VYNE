@@ -126,7 +126,7 @@ export function AttachmentPreview({
                   marginTop: 4,
                   height: 3,
                   borderRadius: 2,
-                  background: "#E8E8F0",
+                  background: "var(--content-border)",
                   overflow: "hidden",
                 }}
               >

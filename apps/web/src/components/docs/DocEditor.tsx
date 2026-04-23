@@ -399,7 +399,7 @@ function TB({
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLButtonElement).style.background = "#F8F8FC";
+          (e.currentTarget as HTMLButtonElement).style.background = "var(--content-bg-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)

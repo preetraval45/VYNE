@@ -171,7 +171,7 @@ export default function InviteMemberModal({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: email ? "#06B6D4" : "#E8E8F0",
+              background: email ? "#06B6D4" : "var(--content-border)",
               color: email ? "#fff" : "#A0A0B8",
               cursor: email ? "pointer" : "default",
               fontSize: 13,
