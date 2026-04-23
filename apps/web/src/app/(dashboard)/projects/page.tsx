@@ -37,6 +37,7 @@ import {
   PageHeader,
   PrimaryLink,
   ViewToggle,
+  EmptyState,
   type Tone,
 } from "@/components/shared/Kit";
 import toast from "react-hot-toast";
@@ -139,30 +140,22 @@ function ProjectsPageInner() {
         style={{ padding: "18px 20px 24px", background: "var(--content-bg-secondary)" }}
       >
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: "var(--content-secondary)" }}
-            >
-              <LayoutGrid size={28} style={{ color: "var(--text-tertiary)" }} />
-            </div>
-            <h3
-              className="font-semibold text-lg mb-2"
-              style={{ color: "var(--text-primary)" }}
-            >
-              {search ? "No projects found" : "No projects yet"}
-            </h3>
-            <p className="text-sm mb-6 max-w-xs" style={{ color: "var(--text-tertiary)" }}>
-              {search
-                ? `No projects match "${search}"`
-                : "Create your first project to start tracking work with your team"}
-            </p>
-            {!search && (
-              <PrimaryLink href="/projects/new">
-                <Plus size={14} /> Create first project
-              </PrimaryLink>
-            )}
-          </div>
+          <EmptyState
+            icon={<LayoutGrid size={24} />}
+            title={search ? "No projects found" : "No projects yet"}
+            body={
+              search
+                ? `No projects match "${search}" — try a different keyword.`
+                : "Projects are where your team tracks work. Create one and start assigning tasks."
+            }
+            action={
+              !search && (
+                <PrimaryLink href="/projects/new">
+                  <Plus size={14} /> Create first project
+                </PrimaryLink>
+              )
+            }
+          />
         ) : view === "board" ? (
           <Board>
             {PROJECT_STAGES.map((stage) => {

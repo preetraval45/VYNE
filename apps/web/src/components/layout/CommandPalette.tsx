@@ -48,7 +48,9 @@ const MAX_RECENT_SEARCHES = 5;
 // ── Types ──────────────────────────────────────────────────────────
 type ResultCategory =
   | "Navigate"
+  | "Projects"
   | "Issues"
+  | "Contacts"
   | "Documents"
   | "Channels"
   | "Messages"
@@ -149,6 +151,22 @@ const MOCK_CHANNELS = [
   { id: "ch6", name: "incidents", memberCount: 4 },
 ] as const;
 
+const MOCK_PROJECTS = [
+  { id: "p-vyne", name: "VYNE Platform", identifier: "VYNE" },
+  { id: "p-mobile", name: "Mobile App", identifier: "MOB" },
+  { id: "p-ai", name: "AI Engine", identifier: "AI" },
+  { id: "p-infra", name: "Infrastructure", identifier: "INFRA" },
+  { id: "p-design", name: "Design System", identifier: "DS" },
+] as const;
+
+const MOCK_CONTACTS = [
+  { id: "c-acme", name: "Acme Corp", email: "hello@acme.com" },
+  { id: "c-globex", name: "Globex", email: "ops@globex.co" },
+  { id: "c-initech", name: "Initech", email: "bill@initech.io" },
+  { id: "c-contoso", name: "Contoso", email: "sales@contoso.dev" },
+  { id: "c-northwind", name: "Northwind", email: "team@northwind.io" },
+] as const;
+
 const MOCK_MESSAGES = [
   {
     id: "m1",
@@ -239,6 +257,42 @@ function searchDocuments(
     icon: <FileText size={16} />,
     action: () => navigate("/docs"),
     category: "Documents" as ResultCategory,
+  }));
+}
+
+function searchProjectList(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_PROJECTS.filter(
+    (p) =>
+      p.name.toLowerCase().includes(q) ||
+      p.identifier.toLowerCase().includes(q),
+  ).map((p) => ({
+    id: `search-proj-${p.id}`,
+    label: p.name,
+    description: `Project · ${p.identifier}`,
+    icon: <Hash size={16} />,
+    action: () => navigate(`/projects/${p.id}`),
+    category: "Projects" as ResultCategory,
+  }));
+}
+
+function searchContactList(
+  q: string,
+  navigate: (path: string) => void,
+): CommandItem[] {
+  return MOCK_CONTACTS.filter(
+    (c) =>
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q),
+  ).map((c) => ({
+    id: `search-contact-${c.id}`,
+    label: c.name,
+    description: c.email,
+    icon: <FileText size={16} />,
+    action: () => navigate("/contacts"),
+    category: "Contacts" as ResultCategory,
   }));
 }
 
@@ -339,7 +393,9 @@ function searchTeam(
 // ── Category icon map ──────────────────────────────────────────────
 const CATEGORY_ICONS: Record<ResultCategory, React.ReactNode> = {
   Navigate: <LayoutGrid size={12} />,
+  Projects: <LayoutGrid size={12} />,
   Issues: <Hash size={12} />,
+  Contacts: <Users size={12} />,
   Documents: <FileText size={12} />,
   Channels: <MessageSquare size={12} />,
   Messages: <MessageSquare size={12} />,
@@ -971,7 +1027,9 @@ export function CommandPalette() {
 
     const navigate = (path: string) => router.push(path);
     return [
+      ...searchProjectList(q, navigate),
       ...searchIssues(q, navigate),
+      ...searchContactList(q, navigate),
       ...searchDocuments(q, navigate),
       ...searchChannels(q, navigate),
       ...searchMessages(q, navigate),

@@ -211,13 +211,13 @@ export function IssueKanban({
           {kanbanInstructions}
         </div>
 
-        <ul
+        <div
+          role="list"
           aria-describedby="kanban-instructions"
           className="flex gap-3"
           style={{
             minWidth: "max-content",
             alignItems: "flex-start",
-            listStyle: "none",
             margin: 0,
             padding: 0,
           }}
@@ -248,7 +248,7 @@ export function IssueKanban({
               isCreating={createIssue.isPending}
             />
           ))}
-        </ul>
+        </div>
       </section>
 
       {/* Drag overlay */}
@@ -363,14 +363,16 @@ function KanbanColumn({
         items={issues.map((i) => i.id)}
         strategy={verticalListSortingStrategy}
       >
-        <ul
+        <div
+          role="list"
           className="flex flex-col gap-2 p-2 flex-1 min-h-[60px]"
           aria-label={`${label} issues`}
-          style={{ listStyle: "none", margin: 0, padding: "0.5rem" }}
+          style={{ margin: 0, padding: "0.5rem" }}
         >
           <AnimatePresence mode="popLayout">
             {issues.map((issue) => (
-              <motion.li
+              <motion.div
+                role="listitem"
                 key={issue.id}
                 layout
                 initial={{ opacity: 0, y: 8 }}
@@ -379,16 +381,16 @@ function KanbanColumn({
                 transition={{ duration: 0.15 }}
               >
                 <IssueCard issue={issue} />
-              </motion.li>
+              </motion.div>
             ))}
           </AnimatePresence>
 
-          {/* Inline Create — rendered as <li> so the parent <ul> stays
-              semantic (axe/structure/list: list elements must only directly
-              contain <li>, <script> or <template>). */}
+          {/* Inline Create — rendered as role=listitem div to match the
+              surrounding role=list container. */}
           <AnimatePresence>
             {showInlineCreate && (
-              <motion.li
+              <motion.div
+                role="listitem"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
@@ -465,10 +467,10 @@ function KanbanColumn({
                     </span>
                   </div>
                 </div>
-              </motion.li>
+              </motion.div>
             )}
           </AnimatePresence>
-        </ul>
+        </div>
       </SortableContext>
 
       {/* Add issue button at bottom */}

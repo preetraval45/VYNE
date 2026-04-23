@@ -28,9 +28,11 @@ const TONE_TOKENS: Record<Tone, { fg: string; bg: string; ring: string }> = {
     ring: "var(--content-border)",
   },
   purple: {
-    fg: "#5B5BD6",
-    bg: "rgba(6, 182, 212, 0.07)",
-    ring: "rgba(6, 182, 212, 0.18)",
+    // Darker teal foreground on teal-soft bg meets WCAG AA (≥4.5:1)
+    // against the pill background in both light and dark themes.
+    fg: "#0E7490",
+    bg: "rgba(6, 182, 212, 0.10)",
+    ring: "rgba(6, 182, 212, 0.28)",
   },
   success: {
     fg: "#0F9D58",
@@ -282,6 +284,7 @@ export function EmptyState({
 }) {
   return (
     <div
+      role="status"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -293,28 +296,39 @@ export function EmptyState({
     >
       {icon && (
         <div
+          aria-hidden="true"
           style={{
-            width: 52,
-            height: 52,
-            borderRadius: 14,
-            background: "var(--content-secondary)",
-            border: "1px solid var(--content-border)",
+            position: "relative",
+            width: 72,
+            height: 72,
+            borderRadius: 18,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "var(--text-tertiary)",
-            marginBottom: 14,
+            marginBottom: 18,
+            background:
+              "radial-gradient(circle at 50% 40%, rgba(6, 182, 212, 0.22), rgba(6, 182, 212, 0.04) 70%, transparent)",
+            color: "var(--vyne-teal)",
           }}
         >
+          <span
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: 18,
+              border: "1px dashed rgba(6, 182, 212, 0.35)",
+            }}
+          />
           {icon}
         </div>
       )}
       <h3
         style={{
-          fontSize: 15,
+          fontSize: 16,
           fontWeight: 600,
           color: "var(--text-primary)",
-          letterSpacing: "-0.01em",
+          letterSpacing: "-0.015em",
           margin: 0,
         }}
       >

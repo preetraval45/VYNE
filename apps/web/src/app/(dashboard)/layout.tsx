@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileSidebarToggle } from "@/components/layout/MobileSidebarToggle";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
@@ -36,6 +37,9 @@ export default function DashboardLayout({
 
       {/* Fixed Sidebar (hidden in focus mode) */}
       {!focusMode && <Sidebar />}
+
+      {/* Mobile drawer toggle (hidden ≥769px via CSS) */}
+      {!focusMode && <MobileSidebarToggle />}
 
       {/* Main Content */}
       <main

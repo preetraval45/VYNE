@@ -75,6 +75,14 @@ const industries = [
 
 const companySizes = ['Just me', '2-10', '11-50', '51-200', '200+']
 
+const useCases = [
+  { id: 'run-company', label: 'Run my whole company on one tool' },
+  { id: 'replace-stack', label: 'Replace Slack + Jira + Notion' },
+  { id: 'erp-crm', label: 'Adopt a modern ERP / CRM' },
+  { id: 'projects-only', label: 'Start with projects, expand later' },
+  { id: 'evaluating', label: 'Just exploring / comparing tools' },
+] as const
+
 /* ─── Confetti Effect ────────────────────────────────────────── */
 function Confetti() {
   const [pieces, setPieces] = useState<Array<{ id: number; x: number; delay: number; color: string; size: number }>>([])
@@ -121,11 +129,18 @@ function Confetti() {
 
 /* ─── Step Components ────────────────────────────────────────── */
 
+interface CompanyData {
+  companyName: string
+  industry: string
+  size: string
+  useCase: string
+}
+
 function StepCompany({
   data,
   onChange,
 }: {
-  data: { companyName: string; industry: string; size: string }
+  data: CompanyData
   onChange: (d: Partial<typeof data>) => void
 }) {
   return (
@@ -232,6 +247,44 @@ function StepCompany({
                 {size}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+            What brings you to VYNE?
+          </label>
+          <div
+            role="radiogroup"
+            aria-label="Primary use case"
+            style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+          >
+            {useCases.map((uc) => {
+              const active = data.useCase === uc.id
+              return (
+                <button
+                  key={uc.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => onChange({ useCase: uc.id })}
+                  style={{
+                    textAlign: 'left',
+                    padding: '11px 14px',
+                    borderRadius: 10,
+                    border: `1.5px solid ${active ? '#06B6D4' : 'var(--content-border)'}`,
+                    background: active ? 'rgba(6, 182, 212,0.08)' : 'var(--content-bg)',
+                    color: active ? '#06B6D4' : 'var(--text-primary)',
+                    fontSize: 14,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {uc.label}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -524,7 +577,7 @@ export default function OnboardingPage() {
   const [isSaving, setIsSaving] = useState(false)
 
   // Form state
-  const [company, setCompany] = useState({ companyName: '', industry: '', size: '' })
+  const [company, setCompany] = useState<CompanyData>({ companyName: '', industry: '', size: '', useCase: '' })
   const [selectedModules, setSelectedModules] = useState<Set<string>>(
     new Set(['chat', 'projects', 'docs', 'ai'])
   )

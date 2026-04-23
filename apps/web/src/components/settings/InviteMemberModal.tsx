@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { X } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface InviteMemberModalProps {
   readonly open: boolean;
@@ -16,6 +17,8 @@ export default function InviteMemberModal({
 }: InviteMemberModalProps) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"member" | "viewer">("member");
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
 
   if (!open) return null;
 
@@ -37,14 +40,23 @@ export default function InviteMemberModal({
         justifyContent: "center",
         zIndex: 200,
       }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Invite team member"
+        tabIndex={-1}
         style={{
           background: "var(--content-bg)",
           borderRadius: 12,
           width: 400,
           padding: 24,
           boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
+          outline: "none",
         }}
       >
         {/* Header */}

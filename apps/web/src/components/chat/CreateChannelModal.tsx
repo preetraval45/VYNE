@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface CreateChannelModalProps {
   readonly onClose: () => void;
@@ -16,6 +17,8 @@ export function CreateChannelModal({
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true, onClose);
 
   const slug = name
     .toLowerCase()
@@ -33,8 +36,16 @@ export function CreateChannelModal({
         justifyContent: "center",
         zIndex: 100,
       }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Create a channel"
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
@@ -44,6 +55,7 @@ export function CreateChannelModal({
           width: 440,
           padding: 24,
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+          outline: "none",
         }}
       >
         <div
@@ -179,6 +191,7 @@ export function CreateChannelModal({
               type="button"
               role="switch"
               aria-checked={isPrivate}
+              aria-label={isPrivate ? "Make channel public" : "Make channel private"}
               onClick={() => setIsPrivate(!isPrivate)}
               onKeyDown={(e) => e.key === " " && setIsPrivate(!isPrivate)}
               style={{
