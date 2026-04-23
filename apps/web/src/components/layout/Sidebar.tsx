@@ -1558,25 +1558,26 @@ export function Sidebar() {
               aria-label={themeLabels[theme] ?? "Toggle theme"}
               title={themeTitles[theme] ?? "Theme"}
               style={{
-                background: "transparent",
-                border: "none",
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
                 cursor: "pointer",
-                color: "var(--text-tertiary)",
-                padding: 4,
-                borderRadius: 6,
+                color: "var(--text-secondary)",
+                width: 32,
+                height: 32,
+                borderRadius: 8,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "color 0.15s",
+                transition: "color 0.15s, border-color 0.15s, background 0.15s",
               }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--vyne-purple)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--text-tertiary)")
-              }
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--vyne-teal)";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-teal)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+              }}
             >
               {themeIcons[theme] ?? moonIcon}
             </button>

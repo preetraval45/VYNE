@@ -3,6 +3,19 @@ import { persist } from "zustand/middleware";
 import { authApi } from "@/lib/api/client";
 import type { User } from "@/types";
 
+// ─── Cookie helpers — mirror token state into cookies so the Next.js
+// middleware can guard dashboard routes server-side. Client-side only.
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+function setAuthCookie(name: string, value: string | null) {
+  if (typeof document === "undefined") return;
+  if (value) {
+    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  } else {
+    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+  }
+}
+
 interface AuthStore {
   user: User | null;
   token: string | null;
@@ -44,6 +57,8 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authApi.login(email, password);
           const { user, token, refreshToken } = response.data;
           set({ user, token, refreshToken, isLoading: false, error: null });
+          setAuthCookie("vyne-token", token);
+          setAuthCookie("vyne-demo", null);
         } catch (err: unknown) {
           const message =
             err instanceof Error
@@ -62,6 +77,8 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authApi.signup(data);
           const { user, token, refreshToken } = response.data;
           set({ user, token, refreshToken, isLoading: false, error: null });
+          setAuthCookie("vyne-token", token);
+          setAuthCookie("vyne-demo", null);
         } catch (err: unknown) {
           const message =
             err instanceof Error
@@ -76,14 +93,24 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: () => {
         set({ user: null, token: null, refreshToken: null, error: null });
+        setAuthCookie("vyne-token", null);
+        setAuthCookie("vyne-demo", null);
         if (globalThis.window !== undefined) {
           globalThis.window.location.href = "/login";
         }
       },
 
-      setUser: (user: User) => set({ user }),
+      setUser: (user: User) => {
+        set({ user });
+        if (user.id === "demo") setAuthCookie("vyne-demo", "1");
+      },
 
-      setToken: (token: string) => set({ token }),
+      setToken: (token: string) => {
+        set({ token });
+        // "demo-token" is the sentinel the login page uses for instant-demo mode.
+        if (token === "demo-token") setAuthCookie("vyne-demo", "1");
+        else setAuthCookie("vyne-token", token);
+      },
 
       setRefreshToken: (refreshToken: string) => set({ refreshToken }),
 

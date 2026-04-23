@@ -67,7 +67,10 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/home");
     } catch {
-      enterDemo();
+      // Real auth error surfaces via `error` in the store — don't
+      // silently enter demo mode (that masked "wrong password" /
+      // "account not found" as a successful demo login).
+      // Users who want the demo should click the explicit button.
     }
   }
 

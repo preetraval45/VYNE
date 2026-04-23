@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
@@ -8,6 +9,7 @@ import { UndoToast } from "@/components/layout/UndoToast";
 import { ProductTour } from "@/components/layout/ProductTour";
 import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 
@@ -17,6 +19,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const focusMode = useUIStore((s) => s.focusMode);
+  const pathname = usePathname();
+  // Derive a module key from the first path segment so the error boundary
+  // resets automatically when the user navigates to a different module.
+  const moduleKey = pathname?.split("/")[1] ?? "root";
 
   return (
     <div
@@ -39,7 +45,14 @@ export default function DashboardLayout({
         style={{ background: "var(--content-bg)" }}
         tabIndex={-1}
       >
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary>
+          {/* Module-scoped boundary: keyed by the first path segment so a
+              crash in one module (e.g. /crm) doesn't blank the whole app
+              and auto-resets when the user navigates to a different one. */}
+          <ModuleErrorBoundary key={moduleKey} moduleName={moduleKey}>
+            {children}
+          </ModuleErrorBoundary>
+        </ErrorBoundary>
       </main>
 
       {/* Global Command Palette */}

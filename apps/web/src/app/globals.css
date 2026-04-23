@@ -956,6 +956,21 @@ textarea {
 }
 .slide-up-fade { animation: slide-up-fade 0.4s var(--ease-out-quart) both; }
 
+/* ─── Drag-and-drop polish (opt-in via data-drag-over) ──────── */
+[data-drag-over="true"] {
+  background: rgba(6, 182, 212, 0.08) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--vyne-teal),
+    0 10px 30px rgba(6, 182, 212, 0.18);
+  transform: scale(1.01);
+}
+[draggable="true"]:active {
+  cursor: grabbing !important;
+}
+[draggable="true"] {
+  cursor: grab;
+}
+
 /* ─── Teal accent utilities (additive) ───────────────────────── */
 .accent-teal         { color: var(--vyne-teal); }
 .bg-accent-teal      { background: var(--vyne-teal); color: #fff; }

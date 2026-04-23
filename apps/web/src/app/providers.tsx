@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
+import { MotionConfig } from "framer-motion";
 import { ThemeApplier } from "@/components/layout/ThemeApplier";
 import { TenantCssInjector } from "@/components/layout/TenantCssInjector";
 
@@ -28,7 +29,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeApplier />
       <TenantCssInjector />
-      {children}
+      {/* Honor OS-level prefers-reduced-motion for every Framer animation */}
+      <MotionConfig reducedMotion="user">
+        {children}
+      </MotionConfig>
       <Toaster
         position="bottom-right"
         toastOptions={{

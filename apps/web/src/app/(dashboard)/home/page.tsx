@@ -72,6 +72,24 @@ function StatCard({
   );
 }
 
+// ── HTML sanitizer for activity-feed strings ─────────────────────
+// The activity feed receives strings like "Sarah updated <strong>VYNE-42</strong>".
+// Authors of fixture data / server events can only intend basic emphasis, so we
+// escape everything then restore the whitelist (<strong>, <em>, <b>, <i>).
+function sanitizeActivityHtml(input: string): string {
+  if (!input) return "";
+  const escaped = input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+  return escaped.replace(
+    /&lt;(\/?(?:strong|em|b|i))&gt;/g,
+    "<$1>",
+  );
+}
+
 // ── Activity item ─────────────────────────────────────────────────
 function ActivityItem({
   avatar,
@@ -109,7 +127,7 @@ function ActivityItem({
       <div>
         <div
           style={{ fontSize: 12, color: "var(--text-primary)" }}
-          dangerouslySetInnerHTML={{ __html: action }}
+          dangerouslySetInnerHTML={{ __html: sanitizeActivityHtml(action) }}
         />
         <div
           style={{ fontSize: 10, color: "var(--text-tertiary)", marginTop: 2 }}
