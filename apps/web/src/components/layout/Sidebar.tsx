@@ -121,9 +121,10 @@ const NAV_ITEMS: NavItemDef[] = [
     badge: 2,
     moduleId: "projects",
     subs: [
-      { label: "All Projects", href: "/projects" },
-      { label: "Issues", href: "/projects" },
-      { label: "Sprints", href: "/projects" },
+      { label: "Projects", href: "/projects" },
+      { label: "Tasks", href: "/projects/tasks" },
+      { label: "Sub Tasks", href: "/projects/subtasks" },
+      { label: "Teams", href: "/projects/teams" },
       { label: "Roadmap", href: "/roadmap" },
     ],
   },
