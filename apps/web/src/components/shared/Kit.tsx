@@ -431,6 +431,7 @@ export function BoardColumn({
   // onAdd / addHref kept for backwards compat with existing call sites
   // but the per-column "+" affordance was removed by request — column
   // headers stay clean; users add via the page-level "New" CTA.
+  onDropItem,
   children,
 }: {
   title: string;
@@ -440,18 +441,41 @@ export function BoardColumn({
   progress?: number;
   onAdd?: () => void;
   addHref?: string;
+  /** Called with the dragged item id when something is dropped on this column */
+  onDropItem?: (itemId: string) => void;
   children: ReactNode;
 }) {
   const t = TONE_TOKENS[accent];
+  const dropHandlers = onDropItem
+    ? {
+        onDragOver: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.currentTarget.setAttribute("data-drag-over", "true");
+        },
+        onDragLeave: (e: React.DragEvent) => {
+          e.currentTarget.removeAttribute("data-drag-over");
+        },
+        onDrop: (e: React.DragEvent) => {
+          e.preventDefault();
+          e.currentTarget.removeAttribute("data-drag-over");
+          const id = e.dataTransfer.getData("text/kit-item-id");
+          if (id) onDropItem(id);
+        },
+      }
+    : {};
 
   return (
     <div
+      {...dropHandlers}
       style={{
         flex: "0 0 280px",
         minWidth: 260,
         display: "flex",
         flexDirection: "column",
         gap: 10,
+        padding: 4,
+        borderRadius: 12,
+        transition: "background 0.15s, box-shadow 0.15s",
       }}
     >
       <div style={{ padding: "0 6px" }}>
@@ -527,6 +551,7 @@ export function BoardCard({
   footer,
   onClick,
   href,
+  dragId,
 }: {
   title: ReactNode;
   starred?: boolean;
@@ -536,7 +561,18 @@ export function BoardCard({
   footer?: ReactNode;
   onClick?: () => void;
   href?: string;
+  /** Set to make the card draggable; value is passed to the column's onDropItem */
+  dragId?: string;
 }) {
+  const dragProps = dragId
+    ? {
+        draggable: true,
+        onDragStart: (e: React.DragEvent) => {
+          e.dataTransfer.setData("text/kit-item-id", dragId);
+          e.dataTransfer.effectAllowed = "move";
+        },
+      }
+    : {};
   const inner = (
     <>
       <div
@@ -665,7 +701,7 @@ export function BoardCard({
 
   if (href) {
     return (
-      <Link href={href} style={cardStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
+      <Link href={href} style={cardStyle} onMouseEnter={onEnter} onMouseLeave={onLeave} {...dragProps}>
         {inner}
       </Link>
     );
@@ -673,6 +709,7 @@ export function BoardCard({
 
   return (
     <div
+      {...dragProps}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}

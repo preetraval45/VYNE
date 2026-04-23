@@ -174,6 +174,13 @@ function ProjectsPageInner() {
                   count={stageProjects.length}
                   accent={stage.tone}
                   addHref="/projects/new"
+                  onDropItem={(projectId) => {
+                    const current = projects.find((p) => p.id === projectId);
+                    if (current && current.status !== stage.id) {
+                      useProjectsStore.getState().updateProject(projectId, { status: stage.id });
+                      toast.success(`Moved to ${stage.label}`);
+                    }
+                  }}
                 >
                   {stageProjects.map((project) => {
                     const pTasks = allTasks.filter((t) => t.projectId === project.id);
@@ -192,6 +199,7 @@ function ProjectsPageInner() {
                     return (
                       <BoardCard
                         key={project.id}
+                        dragId={project.id}
                         title={project.name}
                         href={`/projects/${project.id}`}
                         dateRange={range}
