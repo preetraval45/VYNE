@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Clock } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
@@ -713,31 +714,68 @@ export function BoardCard({
     el.style.borderColor = "var(--content-border)";
   };
 
-  if (href) {
+  // Draggable cards can't use a Next <Link> — anchors have native drag
+  // behavior that hijacks `dataTransfer` (dragging the URL instead of the
+  // card). When dragId is set we render a div and navigate via router on
+  // click, preserving both behaviors.
+  if (href && !dragId) {
     return (
-      <Link href={href} style={cardStyle} onMouseEnter={onEnter} onMouseLeave={onLeave} {...dragProps}>
+      <Link href={href} style={cardStyle} onMouseEnter={onEnter} onMouseLeave={onLeave}>
         {inner}
       </Link>
     );
   }
 
   return (
+    <DraggableCardShell
+      cardStyle={cardStyle}
+      onEnter={onEnter}
+      onLeave={onLeave}
+      onClick={onClick}
+      href={href}
+      dragProps={dragProps}
+    >
+      {inner}
+    </DraggableCardShell>
+  );
+}
+
+function DraggableCardShell({
+  cardStyle,
+  onEnter,
+  onLeave,
+  onClick,
+  href,
+  dragProps,
+  children,
+}: {
+  cardStyle: CSSProperties;
+  onEnter: (e: React.MouseEvent<HTMLElement>) => void;
+  onLeave: (e: React.MouseEvent<HTMLElement>) => void;
+  onClick?: () => void;
+  href?: string;
+  dragProps: Record<string, unknown>;
+  children: ReactNode;
+}) {
+  const router = useRouter();
+  const activate = onClick ?? (href ? () => router.push(href) : undefined);
+  return (
     <div
       {...dragProps}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
+      role={activate ? "button" : undefined}
+      tabIndex={activate ? 0 : undefined}
+      onClick={activate}
       onKeyDown={(e) => {
-        if (onClick && (e.key === "Enter" || e.key === " ")) {
+        if (activate && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
-          onClick();
+          activate();
         }
       }}
       style={cardStyle}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      {inner}
+      {children}
     </div>
   );
 }
