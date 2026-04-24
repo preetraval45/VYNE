@@ -3,7 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Clock, Plus, GripVertical } from "lucide-react";
 
 /* ───────────────────────────────────────────────────────────────
  * VYNE design-system kit — small, opinionated primitives so every
@@ -421,6 +421,21 @@ export function StatCard({
 
 /* ─── Board primitives (Odoo/Trello-style kanban) ─────────────── */
 
+const addBtnStyle: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 22,
+  height: 22,
+  borderRadius: 6,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--vyne-teal)",
+  cursor: "pointer",
+  textDecoration: "none",
+  transition: "background 0.12s, border-color 0.12s",
+};
+
 export function Board({ children }: { children: ReactNode }) {
   return (
     <div
@@ -443,9 +458,9 @@ export function BoardColumn({
   count,
   accent = "neutral",
   progress,
-  // onAdd / addHref kept for backwards compat with existing call sites
-  // but the per-column "+" affordance was removed by request — column
-  // headers stay clean; users add via the page-level "New" CTA.
+  onAdd,
+  addHref,
+  addLabel,
   onDropItem,
   children,
 }: {
@@ -456,6 +471,8 @@ export function BoardColumn({
   progress?: number;
   onAdd?: () => void;
   addHref?: string;
+  /** aria-label for the "+" button (defaults to "Add to {title}") */
+  addLabel?: string;
   /** Called with the dragged item id when something is dropped on this column */
   onDropItem?: (itemId: string) => void;
   children: ReactNode;
@@ -530,18 +547,44 @@ export function BoardColumn({
           >
             {title}
           </h3>
-          {typeof count === "number" && (
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: "var(--text-tertiary)",
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {count}
-            </span>
-          )}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            {typeof count === "number" && (
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "var(--text-tertiary)",
+                  fontVariantNumeric: "tabular-nums",
+                  minWidth: 16,
+                  textAlign: "right",
+                }}
+              >
+                {count}
+              </span>
+            )}
+            {(onAdd || addHref) && (
+              addHref ? (
+                <Link
+                  href={addHref}
+                  aria-label={addLabel ?? `Add to ${title}`}
+                  title={addLabel ?? `Add to ${title}`}
+                  style={addBtnStyle}
+                >
+                  <Plus size={13} />
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onAdd}
+                  aria-label={addLabel ?? `Add to ${title}`}
+                  title={addLabel ?? `Add to ${title}`}
+                  style={addBtnStyle}
+                >
+                  <Plus size={13} />
+                </button>
+              )
+            )}
+          </div>
         </div>
         <div
           style={{
@@ -572,7 +615,13 @@ export function BoardColumn({
           minHeight: 120,
         }}
       >
-        {children}
+        {count === 0 ? (
+          <div className="kanban-empty-placeholder" aria-hidden="true">
+            <Plus size={12} /> Drop here or add
+          </div>
+        ) : (
+          children
+        )}
       </div>
     </div>
   );
@@ -614,6 +663,11 @@ export function BoardCard({
     : {};
   const inner = (
     <>
+      {dragId && (
+        <span className="drag-grip" aria-hidden="true">
+          <GripVertical size={12} />
+        </span>
+      )}
       <div
         style={{
           display: "flex",

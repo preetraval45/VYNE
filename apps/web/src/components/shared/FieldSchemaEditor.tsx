@@ -220,6 +220,7 @@ function FieldsTab({
   const removeField = useCustomFieldsStore((s) => s.removeField);
   const reorderFields = useCustomFieldsStore((s) => s.reorderFields);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
 
   return (
     <div>
@@ -253,7 +254,9 @@ function FieldsTab({
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = "move";
+              setOverIdx(i);
             }}
+            onDragLeave={() => setOverIdx((v) => (v === i ? null : v))}
             onDrop={(e) => {
               e.preventDefault();
               const raw = e.dataTransfer.getData("text/plain");
@@ -262,8 +265,12 @@ function FieldsTab({
                 if (!Number.isNaN(from) && from !== i) reorderFields(moduleId, from, i);
               }
               setDraggingIdx(null);
+              setOverIdx(null);
             }}
-            onDragEnd={() => setDraggingIdx(null)}
+            onDragEnd={() => {
+              setDraggingIdx(null);
+              setOverIdx(null);
+            }}
             style={{
               display: "grid",
               gridTemplateColumns: "18px 1fr 130px 36px",
@@ -271,9 +278,11 @@ function FieldsTab({
               gap: 10,
               padding: "8px 10px",
               borderRadius: 10,
-              border: "1px solid var(--content-border)",
-              background: "var(--content-bg)",
-              opacity: draggingIdx === i ? 0.5 : 1,
+              border: `1px solid ${overIdx === i && draggingIdx !== null && draggingIdx !== i ? "var(--vyne-teal)" : "var(--content-border)"}`,
+              background: overIdx === i && draggingIdx !== null && draggingIdx !== i ? "var(--vyne-teal-soft)" : "var(--content-bg)",
+              opacity: draggingIdx === i ? 0.45 : 1,
+              transition: "border-color 0.12s, background 0.12s",
+              cursor: "grab",
             }}
           >
             <span aria-hidden="true" style={{ color: "var(--text-tertiary)", cursor: "grab" }}>
@@ -358,6 +367,7 @@ function StatusesTab({
   const removeStatus = useCustomFieldsStore((s) => s.removeStatus);
   const reorderStatuses = useCustomFieldsStore((s) => s.reorderStatuses);
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [overIdx, setOverIdx] = useState<number | null>(null);
 
   return (
     <div>
@@ -390,7 +400,9 @@ function StatusesTab({
             onDragOver={(e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = "move";
+              setOverIdx(i);
             }}
+            onDragLeave={() => setOverIdx((v) => (v === i ? null : v))}
             onDrop={(e) => {
               e.preventDefault();
               const raw = e.dataTransfer.getData("text/plain");
@@ -399,8 +411,12 @@ function StatusesTab({
                 if (!Number.isNaN(from) && from !== i) reorderStatuses(moduleId, from, i);
               }
               setDraggingIdx(null);
+              setOverIdx(null);
             }}
-            onDragEnd={() => setDraggingIdx(null)}
+            onDragEnd={() => {
+              setDraggingIdx(null);
+              setOverIdx(null);
+            }}
             style={{
               display: "grid",
               gridTemplateColumns: "18px 36px 1fr 36px",
@@ -408,9 +424,11 @@ function StatusesTab({
               gap: 10,
               padding: "8px 10px",
               borderRadius: 10,
-              border: "1px solid var(--content-border)",
-              background: "var(--content-bg)",
-              opacity: draggingIdx === i ? 0.5 : 1,
+              border: `1px solid ${overIdx === i && draggingIdx !== null && draggingIdx !== i ? "var(--vyne-teal)" : "var(--content-border)"}`,
+              background: overIdx === i && draggingIdx !== null && draggingIdx !== i ? "var(--vyne-teal-soft)" : "var(--content-bg)",
+              opacity: draggingIdx === i ? 0.45 : 1,
+              transition: "border-color 0.12s, background 0.12s",
+              cursor: "grab",
             }}
           >
             <span aria-hidden="true" style={{ color: "var(--text-tertiary)", cursor: "grab" }}>

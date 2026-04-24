@@ -161,10 +161,25 @@ export default function TasksKanbanPage() {
               type="button"
               onClick={() => setCreateForProjectId("")}
               className="btn-teal"
-              aria-label="Create new task"
+              aria-label="Create new task (C)"
+              title="New task  ·  C"
               style={{ height: 34 }}
             >
               <Plus size={14} /> New task
+              <kbd
+                aria-hidden="true"
+                style={{
+                  marginLeft: 6,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  background: "rgba(255,255,255,0.18)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                C
+              </kbd>
             </button>
           </>
         }

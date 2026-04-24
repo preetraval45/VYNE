@@ -41,6 +41,11 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
+import {
+  useProjects,
+  useProjectsStore,
+  useTeamMembers,
+} from "@/lib/stores/projects";
 import { usePinsStore } from "@/lib/stores/pins";
 import {
   useTheme,
@@ -50,10 +55,48 @@ import {
 } from "@/lib/stores/theme";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 
+// ── Sidebar sub-item live count badge ─────────────────────────────
+function SidebarSubBadge({ badgeKey }: { badgeKey: "projects" | "tasks" | "subtasks" | "teams" }) {
+  const projects = useProjects();
+  const tasks = useProjectsStore((s) => s.tasks);
+  const members = useTeamMembers();
+
+  let count = 0;
+  if (badgeKey === "projects") count = projects.length;
+  else if (badgeKey === "tasks") count = tasks.filter((t) => t.status !== "done").length;
+  else if (badgeKey === "subtasks") count = tasks.reduce((a, t) => a + t.subtasks.filter((s) => !s.done).length, 0);
+  else if (badgeKey === "teams") count = members.length;
+
+  if (count === 0) return null;
+  return (
+    <span
+      aria-label={`${count} ${badgeKey}`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 20,
+        height: 16,
+        padding: "0 5px",
+        borderRadius: 999,
+        background: "var(--vyne-teal-soft)",
+        color: "var(--vyne-teal)",
+        fontSize: 10,
+        fontWeight: 700,
+        fontVariantNumeric: "tabular-nums",
+      }}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 // ── Navigation item definition ────────────────────────────────────
 interface SubItem {
   label: string;
   href: string;
+  /** Optional count badge key — resolved at render time from live stores */
+  badgeKey?: "projects" | "tasks" | "subtasks" | "teams";
 }
 
 interface NavItemDef {
@@ -121,10 +164,10 @@ const NAV_ITEMS: NavItemDef[] = [
     badge: 2,
     moduleId: "projects",
     subs: [
-      { label: "Projects", href: "/projects" },
-      { label: "Tasks", href: "/projects/tasks" },
-      { label: "Sub Tasks", href: "/projects/subtasks" },
-      { label: "Teams", href: "/projects/teams" },
+      { label: "Projects", href: "/projects", badgeKey: "projects" },
+      { label: "Tasks", href: "/projects/tasks", badgeKey: "tasks" },
+      { label: "Sub Tasks", href: "/projects/subtasks", badgeKey: "subtasks" },
+      { label: "Teams", href: "/projects/teams", badgeKey: "teams" },
       { label: "Roadmap", href: "/roadmap" },
     ],
   },
@@ -529,7 +572,8 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
                   opacity: 0.5,
                 }}
               />
-              {sub.label}
+              <span style={{ flex: 1 }}>{sub.label}</span>
+              {sub.badgeKey && <SidebarSubBadge badgeKey={sub.badgeKey} />}
             </button>
           ))}
         </div>

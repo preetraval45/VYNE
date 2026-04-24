@@ -146,11 +146,26 @@ export default function SubtasksKanbanPage() {
               type="button"
               onClick={() => setShowCreate(true)}
               className="btn-teal"
-              aria-label="Create new subtask"
+              aria-label="Create new subtask (C)"
+              title="New subtask  ·  C"
               style={{ height: 34 }}
               disabled={allTasks.length === 0}
             >
               <Plus size={14} /> New subtask
+              <kbd
+                aria-hidden="true"
+                style={{
+                  marginLeft: 6,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  background: "rgba(255,255,255,0.18)",
+                  fontSize: 10,
+                  fontWeight: 700,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                C
+              </kbd>
             </button>
           </>
         }
