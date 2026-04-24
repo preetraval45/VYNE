@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Users, Folder } from "lucide-react";
 import { useProjects, useTeamMembers } from "@/lib/stores/projects";
-import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
 
@@ -22,7 +21,6 @@ export default function TeamsPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ProjectsSubNav />
       <ProjectsStatsStrip
         items={[
           { label: "Members", value: members.length, tone: "teal", hint: "Total teammates" },

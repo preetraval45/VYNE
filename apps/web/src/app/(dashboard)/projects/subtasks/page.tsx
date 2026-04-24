@@ -6,7 +6,6 @@ import { Clock, CheckSquare, Square, Search, X, ListTree, Plus } from "lucide-re
 import toast from "react-hot-toast";
 import { useProjects, useProjectsStore } from "@/lib/stores/projects";
 import type { Subtask, Task } from "@/lib/fixtures/projects";
-import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -66,7 +65,6 @@ export default function SubtasksKanbanPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ProjectsSubNav />
       <ProjectsStatsStrip
         items={[
           { label: "Total", value: kpis.total, hint: "All subtasks" },

@@ -26,7 +26,6 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
-import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import Link from "next/link";
 import {
   useProjectsStore,
@@ -86,6 +85,8 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showAddTask, setShowAddTask] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
@@ -96,15 +97,18 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   );
 
   const filteredTasks = useMemo(() => {
-    if (!search.trim()) return tasks;
-    const q = search.toLowerCase();
-    return tasks.filter(
-      (t) =>
+    const q = search.trim().toLowerCase();
+    return tasks.filter((t) => {
+      if (statusFilter !== "all" && t.status !== statusFilter) return false;
+      if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
+      if (!q) return true;
+      return (
         t.title.toLowerCase().includes(q) ||
         t.key.toLowerCase().includes(q) ||
-        t.tags.some((tag) => tag.toLowerCase().includes(q)),
-    );
-  }, [tasks, search]);
+        t.tags.some((tag) => tag.toLowerCase().includes(q))
+      );
+    });
+  }, [tasks, search, statusFilter, priorityFilter]);
 
   const progress = useMemo(() => {
     if (tasks.length === 0) return 0;
@@ -157,7 +161,6 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
       className="flex flex-col h-full"
       style={{ background: "var(--content-bg-secondary)" }}
     >
-      <ProjectsSubNav />
       {/* Project Header — muted, Odoo/Linear-adjacent */}
       <header
         className="px-6 pt-5 pb-4 flex-shrink-0"
@@ -303,12 +306,14 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         </div>
       </header>
 
-      {/* Pipeline stages — Odoo/ERPNext style */}
+      {/* Project status pipeline — single tight row so the board gets room */}
       <div
         className="px-6 flex-shrink-0"
         style={{
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
+          paddingTop: 6,
+          paddingBottom: 6,
         }}
       >
         {(() => {
@@ -317,45 +322,14 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             { id: "paused", label: "On Hold", tone: "warn" },
             { id: "completed", label: "Completed", tone: "success" },
           ];
-          const counts = {
-            todo: tasks.filter((t) => t.status === "todo").length,
-            in_progress: tasks.filter((t) => t.status === "in_progress").length,
-            in_review: tasks.filter((t) => t.status === "in_review").length,
-            done: tasks.filter((t) => t.status === "done").length,
-            blocked: tasks.filter((t) => t.status === "blocked").length,
-          };
-          const taskStages: PipelineStage[] = [
-            { id: "todo", label: "Todo", meta: String(counts.todo), tone: "neutral" },
-            { id: "in_progress", label: "In Progress", meta: String(counts.in_progress), tone: "info" },
-            { id: "in_review", label: "In Review", meta: String(counts.in_review), tone: "warn" },
-            { id: "done", label: "Done", meta: String(counts.done), tone: "success" },
-            { id: "blocked", label: "Blocked", meta: String(counts.blocked), tone: "danger" },
-          ];
           return (
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingTop: 10, paddingBottom: 6 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)" }}>
-                Project status
-              </div>
-              <PipelineBreadcrumb
-                stages={stages}
-                activeId={project.status}
-                onSelect={(id) => {
-                  updateProject(project.id, { status: id as ProjectDetail["status"] });
-                }}
-              />
-              <div style={{ fontSize: 10.5, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-tertiary)", marginTop: 4 }}>
-                Task pipeline · drag cards between columns
-              </div>
-              <PipelineBreadcrumb
-                stages={taskStages}
-                activeId={
-                  counts.in_progress > 0 ? "in_progress" :
-                  counts.in_review > 0 ? "in_review" :
-                  counts.todo > 0 ? "todo" :
-                  counts.blocked > 0 ? "blocked" : "done"
-                }
-              />
-            </div>
+            <PipelineBreadcrumb
+              stages={stages}
+              activeId={project.status}
+              onSelect={(id) => {
+                updateProject(project.id, { status: id as ProjectDetail["status"] });
+              }}
+            />
           );
         })()}
       </div>
@@ -414,27 +388,112 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+        {/* Centered search + filter bar */}
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+          style={{
+            background: "var(--content-secondary)",
+            border: "1px solid var(--content-border)",
+            flex: 1,
+            maxWidth: 640,
+            margin: "0 auto",
+            height: 36,
+          }}
+        >
+          <Search size={14} style={{ color: "var(--text-tertiary)" }} />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tasks, filter by status or priority…"
+            aria-label="Search tasks"
+            className="flex-1 bg-transparent text-sm focus:outline-none"
+            style={{ color: "var(--text-primary)", minWidth: 120 }}
+          />
+          <span
+            aria-hidden="true"
+            style={{ width: 1, height: 18, background: "var(--content-border)" }}
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as TaskStatus | "all")}
+            aria-label="Filter by status"
             style={{
-              background: "var(--content-secondary)",
-              border: "1px solid var(--content-border)",
-              width: 220,
-              height: 32,
+              padding: "4px 6px",
+              borderRadius: 6,
+              border: "none",
+              background: "transparent",
+              color:
+                statusFilter === "all" ? "var(--text-tertiary)" : "var(--vyne-teal)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              outline: "none",
             }}
           >
-            <Search size={13} style={{ color: "var(--text-tertiary)" }} />
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tasks..."
-              aria-label="Search tasks"
-              className="flex-1 bg-transparent text-sm focus:outline-none"
-              style={{ color: "var(--text-primary)" }}
-            />
-          </div>
+            <option value="all">All statuses</option>
+            {(Object.keys(TASK_STATUS_META) as TaskStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {TASK_STATUS_META[s].label}
+              </option>
+            ))}
+          </select>
+          <span
+            aria-hidden="true"
+            style={{ width: 1, height: 18, background: "var(--content-border)" }}
+          />
+          <select
+            value={priorityFilter}
+            onChange={(e) =>
+              setPriorityFilter(e.target.value as TaskPriority | "all")
+            }
+            aria-label="Filter by priority"
+            style={{
+              padding: "4px 6px",
+              borderRadius: 6,
+              border: "none",
+              background: "transparent",
+              color:
+                priorityFilter === "all" ? "var(--text-tertiary)" : "var(--vyne-teal)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="all">All priorities</option>
+            {(Object.keys(TASK_PRIORITY_META) as TaskPriority[]).map((p) => (
+              <option key={p} value={p}>
+                {TASK_PRIORITY_META[p].label}
+              </option>
+            ))}
+          </select>
+          {(search || statusFilter !== "all" || priorityFilter !== "all") && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setStatusFilter("all");
+                setPriorityFilter("all");
+              }}
+              aria-label="Clear filters"
+              title="Clear filters"
+              style={{
+                padding: "4px 8px",
+                borderRadius: 6,
+                border: "none",
+                background: "var(--vyne-teal-soft)",
+                color: "var(--vyne-teal)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Reset
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setShowSchemaEditor(true)}

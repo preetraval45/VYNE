@@ -40,7 +40,6 @@ import {
   EmptyState,
   type Tone,
 } from "@/components/shared/Kit";
-import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import toast from "react-hot-toast";
 
 // ─── Main Page ────────────────────────────────────────────────────
@@ -96,7 +95,6 @@ function ProjectsPageInner() {
 
   return (
     <div className="flex flex-col h-full">
-      <ProjectsSubNav />
       <PageHeader
         icon={<LayoutGrid size={16} />}
         title="Projects"

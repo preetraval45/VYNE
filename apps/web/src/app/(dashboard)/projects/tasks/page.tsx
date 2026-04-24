@@ -6,7 +6,6 @@ import { Star, Clock, CheckSquare, Search, X, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects, useProjectsStore } from "@/lib/stores/projects";
 import { TASK_STATUS_META, getMember, type Task } from "@/lib/fixtures/projects";
-import { ProjectsSubNav } from "@/components/projects/ProjectsSubNav";
 import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -21,7 +20,8 @@ export default function TasksKanbanPage() {
   const [filter, setFilter] = useState<Filter>("open");
   const [search, setSearch] = useState("");
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
+  const [createForProjectId, setCreateForProjectId] = useState<string | null>(null);
+  const showCreate = createForProjectId !== null;
 
   const visibleTasks = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -73,7 +73,6 @@ export default function TasksKanbanPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ProjectsSubNav />
       <ProjectsStatsStrip
         items={[
           { label: "Total", value: kpis.total, hint: "All tasks" },
@@ -160,7 +159,7 @@ export default function TasksKanbanPage() {
             </div>
             <button
               type="button"
-              onClick={() => setShowCreate(true)}
+              onClick={() => setCreateForProjectId("")}
               className="btn-teal"
               aria-label="Create new task"
               style={{ height: 34 }}
@@ -291,8 +290,9 @@ export default function TasksKanbanPage() {
                       tasks.map((task) => <TaskCard key={task.id} task={task} />)
                     )}
                   </div>
-                  <Link
-                    href={`/projects/${project.id}`}
+                  <button
+                    type="button"
+                    onClick={() => setCreateForProjectId(project.id)}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -301,13 +301,16 @@ export default function TasksKanbanPage() {
                       margin: "0 4px 4px",
                       borderRadius: 8,
                       color: "var(--vyne-teal)",
+                      background: "transparent",
+                      border: "none",
                       fontSize: 12.5,
                       fontWeight: 600,
-                      textDecoration: "none",
+                      cursor: "pointer",
+                      textAlign: "left",
                     }}
                   >
-                    <Plus size={12} /> Open project
-                  </Link>
+                    <Plus size={12} /> Add task
+                  </button>
                 </section>
               );
             })}
@@ -317,8 +320,9 @@ export default function TasksKanbanPage() {
 
       <NewTaskQuickModal
         open={showCreate}
-        onClose={() => setShowCreate(false)}
+        onClose={() => setCreateForProjectId(null)}
         projects={projects}
+        defaultProjectId={createForProjectId ?? ""}
         onCreate={(projectId, title) => {
           addTask(projectId, {
             title,
@@ -336,7 +340,7 @@ export default function TasksKanbanPage() {
           });
           const name = projects.find((p) => p.id === projectId)?.name ?? "project";
           toast.success(`Task added to ${name}`);
-          setShowCreate(false);
+          setCreateForProjectId(null);
         }}
       />
     </div>
@@ -347,20 +351,22 @@ function NewTaskQuickModal({
   open,
   onClose,
   projects,
+  defaultProjectId = "",
   onCreate,
 }: {
   open: boolean;
   onClose: () => void;
   projects: ReturnType<typeof useProjects>;
+  defaultProjectId?: string;
   onCreate: (projectId: string, title: string) => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open, onClose);
-  const [projectId, setProjectId] = useState("");
+  const [projectId, setProjectId] = useState(defaultProjectId);
   const [title, setTitle] = useState("");
 
   if (!open) return null;
-  const effectiveProjectId = projectId || projects[0]?.id || "";
+  const effectiveProjectId = projectId || defaultProjectId || projects[0]?.id || "";
 
   return (
     <div
