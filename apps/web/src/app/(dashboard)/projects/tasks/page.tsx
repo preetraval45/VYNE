@@ -185,13 +185,12 @@ export default function TasksKanbanPage() {
                 </button>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setCreateForProjectId("")}
+            <Link
+              href="/projects/tasks/new"
               className="btn-teal"
               aria-label="Create new task (C)"
               title="New task  ·  C"
-              style={{ height: 34 }}
+              style={{ height: 34, textDecoration: "none" }}
             >
               <Plus size={14} /> New task
               <kbd
@@ -208,7 +207,7 @@ export default function TasksKanbanPage() {
               >
                 C
               </kbd>
-            </button>
+            </Link>
           </>
         }
       />
@@ -333,9 +332,8 @@ export default function TasksKanbanPage() {
                       tasks.map((task) => <TaskCard key={task.id} task={task} />)
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setCreateForProjectId(project.id)}
+                  <Link
+                    href={`/projects/tasks/new?project=${project.id}`}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -345,15 +343,13 @@ export default function TasksKanbanPage() {
                       borderRadius: 8,
                       color: "var(--vyne-teal)",
                       background: "transparent",
-                      border: "none",
                       fontSize: 12.5,
                       fontWeight: 600,
-                      cursor: "pointer",
-                      textAlign: "left",
+                      textDecoration: "none",
                     }}
                   >
                     <Plus size={12} /> Add task
-                  </button>
+                  </Link>
                 </section>
               );
             })}

@@ -142,14 +142,17 @@ export default function SubtasksKanbanPage() {
                 </button>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setShowCreate(true)}
+            <Link
+              href="/projects/subtasks/new"
               className="btn-teal"
               aria-label="Create new subtask (C)"
               title="New subtask  ·  C"
-              style={{ height: 34 }}
-              disabled={allTasks.length === 0}
+              style={{
+                height: 34,
+                textDecoration: "none",
+                pointerEvents: allTasks.length === 0 ? "none" : "auto",
+                opacity: allTasks.length === 0 ? 0.5 : 1,
+              }}
             >
               <Plus size={14} /> New subtask
               <kbd
@@ -166,7 +169,7 @@ export default function SubtasksKanbanPage() {
               >
                 C
               </kbd>
-            </button>
+            </Link>
           </>
         }
       />

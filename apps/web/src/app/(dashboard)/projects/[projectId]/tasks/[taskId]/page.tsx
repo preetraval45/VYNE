@@ -30,6 +30,7 @@ import {
   type TaskStatus,
 } from "@/lib/fixtures/projects";
 import { PipelineBreadcrumb, type PipelineStage } from "@/components/shared/Kit";
+import { useCustomFieldsStore } from "@/lib/stores/customFields";
 
 const STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -576,6 +577,9 @@ export default function TaskDetailPage({ params }: PageProps) {
               </div>
             </section>
 
+            <CustomFieldsPanel taskId={task.id} />
+
+
             <section style={cardStyle}>
               <h2 style={sectionTitle}>Summary</h2>
               <div style={{ fontSize: 13, margin: 0 }}>
@@ -681,6 +685,109 @@ export default function TaskDetailPage({ params }: PageProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function CustomFieldsPanel({ taskId }: { taskId: string }) {
+  const fields = useCustomFieldsStore((s) => s.getSchema("tasks").fields);
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = localStorage.getItem(`vyne-task-custom:${taskId}`);
+      return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  if (fields.length === 0) return null;
+
+  function set(id: string, v: string) {
+    setValues((prev) => {
+      const next = { ...prev, [id]: v };
+      try {
+        localStorage.setItem(`vyne-task-custom:${taskId}`, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  return (
+    <section style={cardStyle}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 12,
+        }}
+      >
+        <h2 style={sectionTitle}>Custom fields</h2>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: "var(--vyne-teal)",
+            background: "var(--vyne-teal-soft)",
+            padding: "2px 8px",
+            borderRadius: 999,
+          }}
+        >
+          {fields.length} configured
+        </span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {fields.map((f) => (
+          <div key={f.id} style={{ display: "grid", gridTemplateColumns: "110px 1fr", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--text-tertiary)",
+                fontWeight: 500,
+              }}
+            >
+              {f.label}
+            </span>
+            {f.type === "checkbox" ? (
+              <input
+                type="checkbox"
+                aria-label={f.label}
+                title={f.label}
+                checked={values[f.id] === "true"}
+                onChange={(e) => set(f.id, e.target.checked ? "true" : "false")}
+              />
+            ) : f.type === "select" ? (
+              <select
+                aria-label={f.label}
+                title={f.label}
+                value={values[f.id] ?? ""}
+                onChange={(e) => set(f.id, e.target.value)}
+                style={{ ...inputStyle, padding: "6px 8px" }}
+              >
+                <option value="">—</option>
+                {(f.options ?? []).map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                aria-label={f.label}
+                title={f.label}
+                placeholder={f.label}
+                value={values[f.id] ?? ""}
+                onChange={(e) => set(f.id, e.target.value)}
+                style={{ ...inputStyle, padding: "6px 8px" }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

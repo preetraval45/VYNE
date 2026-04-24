@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { X, Plus, Trash2, GripVertical, RotateCcw } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   useCustomFieldsStore,
   type FieldType,
@@ -345,7 +346,10 @@ function FieldsTab({
 
       <button
         type="button"
-        onClick={() => addField(moduleId, { label: "New field", type: "text" })}
+        onClick={() => {
+          addField(moduleId, { label: "New field", type: "text" });
+          toast.success("Field added — visible now on create forms and task detail");
+        }}
         style={addBtn}
       >
         <Plus size={14} /> Add field
@@ -461,7 +465,10 @@ function StatusesTab({
       <button
         type="button"
         onClick={() =>
-          addStatus(moduleId, { label: "New status", color: STATUS_COLORS[0] })
+          {
+            addStatus(moduleId, { label: "New status", color: STATUS_COLORS[0] });
+            toast.success("Status added — pipelines and boards will pick it up");
+          }
         }
         style={addBtn}
       >
