@@ -169,10 +169,41 @@ function ProjectsPageInner() {
                   addHref="/projects/new"
                   onDropItem={(projectId) => {
                     const current = projects.find((p) => p.id === projectId);
-                    if (current && current.status !== stage.id) {
-                      useProjectsStore.getState().updateProject(projectId, { status: stage.id });
-                      toast.success(`Moved to ${stage.label}`);
-                    }
+                    if (!current || current.status === stage.id) return;
+                    const previousStatus = current.status;
+                    useProjectsStore
+                      .getState()
+                      .updateProject(projectId, { status: stage.id });
+                    toast.success(
+                      (t) => (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+                          Moved to {stage.label}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              useProjectsStore
+                                .getState()
+                                .updateProject(projectId, { status: previousStatus });
+                              toast.dismiss(t.id);
+                              toast.success("Reverted");
+                            }}
+                            style={{
+                              padding: "3px 10px",
+                              borderRadius: 6,
+                              border: "1px solid var(--vyne-teal)",
+                              background: "transparent",
+                              color: "var(--vyne-teal)",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Undo
+                          </button>
+                        </span>
+                      ),
+                      { duration: 5000 },
+                    );
                   }}
                 >
                   {stageProjects.map((project) => {

@@ -174,7 +174,11 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           background: "var(--content-bg)",
         }}
       >
-        <div className="flex items-center gap-2 mb-3" style={{ fontSize: 12 }}>
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 mb-3"
+          style={{ fontSize: 12 }}
+        >
           <Link
             href="/projects"
             className="inline-flex items-center gap-1"
@@ -184,10 +188,34 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             Projects
           </Link>
           <span style={{ color: "var(--text-tertiary)" }}>/</span>
-          <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>
+          <Link
+            href="/projects"
+            style={{ color: "var(--text-tertiary)", textDecoration: "none" }}
+          >
+            All projects
+          </Link>
+          <span style={{ color: "var(--text-tertiary)" }}>/</span>
+          <span
+            style={{ color: "var(--text-primary)", fontWeight: 600 }}
+            aria-current="page"
+          >
+            {project.name}
+          </span>
+          <span
+            style={{
+              marginLeft: 4,
+              padding: "1px 6px",
+              borderRadius: 4,
+              background: "var(--content-secondary)",
+              color: "var(--text-tertiary)",
+              fontSize: 10.5,
+              fontFamily: "var(--font-mono)",
+              fontWeight: 600,
+            }}
+          >
             {project.identifier}
           </span>
-        </div>
+        </nav>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
             <div

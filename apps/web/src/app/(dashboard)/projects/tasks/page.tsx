@@ -66,9 +66,37 @@ export default function TasksKanbanPage() {
     if (!taskId) return;
     const task = allTasks.find((t) => t.id === taskId);
     if (!task || task.projectId === projectId) return;
+    const previousProjectId = task.projectId;
     updateTask(taskId, { projectId });
     const projectName = projects.find((p) => p.id === projectId)?.name ?? "project";
-    toast.success(`Moved to ${projectName}`);
+    toast.success(
+      (t) => (
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
+          Moved to {projectName}
+          <button
+            type="button"
+            onClick={() => {
+              updateTask(taskId, { projectId: previousProjectId });
+              toast.dismiss(t.id);
+              toast.success("Reverted");
+            }}
+            style={{
+              padding: "3px 10px",
+              borderRadius: 6,
+              border: "1px solid var(--vyne-teal)",
+              background: "transparent",
+              color: "var(--vyne-teal)",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Undo
+          </button>
+        </span>
+      ),
+      { duration: 5000 },
+    );
   }
 
   return (
