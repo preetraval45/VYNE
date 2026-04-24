@@ -483,7 +483,9 @@ export function BoardColumn({
           e.preventDefault();
           e.currentTarget.removeAttribute("data-drag-over");
           const raw = e.dataTransfer.getData("text/plain");
-          const id = raw.startsWith("kit-item:") ? raw.slice(9) : "";
+          let id = raw.startsWith("kit-item:") ? raw.slice(9) : "";
+          // Fallback: some drag sources may have set the legacy MIME
+          if (!id) id = e.dataTransfer.getData("text/kit-item-id");
           if (id) onDropItem(id);
         },
       }
@@ -495,6 +497,7 @@ export function BoardColumn({
       style={{
         flex: "0 0 280px",
         minWidth: 260,
+        minHeight: 320,
         display: "flex",
         flexDirection: "column",
         gap: 10,
@@ -560,7 +563,15 @@ export function BoardColumn({
           )}
         </div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          flex: 1,
+          minHeight: 120,
+        }}
+      >
         {children}
       </div>
     </div>
