@@ -93,7 +93,6 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [showAddTask, setShowAddTask] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
 
   const selectedTask = useMemo(
@@ -620,12 +619,10 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         />
       )}
 
-      {/* Add Task Modal */}
-      <AddTaskModal
-        open={showAddTask}
-        onClose={() => setShowAddTask(false)}
-        projectId={projectId}
-      />
+      {/* New-task slide-in was removed: task creation is full-page at
+          /projects/tasks/new?project=<id>. The AddTaskModal component
+          below is kept only so nothing else in the tree crashes if it
+          still references the import; nothing in this file opens it. */}
 
       {/* Custom fields + statuses editor */}
       <FieldSchemaEditor
