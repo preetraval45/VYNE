@@ -32,6 +32,7 @@ import {
 import { formatRelativeTime } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 import {
   MOCK_PRODUCTS,
@@ -2222,6 +2223,11 @@ function OpsPageInner() {
         overflow: "hidden",
       }}
     >
+      <DemoDataBanner
+        moduleName="Operations"
+        ctaLabel="Ask Vyne how to import"
+        ctaHref="/ai/chat?prompt=How%20do%20I%20import%20my%20inventory%20and%20orders%20into%20VYNE%3F"
+      />
       <PageHeader
         icon={<Package size={16} />}
         title="Operations"

@@ -109,332 +109,303 @@ export const ALL_QUARTERS: Quarter[] = [
   "Q4 2026",
 ];
 
-// ── Mock features (24 total) ────────────────────────────────────
+// ── Roadmap, built in public ────────────────────────────────────
+//
+// This list mirrors what is actually running in the app today, what is
+// being built, and what the team has committed to next. Everything is
+// demo data until a "shipped" item is explicitly marked backed by a
+// real backend. Early-beta interest counts, not marketing numbers.
 export const FEATURES: RoadmapFeature[] = [
-  // ── Q1 2026 ─────────────────────────────────────────────────
+  // ── Q1 2026 — SHIPPED in this build ─────────────────────────
   {
     id: "rf-01",
-    title: "AI Thread Summaries",
-    module: "Chat",
-    status: "shipped",
-    priority: "critical",
-    quarter: "Q1 2026",
-    votes: 284,
-    description: "Auto-summarize long chat threads with one click.",
-    fullDescription:
-      "AI-powered thread summarization that condenses long conversations into key points, decisions, and action items. Supports 20+ languages and works across channels and DMs. Summaries are cached and update as new messages arrive.",
-    linkedIssues: ["CHAT-142", "CHAT-155", "AI-034"],
-  },
-  {
-    id: "rf-02",
-    title: "Kanban Board with Sprints",
+    title: "Projects — Kanban, Tasks, Sub-tasks, Teams",
     module: "Projects",
     status: "shipped",
     priority: "critical",
     quarter: "Q1 2026",
-    votes: 312,
-    description: "Full Kanban board with drag-and-drop and sprint management.",
+    votes: 14,
+    description:
+      "Drag-and-drop board, custom statuses, custom fields, per-project boards.",
     fullDescription:
-      "Complete project management with Kanban boards, sprint planning, velocity tracking, and burndown charts. Supports custom columns, WIP limits, and swimlanes. Integrates with Git for auto-linking commits to issues.",
-    linkedIssues: ["PROJ-089", "PROJ-102"],
+      "Full project workspace with an Odoo-style sub-nav (Projects / Tasks / Sub Tasks / Teams), drag-and-drop kanban with custom status columns you define yourself, per-task custom fields, sub-tasks, and a team directory. Data lives in browser localStorage today — the Supabase-backed version is on the next milestone.",
+    linkedIssues: ["PROJ-kanban", "PROJ-custom-fields"],
+  },
+  {
+    id: "rf-02",
+    title: "Vyne AI — workspace-grounded chat",
+    module: "AI",
+    status: "shipped",
+    priority: "critical",
+    quarter: "Q1 2026",
+    votes: 22,
+    description:
+      "Claude-powered chat grounded on your projects, tasks, CRM, ops, and invoices with citations.",
+    fullDescription:
+      "A chat surface branded as Vyne AI (not ChatGPT). Each answer is grounded on the workspace you actually have loaded: projects, tasks, CRM deals, ops products, invoices. Responses include [kind:id] citations that render as clickable teal pills linking directly to the underlying record. Falls back to deterministic local answers when ANTHROPIC_API_KEY is unset.",
+    linkedIssues: ["AI-chat", "AI-citations"],
   },
   {
     id: "rf-03",
-    title: "Block-based Document Editor",
-    module: "Docs",
+    title: "AI memory — brief, compass, streak, archive",
+    module: "AI",
     status: "shipped",
-    priority: "critical",
+    priority: "high",
     quarter: "Q1 2026",
-    votes: 267,
+    votes: 9,
     description:
-      "Notion-style block editor with slash commands and nested pages.",
+      "Persistent AI memory with morning brief, weekly intention, streak-with-grace, ask-the-archive.",
     fullDescription:
-      "Rich block editor supporting text, headings, lists, code blocks, tables, images, embeds, and callouts. Slash command menu for quick block insertion. Nested page hierarchy with breadcrumb navigation. Auto-save with version history.",
-    linkedIssues: ["DOCS-001", "DOCS-018"],
+      "Compound memory: every session and morning brief persists locally so the product becomes more valuable the longer you use it. Includes the Compass (weekly intention), a streak counter with a one-day grace per 7 days, and the Archive panel for searching past Q&A. Home page surfaces today's brief and any overdue tasks.",
+    linkedIssues: ["AI-memory", "AI-archive"],
   },
   {
     id: "rf-04",
-    title: "ERP-Connected Chat Alerts",
-    module: "Chat",
+    title: "Block-based document editor",
+    module: "Docs",
     status: "shipped",
     priority: "high",
     quarter: "Q1 2026",
-    votes: 198,
+    votes: 8,
     description:
-      "Low stock, overdue invoices, and delayed orders post to channels automatically.",
+      "Notion-style block editor with slash commands and nested pages.",
     fullDescription:
-      "Smart notifications that bridge ERP events and chat. Configurable triggers for inventory thresholds, payment due dates, and shipment delays. Messages include actionable buttons for quick response directly from chat.",
-    linkedIssues: ["CHAT-201", "ERP-067"],
+      "Rich block editor supporting text, headings, lists, code blocks, tables, images, and callouts. Slash command menu for quick block insertion and nested page hierarchy with breadcrumb navigation. Single-user today; real-time collaboration is in progress.",
+    linkedIssues: ["DOCS-editor"],
   },
   {
     id: "rf-05",
-    title: "Deployment Tracking Dashboard",
-    module: "DevOps",
+    title: "Per-record activity feed",
+    module: "Platform",
     status: "shipped",
-    priority: "high",
+    priority: "medium",
     quarter: "Q1 2026",
-    votes: 156,
-    description: "Track deployments, rollbacks, and CI/CD pipeline status.",
+    votes: 6,
+    description:
+      "Every status change, assignment, and update appears in the record's own activity log.",
     fullDescription:
-      "Centralized view of all deployments across environments. Tracks build times, success rates, rollback frequency, and deployment frequency (DORA metrics). Integrates with GitHub Actions, GitLab CI, and Jenkins.",
-    linkedIssues: ["DEV-044"],
+      "Scoped by (recordType, recordId) so a task, project, deal, contact, or invoice can subscribe to its own history without pulling the whole log. Renders rows like 'You moved VYNE-42 from Todo → In Progress · 3m ago'. Persisted to localStorage; server sync arrives with the backend.",
+    linkedIssues: ["PLAT-activity"],
   },
   {
     id: "rf-06",
-    title: "Mobile App (iOS + Android)",
-    module: "Mobile",
+    title: "Roadmap, published",
+    module: "Platform",
     status: "shipped",
-    priority: "critical",
+    priority: "medium",
     quarter: "Q1 2026",
-    votes: 341,
-    description: "React Native app with Chat, Projects, and Home modules.",
+    votes: 4,
+    description:
+      "This page — built in public so customers can see exactly where VYNE is.",
     fullDescription:
-      "Full-featured mobile app built with React Native and Expo. Supports push notifications, offline message queue, biometric authentication, and deep linking. Available on both iOS and Android app stores.",
-    linkedIssues: ["MOB-001", "MOB-022", "MOB-035"],
+      "Rather than hiding the roadmap behind a pitch deck, it's a first-class page in the product. Statuses are honest: 'shipped' means running right now in the build you're using, not announced-but-unbuilt. Feature requests land in /roadmap/request.",
   },
 
-  // ── Q2 2026 ─────────────────────────────────────────────────
+  // ── Q2 2026 — IN PROGRESS ───────────────────────────────────
   {
     id: "rf-07",
-    title: "Real-time Collaborative Docs",
-    module: "Docs",
+    title: "Supabase backend + real auth",
+    module: "Platform",
     status: "in-progress",
     priority: "critical",
     quarter: "Q2 2026",
-    votes: 389,
-    description: "Google Docs-style multiplayer editing with live cursors.",
+    votes: 18,
+    description:
+      "Move projects, tasks, CRM, and AI memory off localStorage to a real Postgres backend.",
     fullDescription:
-      "CRDT-based real-time collaboration powered by Yjs. Multiple users can edit simultaneously with live cursor positions and awareness indicators. Conflict-free merging ensures no data loss even with poor connectivity.",
-    linkedIssues: ["DOCS-045", "DOCS-048", "DOCS-052"],
+      "Supabase-hosted Postgres with RLS, email/password auth, and server-side persistence for every store that is currently localStorage-only. This is the line between demo and real product — once it's live, teams can actually share a workspace.",
+    linkedIssues: ["PLAT-supabase", "AUTH-real"],
   },
   {
     id: "rf-08",
-    title: "AI Demand Forecasting",
-    module: "AI",
+    title: "Real-time chat (channels + DMs)",
+    module: "Chat",
     status: "in-progress",
     priority: "critical",
     quarter: "Q2 2026",
-    votes: 274,
+    votes: 15,
     description:
-      "Predict inventory needs based on sales patterns and seasonality.",
+      "Realtime channel messages, DMs, typing indicators, and unread counts.",
     fullDescription:
-      "Machine learning model trained on historical sales data, seasonal trends, and lead times to predict optimal reorder points. Generates automatic purchase order suggestions. Integrates with supplier lead time data for accuracy.",
-    linkedIssues: ["AI-055", "ERP-112"],
+      "The /chat surface is currently a UI shell over fixtures. This ships the websocket-backed message bus, presence, typing indicators, unread counts, and @-mentions. Threaded replies and reactions ship alongside.",
+    linkedIssues: ["CHAT-realtime"],
   },
   {
     id: "rf-09",
-    title: "LangGraph Multi-step AI Agents",
-    module: "AI",
+    title: "Real-time collaborative docs",
+    module: "Docs",
     status: "in-progress",
-    priority: "critical",
+    priority: "high",
     quarter: "Q2 2026",
-    votes: 302,
-    description:
-      "Autonomous agents that investigate incidents and automate workflows.",
+    votes: 11,
+    description: "Multiplayer editing with live cursors and offline-safe merge.",
     fullDescription:
-      "Agentic AI system built on LangGraph that can chain multiple tools: query databases, read logs, check inventory, send messages, and create issues. Agents can investigate production incidents end-to-end and suggest remediations.",
-    linkedIssues: ["AI-060", "AI-062", "AI-065"],
+      "CRDT-based collaboration (Yjs) so multiple people can edit the same doc without stepping on each other. Live cursor positions, awareness indicators, and conflict-free merging even with spotty connectivity.",
+    linkedIssues: ["DOCS-multiplayer"],
   },
   {
     id: "rf-10",
-    title: "Supplier Portal",
-    module: "ERP",
+    title: "Demo-data banners on every module",
+    module: "Platform",
     status: "in-progress",
-    priority: "high",
+    priority: "medium",
     quarter: "Q2 2026",
-    votes: 187,
+    votes: 7,
     description:
-      "External supplier login to confirm POs and update delivery status.",
+      "Clear 'This is sample data — import yours' banners on CRM, Ops, Finance, HR.",
     fullDescription:
-      "White-labeled portal for suppliers to view and confirm purchase orders, update shipment tracking, upload invoices, and communicate with procurement teams. Reduces manual email-based coordination by 80%.",
-    linkedIssues: ["ERP-134", "ERP-138"],
-  },
-  {
-    id: "rf-11",
-    title: "Huddles / Voice Calls",
-    module: "Chat",
-    status: "in-progress",
-    priority: "critical",
-    quarter: "Q2 2026",
-    votes: 356,
-    description: "One-click voice and video calls within channels and DMs.",
-    fullDescription:
-      "WebRTC-based voice and video calling built directly into chat. Supports huddles (always-on voice rooms), scheduled calls, screen sharing, and recording. No external meeting links needed.",
-    linkedIssues: ["CHAT-220", "CHAT-225"],
+      "Every module that ships with seed fixtures gets a banner that says so explicitly, with a one-click path to import your own data or connect a source. Trust comes from being honest about what's real and what's demo.",
+    linkedIssues: ["PLAT-demo-banner"],
   },
 
-  // ── Q3 2026 ─────────────────────────────────────────────────
+  // ── Q3 2026 — PLANNED ───────────────────────────────────────
+  {
+    id: "rf-11",
+    title: "Real CRM pipeline",
+    module: "ERP",
+    status: "planned",
+    priority: "critical",
+    quarter: "Q3 2026",
+    votes: 12,
+    description:
+      "Backed deal pipeline with stages, activities, and live forecasting.",
+    fullDescription:
+      "Promote the CRM shell to a real module: customizable pipeline stages, activity timeline per deal, probability-weighted forecasting, and email/call logging. Integrates with Vyne AI for instant 'what's at risk this quarter?' answers grounded on live deals.",
+    linkedIssues: ["CRM-pipeline"],
+  },
   {
     id: "rf-12",
-    title: "Multi-warehouse Support",
+    title: "Invoicing — send, track, get paid",
     module: "ERP",
     status: "planned",
     priority: "high",
     quarter: "Q3 2026",
-    votes: 223,
+    votes: 9,
     description:
-      "Track inventory across multiple locations with inter-warehouse transfers.",
+      "Real invoice creation, PDF generation, email delivery, Stripe payment links.",
     fullDescription:
-      "Multi-location inventory management with warehouse-specific stock levels, inter-warehouse transfer orders, location-based picking, and consolidated reporting. Supports barcode scanning for warehouse operations.",
-    linkedIssues: ["ERP-150"],
+      "The current /invoicing page is a UI shell. This ships the full flow: create invoice from a deal or task, generate a PDF, send by email, accept payment via Stripe, and track status with reminders on overdue invoices.",
+    linkedIssues: ["INV-real"],
   },
   {
     id: "rf-13",
-    title: "CRM Pipeline",
+    title: "ERP — inventory, POs, and receiving",
     module: "ERP",
     status: "planned",
-    priority: "critical",
+    priority: "high",
     quarter: "Q3 2026",
-    votes: 298,
+    votes: 10,
     description:
-      "Sales pipeline with lead scoring, deal tracking, and forecasting.",
+      "Actual inventory tracking with purchase orders, stock movements, and supplier records.",
     fullDescription:
-      "Full CRM module with customizable pipeline stages, lead scoring based on engagement signals, deal probability forecasting, and activity tracking. Integrates with chat for instant customer communication and with docs for proposal management.",
-    linkedIssues: ["ERP-160", "ERP-162"],
+      "Products, stock levels, purchase orders, receiving, and stock movements — the operational core of the ERP surface. Vyne AI picks up this data automatically for 'what's low-stock?' and 'which supplier is slowest?' questions.",
+    linkedIssues: ["ERP-core"],
   },
   {
     id: "rf-14",
-    title: "AI Business Intelligence",
-    module: "AI",
+    title: "HR — people, time off, onboarding",
+    module: "ERP",
     status: "planned",
-    priority: "critical",
+    priority: "medium",
     quarter: "Q3 2026",
-    votes: 334,
-    description: "Natural language queries across all business data.",
+    votes: 6,
+    description:
+      "Employee directory, time-off requests, onboarding checklists.",
     fullDescription:
-      'Ask questions like "Which customers are at churn risk?" or "What caused the Q2 revenue drop?" and get instant answers with visualizations. Queries span ERP, Projects, Chat, and DevOps data for truly cross-functional insights.',
-    linkedIssues: ["AI-080"],
+      "HR module with employee profiles, org chart, leave request and approval workflows, and onboarding task templates. Self-service portal for employees to submit requests and view their own records.",
+    linkedIssues: ["HR-core"],
   },
   {
     id: "rf-15",
-    title: "Workflow Automation from Chat",
+    title: "Workflow automations from chat",
     module: "Chat",
     status: "planned",
-    priority: "high",
+    priority: "medium",
     quarter: "Q3 2026",
-    votes: 245,
-    description: "Slash commands in chat that trigger ERP actions directly.",
+    votes: 8,
+    description:
+      "Slash commands like /approve-invoice or /assign @alex PROJ-42 run the action.",
     fullDescription:
-      "Type /approve-order ORD-123, /restock SKU-456, or /close-issue PROJ-89 directly in chat. VYNE parses the command, executes the action in the relevant module, and confirms with a rich card response. No context switching needed.",
-    linkedIssues: ["CHAT-240", "ERP-170"],
+      "Type /approve-invoice INV-123, /restock SKU-456, or /assign @alex PROJ-42 directly in chat. Vyne parses the command, executes it in the relevant module, and posts a rich card with the result. No context-switch needed.",
+    linkedIssues: ["CHAT-commands"],
   },
+
+  // ── Q4 2026 — UNDER CONSIDERATION ───────────────────────────
   {
     id: "rf-16",
-    title: "HR Module",
-    module: "ERP",
-    status: "planned",
+    title: "Mobile app (iOS + Android)",
+    module: "Mobile",
+    status: "under-consideration",
     priority: "high",
-    quarter: "Q3 2026",
-    votes: 178,
-    description:
-      "Employee directory, org chart, leave management, and onboarding.",
+    quarter: "Q4 2026",
+    votes: 13,
+    description: "Native-feeling app for chat, projects, and AI on the go.",
     fullDescription:
-      "Complete HR management with employee profiles, department org charts, leave request and approval workflows, onboarding task checklists, and employee self-service portal. Integrates with payroll for seamless compensation management.",
-    linkedIssues: ["ERP-180"],
+      "React Native app with offline message queue, push notifications, biometric sign-in, and deep-linking into any record. Prioritizing chat + projects + AI brief for v1 — ERP comes later.",
   },
   {
     id: "rf-17",
-    title: "Cross-Module AI Correlation Engine",
-    module: "AI",
-    status: "planned",
-    priority: "critical",
-    quarter: "Q3 2026",
-    votes: 312,
-    description:
-      "Connect deployment failures to stuck orders and revenue impact.",
-    fullDescription:
-      'The crown jewel of VYNE AI. Correlates events across all modules: "Deployment v2.3.1 failed at 14:22 -> API gateway returned 503 -> 47 orders stuck in processing -> $12,400 estimated revenue at risk -> Auto-notified on-call engineer." No other platform does this.',
-    linkedIssues: ["AI-090", "AI-092", "DEV-088"],
-  },
-
-  // ── Q4 2026 ─────────────────────────────────────────────────
-  {
-    id: "rf-18",
-    title: "Customer Portal",
+    title: "Multi-warehouse inventory",
     module: "ERP",
     status: "under-consideration",
-    priority: "high",
+    priority: "medium",
     quarter: "Q4 2026",
-    votes: 167,
-    description: "Branded portal for customers to track orders and invoices.",
+    votes: 5,
+    description:
+      "Location-aware stock, inter-warehouse transfers, barcode scanning.",
     fullDescription:
-      "White-labeled customer-facing portal where end customers can track order status, view and pay invoices, submit support tickets, and access product documentation. Fully customizable with company branding.",
+      "Warehouse-specific stock levels with transfer orders between locations, barcode-friendly pick flows, and consolidated cross-site reporting. Depends on the ERP core shipping first.",
+  },
+  {
+    id: "rf-18",
+    title: "AI meeting notes + action items",
+    module: "AI",
+    status: "under-consideration",
+    priority: "medium",
+    quarter: "Q4 2026",
+    votes: 11,
+    description:
+      "Transcribe a call, generate a summary, and auto-create tasks.",
+    fullDescription:
+      "Join voice or video calls as a participant, transcribe in real time, summarize decisions, and create follow-up tasks in the right project with the right assignee. Ties into the memory store so 'what did we decide last Tuesday?' just works.",
   },
   {
     id: "rf-19",
-    title: "White-Label / Custom Branding",
+    title: "Marketplace / integrations",
     module: "Platform",
     status: "under-consideration",
-    priority: "critical",
+    priority: "medium",
     quarter: "Q4 2026",
-    votes: 256,
-    description:
-      "Full white-label SaaS with custom logos, colors, and domains.",
+    votes: 9,
+    description: "Stripe, Shopify, QuickBooks, Google Calendar, Gmail, Slack.",
     fullDescription:
-      "Each customer org can configure their own logo, color palette, custom domain, and email templates. Enables VYNE resellers and agencies to offer branded versions. Includes custom login pages and onboarding flows.",
+      "A curated set of integrations for the workflows that actually matter to SMBs: Stripe for payments, Shopify for e-commerce orders, QuickBooks for accounting sync, Gmail + Google Calendar for comms, and Slack for teams already living there.",
   },
   {
     id: "rf-20",
-    title: "Marketplace / App Store",
+    title: "Field-level RBAC + audit log",
     module: "Platform",
     status: "under-consideration",
-    priority: "high",
+    priority: "medium",
     quarter: "Q4 2026",
-    votes: 234,
+    votes: 6,
     description:
-      "Third-party integrations: Stripe, Shopify, Amazon, QuickBooks.",
+      "Role-based access at the field level with a full audit log of who saw what.",
     fullDescription:
-      "Plugin marketplace for third-party integrations. Launch partners include Stripe (payments), Shopify (e-commerce sync), Amazon (FBA integration), QuickBooks (accounting sync), and WooCommerce (orders). SDK available for custom integrations.",
+      "For teams that need it: permission rules per role, per team, and per field (hide salaries from non-HR, mask customer PII from engineering, etc). Every read and write is logged to an audit stream you can export.",
   },
   {
     id: "rf-21",
-    title: "AI Meeting Notes + Action Items",
-    module: "AI",
-    status: "under-consideration",
-    priority: "high",
-    quarter: "Q4 2026",
-    votes: 289,
-    description:
-      "Auto-transcribe calls, summarize, and create tasks from meetings.",
-    fullDescription:
-      "Joins voice/video calls as a bot, transcribes in real-time, generates meeting summaries, extracts action items, and auto-creates tasks in Projects. Supports follow-up reminders and meeting analytics dashboard.",
-  },
-  {
-    id: "rf-22",
-    title: "Subscription Billing",
-    module: "ERP",
-    status: "under-consideration",
-    priority: "medium",
-    quarter: "Q4 2026",
-    votes: 145,
-    description:
-      "Recurring invoices, subscription plans, and dunning management.",
-    fullDescription:
-      "Manage subscription-based revenue with plan creation, trial periods, proration, dunning emails for failed payments, and revenue recognition reports. Integrates with Stripe for payment processing.",
-  },
-  {
-    id: "rf-23",
-    title: "External Guest Access",
-    module: "Chat",
-    status: "under-consideration",
-    priority: "medium",
-    quarter: "Q4 2026",
-    votes: 198,
-    description: "Invite external companies to shared channels.",
-    fullDescription:
-      "Slack Connect equivalent allowing organizations to create shared channels with suppliers, clients, and agencies. Includes granular permissions, message retention policies, and compliance controls for external communications.",
-  },
-  {
-    id: "rf-24",
-    title: "Granular RBAC + Field-Level Permissions",
+    title: "Custom branding / white-label",
     module: "Platform",
     status: "under-consideration",
-    priority: "high",
+    priority: "low",
     quarter: "Q4 2026",
-    votes: 203,
-    description: "Control who sees what fields, records, and modules per role.",
+    votes: 4,
+    description:
+      "Your logo, your colors, your domain — useful for agencies and resellers.",
     fullDescription:
-      "Enterprise-grade role-based access control with field-level visibility rules. Configure permissions per role, team, or individual. Supports data masking for sensitive fields like salary, pricing, and customer data.",
+      "Configure logo, color palette, custom domain, and branded email templates per workspace. Enables agencies and resellers to deliver a branded VYNE to their own clients.",
   },
 ];
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import {
   EMPLOYEES,
   INITIAL_LEAVE_REQUESTS,
@@ -1723,6 +1724,11 @@ export default function HRPage() {
         overflow: "hidden",
       }}
     >
+      <DemoDataBanner
+        moduleName="HR"
+        ctaLabel="Ask Vyne how to import"
+        ctaHref="/ai/chat?prompt=How%20do%20I%20import%20my%20employee%20directory%20into%20VYNE%3F"
+      />
       {/* Header */}
       <div
         style={{

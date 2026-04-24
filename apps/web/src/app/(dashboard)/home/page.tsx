@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Sunrise, ArrowRight, AlertTriangle } from "lucide-react";
 import {
   STAT_CARDS,
   RECENT_ACTIVITY,
@@ -12,6 +15,8 @@ import {
 import { VisuallyHidden } from "@/components/shared/VisuallyHidden";
 import { useAuthStore } from "@/lib/stores/auth";
 import { VyneLogo } from "@/components/brand/VyneLogo";
+import { useAiMemoryStore } from "@/lib/stores/aiMemory";
+import { useProjectsStore } from "@/lib/stores/projects";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -139,6 +144,231 @@ function ActivityItem({
   );
 }
 
+// ── Vyne AI Focus Card ───────────────────────────────────────────
+// Replaces the old "Active Incident" banner. Shows today's morning
+// brief if one exists, otherwise a generate-brief prompt. Always
+// lists up to 3 overdue tasks from the real project store so the
+// surface is grounded in the user's actual work instead of fixture
+// dollars. No fake $12,400 numbers on the dashboard — see audit notes.
+function HomeFocusCard() {
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const brief = useAiMemoryStore((s) => {
+    const top = s.briefs[0];
+    return top && top.createdAt.slice(0, 10) === todayKey ? top : null;
+  });
+  const compass = useAiMemoryStore((s) => s.compass);
+  const tasks = useProjectsStore((s) => s.tasks);
+  const projects = useProjectsStore((s) => s.projects);
+
+  const overdue = useMemo(() => {
+    const now = Date.now();
+    const projectName = (pid: string) =>
+      projects.find((p) => p.id === pid)?.name ?? "Project";
+    return tasks
+      .filter(
+        (t) =>
+          t.status !== "done" &&
+          t.dueDate &&
+          new Date(t.dueDate).getTime() < now,
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.dueDate as string).getTime() -
+          new Date(b.dueDate as string).getTime(),
+      )
+      .slice(0, 3)
+      .map((t) => ({
+        id: t.id,
+        projectId: t.projectId,
+        key: t.key,
+        title: t.title,
+        project: projectName(t.projectId),
+      }));
+  }, [tasks, projects]);
+
+  return (
+    <section
+      aria-label="Vyne AI focus"
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        border: "1px solid var(--vyne-teal-border)",
+        borderRadius: 14,
+        padding: "18px 20px",
+        marginBottom: 16,
+        background:
+          "linear-gradient(135deg, var(--vyne-teal-soft) 0%, var(--content-bg) 55%, var(--content-bg) 100%)",
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "radial-gradient(600px 200px at 0% 0%, rgba(6,182,212,0.10), transparent 70%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            background: "var(--vyne-teal-soft)",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--vyne-teal)",
+          }}
+        >
+          <Sunrise size={15} />
+        </div>
+        <h2
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: "-0.01em",
+            color: "var(--text-primary)",
+            margin: 0,
+          }}
+        >
+          Your focus
+        </h2>
+        {compass?.intention && (
+          <span
+            style={{
+              fontSize: 10.5,
+              fontWeight: 600,
+              color: "var(--vyne-teal)",
+              background: "var(--vyne-teal-soft)",
+              padding: "2px 8px",
+              borderRadius: 999,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Compass · {compass.intention.slice(0, 32)}
+            {compass.intention.length > 32 ? "…" : ""}
+          </span>
+        )}
+        <Link
+          href="/ai/chat"
+          style={{
+            marginLeft: "auto",
+            fontSize: 11,
+            fontWeight: 600,
+            color: "var(--vyne-teal)",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          Ask Vyne <ArrowRight size={11} />
+        </Link>
+      </div>
+
+      <p
+        style={{
+          position: "relative",
+          margin: 0,
+          fontSize: 13,
+          lineHeight: 1.6,
+          color: "var(--text-primary)",
+          marginBottom: overdue.length > 0 ? 12 : 0,
+        }}
+      >
+        {brief ? (
+          brief.summary
+        ) : (
+          <>
+            No brief for today yet.{" "}
+            <Link
+              href="/ai/chat?brief=1"
+              style={{ color: "var(--vyne-teal)", fontWeight: 600 }}
+            >
+              Generate today&apos;s brief →
+            </Link>
+          </>
+        )}
+      </p>
+
+      {overdue.length > 0 && (
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 6,
+          }}
+        >
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 11,
+              color: "var(--status-danger)",
+              fontWeight: 600,
+            }}
+          >
+            <AlertTriangle size={11} /> Overdue
+          </span>
+          {overdue.map((t) => (
+            <Link
+              key={t.id}
+              href={`/projects/${t.projectId}/tasks/${t.id}`}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 500,
+                color: "var(--text-primary)",
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 999,
+                padding: "3px 10px",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                maxWidth: 320,
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10.5,
+                  color: "var(--vyne-teal)",
+                }}
+              >
+                {t.key}
+              </span>
+              <span
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {t.title}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
@@ -197,6 +427,7 @@ export default function HomePage() {
             })}
           </span>
           <button
+            type="button"
             onClick={() => router.push("/projects")}
             aria-label="Create new issue"
             style={{
@@ -356,6 +587,7 @@ export default function HomePage() {
               { label: "Admin", icon: "🛡️", color: "#2C3E50", href: "/admin" },
             ].map((mod) => (
               <button
+            type="button"
                 key={mod.href}
                 onClick={() => router.push(mod.href)}
                 style={{
@@ -417,6 +649,9 @@ export default function HomePage() {
         </section>
 
         {/* AI Alert Card */}
+        <HomeFocusCard />
+
+        {false && (
         <section
           aria-label="Active incident alert"
           style={{
@@ -491,6 +726,7 @@ export default function HomePage() {
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
+            type="button"
               style={{
                 background: "var(--vyne-purple)",
                 color: "#fff",
@@ -506,6 +742,7 @@ export default function HomePage() {
               🔄 Execute Rollback
             </button>
             <button
+            type="button"
               style={{
                 background: "transparent",
                 color: "var(--text-secondary)",
@@ -521,6 +758,7 @@ export default function HomePage() {
               View Metrics
             </button>
             <button
+            type="button"
               style={{
                 background: "transparent",
                 color: "var(--text-secondary)",
@@ -537,6 +775,7 @@ export default function HomePage() {
             </button>
           </div>
         </section>
+        )}
 
         {/* Stats grid */}
         <section aria-label="Key metrics">
@@ -601,6 +840,7 @@ export default function HomePage() {
                   Recent Activity
                 </h2>
                 <button
+            type="button"
                   style={{
                     background: "transparent",
                     border: "none",
@@ -815,6 +1055,7 @@ export default function HomePage() {
                 >
                   {AI_RECENT_QUERIES.map((q) => (
                     <button
+            type="button"
                       key={q}
                       style={{
                         background: "var(--content-bg)",
@@ -834,6 +1075,7 @@ export default function HomePage() {
                 </div>
               </div>
               <button
+            type="button"
                 style={{
                   width: "100%",
                   background: "var(--vyne-purple)",
@@ -879,6 +1121,7 @@ export default function HomePage() {
               >
                 {QUICK_ACTIONS.map(({ label, route }) => (
                   <button
+            type="button"
                     key={label}
                     onClick={() => router.push(route)}
                     style={{

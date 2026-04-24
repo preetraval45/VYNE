@@ -20,6 +20,7 @@ import {
   useTeamMembers,
 } from "@/lib/stores/projects";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
+import { useActivityStore } from "@/lib/stores/activity";
 import type { ProjectDetail } from "@/lib/stores/projects";
 import { useDebounce } from "@/hooks/useDebounce";
 import { formatDate } from "@/lib/utils";
@@ -202,6 +203,15 @@ function ProjectsPageInner() {
                     useProjectsStore
                       .getState()
                       .updateProject(projectId, { status: stage.id as ProjectDetail["status"] });
+                    useActivityStore.getState().log({
+                      recordType: "project",
+                      recordId: projectId,
+                      verb: "moved",
+                      summary: `moved ${current.name} status`,
+                      field: "status",
+                      from: previousStatus,
+                      to: stage.label,
+                    });
                     toast.success(
                       (t) => (
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>

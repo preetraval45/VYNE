@@ -20,6 +20,7 @@ import {
 } from "@/lib/fixtures/finance";
 import { useFinanceStore } from "@/lib/stores/finance";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 
 // ─── Helpers ──────────────────────────────────────────────────────
@@ -733,6 +734,11 @@ export default function FinancePage() {
         overflow: "hidden",
       }}
     >
+      <DemoDataBanner
+        moduleName="Finance"
+        ctaLabel="Ask Vyne how to import"
+        ctaHref="/ai/chat?prompt=How%20do%20I%20import%20my%20journal%20entries%20or%20connect%20QuickBooks%20to%20VYNE%3F"
+      />
       <PageHeader
         icon={<DollarSign size={16} />}
         title="Finance"

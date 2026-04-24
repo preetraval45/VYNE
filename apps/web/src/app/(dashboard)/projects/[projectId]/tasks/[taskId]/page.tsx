@@ -31,6 +31,8 @@ import {
 } from "@/lib/fixtures/projects";
 import { PipelineBreadcrumb, type PipelineStage } from "@/components/shared/Kit";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
+import { useActivityStore } from "@/lib/stores/activity";
+import { ActivityFeed } from "@/components/shared/ActivityFeed";
 
 const STATUS_ORDER: TaskStatus[] = [
   "todo",
@@ -102,8 +104,19 @@ export default function TaskDetailPage({ params }: PageProps) {
   function onStatusChange(nextId: string) {
     const next = nextId as TaskStatus;
     if (next === task!.status) return;
+    const prevLabel = TASK_STATUS_META[task!.status].label;
+    const nextLabel = TASK_STATUS_META[next].label;
     updateTask(task!.id, { status: next });
-    toast.success(`Status → ${TASK_STATUS_META[next].label}`);
+    useActivityStore.getState().log({
+      recordType: "task",
+      recordId: task!.id,
+      verb: "moved",
+      summary: `moved ${task!.key ?? "this task"} status`,
+      field: "status",
+      from: prevLabel,
+      to: nextLabel,
+    });
+    toast.success(`Status → ${nextLabel}`);
   }
 
   function onAddSubtask() {
@@ -681,6 +694,8 @@ export default function TaskDetailPage({ params }: PageProps) {
             >
               <Trash2 size={13} /> Delete task
             </button>
+
+            <ActivityFeed recordType="task" recordId={task.id} />
           </aside>
         </div>
       </div>

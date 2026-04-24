@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Plus, Pencil, ArrowRight, TrendingUp, Search, Edit2, Check, XCircle } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill, PrimaryLink, type Tone } from "@/components/shared/Kit";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
@@ -918,6 +919,11 @@ function CRMPageInner() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
+      <DemoDataBanner
+        moduleName="CRM"
+        ctaLabel="Ask Vyne how to import"
+        ctaHref="/ai/chat?prompt=How%20do%20I%20import%20my%20CRM%20data%20into%20VYNE%3F"
+      />
       <PageHeader
         icon={<TrendingUp size={16} />}
         title="CRM Pipeline"
