@@ -688,8 +688,12 @@ export default function TaskDetailPage({ params }: PageProps) {
   );
 }
 
+const EMPTY_CUSTOM_FIELDS: ReturnType<typeof useCustomFieldsStore.getState>["schemas"][string]["fields"] = [];
+
 function CustomFieldsPanel({ taskId }: { taskId: string }) {
-  const fields = useCustomFieldsStore((s) => s.getSchema("tasks").fields);
+  const fields = useCustomFieldsStore(
+    (s) => s.schemas["tasks"]?.fields ?? EMPTY_CUSTOM_FIELDS,
+  );
   const [values, setValues] = useState<Record<string, string>>(() => {
     if (typeof window === "undefined") return {};
     try {

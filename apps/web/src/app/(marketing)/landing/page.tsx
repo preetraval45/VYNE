@@ -315,7 +315,7 @@ function Hero() {
         >
           One workspace.
           <br />
-          <span className="aurora-text">Every tool replaced.</span>
+          <span className="aurora-text">AI that knows your company.</span>
         </motion.h1>
 
         <motion.p
@@ -331,8 +331,8 @@ function Hero() {
             letterSpacing: '-0.005em',
           }}
         >
-          VYNE replaces Slack, Jira, Notion, QuickBooks, and Salesforce with a single AI-powered
-          platform. Chat, projects, docs, ERP, and finance — connected by intelligence.
+          VYNE unifies chat, projects, docs, and CRM into one workspace — with a built-in AI that
+          actually reads your company data. ERP, Finance, and HR are on the near roadmap.
         </motion.p>
 
         <motion.div
@@ -367,7 +367,7 @@ function Hero() {
             Replaces
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
-            {['Slack', 'Jira', 'Notion', 'QuickBooks', 'Salesforce', 'Datadog'].map((tool) => (
+            {['Slack', 'Jira', 'Notion', 'ClickUp', 'Linear', 'HubSpot'].map((tool) => (
               <div
                 key={tool}
                 style={{

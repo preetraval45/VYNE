@@ -40,18 +40,30 @@ interface CustomFieldsStore {
   resetModule: (moduleId: string) => void;
 }
 
+// Stable default instances so Zustand selectors returning the default
+// compare equal across renders. Previously each call rebuilt the object
+// and crashed React with "Maximum update depth exceeded" (error #185).
+const DEFAULT_PROJECT_FIELDS: CustomField[] = [];
+const DEFAULT_PROJECT_STATUSES: CustomStatus[] = [
+  { id: "active", label: "Active", color: "#06B6D4" },
+  { id: "paused", label: "On Hold", color: "#F59E0B" },
+  { id: "completed", label: "Completed", color: "#22C55E" },
+];
 const DEFAULT_PROJECT_SCHEMA: ModuleSchema = {
-  fields: [],
-  statuses: [
-    { id: "active", label: "Active", color: "#06B6D4" },
-    { id: "paused", label: "On Hold", color: "#F59E0B" },
-    { id: "completed", label: "Completed", color: "#22C55E" },
-  ],
+  fields: DEFAULT_PROJECT_FIELDS,
+  statuses: DEFAULT_PROJECT_STATUSES,
+};
+
+const EMPTY_FIELDS: CustomField[] = [];
+const EMPTY_STATUSES: CustomStatus[] = [];
+const EMPTY_SCHEMA: ModuleSchema = {
+  fields: EMPTY_FIELDS,
+  statuses: EMPTY_STATUSES,
 };
 
 function defaultSchemaFor(moduleId: string): ModuleSchema {
   if (moduleId === "projects") return DEFAULT_PROJECT_SCHEMA;
-  return { fields: [], statuses: [] };
+  return EMPTY_SCHEMA;
 }
 
 const newId = () =>

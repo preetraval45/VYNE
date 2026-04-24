@@ -41,8 +41,11 @@ export function FieldSchemaEditor({
   onClose: () => void;
   title?: string;
 }) {
-  const store = useCustomFieldsStore();
-  const schema = store.getSchema(moduleId);
+  // Subscribe to the schemas map only; resolve this module's schema via
+  // the store's getSchema (now backed by frozen defaults, so repeated
+  // calls return the same reference and don't trigger re-render loops).
+  const schemasMap = useCustomFieldsStore((s) => s.schemas);
+  const schema = schemasMap[moduleId] ?? useCustomFieldsStore.getState().getSchema(moduleId);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, open, onClose);
 
@@ -182,7 +185,7 @@ export function FieldSchemaEditor({
         >
           <button
             type="button"
-            onClick={() => store.resetModule(moduleId)}
+            onClick={() => useCustomFieldsStore.getState().resetModule(moduleId)}
             style={{
               display: "inline-flex",
               alignItems: "center",

@@ -13,6 +13,11 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "@/lib/fixtures/projects";
+import type { CustomField } from "@/lib/stores/customFields";
+
+// Stable empty reference so the Zustand selector returns referentially
+// equal values across renders and never causes a re-render loop.
+const EMPTY_FIELDS: CustomField[] = [];
 
 export default function NewTaskPage() {
   const router = useRouter();
@@ -22,9 +27,13 @@ export default function NewTaskPage() {
   const teamMembers = useTeamMembers();
   const addTask = useProjectsStore((s) => s.addTask);
 
-  // Read custom fields admin has defined for the projects module via the
-  // wrench tool (so the form actually surfaces them).
-  const customFields = useCustomFieldsStore((s) => s.getSchema("tasks").fields);
+  // Read custom fields admin has defined via the wrench tool. Selected
+  // from the stored schemas map directly (getSchema returns defaults via
+  // a call path that can confuse referential equality). Equivalent to
+  // getSchema("tasks").fields for display.
+  const customFields = useCustomFieldsStore(
+    (s) => s.schemas["tasks"]?.fields ?? EMPTY_FIELDS,
+  );
 
   const [form, setForm] = useState({
     projectId: defaultProject || projects[0]?.id || "",
