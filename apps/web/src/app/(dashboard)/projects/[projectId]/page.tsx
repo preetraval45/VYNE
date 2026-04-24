@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useProjectsStore,
   useProject,
@@ -77,10 +78,14 @@ interface ProjectPageProps {
 
 export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const { projectId } = use(params);
+  const router = useRouter();
   const project = useProject(projectId);
   const tasks = useProjectTasks(projectId);
   const teamMembers = useTeamMembers();
   const updateProject = useProjectsStore((s) => s.updateProject);
+
+  const openTask = (taskId: string) =>
+    router.push(`/projects/${projectId}/tasks/${taskId}`);
 
   const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
@@ -552,13 +557,13 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
       {/* Content */}
       <div className="flex-1 overflow-auto content-scroll">
         {viewMode === "list" && (
-          <TaskListView tasks={filteredTasks} onTaskClick={setSelectedTaskId} />
+          <TaskListView tasks={filteredTasks} onTaskClick={openTask} />
         )}
         {viewMode === "board" && (
           <TaskBoardView
             tasks={filteredTasks}
             projectId={projectId}
-            onTaskClick={setSelectedTaskId}
+            onTaskClick={openTask}
             swimlaneMode={swimlaneMode}
           />
         )}
@@ -566,7 +571,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           <div style={{ padding: 20 }}>
             <TaskCalendarView
               tasks={filteredTasks}
-              onTaskClick={setSelectedTaskId}
+              onTaskClick={openTask}
             />
           </div>
         )}

@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileSidebarToggle } from "@/components/layout/MobileSidebarToggle";
+import { GlobalSchemaTool } from "@/components/layout/GlobalSchemaTool";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
@@ -40,6 +41,9 @@ export default function DashboardLayout({
 
       {/* Mobile drawer toggle (hidden ≥769px via CSS) */}
       {!focusMode && <MobileSidebarToggle />}
+
+      {/* Admin-only per-company schema tool — top-right on every page */}
+      {!focusMode && <GlobalSchemaTool />}
 
       {/* Main Content */}
       <main
