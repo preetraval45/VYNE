@@ -59,45 +59,59 @@ export function GlobalSchemaTool() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={!isAdmin}
-        aria-label={label}
-        title={label}
-        className="global-schema-tool"
+      {/* Top-nav rail — a fixed strip across the top of the dashboard.
+          Lives above the page-level header so page-level "+ New" /
+          search buttons never collide with this admin tool. */}
+      <div
+        role="toolbar"
+        aria-label="Workspace admin"
+        className="global-topnav-rail"
         style={{
           position: "fixed",
-          top: 12,
-          right: 12,
-          zIndex: 45,
-          width: 36,
-          height: 36,
-          borderRadius: 10,
+          top: 0,
+          right: 0,
+          zIndex: 40,
           display: "inline-flex",
           alignItems: "center",
-          justifyContent: "center",
-          background: "var(--content-bg)",
-          border: "1px solid var(--content-border)",
-          color: isAdmin ? "var(--vyne-teal)" : "var(--text-tertiary)",
-          cursor: isAdmin ? "pointer" : "not-allowed",
-          opacity: isAdmin ? 1 : 0.55,
-          boxShadow: "var(--elev-2)",
-          transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
-        }}
-        onMouseEnter={(e) => {
-          if (!isAdmin) return;
-          (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-teal)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-          (e.currentTarget as HTMLElement).style.borderColor =
-            "var(--content-border)";
+          gap: 6,
+          padding: "8px 12px",
+          pointerEvents: "none",
         }}
       >
-        <Wrench size={16} />
-      </button>
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={!isAdmin}
+          aria-label={label}
+          title={label}
+          style={{
+            pointerEvents: "auto",
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--content-bg)",
+            border: "1px solid var(--content-border)",
+            color: isAdmin ? "var(--vyne-teal)" : "var(--text-tertiary)",
+            cursor: isAdmin ? "pointer" : "not-allowed",
+            opacity: isAdmin ? 1 : 0.55,
+            boxShadow: "var(--elev-1)",
+            transition: "color 0.15s, border-color 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            if (!isAdmin) return;
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-teal)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--content-border)";
+          }}
+        >
+          <Wrench size={14} />
+        </button>
+      </div>
 
       {pickerOpen && (
         <div

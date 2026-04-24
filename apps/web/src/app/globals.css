@@ -1046,6 +1046,17 @@ textarea {
 }
 .slide-up-fade { animation: slide-up-fade 0.4s var(--ease-out-quart) both; }
 
+/* ─── Global top-nav rail reservation ───────────────────────
+ * The fixed .global-topnav-rail sits in the top-right corner.
+ * Reserve horizontal room on every dashboard page header so
+ * page-level "+ New" / search buttons never slide under it. */
+main > div > header,
+main > div > div > header,
+main [class*="PageHeader"],
+main [class*="page-header"] {
+  padding-right: 56px !important;
+}
+
 /* ─── Drag-and-drop polish (opt-in via data-drag-over) ──────── */
 [data-drag-over="true"] {
   background: rgba(6, 182, 212, 0.08) !important;

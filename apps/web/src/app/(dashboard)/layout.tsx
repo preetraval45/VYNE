@@ -42,7 +42,7 @@ export default function DashboardLayout({
       {/* Mobile drawer toggle (hidden ≥769px via CSS) */}
       {!focusMode && <MobileSidebarToggle />}
 
-      {/* Admin-only per-company schema tool — top-right on every page */}
+      {/* Top-nav admin rail — schema tool, visible on every page */}
       {!focusMode && <GlobalSchemaTool />}
 
       {/* Main Content */}
