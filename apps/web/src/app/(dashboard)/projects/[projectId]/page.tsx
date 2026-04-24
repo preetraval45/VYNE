@@ -550,9 +550,10 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             <SlidersHorizontal size={13} />
             Edit fields
           </button>
-          <button
-            type="button"
-            onClick={() => setShowAddTask(true)}
+          <Link
+            href={`/projects/tasks/new?project=${projectId}`}
+            aria-label="Create new task (C)"
+            title="New task  ·  C"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -567,6 +568,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               border: "none",
               cursor: "pointer",
               transition: "background 0.12s",
+              textDecoration: "none",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background =
@@ -578,7 +580,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           >
             <Plus size={14} />
             New task
-          </button>
+          </Link>
         </div>
       </div>
 

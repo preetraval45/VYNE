@@ -302,13 +302,13 @@ const NAV_ITEMS: NavItemDef[] = [
   },
   {
     icon: Brain,
-    label: "AI Assistant",
-    href: "/ai",
+    label: "Vyne AI",
+    href: "/ai/chat",
     color: "#06B6D4",
     moduleId: "ai",
     subs: [
+      { label: "Chat", href: "/ai/chat" },
       { label: "Insights", href: "/ai" },
-      { label: "Ask AI", href: "/ai" },
       { label: "Agent Runs", href: "/ai" },
     ],
   },
