@@ -19,6 +19,7 @@ import {
   useProjectsStore,
   useTeamMembers,
 } from "@/lib/stores/projects";
+import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import type { ProjectDetail } from "@/lib/stores/projects";
 import { useDebounce } from "@/hooks/useDebounce";
 import { formatDate } from "@/lib/utils";
@@ -44,12 +45,22 @@ import toast from "react-hot-toast";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
-// Status column definitions — Odoo-style board stages.
-const PROJECT_STAGES = [
-  { id: "active" as const, label: "Active", tone: "info" as Tone },
-  { id: "paused" as const, label: "On Hold", tone: "warn" as Tone },
-  { id: "completed" as const, label: "Completed", tone: "success" as Tone },
+// Built-in fallback stages when admin hasn't customized statuses.
+const BUILTIN_projectStages = [
+  { id: "active", label: "Active", tone: "info" as Tone, color: "#06B6D4" },
+  { id: "paused", label: "On Hold", tone: "warn" as Tone, color: "#F59E0B" },
+  { id: "completed", label: "Completed", tone: "success" as Tone, color: "#22C55E" },
 ];
+
+// Map hex → tone so custom status colors still get a reasonable pill tint.
+function toneFromColor(hex: string): Tone {
+  const h = hex.toLowerCase();
+  if (h.includes("22c55e") || h.includes("10b981")) return "success";
+  if (h.includes("f59e0b") || h.includes("d97706")) return "warn";
+  if (h.includes("ef4444") || h.includes("dc2626")) return "danger";
+  if (h.includes("8b5cf6") || h.includes("a855f7")) return "purple";
+  return "info";
+}
 
 function formatShortDate(iso: string | undefined): string {
   if (!iso) return "";
@@ -75,6 +86,23 @@ function ProjectsPageInner() {
   const [view, setView] = useState<"board" | "list">("board");
   const debouncedSearch = useDebounce(search, 300);
 
+  // Custom statuses configured by admin via the wrench tool. Fall back
+  // to the built-in trio when the workspace hasn't customized them.
+  const customStatuses = useCustomFieldsStore(
+    (s) => s.schemas["projects"]?.statuses,
+  );
+  const projectStages = useMemo(() => {
+    if (customStatuses && customStatuses.length > 0) {
+      return customStatuses.map((st) => ({
+        id: st.id,
+        label: st.label,
+        color: st.color,
+        tone: toneFromColor(st.color),
+      }));
+    }
+    return BUILTIN_projectStages;
+  }, [customStatuses]);
+
   const filtered = useMemo(
     () =>
       projects.filter((p) =>
@@ -85,7 +113,7 @@ function ProjectsPageInner() {
 
   const projectsByStage = useMemo(() => {
     const map = new Map<string, ProjectDetail[]>();
-    for (const stage of PROJECT_STAGES) map.set(stage.id, []);
+    for (const stage of projectStages) map.set(stage.id, []);
     for (const p of filtered) {
       const bucket = map.get(p.status) ?? map.get("active");
       bucket?.push(p);
@@ -158,7 +186,7 @@ function ProjectsPageInner() {
           />
         ) : view === "board" ? (
           <Board>
-            {PROJECT_STAGES.map((stage) => {
+            {projectStages.map((stage) => {
               const stageProjects = projectsByStage.get(stage.id) ?? [];
               return (
                 <BoardColumn
@@ -173,7 +201,7 @@ function ProjectsPageInner() {
                     const previousStatus = current.status;
                     useProjectsStore
                       .getState()
-                      .updateProject(projectId, { status: stage.id });
+                      .updateProject(projectId, { status: stage.id as ProjectDetail["status"] });
                     toast.success(
                       (t) => (
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
