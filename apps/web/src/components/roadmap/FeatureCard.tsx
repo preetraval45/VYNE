@@ -23,7 +23,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
     <div
       style={{
         background: "var(--content-bg, #fff)",
-        border: "1px solid var(--content-border, #E8E8F0)",
+        border: "1px solid var(--content-border, var(--content-border))",
         borderRadius: 10,
         padding: compact ? "10px 14px" : "14px 18px",
         cursor: "pointer",
@@ -36,7 +36,8 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.borderColor = "var(--content-border, #E8E8F0)";
+        e.currentTarget.style.borderColor =
+          "var(--content-border, var(--content-border))";
       }}
     >
       {/* Header row */}
@@ -64,7 +65,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
           style={{
             fontSize: 13,
             fontWeight: 600,
-            color: "var(--text-primary, #1A1A2E)",
+            color: "var(--text-primary, var(--text-primary))",
             flex: 1,
             minWidth: 0,
           }}
@@ -97,7 +98,10 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
         </span>
         {!compact && (
           <span
-            style={{ fontSize: 10, color: "var(--text-tertiary, #A0A0B8)" }}
+            style={{
+              fontSize: 10,
+              color: "var(--text-tertiary, var(--text-tertiary))",
+            }}
           >
             {feature.quarter}
           </span>
@@ -110,9 +114,15 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
             gap: 4,
           }}
         >
-          <ThumbsUp size={11} color="var(--text-tertiary, #A0A0B8)" />
+          <ThumbsUp
+            size={11}
+            color="var(--text-tertiary, var(--text-tertiary))"
+          />
           <span
-            style={{ fontSize: 10, color: "var(--text-tertiary, #A0A0B8)" }}
+            style={{
+              fontSize: 10,
+              color: "var(--text-tertiary, var(--text-tertiary))",
+            }}
           >
             {feature.votes}
           </span>
@@ -123,7 +133,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
       <p
         style={{
           fontSize: 12,
-          color: "var(--text-secondary, #6B6B8A)",
+          color: "var(--text-secondary, var(--text-secondary))",
           margin: 0,
           lineHeight: 1.5,
         }}
@@ -137,13 +147,13 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
           style={{
             marginTop: 10,
             paddingTop: 10,
-            borderTop: "1px solid var(--content-border, #E8E8F0)",
+            borderTop: "1px solid var(--content-border, var(--content-border))",
           }}
         >
           <p
             style={{
               fontSize: 12,
-              color: "var(--text-primary, #1A1A2E)",
+              color: "var(--text-primary, var(--text-primary))",
               margin: "0 0 8px",
               lineHeight: 1.6,
             }}
@@ -159,7 +169,10 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
                 flexWrap: "wrap",
               }}
             >
-              <Link2 size={12} color="var(--text-tertiary, #A0A0B8)" />
+              <Link2
+                size={12}
+                color="var(--text-tertiary, var(--text-tertiary))"
+              />
               {feature.linkedIssues.map((issue) => (
                 <span
                   key={issue}
@@ -183,9 +196,15 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
       {/* Expand indicator */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 4 }}>
         {expanded ? (
-          <ChevronUp size={14} color="var(--text-tertiary, #A0A0B8)" />
+          <ChevronUp
+            size={14}
+            color="var(--text-tertiary, var(--text-tertiary))"
+          />
         ) : (
-          <ChevronDown size={14} color="var(--text-tertiary, #A0A0B8)" />
+          <ChevronDown
+            size={14}
+            color="var(--text-tertiary, var(--text-tertiary))"
+          />
         )}
       </div>
     </div>

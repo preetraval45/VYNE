@@ -628,7 +628,9 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
+            background: active
+              ? "rgba(6, 182, 212,0.12)"
+              : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
           }}
         >
@@ -803,7 +805,8 @@ function FilterSelect({
   allLabel: string;
 }>) {
   return (
-    <select aria-label="Select option"
+    <select
+      aria-label="Select option"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{
@@ -929,7 +932,7 @@ function BOMTab() {
                   <tr
                     key={b.id}
                     style={{
-                      borderBottom: "1px solid #F0F0F8",
+                      borderBottom: "1px solid var(--content-bg-secondary)",
                       cursor: "pointer",
                     }}
                     onClick={() => setExpandedBOM(isExpanded ? null : b.id)}
@@ -1029,7 +1032,8 @@ function BOMTab() {
                                 <tr
                                   key={i}
                                   style={{
-                                    borderBottom: "1px solid var(--content-border)",
+                                    borderBottom:
+                                      "1px solid var(--content-border)",
                                   }}
                                 >
                                   <td
@@ -1247,7 +1251,12 @@ function ManufacturingOrdersTab() {
               {filtered.map((mo) => {
                 const st = moStatusStyle(mo.status);
                 return (
-                  <tr key={mo.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                  <tr
+                    key={mo.id}
+                    style={{
+                      borderBottom: "1px solid var(--content-bg-secondary)",
+                    }}
+                  >
                     <td
                       style={{
                         ...tdStyle,
@@ -1525,7 +1534,12 @@ function WorkCentersTab() {
             {filtered.map((wc) => {
               const st = wcStatusStyle(wc.status);
               return (
-                <tr key={wc.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={wc.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{wc.name}</td>
                   <td
                     style={{
@@ -1690,7 +1704,12 @@ function OperationsTab() {
           </thead>
           <tbody>
             {filtered.map((op) => (
-              <tr key={op.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+              <tr
+                key={op.id}
+                style={{
+                  borderBottom: "1px solid var(--content-bg-secondary)",
+                }}
+              >
                 <td style={{ ...tdStyle, fontWeight: 600 }}>{op.name}</td>
                 <td style={tdStyle}>
                   <span
@@ -1825,7 +1844,12 @@ function QualityControlTab() {
             {filtered.map((qc) => {
               const st = qcStyle(qc.result);
               return (
-                <tr key={qc.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={qc.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td
                     style={{
                       ...tdStyle,
@@ -2255,15 +2279,13 @@ export default function ManufacturingPage() {
             bom: wo.bomId ?? "",
             startDate: wo.scheduledDate ?? new Date().toISOString(),
             endDate: wo.dueDate ?? new Date().toISOString(),
-            status: (
-              wo.status === "done"
-                ? "Done"
-                : wo.status === "in_progress"
-                  ? "In Progress"
-                  : wo.status === "cancelled"
-                    ? "Cancelled"
-                    : "Draft"
-            ) as MOStatus,
+            status: (wo.status === "done"
+              ? "Done"
+              : wo.status === "in_progress"
+                ? "In Progress"
+                : wo.status === "cancelled"
+                  ? "Cancelled"
+                  : "Draft") as MOStatus,
             assignedTo: "",
           }));
           setTick((t) => t + 1);

@@ -39,7 +39,13 @@ function KpiCard(
         {props.icon}
       </div>
       <div>
-        <div style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 2 }}>
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--text-secondary)",
+            marginBottom: 2,
+          }}
+        >
           {props.label}
         </div>
         <div
@@ -52,7 +58,9 @@ function KpiCard(
         >
           {props.value}
         </div>
-        <div style={{ fontSize: 10, color: "#A0A0B8", marginTop: 2 }}>
+        <div
+          style={{ fontSize: 10, color: "var(--text-tertiary)", marginTop: 2 }}
+        >
           {props.sub}
         </div>
       </div>

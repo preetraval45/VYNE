@@ -290,7 +290,13 @@ function PollCard({
         }}
       >
         <span style={{ fontSize: 14 }}>📊</span>
-        <span style={{ fontWeight: 600, fontSize: 13, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontWeight: 600,
+            fontSize: 13,
+            color: "var(--text-primary)",
+          }}
+        >
           {question}
         </span>
       </div>
@@ -348,7 +354,13 @@ function PollCard({
           </button>
         );
       })}
-      <p style={{ fontSize: 10, color: "var(--text-tertiary)", margin: "6px 0 0" }}>
+      <p
+        style={{
+          fontSize: 10,
+          color: "var(--text-tertiary)",
+          margin: "6px 0 0",
+        }}
+      >
         {total} votes · Closes in 24h
       </p>
     </div>
@@ -362,7 +374,7 @@ function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
     <div
       style={{
         background: "var(--content-secondary)",
-        border: "1px solid #E8E8F0",
+        border: "1px solid var(--content-border)",
         borderRadius: 8,
         padding: "10px 12px",
         display: "flex",

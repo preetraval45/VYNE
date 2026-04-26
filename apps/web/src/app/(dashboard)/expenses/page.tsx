@@ -22,10 +22,22 @@ function statusConfig(s: ExpenseStatus): {
     ExpenseStatus,
     { label: string; bg: string; color: string }
   > = {
-    draft: { label: "Draft", bg: "var(--content-secondary)", color: "var(--text-secondary)" },
+    draft: {
+      label: "Draft",
+      bg: "var(--content-secondary)",
+      color: "var(--text-secondary)",
+    },
     submitted: { label: "Submitted", bg: "#EFF6FF", color: "#1E40AF" },
-    approved: { label: "Approved", bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    rejected: { label: "Rejected", bg: "#FEF2F2", color: "var(--badge-danger-text)" },
+    approved: {
+      label: "Approved",
+      bg: "#F0FDF4",
+      color: "var(--badge-success-text)",
+    },
+    rejected: {
+      label: "Rejected",
+      bg: "#FEF2F2",
+      color: "var(--badge-danger-text)",
+    },
     paid: { label: "Paid", bg: "#F5F3FF", color: "#5B21B6" },
   };
   return map[s];
@@ -116,7 +128,9 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(255,255,255,0.25)" : "var(--content-secondary)",
+            background: active
+              ? "rgba(255,255,255,0.25)"
+              : "var(--content-secondary)",
             color: active ? "#fff" : "var(--text-secondary)",
           }}
         >
@@ -383,7 +397,12 @@ function MyExpensesTab({
           </thead>
           <tbody>
             {mine.map((e) => (
-              <tr key={e.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+              <tr
+                key={e.id}
+                style={{
+                  borderBottom: "1px solid var(--content-bg-secondary)",
+                }}
+              >
                 <td
                   style={{
                     padding: "11px 16px",
@@ -529,7 +548,8 @@ function MyExpensesTab({
             >
               Category
             </label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               id="exp-category"
               style={inputStyle}
               value={form.category}
@@ -626,7 +646,8 @@ function MyExpensesTab({
               >
                 Currency
               </label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 id="exp-currency"
                 style={inputStyle}
                 value={form.currency}
@@ -1185,7 +1206,9 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                   padding: "12px 14px",
                   borderRadius: 8,
                   border: `1px solid ${overBudget ? "rgba(239,68,68,0.3)" : "var(--content-border)"}`,
-                  background: overBudget ? "rgba(239,68,68,0.04)" : "var(--content-secondary)",
+                  background: overBudget
+                    ? "rgba(239,68,68,0.04)"
+                    : "var(--content-secondary)",
                 }}
               >
                 <div style={{ fontSize: 18, marginBottom: 6 }}>

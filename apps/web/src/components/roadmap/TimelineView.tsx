@@ -34,7 +34,7 @@ function QuarterColumn({
           borderBottom: "2px solid",
           borderColor: isCurrentQuarter
             ? "#06B6D4"
-            : "var(--content-border, #E8E8F0)",
+            : "var(--content-border, var(--content-border))",
           marginBottom: 12,
           display: "flex",
           alignItems: "center",
@@ -47,7 +47,7 @@ function QuarterColumn({
             fontWeight: 700,
             color: isCurrentQuarter
               ? "#06B6D4"
-              : "var(--text-primary, #1A1A2E)",
+              : "var(--text-primary, var(--text-primary))",
           }}
         >
           {quarter}
@@ -70,7 +70,7 @@ function QuarterColumn({
           style={{
             marginLeft: "auto",
             fontSize: 11,
-            color: "var(--text-tertiary, #A0A0B8)",
+            color: "var(--text-tertiary, var(--text-tertiary))",
             fontWeight: 500,
           }}
         >
@@ -92,9 +92,9 @@ function QuarterColumn({
             style={{
               padding: 24,
               textAlign: "center",
-              color: "var(--text-tertiary, #A0A0B8)",
+              color: "var(--text-tertiary, var(--text-tertiary))",
               fontSize: 12,
-              border: "1px dashed var(--content-border, #E8E8F0)",
+              border: "1px dashed var(--content-border, var(--content-border))",
               borderRadius: 8,
             }}
           >
@@ -128,7 +128,8 @@ export function TimelineView({ features }: TimelineViewProps) {
           display: "flex",
           gap: 16,
           padding: "10px 16px",
-          borderBottom: "1px solid var(--content-border, #E8E8F0)",
+          borderBottom:
+            "1px solid var(--content-border, var(--content-border))",
           flexShrink: 0,
         }}
       >
@@ -146,7 +147,10 @@ export function TimelineView({ features }: TimelineViewProps) {
               }}
             />
             <span
-              style={{ fontSize: 11, color: "var(--text-secondary, #6B6B8A)" }}
+              style={{
+                fontSize: 11,
+                color: "var(--text-secondary, var(--text-secondary))",
+              }}
             >
               {cfg.label}
             </span>
@@ -160,7 +164,7 @@ export function TimelineView({ features }: TimelineViewProps) {
           style={{
             height: 3,
             background:
-              "linear-gradient(90deg, #06B6D4, #8B5CF6, #A0A0B8, #D4D4D8)",
+              "linear-gradient(90deg, #06B6D4, #8B5CF6, var(--text-tertiary), #D4D4D8)",
             borderRadius: 2,
             margin: "16px 0 8px",
           }}
@@ -179,7 +183,7 @@ export function TimelineView({ features }: TimelineViewProps) {
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
-                background: i === 0 ? "#06B6D4" : "#A0A0B8",
+                background: i === 0 ? "#06B6D4" : "var(--text-tertiary)",
                 border: "2px solid var(--content-bg, #fff)",
                 position: "relative",
                 top: -10,

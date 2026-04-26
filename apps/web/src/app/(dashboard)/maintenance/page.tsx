@@ -609,7 +609,10 @@ const requestStatusStyle: Record<RequestStatus, { bg: string; color: string }> =
     New: { bg: "#EFF6FF", color: "#1E40AF" },
     "In Progress": { bg: "#FFFBEB", color: "var(--badge-warning-text)" },
     Done: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Cancelled: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
+    Cancelled: {
+      bg: "var(--content-secondary)",
+      color: "var(--text-secondary)",
+    },
   };
 
 const frequencyBadgeStyle: Record<PMFrequency, { bg: string; color: string }> =
@@ -740,7 +743,8 @@ function TabBtn({
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)
@@ -937,7 +941,8 @@ function FilterSelect({
   allLabel: string;
 }>) {
   return (
-    <select aria-label="Select option"
+    <select
+      aria-label="Select option"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{
@@ -1417,8 +1422,16 @@ function PreventiveTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={p.status}
-                      bg={p.status === "Active" ? "#F0FDF4" : "var(--content-secondary)"}
-                      color={p.status === "Active" ? "#166534" : "#6B6B8A"}
+                      bg={
+                        p.status === "Active"
+                          ? "#F0FDF4"
+                          : "var(--content-secondary)"
+                      }
+                      color={
+                        p.status === "Active"
+                          ? "#166534"
+                          : "var(--text-secondary)"
+                      }
                     />
                   </td>
                 </tr>

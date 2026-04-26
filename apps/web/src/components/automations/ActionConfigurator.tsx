@@ -76,7 +76,8 @@ function ActionCard(
               {index + 1}
             </span>
           </div>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             id={`action-type-${action.id}`}
             value={action.type}
             onChange={(e) => onTypeChange(action.id, e.target.value)}
@@ -111,7 +112,7 @@ function ActionCard(
                 background: "none",
                 border: "none",
                 cursor: index === 0 ? "not-allowed" : "pointer",
-                color: index === 0 ? "#D0D0E0" : "#6B6B8A",
+                color: index === 0 ? "#D0D0E0" : "var(--text-secondary)",
                 padding: 3,
                 display: "flex",
                 alignItems: "center",
@@ -127,7 +128,8 @@ function ActionCard(
                 background: "none",
                 border: "none",
                 cursor: index === total - 1 ? "not-allowed" : "pointer",
-                color: index === total - 1 ? "#D0D0E0" : "#6B6B8A",
+                color:
+                  index === total - 1 ? "#D0D0E0" : "var(--text-secondary)",
                 padding: 3,
                 display: "flex",
                 alignItems: "center",

@@ -58,10 +58,10 @@ function RecentDocsGrid({
         <div className="w-14 h-14 rounded-2xl bg-[#CFFAFE] flex items-center justify-center">
           <FileText size={24} style={{ color: "var(--vyne-purple)" }} />
         </div>
-        <p className="text-[15px] font-semibold text-[#1A1A2E]">
+        <p className="text-[15px] font-semibold text-[var(--text-primary)]">
           No documents yet
         </p>
-        <p className="text-[13px] text-[#A0A0B8]">
+        <p className="text-[13px] text-[var(--text-tertiary)]">
           Create your first page from the sidebar
         </p>
       </div>
@@ -74,13 +74,13 @@ function RecentDocsGrid({
         <button
           key={doc.id}
           onClick={() => onSelect(doc.id)}
-          className="group flex flex-col gap-2 p-4 rounded-xl border border-[#E8E8F0] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
+          className="group flex flex-col gap-2 p-4 rounded-xl border border-[var(--content-border)] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
         >
           <span className="text-2xl leading-none">{doc.icon ?? "📄"}</span>
-          <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-2 group-hover:text-[#06B6D4] transition-colors">
+          <span className="text-[13px] font-medium text-[var(--text-primary)] line-clamp-2 group-hover:text-[#06B6D4] transition-colors">
             {doc.title}
           </span>
-          <span className="text-[11px] text-[#A0A0B8] mt-auto">
+          <span className="text-[11px] text-[var(--text-tertiary)] mt-auto">
             {formatDistanceToNow(new Date(doc.updatedAt), { addSuffix: true })}
           </span>
         </button>
@@ -104,22 +104,26 @@ function SearchResults({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[15px] font-semibold text-[#1A1A2E]">
+        <h2 className="text-[15px] font-semibold text-[var(--text-primary)]">
           Search results for &ldquo;{query}&rdquo;
         </h2>
         <button
           onClick={onClear}
-          className="flex items-center gap-1 text-[12px] text-[#A0A0B8] hover:text-[#06B6D4] transition-colors"
+          className="flex items-center gap-1 text-[12px] text-[var(--text-tertiary)] hover:text-[#06B6D4] transition-colors"
         >
           <X size={13} />
           Clear
         </button>
       </div>
 
-      {isLoading && <p className="text-[13px] text-[#A0A0B8]">Searching…</p>}
+      {isLoading && (
+        <p className="text-[13px] text-[var(--text-tertiary)]">Searching…</p>
+      )}
 
       {!isLoading && results?.length === 0 && (
-        <p className="text-[13px] text-[#A0A0B8]">No documents found.</p>
+        <p className="text-[13px] text-[var(--text-tertiary)]">
+          No documents found.
+        </p>
       )}
 
       <div className="flex flex-col gap-1">
@@ -130,14 +134,14 @@ function SearchResults({
               onSelect(doc.id);
               onClear();
             }}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[#E8E8F0] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[var(--content-border)] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
           >
             <span className="text-lg">{doc.icon ?? "📄"}</span>
             <div>
-              <p className="text-[13px] font-medium text-[#1A1A2E]">
+              <p className="text-[13px] font-medium text-[var(--text-primary)]">
                 {doc.title}
               </p>
-              <p className="text-[11px] text-[#A0A0B8]">
+              <p className="text-[11px] text-[var(--text-tertiary)]">
                 Updated{" "}
                 {formatDistanceToNow(new Date(doc.updatedAt), {
                   addSuffix: true,
@@ -166,7 +170,9 @@ function ActiveDocPanel({ id }: { id: string }) {
   if (!doc) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-[13px] text-[#A0A0B8]">Document not found.</p>
+        <p className="text-[13px] text-[var(--text-tertiary)]">
+          Document not found.
+        </p>
       </div>
     );
   }
@@ -228,21 +234,26 @@ export default function DocsPage() {
     >
       {/* ── Sidebar / Doc Tree ───────────────────────────────── */}
       <aside
-        className="flex flex-col border-r border-[#E8E8F0] flex-shrink-0 overflow-hidden"
+        className="flex flex-col border-r border-[var(--content-border)] flex-shrink-0 overflow-hidden"
         style={{ width: 220, background: "var(--content-secondary)" }}
       >
         {/* Header */}
-        <div className="flex items-center gap-2 px-3 py-3 border-b border-[#E8E8F0]">
+        <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--content-border)]">
           <FileText size={15} style={{ color: "var(--vyne-purple)" }} />
-          <span className="text-[13px] font-semibold text-[#1A1A2E]">Docs</span>
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">
+            Docs
+          </span>
         </div>
 
         {/* Search */}
         <form onSubmit={handleSearchSubmit} className="px-2 pt-2 pb-1">
           <div className="relative flex items-center">
-            <Search size={12} className="absolute left-2.5 text-[#A0A0B8]" />
+            <Search
+              size={12}
+              className="absolute left-2.5 text-[var(--text-tertiary)]"
+            />
             <input
-              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-white border border-[#E8E8F0] rounded-md outline-none focus:border-[#06B6D4] transition-colors"
+              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-white border border-[var(--content-border)] rounded-md outline-none focus:border-[#06B6D4] transition-colors"
               placeholder="Search docs…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -290,18 +301,18 @@ export default function DocsPage() {
                 <>
                   {/* Welcome header */}
                   <div className="mb-8">
-                    <h1 className="text-[1.75rem] font-bold text-[#1A1A2E] mb-1">
+                    <h1 className="text-[1.75rem] font-bold text-[var(--text-primary)] mb-1">
                       Docs
                     </h1>
-                    <p className="text-[14px] text-[#A0A0B8]">
+                    <p className="text-[14px] text-[var(--text-tertiary)]">
                       Your team&rsquo;s knowledge base — all in one place.
                     </p>
                   </div>
 
                   {/* Recent docs */}
                   <div className="mb-2 flex items-center gap-2">
-                    <Clock size={13} className="text-[#A0A0B8]" />
-                    <span className="text-[12px] font-medium text-[#A0A0B8] uppercase tracking-wide">
+                    <Clock size={13} className="text-[var(--text-tertiary)]" />
+                    <span className="text-[12px] font-medium text-[var(--text-tertiary)] uppercase tracking-wide">
                       Recent
                     </span>
                   </div>

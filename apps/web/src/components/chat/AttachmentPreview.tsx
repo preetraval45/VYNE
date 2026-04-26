@@ -61,7 +61,7 @@ export function AttachmentPreview({
         padding: "8px 12px",
         overflowX: "auto",
         flexWrap: "nowrap",
-        borderTop: "1px solid #F0F0F8",
+        borderTop: "1px solid var(--content-bg-secondary)",
       }}
     >
       {/* Show uploading items that are not yet in files */}
@@ -78,7 +78,7 @@ export function AttachmentPreview({
               padding: "8px 12px",
               borderRadius: 8,
               background: "var(--content-secondary)",
-              border: "1px solid #E8E8F0",
+              border: "1px solid var(--content-border)",
               minWidth: 120,
               maxWidth: 180,
               flexShrink: 0,
@@ -141,7 +141,8 @@ export function AttachmentPreview({
                 />
               </div>
             </div>
-            <button aria-label="Close"
+            <button
+              aria-label="Close"
               onClick={() => onRemove(u.fileId)}
               style={{
                 position: "absolute",
@@ -151,7 +152,7 @@ export function AttachmentPreview({
                 height: 18,
                 borderRadius: "50%",
                 background: "var(--content-bg)",
-                border: "1px solid #E8E8F0",
+                border: "1px solid var(--content-border)",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -177,7 +178,7 @@ export function AttachmentPreview({
             padding: isImage(file.type) ? 4 : "8px 12px",
             borderRadius: 8,
             background: "var(--content-secondary)",
-            border: "1px solid #E8E8F0",
+            border: "1px solid var(--content-border)",
             minWidth: isImage(file.type) ? 68 : 120,
             maxWidth: isImage(file.type) ? 100 : 200,
             flexShrink: 0,
@@ -224,7 +225,13 @@ export function AttachmentPreview({
                 >
                   {file.name}
                 </p>
-                <p style={{ fontSize: 10, color: "var(--text-tertiary)", margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 10,
+                    color: "var(--text-tertiary)",
+                    margin: 0,
+                  }}
+                >
                   {formatSize(file.size)}
                 </p>
               </div>
@@ -232,7 +239,8 @@ export function AttachmentPreview({
           )}
 
           {/* Remove button */}
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={() => onRemove(file.id)}
             style={{
               position: "absolute",
@@ -242,7 +250,7 @@ export function AttachmentPreview({
               height: 18,
               borderRadius: "50%",
               background: "var(--content-bg)",
-              border: "1px solid #E8E8F0",
+              border: "1px solid var(--content-border)",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -308,7 +316,8 @@ export function AttachmentPreview({
                 {u.error}
               </p>
             </div>
-            <button aria-label="Close"
+            <button
+              aria-label="Close"
               onClick={() => onRemove(u.fileId)}
               style={{
                 position: "absolute",

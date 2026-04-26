@@ -42,7 +42,7 @@ const MOCK_NOTIFICATIONS: Notification[] = [
     id: "n2",
     type: "mention",
     title: "Sarah K. mentioned you",
-    body: '@Preet can you review the Acme Corp contract before EOD?',
+    body: "@Preet can you review the Acme Corp contract before EOD?",
     time: "12m ago",
     priority: "high",
     read: false,
@@ -91,10 +91,30 @@ const PRIORITY_CONFIG: Record<
   string,
   { color: string; bg: string; label: string; rank: number }
 > = {
-  critical: { color: "#EF4444", bg: "rgba(239,68,68,0.08)", label: "CRITICAL", rank: 0 },
-  high: { color: "#F59E0B", bg: "rgba(245,158,11,0.08)", label: "HIGH", rank: 1 },
-  medium: { color: "#3B82F6", bg: "rgba(59,130,246,0.08)", label: "MEDIUM", rank: 2 },
-  low: { color: "var(--text-secondary)", bg: "rgba(107,107,138,0.06)", label: "LOW", rank: 3 },
+  critical: {
+    color: "#EF4444",
+    bg: "rgba(239,68,68,0.08)",
+    label: "CRITICAL",
+    rank: 0,
+  },
+  high: {
+    color: "#F59E0B",
+    bg: "rgba(245,158,11,0.08)",
+    label: "HIGH",
+    rank: 1,
+  },
+  medium: {
+    color: "#3B82F6",
+    bg: "rgba(59,130,246,0.08)",
+    label: "MEDIUM",
+    rank: 2,
+  },
+  low: {
+    color: "var(--text-secondary)",
+    bg: "rgba(107,107,138,0.06)",
+    label: "LOW",
+    rank: 3,
+  },
 };
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
@@ -145,7 +165,12 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
           prev.map((n) => {
             const r = byId.get(n.id);
             if (!r) return n;
-            return { ...n, priority: r.priority, aiReason: r.reason, aiScore: r.score };
+            return {
+              ...n,
+              priority: r.priority,
+              aiReason: r.reason,
+              aiScore: r.score,
+            };
           }),
         );
       }
@@ -190,7 +215,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
         maxHeight: 460,
         zIndex: 40,
         background: "var(--content-bg, #fff)",
-        border: "1px solid var(--content-border, #E8E8F0)",
+        border: "1px solid var(--content-border, var(--content-border))",
         borderRadius: 14,
         boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
         display: "flex",
@@ -202,7 +227,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
       <div
         style={{
           padding: "14px 16px 10px",
-          borderBottom: "1px solid var(--content-border, #E8E8F0)",
+          borderBottom:
+            "1px solid var(--content-border, var(--content-border))",
         }}
       >
         <div
@@ -218,7 +244,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               style={{
                 fontSize: 14,
                 fontWeight: 700,
-                color: "var(--text-primary, #1A1A2E)",
+                color: "var(--text-primary, var(--text-primary))",
               }}
             >
               Notifications
@@ -250,14 +276,15 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               AI RANKED
             </span>
           </div>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             type="button"
             style={{
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "var(--text-tertiary, #A0A0B8)",
+              color: "var(--text-tertiary, var(--text-tertiary))",
               display: "flex",
               padding: 4,
               borderRadius: 5,
@@ -282,10 +309,11 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                 fontWeight: 600,
                 cursor: "pointer",
                 background:
+                  filter === f ? "rgba(6, 182, 212,0.1)" : "transparent",
+                color:
                   filter === f
-                    ? "rgba(6, 182, 212,0.1)"
-                    : "transparent",
-                color: filter === f ? "#06B6D4" : "var(--text-tertiary, #A0A0B8)",
+                    ? "#06B6D4"
+                    : "var(--text-tertiary, var(--text-tertiary))",
                 textTransform: "capitalize",
               }}
             >
@@ -307,7 +335,9 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               fontSize: 10,
               fontWeight: 600,
               cursor: reranking ? "default" : "pointer",
-              background: rerankProvider ? "rgba(6, 182, 212,0.1)" : "transparent",
+              background: rerankProvider
+                ? "rgba(6, 182, 212,0.1)"
+                : "transparent",
               color: "var(--vyne-purple)",
               opacity: reranking ? 0.6 : 1,
             }}
@@ -330,7 +360,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               fontWeight: 500,
               cursor: "pointer",
               background: "transparent",
-              color: "var(--text-tertiary, #A0A0B8)",
+              color: "var(--text-tertiary, var(--text-tertiary))",
             }}
           >
             Mark all read
@@ -348,7 +378,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             style={{
               padding: "32px 16px",
               textAlign: "center",
-              color: "var(--text-tertiary, #A0A0B8)",
+              color: "var(--text-tertiary, var(--text-tertiary))",
               fontSize: 13,
             }}
           >
@@ -372,9 +402,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                   borderLeft: notif.read
                     ? "3px solid transparent"
                     : `3px solid ${pConfig.color}`,
-                  background: notif.read
-                    ? "transparent"
-                    : pConfig.bg,
+                  background: notif.read ? "transparent" : pConfig.bg,
                   cursor: "pointer",
                   textAlign: "left",
                   transition: "background 0.15s",
@@ -408,7 +436,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                       style={{
                         fontSize: 12,
                         fontWeight: notif.read ? 500 : 700,
-                        color: "var(--text-primary, #1A1A2E)",
+                        color: "var(--text-primary, var(--text-primary))",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -435,7 +463,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                   <p
                     style={{
                       fontSize: 11,
-                      color: "var(--text-secondary, #6B6B8A)",
+                      color: "var(--text-secondary, var(--text-secondary))",
                       lineHeight: 1.4,
                       margin: 0,
                       display: "-webkit-box",
@@ -476,7 +504,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                     <span
                       style={{
                         fontSize: 10,
-                        color: "var(--text-tertiary, #A0A0B8)",
+                        color: "var(--text-tertiary, var(--text-tertiary))",
                       }}
                     >
                       {notif.time}
@@ -497,7 +525,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                 <ChevronRight
                   size={14}
                   style={{
-                    color: "var(--text-tertiary, #A0A0B8)",
+                    color: "var(--text-tertiary, var(--text-tertiary))",
                     flexShrink: 0,
                     alignSelf: "center",
                   }}

@@ -53,7 +53,7 @@ export function FilterBar({ filters, onChange }: FilterBarProps) {
       aria-label="Issue filters"
       className="flex items-center gap-2 px-6 py-2.5 overflow-x-auto"
       style={{
-        borderBottom: "1px solid #E8E8F0",
+        borderBottom: "1px solid var(--content-border)",
         background: "var(--content-secondary)",
       }}
     >

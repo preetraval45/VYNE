@@ -25,7 +25,7 @@ function KanbanColumn({
         flex: "1 0 280px",
         display: "flex",
         flexDirection: "column",
-        background: "var(--content-secondary, #F8F8FC)",
+        background: "var(--content-secondary, var(--content-bg-secondary))",
         borderRadius: 10,
         overflow: "hidden",
       }}
@@ -84,7 +84,7 @@ function KanbanColumn({
             style={{
               padding: 24,
               textAlign: "center",
-              color: "var(--text-tertiary, #A0A0B8)",
+              color: "var(--text-tertiary, var(--text-tertiary))",
               fontSize: 12,
             }}
           >

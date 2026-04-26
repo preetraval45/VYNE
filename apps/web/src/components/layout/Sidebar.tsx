@@ -34,9 +34,9 @@ import {
   Star,
   StarOff,
   Clock,
+  Download as DownloadIcon,
   X as XIcon,
   PanelLeftClose,
-  PanelLeft,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -56,15 +56,24 @@ import {
 import { VyneLogo } from "@/components/brand/VyneLogo";
 
 // ── Sidebar sub-item live count badge ─────────────────────────────
-function SidebarSubBadge({ badgeKey }: { badgeKey: "projects" | "tasks" | "subtasks" | "teams" }) {
+function SidebarSubBadge({
+  badgeKey,
+}: {
+  badgeKey: "projects" | "tasks" | "subtasks" | "teams";
+}) {
   const projects = useProjects();
   const tasks = useProjectsStore((s) => s.tasks);
   const members = useTeamMembers();
 
   let count = 0;
   if (badgeKey === "projects") count = projects.length;
-  else if (badgeKey === "tasks") count = tasks.filter((t) => t.status !== "done").length;
-  else if (badgeKey === "subtasks") count = tasks.reduce((a, t) => a + t.subtasks.filter((s) => !s.done).length, 0);
+  else if (badgeKey === "tasks")
+    count = tasks.filter((t) => t.status !== "done").length;
+  else if (badgeKey === "subtasks")
+    count = tasks.reduce(
+      (a, t) => a + t.subtasks.filter((s) => !s.done).length,
+      0,
+    );
   else if (badgeKey === "teams") count = members.length;
 
   if (count === 0) return null;
@@ -112,7 +121,12 @@ interface NavItemDef {
 
 const NAV_ITEMS: NavItemDef[] = [
   { icon: Home, label: "Home", href: "/home", color: "#06B6D4" },
-  { icon: BarChart3, label: "My Dashboard", href: "/dashboard", color: "#06B6D4" },
+  {
+    icon: BarChart3,
+    label: "My Dashboard",
+    href: "/dashboard",
+    color: "#06B6D4",
+  },
   {
     icon: Contact,
     label: "Accounts/Contacts",
@@ -344,10 +358,31 @@ const NAV_ITEMS: NavItemDef[] = [
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
   { icon: Clock, label: "Timesheet", href: "/timesheet", color: "#0E9F6E" },
   { icon: Activity, label: "Activity", href: "/activity", color: "#F59E0B" },
+  {
+    icon: DownloadIcon,
+    label: "Download apps",
+    href: "/download",
+    color: "#06B6D4",
+  },
   { icon: LifeBuoy, label: "Help centre", href: "/help", color: "#2563EB" },
-  { icon: ListChecks, label: "CS playbooks", href: "/playbooks", color: "#06B6D4" },
-  { icon: GraduationCap, label: "Training", href: "/training", color: "#22D3EE" },
-  { icon: ShieldAlert, label: "DR runbooks", href: "/runbooks", color: "#DC2626" },
+  {
+    icon: ListChecks,
+    label: "CS playbooks",
+    href: "/playbooks",
+    color: "#06B6D4",
+  },
+  {
+    icon: GraduationCap,
+    label: "Training",
+    href: "/training",
+    color: "#22D3EE",
+  },
+  {
+    icon: ShieldAlert,
+    label: "DR runbooks",
+    href: "/runbooks",
+    color: "#DC2626",
+  },
   {
     icon: Settings,
     label: "Settings",
@@ -381,7 +416,14 @@ interface NavRowProps {
   readonly onNavigate: (href: string) => void;
 }
 
-function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigate }: NavRowProps) {
+function NavRow({
+  item,
+  active,
+  expanded,
+  collapsed = false,
+  onToggle,
+  onNavigate,
+}: NavRowProps) {
   const [hovered, setHovered] = useState(false);
   const [flyoutTop, setFlyoutTop] = useState(0);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -403,7 +445,9 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
         ref={buttonRef}
         type="button"
         aria-current={active ? "page" : undefined}
-        aria-expanded={hasSubs && !collapsed ? (expanded ? "true" : "false") : undefined}
+        aria-expanded={
+          hasSubs && !collapsed ? (expanded ? "true" : "false") : undefined
+        }
         title={collapsed ? item.label : undefined}
         onClick={() => {
           if (hasSubs && !collapsed) {
@@ -427,14 +471,14 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
           color: active ? "var(--vyne-teal)" : "var(--text-primary)",
           background: active
             ? "linear-gradient(90deg, rgba(6,182,212,0.14), rgba(6,182,212,0.04) 70%, transparent)"
-            : hovered ? "rgba(6,182,212,0.06)" : "transparent",
+            : hovered
+              ? "rgba(6,182,212,0.06)"
+              : "transparent",
           border: "none",
           borderLeft: active
             ? "2.5px solid var(--vyne-teal)"
             : "2.5px solid transparent",
-          boxShadow: active
-            ? "inset 0 0 0 1px rgba(6,182,212,0.12)"
-            : "none",
+          boxShadow: active ? "inset 0 0 0 1px rgba(6,182,212,0.12)" : "none",
           borderRadius: collapsed ? 0 : "0 8px 8px 0",
           marginRight: collapsed ? 0 : 6,
           transition: "all 0.12s ease",
@@ -450,12 +494,8 @@ function NavRow({ item, active, expanded, collapsed = false, onToggle, onNavigat
             width: 30,
             height: 30,
             borderRadius: 8,
-            background: active
-              ? "rgba(6, 182, 212, 0.14)"
-              : "transparent",
-            color: active
-              ? "var(--vyne-teal)"
-              : "var(--text-secondary)",
+            background: active ? "rgba(6, 182, 212, 0.14)" : "transparent",
+            color: active ? "var(--vyne-teal)" : "var(--text-secondary)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
@@ -778,7 +818,20 @@ function hexToRgb(hex: string): string {
 }
 
 // ── Emoji Status Line ─────────────────────────────────────────────
-const STATUS_EMOJIS = ["😊", "🚀", "🔥", "💻", "🎯", "🏠", "🎧", "🤔", "☕", "🌴", "🔴", "📵"];
+const STATUS_EMOJIS = [
+  "😊",
+  "🚀",
+  "🔥",
+  "💻",
+  "🎯",
+  "🏠",
+  "🎧",
+  "🤔",
+  "☕",
+  "🌴",
+  "🔴",
+  "📵",
+];
 const STATUS_PRESETS = [
   { emoji: "💻", text: "Coding" },
   { emoji: "🎧", text: "In a meeting" },
@@ -790,7 +843,9 @@ const STATUS_PRESETS = [
 
 function EmojiStatusLine() {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<{ emoji: string; text: string } | null>(null);
+  const [status, setStatus] = useState<{ emoji: string; text: string } | null>(
+    null,
+  );
   const [customText, setCustomText] = useState("");
 
   function setPreset(preset: { emoji: string; text: string }) {
@@ -819,7 +874,9 @@ function EmojiStatusLine() {
     if (!saved) return;
     try {
       setStatus(JSON.parse(saved));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   return (
@@ -867,7 +924,7 @@ function EmojiStatusLine() {
             left: 0,
             width: 220,
             background: "var(--content-bg, #fff)",
-            border: "1px solid var(--content-border, #E8E8F0)",
+            border: "1px solid var(--content-border, var(--content-border))",
             borderRadius: 10,
             boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
             zIndex: 100,
@@ -919,12 +976,20 @@ function EmojiStatusLine() {
           {/* Custom emoji row */}
           <div
             style={{
-              borderTop: "1px solid var(--content-border, #E8E8F0)",
+              borderTop:
+                "1px solid var(--content-border, var(--content-border))",
               marginTop: 6,
               paddingTop: 6,
             }}
           >
-            <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginBottom: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 3,
+                flexWrap: "wrap",
+                marginBottom: 6,
+              }}
+            >
               {STATUS_EMOJIS.map((e) => (
                 <button
                   key={e}
@@ -956,7 +1021,8 @@ function EmojiStatusLine() {
                 width: "100%",
                 padding: "5px 8px",
                 borderRadius: 6,
-                border: "1px solid var(--content-border, #E8E8F0)",
+                border:
+                  "1px solid var(--content-border, var(--content-border))",
                 background: "var(--content-bg, #fff)",
                 color: "var(--text-primary)",
                 fontSize: 11,
@@ -1006,7 +1072,9 @@ export function Sidebar() {
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   // Module visibility — hydrated from onboarding / settings localStorage
-  const [enabledModules, setEnabledModules] = useState<Set<string> | null>(null);
+  const [enabledModules, setEnabledModules] = useState<Set<string> | null>(
+    null,
+  );
   useEffect(() => {
     if (typeof globalThis.window === "undefined") return;
     try {
@@ -1014,13 +1082,18 @@ export function Sidebar() {
       if (stored) {
         setEnabledModules(new Set(JSON.parse(stored) as string[]));
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   // Filter items: keep items with no moduleId (always shown) or enabled module
-  const visibleNavItems = enabledModules === null
-    ? NAV_ITEMS
-    : NAV_ITEMS.filter((item) => !item.moduleId || enabledModules.has(item.moduleId));
+  const visibleNavItems =
+    enabledModules === null
+      ? NAV_ITEMS
+      : NAV_ITEMS.filter(
+          (item) => !item.moduleId || enabledModules.has(item.moduleId),
+        );
 
   // ── Pins & recents ─────────────────────────────────────────────
   const pinned = usePinsStore((s) => s.pinned);
@@ -1038,11 +1111,17 @@ export function Sidebar() {
       return pathname === n.href || pathname.startsWith(n.href + "/");
     });
     if (match && match.href !== "/settings") {
-      trackVisit({ href: match.href, label: match.label, module: match.moduleId });
+      trackVisit({
+        href: match.href,
+        label: match.label,
+        module: match.moduleId,
+      });
     }
   }, [pathname, trackVisit]);
 
-  const currentNavItem = visibleNavItems.find((n) => isActiveHref(n.href, pathname));
+  const currentNavItem = visibleNavItems.find((n) =>
+    isActiveHref(n.href, pathname),
+  );
   function isActiveHref(href: string, p: string | null) {
     if (!p) return false;
     if (href === "/home") return p === "/home" || p === "/";
@@ -1110,7 +1189,8 @@ export function Sidebar() {
           gap: 10,
           borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
-          background: "linear-gradient(135deg, rgba(6, 182, 212,0.06) 0%, transparent 100%)",
+          background:
+            "linear-gradient(135deg, rgba(6, 182, 212,0.06) 0%, transparent 100%)",
         }}
       >
         {collapsed ? (
@@ -1157,12 +1237,16 @@ export function Sidebar() {
                   transition: "all 0.15s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--vyne-purple)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--content-border)";
                 }}
               >
                 <Menu size={15} />
@@ -1185,12 +1269,16 @@ export function Sidebar() {
                   transition: "all 0.15s",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--vyne-purple)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--content-border)";
                 }}
               >
                 <PanelLeftClose size={15} />
@@ -1269,7 +1357,11 @@ export function Sidebar() {
                     overflow: "hidden",
                   }}
                 >
-                  <Star size={12} fill="currentColor" style={{ flexShrink: 0, opacity: 0.8 }} />
+                  <Star
+                    size={12}
+                    fill="currentColor"
+                    style={{ flexShrink: 0, opacity: 0.8 }}
+                  />
                   <span
                     style={{
                       overflow: "hidden",
@@ -1395,7 +1487,11 @@ export function Sidebar() {
                   }
                   onClick={(e) => {
                     e.stopPropagation();
-                    togglePin({ href: r.href, label: r.label, module: r.module });
+                    togglePin({
+                      href: r.href,
+                      label: r.label,
+                      module: r.module,
+                    });
                   }}
                   style={{
                     width: 18,
@@ -1423,7 +1519,10 @@ export function Sidebar() {
         )}
 
         {/* Reference currentNavItem so linter sees it used */}
-        <div style={{ display: "none" }} data-current={currentNavItem?.href ?? ""} />
+        <div
+          style={{ display: "none" }}
+          data-current={currentNavItem?.href ?? ""}
+        />
       </nav>
 
       {/* ── User footer ──────────────────────────── */}
@@ -1437,7 +1536,8 @@ export function Sidebar() {
           gap: 9,
           flexShrink: 0,
           position: "relative",
-          background: "linear-gradient(135deg, rgba(6, 182, 212,0.03) 0%, transparent 100%)",
+          background:
+            "linear-gradient(135deg, rgba(6, 182, 212,0.03) 0%, transparent 100%)",
         }}
       >
         {/* Avatar with ring */}
@@ -1497,221 +1597,228 @@ export function Sidebar() {
           </div>
         )}
 
-        {!collapsed && <>
-        {/* Settings gear */}
-        <button
-          type="button"
-          onClick={() => go("/settings")}
-          aria-label="Open settings"
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--text-tertiary)",
-            padding: 4,
-            borderRadius: 6,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "color 0.15s",
-          }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--text-primary)")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--text-tertiary)")
-          }
-        >
-          <Settings size={16} />
-        </button>
-
-        {/* Theme toggle */}
-        {(() => {
-          const themeLabels: Record<string, string> = {
-            light: "Switch to dark mode",
-            dark: "Switch to light mode",
-            system: "Switch to light mode",
-          };
-          const themeTitles: Record<string, string> = {
-            light: "Dark mode",
-            dark: "Light mode",
-            system: "System",
-          };
-          const moonIcon = (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          );
-          const sunIcon = (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <line x1="12" y1="1" x2="12" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="23" />
-              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-              <line x1="1" y1="12" x2="3" y2="12" />
-              <line x1="21" y1="12" x2="23" y2="12" />
-              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-          );
-          const monitorIcon = (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-              <line x1="8" y1="21" x2="16" y2="21" />
-              <line x1="12" y1="17" x2="12" y2="21" />
-            </svg>
-          );
-          const themeIcons: Record<string, React.ReactNode> = {
-            light: moonIcon,
-            dark: sunIcon,
-            system: monitorIcon,
-          };
-          return (
+        {!collapsed && (
+          <>
+            {/* Settings gear */}
             <button
               type="button"
-              onClick={toggleTheme}
-              aria-label={themeLabels[theme] ?? "Toggle theme"}
-              title={themeTitles[theme] ?? "Theme"}
+              onClick={() => go("/settings")}
+              aria-label="Open settings"
               style={{
-                background: "var(--content-secondary)",
-                border: "1px solid var(--content-border)",
+                background: "transparent",
+                border: "none",
                 cursor: "pointer",
-                color: "var(--text-secondary)",
-                width: 32,
-                height: 32,
-                borderRadius: 8,
+                color: "var(--text-tertiary)",
+                padding: 4,
+                borderRadius: 6,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "color 0.15s, border-color 0.15s, background 0.15s",
+                transition: "color 0.15s",
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--vyne-teal)";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-teal)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
-                (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
-              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "var(--text-primary)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)")
+              }
             >
-              {themeIcons[theme] ?? moonIcon}
+              <Settings size={16} />
             </button>
-          );
-        })()}
 
-        {/* Color picker button */}
-        <div style={{ position: "relative" }}>
-          <button
-            type="button"
-            onClick={() => setShowColorPicker(!showColorPicker)}
-            aria-label="Change accent color"
-            title="Accent color"
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--text-tertiary)",
-              padding: 4,
-              borderRadius: 6,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              transition: "color 0.15s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.color =
-                "var(--vyne-purple)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLElement).style.color =
-                "var(--text-tertiary)")
-            }
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            {/* Theme toggle */}
+            {(() => {
+              const themeLabels: Record<string, string> = {
+                light: "Switch to dark mode",
+                dark: "Switch to light mode",
+                system: "Switch to light mode",
+              };
+              const themeTitles: Record<string, string> = {
+                light: "Dark mode",
+                dark: "Light mode",
+                system: "System",
+              };
+              const moonIcon = (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              );
+              const sunIcon = (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+              );
+              const monitorIcon = (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              );
+              const themeIcons: Record<string, React.ReactNode> = {
+                light: moonIcon,
+                dark: sunIcon,
+                system: monitorIcon,
+              };
+              return (
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  aria-label={themeLabels[theme] ?? "Toggle theme"}
+                  title={themeTitles[theme] ?? "Theme"}
+                  style={{
+                    background: "var(--content-secondary)",
+                    border: "1px solid var(--content-border)",
+                    cursor: "pointer",
+                    color: "var(--text-secondary)",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition:
+                      "color 0.15s, border-color 0.15s, background 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--vyne-teal)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "var(--vyne-teal)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-secondary)";
+                    (e.currentTarget as HTMLElement).style.borderColor =
+                      "var(--content-border)";
+                  }}
+                >
+                  {themeIcons[theme] ?? moonIcon}
+                </button>
+              );
+            })()}
+
+            {/* Color picker button */}
+            <div style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                aria-label="Change accent color"
+                title="Accent color"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--text-tertiary)",
+                  padding: 4,
+                  borderRadius: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)")
+                }
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="3"
+                    fill="var(--vyne-purple)"
+                    stroke="none"
+                  />
+                </svg>
+              </button>
+              {showColorPicker && (
+                <AccentPicker onClose={() => setShowColorPicker(false)} />
+              )}
+            </div>
+
+            {/* Logout button */}
+            <button
+              type="button"
+              onClick={() => logout()}
+              aria-label="Sign out"
+              title="Sign out"
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--text-tertiary)",
+                padding: 4,
+                borderRadius: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "var(--status-danger)")
+              }
+              onMouseLeave={(e) =>
+                ((e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)")
+              }
             >
-              <circle cx="12" cy="12" r="10" />
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-                fill="var(--vyne-purple)"
-                stroke="none"
-              />
-            </svg>
-          </button>
-          {showColorPicker && (
-            <AccentPicker onClose={() => setShowColorPicker(false)} />
-          )}
-        </div>
-
-        {/* Logout button */}
-        <button
-          type="button"
-          onClick={() => logout()}
-          aria-label="Sign out"
-          title="Sign out"
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--text-tertiary)",
-            padding: 4,
-            borderRadius: 6,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "color 0.15s",
-          }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--status-danger)")
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.color =
-              "var(--text-tertiary)")
-          }
-        >
-          <LogOut size={16} />
-        </button>
-        </>}
+              <LogOut size={16} />
+            </button>
+          </>
+        )}
 
         {/* User dropdown menu */}
         {menuOpen && (

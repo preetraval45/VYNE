@@ -10,6 +10,8 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useCRMStore } from "@/lib/stores/crm";
+import { useCustomFieldsStore } from "@/lib/stores/customFields";
+import { CustomFieldsForm } from "@/components/shared/CustomFieldsRenderer";
 import {
   STAGES,
   SOURCES,
@@ -43,9 +45,22 @@ function NewDealPageInner() {
     assignee: ASSIGNEES[0],
     notes: "",
   });
+  const [customValues, setCustomValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const dirty = !!(form.company || form.contactName || form.email || form.value || form.notes);
+  // Admin-defined CRM custom fields. Read directly off the schemas map
+  // (same pattern as projects/page.tsx) so React only rerenders when
+  // someone updates the schema, not on every store change.
+  const customFields =
+    useCustomFieldsStore((s) => s.schemas["crm"]?.fields) ?? [];
+
+  const dirty = !!(
+    form.company ||
+    form.contactName ||
+    form.email ||
+    form.value ||
+    form.notes
+  );
   const canSubmit = form.company.trim() && form.contactName.trim();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,6 +81,8 @@ function NewDealPageInner() {
       nextAction: "",
       source: form.source,
       notes: form.notes,
+      customFields:
+        Object.keys(customValues).length > 0 ? customValues : undefined,
     };
     addDeal(deal);
     toast.success(`Deal "${form.company}" created`);
@@ -96,7 +113,9 @@ function NewDealPageInner() {
               id="deal-company"
               type="text"
               value={form.company}
-              onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, company: e.target.value }))
+              }
               placeholder="Acme Corp"
               required
               autoFocus
@@ -105,13 +124,17 @@ function NewDealPageInner() {
             />
           </FormField>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          >
             <FormField label="Contact name" htmlFor="deal-contact" required>
               <input
                 id="deal-contact"
                 type="text"
                 value={form.contactName}
-                onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, contactName: e.target.value }))
+                }
                 placeholder="Jane Smith"
                 required
                 className={inputClass}
@@ -123,7 +146,9 @@ function NewDealPageInner() {
                 id="deal-email"
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
                 placeholder="jane@company.com"
                 className={inputClass}
                 style={inputStyle}
@@ -132,15 +157,22 @@ function NewDealPageInner() {
           </div>
         </FormSection>
 
-        <FormSection title="Pipeline" description="Where is this deal in your sales process?">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <FormSection
+          title="Pipeline"
+          description="Where is this deal in your sales process?"
+        >
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          >
             <FormField label="Deal value" htmlFor="deal-value" hint="USD">
               <input
                 id="deal-value"
                 type="number"
                 min={0}
                 value={form.value}
-                onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, value: e.target.value }))
+                }
                 placeholder="50000"
                 className={inputClass}
                 style={inputStyle}
@@ -149,51 +181,74 @@ function NewDealPageInner() {
             <FormField label="Stage" htmlFor="deal-stage">
               <select
                 id="deal-stage"
+                title="Stage"
+                aria-label="Stage"
                 value={form.stage}
-                onChange={(e) => setForm((f) => ({ ...f, stage: e.target.value as Stage }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, stage: e.target.value as Stage }))
+                }
                 className={`${inputClass} cursor-pointer`}
                 style={inputStyle}
               >
                 {STAGES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </FormField>
             <FormField label="Source" htmlFor="deal-source">
               <select
                 id="deal-source"
+                title="Source"
+                aria-label="Source"
                 value={form.source}
-                onChange={(e) => setForm((f) => ({ ...f, source: e.target.value as Source }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, source: e.target.value as Source }))
+                }
                 className={`${inputClass} cursor-pointer`}
                 style={inputStyle}
               >
                 {SOURCES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </FormField>
             <FormField label="Assignee" htmlFor="deal-assignee">
               <select
                 id="deal-assignee"
+                title="Assignee"
+                aria-label="Assignee"
                 value={form.assignee}
-                onChange={(e) => setForm((f) => ({ ...f, assignee: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, assignee: e.target.value }))
+                }
                 className={`${inputClass} cursor-pointer`}
                 style={inputStyle}
               >
                 {ASSIGNEES.map((a) => (
-                  <option key={a} value={a}>{a}</option>
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
                 ))}
               </select>
             </FormField>
           </div>
         </FormSection>
 
-        <FormSection title="Notes" description="Optional context about this deal.">
+        <FormSection
+          title="Notes"
+          description="Optional context about this deal."
+        >
           <FormField label="Notes" htmlFor="deal-notes">
             <textarea
               id="deal-notes"
               value={form.notes}
-              onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, notes: e.target.value }))
+              }
               placeholder="Decision maker, timeline, budget, pain points…"
               rows={4}
               className={`${inputClass} resize-none`}
@@ -201,6 +256,14 @@ function NewDealPageInner() {
             />
           </FormField>
         </FormSection>
+
+        <CustomFieldsForm
+          fields={customFields}
+          values={customValues}
+          onChange={(id, v) =>
+            setCustomValues((prev) => ({ ...prev, [id]: v }))
+          }
+        />
       </form>
     </FormPageLayout>
   );

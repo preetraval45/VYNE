@@ -90,7 +90,7 @@ export default function AutomationRow(
           <span
             style={{
               fontSize: 10,
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               flex: 1,
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -108,7 +108,7 @@ export default function AutomationRow(
           >
             {automation.runCount} runs
           </span>
-          <span style={{ fontSize: 10, color: "#A0A0B8" }}>
+          <span style={{ fontSize: 10, color: "var(--text-tertiary)" }}>
             {formatRelativeTime(automation.lastRun)}
           </span>
         </div>

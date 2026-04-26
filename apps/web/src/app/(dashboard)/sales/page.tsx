@@ -59,17 +59,32 @@ function stageConfig(s: OpportunityStage): {
     { bg: string; color: string; dotColor: string }
   > = {
     Qualification: { bg: "#EFF6FF", color: "#1E40AF", dotColor: "#3B82F6" },
-    Proposal: { bg: "#FFFBEB", color: "var(--badge-warning-text)", dotColor: "#F59E0B" },
+    Proposal: {
+      bg: "#FFFBEB",
+      color: "var(--badge-warning-text)",
+      dotColor: "#F59E0B",
+    },
     Negotiation: { bg: "#F5F3FF", color: "#5B21B6", dotColor: "#8B5CF6" },
-    "Closed Won": { bg: "#F0FDF4", color: "var(--badge-success-text)", dotColor: "#22C55E" },
-    "Closed Lost": { bg: "#FEF2F2", color: "var(--badge-danger-text)", dotColor: "#EF4444" },
+    "Closed Won": {
+      bg: "#F0FDF4",
+      color: "var(--badge-success-text)",
+      dotColor: "#22C55E",
+    },
+    "Closed Lost": {
+      bg: "#FEF2F2",
+      color: "var(--badge-danger-text)",
+      dotColor: "#EF4444",
+    },
   };
   return map[s];
 }
 
 function quoteStatusConfig(s: QuoteStatus): { bg: string; color: string } {
   const map: Record<QuoteStatus, { bg: string; color: string }> = {
-    Draft: { bg: "#F4F4F8", color: "var(--text-secondary)" },
+    Draft: {
+      bg: "var(--content-bg-secondary)",
+      color: "var(--text-secondary)",
+    },
     Sent: { bg: "#EFF6FF", color: "#1E40AF" },
     Accepted: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Rejected: { bg: "#FEF2F2", color: "var(--badge-danger-text)" },
@@ -102,7 +117,10 @@ function customerStatusConfig(s: CustomerStatus): {
 } {
   const map: Record<CustomerStatus, { bg: string; color: string }> = {
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
-    Inactive: { bg: "#F4F4F8", color: "var(--text-secondary)" },
+    Inactive: {
+      bg: "var(--content-bg-secondary)",
+      color: "var(--text-secondary)",
+    },
     New: { bg: "#EFF6FF", color: "#1E40AF" },
   };
   return map[s];
@@ -122,12 +140,21 @@ function probabilityBadgeStyle(probability: number): {
   color: string;
 } {
   if (probability >= 60) {
-    return { background: "var(--badge-success-bg)", color: "var(--badge-success-text)" };
+    return {
+      background: "var(--badge-success-bg)",
+      color: "var(--badge-success-text)",
+    };
   }
   if (probability >= 30) {
-    return { background: "var(--badge-warning-bg)", color: "var(--badge-warning-text)" };
+    return {
+      background: "var(--badge-warning-bg)",
+      color: "var(--badge-warning-text)",
+    };
   }
-  return { background: "var(--badge-danger-bg)", color: "var(--badge-danger-text)" };
+  return {
+    background: "var(--badge-danger-bg)",
+    color: "var(--badge-danger-text)",
+  };
 }
 
 // ─── Style constants ─────────────────────────────────────────────
@@ -885,7 +912,8 @@ function DealModal({
           >
             {initial ? "Edit Deal" : "New Deal"}
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -957,7 +985,9 @@ function DealModal({
               />
             </div>
             <div>
-              <label htmlFor="opp-probability" style={labelStyle}>Probability (%)</label>
+              <label htmlFor="opp-probability" style={labelStyle}>
+                Probability (%)
+              </label>
               <input
                 id="opp-probability"
                 style={inputStyle}
@@ -979,7 +1009,8 @@ function DealModal({
           >
             <div>
               <label style={labelStyle}>Stage</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 style={selectStyle}
                 value={stage}
                 onChange={(e) => setStage(e.target.value as OpportunityStage)}
@@ -992,7 +1023,9 @@ function DealModal({
               </select>
             </div>
             <div>
-              <label htmlFor="opp-expected-close" style={labelStyle}>Expected Close</label>
+              <label htmlFor="opp-expected-close" style={labelStyle}>
+                Expected Close
+              </label>
               <input
                 id="opp-expected-close"
                 aria-label="Expected close date"
@@ -1005,7 +1038,8 @@ function DealModal({
           </div>
           <div>
             <label style={labelStyle}>Assignee</label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={selectStyle}
               value={assignee}
               onChange={(e) => setAssignee(e.target.value)}
@@ -1106,7 +1140,8 @@ function QuotationModal({
           >
             {initial ? "Edit Quotation" : "New Quotation"}
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1133,7 +1168,9 @@ function QuotationModal({
             />
           </div>
           <div>
-            <label htmlFor="quote-expiry" style={labelStyle}>Expiry Date</label>
+            <label htmlFor="quote-expiry" style={labelStyle}>
+              Expiry Date
+            </label>
             <input
               id="quote-expiry"
               aria-label="Quote expiry date"
@@ -1217,7 +1254,8 @@ function SalesOrderModal({
           >
             New Sales Order
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1340,7 +1378,8 @@ function ProductModal({
           >
             {initial ? "Edit Product" : "Add Product"}
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -1386,7 +1425,8 @@ function ProductModal({
             </div>
             <div>
               <label style={labelStyle}>Category</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 style={selectStyle}
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -1465,7 +1505,9 @@ function OpportunitiesTab() {
   const deleteDeal = useSalesStore((s) => s.deleteDeal);
   const moveDealStage = useSalesStore((s) => s.moveDealStage);
   const dealDetail = useDetailParam("opp");
-  const selectedDeal = dealDetail.id ? deals.find((d) => d.id === dealDetail.id) : undefined;
+  const selectedDeal = dealDetail.id
+    ? deals.find((d) => d.id === dealDetail.id)
+    : undefined;
 
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("");
@@ -1932,7 +1974,11 @@ function OpportunityDetailPanel({
       open={!!deal}
       onClose={onClose}
       title={deal?.name ?? ""}
-      subtitle={deal ? `${deal.company}${deal.contact ? ` · ${deal.contact}` : ""}` : undefined}
+      subtitle={
+        deal
+          ? `${deal.company}${deal.contact ? ` · ${deal.contact}` : ""}`
+          : undefined
+      }
       badge={
         deal && (
           <span
@@ -1955,20 +2001,54 @@ function OpportunityDetailPanel({
       {!deal ? null : (
         <>
           <DetailSection title="Value">
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
               <div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                  }}
+                >
                   ${deal.value.toLocaleString()}
                 </div>
-                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 4,
+                  }}
+                >
                   {deal.probability}% probability
                 </div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div className="text-aurora" style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.015em" }}>
+                <div
+                  className="text-aurora"
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    letterSpacing: "-0.015em",
+                  }}
+                >
                   ${weighted.toLocaleString()}
                 </div>
-                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 2,
+                  }}
+                >
                   Weighted
                 </div>
               </div>
@@ -1979,8 +2059,14 @@ function OpportunityDetailPanel({
             <DetailRow label="Company" value={deal.company} />
             <DetailRow label="Contact" value={deal.contact || "—"} />
             <DetailRow label="Assignee" value={deal.assignee} />
-            <DetailRow label="Expected close" value={deal.expectedClose || "—"} />
-            <DetailRow label="Created" value={new Date(deal.createdAt).toLocaleDateString()} />
+            <DetailRow
+              label="Expected close"
+              value={deal.expectedClose || "—"}
+            />
+            <DetailRow
+              label="Created"
+              value={new Date(deal.createdAt).toLocaleDateString()}
+            />
           </DetailSection>
         </>
       )}
@@ -2061,7 +2147,10 @@ function QuotationsTab() {
               { key: "status", header: "Status" },
             ]}
           />
-          <NewButton label="New Quote" onClick={() => router.push("/sales/quotes/new")} />
+          <NewButton
+            label="New Quote"
+            onClick={() => router.push("/sales/quotes/new")}
+          />
         </div>
       </div>
 
@@ -2287,7 +2376,10 @@ function SalesOrdersTab() {
               { key: "tracking", header: "Tracking" },
             ]}
           />
-          <NewButton label="New Order" onClick={() => router.push("/sales/orders/new")} />
+          <NewButton
+            label="New Order"
+            onClick={() => router.push("/sales/orders/new")}
+          />
         </div>
       </div>
 

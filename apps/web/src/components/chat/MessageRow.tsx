@@ -65,12 +65,14 @@ export function MessageRow({
               style={{
                 fontSize: 13,
                 fontWeight: 600,
-                color: isCurrentUser ? "var(--vyne-purple)" : "var(--text-primary)",
+                color: isCurrentUser
+                  ? "var(--vyne-purple)"
+                  : "var(--text-primary)",
               }}
             >
               {msg.author.name}
             </span>
-            <span style={{ fontSize: 11, color: "#A0A0B8" }}>
+            <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
               {formatRelativeTime(msg.createdAt)}
             </span>
           </div>
@@ -117,8 +119,8 @@ export function MessageRow({
                     : "var(--content-secondary)",
                   border: r.userReacted
                     ? "1px solid rgba(6, 182, 212,0.35)"
-                    : "1px solid #E8E8F0",
-                  color: r.userReacted ? "#06B6D4" : "#6B6B8A",
+                    : "1px solid var(--content-border)",
+                  color: r.userReacted ? "#06B6D4" : "var(--text-secondary)",
                 }}
               >
                 {r.emoji} <span style={{ fontWeight: 600 }}>{r.count}</span>
@@ -129,10 +131,10 @@ export function MessageRow({
               style={{
                 padding: "2px 6px",
                 borderRadius: 20,
-                border: "1px dashed #E8E8F0",
+                border: "1px dashed var(--content-border)",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 fontSize: 12,
               }}
             >
@@ -188,7 +190,7 @@ export function MessageRow({
               display: "flex",
               gap: 2,
               background: "var(--content-bg)",
-              border: "1px solid #E8E8F0",
+              border: "1px solid var(--content-border)",
               borderRadius: 8,
               padding: "3px 4px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
@@ -210,13 +212,15 @@ export function MessageRow({
                   alignItems: "center",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--content-secondary)";
                   (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
                     "transparent";
-                  (e.currentTarget as HTMLElement).style.color = "#6B6B8A";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-secondary)";
                 }}
               >
                 <Smile size={13} />
@@ -242,13 +246,15 @@ export function MessageRow({
                 alignItems: "center",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "var(--content-secondary)";
                 (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#6B6B8A";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-secondary)";
               }}
             >
               <MessageSquare size={13} />
@@ -266,7 +272,8 @@ export function MessageRow({
                 alignItems: "center",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "var(--content-secondary)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =

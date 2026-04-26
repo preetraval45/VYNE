@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/api/security";
 
 export const runtime = "edge";
 
@@ -46,7 +47,12 @@ interface ContextBundle {
     dueDate?: string | null;
     tags?: string[];
   }>;
-  contacts?: Array<{ id: string; name: string; email?: string; company?: string }>;
+  contacts?: Array<{
+    id: string;
+    name: string;
+    email?: string;
+    company?: string;
+  }>;
   deals?: Array<{
     id: string;
     company: string;
@@ -72,9 +78,19 @@ interface ContextBundle {
     total?: number;
     dueDate?: string;
   }>;
-  employees?: Array<{ id: string; name: string; role?: string; department?: string }>;
+  employees?: Array<{
+    id: string;
+    name: string;
+    role?: string;
+    department?: string;
+  }>;
   customStatuses?: Array<{ module: string; id: string; label: string }>;
-  customFields?: Array<{ module: string; id: string; label: string; type: string }>;
+  customFields?: Array<{
+    module: string;
+    id: string;
+    label: string;
+    type: string;
+  }>;
 }
 
 interface AskPayload {
@@ -118,20 +134,44 @@ function serializeContext(ctx: ContextBundle | undefined): string {
   if (!ctx) return "No workspace data was provided.";
   const parts: string[] = [];
   if (ctx.org) parts.push(`ORG: ${JSON.stringify(ctx.org)}`);
-  if (ctx.projects?.length) parts.push(`PROJECTS (${ctx.projects.length}):\n${ctx.projects.map((p) => JSON.stringify(p)).join("\n")}`);
-  if (ctx.tasks?.length) parts.push(`TASKS (${ctx.tasks.length}):\n${ctx.tasks.map((t) => JSON.stringify(t)).join("\n")}`);
-  if (ctx.deals?.length) parts.push(`DEALS (${ctx.deals.length}):\n${ctx.deals.map((d) => JSON.stringify(d)).join("\n")}`);
-  if (ctx.contacts?.length) parts.push(`CONTACTS (${ctx.contacts.length}):\n${ctx.contacts.map((c) => JSON.stringify(c)).join("\n")}`);
-  if (ctx.products?.length) parts.push(`PRODUCTS (${ctx.products.length}):\n${ctx.products.map((p) => JSON.stringify(p)).join("\n")}`);
-  if (ctx.invoices?.length) parts.push(`INVOICES (${ctx.invoices.length}):\n${ctx.invoices.map((i) => JSON.stringify(i)).join("\n")}`);
-  if (ctx.employees?.length) parts.push(`EMPLOYEES (${ctx.employees.length}):\n${ctx.employees.map((e) => JSON.stringify(e)).join("\n")}`);
-  if (ctx.customStatuses?.length) parts.push(`CUSTOM STATUSES: ${JSON.stringify(ctx.customStatuses)}`);
-  if (ctx.customFields?.length) parts.push(`CUSTOM FIELDS: ${JSON.stringify(ctx.customFields)}`);
+  if (ctx.projects?.length)
+    parts.push(
+      `PROJECTS (${ctx.projects.length}):\n${ctx.projects.map((p) => JSON.stringify(p)).join("\n")}`,
+    );
+  if (ctx.tasks?.length)
+    parts.push(
+      `TASKS (${ctx.tasks.length}):\n${ctx.tasks.map((t) => JSON.stringify(t)).join("\n")}`,
+    );
+  if (ctx.deals?.length)
+    parts.push(
+      `DEALS (${ctx.deals.length}):\n${ctx.deals.map((d) => JSON.stringify(d)).join("\n")}`,
+    );
+  if (ctx.contacts?.length)
+    parts.push(
+      `CONTACTS (${ctx.contacts.length}):\n${ctx.contacts.map((c) => JSON.stringify(c)).join("\n")}`,
+    );
+  if (ctx.products?.length)
+    parts.push(
+      `PRODUCTS (${ctx.products.length}):\n${ctx.products.map((p) => JSON.stringify(p)).join("\n")}`,
+    );
+  if (ctx.invoices?.length)
+    parts.push(
+      `INVOICES (${ctx.invoices.length}):\n${ctx.invoices.map((i) => JSON.stringify(i)).join("\n")}`,
+    );
+  if (ctx.employees?.length)
+    parts.push(
+      `EMPLOYEES (${ctx.employees.length}):\n${ctx.employees.map((e) => JSON.stringify(e)).join("\n")}`,
+    );
+  if (ctx.customStatuses?.length)
+    parts.push(`CUSTOM STATUSES: ${JSON.stringify(ctx.customStatuses)}`);
+  if (ctx.customFields?.length)
+    parts.push(`CUSTOM FIELDS: ${JSON.stringify(ctx.customFields)}`);
   return truncate(parts.join("\n\n"), 12_000);
 }
 
 function extractCitations(answer: string): AskResponse["citations"] {
-  const re = /\[(project|task|deal|contact|product|invoice|employee):([^\]]+)\]/g;
+  const re =
+    /\[(project|task|deal|contact|product|invoice|employee):([^\]]+)\]/g;
   const seen = new Set<string>();
   const out: AskResponse["citations"] = [];
   let m: RegExpExecArray | null;
@@ -146,7 +186,10 @@ function extractCitations(answer: string): AskResponse["citations"] {
   return out;
 }
 
-function localFallback(question: string, ctx: ContextBundle | undefined): AskResponse {
+function localFallback(
+  question: string,
+  ctx: ContextBundle | undefined,
+): AskResponse {
   // No key — give a deterministic, honest answer that summarises the
   // workspace so the demo experience is still useful.
   const projectCount = ctx?.projects?.length ?? 0;
@@ -154,7 +197,8 @@ function localFallback(question: string, ctx: ContextBundle | undefined): AskRes
   const openTasks = ctx?.tasks?.filter((t) => t.status !== "done").length ?? 0;
   const overdue =
     ctx?.tasks?.filter(
-      (t) => t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
+      (t) =>
+        t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
     ).length ?? 0;
   const dealCount = ctx?.deals?.length ?? 0;
   const dealValue = ctx?.deals?.reduce((a, d) => a + (d.value ?? 0), 0) ?? 0;
@@ -173,6 +217,9 @@ function localFallback(question: string, ctx: ContextBundle | undefined): AskRes
 }
 
 export async function POST(req: Request) {
+  const rl = await rateLimit({ key: "ai-ask", limit: 20, windowSec: 60, req });
+  if (!rl.ok) return rl.response!;
+
   let payload: AskPayload;
   try {
     payload = (await req.json()) as AskPayload;
@@ -184,51 +231,91 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing question" }, { status: 400 });
   }
 
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) {
+  const claudeKey = process.env.ANTHROPIC_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!claudeKey && !groqKey) {
     return NextResponse.json(localFallback(question, payload.context));
   }
 
   const contextText = serializeContext(payload.context);
   const userPrompt = `CONTEXT\n-------\n${contextText}\n\nQUESTION\n--------\n${question}`;
 
-  const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
+  const history: Array<{ role: "user" | "assistant"; content: string }> = [];
   for (const m of payload.history?.slice(-6) ?? []) {
-    messages.push({ role: m.role, content: m.content });
+    history.push({ role: m.role, content: m.content });
   }
-  messages.push({ role: "user", content: userPrompt });
+  history.push({ role: "user", content: userPrompt });
 
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
-        max_tokens: 700,
-        system: SYSTEM_PROMPT,
-        messages,
-      }),
-    });
-    if (!res.ok) {
-      return NextResponse.json(localFallback(question, payload.context));
+  // Try Claude first when configured, then fall back to Groq's free
+  // Llama-3 endpoint, then to the deterministic local answer.
+  if (claudeKey) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": claudeKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-3-5-haiku-latest",
+          max_tokens: 700,
+          system: SYSTEM_PROMPT,
+          messages: history,
+        }),
+      });
+      if (res.ok) {
+        const body = (await res.json()) as {
+          content?: Array<{ type: string; text?: string }>;
+        };
+        const text = body.content?.find((c) => c.type === "text")?.text?.trim();
+        if (text) {
+          return NextResponse.json({
+            answer: text,
+            citations: extractCitations(text),
+            provider: "vyne",
+          } satisfies AskResponse);
+        }
+      }
+    } catch {
+      // fall through to Groq / local
     }
-    const body = (await res.json()) as {
-      content?: Array<{ type: string; text?: string }>;
-    };
-    const text = body.content?.find((c) => c.type === "text")?.text?.trim();
-    if (!text) {
-      return NextResponse.json(localFallback(question, payload.context));
-    }
-    return NextResponse.json({
-      answer: text,
-      citations: extractCitations(text),
-      provider: "vyne",
-    } satisfies AskResponse);
-  } catch {
-    return NextResponse.json(localFallback(question, payload.context));
   }
+
+  if (groqKey) {
+    try {
+      const res = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${groqKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            max_tokens: 700,
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+          }),
+        },
+      );
+      if (res.ok) {
+        const body = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
+        const text = body.choices?.[0]?.message?.content?.trim();
+        if (text) {
+          return NextResponse.json({
+            answer: text,
+            citations: extractCitations(text),
+            provider: "vyne",
+          } satisfies AskResponse);
+        }
+      }
+    } catch {
+      // fall through to local
+    }
+  }
+
+  return NextResponse.json(localFallback(question, payload.context));
 }

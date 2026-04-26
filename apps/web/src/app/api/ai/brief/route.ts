@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/api/security";
+import { callLlmText } from "@/lib/ai/claude";
 
 export const runtime = "edge";
 
@@ -15,7 +17,12 @@ export const runtime = "edge";
 // client can render them as clickable record links.
 
 interface Context {
-  projects?: Array<{ id: string; name: string; status?: string; identifier?: string }>;
+  projects?: Array<{
+    id: string;
+    name: string;
+    status?: string;
+    identifier?: string;
+  }>;
   tasks?: Array<{
     id: string;
     key?: string;
@@ -26,9 +33,28 @@ interface Context {
     dueDate?: string | null;
     projectName?: string;
   }>;
-  deals?: Array<{ id: string; company: string; stage: string; value: number; nextAction?: string }>;
-  products?: Array<{ id: string; name: string; sku?: string; stock?: number; status?: string }>;
-  invoices?: Array<{ id: string; number?: string; customer?: string; status?: string; total?: number; dueDate?: string }>;
+  deals?: Array<{
+    id: string;
+    company: string;
+    stage: string;
+    value: number;
+    nextAction?: string;
+  }>;
+  products?: Array<{
+    id: string;
+    name: string;
+    sku?: string;
+    stock?: number;
+    status?: string;
+  }>;
+  invoices?: Array<{
+    id: string;
+    number?: string;
+    customer?: string;
+    status?: string;
+    total?: number;
+    dueDate?: string;
+  }>;
 }
 
 interface RecentSession {
@@ -70,7 +96,8 @@ Rules:
 
 function serialize(payload: Payload): string {
   const parts: string[] = [];
-  if (payload.compass) parts.push(`WEEKLY COMPASS INTENTION: "${payload.compass}"`);
+  if (payload.compass)
+    parts.push(`WEEKLY COMPASS INTENTION: "${payload.compass}"`);
   if (payload.recentSessions?.length) {
     parts.push(
       `RECENT Q&A (most recent first, last ${payload.recentSessions.length}):\n` +
@@ -84,16 +111,32 @@ function serialize(payload: Payload): string {
     );
   }
   const ctx = payload.context;
-  if (ctx?.projects?.length) parts.push(`PROJECTS (${ctx.projects.length}): ${JSON.stringify(ctx.projects.slice(0, 20))}`);
-  if (ctx?.tasks?.length) parts.push(`TASKS (${ctx.tasks.length}): ${JSON.stringify(ctx.tasks.slice(0, 60))}`);
-  if (ctx?.deals?.length) parts.push(`DEALS (${ctx.deals.length}): ${JSON.stringify(ctx.deals.slice(0, 20))}`);
-  if (ctx?.products?.length) parts.push(`PRODUCTS (${ctx.products.length}): ${JSON.stringify(ctx.products.slice(0, 20))}`);
-  if (ctx?.invoices?.length) parts.push(`INVOICES (${ctx.invoices.length}): ${JSON.stringify(ctx.invoices.slice(0, 20))}`);
+  if (ctx?.projects?.length)
+    parts.push(
+      `PROJECTS (${ctx.projects.length}): ${JSON.stringify(ctx.projects.slice(0, 20))}`,
+    );
+  if (ctx?.tasks?.length)
+    parts.push(
+      `TASKS (${ctx.tasks.length}): ${JSON.stringify(ctx.tasks.slice(0, 60))}`,
+    );
+  if (ctx?.deals?.length)
+    parts.push(
+      `DEALS (${ctx.deals.length}): ${JSON.stringify(ctx.deals.slice(0, 20))}`,
+    );
+  if (ctx?.products?.length)
+    parts.push(
+      `PRODUCTS (${ctx.products.length}): ${JSON.stringify(ctx.products.slice(0, 20))}`,
+    );
+  if (ctx?.invoices?.length)
+    parts.push(
+      `INVOICES (${ctx.invoices.length}): ${JSON.stringify(ctx.invoices.slice(0, 20))}`,
+    );
   return parts.join("\n\n");
 }
 
 function extractCitations(text: string): BriefResponse["citations"] {
-  const re = /\[(project|task|deal|contact|product|invoice|employee):([^\]]+)\]/g;
+  const re =
+    /\[(project|task|deal|contact|product|invoice|employee):([^\]]+)\]/g;
   const seen = new Set<string>();
   const out: BriefResponse["citations"] = [];
   let m: RegExpExecArray | null;
@@ -110,16 +153,18 @@ function local(payload: Payload): BriefResponse {
   const ctx = payload.context ?? {};
   const overdue =
     ctx.tasks?.filter(
-      (t) => t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
+      (t) =>
+        t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
     ) ?? [];
-  const stalledDeals = ctx.deals?.filter((d) => d.stage === "Negotiation" || d.stage === "Proposal") ?? [];
+  const stalledDeals =
+    ctx.deals?.filter(
+      (d) => d.stage === "Negotiation" || d.stage === "Proposal",
+    ) ?? [];
 
   const lines: string[] = [];
   lines.push(
     `☀️ Good morning. ${
-      payload.compass
-        ? `Your compass this week: "${payload.compass}". `
-        : ""
+      payload.compass ? `Your compass this week: "${payload.compass}". ` : ""
     }Focus today on closing loops before opening new ones.`,
   );
   lines.push("");
@@ -134,12 +179,23 @@ function local(payload: Payload): BriefResponse {
       `• ${stalledDeals.length} deal${stalledDeals.length === 1 ? "" : "s"} in Proposal/Negotiation — nudge [deal:${stalledDeals[0].id}] (${stalledDeals[0].company}).`,
     );
   }
-  const lowStock = ctx.products?.filter((p) => p.status === "low_stock" || p.status === "out_of_stock") ?? [];
+  const lowStock =
+    ctx.products?.filter(
+      (p) => p.status === "low_stock" || p.status === "out_of_stock",
+    ) ?? [];
   if (lowStock.length > 0) {
-    lines.push(`• ${lowStock.length} product${lowStock.length === 1 ? "" : "s"} low on stock — reorder [product:${lowStock[0].sku ?? lowStock[0].id}].`);
+    lines.push(
+      `• ${lowStock.length} product${lowStock.length === 1 ? "" : "s"} low on stock — reorder [product:${lowStock[0].sku ?? lowStock[0].id}].`,
+    );
   }
-  if (overdue.length === 0 && stalledDeals.length === 0 && lowStock.length === 0) {
-    lines.push("• Nothing urgent — a rare clear runway. Spend it on one deep-work block.");
+  if (
+    overdue.length === 0 &&
+    stalledDeals.length === 0 &&
+    lowStock.length === 0
+  ) {
+    lines.push(
+      "• Nothing urgent — a rare clear runway. Spend it on one deep-work block.",
+    );
   }
   lines.push("");
   lines.push(
@@ -155,6 +211,8 @@ function local(payload: Payload): BriefResponse {
 }
 
 export async function POST(req: Request) {
+  const __rl = await rateLimit({ key: "brief", limit: 20, windowSec: 60, req });
+  if (!__rl.ok) return __rl.response!;
   let payload: Payload;
   try {
     payload = (await req.json()) as Payload;
@@ -162,36 +220,14 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return NextResponse.json(local(payload));
-
-  const userPrompt = serialize(payload) || "No workspace data yet — make the brief compass-anchored.";
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
-        max_tokens: 400,
-        system: SYSTEM,
-        messages: [{ role: "user", content: userPrompt }],
-      }),
-    });
-    if (!res.ok) return NextResponse.json(local(payload));
-    const body = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
-    const text = body.content?.find((c) => c.type === "text")?.text?.trim();
-    if (!text) return NextResponse.json(local(payload));
-    return NextResponse.json({
-      summary: text,
-      citations: extractCitations(text),
-      provider: "vyne",
-    } satisfies BriefResponse);
-  } catch {
-    return NextResponse.json(local(payload));
-  }
+  const userPrompt =
+    serialize(payload) ||
+    "No workspace data yet — make the brief compass-anchored.";
+  const text = await callLlmText(SYSTEM, userPrompt, { maxTokens: 400 });
+  if (!text) return NextResponse.json(local(payload));
+  return NextResponse.json({
+    summary: text,
+    citations: extractCitations(text),
+    provider: "vyne",
+  } satisfies BriefResponse);
 }

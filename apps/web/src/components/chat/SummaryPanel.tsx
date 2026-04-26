@@ -15,9 +15,15 @@ interface SummaryPanelProps {
 
 type SummaryState = "loading" | "streaming" | "done" | "error";
 
-export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelProps) {
+export function SummaryPanel({
+  onClose,
+  messages,
+  channelName,
+}: SummaryPanelProps) {
   const [lines, setLines] = useState<string[]>([]);
-  const [actions, setActions] = useState<Array<{ text: string; done: boolean }>>([]);
+  const [actions, setActions] = useState<
+    Array<{ text: string; done: boolean }>
+  >([]);
   const [state, setState] = useState<SummaryState>("loading");
   const [visible, setVisible] = useState(0);
   const [checkedActions, setCheckedActions] = useState<Set<number>>(new Set());
@@ -161,7 +167,8 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
   }
 
   const displayLines = state === "streaming" || state === "done" ? lines : [];
-  const displayActions = state === "streaming" || state === "done" ? actions : [];
+  const displayActions =
+    state === "streaming" || state === "done" ? actions : [];
 
   return (
     <motion.div
@@ -194,7 +201,13 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <Sparkles size={15} style={{ color: "#06B6D4" }} />
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary, #1A1A2E)" }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-primary, var(--text-primary))",
+            }}
+          >
             AI Thread Summary
           </span>
           <span
@@ -207,18 +220,23 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
               fontWeight: 600,
             }}
           >
-            {state === "loading" ? "LOADING" : state === "streaming" ? "LIVE" : "BETA"}
+            {state === "loading"
+              ? "LOADING"
+              : state === "streaming"
+                ? "LIVE"
+                : "BETA"}
           </span>
         </div>
         <div style={{ display: "flex", gap: 4 }}>
           {state === "done" && (
-            <button aria-label="Refresh"
+            <button
+              aria-label="Refresh"
               onClick={fetchSummary}
               style={{
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 display: "flex",
                 padding: 4,
                 borderRadius: 5,
@@ -228,13 +246,14 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
               <RefreshCw size={13} />
             </button>
           )}
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               display: "flex",
               padding: 4,
               borderRadius: 5,
@@ -247,9 +266,24 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
 
       {/* Loading state */}
       {state === "loading" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0" }}>
-          <Loader2 size={16} style={{ color: "#06B6D4", animation: "spin 1s linear infinite" }} />
-          <span style={{ fontSize: 12, color: "var(--text-secondary, #6B6B8A)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "12px 0",
+          }}
+        >
+          <Loader2
+            size={16}
+            style={{ color: "#06B6D4", animation: "spin 1s linear infinite" }}
+          />
+          <span
+            style={{
+              fontSize: 12,
+              color: "var(--text-secondary, var(--text-secondary))",
+            }}
+          >
             Analyzing conversation...
           </span>
           <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
@@ -284,12 +318,18 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
       {/* Action items */}
       {displayActions.length > 0 &&
         (state === "done" || visible > displayLines.length) && (
-          <div style={{ borderTop: "1px solid var(--content-border, #F0F0F8)", paddingTop: 10 }}>
+          <div
+            style={{
+              borderTop:
+                "1px solid var(--content-border, var(--content-bg-secondary))",
+              paddingTop: 10,
+            }}
+          >
             <p
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                color: "var(--text-secondary, #6B6B8A)",
+                color: "var(--text-secondary, var(--text-secondary))",
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
                 margin: "0 0 8px",
@@ -321,8 +361,8 @@ export function SummaryPanel({ onClose, messages, channelName }: SummaryPanelPro
                       style={{
                         fontSize: 12,
                         color: isDone
-                          ? "var(--text-tertiary, #A0A0B8)"
-                          : "var(--text-primary, #1A1A2E)",
+                          ? "var(--text-tertiary, var(--text-tertiary))"
+                          : "var(--text-primary, var(--text-primary))",
                         textDecoration: isDone ? "line-through" : "none",
                         transition: "all 0.15s",
                       }}

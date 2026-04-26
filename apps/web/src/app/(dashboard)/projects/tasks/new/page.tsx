@@ -5,7 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
-import { useProjects, useProjectsStore, useTeamMembers } from "@/lib/stores/projects";
+import {
+  useProjects,
+  useProjectsStore,
+  useTeamMembers,
+} from "@/lib/stores/projects";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import {
   TASK_PRIORITY_META,
@@ -68,7 +72,10 @@ export default function NewTaskPage() {
       dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
       estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : null,
       timeSpent: null,
-      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
       subtasks: [],
       comments: [],
     });
@@ -77,11 +84,16 @@ export default function NewTaskPage() {
     if (Object.keys(form.custom).length > 0) {
       try {
         const key = "vyne-task-custom";
-        const all = JSON.parse(localStorage.getItem(key) ?? "{}") as Record<string, Record<string, string>>;
+        const all = JSON.parse(localStorage.getItem(key) ?? "{}") as Record<
+          string,
+          Record<string, string>
+        >;
         // Keyed by a synthetic tempId — replaced on first save round-trip
         all[`pending:${Date.now()}`] = form.custom;
         localStorage.setItem(key, JSON.stringify(all));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     toast.success("Task created");
     router.push(`/projects/${form.projectId}`);
@@ -143,10 +155,20 @@ export default function NewTaskPage() {
       <form
         onSubmit={onSubmit}
         className="flex-1 overflow-auto content-scroll"
-        style={{ padding: "24px", display: "flex", flexDirection: "column", gap: 16, maxWidth: 720, margin: "0 auto", width: "100%" }}
+        style={{
+          padding: "24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          maxWidth: 720,
+          margin: "0 auto",
+          width: "100%",
+        }}
       >
         <Field label="Project" required>
           <select
+            title="Project"
+            aria-label="Project"
             value={form.projectId}
             onChange={(e) => set("projectId", e.target.value)}
             style={inputStyle}
@@ -186,9 +208,13 @@ export default function NewTaskPage() {
           />
         </Field>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+        >
           <Field label="Status">
             <select
+              title="Status"
+              aria-label="Status"
               value={form.status}
               onChange={(e) => set("status", e.target.value as TaskStatus)}
               style={inputStyle}
@@ -202,6 +228,8 @@ export default function NewTaskPage() {
           </Field>
           <Field label="Priority">
             <select
+              title="Priority"
+              aria-label="Priority"
               value={form.priority}
               onChange={(e) => set("priority", e.target.value as TaskPriority)}
               style={inputStyle}
@@ -215,9 +243,13 @@ export default function NewTaskPage() {
           </Field>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+        >
           <Field label="Assignee">
             <select
+              title="Assignee"
+              aria-label="Assignee"
               value={form.assigneeId}
               onChange={(e) => set("assigneeId", e.target.value)}
               style={inputStyle}
@@ -233,6 +265,8 @@ export default function NewTaskPage() {
           <Field label="Due date">
             <input
               type="date"
+              title="Due date"
+              aria-label="Due date"
               value={form.dueDate}
               onChange={(e) => set("dueDate", e.target.value)}
               style={inputStyle}
@@ -240,7 +274,9 @@ export default function NewTaskPage() {
           </Field>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+        >
           <Field label="Estimate (hours)">
             <input
               type="number"
@@ -289,6 +325,8 @@ export default function NewTaskPage() {
                   {f.type === "checkbox" ? (
                     <input
                       type="checkbox"
+                      title={f.label}
+                      aria-label={f.label}
                       checked={form.custom[f.id] === "true"}
                       onChange={(e) =>
                         setCustom(f.id, e.target.checked ? "true" : "false")
@@ -296,6 +334,8 @@ export default function NewTaskPage() {
                     />
                   ) : f.type === "select" ? (
                     <select
+                      title={f.label}
+                      aria-label={f.label}
                       value={form.custom[f.id] ?? ""}
                       onChange={(e) => setCustom(f.id, e.target.value)}
                       style={inputStyle}
@@ -309,7 +349,15 @@ export default function NewTaskPage() {
                     </select>
                   ) : (
                     <input
-                      type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                      type={
+                        f.type === "number"
+                          ? "number"
+                          : f.type === "date"
+                            ? "date"
+                            : "text"
+                      }
+                      title={f.label}
+                      aria-label={f.label}
                       value={form.custom[f.id] ?? ""}
                       onChange={(e) => setCustom(f.id, e.target.value)}
                       style={inputStyle}

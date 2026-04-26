@@ -304,13 +304,15 @@ function KanbanColumn({
         "kanban-col flex flex-col rounded-xl transition-colors",
         isOver && "ring-2",
       )}
-      style={{
-        width: "272px",
-        minWidth: "272px",
-        background: isOver ? bgColor : "var(--content-bg-secondary)",
-        ["--tw-ring-color" as string]: color,
-        border: isOver ? `1px solid ${color}40` : "1px solid transparent",
-      } as React.CSSProperties}
+      style={
+        {
+          width: "272px",
+          minWidth: "272px",
+          background: isOver ? bgColor : "var(--content-bg-secondary)",
+          ["--tw-ring-color" as string]: color,
+          border: isOver ? `1px solid ${color}40` : "1px solid transparent",
+        } as React.CSSProperties
+      }
     >
       {/* Column Header */}
       <div
@@ -348,7 +350,8 @@ function KanbanColumn({
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+            (e.currentTarget as HTMLElement).style.color =
+              "var(--text-tertiary)";
           }}
           aria-label={`Add issue to ${label}`}
           title={`Add issue to ${label}`}
@@ -453,7 +456,10 @@ function KanbanColumn({
                       type="button"
                       onClick={onInlineCreateCancel}
                       className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
-                      style={{ color: "var(--text-secondary)", background: "var(--content-secondary)" }}
+                      style={{
+                        color: "var(--text-secondary)",
+                        background: "var(--content-secondary)",
+                      }}
                       aria-label="Cancel creating issue"
                     >
                       Cancel
@@ -486,7 +492,8 @@ function KanbanColumn({
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "transparent";
-            (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+            (e.currentTarget as HTMLElement).style.color =
+              "var(--text-tertiary)";
           }}
           aria-label={`Add issue to ${label}`}
         >

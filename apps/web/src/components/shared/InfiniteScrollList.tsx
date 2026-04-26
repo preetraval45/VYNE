@@ -65,7 +65,7 @@ function InfiniteScrollStyles() {
 
 .vyne-infinite-scroll__spinner-text {
   font-size: 13px;
-  color: var(--text-secondary, #6B6B8A);
+  color: var(--text-secondary, var(--text-secondary));
 }
 
 .vyne-infinite-scroll__load-more {
@@ -83,7 +83,7 @@ function InfiniteScrollStyles() {
   border: 1px solid var(--content-border, #E0E0EC);
   border-radius: 8px;
   background: var(--content-bg, #FFFFFF);
-  color: var(--text-primary, #1A1A2E);
+  color: var(--text-primary, var(--text-primary));
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -110,7 +110,7 @@ function InfiniteScrollStyles() {
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  color: var(--text-tertiary, #A0A0B8);
+  color: var(--text-tertiary, var(--text-tertiary));
   font-size: 14px;
 }
 
@@ -119,14 +119,14 @@ function InfiniteScrollStyles() {
   align-items: center;
   justify-content: center;
   padding: 16px 0;
-  color: var(--text-tertiary, #A0A0B8);
+  color: var(--text-tertiary, var(--text-tertiary));
   font-size: 12px;
 }
 
 [data-theme="dark"] .vyne-infinite-scroll__load-more-btn {
   background: var(--content-bg, #12121E);
   border-color: var(--content-border, #2A2A42);
-  color: var(--text-primary, #E8E8F0);
+  color: var(--text-primary, var(--content-border));
 }
 
 [data-theme="dark"] .vyne-infinite-scroll__load-more-btn:hover:not(:disabled) {

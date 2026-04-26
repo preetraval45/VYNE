@@ -66,10 +66,17 @@ export function CreateChannelModal({
             marginBottom: 20,
           }}
         >
-          <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-primary)" }}>
+          <span
+            style={{
+              fontSize: 15,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+            }}
+          >
             Create a channel
           </span>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -85,7 +92,13 @@ export function CreateChannelModal({
           </button>
         </div>
 
-        <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--text-secondary)",
+            marginBottom: 16,
+          }}
+        >
           Channels are where your team communicates. Best when organized around
           a topic.
         </p>
@@ -115,7 +128,13 @@ export function CreateChannelModal({
               background: "var(--content-secondary)",
             }}
           >
-            <span style={{ padding: "0 10px", color: "var(--text-tertiary)", fontSize: 13 }}>
+            <span
+              style={{
+                padding: "0 10px",
+                color: "var(--text-tertiary)",
+                fontSize: 13,
+              }}
+            >
               #
             </span>
             <input
@@ -135,7 +154,13 @@ export function CreateChannelModal({
             />
           </div>
           {slug && slug !== name.toLowerCase() && (
-            <p style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 4 }}>
+            <p
+              style={{
+                fontSize: 11,
+                color: "var(--text-tertiary)",
+                marginTop: 4,
+              }}
+            >
               Channel will be created as #{slug}
             </p>
           )}
@@ -191,14 +216,18 @@ export function CreateChannelModal({
               type="button"
               role="switch"
               aria-checked={isPrivate}
-              aria-label={isPrivate ? "Make channel public" : "Make channel private"}
+              aria-label={
+                isPrivate ? "Make channel public" : "Make channel private"
+              }
               onClick={() => setIsPrivate(!isPrivate)}
               onKeyDown={(e) => e.key === " " && setIsPrivate(!isPrivate)}
               style={{
                 width: 36,
                 height: 20,
                 borderRadius: 10,
-                background: isPrivate ? "var(--vyne-purple)" : "var(--content-border)",
+                background: isPrivate
+                  ? "var(--vyne-purple)"
+                  : "var(--content-border)",
                 position: "relative",
                 cursor: "pointer",
                 transition: "background 0.2s",
@@ -221,7 +250,13 @@ export function CreateChannelModal({
               />
             </button>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 Make private
               </div>
               <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
@@ -259,7 +294,7 @@ export function CreateChannelModal({
               borderRadius: 8,
               border: "none",
               background: slug ? "#06B6D4" : "var(--content-border)",
-              color: slug ? "#fff" : "#A0A0B8",
+              color: slug ? "#fff" : "var(--text-tertiary)",
               cursor: slug ? "pointer" : "default",
               fontSize: 13,
               fontWeight: 500,

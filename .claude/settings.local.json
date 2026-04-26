@@ -151,7 +151,22 @@
       "Bash(grep -rEn '<button\\(\\\\b[^>]*\\)?>$' --include=\"*.tsx\" .)",
       "Bash(git commit -m 'feat\\(ui\\): teal-tinted surfaces + gradient layering in both themes *)",
       "Bash(echo \"EXIT=$?\")",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(pnpm --filter @vyne/web typecheck)",
+      "Bash(command -v vercel)",
+      "Bash(vercel --version)",
+      "Bash(vercel --cwd apps/web --yes)",
+      "Bash(vercel projects *)",
+      "Bash(vercel --cwd apps/web --prod --yes)",
+      "Bash(vercel domains *)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel pull *)",
+      "Read(//c/Users/preet/AppData/**)",
+      "Read(//c/Users/preet/.local/share/**)",
+      "Bash(node -e \"console.log\\(JSON.parse\\(require\\('fs'\\).readFileSync\\('C:/Users/preet/AppData/Roaming/com.vercel.cli/Data/auth.json','utf8'\\)\\).token\\)\")",
+      "Bash(vercel --prod --yes --force)",
+      "Bash(python3 -)",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); const e=\\(d.envs||[]\\).find\\(x=>x.key==='GROQ_API_KEY'\\); console.log\\(e?'GROQ_API_KEY present, targets:'+JSON.stringify\\(e.target\\):'NOT FOUND'\\)\")"
     ]
   }
 }

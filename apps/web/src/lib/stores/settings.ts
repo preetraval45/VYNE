@@ -210,17 +210,19 @@ export const useSettingsStore = create<SettingsStore>()(
       appearance: DEFAULT_APPEARANCE,
       members: DEFAULT_MEMBERS,
 
+      // Settings updates: optimistic + persist locally. The api-gateway
+      // service is not deployed yet, so /api/settings/* returns 404. Until
+      // it lands we keep the optimistic state — the zustand `persist`
+      // middleware writes to localStorage so changes survive reload.
+      // Once the gateway is live we can switch back to revert-on-error.
       updateOrgSettings: async (patch) => {
         const prev = get().orgSettings;
         const next = { ...prev, ...patch };
-        // Optimistic update
         set({ orgSettings: next });
         try {
           await apiClient.patch("/api/settings/org", next);
         } catch {
-          // Revert on failure
-          set({ orgSettings: prev });
-          throw new Error("Failed to save organisation settings");
+          // Backend offline — keep the local optimistic state.
         }
       },
 
@@ -231,8 +233,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           await apiClient.patch("/api/settings/notifications", next);
         } catch {
-          set({ notificationSettings: prev });
-          throw new Error("Failed to save notification settings");
+          // keep local
         }
       },
 
@@ -243,8 +244,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           await apiClient.patch("/api/settings/erp", next);
         } catch {
-          set({ erpSettings: prev });
-          throw new Error("Failed to save ERP settings");
+          // keep local
         }
       },
 
@@ -255,8 +255,7 @@ export const useSettingsStore = create<SettingsStore>()(
         try {
           await apiClient.patch("/api/settings/appearance", next);
         } catch {
-          set({ appearance: prev });
-          throw new Error("Failed to save appearance settings");
+          // keep local
         }
       },
 

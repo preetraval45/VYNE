@@ -40,7 +40,13 @@ function SectionCard({
           borderBottom: "1px solid var(--content-border)",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           {title}
         </span>
       </div>
@@ -64,11 +70,23 @@ function FieldRow({
       }}
     >
       <div style={{ width: 200, flexShrink: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: "var(--text-primary)",
+          }}
+        >
           {label}
         </div>
         {hint && (
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+              marginTop: 1,
+            }}
+          >
             {hint}
           </div>
         )}
@@ -80,29 +98,33 @@ function FieldRow({
 
 // ─── Module list ─────────────────────────────────────────────────
 const ALL_MODULES: Array<{ id: string; label: string; group: string }> = [
-  { id: "chat",          label: "Messaging",      group: "Collaboration" },
-  { id: "projects",      label: "Projects",       group: "Collaboration" },
-  { id: "docs",          label: "Documents",      group: "Collaboration" },
-  { id: "ai",            label: "AI Assistant",   group: "Collaboration" },
-  { id: "erp",           label: "ERP / Inventory", group: "Operations" },
-  { id: "finance",       label: "Finance",        group: "Operations" },
-  { id: "crm",           label: "CRM",            group: "Operations" },
-  { id: "sales",         label: "Sales",          group: "Operations" },
-  { id: "invoicing",     label: "Invoicing",      group: "Operations" },
-  { id: "manufacturing", label: "Manufacturing",  group: "Operations" },
-  { id: "purchase",      label: "Purchase",       group: "Operations" },
-  { id: "hr",            label: "HR & People",    group: "Operations" },
-  { id: "marketing",     label: "Marketing",      group: "Operations" },
-  { id: "maintenance",   label: "Maintenance",    group: "Operations" },
-  { id: "support",       label: "Support",        group: "Operations" },
-  { id: "observe",       label: "Observability",  group: "Operations" },
+  { id: "chat", label: "Messaging", group: "Collaboration" },
+  { id: "projects", label: "Projects", group: "Collaboration" },
+  { id: "docs", label: "Documents", group: "Collaboration" },
+  { id: "ai", label: "AI Assistant", group: "Collaboration" },
+  { id: "erp", label: "ERP / Inventory", group: "Operations" },
+  { id: "finance", label: "Finance", group: "Operations" },
+  { id: "crm", label: "CRM", group: "Operations" },
+  { id: "sales", label: "Sales", group: "Operations" },
+  { id: "invoicing", label: "Invoicing", group: "Operations" },
+  { id: "manufacturing", label: "Manufacturing", group: "Operations" },
+  { id: "purchase", label: "Purchase", group: "Operations" },
+  { id: "hr", label: "HR & People", group: "Operations" },
+  { id: "marketing", label: "Marketing", group: "Operations" },
+  { id: "maintenance", label: "Maintenance", group: "Operations" },
+  { id: "support", label: "Support", group: "Operations" },
+  { id: "observe", label: "Observability", group: "Operations" },
 ];
 
 function Toggle({
   checked,
   onChange,
   label,
-}: Readonly<{ checked: boolean; onChange: (v: boolean) => void; label: string }>) {
+}: Readonly<{
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}>) {
   return (
     <button
       type="button"
@@ -162,7 +184,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
 
   // ─── Module state ─────────────────────────────────────────────
   const [enabledModules, setEnabledModules] = useState<Set<string>>(
-    new Set(ALL_MODULES.map((m) => m.id))
+    new Set(ALL_MODULES.map((m) => m.id)),
   );
   const [modulesSaved, setModulesSaved] = useState(false);
   const [modulesSaving, setModulesSaving] = useState(false);
@@ -176,10 +198,14 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
       const onboarding = localStorage.getItem("vyne-onboarding");
       if (onboarding) {
         const parsed = JSON.parse(onboarding) as {
-          company?: { branding?: { accentColor?: string; customDomain?: string } };
+          company?: {
+            branding?: { accentColor?: string; customDomain?: string };
+          };
         };
-        if (parsed.company?.branding?.accentColor) setAccentColor(parsed.company.branding.accentColor);
-        if (parsed.company?.branding?.customDomain) setCustomDomain(parsed.company.branding.customDomain);
+        if (parsed.company?.branding?.accentColor)
+          setAccentColor(parsed.company.branding.accentColor);
+        if (parsed.company?.branding?.customDomain)
+          setCustomDomain(parsed.company.branding.customDomain);
       }
     } catch {
       // ignore
@@ -188,52 +214,68 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
 
   const saveBranding = useCallback(async () => {
     setBrandingSaving(true);
+    // Persist locally FIRST so the change survives reload even when the
+    // gateway is offline. The gateway call is best-effort.
+    try {
+      const existing = JSON.parse(
+        localStorage.getItem("vyne-onboarding") ?? "{}",
+      ) as Record<string, unknown>;
+      existing.company = {
+        ...((existing.company as object) ?? {}),
+        branding: { accentColor, customDomain },
+      };
+      localStorage.setItem("vyne-onboarding", JSON.stringify(existing));
+    } catch {
+      /* ignore */
+    }
     try {
       if (user?.orgId) {
         await orgsApi.update(user.orgId, {
-          settings: { branding: { accentColor, customDomain: customDomain || undefined } },
+          settings: {
+            branding: { accentColor, customDomain: customDomain || undefined },
+          },
         });
       }
-      // Always update localStorage so sidebar picks up accent color
-      try {
-        const existing = JSON.parse(localStorage.getItem("vyne-onboarding") ?? "{}") as Record<string, unknown>;
-        existing.company = { ...(existing.company as object ?? {}), branding: { accentColor, customDomain } };
-        localStorage.setItem("vyne-onboarding", JSON.stringify(existing));
-      } catch { /* ignore */ }
-      setBrandingSaved(true);
-      onToast("Branding saved");
-      setTimeout(() => setBrandingSaved(false), 2000);
     } catch {
-      onToast("Failed to save branding");
-    } finally {
-      setBrandingSaving(false);
+      // Backend not deployed yet — local persistence above keeps the change.
     }
+    setBrandingSaved(true);
+    onToast("Branding saved");
+    setTimeout(() => setBrandingSaved(false), 2000);
+    setBrandingSaving(false);
   }, [accentColor, customDomain, user, onToast]);
 
   const saveModules = useCallback(async () => {
     setModulesSaving(true);
+    // Persist module toggles locally first so they survive reload.
+    localStorage.setItem(
+      "vyne-modules",
+      JSON.stringify(Array.from(enabledModules)),
+    );
     try {
-      // Build feature flags
       const features: Record<string, boolean> = {};
       for (const m of ALL_MODULES) {
         const key = m.id === "observe" ? "observability" : m.id;
         features[key] = enabledModules.has(m.id);
       }
-
       if (user?.orgId) {
         await orgsApi.update(user.orgId, {
-          settings: { features: features as Parameters<typeof orgsApi.update>[1]["settings"] extends { features?: infer F } ? F : never },
+          settings: {
+            features: features as Parameters<
+              typeof orgsApi.update
+            >[1]["settings"] extends { features?: infer F }
+              ? F
+              : never,
+          },
         });
       }
-      localStorage.setItem("vyne-modules", JSON.stringify(Array.from(enabledModules)));
-      setModulesSaved(true);
-      onToast("Module settings saved — reload to apply");
-      setTimeout(() => setModulesSaved(false), 2000);
     } catch {
-      onToast("Failed to save modules");
-    } finally {
-      setModulesSaving(false);
+      // Backend not deployed yet — local persistence above keeps the change.
     }
+    setModulesSaved(true);
+    onToast("Module settings saved — reload to apply");
+    setTimeout(() => setModulesSaved(false), 2000);
+    setModulesSaving(false);
   }, [enabledModules, user, onToast]);
 
   // Keep local in sync when store rehydrates
@@ -263,6 +305,9 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
       <SectionCard title="Organisation">
         <FieldRow label="Company Name" hint="Displayed across the platform">
           <input
+            title="Company Name"
+            aria-label="Company Name"
+            placeholder="Acme Inc."
             value={local.name}
             onChange={(e) => setLocal({ ...local, name: e.target.value })}
             style={inputStyle}
@@ -318,7 +363,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </FieldRow>
 
         <FieldRow label="Timezone">
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={local.timezone}
             onChange={(e) => setLocal({ ...local, timezone: e.target.value })}
             style={selectStyle}
@@ -341,7 +387,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </FieldRow>
 
         <FieldRow label="Language">
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={local.language}
             onChange={(e) => setLocal({ ...local, language: e.target.value })}
             style={{ ...selectStyle, maxWidth: 240 }}
@@ -368,7 +415,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           label="Currency"
           hint="Default currency for orders & invoices"
         >
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={local.defaultCurrency}
             onChange={(e) =>
               setLocal({ ...local, defaultCurrency: e.target.value })
@@ -385,7 +433,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           label="Fiscal Year Start"
           hint="Month the financial year begins"
         >
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={local.fiscalYearStart}
             onChange={(e) =>
               setLocal({ ...local, fiscalYearStart: e.target.value })
@@ -414,7 +463,11 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
             padding: "8px 18px",
             borderRadius: 8,
             border: "none",
-            background: saved ? "var(--status-success)" : hasChanged ? "var(--vyne-purple)" : "var(--content-border)",
+            background: saved
+              ? "var(--status-success)"
+              : hasChanged
+                ? "var(--vyne-purple)"
+                : "var(--content-border)",
             color: saved || hasChanged ? "#fff" : "var(--text-tertiary)",
             cursor: hasChanged ? "pointer" : "default",
             fontSize: 13,
@@ -476,7 +529,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               style={{ ...inputStyle, maxWidth: 120 }}
               aria-label="Accent color hex"
             />
-            <Palette size={14} color="#A0A0B8" />
+            <Palette size={14} color="var(--text-tertiary)" />
           </div>
         </FieldRow>
 
@@ -485,7 +538,11 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           hint="White-label: e.g. app.yourcompany.com"
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Globe size={14} color="#A0A0B8" style={{ flexShrink: 0 }} />
+            <Globe
+              size={14}
+              color="var(--text-tertiary)"
+              style={{ flexShrink: 0 }}
+            />
             <input
               value={customDomain}
               onChange={(e) => setCustomDomain(e.target.value)}
@@ -517,7 +574,15 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               transition: "all 0.2s",
             }}
           >
-            {brandingSaved ? <><Check size={14} /> Saved!</> : brandingSaving ? "Saving…" : "Save Branding"}
+            {brandingSaved ? (
+              <>
+                <Check size={14} /> Saved!
+              </>
+            ) : brandingSaving ? (
+              "Saving…"
+            ) : (
+              "Save Branding"
+            )}
           </button>
         </div>
       </SectionCard>
@@ -554,11 +619,15 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
                     justifyContent: "space-between",
                     padding: "8px 12px",
                     borderRadius: 8,
-                    background: enabledModules.has(mod.id) ? "rgba(6, 182, 212,0.07)" : "var(--content-secondary)",
+                    background: enabledModules.has(mod.id)
+                      ? "rgba(6, 182, 212,0.07)"
+                      : "var(--content-secondary)",
                     border: `1px solid ${enabledModules.has(mod.id) ? "rgba(6, 182, 212,0.25)" : "var(--content-border)"}`,
                   }}
                 >
-                  <span style={{ fontSize: 13, color: "var(--text-primary)" }}>{mod.label}</span>
+                  <span style={{ fontSize: 13, color: "var(--text-primary)" }}>
+                    {mod.label}
+                  </span>
                   <Toggle
                     label={`Toggle ${mod.label}`}
                     checked={enabledModules.has(mod.id)}
@@ -577,7 +646,9 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           </div>
         ))}
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+        <div
+          style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}
+        >
           <button
             type="button"
             onClick={saveModules}
@@ -598,7 +669,15 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               transition: "all 0.2s",
             }}
           >
-            {modulesSaved ? <><Check size={14} /> Saved!</> : modulesSaving ? "Saving…" : "Save Modules"}
+            {modulesSaved ? (
+              <>
+                <Check size={14} /> Saved!
+              </>
+            ) : modulesSaving ? (
+              "Saving…"
+            ) : (
+              "Save Modules"
+            )}
           </button>
         </div>
       </SectionCard>

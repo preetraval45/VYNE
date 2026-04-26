@@ -29,7 +29,10 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "@/lib/fixtures/projects";
-import { PipelineBreadcrumb, type PipelineStage } from "@/components/shared/Kit";
+import {
+  PipelineBreadcrumb,
+  type PipelineStage,
+} from "@/components/shared/Kit";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import { useActivityStore } from "@/lib/stores/activity";
 import { ActivityFeed } from "@/components/shared/ActivityFeed";
@@ -60,7 +63,16 @@ export default function TaskDetailPage({ params }: PageProps) {
   const { projectId, taskId } = use(params);
   const router = useRouter();
   const project = useProject(projectId);
-  const task = useProjectsStore((s) => s.tasks.find((t) => t.id === taskId));
+  // Select the stable `tasks` array first then derive with useMemo —
+  // returning `s.tasks.find(...)` directly recomputes on every store
+  // change and trips React 19's useSyncExternalStore consistency check
+  // (Minified React error #185 — Maximum update depth exceeded). Same
+  // fix as the comment on `useProjectTasks` in the projects store.
+  const tasks = useProjectsStore((s) => s.tasks);
+  const task = useMemo(
+    () => tasks.find((t) => t.id === taskId),
+    [tasks, taskId],
+  );
   const teamMembers = useTeamMembers();
   const updateTask = useProjectsStore((s) => s.updateTask);
   const deleteTask = useProjectsStore((s) => s.deleteTask);
@@ -122,7 +134,12 @@ export default function TaskDetailPage({ params }: PageProps) {
   function onAddSubtask() {
     const title = newSubtaskTitle.trim();
     if (!title) return;
-    addSubtask(task!.id, { title, done: false, assigneeId: null, dueDate: null });
+    addSubtask(task!.id, {
+      title,
+      done: false,
+      assigneeId: null,
+      dueDate: null,
+    });
     setNewSubtaskTitle("");
   }
 
@@ -144,7 +161,10 @@ export default function TaskDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: "var(--content-bg-secondary)" }}>
+    <div
+      className="flex flex-col h-full"
+      style={{ background: "var(--content-bg-secondary)" }}
+    >
       {/* Breadcrumb + meta bar */}
       <header
         style={{
@@ -319,11 +339,17 @@ export default function TaskDetailPage({ params }: PageProps) {
                       style={{
                         background: "transparent",
                         border: "none",
-                        color: s.done ? "var(--vyne-teal)" : "var(--text-tertiary)",
+                        color: s.done
+                          ? "var(--vyne-teal)"
+                          : "var(--text-tertiary)",
                         cursor: "pointer",
                       }}
                     >
-                      {s.done ? <CheckSquare size={15} /> : <Square size={15} />}
+                      {s.done ? (
+                        <CheckSquare size={15} />
+                      ) : (
+                        <Square size={15} />
+                      )}
                     </button>
                     <span
                       style={{
@@ -499,7 +525,14 @@ export default function TaskDetailPage({ params }: PageProps) {
           <aside style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <section style={cardStyle}>
               <h2 style={sectionTitle}>Properties</h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  marginTop: 12,
+                }}
+              >
                 <Row icon={<Flag size={13} />} label="Priority">
                   <select
                     value={task.priority}
@@ -511,11 +544,13 @@ export default function TaskDetailPage({ params }: PageProps) {
                     aria-label="Priority"
                     style={{ ...inputStyle, padding: "6px 8px" }}
                   >
-                    {(Object.keys(TASK_PRIORITY_META) as TaskPriority[]).map((p) => (
-                      <option key={p} value={p}>
-                        {TASK_PRIORITY_META[p].label}
-                      </option>
-                    ))}
+                    {(Object.keys(TASK_PRIORITY_META) as TaskPriority[]).map(
+                      (p) => (
+                        <option key={p} value={p}>
+                          {TASK_PRIORITY_META[p].label}
+                        </option>
+                      ),
+                    )}
                   </select>
                 </Row>
                 <Row icon={<User size={13} />} label="Assignee">
@@ -592,7 +627,6 @@ export default function TaskDetailPage({ params }: PageProps) {
 
             <CustomFieldsPanel taskId={task.id} />
 
-
             <section style={cardStyle}>
               <h2 style={sectionTitle}>Summary</h2>
               <div style={{ fontSize: 13, margin: 0 }}>
@@ -627,7 +661,13 @@ export default function TaskDetailPage({ params }: PageProps) {
                 <SummaryRow
                   label="Priority"
                   value={
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
                       <span
                         style={{
                           width: 8,
@@ -644,7 +684,13 @@ export default function TaskDetailPage({ params }: PageProps) {
                   label="Assignee"
                   value={
                     assignee ? (
-                      <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 6,
+                        }}
+                      >
                         <span
                           style={{
                             width: 18,
@@ -664,13 +710,28 @@ export default function TaskDetailPage({ params }: PageProps) {
                         {assignee.name}
                       </span>
                     ) : (
-                      <span style={{ color: "var(--text-tertiary)" }}>Unassigned</span>
+                      <span style={{ color: "var(--text-tertiary)" }}>
+                        Unassigned
+                      </span>
                     )
                   }
                 />
-                <SummaryRow label="Created" value={new Date(task.createdAt).toLocaleDateString()} />
-                <SummaryRow label="Updated" value={new Date(task.updatedAt).toLocaleDateString()} />
-                <SummaryRow label="Key" value={<code style={{ fontFamily: "var(--font-mono)" }}>{task.key}</code>} />
+                <SummaryRow
+                  label="Created"
+                  value={new Date(task.createdAt).toLocaleDateString()}
+                />
+                <SummaryRow
+                  label="Updated"
+                  value={new Date(task.updatedAt).toLocaleDateString()}
+                />
+                <SummaryRow
+                  label="Key"
+                  value={
+                    <code style={{ fontFamily: "var(--font-mono)" }}>
+                      {task.key}
+                    </code>
+                  }
+                />
               </div>
             </section>
 
@@ -703,7 +764,9 @@ export default function TaskDetailPage({ params }: PageProps) {
   );
 }
 
-const EMPTY_CUSTOM_FIELDS: ReturnType<typeof useCustomFieldsStore.getState>["schemas"][string]["fields"] = [];
+const EMPTY_CUSTOM_FIELDS: ReturnType<
+  typeof useCustomFieldsStore.getState
+>["schemas"][string]["fields"] = [];
 
 function CustomFieldsPanel({ taskId }: { taskId: string }) {
   const fields = useCustomFieldsStore(
@@ -725,7 +788,10 @@ function CustomFieldsPanel({ taskId }: { taskId: string }) {
     setValues((prev) => {
       const next = { ...prev, [id]: v };
       try {
-        localStorage.setItem(`vyne-task-custom:${taskId}`, JSON.stringify(next));
+        localStorage.setItem(
+          `vyne-task-custom:${taskId}`,
+          JSON.stringify(next),
+        );
       } catch {
         /* ignore */
       }
@@ -759,7 +825,15 @@ function CustomFieldsPanel({ taskId }: { taskId: string }) {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {fields.map((f) => (
-          <div key={f.id} style={{ display: "grid", gridTemplateColumns: "110px 1fr", alignItems: "center", gap: 8 }}>
+          <div
+            key={f.id}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "110px 1fr",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <span
               style={{
                 fontSize: 12,
@@ -794,7 +868,13 @@ function CustomFieldsPanel({ taskId }: { taskId: string }) {
               </select>
             ) : (
               <input
-                type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                type={
+                  f.type === "number"
+                    ? "number"
+                    : f.type === "date"
+                      ? "date"
+                      : "text"
+                }
                 aria-label={f.label}
                 title={f.label}
                 placeholder={f.label}
@@ -810,9 +890,24 @@ function CustomFieldsPanel({ taskId }: { taskId: string }) {
   );
 }
 
-function Row({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
+function Row({
+  icon,
+  label,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "110px 1fr", alignItems: "center", gap: 8 }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "110px 1fr",
+        alignItems: "center",
+        gap: 8,
+      }}
+    >
       <span
         style={{
           display: "inline-flex",
@@ -831,7 +926,13 @@ function Row({ icon, label, children }: { icon: React.ReactNode; label: string; 
   );
 }
 
-function SummaryRow({ label, value }: { label: string; value: React.ReactNode }) {
+function SummaryRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div
       style={{
@@ -853,7 +954,9 @@ function SummaryRow({ label, value }: { label: string; value: React.ReactNode })
       >
         {label}
       </span>
-      <span style={{ fontSize: 13, color: "var(--text-primary)" }}>{value}</span>
+      <span style={{ fontSize: 13, color: "var(--text-primary)" }}>
+        {value}
+      </span>
     </div>
   );
 }

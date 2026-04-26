@@ -130,7 +130,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
       style={{
         width: 360,
         minWidth: 360,
-        borderLeft: "1px solid #E8E8F0",
+        borderLeft: "1px solid var(--content-border)",
         display: "flex",
         flexDirection: "column",
         background: "var(--content-bg)",
@@ -144,11 +144,17 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "14px 16px",
-          borderBottom: "1px solid #E8E8F0",
+          borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           Thread
         </span>
         <button
@@ -194,7 +200,8 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
             display: "flex",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+            (e.currentTarget as HTMLElement).style.background =
+              "var(--content-secondary)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -208,7 +215,7 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
       <div
         style={{
           padding: "14px 16px",
-          borderBottom: "1px solid #F0F0F8",
+          borderBottom: "1px solid var(--content-bg-secondary)",
           flexShrink: 0,
           background: "var(--content-secondary)",
         }}
@@ -224,7 +231,13 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
                 marginBottom: 3,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {parentMsg.author.name}
               </span>
               <span style={{ fontSize: 10, color: "var(--text-tertiary)" }}>
@@ -471,7 +484,13 @@ export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
           </p>
         )}
         {typingUsers.length > 0 && (
-          <p style={{ fontSize: 11, color: "var(--text-tertiary)", fontStyle: "italic" }}>
+          <p
+            style={{
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+              fontStyle: "italic",
+            }}
+          >
             {typingUsers[0].name} is typing…
           </p>
         )}

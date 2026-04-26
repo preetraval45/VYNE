@@ -196,13 +196,13 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                         (e.currentTarget as HTMLElement).style.background =
                           "var(--content-bg-secondary)";
                         (e.currentTarget as HTMLElement).style.color =
-                          "#1A1A2E";
+                          "var(--text-primary)";
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
                           "transparent";
                         (e.currentTarget as HTMLElement).style.color =
-                          "#A0A0B8";
+                          "var(--text-tertiary)";
                       }}
                     >
                       <X size={16} aria-hidden="true" />
@@ -245,7 +245,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                             "0 0 0 3px rgba(6, 182, 212,0.08)";
                         }}
                         onBlur={(e) => {
-                          e.target.style.border = "1px solid #E8E8F0";
+                          e.target.style.border =
+                            "1px solid var(--content-border)";
                           e.target.style.boxShadow = "none";
                         }}
                       />
@@ -290,7 +291,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                             "0 0 0 3px rgba(6, 182, 212,0.08)";
                         }}
                         onBlur={(e) => {
-                          e.target.style.border = "1px solid #E8E8F0";
+                          e.target.style.border =
+                            "1px solid var(--content-border)";
                           e.target.style.boxShadow = "none";
                         }}
                         aria-describedby="identifier-hint"
@@ -335,7 +337,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                           "0 0 0 3px rgba(6, 182, 212,0.08)";
                       }}
                       onBlur={(e) => {
-                        e.target.style.border = "1px solid #E8E8F0";
+                        e.target.style.border =
+                          "1px solid var(--content-border)";
                         e.target.style.boxShadow = "none";
                       }}
                     />
@@ -381,7 +384,9 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                   {/* Actions */}
                   <div
                     className="flex items-center justify-end gap-2 pt-2"
-                    style={{ borderTop: "1px solid #F0F0F8" }}
+                    style={{
+                      borderTop: "1px solid var(--content-bg-secondary)",
+                    }}
                   >
                     <button
                       type="button"

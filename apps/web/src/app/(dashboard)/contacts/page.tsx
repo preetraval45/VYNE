@@ -3,7 +3,16 @@
 import { Suspense, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Upload, X, Pencil, Trash2, ArrowRight, Users } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Upload,
+  X,
+  Pencil,
+  Trash2,
+  ArrowRight,
+  Users,
+} from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/Kit";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
@@ -56,7 +65,10 @@ function accountStatusConfig(s: AccountStatus): { bg: string; color: string } {
   const map: Record<AccountStatus, { bg: string; color: string }> = {
     Active: { bg: "#F0FDF4", color: "var(--badge-success-text)" },
     Prospect: { bg: "#EFF6FF", color: "#1E40AF" },
-    Inactive: { bg: "#F4F4F8", color: "var(--text-secondary)" },
+    Inactive: {
+      bg: "var(--content-bg-secondary)",
+      color: "var(--text-secondary)",
+    },
   };
   return map[s];
 }
@@ -213,7 +225,9 @@ function TabBtn({
             fontSize: 10,
             padding: "1px 6px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
+            background: active
+              ? "rgba(6, 182, 212,0.12)"
+              : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-tertiary)",
             fontWeight: 600,
           }}
@@ -632,7 +646,8 @@ function AccountModal({
           >
             {initial ? "Edit Account" : "New Account"}
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -663,7 +678,8 @@ function AccountModal({
           >
             <div>
               <label style={labelStyle}>Industry</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 style={selectStyle}
                 value={industry}
                 onChange={(e) => setIndustry(e.target.value)}
@@ -677,7 +693,8 @@ function AccountModal({
             </div>
             <div>
               <label style={labelStyle}>Status</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 style={selectStyle}
                 value={status}
                 onChange={(e) => setStatus(e.target.value as AccountStatus)}
@@ -732,7 +749,8 @@ function AccountModal({
           </div>
           <div>
             <label style={labelStyle}>Owner</label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={selectStyle}
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
@@ -862,7 +880,8 @@ function ContactModal({
           >
             {initial ? "Edit Contact" : "New Contact"}
           </h2>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -915,7 +934,8 @@ function ContactModal({
           </div>
           <div>
             <label style={labelStyle}>Company (Account)</label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={selectStyle}
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
@@ -1288,7 +1308,11 @@ function AccountsTab() {
                           <IconBtn
                             icon={<Pencil size={13} />}
                             title="Edit"
-                            onClick={() => router.push(`/contacts/accounts/${account.id}/edit`)}
+                            onClick={() =>
+                              router.push(
+                                `/contacts/accounts/${account.id}/edit`,
+                              )
+                            }
                           />
                           <IconBtn
                             icon={<Trash2 size={13} />}
@@ -1310,7 +1334,9 @@ function AccountsTab() {
       {/* Slide-in account detail panel */}
       <AccountDetailPanel
         account={selectedAccount}
-        contacts={contacts.filter((c) => c.accountId === (selectedAccount?.id ?? ""))}
+        contacts={contacts.filter(
+          (c) => c.accountId === (selectedAccount?.id ?? ""),
+        )}
         onClose={accountDetail.close}
       />
 
@@ -1579,7 +1605,9 @@ function ContactsTabContent() {
                         <IconBtn
                           icon={<Pencil size={13} />}
                           title="Edit"
-                          onClick={() => router.push(`/contacts/people/${contact.id}/edit`)}
+                          onClick={() =>
+                            router.push(`/contacts/people/${contact.id}/edit`)
+                          }
                         />
                         <IconBtn
                           icon={<Trash2 size={13} />}
@@ -1600,7 +1628,9 @@ function ContactsTabContent() {
       {/* Slide-in contact detail panel */}
       <ContactDetailPanel
         contact={selectedContact}
-        account={accounts.find((a) => a.id === (selectedContact?.accountId ?? ""))}
+        account={accounts.find(
+          (a) => a.id === (selectedContact?.accountId ?? ""),
+        )}
         onClose={contactDetail.close}
       />
 
@@ -1765,7 +1795,7 @@ function ImportTab() {
                   fontWeight: 500,
                   background: col.required
                     ? "rgba(6, 182, 212,0.08)"
-                    : "#F4F4F8",
+                    : "var(--content-bg-secondary)",
                   color: col.required
                     ? "var(--vyne-purple)"
                     : "var(--text-tertiary)",
@@ -1895,7 +1925,7 @@ function ImportTab() {
                   fontWeight: 500,
                   background: col.required
                     ? "rgba(6, 182, 212,0.08)"
-                    : "#F4F4F8",
+                    : "var(--content-bg-secondary)",
                   color: col.required
                     ? "var(--vyne-purple)"
                     : "var(--text-tertiary)",
@@ -2004,7 +2034,12 @@ function ImportTab() {
             fill="none"
             style={{ margin: "0 auto 14px", display: "block" }}
           >
-            <rect width="40" height="40" rx="10" fill="rgba(6, 182, 212,0.08)" />
+            <rect
+              width="40"
+              height="40"
+              rx="10"
+              fill="rgba(6, 182, 212,0.08)"
+            />
             <path
               d="M13 27v2a1 1 0 001 1h12a1 1 0 001-1v-2M20 12v12M16 16l4-4 4 4"
               stroke={dragOver ? "var(--vyne-purple)" : "var(--text-tertiary)"}
@@ -2258,13 +2293,19 @@ function AccountDetailPanel({
   contacts: Contact[];
   onClose: () => void;
 }) {
-  const sc = account ? accountStatusConfig(account.status) : { bg: "", color: "" };
+  const sc = account
+    ? accountStatusConfig(account.status)
+    : { bg: "", color: "" };
   return (
     <DetailPanel
       open={!!account}
       onClose={onClose}
       title={account?.name ?? ""}
-      subtitle={account ? `${account.industry} · ${account.employees.toLocaleString()} employees` : undefined}
+      subtitle={
+        account
+          ? `${account.industry} · ${account.employees.toLocaleString()} employees`
+          : undefined
+      }
       badge={
         account && (
           <span
@@ -2299,20 +2340,54 @@ function AccountDetailPanel({
       {!account ? null : (
         <>
           <DetailSection title="Revenue & size">
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
               <div>
-                <div style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+                <div
+                  style={{
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: "var(--text-primary)",
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                  }}
+                >
                   {fmtRevenue(account.revenue)}
                 </div>
-                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 4,
+                  }}
+                >
                   Annual revenue
                 </div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div className="text-aurora" style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.02em" }}>
+                <div
+                  className="text-aurora"
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
                   {account.employees.toLocaleString()}
                 </div>
-                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 2,
+                  }}
+                >
                   Employees
                 </div>
               </div>
@@ -2321,11 +2396,21 @@ function AccountDetailPanel({
 
           <DetailSection title="Details">
             <DetailRow label="Industry" value={account.industry} />
-            <DetailRow label="Website" value={account.website || "—"} mono={!!account.website} />
+            <DetailRow
+              label="Website"
+              value={account.website || "—"}
+              mono={!!account.website}
+            />
             <DetailRow label="Phone" value={account.phone || "—"} />
             <DetailRow
               label="Owner"
-              value={account.owner || <span style={{ color: "var(--text-tertiary)" }}>Unassigned</span>}
+              value={
+                account.owner || (
+                  <span style={{ color: "var(--text-tertiary)" }}>
+                    Unassigned
+                  </span>
+                )
+              }
             />
           </DetailSection>
 
@@ -2348,21 +2433,47 @@ function AccountDetailPanel({
                     <span
                       aria-hidden="true"
                       style={{
-                        width: 24, height: 24, borderRadius: "50%",
+                        width: 24,
+                        height: 24,
+                        borderRadius: "50%",
                         background: "rgba(6, 182, 212,0.12)",
                         color: "var(--vyne-purple)",
-                        display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 10, fontWeight: 700, flexShrink: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        flexShrink: 0,
                       }}
                     >
-                      {c.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                      {c.name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .join("")
+                        .slice(0, 2)}
                     </span>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          fontWeight: 500,
+                          color: "var(--text-primary)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {c.name}
                       </div>
                       {c.title && (
-                        <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{c.title}</div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "var(--text-tertiary)",
+                          }}
+                        >
+                          {c.title}
+                        </div>
                       )}
                     </div>
                   </Link>
@@ -2390,7 +2501,11 @@ function ContactDetailPanel({
       open={!!contact}
       onClose={onClose}
       title={contact?.name ?? ""}
-      subtitle={contact ? [contact.title, contact.company].filter(Boolean).join(" · ") : undefined}
+      subtitle={
+        contact
+          ? [contact.title, contact.company].filter(Boolean).join(" · ")
+          : undefined
+      }
       headerActions={
         contact && (
           <Link
@@ -2407,10 +2522,17 @@ function ContactDetailPanel({
       {!contact ? null : (
         <>
           <DetailSection title="Contact">
-            <DetailRow label="Email" value={contact.email || "—"} mono={!!contact.email} />
+            <DetailRow
+              label="Email"
+              value={contact.email || "—"}
+              mono={!!contact.email}
+            />
             <DetailRow label="Phone" value={contact.phone || "—"} />
             <DetailRow label="Department" value={contact.department || "—"} />
-            <DetailRow label="Last contact" value={daysSinceStr(contact.lastContact)} />
+            <DetailRow
+              label="Last contact"
+              value={daysSinceStr(contact.lastContact)}
+            />
           </DetailSection>
 
           {account && (
@@ -2429,24 +2551,42 @@ function ContactDetailPanel({
                 <span
                   aria-hidden="true"
                   style={{
-                    width: 28, height: 28, borderRadius: 8,
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
                     background: "rgba(6, 182, 212,0.08)",
                     color: "var(--vyne-purple)",
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 10, fontWeight: 700, flexShrink: 0,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    flexShrink: 0,
                   }}
                 >
                   {account.name.slice(0, 2).toUpperCase()}
                 </span>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {account.name}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                     {account.industry} {"·"} {fmtRevenue(account.revenue)}
                   </div>
                 </div>
-                <ArrowRight size={13} style={{ color: "var(--text-tertiary)" }} />
+                <ArrowRight
+                  size={13}
+                  style={{ color: "var(--text-tertiary)" }}
+                />
               </Link>
             </DetailSection>
           )}

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 /**
  * Skeleton loading components for VYNE.
@@ -12,7 +12,7 @@
  *   <SkeletonTable rows={5} columns={4} />
  */
 
-import React from 'react'
+import React from "react";
 
 /* ────────────────────────────────────────────────────────────────────
  * Shared shimmer style tag — injected once via a top-level component.
@@ -33,7 +33,7 @@ function ShimmerStyles() {
 }
 
 :root {
-  --skeleton-base: #E8E8F0;
+  --skeleton-base: var(--content-border);
   --skeleton-shine: #F4F4FA;
 }
 
@@ -56,13 +56,13 @@ function ShimmerStyles() {
 `,
       }}
     />
-  )
+  );
 }
 
 /** Ensure shimmer CSS is present in the tree. Call once at the top of any
  *  skeleton component — React deduplicates the <style> by id. */
 function useShimmerStyles(): React.ReactElement {
-  return <ShimmerStyles />
+  return <ShimmerStyles />;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -71,22 +71,22 @@ function useShimmerStyles(): React.ReactElement {
 
 type SkeletonLineProps = Readonly<{
   /** CSS width value. Default `'100%'` */
-  width?: string
+  width?: string;
   /** CSS height value. Default `'12px'` */
-  height?: string
+  height?: string;
   /** Border radius override. Default inherits from `.vyne-skeleton` */
-  borderRadius?: string | number
+  borderRadius?: string | number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
 export function SkeletonLine({
-  width = '100%',
-  height = '12px',
+  width = "100%",
+  height = "12px",
   borderRadius,
-  className = '',
+  className = "",
 }: SkeletonLineProps) {
-  const styles = useShimmerStyles()
+  const styles = useShimmerStyles();
   return (
     <>
       {styles}
@@ -100,7 +100,7 @@ export function SkeletonLine({
         aria-hidden="true"
       />
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -109,40 +109,45 @@ export function SkeletonLine({
 
 type SkeletonCardProps = Readonly<{
   /** Number of body text lines. Default `3` */
-  lines?: number
+  lines?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
-export function SkeletonCard({ lines = 3, className = '' }: SkeletonCardProps) {
-  const styles = useShimmerStyles()
+export function SkeletonCard({ lines = 3, className = "" }: SkeletonCardProps) {
+  const styles = useShimmerStyles();
   return (
     <>
       {styles}
       <div
         className={className}
         style={{
-          background: 'var(--content-secondary)',
-          border: '1px solid var(--content-border)',
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
-          padding: '18px 20px',
+          padding: "18px 20px",
         }}
         aria-hidden="true"
       >
         {/* Title line */}
         <div
           className="vyne-skeleton"
-          style={{ width: '55%', height: 14, marginBottom: 16, borderRadius: 6 }}
+          style={{
+            width: "55%",
+            height: 14,
+            marginBottom: 16,
+            borderRadius: 6,
+          }}
         />
 
         {/* Body lines */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {Array.from({ length: lines }).map((_, i) => (
             <div
               key={i}
               className="vyne-skeleton"
               style={{
-                width: i === lines - 1 ? '40%' : `${85 - i * 10}%`,
+                width: i === lines - 1 ? "40%" : `${85 - i * 10}%`,
                 height: 10,
                 borderRadius: 5,
               }}
@@ -151,7 +156,7 @@ export function SkeletonCard({ lines = 3, className = '' }: SkeletonCardProps) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -160,21 +165,21 @@ export function SkeletonCard({ lines = 3, className = '' }: SkeletonCardProps) {
 
 type SkeletonTableProps = Readonly<{
   /** Number of rows. Default `5` */
-  rows?: number
+  rows?: number;
   /** Number of columns. Default `4` */
-  columns?: number
+  columns?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
 export function SkeletonTable({
   rows = 5,
   columns = 4,
-  className = '',
+  className = "",
 }: SkeletonTableProps) {
-  const styles = useShimmerStyles()
+  const styles = useShimmerStyles();
 
-  const columnWidths = ['30%', '45%', '25%', '20%', '35%', '40%']
+  const columnWidths = ["30%", "45%", "25%", "20%", "35%", "40%"];
 
   return (
     <>
@@ -182,21 +187,21 @@ export function SkeletonTable({
       <div
         className={className}
         style={{
-          background: 'var(--content-secondary)',
-          border: '1px solid var(--content-border)',
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
-          overflow: 'hidden',
+          overflow: "hidden",
         }}
         aria-hidden="true"
       >
         {/* Header row */}
         <div
           style={{
-            display: 'grid',
+            display: "grid",
             gridTemplateColumns: `repeat(${columns}, 1fr)`,
             gap: 12,
-            padding: '14px 18px',
-            borderBottom: '1px solid var(--content-border)',
+            padding: "14px 18px",
+            borderBottom: "1px solid var(--content-border)",
           }}
         >
           {Array.from({ length: columns }).map((_, i) => (
@@ -217,14 +222,12 @@ export function SkeletonTable({
           <div
             key={rowIdx}
             style={{
-              display: 'grid',
+              display: "grid",
               gridTemplateColumns: `repeat(${columns}, 1fr)`,
               gap: 12,
-              padding: '12px 18px',
+              padding: "12px 18px",
               borderBottom:
-                rowIdx < rows - 1
-                  ? '1px solid var(--content-border)'
-                  : 'none',
+                rowIdx < rows - 1 ? "1px solid var(--content-border)" : "none",
             }}
           >
             {Array.from({ length: columns }).map((_, colIdx) => (
@@ -242,7 +245,7 @@ export function SkeletonTable({
         ))}
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -251,21 +254,21 @@ export function SkeletonTable({
 
 type SkeletonKanbanProps = Readonly<{
   /** Number of columns. Default `4` */
-  columns?: number
+  columns?: number;
   /** Cards per column. Default `3` */
-  cardsPerColumn?: number
+  cardsPerColumn?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
 function KanbanCardSkeleton() {
   return (
     <div
       style={{
-        background: 'var(--content-bg, #FFFFFF)',
-        border: '1px solid var(--content-border)',
+        background: "var(--content-bg, #FFFFFF)",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
-        padding: '14px 16px',
+        padding: "14px 16px",
       }}
     >
       {/* Tag pill */}
@@ -276,18 +279,24 @@ function KanbanCardSkeleton() {
       {/* Title */}
       <div
         className="vyne-skeleton"
-        style={{ width: '80%', height: 11, borderRadius: 5, marginBottom: 8 }}
+        style={{ width: "80%", height: 11, borderRadius: 5, marginBottom: 8 }}
       />
       {/* Subtitle */}
       <div
         className="vyne-skeleton"
-        style={{ width: '55%', height: 9, borderRadius: 5, marginBottom: 14 }}
+        style={{ width: "55%", height: 9, borderRadius: 5, marginBottom: 14 }}
       />
       {/* Footer: avatar + badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <div
           className="vyne-skeleton"
-          style={{ width: 22, height: 22, borderRadius: '50%' }}
+          style={{ width: 22, height: 22, borderRadius: "50%" }}
         />
         <div
           className="vyne-skeleton"
@@ -295,19 +304,19 @@ function KanbanCardSkeleton() {
         />
       </div>
     </div>
-  )
+  );
 }
 
 export function SkeletonKanban({
   columns = 4,
   cardsPerColumn = 3,
-  className = '',
+  className = "",
 }: SkeletonKanbanProps) {
-  const styles = useShimmerStyles()
+  const styles = useShimmerStyles();
 
-  const columnCardCounts = Array.from({ length: columns }).map(
-    (_, i) => Math.max(1, cardsPerColumn - (i % 2)),
-  )
+  const columnCardCounts = Array.from({ length: columns }).map((_, i) =>
+    Math.max(1, cardsPerColumn - (i % 2)),
+  );
 
   return (
     <>
@@ -315,10 +324,10 @@ export function SkeletonKanban({
       <div
         className={className}
         style={{
-          display: 'flex',
+          display: "flex",
           gap: 16,
-          overflowX: 'auto',
-          padding: '4px 0',
+          overflowX: "auto",
+          padding: "4px 0",
         }}
         aria-hidden="true"
       >
@@ -326,26 +335,26 @@ export function SkeletonKanban({
           <div
             key={colIdx}
             style={{
-              flex: '0 0 280px',
+              flex: "0 0 280px",
               minWidth: 280,
-              display: 'flex',
-              flexDirection: 'column',
+              display: "flex",
+              flexDirection: "column",
               gap: 10,
             }}
           >
             {/* Column header */}
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
+                display: "flex",
+                alignItems: "center",
                 gap: 8,
                 marginBottom: 4,
-                padding: '0 2px',
+                padding: "0 2px",
               }}
             >
               <div
                 className="vyne-skeleton"
-                style={{ width: 10, height: 10, borderRadius: '50%' }}
+                style={{ width: 10, height: 10, borderRadius: "50%" }}
               />
               <div
                 className="vyne-skeleton"
@@ -353,19 +362,26 @@ export function SkeletonKanban({
               />
               <div
                 className="vyne-skeleton"
-                style={{ width: 20, height: 16, borderRadius: 8, marginLeft: 'auto' }}
+                style={{
+                  width: 20,
+                  height: 16,
+                  borderRadius: 8,
+                  marginLeft: "auto",
+                }}
               />
             </div>
 
             {/* Cards */}
-            {Array.from({ length: columnCardCounts[colIdx] }).map((_, cardIdx) => (
-              <KanbanCardSkeleton key={cardIdx} />
-            ))}
+            {Array.from({ length: columnCardCounts[colIdx] }).map(
+              (_, cardIdx) => (
+                <KanbanCardSkeleton key={cardIdx} />
+              ),
+            )}
           </div>
         ))}
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -374,32 +390,32 @@ export function SkeletonKanban({
 
 type SkeletonListProps = Readonly<{
   /** Number of list items. Default `5` */
-  items?: number
+  items?: number;
   /** Avatar size in px. Default `32` */
-  avatarSize?: number
+  avatarSize?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
 export function SkeletonList({
   items = 5,
   avatarSize = 32,
-  className = '',
+  className = "",
 }: SkeletonListProps) {
-  const styles = useShimmerStyles()
+  const styles = useShimmerStyles();
   return (
     <>
       {styles}
       <div
         className={className}
         style={{
-          display: 'flex',
-          flexDirection: 'column',
+          display: "flex",
+          flexDirection: "column",
           gap: 0,
-          background: 'var(--content-secondary)',
-          border: '1px solid var(--content-border)',
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
-          overflow: 'hidden',
+          overflow: "hidden",
         }}
         aria-hidden="true"
       >
@@ -407,12 +423,12 @@ export function SkeletonList({
           <div
             key={i}
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 12,
-              padding: '12px 18px',
+              padding: "12px 18px",
               borderBottom:
-                i < items - 1 ? '1px solid var(--content-border)' : 'none',
+                i < items - 1 ? "1px solid var(--content-border)" : "none",
             }}
           >
             {/* Avatar circle */}
@@ -421,12 +437,19 @@ export function SkeletonList({
               style={{
                 width: avatarSize,
                 height: avatarSize,
-                borderRadius: '50%',
+                borderRadius: "50%",
                 flexShrink: 0,
               }}
             />
             {/* Text lines */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}
+            >
               <div
                 className="vyne-skeleton"
                 style={{
@@ -458,7 +481,7 @@ export function SkeletonList({
         ))}
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -467,22 +490,22 @@ export function SkeletonList({
 
 type SkeletonChartProps = Readonly<{
   /** Height of the chart area. Default `'200px'` */
-  height?: string
+  height?: string;
   /** Number of vertical bars to show. Default `7` */
-  bars?: number
+  bars?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
 export function SkeletonChart({
-  height = '200px',
+  height = "200px",
   bars = 7,
-  className = '',
+  className = "",
 }: SkeletonChartProps) {
-  const styles = useShimmerStyles()
+  const styles = useShimmerStyles();
 
   /* Pseudo-random bar heights that look organic */
-  const barHeights = [65, 40, 80, 55, 90, 45, 70, 60, 85, 50]
+  const barHeights = [65, 40, 80, 55, 90, 45, 70, 60, 85, 50];
 
   return (
     <>
@@ -490,19 +513,19 @@ export function SkeletonChart({
       <div
         className={className}
         style={{
-          background: 'var(--content-secondary)',
-          border: '1px solid var(--content-border)',
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
           borderRadius: 12,
-          padding: '18px 20px',
+          padding: "18px 20px",
         }}
         aria-hidden="true"
       >
         {/* Header: title + legend */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             marginBottom: 20,
           }}
         >
@@ -510,7 +533,7 @@ export function SkeletonChart({
             className="vyne-skeleton"
             style={{ width: 120, height: 12, borderRadius: 6 }}
           />
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: "flex", gap: 12 }}>
             <div
               className="vyne-skeleton"
               style={{ width: 50, height: 8, borderRadius: 4 }}
@@ -526,10 +549,10 @@ export function SkeletonChart({
         <div
           style={{
             height,
-            display: 'flex',
-            alignItems: 'flex-end',
+            display: "flex",
+            alignItems: "flex-end",
             gap: 10,
-            borderBottom: '1px solid var(--content-border)',
+            borderBottom: "1px solid var(--content-border)",
             paddingBottom: 12,
           }}
         >
@@ -540,7 +563,7 @@ export function SkeletonChart({
               style={{
                 flex: 1,
                 height: `${barHeights[i % barHeights.length]}%`,
-                borderRadius: '6px 6px 2px 2px',
+                borderRadius: "6px 6px 2px 2px",
               }}
             />
           ))}
@@ -549,7 +572,7 @@ export function SkeletonChart({
         {/* X-axis labels */}
         <div
           style={{
-            display: 'flex',
+            display: "flex",
             gap: 10,
             marginTop: 10,
           }}
@@ -568,7 +591,7 @@ export function SkeletonChart({
         </div>
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -577,42 +600,42 @@ export function SkeletonChart({
 
 type SkeletonStatProps = Readonly<{
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
-export function SkeletonStat({ className = '' }: SkeletonStatProps) {
-  const styles = useShimmerStyles()
+export function SkeletonStat({ className = "" }: SkeletonStatProps) {
+  const styles = useShimmerStyles();
   return (
     <>
       {styles}
       <div
         className={className}
         style={{
-          background: 'var(--content-secondary)',
-          border: '1px solid var(--content-border)',
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
           borderRadius: 10,
-          padding: '14px 16px',
+          padding: "14px 16px",
         }}
         aria-hidden="true"
       >
         {/* Label */}
         <div
           className="vyne-skeleton"
-          style={{ width: '50%', height: 9, borderRadius: 5, marginBottom: 10 }}
+          style={{ width: "50%", height: 9, borderRadius: 5, marginBottom: 10 }}
         />
         {/* Big number */}
         <div
           className="vyne-skeleton"
-          style={{ width: '35%', height: 22, borderRadius: 6, marginBottom: 8 }}
+          style={{ width: "35%", height: 22, borderRadius: 6, marginBottom: 8 }}
         />
         {/* Delta / trend */}
         <div
           className="vyne-skeleton"
-          style={{ width: '60%', height: 8, borderRadius: 4 }}
+          style={{ width: "60%", height: 8, borderRadius: 4 }}
         />
       </div>
     </>
-  )
+  );
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -621,17 +644,20 @@ export function SkeletonStat({ className = '' }: SkeletonStatProps) {
 
 type SkeletonStatRowProps = Readonly<{
   /** Number of stat cards. Default `4` */
-  count?: number
+  count?: number;
   /** Extra className */
-  className?: string
-}>
+  className?: string;
+}>;
 
-export function SkeletonStatRow({ count = 4, className = '' }: SkeletonStatRowProps) {
+export function SkeletonStatRow({
+  count = 4,
+  className = "",
+}: SkeletonStatRowProps) {
   return (
     <div
       className={className}
       style={{
-        display: 'grid',
+        display: "grid",
         gridTemplateColumns: `repeat(${count}, 1fr)`,
         gap: 12,
       }}
@@ -640,5 +666,5 @@ export function SkeletonStatRow({ count = 4, className = '' }: SkeletonStatRowPr
         <SkeletonStat key={i} />
       ))}
     </div>
-  )
+  );
 }

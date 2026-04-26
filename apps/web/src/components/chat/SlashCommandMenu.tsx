@@ -48,7 +48,7 @@ export function SlashCommandMenu({
         right: 0,
         zIndex: 50,
         background: "var(--content-bg)",
-        border: "1px solid #E8E8F0",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         boxShadow: "0 -4px 24px rgba(0,0,0,0.1)",
         padding: "6px 6px",
@@ -60,7 +60,7 @@ export function SlashCommandMenu({
         style={{
           fontSize: 10,
           fontWeight: 600,
-          color: "#A0A0B8",
+          color: "var(--text-tertiary)",
           textTransform: "uppercase",
           letterSpacing: "0.07em",
           margin: "0 4px 6px",
@@ -101,11 +101,19 @@ export function SlashCommandMenu({
                 flexWrap: "wrap",
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
                 /{c.cmd}
               </span>
               {c.args && (
-                <span style={{ fontSize: 11, color: "#A0A0B8" }}>{c.args}</span>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+                  {c.args}
+                </span>
               )}
               <span
                 style={{

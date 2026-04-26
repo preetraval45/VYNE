@@ -84,17 +84,22 @@ export function ChatArea({
 
     // Wire to real APIs
     try {
-      let result: { success: boolean; data: unknown; message: string } | null = null;
+      let result: { success: boolean; data: unknown; message: string } | null =
+        null;
 
       switch (cmd) {
         case "approve-order":
-          result = await slashCommandApi.approveOrder(args.trim() || "ORD-1042");
+          result = await slashCommandApi.approveOrder(
+            args.trim() || "ORD-1042",
+          );
           break;
         case "stock-check":
           result = await slashCommandApi.stockCheck(args.trim() || "SKU-001");
           break;
         case "invoice":
-          result = await slashCommandApi.createInvoice(args.trim() || "Acme Corp");
+          result = await slashCommandApi.createInvoice(
+            args.trim() || "Acme Corp",
+          );
           break;
         case "create-task":
           result = await slashCommandApi.createTask(args.trim() || "New Task");
@@ -182,7 +187,7 @@ export function ChatArea({
             display: "flex",
             alignItems: "center",
             padding: "12px 18px",
-            borderBottom: "1px solid #E8E8F0",
+            borderBottom: "1px solid var(--content-border)",
             flexShrink: 0,
             gap: 10,
           }}
@@ -190,20 +195,36 @@ export function ChatArea({
           {isDM ? (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <UserAvatar name={channelName} size={28} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {channelName}
               </span>
             </div>
           ) : (
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Hash size={16} style={{ color: "var(--text-secondary)" }} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {channelName}
               </span>
               {description && (
                 <>
-                  <span style={{ color: "var(--content-border)", margin: "0 4px" }}>|</span>
-                  <span style={{ fontSize: 12, color: "#A0A0B8" }}>
+                  <span
+                    style={{ color: "var(--content-border)", margin: "0 4px" }}
+                  >
+                    |
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
                     {description}
                   </span>
                 </>
@@ -224,7 +245,7 @@ export function ChatArea({
                   ? "rgba(6, 182, 212,0.08)"
                   : "transparent",
                 cursor: "pointer",
-                color: summaryOpen ? "#06B6D4" : "#A0A0B8",
+                color: summaryOpen ? "#06B6D4" : "var(--text-tertiary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
@@ -243,11 +264,9 @@ export function ChatArea({
                 border: notifOpen
                   ? "1px solid rgba(245,158,11,0.4)"
                   : "1px solid transparent",
-                background: notifOpen
-                  ? "rgba(245,158,11,0.08)"
-                  : "transparent",
+                background: notifOpen ? "rgba(245,158,11,0.08)" : "transparent",
                 cursor: "pointer",
-                color: notifOpen ? "#F59E0B" : "#A0A0B8",
+                color: notifOpen ? "#F59E0B" : "var(--text-tertiary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
@@ -269,28 +288,30 @@ export function ChatArea({
                 }}
               />
             </button>
-            <button aria-label="Search"
+            <button
+              aria-label="Search"
               style={{
                 padding: "5px",
                 borderRadius: 7,
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 display: "flex",
               }}
               title="Search"
             >
               <Search size={15} />
             </button>
-            <button aria-label="Settings"
+            <button
+              aria-label="Settings"
               style={{
                 padding: "5px",
                 borderRadius: 7,
                 border: "none",
                 background: "transparent",
                 cursor: "pointer",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 display: "flex",
               }}
               title="Settings"
@@ -357,18 +378,21 @@ export function ChatArea({
             </div>
           ) : (
             <>
-              {messages.map((msg, i) => (
-                <MessageRow
-                  key={msg.id}
-                  msg={msg}
-                  prevMsg={messages[i - 1]}
-                  onReaction={addReaction}
-                  onReply={onOpenThread}
-                  isCurrentUser={
-                    msg.author.id === "me" || msg.author.name === "Preet Raval"
-                  }
-                />
-              ))}
+              {messages
+                .filter((m) => !m.parentMessageId)
+                .map((msg, i, arr) => (
+                  <MessageRow
+                    key={msg.id}
+                    msg={msg}
+                    prevMsg={arr[i - 1]}
+                    onReaction={addReaction}
+                    onReply={onOpenThread}
+                    isCurrentUser={
+                      msg.author.id === "me" ||
+                      msg.author.name === "Preet Raval"
+                    }
+                  />
+                ))}
               {cmdMessages.map((cm) => (
                 <div
                   key={cm.id}
@@ -406,7 +430,9 @@ export function ChatArea({
                       >
                         VYNE Bot
                       </span>
-                      <span style={{ fontSize: 10, color: "#A0A0B8" }}>
+                      <span
+                        style={{ fontSize: 10, color: "var(--text-tertiary)" }}
+                      >
                         /{cm.cmd} {cm.args}
                       </span>
                     </div>
@@ -424,7 +450,7 @@ export function ChatArea({
                 alignItems: "center",
                 gap: 6,
                 padding: "8px 0",
-                color: "#A0A0B8",
+                color: "var(--text-tertiary)",
                 fontSize: 11,
                 fontStyle: "italic",
               }}
@@ -447,7 +473,7 @@ export function ChatArea({
                       width: 4,
                       height: 4,
                       borderRadius: "50%",
-                      background: "#A0A0B8",
+                      background: "var(--text-tertiary)",
                       display: "inline-block",
                     }}
                   />

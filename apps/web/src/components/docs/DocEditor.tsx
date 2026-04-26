@@ -66,7 +66,9 @@ function versionsKey(docId: string) {
 function loadVersions(docId: string): DocVersion[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(versionsKey(docId)) ?? "[]") as DocVersion[];
+    return JSON.parse(
+      localStorage.getItem(versionsKey(docId)) ?? "[]",
+    ) as DocVersion[];
   } catch {
     return [];
   }
@@ -110,7 +112,7 @@ function VersionHistoryPanel({
         width: 300,
         height: "100%",
         background: "var(--content-bg)",
-        borderLeft: "1px solid #E8E8F0",
+        borderLeft: "1px solid var(--content-border)",
         display: "flex",
         flexDirection: "column",
         zIndex: 20,
@@ -121,20 +123,32 @@ function VersionHistoryPanel({
       <div
         style={{
           padding: "14px 16px",
-          borderBottom: "1px solid #E8E8F0",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           Version History
         </span>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close version history"
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-tertiary)", padding: 2 }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--text-tertiary)",
+            padding: 2,
+          }}
         >
           <X size={16} />
         </button>
@@ -143,8 +157,17 @@ function VersionHistoryPanel({
       {/* Version list */}
       <div style={{ flex: 1, overflowY: "auto" }}>
         {versions.length === 0 ? (
-          <div style={{ padding: 24, textAlign: "center", color: "var(--text-tertiary)", fontSize: 13 }}>
-            No versions saved yet.<br />Versions are created automatically as you edit.
+          <div
+            style={{
+              padding: 24,
+              textAlign: "center",
+              color: "var(--text-tertiary)",
+              fontSize: 13,
+            }}
+          >
+            No versions saved yet.
+            <br />
+            Versions are created automatically as you edit.
           </div>
         ) : (
           versions.map((v) => (
@@ -158,21 +181,35 @@ function VersionHistoryPanel({
                 flexDirection: "column",
                 gap: 2,
                 padding: "10px 16px",
-                borderBottom: "1px solid #F4F4F8",
-                background: preview?.id === v.id ? "rgba(6, 182, 212,0.04)" : "transparent",
+                borderBottom: "1px solid var(--content-bg-secondary)",
+                background:
+                  preview?.id === v.id
+                    ? "rgba(6, 182, 212,0.04)"
+                    : "transparent",
                 border: "none",
                 cursor: "pointer",
                 textAlign: "left",
-                borderLeft: preview?.id === v.id ? "3px solid #06B6D4" : "3px solid transparent",
+                borderLeft:
+                  preview?.id === v.id
+                    ? "3px solid #06B6D4"
+                    : "3px solid transparent",
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {v.title}
               </span>
               <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                 {new Date(v.savedAt).toLocaleString(undefined, {
-                  month: "short", day: "numeric",
-                  hour: "2-digit", minute: "2-digit",
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}
               </span>
             </button>
@@ -185,7 +222,7 @@ function VersionHistoryPanel({
         <div
           style={{
             padding: 12,
-            borderTop: "1px solid #E8E8F0",
+            borderTop: "1px solid var(--content-border)",
             display: "flex",
             gap: 8,
           }}
@@ -274,8 +311,7 @@ const SLASH_ITEMS = [
   {
     title: "Code Block",
     icon: "</>",
-    command: (editor: Editor) =>
-      editor.chain().focus().toggleCodeBlock().run(),
+    command: (editor: Editor) => editor.chain().focus().toggleCodeBlock().run(),
   },
   {
     title: "Divider",
@@ -337,7 +373,7 @@ function SlashMenu({
 
   return (
     <div
-      className="absolute z-50 bg-white border border-[#E8E8F0] rounded-xl shadow-lg py-1 min-w-[200px]"
+      className="absolute z-50 bg-white border border-[var(--content-border)] rounded-xl shadow-lg py-1 min-w-[200px]"
       style={{ top: "calc(100% + 4px)", left: 0 }}
     >
       {filtered.map((item, i) => (
@@ -359,8 +395,12 @@ function SlashMenu({
           <span
             className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold flex-shrink-0"
             style={{
-              background: i === active ? "rgba(6, 182, 212,0.12)" : "#F4F4F8",
-              color: i === active ? "var(--vyne-purple)" : "var(--text-secondary)",
+              background:
+                i === active
+                  ? "rgba(6, 182, 212,0.12)"
+                  : "var(--content-bg-secondary)",
+              color:
+                i === active ? "var(--vyne-purple)" : "var(--text-secondary)",
             }}
           >
             {item.icon}
@@ -399,7 +439,8 @@ function TB({
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLButtonElement).style.background = "var(--content-bg-secondary)";
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "var(--content-bg-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)
@@ -427,7 +468,9 @@ export function DocEditor({ doc }: DocEditorProps) {
 
   // ── Version history state ─────────────────────────────────────
   const [showHistory, setShowHistory] = useState(false);
-  const [versions, setVersions] = useState<DocVersion[]>(() => loadVersions(doc.id));
+  const [versions, setVersions] = useState<DocVersion[]>(() =>
+    loadVersions(doc.id),
+  );
   const [diffVersion, setDiffVersion] = useState<DocVersion | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
@@ -446,7 +489,12 @@ export function DocEditor({ doc }: DocEditorProps) {
 
   // ── Real-time collaboration (y-webrtc) ────────────────────────
   const currentUser = useAuthStore((s) => s.user);
-  const { ydoc, provider, users: collabUsers, status: collabStatus } = useCollab({
+  const {
+    ydoc,
+    provider,
+    users: collabUsers,
+    status: collabStatus,
+  } = useCollab({
     docId: doc.id,
     userId: currentUser?.id ?? "anon",
     userName: currentUser?.name ?? "Guest",
@@ -573,12 +621,19 @@ export function DocEditor({ doc }: DocEditorProps) {
       }
     })();
     editor.commands.setContent(content);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc.id]);
 
   // ── AI ghost-text suggestion ──────────────────────────────────
   const requestSuggestion = useCallback(
-    async (mode: "continue" | "improve" | "shorter" | "longer" | "summarise" = "continue") => {
+    async (
+      mode:
+        | "continue"
+        | "improve"
+        | "shorter"
+        | "longer"
+        | "summarise" = "continue",
+    ) => {
       if (!editor) return;
       setAiLoading(true);
       try {
@@ -591,9 +646,15 @@ export function DocEditor({ doc }: DocEditorProps) {
         const res = await fetch("/api/ai/suggest", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ context: contextText || "Start writing…", mode }),
+          body: JSON.stringify({
+            context: contextText || "Start writing…",
+            mode,
+          }),
         });
-        const data = (await res.json()) as { suggestion?: string; error?: string };
+        const data = (await res.json()) as {
+          suggestion?: string;
+          error?: string;
+        };
         if (data.suggestion) {
           setAiSuggestion({ text: data.suggestion, anchor: from });
         }
@@ -654,31 +715,37 @@ export function DocEditor({ doc }: DocEditorProps) {
     <div className="flex flex-col h-full">
       {/* Toolbar */}
       <div
-        className="flex items-center gap-0.5 px-6 py-2 border-b border-[#E8E8F0] flex-shrink-0 flex-wrap"
+        className="flex items-center gap-0.5 px-6 py-2 border-b border-[var(--content-border)] flex-shrink-0 flex-wrap"
         style={{ background: "var(--content-secondary)" }}
       >
         <TB
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 1 }).run()
+          }
           active={editor?.isActive("heading", { level: 1 })}
           title="Heading 1"
         >
           <Heading1 size={14} />
         </TB>
         <TB
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 2 }).run()
+          }
           active={editor?.isActive("heading", { level: 2 })}
           title="Heading 2"
         >
           <Heading2 size={14} />
         </TB>
         <TB
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
+          onClick={() =>
+            editor?.chain().focus().toggleHeading({ level: 3 }).run()
+          }
           active={editor?.isActive("heading", { level: 3 })}
           title="Heading 3"
         >
           <Heading3 size={14} />
         </TB>
-        <div className="w-px h-4 bg-[#E8E8F0] mx-1" />
+        <div className="w-px h-4 bg-[var(--content-border)] mx-1" />
         <TB
           onClick={() => editor?.chain().focus().toggleBold().run()}
           active={editor?.isActive("bold")}
@@ -707,7 +774,7 @@ export function DocEditor({ doc }: DocEditorProps) {
         >
           <Code size={14} />
         </TB>
-        <div className="w-px h-4 bg-[#E8E8F0] mx-1" />
+        <div className="w-px h-4 bg-[var(--content-border)] mx-1" />
         <TB
           onClick={() => editor?.chain().focus().toggleBulletList().run()}
           active={editor?.isActive("bulletList")}
@@ -782,7 +849,10 @@ export function DocEditor({ doc }: DocEditorProps) {
           >
             <MessageCircle size={14} />
           </TB>
-          <TB onClick={() => fileInputRef.current?.click()} title="Insert image">
+          <TB
+            onClick={() => fileInputRef.current?.click()}
+            title="Insert image"
+          >
             <ImageIcon size={14} />
           </TB>
           <TB
@@ -800,9 +870,9 @@ export function DocEditor({ doc }: DocEditorProps) {
           >
             <History size={14} />
           </TB>
-          <div className="w-px h-4 bg-[#E8E8F0]" />
+          <div className="w-px h-4 bg-[var(--content-border)]" />
           <CollabPresence users={collabUsers} status={collabStatus} />
-          <div className="w-px h-4 bg-[#E8E8F0]" />
+          <div className="w-px h-4 bg-[var(--content-border)]" />
           <span>{charCount.toLocaleString()} chars</span>
           <span>{isSaving ? "Saving…" : "Saved"}</span>
         </div>
@@ -826,13 +896,22 @@ export function DocEditor({ doc }: DocEditorProps) {
             });
             const data = (await res.json()) as { url?: string; error?: string };
             if (res.ok && data.url) {
-              editor.chain().focus().setImage({ src: data.url, alt: file.name }).run();
+              editor
+                .chain()
+                .focus()
+                .setImage({ src: data.url, alt: file.name })
+                .run();
             } else {
               // Fallback to local base64 if the upload endpoint failed for any reason.
               const reader = new FileReader();
               reader.onload = (ev) => {
                 const src = ev.target?.result as string;
-                if (src) editor.chain().focus().setImage({ src, alt: file.name }).run();
+                if (src)
+                  editor
+                    .chain()
+                    .focus()
+                    .setImage({ src, alt: file.name })
+                    .run();
               };
               reader.readAsDataURL(file);
             }
@@ -840,7 +919,8 @@ export function DocEditor({ doc }: DocEditorProps) {
             const reader = new FileReader();
             reader.onload = (ev) => {
               const src = ev.target?.result as string;
-              if (src) editor.chain().focus().setImage({ src, alt: file.name }).run();
+              if (src)
+                editor.chain().focus().setImage({ src, alt: file.name }).run();
             };
             reader.readAsDataURL(file);
           }
@@ -859,7 +939,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           {/* Title */}
           <input
             ref={titleRef}
-            className="w-full text-[2rem] font-bold text-[#1A1A2E] bg-transparent border-none outline-none placeholder:text-[#D0D0E0] mb-6"
+            className="w-full text-[2rem] font-bold text-[var(--text-primary)] bg-transparent border-none outline-none placeholder:text-[#D0D0E0] mb-6"
             placeholder="Untitled"
             value={title}
             onChange={(e) => {
@@ -915,11 +995,16 @@ export function DocEditor({ doc }: DocEditorProps) {
               setTitle(v.title);
               try {
                 const parsed = JSON.parse(v.content);
-                editor?.commands.setContent(parsed?.type === "doc" ? parsed : v.content);
+                editor?.commands.setContent(
+                  parsed?.type === "doc" ? parsed : v.content,
+                );
               } catch {
                 editor?.commands.setContent(v.content);
               }
-              updateDoc.mutate({ id: doc.id, data: { title: v.title, content: v.content } });
+              updateDoc.mutate({
+                id: doc.id,
+                data: { title: v.title, content: v.content },
+              });
             }}
           />
         )}
@@ -947,7 +1032,11 @@ export function DocEditor({ doc }: DocEditorProps) {
           >
             <Sparkles
               size={14}
-              style={{ color: "var(--vyne-purple)", marginTop: 2, flexShrink: 0 }}
+              style={{
+                color: "var(--vyne-purple)",
+                marginTop: 2,
+                flexShrink: 0,
+              }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
@@ -1230,7 +1319,10 @@ export function DocEditor({ doc }: DocEditorProps) {
                   }
                   updateDoc.mutate({
                     id: doc.id,
-                    data: { title: diffVersion.title, content: diffVersion.content },
+                    data: {
+                      title: diffVersion.title,
+                      content: diffVersion.content,
+                    },
                   });
                   setDiffVersion(null);
                   setShowHistory(false);
@@ -1298,7 +1390,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           color: var(--vyne-purple);
         }
         .tiptap-editor .ProseMirror pre {
-          background: #1A1A2E;
+          background: var(--text-primary);
           border-radius: 8px;
           padding: 1rem;
           margin: 0.75rem 0;

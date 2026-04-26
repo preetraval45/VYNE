@@ -26,11 +26,17 @@ interface OpenApiSpec {
   info: { title: string; version: string; description: string };
   servers: Array<{ url: string; description: string }>;
   tags: Array<{ name: string; description: string }>;
-  paths: Record<string, Record<string, {
-    summary: string;
-    operationId: string;
-    tags?: string[];
-  }>>;
+  paths: Record<
+    string,
+    Record<
+      string,
+      {
+        summary: string;
+        operationId: string;
+        tags?: string[];
+      }
+    >
+  >;
 }
 
 const RATE_LIMIT_TIERS = [
@@ -133,7 +139,7 @@ function CopyButton({ text }: { text: string }) {
         borderRadius: 5,
         background: "rgba(255,255,255,0.08)",
         border: "1px solid rgba(255,255,255,0.1)",
-        color: copied ? "#4ADE80" : "#A0A0B8",
+        color: copied ? "#4ADE80" : "var(--text-tertiary)",
         fontSize: 10,
         fontWeight: 600,
         cursor: "pointer",
@@ -280,7 +286,9 @@ export default function DevelopersPage() {
             >
               V
             </div>
-            <span style={{ fontWeight: 700, fontSize: 16 }}>VYNE Developers</span>
+            <span style={{ fontWeight: 700, fontSize: 16 }}>
+              VYNE Developers
+            </span>
           </div>
         </div>
       </header>
@@ -370,7 +378,10 @@ export default function DevelopersPage() {
                 textDecoration: "none",
               }}
             >
-              <Terminal size={18} style={{ color: "#22C55E", marginBottom: 8 }} />
+              <Terminal
+                size={18}
+                style={{ color: "#22C55E", marginBottom: 8 }}
+              />
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>
                 CLI
               </div>
@@ -408,7 +419,10 @@ export default function DevelopersPage() {
                 textDecoration: "none",
               }}
             >
-              <Webhook size={18} style={{ color: "#F59E0B", marginBottom: 8 }} />
+              <Webhook
+                size={18}
+                style={{ color: "#F59E0B", marginBottom: 8 }}
+              />
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>
                 Webhooks
               </div>
@@ -544,7 +558,14 @@ export default function DevelopersPage() {
             </aside>
 
             {/* Request + response */}
-            <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div
+              style={{
+                padding: 18,
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+              }}
+            >
               {selectedOp ? (
                 <>
                   <div>
@@ -596,7 +617,9 @@ export default function DevelopersPage() {
                     </p>
                   </div>
 
-                  <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label
+                    style={{ display: "flex", flexDirection: "column", gap: 4 }}
+                  >
                     <span
                       style={{
                         fontSize: 10,
@@ -626,8 +649,15 @@ export default function DevelopersPage() {
                     />
                   </label>
 
-                  {(selectedOp.method === "POST" || selectedOp.method === "PATCH") && (
-                    <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {(selectedOp.method === "POST" ||
+                    selectedOp.method === "PATCH") && (
+                    <label
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                    >
                       <span
                         style={{
                           fontSize: 10,
@@ -672,8 +702,7 @@ export default function DevelopersPage() {
                       padding: "9px 18px",
                       borderRadius: 9,
                       border: "none",
-                      background:
-                        "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                      background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
                       color: "#fff",
                       fontSize: 13,
                       fontWeight: 600,
@@ -694,7 +723,9 @@ export default function DevelopersPage() {
                   )}
 
                   <div style={{ position: "relative" }}>
-                    <CopyButton text={curlSnippet(selectedOp, apiKey, bodyText)} />
+                    <CopyButton
+                      text={curlSnippet(selectedOp, apiKey, bodyText)}
+                    />
                     <Highlighted>
                       {curlSnippet(selectedOp, apiKey, bodyText)}
                     </Highlighted>
@@ -733,10 +764,7 @@ export default function DevelopersPage() {
       </section>
 
       {/* CLI */}
-      <section
-        id="cli"
-        style={{ padding: "60px 24px", scrollMarginTop: 80 }}
-      >
+      <section id="cli" style={{ padding: "60px 24px", scrollMarginTop: 80 }}>
         <div
           style={{
             maxWidth: 1180,
@@ -747,7 +775,10 @@ export default function DevelopersPage() {
           }}
         >
           <div>
-            <Terminal size={24} style={{ color: "#22C55E", marginBottom: 12 }} />
+            <Terminal
+              size={24}
+              style={{ color: "#22C55E", marginBottom: 12 }}
+            />
             <h2
               style={{
                 fontSize: 22,
@@ -760,9 +791,9 @@ export default function DevelopersPage() {
               The VYNE CLI
             </h2>
             <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
-              Script every part of your workspace from the terminal. Open
-              issues from a commit hook, ship a release note, kick off an AI
-              agent — all without leaving the shell.
+              Script every part of your workspace from the terminal. Open issues
+              from a commit hook, ship a release note, kick off an AI agent —
+              all without leaving the shell.
             </p>
             <ul
               style={{
@@ -777,9 +808,9 @@ export default function DevelopersPage() {
               }}
             >
               {[
-                "vyne issue create --title \"Fix billing UI\" --priority high",
+                'vyne issue create --title "Fix billing UI" --priority high',
                 "vyne docs sync ./README.md → /docs/onboarding",
-                "vyne ai query \"Which orders are stuck?\"",
+                'vyne ai query "Which orders are stuck?"',
                 "vyne webhook test order.created",
               ].map((cmd) => (
                 <li
@@ -914,8 +945,9 @@ https://marketplace.visualstudio.com/items?itemName=vyne.vyne-vscode
               margin: "0 0 22px",
             }}
           >
-            Each key carries its own tier. Headers on every response — <code>X-RateLimit-Limit</code>,{" "}
-            <code>X-RateLimit-Remaining</code>, <code>X-RateLimit-Reset</code> — keep your client honest.
+            Each key carries its own tier. Headers on every response —{" "}
+            <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>,{" "}
+            <code>X-RateLimit-Reset</code> — keep your client honest.
           </p>
           <div
             style={{
@@ -956,15 +988,25 @@ https://marketplace.visualstudio.com/items?itemName=vyne.vyne-vscode
                     color: "rgba(255,255,255,0.85)",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <dt style={{ color: "rgba(255,255,255,0.5)" }}>Sustained</dt>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <dt style={{ color: "rgba(255,255,255,0.5)" }}>
+                      Sustained
+                    </dt>
                     <dd style={{ margin: 0 }}>{t.rps}</dd>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <dt style={{ color: "rgba(255,255,255,0.5)" }}>Daily cap</dt>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <dt style={{ color: "rgba(255,255,255,0.5)" }}>
+                      Daily cap
+                    </dt>
                     <dd style={{ margin: 0 }}>{t.daily}</dd>
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
                     <dt style={{ color: "rgba(255,255,255,0.5)" }}>Burst</dt>
                     <dd style={{ margin: 0 }}>{t.burst}</dd>
                   </div>
@@ -972,7 +1014,13 @@ https://marketplace.visualstudio.com/items?itemName=vyne.vyne-vscode
               </div>
             ))}
           </div>
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 8 }}>
+          <p
+            style={{
+              fontSize: 11,
+              color: "rgba(255,255,255,0.4)",
+              marginTop: 8,
+            }}
+          >
             * Enterprise: subject to fair-use ceilings. Talk to us.
           </p>
         </div>
@@ -1060,7 +1108,11 @@ function mockResponse(op: OperationDef): unknown {
     };
   }
   if (path.endsWith("/approve")) {
-    return { id: "ord_a8k3pq", status: "confirmed", approvedAt: new Date().toISOString() };
+    return {
+      id: "ord_a8k3pq",
+      status: "confirmed",
+      approvedAt: new Date().toISOString(),
+    };
   }
   if (path.includes("/webhooks") && method === "GET") {
     return [

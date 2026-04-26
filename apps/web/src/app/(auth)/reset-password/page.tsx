@@ -90,7 +90,10 @@ function ResetPasswordForm() {
         >
           <AlertCircle size={28} style={{ color: "#F87171" }} />
         </div>
-        <p className="text-sm text-center mb-4" style={{ color: "#A0A0B8" }}>
+        <p
+          className="text-sm text-center mb-4"
+          style={{ color: "var(--text-tertiary)" }}
+        >
           Invalid or missing reset link. Please request a new password reset.
         </p>
         <Link
@@ -123,7 +126,10 @@ function ResetPasswordForm() {
           <CheckCircle size={28} style={{ color: "#22C55E" }} />
         </div>
         <p className="text-base font-medium text-white mb-2">Password reset!</p>
-        <p className="text-sm text-center" style={{ color: "#A0A0B8" }}>
+        <p
+          className="text-sm text-center"
+          style={{ color: "var(--text-tertiary)" }}
+        >
           Redirecting to login...
         </p>
         <div className="mt-4">
@@ -160,7 +166,7 @@ function ResetPasswordForm() {
           <label
             htmlFor="password"
             className="block text-sm font-medium mb-1.5"
-            style={{ color: "#A0A0B8" }}
+            style={{ color: "var(--text-tertiary)" }}
           >
             New password
           </label>
@@ -226,7 +232,7 @@ function ResetPasswordForm() {
                   color: password
                     ? req.valid
                       ? "#22C55E"
-                      : "#6B6B8A"
+                      : "var(--text-secondary)"
                     : "#4A4A6A",
                 }}
               >
@@ -236,7 +242,7 @@ function ResetPasswordForm() {
                     background: password
                       ? req.valid
                         ? "#22C55E"
-                        : "#6B6B8A"
+                        : "var(--text-secondary)"
                       : "#4A4A6A",
                   }}
                 />
@@ -251,7 +257,7 @@ function ResetPasswordForm() {
           <label
             htmlFor="confirmPassword"
             className="block text-sm font-medium mb-1.5"
-            style={{ color: "#A0A0B8" }}
+            style={{ color: "var(--text-tertiary)" }}
           >
             Confirm password
           </label>
@@ -346,7 +352,7 @@ export default function ResetPasswordPage() {
       className="min-h-screen flex items-center justify-center px-4"
       style={{
         background:
-          "linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 50%, #0F0F1E 100%)",
+          "linear-gradient(135deg, #0F0F1E 0%, var(--text-primary) 50%, #0F0F1E 100%)",
       }}
     >
       {/* Background decoration */}
@@ -380,7 +386,7 @@ export default function ResetPasswordPage() {
           <h1 className="text-2xl font-semibold text-white tracking-tight">
             Set new password
           </h1>
-          <p className="text-sm mt-1" style={{ color: "#A0A0B8" }}>
+          <p className="text-sm mt-1" style={{ color: "var(--text-tertiary)" }}>
             Choose a strong password for your account
           </p>
         </div>
@@ -410,7 +416,10 @@ export default function ResetPasswordPage() {
         </div>
 
         {/* Back to login */}
-        <p className="text-center text-sm mt-6" style={{ color: "var(--text-secondary)" }}>
+        <p
+          className="text-center text-sm mt-6"
+          style={{ color: "var(--text-secondary)" }}
+        >
           Remember your password?{" "}
           <Link
             href="/login"

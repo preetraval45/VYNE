@@ -48,7 +48,8 @@ export function ExportButton<T extends Record<string, unknown>>({
         borderRadius: 8,
         border: "1px solid var(--content-border)",
         background: "transparent",
-        color: data.length === 0 ? "#A0A0B8" : "#6B6B8A",
+        color:
+          data.length === 0 ? "var(--text-tertiary)" : "var(--text-secondary)",
         cursor: data.length === 0 ? "not-allowed" : "pointer",
         fontSize: 12,
         fontWeight: 500,
@@ -58,7 +59,8 @@ export function ExportButton<T extends Record<string, unknown>>({
       }}
       onMouseEnter={(e) => {
         if (data.length > 0) {
-          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--content-secondary)";
           (e.currentTarget as HTMLElement).style.borderColor =
             "rgba(0,0,0,0.18)";
         }

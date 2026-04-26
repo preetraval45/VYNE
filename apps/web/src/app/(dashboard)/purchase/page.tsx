@@ -613,7 +613,9 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(6, 182, 212,0.12)" : "var(--content-secondary)",
+            background: active
+              ? "rgba(6, 182, 212,0.12)"
+              : "var(--content-secondary)",
             color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
           }}
         >
@@ -788,7 +790,8 @@ function FilterSelect({
   allLabel: string;
 }>) {
   return (
-    <select aria-label="Select option"
+    <select
+      aria-label="Select option"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{
@@ -957,7 +960,7 @@ function PurchaseOrdersTab() {
                 <tr
                   key={po.id}
                   style={{
-                    borderBottom: "1px solid #F0F0F8",
+                    borderBottom: "1px solid var(--content-bg-secondary)",
                     cursor: "pointer",
                   }}
                 >
@@ -1094,7 +1097,12 @@ function VendorsTab() {
             {filtered.map((v) => {
               const st = vendorStatusStyle(v.status);
               return (
-                <tr key={v.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={v.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{v.name}</td>
                   <td style={tdStyle}>{v.contact}</td>
                   <td
@@ -1240,7 +1248,12 @@ function ProductsTab() {
           </thead>
           <tbody>
             {filtered.map((p) => (
-              <tr key={p.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+              <tr
+                key={p.id}
+                style={{
+                  borderBottom: "1px solid var(--content-bg-secondary)",
+                }}
+              >
                 <td style={{ ...tdStyle, fontWeight: 600 }}>{p.name}</td>
                 <td
                   style={{
@@ -1379,7 +1392,12 @@ function ReceiptsTab() {
             {filtered.map((r) => {
               const st = qcStyle(r.qualityCheck);
               return (
-                <tr key={r.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={r.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td
                     style={{
                       ...tdStyle,
@@ -1525,7 +1543,12 @@ function BillsTab() {
             {filtered.map((b) => {
               const st = billStatusStyle(b.status);
               return (
-                <tr key={b.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={b.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td
                     style={{
                       ...tdStyle,
@@ -1821,17 +1844,15 @@ export default function PurchasePage() {
             date: o.createdAt.slice(0, 10),
             expectedDelivery: o.createdAt.slice(0, 10),
             amount: o.total,
-            status: (
-              o.status === "delivered"
-                ? "Received"
-                : o.status === "shipped"
-                  ? "Confirmed"
-                  : o.status === "confirmed"
-                    ? "Sent"
-                    : o.status === "cancelled"
-                      ? "Cancelled"
-                      : "Draft"
-            ) as POStatus,
+            status: (o.status === "delivered"
+              ? "Received"
+              : o.status === "shipped"
+                ? "Confirmed"
+                : o.status === "confirmed"
+                  ? "Sent"
+                  : o.status === "cancelled"
+                    ? "Cancelled"
+                    : "Draft") as POStatus,
             itemsCount: o.lines?.length ?? i + 1,
           }));
           setTick((t) => t + 1);
@@ -1851,7 +1872,9 @@ export default function PurchasePage() {
             productsSupplied: [],
             totalPurchased: 0,
             rating: 4,
-            status: (s.status === "inactive" ? "Inactive" : "Active") as VendorStatus,
+            status: (s.status === "inactive"
+              ? "Inactive"
+              : "Active") as VendorStatus,
           }));
           setTick((t) => t + 1);
         }

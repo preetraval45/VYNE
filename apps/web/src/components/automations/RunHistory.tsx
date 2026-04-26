@@ -16,7 +16,7 @@ export default function RunHistory(
         style={{
           padding: "40px 20px",
           textAlign: "center",
-          color: "#A0A0B8",
+          color: "var(--text-tertiary)",
           fontSize: 12,
         }}
       >
@@ -42,7 +42,7 @@ export default function RunHistory(
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
             }}

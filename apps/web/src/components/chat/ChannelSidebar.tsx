@@ -42,7 +42,7 @@ export function ChannelSidebar({
       style={{
         width: 240,
         minWidth: 240,
-        borderRight: "1px solid #E8E8F0",
+        borderRight: "1px solid var(--content-border)",
         background: "var(--content-secondary)",
         display: "flex",
         flexDirection: "column",
@@ -53,7 +53,7 @@ export function ChannelSidebar({
       <div
         style={{
           padding: "14px 14px 10px",
-          borderBottom: "1px solid #E8E8F0",
+          borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
         }}
       >
@@ -65,7 +65,13 @@ export function ChannelSidebar({
             marginBottom: 10,
           }}
         >
-          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+            }}
+          >
             Messages
           </span>
           <button
@@ -89,7 +95,8 @@ export function ChannelSidebar({
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+              (e.currentTarget as HTMLElement).style.color =
+                "var(--text-tertiary)";
             }}
           >
             <Plus size={14} />
@@ -101,12 +108,15 @@ export function ChannelSidebar({
             alignItems: "center",
             gap: 7,
             background: "var(--content-secondary)",
-            border: "1px solid #E8E8F0",
+            border: "1px solid var(--content-border)",
             borderRadius: 8,
             padding: "5px 10px",
           }}
         >
-          <Search size={12} style={{ color: "var(--text-tertiary)", flexShrink: 0 }} />
+          <Search
+            size={12}
+            style={{ color: "var(--text-tertiary)", flexShrink: 0 }}
+          />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -230,8 +240,10 @@ export function ChannelSidebar({
                       {(ch.unreadCount ?? 0) > 0 && (
                         <span
                           style={{
-                            background: isActive ? "#06B6D4" : "var(--content-border)",
-                            color: isActive ? "#fff" : "#6B6B8A",
+                            background: isActive
+                              ? "#06B6D4"
+                              : "var(--content-border)",
+                            color: isActive ? "#fff" : "var(--text-secondary)",
                             borderRadius: 10,
                             padding: "0 5px",
                             fontSize: 10,
@@ -269,7 +281,8 @@ export function ChannelSidebar({
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                   }}
                 >
                   <Plus size={12} /> Add channel
@@ -420,7 +433,8 @@ export function ChannelSidebar({
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                   }}
                 >
                   <Plus size={12} /> New message

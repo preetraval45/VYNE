@@ -39,7 +39,13 @@ function SectionCard({
           borderBottom: "1px solid var(--content-border)",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           {title}
         </span>
       </div>
@@ -63,11 +69,23 @@ function FieldRow({
       }}
     >
       <div style={{ width: 200, flexShrink: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: "var(--text-primary)",
+          }}
+        >
           {label}
         </div>
         {hint && (
-          <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+              marginTop: 1,
+            }}
+          >
             {hint}
           </div>
         )}
@@ -88,6 +106,7 @@ function Toggle({
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-label={label ?? (checked ? "Disable" : "Enable")}
         onClick={onChange}
         onKeyDown={(e) => e.key === " " && onChange()}
         style={{
@@ -116,7 +135,11 @@ function Toggle({
           }}
         />
       </button>
-      {label && <span style={{ fontSize: 12, color: "var(--text-primary)" }}>{label}</span>}
+      {label && (
+        <span style={{ fontSize: 12, color: "var(--text-primary)" }}>
+          {label}
+        </span>
+      )}
     </div>
   );
 }
@@ -233,7 +256,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
           label="Default Warehouse"
           hint="Primary warehouse for stock operations"
         >
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={warehouse}
             onChange={(e) => setWarehouse(e.target.value)}
             style={{ ...selectStyle, maxWidth: 240 }}
@@ -254,6 +278,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
             type="number"
             value={threshold}
             onChange={(e) => setThreshold(e.target.value)}
+            aria-label="Low stock threshold quantity"
+            placeholder="e.g. 10"
             style={{ ...inputStyle, maxWidth: 120 }}
           />
         </FieldRow>
@@ -336,7 +362,11 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                 style={{ borderTop: "1px solid var(--content-border)" }}
               >
                 <td
-                  style={{ padding: "9px 0", fontSize: 13, color: "var(--text-primary)" }}
+                  style={{
+                    padding: "9px 0",
+                    fontSize: 13,
+                    color: "var(--text-primary)",
+                  }}
                 >
                   {t.name}
                 </td>
@@ -382,7 +412,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   )}
                 </td>
                 <td style={{ padding: "9px 0", textAlign: "right" }}>
-                  <button aria-label="Delete"
+                  <button
+                    aria-label="Delete"
                     onClick={() => handleRemoveTax(t.id)}
                     style={{
                       padding: "3px 6px",
@@ -398,7 +429,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                       (e.currentTarget as HTMLElement).style.color = "#EF4444";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                      (e.currentTarget as HTMLElement).style.color =
+                        "var(--text-tertiary)";
                     }}
                   >
                     <Trash2 size={13} />
@@ -444,7 +476,13 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
 
       {/* Custom Fields */}
       <SectionCard title="Custom Fields">
-        <p style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
+        <p
+          style={{
+            fontSize: 12,
+            color: "var(--text-secondary)",
+            marginBottom: 12,
+          }}
+        >
           Add custom attributes to Products, Orders, Customers, or Suppliers.
         </p>
 
@@ -480,11 +518,16 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
               >
                 {f.entity}
               </span>
-              <span style={{ fontSize: 13, color: "var(--text-primary)", flex: 1 }}>
+              <span
+                style={{ fontSize: 13, color: "var(--text-primary)", flex: 1 }}
+              >
                 {f.label}
               </span>
-              <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>{f.type}</span>
-              <button aria-label="Delete"
+              <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+                {f.type}
+              </span>
+              <button
+                aria-label="Delete"
                 onClick={() => handleRemoveField(f.id)}
                 style={{
                   padding: "3px 6px",
@@ -500,7 +543,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
                   (e.currentTarget as HTMLElement).style.color = "#EF4444";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
                 }}
               >
                 <Trash2 size={13} />
@@ -510,7 +554,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={newFieldEntity}
             onChange={(e) => setNewFieldEntity(e.target.value)}
             style={{ ...selectStyle, width: 130, flex: "none" }}
@@ -525,7 +570,8 @@ export default function ErpSettings({ onToast }: ErpSettingsProps) {
             placeholder="Field label"
             style={{ ...inputStyle, flex: 1 }}
           />
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={newFieldType}
             onChange={(e) =>
               setNewFieldType(e.target.value as CustomField["type"])

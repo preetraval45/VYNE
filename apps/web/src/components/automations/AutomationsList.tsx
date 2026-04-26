@@ -104,7 +104,7 @@ export default function AutomationsList(
               style={{
                 flex: 1,
                 background: isActive ? "#06B6D4" : "transparent",
-                color: isActive ? "#fff" : "#6B6B8A",
+                color: isActive ? "#fff" : "var(--text-secondary)",
                 border: isActive
                   ? "1px solid #06B6D4"
                   : "1px solid var(--content-border)",

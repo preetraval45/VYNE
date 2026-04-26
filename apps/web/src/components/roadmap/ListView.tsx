@@ -64,7 +64,9 @@ function SortHeader({
         cursor: "pointer",
         fontSize: 11,
         fontWeight: 600,
-        color: isActive ? "#06B6D4" : "var(--text-secondary, #6B6B8A)",
+        color: isActive
+          ? "#06B6D4"
+          : "var(--text-secondary, var(--text-secondary))",
         textTransform: "uppercase",
         letterSpacing: "0.05em",
         padding: 0,
@@ -127,8 +129,8 @@ export function ListView({ features }: ListViewProps) {
   const cellStyle: React.CSSProperties = {
     padding: "12px 16px",
     fontSize: 13,
-    color: "var(--text-primary, #1A1A2E)",
-    borderTop: "1px solid var(--content-border, #E8E8F0)",
+    color: "var(--text-primary, var(--text-primary))",
+    borderTop: "1px solid var(--content-border, var(--content-border))",
   };
 
   return (
@@ -136,14 +138,19 @@ export function ListView({ features }: ListViewProps) {
       <div
         style={{
           background: "var(--content-bg, #fff)",
-          border: "1px solid var(--content-border, #E8E8F0)",
+          border: "1px solid var(--content-border, var(--content-border))",
           borderRadius: 10,
           overflow: "hidden",
         }}
       >
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ background: "var(--content-secondary, #F8F8FC)" }}>
+            <tr
+              style={{
+                background:
+                  "var(--content-secondary, var(--content-bg-secondary))",
+              }}
+            >
               <th style={{ ...headerStyle, width: "30%" }}>
                 <SortHeader
                   label="Feature"
@@ -208,7 +215,7 @@ export function ListView({ features }: ListViewProps) {
                   style={{
                     ...cellStyle,
                     textAlign: "center",
-                    color: "var(--text-tertiary, #A0A0B8)",
+                    color: "var(--text-tertiary, var(--text-tertiary))",
                     padding: 40,
                   }}
                 >
@@ -226,7 +233,7 @@ export function ListView({ features }: ListViewProps) {
                   style={{ transition: "background 0.1s" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background =
-                      "var(--content-secondary, #F8F8FC)";
+                      "var(--content-secondary, var(--content-bg-secondary))";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = "transparent";
@@ -252,7 +259,7 @@ export function ListView({ features }: ListViewProps) {
                         <div
                           style={{
                             fontSize: 11,
-                            color: "var(--text-tertiary, #A0A0B8)",
+                            color: "var(--text-tertiary, var(--text-tertiary))",
                             marginTop: 2,
                           }}
                         >
@@ -293,7 +300,7 @@ export function ListView({ features }: ListViewProps) {
                     style={{
                       ...cellStyle,
                       fontSize: 12,
-                      color: "var(--text-secondary, #6B6B8A)",
+                      color: "var(--text-secondary, var(--text-secondary))",
                     }}
                   >
                     {f.quarter}

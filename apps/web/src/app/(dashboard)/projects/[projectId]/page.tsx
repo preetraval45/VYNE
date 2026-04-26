@@ -26,6 +26,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
+import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -52,6 +53,18 @@ import {
   type TaskPriority,
 } from "@/lib/fixtures/projects";
 import { cn, formatDate } from "@/lib/utils";
+
+// Map a custom-status colour hex into the Pill `Tone` palette so admin-
+// chosen colours render with consistent tonal weight. Mirrors the helper
+// in apps/web/src/app/(dashboard)/projects/page.tsx.
+function toneFromColor(hex: string): Tone {
+  const h = hex.toLowerCase();
+  if (h.includes("22c55e") || h.includes("10b981")) return "success";
+  if (h.includes("f59e0b") || h.includes("d97706")) return "warn";
+  if (h.includes("ef4444") || h.includes("dc2626")) return "danger";
+  if (h.includes("8b5cf6") || h.includes("a855f7")) return "purple";
+  return "info";
+}
 import toast from "react-hot-toast";
 import { CalendarView } from "@/components/shared/CalendarView";
 import { GanttChart } from "@/components/shared/GanttChart";
@@ -91,7 +104,9 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
   const [swimlaneMode, setSwimlaneMode] = useState<SwimlaneMode>("none");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
-  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
+  const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">(
+    "all",
+  );
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
 
@@ -104,7 +119,8 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
     const q = search.trim().toLowerCase();
     return tasks.filter((t) => {
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
-      if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
+      if (priorityFilter !== "all" && t.priority !== priorityFilter)
+        return false;
       if (!q) return true;
       return (
         t.title.toLowerCase().includes(q) ||
@@ -331,7 +347,8 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                   fontVariantNumeric: "tabular-nums",
                 }}
               >
-                {tasks.filter((t) => t.status === "done").length} of {tasks.length} tasks
+                {tasks.filter((t) => t.status === "done").length} of{" "}
+                {tasks.length} tasks
               </div>
             </div>
           </div>
@@ -349,17 +366,31 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         }}
       >
         {(() => {
-          const stages: PipelineStage[] = [
-            { id: "active", label: "Active", tone: "info" },
-            { id: "paused", label: "On Hold", tone: "warn" },
-            { id: "completed", label: "Completed", tone: "success" },
-          ];
+          // Read admin-configured project statuses (same source as the
+          // kanban board on /projects). Fall back to the built-in trio
+          // when the workspace hasn't customised them.
+          const customStatuses =
+            useCustomFieldsStore.getState().schemas["projects"]?.statuses;
+          const stages: PipelineStage[] =
+            customStatuses && customStatuses.length > 0
+              ? customStatuses.map((st) => ({
+                  id: st.id,
+                  label: st.label,
+                  tone: toneFromColor(st.color),
+                }))
+              : [
+                  { id: "active", label: "Active", tone: "info" },
+                  { id: "paused", label: "On Hold", tone: "warn" },
+                  { id: "completed", label: "Completed", tone: "success" },
+                ];
           return (
             <PipelineBreadcrumb
               stages={stages}
               activeId={project.status}
               onSelect={(id) => {
-                updateProject(project.id, { status: id as ProjectDetail["status"] });
+                updateProject(project.id, {
+                  status: id as ProjectDetail["status"],
+                });
               }}
             />
           );
@@ -381,7 +412,11 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             options={[
               { value: "list", label: "List", icon: <LayoutList size={14} /> },
               { value: "board", label: "Board", icon: <Columns3 size={14} /> },
-              { value: "calendar", label: "Calendar", icon: <CalendarIcon size={14} /> },
+              {
+                value: "calendar",
+                label: "Calendar",
+                icon: <CalendarIcon size={14} />,
+              },
               { value: "gantt", label: "Gantt", icon: <GanttIcon size={14} /> },
             ]}
           />
@@ -399,7 +434,9 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               <span>Group by</span>
               <select
                 value={swimlaneMode}
-                onChange={(e) => setSwimlaneMode(e.target.value as SwimlaneMode)}
+                onChange={(e) =>
+                  setSwimlaneMode(e.target.value as SwimlaneMode)
+                }
                 aria-label="Swimlane grouping"
                 style={{
                   padding: "4px 8px",
@@ -444,11 +481,17 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           />
           <span
             aria-hidden="true"
-            style={{ width: 1, height: 18, background: "var(--content-border)" }}
+            style={{
+              width: 1,
+              height: 18,
+              background: "var(--content-border)",
+            }}
           />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as TaskStatus | "all")}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as TaskStatus | "all")
+            }
             aria-label="Filter by status"
             style={{
               padding: "4px 6px",
@@ -456,7 +499,9 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               border: "none",
               background: "transparent",
               color:
-                statusFilter === "all" ? "var(--text-tertiary)" : "var(--vyne-teal)",
+                statusFilter === "all"
+                  ? "var(--text-tertiary)"
+                  : "var(--vyne-teal)",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -472,7 +517,11 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           </select>
           <span
             aria-hidden="true"
-            style={{ width: 1, height: 18, background: "var(--content-border)" }}
+            style={{
+              width: 1,
+              height: 18,
+              background: "var(--content-border)",
+            }}
           />
           <select
             value={priorityFilter}
@@ -486,7 +535,9 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               border: "none",
               background: "transparent",
               color:
-                priorityFilter === "all" ? "var(--text-tertiary)" : "var(--vyne-teal)",
+                priorityFilter === "all"
+                  ? "var(--text-tertiary)"
+                  : "var(--vyne-teal)",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -574,7 +625,8 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                 "var(--vyne-purple-light, #22D3EE)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "var(--vyne-purple)";
+              (e.currentTarget as HTMLElement).style.background =
+                "var(--vyne-purple)";
             }}
           >
             <Plus size={14} />
@@ -598,10 +650,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         )}
         {viewMode === "calendar" && (
           <div style={{ padding: 20 }}>
-            <TaskCalendarView
-              tasks={filteredTasks}
-              onTaskClick={openTask}
-            />
+            <TaskCalendarView tasks={filteredTasks} onTaskClick={openTask} />
           </div>
         )}
         {viewMode === "gantt" && (
@@ -852,7 +901,8 @@ function TaskListView({
                   </div>
                 </td>
                 <td className="px-3 py-2.5">
-                  <button aria-label="Delete"
+                  <button
+                    aria-label="Delete"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (confirm("Delete this task?")) {
@@ -935,7 +985,8 @@ function TaskBoardView({
   }
 
   // Build swimlane groups
-  const lanes: { key: string; label: string; color: string; tasks: Task[] }[] = [];
+  const lanes: { key: string; label: string; color: string; tasks: Task[] }[] =
+    [];
   if (swimlaneMode === "assignee") {
     const byAssignee = new Map<string, Task[]>();
     for (const t of tasks) {
@@ -954,7 +1005,7 @@ function TaskBoardView({
       lanes.push({
         key: k,
         label: member?.name ?? (k === "_unassigned" ? "Unassigned" : k),
-        color: member ? "#06B6D4" : "#6B6B8A",
+        color: member ? "#06B6D4" : "var(--text-secondary)",
         tasks: byAssignee.get(k) ?? [],
       });
     }
@@ -1088,9 +1139,11 @@ function TaskGanttView({ tasks }: { tasks: Task[] }) {
           id: t.id,
           label: t.title,
           start: t.createdAt,
-          end: t.dueDate ?? new Date(
-            new Date(t.createdAt).getTime() + 7 * 86_400_000,
-          ).toISOString(),
+          end:
+            t.dueDate ??
+            new Date(
+              new Date(t.createdAt).getTime() + 7 * 86_400_000,
+            ).toISOString(),
           color:
             t.priority === "urgent"
               ? "#EF4444"
@@ -1167,7 +1220,9 @@ function BoardColumn({
         e.preventDefault();
         setDragOver(false);
         const raw = e.dataTransfer.getData("text/plain");
-        const taskId = raw.startsWith("task:") ? raw.slice(5) : e.dataTransfer.getData("taskId");
+        const taskId = raw.startsWith("task:")
+          ? raw.slice(5)
+          : e.dataTransfer.getData("taskId");
         if (taskId) onDrop(taskId, columnId);
       }}
     >
@@ -1238,7 +1293,11 @@ function BoardCard({
         e.dataTransfer?.setData("text/plain", `task:${task.id}`);
         if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
       }}
-      whileHover={{ boxShadow: "0 8px 24px rgba(6,182,212,0.12)", y: -2, borderColor: "#06B6D4" }}
+      whileHover={{
+        boxShadow: "0 8px 24px rgba(6,182,212,0.12)",
+        y: -2,
+        borderColor: "#06B6D4",
+      }}
       transition={{ duration: 0.15 }}
       onClick={() => onTaskClick(task.id)}
       className="group p-3.5 rounded-xl cursor-pointer select-none"
@@ -1279,7 +1338,10 @@ function BoardCard({
             <span
               key={tag}
               className="text-xs px-1.5 py-0.5 rounded font-medium"
-              style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
+              style={{
+                background: "var(--content-secondary)",
+                color: "var(--text-secondary)",
+              }}
             >
               {tag}
             </span>
@@ -1291,7 +1353,9 @@ function BoardCard({
               className="flex items-center gap-1 text-xs"
               style={{
                 color:
-                  new Date(task.dueDate) < new Date() ? "#EF4444" : "#A0A0B8",
+                  new Date(task.dueDate) < new Date()
+                    ? "#EF4444"
+                    : "var(--text-tertiary)",
               }}
             >
               <Calendar size={10} />
@@ -1443,7 +1507,8 @@ function AddTaskModal({
                     Add Task
                   </Dialog.Title>
                   <Dialog.Close asChild>
-                    <button aria-label="Close"
+                    <button
+                      aria-label="Close"
                       className="p-1.5 rounded-lg"
                       style={{ color: "var(--text-tertiary)" }}
                     >
@@ -1492,7 +1557,8 @@ function AddTaskModal({
                       <label className={labelClass} style={labelStyle}>
                         Status
                       </label>
-                      <select aria-label="Select option"
+                      <select
+                        aria-label="Select option"
                         value={form.status}
                         onChange={(e) =>
                           setForm((f) => ({
@@ -1514,7 +1580,8 @@ function AddTaskModal({
                       <label className={labelClass} style={labelStyle}>
                         Priority
                       </label>
-                      <select aria-label="Select option"
+                      <select
+                        aria-label="Select option"
                         value={form.priority}
                         onChange={(e) =>
                           setForm((f) => ({
@@ -1538,7 +1605,8 @@ function AddTaskModal({
                     <label className={labelClass} style={labelStyle}>
                       Assignee
                     </label>
-                    <select aria-label="Select option"
+                    <select
+                      aria-label="Select option"
                       value={form.assigneeId}
                       onChange={(e) =>
                         setForm((f) => ({ ...f, assigneeId: e.target.value }))
@@ -1628,7 +1696,9 @@ function AddTaskModal({
                   {/* Actions */}
                   <div
                     className="flex justify-end gap-2 pt-2"
-                    style={{ borderTop: "1px solid #F0F0F8" }}
+                    style={{
+                      borderTop: "1px solid var(--content-bg-secondary)",
+                    }}
                   >
                     <button
                       type="button"
@@ -1840,7 +1910,10 @@ function TaskDetailPanel({
           <div className="flex items-center gap-2">
             <span
               className="text-xs font-mono font-semibold px-2 py-0.5 rounded"
-              style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
+              style={{
+                background: "var(--content-secondary)",
+                color: "var(--text-secondary)",
+              }}
             >
               {task.key}
             </span>
@@ -1864,13 +1937,16 @@ function TaskDetailPanel({
             >
               <Trash2 size={14} />
             </button>
-            <button aria-label="Close"
+            <button
+              aria-label="Close"
               onClick={onClose}
               className="p-1.5 rounded-lg transition-colors"
               style={{ color: "var(--text-tertiary)" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--content-bg-secondary)";
-                (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
+                (e.currentTarget as HTMLElement).style.background =
+                  "var(--content-bg-secondary)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-primary)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
@@ -1903,11 +1979,15 @@ function TaskDetailPanel({
             {/* Properties */}
             <div
               className="mt-5 space-y-3"
-              style={{ borderTop: "1px solid #F0F0F8", paddingTop: "16px" }}
+              style={{
+                borderTop: "1px solid var(--content-bg-secondary)",
+                paddingTop: "16px",
+              }}
             >
               {/* Status */}
               <PropRow icon={<Flag size={13} />} label="Status">
-                <select aria-label="Select option"
+                <select
+                  aria-label="Select option"
                   value={task.status}
                   onChange={(e) =>
                     handleStatusChange(e.target.value as TaskStatus)
@@ -1929,7 +2009,8 @@ function TaskDetailPanel({
 
               {/* Priority */}
               <PropRow icon={<Flag size={13} />} label="Priority">
-                <select aria-label="Select option"
+                <select
+                  aria-label="Select option"
                   value={task.priority}
                   onChange={(e) =>
                     handlePriorityChange(e.target.value as TaskPriority)
@@ -1951,7 +2032,8 @@ function TaskDetailPanel({
 
               {/* Assignee */}
               <PropRow icon={<User size={13} />} label="Assignee">
-                <select aria-label="Select option"
+                <select
+                  aria-label="Select option"
                   value={task.assigneeId ?? ""}
                   onChange={(e) => handleAssigneeChange(e.target.value)}
                   className="text-xs font-medium px-2 py-1 rounded-lg focus:outline-none cursor-pointer"
@@ -2039,7 +2121,8 @@ function TaskDetailPanel({
                       }}
                     >
                       {tag}
-                      <button aria-label="Close"
+                      <button
+                        aria-label="Close"
                         onClick={() => handleRemoveTag(tag)}
                         className="hover:text-red-500 transition-colors"
                       >
@@ -2099,7 +2182,7 @@ function TaskDetailPanel({
           {/* Subtasks */}
           <div
             className="px-5 pt-4 pb-4"
-            style={{ borderTop: "1px solid #F0F0F8" }}
+            style={{ borderTop: "1px solid var(--content-bg-secondary)" }}
           >
             <div className="flex items-center justify-between mb-3">
               <h3
@@ -2177,13 +2260,14 @@ function TaskDetailPanel({
                             color:
                               new Date(st.dueDate) < new Date()
                                 ? "#EF4444"
-                                : "#A0A0B8",
+                                : "var(--text-tertiary)",
                           }}
                         >
                           {formatDate(st.dueDate)}
                         </span>
                       )}
-                      <button aria-label="Close"
+                      <button
+                        aria-label="Close"
                         onClick={() => {
                           deleteSubtask(task.id, st.id);
                           toast.success("Subtask removed");
@@ -2243,7 +2327,8 @@ function TaskDetailPanel({
                     }}
                   />
                   <div className="flex gap-2">
-                    <select aria-label="Select option"
+                    <select
+                      aria-label="Select option"
                       value={newSubtaskAssignee}
                       onChange={(e) => setNewSubtaskAssignee(e.target.value)}
                       className="text-xs px-2 py-1 rounded flex-1 focus:outline-none"
@@ -2277,7 +2362,10 @@ function TaskDetailPanel({
                     <button
                       onClick={() => setShowAddSubtask(false)}
                       className="px-3 py-1 rounded text-xs font-medium"
-                      style={{ background: "var(--content-secondary)", color: "var(--text-secondary)" }}
+                      style={{
+                        background: "var(--content-secondary)",
+                        color: "var(--text-secondary)",
+                      }}
                     >
                       Cancel
                     </button>
@@ -2290,7 +2378,7 @@ function TaskDetailPanel({
           {/* Comments */}
           <div
             className="px-5 pt-4 pb-4"
-            style={{ borderTop: "1px solid #F0F0F8" }}
+            style={{ borderTop: "1px solid var(--content-bg-secondary)" }}
           >
             <h3
               className="text-xs font-semibold uppercase tracking-wider mb-4"
@@ -2369,7 +2457,8 @@ function TaskDetailPanel({
                   }}
                 />
               </div>
-              <button aria-label="Send"
+              <button
+                aria-label="Send"
                 type="submit"
                 disabled={!commentText.trim()}
                 className="p-2.5 rounded-lg transition-all disabled:opacity-40"

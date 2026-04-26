@@ -20,7 +20,7 @@ export function EmojiPicker({ onPick, onClose }: EmojiPickerProps) {
         right: 0,
         zIndex: 50,
         background: "var(--content-bg)",
-        border: "1px solid #E8E8F0",
+        border: "1px solid var(--content-border)",
         borderRadius: 10,
         padding: 8,
         boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
@@ -47,7 +47,8 @@ export function EmojiPicker({ onPick, onClose }: EmojiPickerProps) {
             lineHeight: 1,
           }}
           onMouseEnter={(ev) => {
-            (ev.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+            (ev.currentTarget as HTMLElement).style.background =
+              "var(--content-secondary)";
           }}
           onMouseLeave={(ev) => {
             (ev.currentTarget as HTMLElement).style.background = "transparent";

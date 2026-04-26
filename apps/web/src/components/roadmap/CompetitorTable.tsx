@@ -26,7 +26,7 @@ export function CompetitorTable() {
     fontSize: 12,
     fontWeight: 600,
     textAlign: "center",
-    color: "var(--text-secondary, #6B6B8A)",
+    color: "var(--text-secondary, var(--text-secondary))",
     whiteSpace: "nowrap",
   };
 
@@ -34,7 +34,7 @@ export function CompetitorTable() {
     padding: "10px 14px",
     fontSize: 12,
     textAlign: "center",
-    borderTop: "1px solid var(--content-border, #E8E8F0)",
+    borderTop: "1px solid var(--content-border, var(--content-border))",
   };
 
   return (
@@ -42,7 +42,7 @@ export function CompetitorTable() {
       style={{
         margin: "0 16px 16px",
         background: "var(--content-bg, #fff)",
-        border: "1px solid var(--content-border, #E8E8F0)",
+        border: "1px solid var(--content-border, var(--content-border))",
         borderRadius: 12,
         overflow: "hidden",
       }}
@@ -51,7 +51,8 @@ export function CompetitorTable() {
       <div
         style={{
           padding: "16px 20px",
-          borderBottom: "1px solid var(--content-border, #E8E8F0)",
+          borderBottom:
+            "1px solid var(--content-border, var(--content-border))",
           background:
             "linear-gradient(135deg, rgba(6, 182, 212,0.04) 0%, rgba(139,92,246,0.04) 100%)",
         }}
@@ -60,7 +61,7 @@ export function CompetitorTable() {
           style={{
             fontSize: 16,
             fontWeight: 700,
-            color: "var(--text-primary, #1A1A2E)",
+            color: "var(--text-primary, var(--text-primary))",
             margin: 0,
             letterSpacing: "-0.02em",
           }}
@@ -70,7 +71,7 @@ export function CompetitorTable() {
         <p
           style={{
             fontSize: 12,
-            color: "var(--text-secondary, #6B6B8A)",
+            color: "var(--text-secondary, var(--text-secondary))",
             margin: "4px 0 0",
           }}
         >
@@ -84,7 +85,12 @@ export function CompetitorTable() {
           style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}
         >
           <thead>
-            <tr style={{ background: "var(--content-secondary, #F8F8FC)" }}>
+            <tr
+              style={{
+                background:
+                  "var(--content-secondary, var(--content-bg-secondary))",
+              }}
+            >
               <th
                 style={{
                   ...headerCellStyle,
@@ -125,7 +131,7 @@ export function CompetitorTable() {
                       ...cellStyle,
                       textAlign: "left",
                       fontWeight: 500,
-                      color: "var(--text-primary, #1A1A2E)",
+                      color: "var(--text-primary, var(--text-primary))",
                     }}
                   >
                     <div
@@ -182,8 +188,8 @@ export function CompetitorTable() {
       <div
         style={{
           padding: "12px 20px",
-          borderTop: "1px solid var(--content-border, #E8E8F0)",
-          background: "var(--content-secondary, #F8F8FC)",
+          borderTop: "1px solid var(--content-border, var(--content-border))",
+          background: "var(--content-secondary, var(--content-bg-secondary))",
           display: "flex",
           alignItems: "center",
           gap: 16,
@@ -201,12 +207,20 @@ export function CompetitorTable() {
             }}
           />
           <span
-            style={{ fontSize: 11, color: "var(--text-secondary, #6B6B8A)" }}
+            style={{
+              fontSize: 11,
+              color: "var(--text-secondary, var(--text-secondary))",
+            }}
           >
             Green rows = VYNE-unique capabilities
           </span>
         </div>
-        <div style={{ fontSize: 11, color: "var(--text-tertiary, #A0A0B8)" }}>
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--text-tertiary, var(--text-tertiary))",
+          }}
+        >
           VYNE covers{" "}
           <span style={{ fontWeight: 700, color: "#06B6D4" }}>
             {COMPETITOR_DATA.filter((r) => r.vyne).length}/

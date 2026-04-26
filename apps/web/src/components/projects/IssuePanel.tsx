@@ -200,51 +200,63 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" aria-label="Open in new tab"
+                <button
+                  type="button"
+                  aria-label="Open in new tab"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-bg-secondary)";
-                    (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-primary)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                   }}
                 >
                   <ExternalLink size={14} />
                 </button>
-                <button type="button" aria-label="More options"
+                <button
+                  type="button"
+                  aria-label="More options"
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-bg-secondary)";
-                    (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-primary)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                   }}
                 >
                   <MoreHorizontal size={14} />
                 </button>
-                <button type="button" aria-label="Close"
+                <button
+                  type="button"
+                  aria-label="Close"
                   onClick={onClose}
                   className="p-1.5 rounded-lg transition-colors"
                   style={{ color: "var(--text-tertiary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-bg-secondary)";
-                    (e.currentTarget as HTMLElement).style.color = "#1A1A2E";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-primary)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "transparent";
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                   }}
                 >
                   <X size={14} />
@@ -273,7 +285,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                 <div
                   className="mt-5 space-y-3"
                   style={{
-                    borderTop: "1px solid #F0F0F8",
+                    borderTop: "1px solid var(--content-bg-secondary)",
                     paddingTop: "16px",
                   }}
                 >
@@ -311,7 +323,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                           color:
                             new Date(issue.dueDate) < new Date()
                               ? "#EF4444"
-                              : "#6B6B8A",
+                              : "var(--text-secondary)",
                         }}
                       >
                         {formatDate(issue.dueDate)}
@@ -411,10 +423,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                   <div style={{ flex: 1 }} />
                   <ReactionsBar subjectId={`issue:${issue.id}`} />
                 </div>
-                <IssueTimeTracker
-                  issueId={issue.id}
-                  issueTitle={issue.title}
-                />
+                <IssueTimeTracker issueId={issue.id} issueTitle={issue.title} />
               </div>
 
               {/* ─── Vyne AI insights (tagging + next actions) ──── */}

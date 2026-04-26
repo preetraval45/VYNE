@@ -15,8 +15,9 @@ export function PresenceDot({ status }: PresenceDotProps) {
         borderRadius: "50%",
         flexShrink: 0,
         display: "inline-block",
-        background: PRESENCE_COLORS[status ?? "offline"] ?? "#6B6B8A",
-        border: "1.5px solid #FAFAFE",
+        background:
+          PRESENCE_COLORS[status ?? "offline"] ?? "var(--text-secondary)",
+        border: "1.5px solid var(--content-bg-secondary)",
       }}
     />
   );

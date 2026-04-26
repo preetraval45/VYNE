@@ -27,7 +27,7 @@ export default function EmbedWidgetPage({ params }: PageProps) {
         fontFamily:
           "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
         background: "#fff",
-        color: "#1A1A2E",
+        color: "var(--text-primary)",
         padding: 20,
         minHeight: "100vh",
         boxSizing: "border-box",
@@ -57,10 +57,16 @@ export default function EmbedWidgetPage({ params }: PageProps) {
         >
           V
         </div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#1A1A2E" }}>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+          }}
+        >
           VYNE
         </span>
-        <span style={{ fontSize: 11, color: "#A0A0B8" }}>
+        <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
           Embedded · {widget}
         </span>
       </header>
@@ -69,9 +75,9 @@ export default function EmbedWidgetPage({ params }: PageProps) {
         style={{
           marginTop: 18,
           paddingTop: 12,
-          borderTop: "1px solid #E8E8F0",
+          borderTop: "1px solid var(--content-border)",
           fontSize: 10,
-          color: "#A0A0B8",
+          color: "var(--text-tertiary)",
           textAlign: "center",
         }}
       >
@@ -127,16 +133,18 @@ function StatsWidget() {
           style={{
             padding: 14,
             borderRadius: 10,
-            border: "1px solid #E8E8F0",
+            border: "1px solid var(--content-border)",
             background: "var(--content-bg-secondary)",
           }}
         >
-          <div style={{ fontSize: 11, color: "#6B6B8A" }}>{s.label}</div>
+          <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+            {s.label}
+          </div>
           <div
             style={{
               fontSize: 22,
               fontWeight: 700,
-              color: "#1A1A2E",
+              color: "var(--text-primary)",
               letterSpacing: "-0.02em",
               marginTop: 2,
             }}
@@ -172,7 +180,7 @@ function KanbanWidget() {
           style={{
             padding: 8,
             borderRadius: 9,
-            background: "#F4F4F8",
+            background: "var(--content-bg-secondary)",
           }}
         >
           <div
@@ -181,7 +189,7 @@ function KanbanWidget() {
               fontWeight: 700,
               textTransform: "uppercase",
               letterSpacing: "0.06em",
-              color: "#6B6B8A",
+              color: "var(--text-secondary)",
               marginBottom: 6,
             }}
           >
@@ -195,9 +203,9 @@ function KanbanWidget() {
                 marginBottom: 6,
                 borderRadius: 7,
                 background: "#fff",
-                border: "1px solid #E8E8F0",
+                border: "1px solid var(--content-border)",
                 fontSize: 11,
-                color: "#1A1A2E",
+                color: "var(--text-primary)",
               }}
             >
               {t}
@@ -231,10 +239,14 @@ function IncidentsWidget() {
       >
         🔴 Active incident
       </div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: "#1A1A2E" }}>
+      <div
+        style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}
+      >
         api-service v2.4.1 deploy failed
       </div>
-      <div style={{ fontSize: 11, color: "#6B6B8A", marginTop: 2 }}>
+      <div
+        style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}
+      >
         47 orders stuck · $12.4k at risk · started 7m ago
       </div>
     </div>
@@ -274,7 +286,7 @@ function AiChatWidget() {
           border: "1px solid #D8D8E8",
           background: "#fff",
           fontSize: 12,
-          color: "#1A1A2E",
+          color: "var(--text-primary)",
         }}
       />
     </div>
@@ -295,14 +307,14 @@ function DocsSearchWidget() {
           border: "1px solid #D8D8E8",
           background: "#fff",
           fontSize: 12,
-          color: "#1A1A2E",
+          color: "var(--text-primary)",
           marginBottom: 10,
         }}
       />
       <div
         style={{
           fontSize: 11,
-          color: "#6B6B8A",
+          color: "var(--text-secondary)",
           padding: 8,
           background: "var(--content-bg-secondary)",
           borderRadius: 6,

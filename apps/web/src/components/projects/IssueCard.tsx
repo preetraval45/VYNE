@@ -39,7 +39,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
     urgent: "#EF4444",
     high: "#F59E0B",
     medium: "#3B82F6",
-    low: "#A0A0B8",
+    low: "var(--text-tertiary)",
     no_priority: "#D1D1E0",
   };
 
@@ -58,7 +58,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
             background: isSortableDragging ? "#CFFAFE" : "#FFFFFF",
             border: isSortableDragging
               ? "1px solid #06B6D4"
-              : "1px solid #E8E8F0",
+              : "1px solid var(--content-border)",
             boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
           }}
         >
@@ -132,7 +132,7 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
                     color:
                       new Date(issue.dueDate) < new Date()
                         ? "#EF4444"
-                        : "#A0A0B8",
+                        : "var(--text-tertiary)",
                   }}
                 >
                   <Calendar size={10} />

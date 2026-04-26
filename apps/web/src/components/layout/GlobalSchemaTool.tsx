@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Wrench } from "lucide-react";
+import Link from "next/link";
+import { Wrench, Download as DownloadIcon } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import { useUser } from "@/lib/stores/auth";
 
@@ -67,17 +68,62 @@ export function GlobalSchemaTool() {
         aria-label="Workspace admin"
         className="global-topnav-rail"
         style={{
+          // Inline with the per-page header row so the buttons read as
+          // part of the top navbar instead of a floating overlay. 340px
+          // right-offset clears the longest "Sat, Sep 30, 2026" date
+          // plus the "+ New Issue" button and PR avatar on home/dashboard
+          // pages. On pages without those right-side controls the buttons
+          // simply sit further left in the navbar — still visually nav-y.
           position: "fixed",
-          top: 0,
-          right: 0,
-          zIndex: 40,
+          // Anchored to the global top-bar strip reserved by main's
+          // padding-top:48 — see globals.css `.dashboard-topbar-reserve`.
+          top: 8,
+          right: 24,
+          zIndex: 50,
           display: "inline-flex",
           alignItems: "center",
           gap: 6,
-          padding: "8px 12px",
+          height: 32,
           pointerEvents: "none",
         }}
       >
+        <Link
+          href="/download"
+          aria-label="Download desktop and mobile apps"
+          title="Download desktop & mobile apps"
+          style={{
+            // Sized to match other page-header buttons (e.g. "+ New Issue")
+            // so the navbar reads as a single coherent row.
+            pointerEvents: "auto",
+            height: 32,
+            padding: "0 12px",
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background: "var(--vyne-teal-soft)",
+            color: "var(--vyne-teal)",
+            fontSize: 12.5,
+            fontWeight: 600,
+            letterSpacing: "-0.005em",
+            border: "1px solid var(--vyne-teal)",
+            textDecoration: "none",
+            transition: "background 0.15s, color 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.background =
+              "var(--vyne-teal)";
+            (e.currentTarget as HTMLElement).style.color = "#06121A";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.background =
+              "var(--vyne-teal-soft)";
+            (e.currentTarget as HTMLElement).style.color = "var(--vyne-teal)";
+          }}
+        >
+          <DownloadIcon size={13} strokeWidth={2.25} />
+          <span>Get app</span>
+        </Link>
         <button
           type="button"
           onClick={handleClick}
@@ -86,23 +132,23 @@ export function GlobalSchemaTool() {
           title={label}
           style={{
             pointerEvents: "auto",
-            width: 30,
-            height: 30,
+            width: 32,
+            height: 32,
             borderRadius: 8,
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "var(--content-bg)",
+            background: "var(--content-secondary)",
             border: "1px solid var(--content-border)",
             color: isAdmin ? "var(--vyne-teal)" : "var(--text-tertiary)",
             cursor: isAdmin ? "pointer" : "not-allowed",
             opacity: isAdmin ? 1 : 0.55,
-            boxShadow: "var(--elev-1)",
             transition: "color 0.15s, border-color 0.15s",
           }}
           onMouseEnter={(e) => {
             if (!isAdmin) return;
-            (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-teal)";
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--vyne-teal)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor =

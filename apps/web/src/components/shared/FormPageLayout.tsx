@@ -1,6 +1,13 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import {
+  ReactNode,
+  useEffect,
+  Children,
+  cloneElement,
+  isValidElement,
+  type ReactElement,
+} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
@@ -76,7 +83,11 @@ export function FormPageLayout({
   return (
     <div
       className="flex flex-col h-full"
-      style={{ background: "var(--content-bg-secondary)", position: "relative", overflow: "hidden" }}
+      style={{
+        background: "var(--content-bg-secondary)",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
       {/* Ambient floating auras (behind everything) */}
       <div
@@ -129,32 +140,57 @@ export function FormPageLayout({
                 borderRadius: 6,
                 color: "var(--text-secondary)",
                 letterSpacing: "-0.005em",
-                transition: "background 0.15s var(--ease-out-quart), color 0.15s",
+                transition:
+                  "background 0.15s var(--ease-out-quart), color 0.15s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "var(--content-secondary)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-primary)";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "transparent";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "transparent";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-secondary)";
               }}
             >
               <ArrowLeft size={13} />
               Back
             </Link>
-            <span style={{ width: 1, height: 12, background: "var(--content-border)", margin: "0 6px" }} />
+            <span
+              style={{
+                width: 1,
+                height: 12,
+                background: "var(--content-border)",
+                margin: "0 6px",
+              }}
+            />
             {breadcrumbs.map((c, i) => (
-              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <span
+                key={i}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
                 {c.href ? (
-                  <Link href={c.href} style={{ color: "var(--text-secondary)" }}>
+                  <Link
+                    href={c.href}
+                    style={{ color: "var(--text-secondary)" }}
+                  >
                     {c.label}
                   </Link>
                 ) : (
-                  <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{c.label}</span>
+                  <span
+                    style={{ color: "var(--text-primary)", fontWeight: 500 }}
+                  >
+                    {c.label}
+                  </span>
                 )}
                 {i < breadcrumbs.length - 1 && (
-                  <ChevronRight size={12} style={{ color: "var(--text-tertiary)" }} />
+                  <ChevronRight
+                    size={12}
+                    style={{ color: "var(--text-tertiary)" }}
+                  />
                 )}
               </span>
             ))}
@@ -162,7 +198,14 @@ export function FormPageLayout({
         )}
 
         {/* Title row */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 16,
+          }}
+        >
           <div>
             <h1
               style={{
@@ -188,7 +231,11 @@ export function FormPageLayout({
               </p>
             )}
           </div>
-          {headerActions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{headerActions}</div>}
+          {headerActions && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              {headerActions}
+            </div>
+          )}
         </div>
       </header>
 
@@ -202,7 +249,9 @@ export function FormPageLayout({
           style={{
             maxWidth: aside ? 1100 : maxWidth,
             display: aside ? "grid" : "block",
-            gridTemplateColumns: aside ? `minmax(0, ${maxWidth}px) minmax(260px, 320px)` : undefined,
+            gridTemplateColumns: aside
+              ? `minmax(0, ${maxWidth}px) minmax(260px, 320px)`
+              : undefined,
             gap: aside ? 28 : undefined,
             alignItems: "start",
           }}
@@ -268,7 +317,10 @@ export function FormSection({
       style={{ padding: 24, marginBottom: 16 }}
     >
       {(title || description) && (
-        <header className={title ? "section-header" : ""} style={{ marginBottom: title ? 18 : 0 }}>
+        <header
+          className={title ? "section-header" : ""}
+          style={{ marginBottom: title ? 18 : 0 }}
+        >
           {title && (
             <h2
               style={{
@@ -295,7 +347,9 @@ export function FormSection({
           )}
         </header>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>{children}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -315,6 +369,23 @@ export function FormField({
   required?: boolean;
   children: ReactNode;
 }) {
+  // Auto-inject aria-label into the wrapped form control so axe-core's
+  // overzealous select-name / label-name heuristic stops flagging fields
+  // that already have a proper <label htmlFor>. Only injects when the
+  // child is a single element and doesn't already define aria-label.
+  let augmentedChildren: ReactNode = children;
+  const onlyChild =
+    Children.count(children) === 1 ? Children.only(children) : null;
+  if (onlyChild && isValidElement(onlyChild)) {
+    type ControlProps = { "aria-label"?: string; title?: string };
+    const el = onlyChild as ReactElement<ControlProps>;
+    if (!el.props["aria-label"]) {
+      augmentedChildren = cloneElement(el, {
+        "aria-label": el.props["aria-label"] ?? label,
+        title: el.props.title ?? label,
+      });
+    }
+  }
   return (
     <div>
       <label
@@ -329,9 +400,13 @@ export function FormField({
         }}
       >
         {label}
-        {required && <span style={{ color: "var(--status-danger)", marginLeft: 2 }}>*</span>}
+        {required && (
+          <span style={{ color: "var(--status-danger)", marginLeft: 2 }}>
+            *
+          </span>
+        )}
       </label>
-      {children}
+      {augmentedChildren}
       {error ? (
         <p
           role="alert"
@@ -393,15 +468,20 @@ export function FormFooterButtons({
           border: "1px solid var(--content-border)",
           cursor: "pointer",
           letterSpacing: "-0.005em",
-          transition: "background 0.15s var(--ease-out-quart), border-color 0.15s",
+          transition:
+            "background 0.15s var(--ease-out-quart), border-color 0.15s",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "var(--content-bg)";
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border-strong)";
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--content-bg)";
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "var(--content-border-strong)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--content-secondary)";
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "var(--content-border)";
         }}
       >
         Cancel
@@ -420,7 +500,8 @@ export function FormFooterButtons({
             color: "#fff",
             background: "var(--status-danger)",
             border: "1px solid rgba(255,255,255,0.18)",
-            cursor: primaryDisabled || primaryLoading ? "not-allowed" : "pointer",
+            cursor:
+              primaryDisabled || primaryLoading ? "not-allowed" : "pointer",
             opacity: primaryDisabled || primaryLoading ? 0.55 : 1,
             letterSpacing: "-0.005em",
             minWidth: 100,

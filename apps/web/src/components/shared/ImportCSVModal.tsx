@@ -273,7 +273,13 @@ export function ImportCSVModal({
             marginBottom: 18,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+            }}
+          >
             Import {moduleName}
           </span>
           <button
@@ -331,7 +337,7 @@ export function ImportCSVModal({
                     height: 22,
                     borderRadius: "50%",
                     background: isActive ? "#06B6D4" : "#E0E0EC",
-                    color: isActive ? "#fff" : "#A0A0B8",
+                    color: isActive ? "#fff" : "var(--text-tertiary)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -344,7 +350,9 @@ export function ImportCSVModal({
                 <span
                   style={{
                     fontSize: 12,
-                    color: isActive ? "#1A1A2E" : "#A0A0B8",
+                    color: isActive
+                      ? "var(--text-primary)"
+                      : "var(--text-tertiary)",
                     fontWeight: isActive ? 500 : 400,
                   }}
                 >
@@ -382,7 +390,9 @@ export function ImportCSVModal({
                 padding: "40px 20px",
                 textAlign: "center",
                 cursor: "pointer",
-                background: dragOver ? "rgba(6, 182, 212,0.04)" : "var(--content-secondary)",
+                background: dragOver
+                  ? "rgba(6, 182, 212,0.04)"
+                  : "var(--content-secondary)",
                 transition: "all 0.15s",
               }}
             >
@@ -397,7 +407,7 @@ export function ImportCSVModal({
               >
                 <path
                   d="M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4M16 4v18M10 10l6-6 6 6"
-                  stroke={dragOver ? "#06B6D4" : "#A0A0B8"}
+                  stroke={dragOver ? "#06B6D4" : "var(--text-tertiary)"}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -444,7 +454,13 @@ export function ImportCSVModal({
         {/* ── Step: Column Mapping ─────────────────────────────── */}
         {step === "mapping" && (
           <>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 14 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--text-secondary)",
+                marginBottom: 14,
+              }}
+            >
               Map your CSV columns to the expected fields. Required fields are
               marked with *.
             </div>
@@ -491,7 +507,8 @@ export function ImportCSVModal({
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <select aria-label="Select option"
+                  <select
+                    aria-label="Select option"
                     value={columnMapping[col.key] ?? ""}
                     onChange={(e) =>
                       setColumnMapping((prev) => ({
@@ -557,7 +574,13 @@ export function ImportCSVModal({
         {/* ── Step: Preview ────────────────────────────────────── */}
         {step === "preview" && (
           <>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 12 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--text-secondary)",
+                marginBottom: 12,
+              }}
+            >
               Preview of first {Math.min(previewRows.length, 5)} rows (
               {rawResult?.rowCount ?? 0} total)
             </div>
@@ -709,7 +732,13 @@ export function ImportCSVModal({
                 }}
               />
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 8 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--text-tertiary)",
+                marginTop: 8,
+              }}
+            >
               {importProgress}%
             </div>
           </div>
@@ -757,7 +786,13 @@ export function ImportCSVModal({
             >
               Import Complete
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 16 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--text-secondary)",
+                marginBottom: 16,
+              }}
+            >
               {rawResult?.rowCount ?? 0} rows imported into {moduleName}
             </div>
 
@@ -785,7 +820,11 @@ export function ImportCSVModal({
                 {importErrors.slice(0, 5).map((err, i) => (
                   <div
                     key={i}
-                    style={{ fontSize: 11, color: "var(--badge-warning-text)", padding: "2px 0" }}
+                    style={{
+                      fontSize: 11,
+                      color: "var(--badge-warning-text)",
+                      padding: "2px 0",
+                    }}
                   >
                     {err}
                   </div>

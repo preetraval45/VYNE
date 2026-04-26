@@ -418,7 +418,7 @@ function CreateTenantModal({
     >
       <div
         style={{
-          background: "#1A1A2E",
+          background: "var(--text-primary)",
           borderRadius: 14,
           width: 480,
           padding: 28,
@@ -486,7 +486,8 @@ function CreateTenantModal({
           >
             Plan
           </label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             id="nt-plan"
             value={form.plan}
             onChange={(e) => setForm({ ...form, plan: e.target.value as Plan })}
@@ -502,13 +503,22 @@ function CreateTenantModal({
               boxSizing: "border-box",
             }}
           >
-            <option value="Starter" style={{ background: "#1A1A2E" }}>
+            <option
+              value="Starter"
+              style={{ background: "var(--text-primary)" }}
+            >
               Starter -- $99/mo
             </option>
-            <option value="Growth" style={{ background: "#1A1A2E" }}>
+            <option
+              value="Growth"
+              style={{ background: "var(--text-primary)" }}
+            >
               Growth -- $480/mo
             </option>
-            <option value="Enterprise" style={{ background: "#1A1A2E" }}>
+            <option
+              value="Enterprise"
+              style={{ background: "var(--text-primary)" }}
+            >
               Enterprise -- Custom
             </option>
           </select>
@@ -1040,7 +1050,8 @@ function TenantDetailPanel({
                 >
                   Upgrade or downgrade this tenant&apos;s plan
                 </div>
-                <select aria-label="Select option"
+                <select
+                  aria-label="Select option"
                   value={tenant.plan}
                   onChange={() => onAction("plan_changed")}
                   style={{
@@ -1321,7 +1332,8 @@ export default function TenantsPage() {
             outline: "none",
           }}
         />
-        <select aria-label="Select option"
+        <select
+          aria-label="Select option"
           value={filterPlan}
           onChange={(e) => setFilterPlan(e.target.value as Plan | "All")}
           style={selectStyle}
@@ -1339,7 +1351,8 @@ export default function TenantsPage() {
             Enterprise
           </option>
         </select>
-        <select aria-label="Select option"
+        <select
+          aria-label="Select option"
           value={filterStatus}
           onChange={(e) =>
             setFilterStatus(e.target.value as TenantStatus | "All")

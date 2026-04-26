@@ -2,7 +2,23 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Settings, Users, Package, Bell, DollarSign, Code, Shield, FileClock, Zap, FormInput, Plug, ScrollText, Sparkles, BarChart3, Smartphone } from "lucide-react";
+import {
+  Settings,
+  Users,
+  Package,
+  Bell,
+  DollarSign,
+  Code,
+  Shield,
+  FileClock,
+  Zap,
+  FormInput,
+  Plug,
+  ScrollText,
+  Sparkles,
+  BarChart3,
+  Smartphone,
+} from "lucide-react";
 
 // Settings page was a 228KB single chunk because it imported all 15 panels
 // eagerly. Each panel is its own tab — the user sees exactly one at a time —
@@ -20,24 +36,56 @@ const panelLoading = () => (
   </div>
 );
 const lazyPanel = (
-  loader: () => Promise<{ default: React.ComponentType<{ onToast: (msg: string) => void }> }>,
+  loader: () => Promise<{
+    default: React.ComponentType<{ onToast: (msg: string) => void }>;
+  }>,
 ) => dynamic(loader, { ssr: false, loading: panelLoading });
 
-const GeneralSettings = lazyPanel(() => import("@/components/settings/GeneralSettings"));
-const MembersSettings = lazyPanel(() => import("@/components/settings/MembersSettings"));
-const NotificationsSettings = lazyPanel(() => import("@/components/settings/NotificationsSettings"));
-const ErpSettings = lazyPanel(() => import("@/components/settings/ErpSettings"));
-const BillingSettings = lazyPanel(() => import("@/components/settings/BillingSettings"));
-const DeveloperSettings = lazyPanel(() => import("@/components/settings/DeveloperSettings"));
-const SecuritySettings = lazyPanel(() => import("@/components/settings/SecuritySettings"));
-const AuditSettings = lazyPanel(() => import("@/components/settings/AuditSettings"));
-const SnippetsSettings = lazyPanel(() => import("@/components/settings/SnippetsSettings"));
-const FormsSettings = lazyPanel(() => import("@/components/settings/FormsSettings"));
-const IntegrationsSettings = lazyPanel(() => import("@/components/settings/IntegrationsSettings"));
-const ComplianceSettings = lazyPanel(() => import("@/components/settings/ComplianceSettings"));
-const GrowthSettings = lazyPanel(() => import("@/components/settings/GrowthSettings"));
-const AnalyticsSettings = lazyPanel(() => import("@/components/settings/AnalyticsSettings"));
-const MobileSettings = lazyPanel(() => import("@/components/settings/MobileSettings"));
+const GeneralSettings = lazyPanel(
+  () => import("@/components/settings/GeneralSettings"),
+);
+const MembersSettings = lazyPanel(
+  () => import("@/components/settings/MembersSettings"),
+);
+const NotificationsSettings = lazyPanel(
+  () => import("@/components/settings/NotificationsSettings"),
+);
+const ErpSettings = lazyPanel(
+  () => import("@/components/settings/ErpSettings"),
+);
+const BillingSettings = lazyPanel(
+  () => import("@/components/settings/BillingSettings"),
+);
+const DeveloperSettings = lazyPanel(
+  () => import("@/components/settings/DeveloperSettings"),
+);
+const SecuritySettings = lazyPanel(
+  () => import("@/components/settings/SecuritySettings"),
+);
+const AuditSettings = lazyPanel(
+  () => import("@/components/settings/AuditSettings"),
+);
+const SnippetsSettings = lazyPanel(
+  () => import("@/components/settings/SnippetsSettings"),
+);
+const FormsSettings = lazyPanel(
+  () => import("@/components/settings/FormsSettings"),
+);
+const IntegrationsSettings = lazyPanel(
+  () => import("@/components/settings/IntegrationsSettings"),
+);
+const ComplianceSettings = lazyPanel(
+  () => import("@/components/settings/ComplianceSettings"),
+);
+const GrowthSettings = lazyPanel(
+  () => import("@/components/settings/GrowthSettings"),
+);
+const AnalyticsSettings = lazyPanel(
+  () => import("@/components/settings/AnalyticsSettings"),
+);
+const MobileSettings = lazyPanel(
+  () => import("@/components/settings/MobileSettings"),
+);
 
 // ─── Tab config ──────────────────────────────────────────────────
 const TABS = [
@@ -90,7 +138,7 @@ function Toast({
         zIndex: 9999,
         padding: "10px 18px",
         borderRadius: 10,
-        background: "#1A1A2E",
+        background: "var(--text-primary)",
         color: "#fff",
         fontSize: 13,
         fontWeight: 500,
@@ -162,14 +210,15 @@ export default function SettingsPage() {
               cursor: "pointer",
               fontSize: 13,
               background: tab === id ? "rgba(6, 182, 212,0.1)" : "transparent",
-              color: tab === id ? "#06B6D4" : "#6B6B8A",
+              color: tab === id ? "#06B6D4" : "var(--text-secondary)",
               fontWeight: tab === id ? 500 : 400,
               marginBottom: 2,
               transition: "all 0.12s",
             }}
             onMouseEnter={(e) => {
               if (tab !== id)
-                (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+                (e.currentTarget as HTMLElement).style.background =
+                  "var(--content-secondary)";
             }}
             onMouseLeave={(e) => {
               if (tab !== id)

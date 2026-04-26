@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/api/security";
+import { callClaudeJson } from "@/lib/ai/claude";
 
 export const runtime = "edge";
 
@@ -54,13 +56,22 @@ function lexicalFallback(query: string, sessions: SessionLike[]): Hit[] {
     .map((x) => ({
       id: x.session.id,
       createdAt: x.session.createdAt,
-      snippet: x.session.answer.slice(0, 220) + (x.session.answer.length > 220 ? "…" : ""),
+      snippet:
+        x.session.answer.slice(0, 220) +
+        (x.session.answer.length > 220 ? "…" : ""),
       reason: `Keyword match (${Math.round(x.score)})`,
       score: x.score,
     }));
 }
 
 export async function POST(req: Request) {
+  const __rl = await rateLimit({
+    key: "archive-search",
+    limit: 20,
+    windowSec: 60,
+    req,
+  });
+  if (!__rl.ok) return __rl.response!;
   let payload: Payload;
   try {
     payload = (await req.json()) as Payload;
@@ -70,69 +81,46 @@ export async function POST(req: Request) {
   if (!payload.query?.trim()) return NextResponse.json({ hits: [] });
   if (!payload.sessions?.length) return NextResponse.json({ hits: [] });
 
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) {
-    return NextResponse.json({ hits: lexicalFallback(payload.query, payload.sessions) });
-  }
+  const sessionsText = payload.sessions
+    .slice(0, 120)
+    .map(
+      (s) =>
+        `[[${s.id}]] ${new Date(s.createdAt).toISOString().slice(0, 10)}\nQ: ${s.question}\nA: ${s.answer.slice(0, 400)}`,
+    )
+    .join("\n\n---\n\n");
 
-  try {
-    const sessionsText = payload.sessions
-      .slice(0, 120)
-      .map(
-        (s) =>
-          `[[${s.id}]] ${new Date(s.createdAt).toISOString().slice(0, 10)}\nQ: ${s.question}\nA: ${s.answer.slice(0, 400)}`,
-      )
-      .join("\n\n---\n\n");
-
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": key,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
-        max_tokens: 500,
-        system: `You are Vyne AI's archive search. Return the 3 most relevant past sessions
+  const parsed = await callClaudeJson<{
+    hits?: Array<{ id: string; reason: string }>;
+  }>(
+    `You are Vyne AI's archive search. Return the 3 most relevant past sessions
 for the user's query. Output raw JSON, no prose, matching this schema:
 
 {"hits":[{"id":"<session id from [[…]]>","reason":"<1 short sentence why it matched>"}, …]}
 
 Rank by semantic relevance first, recency second. If nothing is a plausible match, return {"hits":[]}.`,
-        messages: [
-          {
-            role: "user",
-            content: `QUERY: ${payload.query}\n\nSESSIONS:\n${sessionsText}`,
-          },
-        ],
-      }),
+    `QUERY: ${payload.query}\n\nSESSIONS:\n${sessionsText}`,
+    { maxTokens: 500 },
+  );
+
+  if (!parsed?.hits) {
+    return NextResponse.json({
+      hits: lexicalFallback(payload.query, payload.sessions),
     });
-    if (!res.ok) {
-      return NextResponse.json({ hits: lexicalFallback(payload.query, payload.sessions) });
-    }
-    const body = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
-    const text = body.content?.find((c) => c.type === "text")?.text?.trim();
-    if (!text) return NextResponse.json({ hits: lexicalFallback(payload.query, payload.sessions) });
-    const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-    const parsed = JSON.parse(cleaned) as { hits?: Array<{ id: string; reason: string }> };
-    const byId = new Map(payload.sessions.map((s) => [s.id, s]));
-    const hits: Hit[] = (parsed.hits ?? [])
-      .map((h, i) => {
-        const s = byId.get(h.id);
-        if (!s) return null;
-        return {
-          id: s.id,
-          createdAt: s.createdAt,
-          snippet:
-            s.answer.slice(0, 220) + (s.answer.length > 220 ? "…" : ""),
-          reason: h.reason,
-          score: 100 - i,
-        };
-      })
-      .filter((h): h is Hit => h !== null);
-    return NextResponse.json({ hits });
-  } catch {
-    return NextResponse.json({ hits: lexicalFallback(payload.query, payload.sessions) });
   }
+
+  const byId = new Map(payload.sessions.map((s) => [s.id, s]));
+  const hits: Hit[] = parsed.hits
+    .map((h, i) => {
+      const s = byId.get(h.id);
+      if (!s) return null;
+      return {
+        id: s.id,
+        createdAt: s.createdAt,
+        snippet: s.answer.slice(0, 220) + (s.answer.length > 220 ? "…" : ""),
+        reason: h.reason,
+        score: 100 - i,
+      };
+    })
+    .filter((h): h is Hit => h !== null);
+  return NextResponse.json({ hits });
 }

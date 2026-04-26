@@ -34,7 +34,7 @@ export function FeatureRequestModal({
   const labelStyle: React.CSSProperties = {
     fontSize: 12,
     fontWeight: 600,
-    color: "var(--text-primary, #1A1A2E)",
+    color: "var(--text-primary, var(--text-primary))",
     marginBottom: 4,
     display: "block",
   };
@@ -43,11 +43,11 @@ export function FeatureRequestModal({
     width: "100%",
     padding: "8px 12px",
     borderRadius: 8,
-    border: "1px solid var(--content-border, #E8E8F0)",
+    border: "1px solid var(--content-border, var(--content-border))",
     fontSize: 13,
     outline: "none",
-    background: "var(--content-secondary, #F8F8FC)",
-    color: "var(--text-primary, #1A1A2E)",
+    background: "var(--content-secondary, var(--content-bg-secondary))",
+    color: "var(--text-primary, var(--text-primary))",
     boxSizing: "border-box",
   };
 
@@ -85,7 +85,8 @@ export function FeatureRequestModal({
         <div
           style={{
             padding: "18px 24px",
-            borderBottom: "1px solid var(--content-border, #E8E8F0)",
+            borderBottom:
+              "1px solid var(--content-border, var(--content-border))",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -95,7 +96,8 @@ export function FeatureRequestModal({
           <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>
             Request a Feature
           </span>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               background: "rgba(255,255,255,0.2)",
@@ -156,7 +158,8 @@ export function FeatureRequestModal({
           <div style={{ display: "flex", gap: 12 }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Module</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 value={module}
                 onChange={(e) => setModule(e.target.value as Module)}
                 style={inputStyle}
@@ -170,7 +173,8 @@ export function FeatureRequestModal({
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Priority Suggestion</label>
-              <select aria-label="Select option"
+              <select
+                aria-label="Select option"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
                 style={inputStyle}
@@ -198,9 +202,10 @@ export function FeatureRequestModal({
               style={{
                 padding: "8px 16px",
                 borderRadius: 8,
-                border: "1px solid var(--content-border, #E8E8F0)",
+                border:
+                  "1px solid var(--content-border, var(--content-border))",
                 background: "var(--content-bg, #fff)",
-                color: "var(--text-secondary, #6B6B8A)",
+                color: "var(--text-secondary, var(--text-secondary))",
                 fontSize: 13,
                 fontWeight: 500,
                 cursor: "pointer",

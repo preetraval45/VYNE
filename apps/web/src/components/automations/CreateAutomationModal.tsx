@@ -46,7 +46,9 @@ export default function CreateAutomationModal(
           >
             New Automation
           </h2>
-          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}>
+          <p
+            style={{ fontSize: 13, color: "var(--text-secondary)", margin: 0 }}
+          >
             Start from a template or build from scratch
           </p>
         </div>
@@ -85,7 +87,13 @@ export default function CreateAutomationModal(
               >
                 {tpl.label}
               </span>
-              <span style={{ fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.5,
+                }}
+              >
                 {tpl.description}
               </span>
               {tpl.id !== "tpl-custom" && (
@@ -138,7 +146,7 @@ export default function CreateAutomationModal(
             style={{
               background: "none",
               border: "none",
-              color: "#A0A0B8",
+              color: "var(--text-tertiary)",
               fontSize: 12,
               cursor: "pointer",
               textDecoration: "underline",

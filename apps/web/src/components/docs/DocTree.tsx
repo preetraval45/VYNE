@@ -1,25 +1,33 @@
-'use client'
+"use client";
 
-import { useState, useRef, useEffect } from 'react'
-import { ChevronRight, FileText, MoreHorizontal, Plus, Trash2, Edit2, FilePlus } from 'lucide-react'
-import type { Document } from '@/types'
+import { useState, useRef, useEffect } from "react";
+import {
+  ChevronRight,
+  FileText,
+  MoreHorizontal,
+  Plus,
+  Trash2,
+  Edit2,
+  FilePlus,
+} from "lucide-react";
+import type { Document } from "@/types";
 
 interface DocTreeProps {
-  docs: Document[]
-  allDocs: Document[]
-  activeDocId?: string
-  depth?: number
-  onSelect: (id: string) => void
-  onCreateChild: (parentId: string) => void
-  onRename: (id: string, title: string) => void
-  onDelete: (id: string) => void
-  onCreateRoot: () => void
+  docs: Document[];
+  allDocs: Document[];
+  activeDocId?: string;
+  depth?: number;
+  onSelect: (id: string) => void;
+  onCreateChild: (parentId: string) => void;
+  onRename: (id: string, title: string) => void;
+  onDelete: (id: string) => void;
+  onCreateRoot: () => void;
 }
 
 interface MenuState {
-  docId: string
-  x: number
-  y: number
+  docId: string;
+  x: number;
+  y: number;
 }
 
 export function DocTree({
@@ -33,71 +41,74 @@ export function DocTree({
   onDelete,
   onCreateRoot,
 }: DocTreeProps) {
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [menu, setMenu] = useState<MenuState | null>(null)
-  const [renamingId, setRenamingId] = useState<string | null>(null)
-  const [renameValue, setRenameValue] = useState('')
-  const renameRef = useRef<HTMLInputElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [menu, setMenu] = useState<MenuState | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const renameRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (renamingId && renameRef.current) {
-      renameRef.current.focus()
-      renameRef.current.select()
+      renameRef.current.focus();
+      renameRef.current.select();
     }
-  }, [renamingId])
+  }, [renamingId]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenu(null)
+        setMenu(null);
       }
     }
-    if (menu) document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [menu])
+    if (menu) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menu]);
 
   function getChildren(parentId: string) {
-    return allDocs.filter((d) => d.parentId === parentId)
+    return allDocs.filter((d) => d.parentId === parentId);
   }
 
   function handleMenuOpen(e: React.MouseEvent, docId: string) {
-    e.stopPropagation()
-    setMenu({ docId, x: e.clientX, y: e.clientY })
+    e.stopPropagation();
+    setMenu({ docId, x: e.clientX, y: e.clientY });
   }
 
   function handleRenameStart(doc: Document) {
-    setMenu(null)
-    setRenamingId(doc.id)
-    setRenameValue(doc.title)
+    setMenu(null);
+    setRenamingId(doc.id);
+    setRenameValue(doc.title);
   }
 
   function handleRenameCommit() {
     if (renamingId && renameValue.trim()) {
-      onRename(renamingId, renameValue.trim())
+      onRename(renamingId, renameValue.trim());
     }
-    setRenamingId(null)
-    setRenameValue('')
+    setRenamingId(null);
+    setRenameValue("");
   }
 
   function handleRenameKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') handleRenameCommit()
-    if (e.key === 'Escape') { setRenamingId(null); setRenameValue('') }
+    if (e.key === "Enter") handleRenameCommit();
+    if (e.key === "Escape") {
+      setRenamingId(null);
+      setRenameValue("");
+    }
   }
 
   function toggleExpand(id: string) {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }))
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  const paddingLeft = depth * 16 + 8
+  const paddingLeft = depth * 16 + 8;
 
   return (
     <div>
       {docs.map((doc) => {
-        const children = getChildren(doc.id)
-        const hasChildren = children.length > 0
-        const isExpanded = expanded[doc.id]
-        const isActive = activeDocId === doc.id
+        const children = getChildren(doc.id);
+        const hasChildren = children.length > 0;
+        const isExpanded = expanded[doc.id];
+        const isActive = activeDocId === doc.id;
 
         return (
           <div key={doc.id}>
@@ -105,7 +116,7 @@ export function DocTree({
               className="group flex items-center gap-1 py-[3px] px-1 rounded-md cursor-pointer select-none"
               style={{
                 paddingLeft,
-                background: isActive ? 'rgba(6, 182, 212,0.08)' : undefined,
+                background: isActive ? "rgba(6, 182, 212,0.08)" : undefined,
               }}
               onClick={() => onSelect(doc.id)}
             >
@@ -113,19 +124,21 @@ export function DocTree({
               <button
                 className="flex-shrink-0 w-4 h-4 flex items-center justify-center rounded hover:bg-black/[0.06] transition-colors"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  if (hasChildren) toggleExpand(doc.id)
-                  else onCreateChild(doc.id)
+                  e.stopPropagation();
+                  if (hasChildren) toggleExpand(doc.id);
+                  else onCreateChild(doc.id);
                 }}
               >
                 {hasChildren ? (
                   <ChevronRight
                     size={12}
-                    className="text-[#A0A0B8] transition-transform"
-                    style={{ transform: isExpanded ? 'rotate(90deg)' : undefined }}
+                    className="text-[var(--text-tertiary)] transition-transform"
+                    style={{
+                      transform: isExpanded ? "rotate(90deg)" : undefined,
+                    }}
                   />
                 ) : (
-                  <span className="text-[10px] text-[#A0A0B8] opacity-0 group-hover:opacity-100">
+                  <span className="text-[10px] text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100">
                     <ChevronRight size={12} className="opacity-0" />
                   </span>
                 )}
@@ -133,7 +146,7 @@ export function DocTree({
 
               {/* Icon */}
               <span className="text-[14px] w-5 flex-shrink-0 text-center leading-none">
-                {doc.icon ?? '📄'}
+                {doc.icon ?? "📄"}
               </span>
 
               {/* Title / rename input */}
@@ -151,7 +164,9 @@ export function DocTree({
                 <span
                   className="flex-1 min-w-0 text-[13px] truncate"
                   style={{
-                    color: isActive ? '#1A1A2E' : '#3A3A5A',
+                    color: isActive
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
                     fontWeight: isActive ? 500 : 400,
                   }}
                 >
@@ -163,17 +178,24 @@ export function DocTree({
               <div className="flex-shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.06]"
-                  onClick={(e) => { e.stopPropagation(); onCreateChild(doc.id); toggleExpand(doc.id) }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCreateChild(doc.id);
+                    toggleExpand(doc.id);
+                  }}
                   title="Add child page"
                 >
-                  <Plus size={11} className="text-[#A0A0B8]" />
+                  <Plus size={11} className="text-[var(--text-tertiary)]" />
                 </button>
                 <button
                   className="w-5 h-5 flex items-center justify-center rounded hover:bg-black/[0.06]"
                   onClick={(e) => handleMenuOpen(e, doc.id)}
                   title="More options"
                 >
-                  <MoreHorizontal size={11} className="text-[#A0A0B8]" />
+                  <MoreHorizontal
+                    size={11}
+                    className="text-[var(--text-tertiary)]"
+                  />
                 </button>
               </div>
             </div>
@@ -193,13 +215,13 @@ export function DocTree({
               />
             )}
           </div>
-        )
+        );
       })}
 
       {/* New Page button at root level */}
       {depth === 0 && (
         <button
-          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[#A0A0B8] hover:text-[#06B6D4] hover:bg-[rgba(6, 182, 212,0.06)] transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[var(--text-tertiary)] hover:text-[#06B6D4] hover:bg-[rgba(6, 182, 212,0.06)] transition-colors"
           onClick={onCreateRoot}
         >
           <Plus size={14} />
@@ -211,41 +233,47 @@ export function DocTree({
       {menu && (
         <div
           ref={menuRef}
-          className="fixed z-50 bg-white rounded-lg shadow-panel border border-[#E8E8F0] py-1 min-w-[160px]"
+          className="fixed z-50 bg-white rounded-lg shadow-panel border border-[var(--content-border)] py-1 min-w-[160px]"
           style={{ left: menu.x, top: menu.y }}
         >
           {(() => {
-            const doc = allDocs.find((d) => d.id === menu.docId)
-            if (!doc) return null
+            const doc = allDocs.find((d) => d.id === menu.docId);
+            if (!doc) return null;
             return (
               <>
                 <button
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-[#3A3A5A] hover:bg-[#F8F8FC] text-left"
-                  onClick={() => { setMenu(null); onCreateChild(doc.id) }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-[var(--text-secondary)] hover:bg-[var(--content-bg-secondary)] text-left"
+                  onClick={() => {
+                    setMenu(null);
+                    onCreateChild(doc.id);
+                  }}
                 >
-                  <FilePlus size={13} className="text-[#A0A0B8]" />
+                  <FilePlus size={13} className="text-[var(--text-tertiary)]" />
                   Add child page
                 </button>
                 <button
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-[#3A3A5A] hover:bg-[#F8F8FC] text-left"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-[var(--text-secondary)] hover:bg-[var(--content-bg-secondary)] text-left"
                   onClick={() => handleRenameStart(doc)}
                 >
-                  <Edit2 size={13} className="text-[#A0A0B8]" />
+                  <Edit2 size={13} className="text-[var(--text-tertiary)]" />
                   Rename
                 </button>
-                <div className="border-t border-[#E8E8F0] my-1" />
+                <div className="border-t border-[var(--content-border)] my-1" />
                 <button
                   className="w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-red-500 hover:bg-red-50 text-left"
-                  onClick={() => { setMenu(null); onDelete(doc.id) }}
+                  onClick={() => {
+                    setMenu(null);
+                    onDelete(doc.id);
+                  }}
                 >
                   <Trash2 size={13} />
                   Delete
                 </button>
               </>
-            )
+            );
           })()}
         </div>
       )}
     </div>
-  )
+  );
 }

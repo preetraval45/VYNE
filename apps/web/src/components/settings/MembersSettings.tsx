@@ -59,7 +59,13 @@ function SectionCard({
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           {title}
         </span>
         {action}
@@ -227,7 +233,8 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                   {m.role === "admin" ? (
                     <RoleBadge role="admin" />
                   ) : (
-                    <select aria-label="Select option"
+                    <select
+                      aria-label="Select option"
                       value={m.role}
                       onChange={(e) =>
                         handleRoleChange(
@@ -328,7 +335,8 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                         </button>
                       </div>
                     ) : (
-                      <button aria-label="Delete"
+                      <button
+                        aria-label="Delete"
                         onClick={() => setConfirmDeleteId(m.id)}
                         style={{
                           padding: "4px 6px",
@@ -346,7 +354,7 @@ export default function MembersSettings({ onToast }: MembersSettingsProps) {
                         }}
                         onMouseLeave={(e) => {
                           (e.currentTarget as HTMLElement).style.color =
-                            "#A0A0B8";
+                            "var(--text-tertiary)";
                         }}
                       >
                         <Trash2 size={13} />
@@ -388,7 +396,10 @@ type Permission =
   | "audit.read"
   | "api.keys";
 
-const PERM_GROUPS: Array<{ name: string; perms: Array<{ id: Permission; label: string }> }> = [
+const PERM_GROUPS: Array<{
+  name: string;
+  perms: Array<{ id: Permission; label: string }>;
+}> = [
   {
     name: "Projects & Docs",
     perms: [
@@ -480,12 +491,7 @@ const DEFAULT_ROLES: RoleDef[] = [
     name: "Viewer",
     description: "Read-only access.",
     isBuiltin: true,
-    perms: new Set([
-      "issues.read",
-      "docs.read",
-      "orders.read",
-      "billing.read",
-    ]),
+    perms: new Set(["issues.read", "docs.read", "orders.read", "billing.read"]),
   },
 ];
 
@@ -519,11 +525,7 @@ function RolesMatrix({ onToast }: { onToast: (m: string) => void }) {
         name: newRoleName,
         description: newRoleDesc || "Custom role",
         isBuiltin: false,
-        perms: new Set([
-          "issues.read",
-          "docs.read",
-          "ai.use",
-        ]),
+        perms: new Set(["issues.read", "docs.read", "ai.use"]),
       },
     ]);
     onToast(`Role "${newRoleName}" created`);
@@ -849,8 +851,7 @@ function RolesGroup({
               style={{
                 fontSize: 10,
                 color: "var(--text-tertiary)",
-                fontFamily:
-                  "var(--font-geist-mono), ui-monospace, monospace",
+                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 marginTop: 1,
               }}
             >

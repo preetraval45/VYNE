@@ -261,7 +261,9 @@ export default function InviteMemberModal({
                 padding: "7px 12px",
                 borderRadius: 8,
                 border: "1px solid var(--vyne-teal-border)",
-                background: copied ? "var(--vyne-teal)" : "var(--vyne-teal-soft)",
+                background: copied
+                  ? "var(--vyne-teal)"
+                  : "var(--vyne-teal-soft)",
                 color: copied ? "#fff" : "var(--vyne-teal)",
                 fontSize: 12,
                 fontWeight: 600,
@@ -312,7 +314,7 @@ export default function InviteMemberModal({
               borderRadius: 8,
               border: "none",
               background: email ? "#06B6D4" : "var(--content-border)",
-              color: email ? "#fff" : "#A0A0B8",
+              color: email ? "#fff" : "var(--text-tertiary)",
               cursor: email ? "pointer" : "default",
               fontSize: 13,
               fontWeight: 500,

@@ -131,7 +131,11 @@ function PRBadge({ state }: Readonly<{ state: PullRequest["state"] }>) {
   const map: Record<string, { label: string; bg: string; color: string }> = {
     open: { label: "Open", bg: "#F0FDF4", color: "var(--badge-success-text)" },
     merged: { label: "Merged", bg: "#F3F0FF", color: "#5B21B6" },
-    closed: { label: "Closed", bg: "#F8F8F8", color: "var(--text-secondary)" },
+    closed: {
+      label: "Closed",
+      bg: "var(--content-bg-secondary)",
+      color: "var(--text-secondary)",
+    },
   };
   const s = map[state] ?? map.closed;
   return (
@@ -214,7 +218,9 @@ function TabBtn({
             fontWeight: 600,
             padding: "1px 5px",
             borderRadius: 10,
-            background: active ? "rgba(255,255,255,0.25)" : "var(--content-secondary)",
+            background: active
+              ? "rgba(255,255,255,0.25)"
+              : "var(--content-secondary)",
             color: active ? "#fff" : "var(--text-secondary)",
           }}
         >
@@ -479,7 +485,12 @@ function OverviewTab({
             </thead>
             <tbody>
               {deployments.slice(0, 5).map((d) => (
-                <tr key={d.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+                <tr
+                  key={d.id}
+                  style={{
+                    borderBottom: "1px solid var(--content-bg-secondary)",
+                  }}
+                >
                   <td
                     style={{
                       padding: "10px 16px",
@@ -556,7 +567,7 @@ function OverviewTab({
                 key={svc}
                 style={{
                   padding: "10px 18px",
-                  borderBottom: "1px solid #F0F0F8",
+                  borderBottom: "1px solid var(--content-bg-secondary)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -680,7 +691,10 @@ function DeploymentsTab({
                   borderRadius: 20,
                   fontSize: 12,
                   fontWeight: filter === s ? 600 : 400,
-                  background: filter === s ? "var(--vyne-purple)" : "var(--content-secondary)",
+                  background:
+                    filter === s
+                      ? "var(--vyne-purple)"
+                      : "var(--content-secondary)",
                   color: filter === s ? "#fff" : "var(--text-secondary)",
                   border: "none",
                   cursor: "pointer",
@@ -690,7 +704,8 @@ function DeploymentsTab({
               </button>
             ),
           )}
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             value={envFilter}
             onChange={(e) => setEnvFilter(e.target.value)}
             style={{
@@ -780,7 +795,12 @@ function DeploymentsTab({
               </tr>
             )}
             {filtered.map((d) => (
-              <tr key={d.id} style={{ borderBottom: "1px solid #F0F0F8" }}>
+              <tr
+                key={d.id}
+                style={{
+                  borderBottom: "1px solid var(--content-bg-secondary)",
+                }}
+              >
                 <td
                   style={{
                     padding: "11px 16px",
@@ -886,7 +906,8 @@ function DeploymentsTab({
             />
           </FormField>
           <FormField label="Environment">
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={inputStyle}
               value={form.environment}
               onChange={(e) =>
@@ -1007,7 +1028,10 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
                 borderRadius: 20,
                 fontSize: 12,
                 fontWeight: filter === v ? 600 : 400,
-                background: filter === v ? "var(--vyne-purple)" : "var(--content-secondary)",
+                background:
+                  filter === v
+                    ? "var(--vyne-purple)"
+                    : "var(--content-secondary)",
                 color: filter === v ? "#fff" : "var(--text-secondary)",
                 border: "none",
                 cursor: "pointer",
@@ -1068,7 +1092,9 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
             style={{
               padding: "12px 18px",
               borderBottom:
-                i < filtered.length - 1 ? "1px solid #F0F0F8" : "none",
+                i < filtered.length - 1
+                  ? "1px solid var(--content-bg-secondary)"
+                  : "none",
               display: "flex",
               alignItems: "center",
               gap: 14,
@@ -1253,7 +1279,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
                 justifyContent: "space-between",
                 marginTop: 12,
                 paddingTop: 10,
-                borderTop: "1px solid #F0F0F8",
+                borderTop: "1px solid var(--content-bg-secondary)",
               }}
             >
               <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
@@ -1551,14 +1577,51 @@ function demoDiffFor(pr: PullRequest): DiffFile[] {
     {
       path: `${pr.repoName.split("/").pop() ?? "src"}/lib/auth.ts`,
       lines: [
-        { kind: "hunk", content: `@@ -42,7 +42,9 @@ export async function signIn(...)` },
-        { kind: "ctx", old: 42, new: 42, content: "  const user = await db.user.findUnique({ where: { email } });" },
-        { kind: "ctx", old: 43, new: 43, content: "  if (!user) throw new AuthError('no-such-user');" },
-        { kind: "del", old: 44, content: "  const ok = await bcrypt.compare(pw, user.hash);" },
-        { kind: "add", new: 44, content: "  const ok = await argon2.verify(user.hash, pw);" },
-        { kind: "add", new: 45, content: "  await auditLog.record({ kind: 'signin', userId: user.id });" },
-        { kind: "ctx", old: 45, new: 46, content: "  if (!ok) throw new AuthError('bad-credentials');" },
-        { kind: "ctx", old: 46, new: 47, content: "  return issueSession(user);" },
+        {
+          kind: "hunk",
+          content: `@@ -42,7 +42,9 @@ export async function signIn(...)`,
+        },
+        {
+          kind: "ctx",
+          old: 42,
+          new: 42,
+          content:
+            "  const user = await db.user.findUnique({ where: { email } });",
+        },
+        {
+          kind: "ctx",
+          old: 43,
+          new: 43,
+          content: "  if (!user) throw new AuthError('no-such-user');",
+        },
+        {
+          kind: "del",
+          old: 44,
+          content: "  const ok = await bcrypt.compare(pw, user.hash);",
+        },
+        {
+          kind: "add",
+          new: 44,
+          content: "  const ok = await argon2.verify(user.hash, pw);",
+        },
+        {
+          kind: "add",
+          new: 45,
+          content:
+            "  await auditLog.record({ kind: 'signin', userId: user.id });",
+        },
+        {
+          kind: "ctx",
+          old: 45,
+          new: 46,
+          content: "  if (!ok) throw new AuthError('bad-credentials');",
+        },
+        {
+          kind: "ctx",
+          old: 46,
+          new: 47,
+          content: "  return issueSession(user);",
+        },
         { kind: "ctx", old: 47, new: 48, content: "}" },
       ],
     },
@@ -1569,8 +1632,17 @@ function demoDiffFor(pr: PullRequest): DiffFile[] {
         { kind: "add", new: 1, content: "import { db } from './db';" },
         { kind: "add", new: 2, content: "" },
         { kind: "add", new: 3, content: "export const auditLog = {" },
-        { kind: "add", new: 4, content: "  async record(event: { kind: string; userId: string }) {" },
-        { kind: "add", new: 5, content: "    await db.auditLog.create({ data: { ...event, at: new Date() } });" },
+        {
+          kind: "add",
+          new: 4,
+          content: "  async record(event: { kind: string; userId: string }) {",
+        },
+        {
+          kind: "add",
+          new: 5,
+          content:
+            "    await db.auditLog.create({ data: { ...event, at: new Date() } });",
+        },
         { kind: "add", new: 6, content: "  }," },
         { kind: "add", new: 7, content: "};" },
       ],

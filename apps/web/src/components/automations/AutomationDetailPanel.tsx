@@ -446,7 +446,8 @@ export default function AutomationDetailPanel(
                   outline: "none",
                 }}
               />
-              <button aria-label="Confirm"
+              <button
+                aria-label="Confirm"
                 onClick={handleNameSave}
                 style={{
                   background: "#06B6D4",
@@ -479,7 +480,13 @@ export default function AutomationDetailPanel(
             <div
               style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}
             >
-              <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {automation.name}
               </span>
               <button
@@ -529,7 +536,9 @@ export default function AutomationDetailPanel(
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <StatusBadge status={automation.status} />
           <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
-            <strong style={{ color: "var(--text-primary)" }}>{automation.runCount}</strong>{" "}
+            <strong style={{ color: "var(--text-primary)" }}>
+              {automation.runCount}
+            </strong>{" "}
             runs total
           </span>
           <span style={{ fontSize: 11, color: "var(--text-secondary)" }}>
@@ -568,7 +577,7 @@ export default function AutomationDetailPanel(
                 padding: "10px 14px",
                 fontSize: 12,
                 fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#06B6D4" : "#6B6B8A",
+                color: isActive ? "#06B6D4" : "var(--text-secondary)",
                 borderBottom: isActive
                   ? "2px solid #06B6D4"
                   : "2px solid transparent",

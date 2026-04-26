@@ -27,7 +27,11 @@ const TIERS = [
     name: "Authorized",
     revenue: "$0 - $50k ARR",
     margin: "10%",
-    benefits: ["Co-branded marketing kit", "Partner badge", "Quarterly business review"],
+    benefits: [
+      "Co-branded marketing kit",
+      "Partner badge",
+      "Quarterly business review",
+    ],
   },
   {
     name: "Silver",
@@ -55,24 +59,91 @@ const TIERS = [
 ];
 
 const ASSETS = [
-  { name: "VYNE Pitch Deck (16 slides)", size: "2.4 MB", type: "PDF", category: "Sales" },
-  { name: "ROI Calculator (XLS)", size: "180 KB", type: "Excel", category: "Sales" },
-  { name: "Battle cards vs. Slack/Jira/Notion", size: "1.1 MB", type: "PDF", category: "Sales" },
-  { name: "Brand kit (logos, colours)", size: "12 MB", type: "ZIP", category: "Marketing" },
-  { name: "Co-branded one-pager template", size: "4.2 MB", type: "Figma", category: "Marketing" },
-  { name: "Demo script + sandbox login", size: "84 KB", type: "PDF", category: "Enablement" },
-  { name: "Implementation playbook", size: "2.0 MB", type: "PDF", category: "Enablement" },
+  {
+    name: "VYNE Pitch Deck (16 slides)",
+    size: "2.4 MB",
+    type: "PDF",
+    category: "Sales",
+  },
+  {
+    name: "ROI Calculator (XLS)",
+    size: "180 KB",
+    type: "Excel",
+    category: "Sales",
+  },
+  {
+    name: "Battle cards vs. Slack/Jira/Notion",
+    size: "1.1 MB",
+    type: "PDF",
+    category: "Sales",
+  },
+  {
+    name: "Brand kit (logos, colours)",
+    size: "12 MB",
+    type: "ZIP",
+    category: "Marketing",
+  },
+  {
+    name: "Co-branded one-pager template",
+    size: "4.2 MB",
+    type: "Figma",
+    category: "Marketing",
+  },
+  {
+    name: "Demo script + sandbox login",
+    size: "84 KB",
+    type: "PDF",
+    category: "Enablement",
+  },
+  {
+    name: "Implementation playbook",
+    size: "2.0 MB",
+    type: "PDF",
+    category: "Enablement",
+  },
 ];
 
 const SAMPLE_DEALS: DealRow[] = [
-  { id: "d1", customer: "Acme Manufacturing", stage: "won", partner: "You", arr: "$48k", registered: "2026-02-12" },
-  { id: "d2", customer: "Northwind Logistics", stage: "qualified", partner: "You", arr: "$120k", registered: "2026-03-04" },
-  { id: "d3", customer: "Bluefin Robotics", stage: "registered", partner: "You", arr: "$24k", registered: "2026-04-09" },
+  {
+    id: "d1",
+    customer: "Acme Manufacturing",
+    stage: "won",
+    partner: "You",
+    arr: "$48k",
+    registered: "2026-02-12",
+  },
+  {
+    id: "d2",
+    customer: "Northwind Logistics",
+    stage: "qualified",
+    partner: "You",
+    arr: "$120k",
+    registered: "2026-03-04",
+  },
+  {
+    id: "d3",
+    customer: "Bluefin Robotics",
+    stage: "registered",
+    partner: "You",
+    arr: "$24k",
+    registered: "2026-04-09",
+  },
 ];
 
-const STAGE_STYLE: Record<DealRow["stage"], { label: string; bg: string; color: string }> = {
-  registered: { label: "Registered", bg: "rgba(59,130,246,0.15)", color: "#93C5FD" },
-  qualified: { label: "Qualified", bg: "rgba(245,158,11,0.15)", color: "#FCD34D" },
+const STAGE_STYLE: Record<
+  DealRow["stage"],
+  { label: string; bg: string; color: string }
+> = {
+  registered: {
+    label: "Registered",
+    bg: "rgba(59,130,246,0.15)",
+    color: "#93C5FD",
+  },
+  qualified: {
+    label: "Qualified",
+    bg: "rgba(245,158,11,0.15)",
+    color: "#FCD34D",
+  },
   won: { label: "Won", bg: "rgba(34,197,94,0.15)", color: "#4ADE80" },
   lost: { label: "Lost", bg: "rgba(239,68,68,0.15)", color: "#F87171" },
 };
@@ -160,9 +231,7 @@ export default function PartnersPage() {
             >
               V
             </div>
-            <span style={{ fontWeight: 700, fontSize: 16 }}>
-              VYNE Partners
-            </span>
+            <span style={{ fontWeight: 700, fontSize: 16 }}>VYNE Partners</span>
           </div>
         </div>
       </header>
@@ -246,9 +315,7 @@ export default function PartnersPage() {
                   padding: "9px 14px",
                   borderRadius: "8px 8px 0 0",
                   border: "none",
-                  background: active
-                    ? "rgba(6, 182, 212,0.12)"
-                    : "transparent",
+                  background: active ? "rgba(6, 182, 212,0.12)" : "transparent",
                   color: active ? "#67E8F9" : "rgba(255,255,255,0.55)",
                   fontSize: 13,
                   fontWeight: 600,
@@ -287,7 +354,8 @@ export default function PartnersPage() {
               }}
             >
               {TIERS.map((t, i) => {
-                const accent = ["#A0A0B8", "#67E8F9", "#FCD34D"][i] ?? "#fff";
+                const accent =
+                  ["var(--text-tertiary)", "#67E8F9", "#FCD34D"][i] ?? "#fff";
                 return (
                   <div
                     key={t.name}
@@ -418,7 +486,10 @@ export default function PartnersPage() {
                     border: "1px solid rgba(255,255,255,0.06)",
                   }}
                 >
-                  <p.icon size={18} style={{ color: "#22D3EE", marginBottom: 8 }} />
+                  <p.icon
+                    size={18}
+                    style={{ color: "#22D3EE", marginBottom: 8 }}
+                  />
                   <div
                     style={{
                       fontSize: 14,

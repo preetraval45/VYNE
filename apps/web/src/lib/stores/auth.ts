@@ -1,18 +1,55 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { authApi } from "@/lib/api/client";
+import { csrfFetch } from "@/lib/api/csrfFetch";
 import type { User } from "@/types";
 
-// ─── Cookie helpers — mirror token state into cookies so the Next.js
-// middleware can guard dashboard routes server-side. Client-side only.
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+// ─── Auth cookie writer (server-set, HttpOnly) ──────────────────
+//
+// Tokens used to be written from the client via document.cookie, which
+// meant any reflected XSS could read the session. We now POST to
+// /api/auth/session and the server sets `vyne-token` as
+// `HttpOnly; Secure; SameSite=Strict` — JS can no longer touch it.
+// The middleware (apps/web/src/middleware.ts) reads the cookie on every
+// dashboard navigation, so this works without changing the guard logic.
+//
+// `setAuthCookie` keeps its existing call sites; it just routes through
+// the server now and silently no-ops on SSR.
 
-function setAuthCookie(name: string, value: string | null) {
-  if (typeof document === "undefined") return;
-  if (value) {
-    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
-  } else {
-    document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Lax`;
+async function setAuthCookie(
+  name: "vyne-token" | "vyne-demo",
+  value: string | null,
+) {
+  if (globalThis.window === undefined) return;
+
+  // Clearing — DELETE both cookies. The route always expires both, which
+  // matches the previous behaviour where logout clears each one in turn.
+  if (value === null) {
+    try {
+      await csrfFetch("/api/auth/session", { method: "DELETE" });
+    } catch {
+      // Network failure — fall back to expiring whatever JS-readable
+      // cookie may still exist from older clients.
+      document.cookie = `${name}=; Path=/; Max-Age=0; SameSite=Strict; Secure`;
+    }
+    return;
+  }
+
+  const payload = name === "vyne-demo" ? { demo: true } : { token: value };
+  try {
+    // The very first POST has no CSRF cookie yet — the response
+    // installs one, so subsequent state-changing calls are protected.
+    await fetch("/api/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Best-effort: if the API call fails (offline, etc.) keep the
+    // existing in-memory store so the user isn't booted to login.
+    // The middleware will reject the next navigation, which is the
+    // correct fail-closed behaviour.
   }
 }
 
@@ -57,8 +94,9 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authApi.login(email, password);
           const { user, token, refreshToken } = response.data;
           set({ user, token, refreshToken, isLoading: false, error: null });
-          setAuthCookie("vyne-token", token);
-          setAuthCookie("vyne-demo", null);
+          // Await the server-set HttpOnly cookie before returning so the
+          // caller can router.push() into a guarded route immediately.
+          await setAuthCookie("vyne-token", token);
         } catch (err: unknown) {
           const message =
             err instanceof Error
@@ -77,8 +115,7 @@ export const useAuthStore = create<AuthStore>()(
           const response = await authApi.signup(data);
           const { user, token, refreshToken } = response.data;
           set({ user, token, refreshToken, isLoading: false, error: null });
-          setAuthCookie("vyne-token", token);
-          setAuthCookie("vyne-demo", null);
+          await setAuthCookie("vyne-token", token);
         } catch (err: unknown) {
           const message =
             err instanceof Error

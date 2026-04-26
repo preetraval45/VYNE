@@ -50,7 +50,7 @@ function getDocIcon(type: string) {
     return <FileText size={18} style={{ color: "#2980B9" }} />;
   if (type === "text/plain")
     return <FileText size={18} style={{ color: "var(--text-secondary)" }} />;
-  return <FileIcon size={18} style={{ color: "#A0A0B8" }} />;
+  return <FileIcon size={18} style={{ color: "var(--text-tertiary)" }} />;
 }
 
 // ─── Lightbox sub-component ──────────────────────────────────────
@@ -81,7 +81,8 @@ function Lightbox({
         cursor: "zoom-out",
       }}
     >
-      <button aria-label="Close"
+      <button
+        aria-label="Close"
         onClick={onClose}
         style={{
           position: "absolute",
@@ -139,7 +140,7 @@ function ImageAttachment({
           borderRadius: 8,
           overflow: "hidden",
           maxWidth: 320,
-          border: "1px solid #E8E8F0",
+          border: "1px solid var(--content-border)",
         }}
         onMouseEnter={(e) => {
           const overlay = e.currentTarget.querySelector(
@@ -223,19 +224,23 @@ function DocAttachment({
         padding: "10px 14px",
         borderRadius: 8,
         background: "var(--content-secondary)",
-        border: "1px solid #E8E8F0",
+        border: "1px solid var(--content-border)",
         cursor: "pointer",
         maxWidth: 300,
         textAlign: "left",
         transition: "background 0.15s, border-color 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+        (e.currentTarget as HTMLElement).style.background =
+          "var(--content-secondary)";
+        (e.currentTarget as HTMLElement).style.borderColor =
+          "var(--content-border)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "var(--content-bg-secondary)";
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+        (e.currentTarget as HTMLElement).style.background =
+          "var(--content-bg-secondary)";
+        (e.currentTarget as HTMLElement).style.borderColor =
+          "var(--content-border)";
       }}
     >
       <div
@@ -244,7 +249,7 @@ function DocAttachment({
           height: 36,
           borderRadius: 8,
           background: "var(--content-bg)",
-          border: "1px solid #E8E8F0",
+          border: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -267,11 +272,21 @@ function DocAttachment({
         >
           {attachment.filename}
         </p>
-        <p style={{ fontSize: 11, color: "#A0A0B8", margin: 0, marginTop: 2 }}>
+        <p
+          style={{
+            fontSize: 11,
+            color: "var(--text-tertiary)",
+            margin: 0,
+            marginTop: 2,
+          }}
+        >
           {formatSize(attachment.size)}
         </p>
       </div>
-      <Download size={14} style={{ color: "#A0A0B8", flexShrink: 0 }} />
+      <Download
+        size={14}
+        style={{ color: "var(--text-tertiary)", flexShrink: 0 }}
+      />
     </button>
   );
 }

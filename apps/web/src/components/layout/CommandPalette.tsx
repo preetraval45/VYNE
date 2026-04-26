@@ -284,8 +284,7 @@ function searchContactList(
 ): CommandItem[] {
   return MOCK_CONTACTS.filter(
     (c) =>
-      c.name.toLowerCase().includes(q) ||
-      c.email.toLowerCase().includes(q),
+      c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q),
   ).map((c) => ({
     id: `search-contact-${c.id}`,
     label: c.name,
@@ -454,12 +453,12 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
       )}
       style={{
         background: isSelected ? "rgba(6, 182, 212,0.15)" : "transparent",
-        color: isSelected ? "#FFFFFF" : "#A0A0B8",
+        color: isSelected ? "#FFFFFF" : "var(--text-tertiary)",
       }}
     >
       <span
         className="flex-shrink-0"
-        style={{ color: isSelected ? "#22D3EE" : "#6B6B8A" }}
+        style={{ color: isSelected ? "#22D3EE" : "var(--text-secondary)" }}
       >
         {item.icon}
       </span>
@@ -1284,11 +1283,21 @@ export function CommandPalette() {
                 <span style={{ fontSize: 13 }}>✨</span>
                 AI Search Mode
                 {aiLoading ? (
-                  <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)" }}>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      color: "rgba(255,255,255,0.4)",
+                    }}
+                  >
                     Asking Vyne…
                   </span>
                 ) : aiProvider ? (
-                  <span style={{ marginLeft: "auto", color: "rgba(255,255,255,0.4)" }}>
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      color: "rgba(255,255,255,0.4)",
+                    }}
+                  >
                     via {aiProvider}
                   </span>
                 ) : null}
@@ -1425,34 +1434,34 @@ export function CommandPalette() {
 
             {/* Results (hidden when AI search mode is active) */}
             {!isAiMode && (
-            <div className="max-h-[400px] overflow-y-auto content-scroll py-2">
-              {filteredItems.length === 0 ? (
-                <div
-                  className="px-4 py-8 text-center text-sm"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  No results for &quot;{query}&quot;
-                </div>
-              ) : (
-                Object.entries(grouped).map(([category, items]) => (
-                  <div key={category}>
-                    <SectionHeader category={category as ResultCategory} />
-                    {items.map((cmd) => {
-                      const globalIndex = filteredItems.indexOf(cmd);
-                      return (
-                        <ResultItem
-                          key={cmd.id}
-                          item={cmd}
-                          isSelected={globalIndex === selectedIndex}
-                          onSelect={() => runCommand(cmd)}
-                          onHover={() => setSelectedIndex(globalIndex)}
-                        />
-                      );
-                    })}
+              <div className="max-h-[400px] overflow-y-auto content-scroll py-2">
+                {filteredItems.length === 0 ? (
+                  <div
+                    className="px-4 py-8 text-center text-sm"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    No results for &quot;{query}&quot;
                   </div>
-                ))
-              )}
-            </div>
+                ) : (
+                  Object.entries(grouped).map(([category, items]) => (
+                    <div key={category}>
+                      <SectionHeader category={category as ResultCategory} />
+                      {items.map((cmd) => {
+                        const globalIndex = filteredItems.indexOf(cmd);
+                        return (
+                          <ResultItem
+                            key={cmd.id}
+                            item={cmd}
+                            isSelected={globalIndex === selectedIndex}
+                            onSelect={() => runCommand(cmd)}
+                            onHover={() => setSelectedIndex(globalIndex)}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </div>
             )}
 
             {/* Footer */}

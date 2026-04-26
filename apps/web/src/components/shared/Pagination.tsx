@@ -40,7 +40,7 @@ function PaginationStyles() {
   gap: 16px;
   padding: 12px 0;
   font-size: 13px;
-  color: var(--text-secondary, #6B6B8A);
+  color: var(--text-secondary, var(--text-secondary));
   flex-wrap: wrap;
 }
 
@@ -64,7 +64,7 @@ function PaginationStyles() {
   border: 1px solid var(--content-border, #E0E0EC);
   border-radius: 6px;
   background: var(--content-bg, #FFFFFF);
-  color: var(--text-primary, #1A1A2E);
+  color: var(--text-primary, var(--text-primary));
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -101,7 +101,7 @@ function PaginationStyles() {
   justify-content: center;
   min-width: 32px;
   height: 32px;
-  color: var(--text-tertiary, #A0A0B8);
+  color: var(--text-tertiary, var(--text-tertiary));
   font-size: 14px;
   user-select: none;
   letter-spacing: 2px;
@@ -113,7 +113,7 @@ function PaginationStyles() {
   border: 1px solid var(--content-border, #E0E0EC);
   border-radius: 6px;
   background: var(--content-bg, #FFFFFF);
-  color: var(--text-primary, #1A1A2E);
+  color: var(--text-primary, var(--text-primary));
   font-size: 13px;
   cursor: pointer;
   transition: border-color 0.15s ease;
@@ -132,7 +132,7 @@ function PaginationStyles() {
 [data-theme="dark"] .vyne-pagination__btn {
   background: var(--content-bg, #12121E);
   border-color: var(--content-border, #2A2A42);
-  color: var(--text-primary, #E8E8F0);
+  color: var(--text-primary, var(--content-border));
 }
 
 [data-theme="dark"] .vyne-pagination__btn:hover:not(:disabled):not(.vyne-pagination__btn--active) {
@@ -142,7 +142,7 @@ function PaginationStyles() {
 [data-theme="dark"] .vyne-pagination__size-select {
   background: var(--content-bg, #12121E);
   border-color: var(--content-border, #2A2A42);
-  color: var(--text-primary, #E8E8F0);
+  color: var(--text-primary, var(--content-border));
 }
 `,
       }}

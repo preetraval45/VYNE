@@ -106,7 +106,7 @@ export function MessageComposer({
         }
         case "Monday 9am": {
           sendAt = new Date(now);
-          const daysUntilMonday = ((1 - now.getDay() + 7) % 7) || 7;
+          const daysUntilMonday = (1 - now.getDay() + 7) % 7 || 7;
           sendAt.setDate(sendAt.getDate() + daysUntilMonday);
           sendAt.setHours(9, 0, 0, 0);
           break;
@@ -115,10 +115,21 @@ export function MessageComposer({
           sendAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
       }
       // Store scheduled message in localStorage for persistence
-      const scheduled = JSON.parse(localStorage.getItem("vyne-scheduled-messages") || "[]");
-      scheduled.push({ text: trimmed, sendAt: sendAt.toISOString(), scheduledFor });
-      localStorage.setItem("vyne-scheduled-messages", JSON.stringify(scheduled));
-      onSend(`📅 Scheduled for ${scheduledFor} (${sendAt.toLocaleString()}): ${trimmed}`);
+      const scheduled = JSON.parse(
+        localStorage.getItem("vyne-scheduled-messages") || "[]",
+      );
+      scheduled.push({
+        text: trimmed,
+        sendAt: sendAt.toISOString(),
+        scheduledFor,
+      });
+      localStorage.setItem(
+        "vyne-scheduled-messages",
+        JSON.stringify(scheduled),
+      );
+      onSend(
+        `📅 Scheduled for ${scheduledFor} (${sendAt.toLocaleString()}): ${trimmed}`,
+      );
       setScheduledFor(null);
     } else {
       onSend(trimmed, hasAttachments ? files : undefined);
@@ -188,7 +199,7 @@ export function MessageComposer({
     <div
       style={{
         padding: "12px 16px",
-        borderTop: "1px solid #E8E8F0",
+        borderTop: "1px solid var(--content-border)",
         flexShrink: 0,
       }}
     >
@@ -208,7 +219,8 @@ export function MessageComposer({
         >
           <Clock size={11} />
           Scheduled: {scheduledFor}
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={() => setScheduledFor(null)}
             style={{
               marginLeft: "auto",
@@ -247,7 +259,7 @@ export function MessageComposer({
             display: "flex",
             gap: 2,
             padding: "6px 10px",
-            borderBottom: "1px solid #F0F0F8",
+            borderBottom: "1px solid var(--content-bg-secondary)",
           }}
         >
           {[
@@ -297,7 +309,8 @@ export function MessageComposer({
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)";
               }}
             >
               {icon}
@@ -378,7 +391,7 @@ export function MessageComposer({
                 background:
                   files.length > 0 ? "rgba(6, 182, 212,0.1)" : "transparent",
                 cursor: "pointer",
-                color: files.length > 0 ? "#06B6D4" : "#A0A0B8",
+                color: files.length > 0 ? "#06B6D4" : "var(--text-tertiary)",
                 display: "flex",
               }}
               onMouseEnter={(e) => {
@@ -386,7 +399,8 @@ export function MessageComposer({
               }}
               onMouseLeave={(e) => {
                 if (files.length === 0)
-                  (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
               }}
             >
               <Paperclip size={15} />
@@ -408,11 +422,13 @@ export function MessageComposer({
               }}
               onMouseEnter={(e) => {
                 if (capturing === null) {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)";
                 }
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)";
               }}
             >
               <Mic size={15} />
@@ -434,11 +450,13 @@ export function MessageComposer({
               }}
               onMouseEnter={(e) => {
                 if (capturing === null) {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-purple)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)";
                 }
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--text-tertiary)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)";
               }}
             >
               <MonitorUp size={15} />
@@ -460,7 +478,8 @@ export function MessageComposer({
                   (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
                 }}
               >
                 <Smile size={15} />
@@ -487,7 +506,8 @@ export function MessageComposer({
                 (e.currentTarget as HTMLElement).style.color = "#06B6D4";
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)";
               }}
             >
               <AtSign size={15} />
@@ -504,7 +524,7 @@ export function MessageComposer({
                     ? "rgba(6, 182, 212,0.1)"
                     : "transparent",
                   cursor: "pointer",
-                  color: scheduleOpen ? "#06B6D4" : "#A0A0B8",
+                  color: scheduleOpen ? "#06B6D4" : "var(--text-tertiary)",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
@@ -512,7 +532,8 @@ export function MessageComposer({
                 }}
                 onMouseLeave={(e) => {
                   if (!scheduleOpen)
-                    (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-tertiary)";
                 }}
               >
                 <Clock size={15} />
@@ -524,7 +545,7 @@ export function MessageComposer({
                     bottom: "calc(100% + 6px)",
                     left: 0,
                     background: "var(--content-bg)",
-                    border: "1px solid #E8E8F0",
+                    border: "1px solid var(--content-border)",
                     borderRadius: 8,
                     padding: 6,
                     boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
@@ -588,7 +609,7 @@ export function MessageComposer({
               border: "none",
               cursor: canSend ? "pointer" : "default",
               background: canSend ? "#06B6D4" : "var(--content-border)",
-              color: canSend ? "#fff" : "#A0A0B8",
+              color: canSend ? "#fff" : "var(--text-tertiary)",
               display: "flex",
               alignItems: "center",
               gap: 5,

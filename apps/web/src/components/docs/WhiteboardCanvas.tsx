@@ -29,7 +29,15 @@ type Stroke =
       y2: number;
     };
 
-const COLORS = ["#06B6D4", "#22C55E", "#F59E0B", "#EF4444", "#3B82F6", "#EC4899", "#1A1A2E"];
+const COLORS = [
+  "#06B6D4",
+  "#22C55E",
+  "#F59E0B",
+  "#EF4444",
+  "#3B82F6",
+  "#EC4899",
+  "var(--text-primary)",
+];
 
 interface Props {
   initialStrokes?: Stroke[];
@@ -37,7 +45,11 @@ interface Props {
   height?: number;
 }
 
-export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Props) {
+export function WhiteboardCanvas({
+  initialStrokes,
+  onChange,
+  height = 360,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
   const startRef = useRef<{ x: number; y: number } | null>(null);
@@ -107,10 +119,7 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
     startRef.current = p;
 
     if (tool === "pen" || tool === "eraser") {
-      setStrokes((prev) => [
-        ...prev,
-        { tool, color, size, points: [p] },
-      ]);
+      setStrokes((prev) => [...prev, { tool, color, size, points: [p] }]);
     } else {
       setStrokes((prev) => [
         ...prev,
@@ -192,12 +201,14 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
           flexWrap: "wrap",
         }}
       >
-        {([
-          ["pen", Pencil],
-          ["rect", Square],
-          ["circle", Circle],
-          ["eraser", Eraser],
-        ] as const).map(([t, Icon]) => (
+        {(
+          [
+            ["pen", Pencil],
+            ["rect", Square],
+            ["circle", Circle],
+            ["eraser", Eraser],
+          ] as const
+        ).map(([t, Icon]) => (
           <button
             key={t}
             type="button"
@@ -214,7 +225,8 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
               border: "none",
               cursor: "pointer",
               background: tool === t ? "rgba(6, 182, 212,0.12)" : "transparent",
-              color: tool === t ? "var(--vyne-purple)" : "var(--text-secondary)",
+              color:
+                tool === t ? "var(--vyne-purple)" : "var(--text-secondary)",
             }}
           >
             <Icon size={14} />
@@ -242,7 +254,10 @@ export function WhiteboardCanvas({ initialStrokes, onChange, height = 360 }: Pro
               width: 20,
               height: 20,
               borderRadius: "50%",
-              border: color === c ? "2px solid var(--text-primary)" : "2px solid transparent",
+              border:
+                color === c
+                  ? "2px solid var(--text-primary)"
+                  : "2px solid transparent",
               background: c,
               cursor: "pointer",
             }}

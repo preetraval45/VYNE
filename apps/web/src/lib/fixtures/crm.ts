@@ -23,6 +23,13 @@ export interface Deal {
   nextAction: string;
   source: Source;
   notes: string;
+  /**
+   * Per-deal values for admin-defined custom fields (configured via the
+   * top-bar wrench → Customize → CRM module). Keyed by the field id from
+   * useCustomFieldsStore.schemas.crm.fields. Stays optional so existing
+   * mock data without it remains valid.
+   */
+  customFields?: Record<string, string>;
 }
 
 // ── Mock Data ────────────────────────────────────────────────────

@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreditCard, Check, ArrowUpRight, Download, Loader2 } from "lucide-react";
+import {
+  CreditCard,
+  Check,
+  ArrowUpRight,
+  Download,
+  Loader2,
+} from "lucide-react";
 import { billingApi } from "@/lib/api/client";
 
 // ─── Shared UI ───────────────────────────────────────────────────
@@ -33,7 +39,13 @@ function SectionCard({
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: "var(--text-primary)",
+          }}
+        >
           {title}
         </span>
         {action}
@@ -132,7 +144,9 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
       url.searchParams.delete("billing");
       window.history.replaceState({}, "", url.toString());
     } else if (billing === "demo") {
-      onToast("Stripe not configured — add STRIPE_SECRET_KEY to enable payments.");
+      onToast(
+        "Stripe not configured — add STRIPE_SECRET_KEY to enable payments.",
+      );
       const url = new URL(window.location.href);
       url.searchParams.delete("billing");
       window.history.replaceState({}, "", url.toString());
@@ -235,7 +249,9 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     border: isCurrent
                       ? "2px solid #06B6D4"
                       : "1px solid var(--content-border)",
-                    background: isCurrent ? "rgba(6, 182, 212,0.05)" : "var(--content-bg)",
+                    background: isCurrent
+                      ? "rgba(6, 182, 212,0.05)"
+                      : "var(--content-bg)",
                     position: "relative",
                   }}
                 >
@@ -291,7 +307,9 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         size={12}
                         style={{ color: "#16A34A", flexShrink: 0 }}
                       />
-                      <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                      <span
+                        style={{ fontSize: 12, color: "var(--text-secondary)" }}
+                      >
                         {f}
                       </span>
                     </div>
@@ -323,7 +341,9 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     <button
                       onClick={() =>
                         tier === "enterprise"
-                          ? onToast("Contact sales@vyne.ai for Enterprise pricing")
+                          ? onToast(
+                              "Contact sales@vyne.ai for Enterprise pricing",
+                            )
                           : handleUpgrade(tier)
                       }
                       disabled={upgrading === tier}
@@ -346,11 +366,18 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       }}
                     >
                       {upgrading === tier ? (
-                        <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                        <Loader2
+                          size={12}
+                          style={{ animation: "spin 1s linear infinite" }}
+                        />
                       ) : tier === "enterprise" ? (
-                        <>Contact Sales <ArrowUpRight size={12} /></>
+                        <>
+                          Contact Sales <ArrowUpRight size={12} />
+                        </>
                       ) : (
-                        <>Upgrade <ArrowUpRight size={12} /></>
+                        <>
+                          Upgrade <ArrowUpRight size={12} />
+                        </>
                       )}
                     </button>
                   )}
@@ -372,7 +399,13 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 Team Members
               </span>
             </div>
@@ -386,7 +419,13 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 Storage ({usageStats.storage.unit})
               </span>
             </div>
@@ -400,7 +439,13 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                 marginBottom: 6,
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-primary)" }}>
+              <span
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 API Calls {usageStats.apiCalls.unit}
               </span>
             </div>
@@ -433,7 +478,13 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
               <CreditCard size={16} style={{ color: "#fff" }} />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--text-primary)",
+                }}
+              >
                 Visa ending in 4242
               </div>
               <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
@@ -536,7 +587,8 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                   </span>
                 </td>
                 <td style={{ padding: "10px 0", textAlign: "right" }}>
-                  <button aria-label="Download"
+                  <button
+                    aria-label="Download"
                     onClick={() => onToast(`Downloading ${inv.id}...`)}
                     style={{
                       padding: "4px 6px",
@@ -552,7 +604,8 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       (e.currentTarget as HTMLElement).style.color = "#06B6D4";
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#A0A0B8";
+                      (e.currentTarget as HTMLElement).style.color =
+                        "var(--text-tertiary)";
                     }}
                   >
                     <Download size={13} />
@@ -710,8 +763,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
           }}
         >
           Display pricing, invoices, and billing reports in your reporting
-          currency. Stripe handles FX automatically on customer-facing
-          invoices.
+          currency. Stripe handles FX automatically on customer-facing invoices.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {(Object.keys(CURRENCY_RATES) as Currency[]).map((c) => {
@@ -729,14 +781,11 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                   background: active
                     ? "rgba(6, 182, 212,0.08)"
                     : "var(--content-bg)",
-                  color: active
-                    ? "var(--vyne-purple)"
-                    : "var(--text-primary)",
+                  color: active ? "var(--vyne-purple)" : "var(--text-primary)",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: "pointer",
-                  fontFamily:
-                    "var(--font-geist-mono), ui-monospace, monospace",
+                  fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
                 }}
               >
                 {m.symbol} {c}
@@ -862,9 +911,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                     type="button"
                     onClick={() =>
                       setTaxLocations((prev) =>
-                        active
-                          ? prev.filter((p) => p !== loc)
-                          : [...prev, loc],
+                        active ? prev.filter((p) => p !== loc) : [...prev, loc],
                       )
                     }
                     style={{
@@ -904,9 +951,15 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
         >
           <RecogStat label="Booked (6mo)" value={fmt(totalBooked)} />
           <RecogStat label="Recognized" value={fmt(totalRecognized)} accent />
-          <RecogStat label="Deferred" value={fmt(totalDeferred)} sub="On balance sheet" />
+          <RecogStat
+            label="Deferred"
+            value={fmt(totalDeferred)}
+            sub="On balance sheet"
+          />
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}
+        >
           <thead>
             <tr
               style={{
@@ -1019,7 +1072,8 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {meters.map((m, idx) => {
-            const cost = (m.used / (m.unit.includes("1k") ? 1000 : 1)) * m.pricePerUnit;
+            const cost =
+              (m.used / (m.unit.includes("1k") ? 1000 : 1)) * m.pricePerUnit;
             return (
               <div
                 key={m.key}
@@ -1055,7 +1109,9 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                     {m.key}
                   </code>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 3 }}
+                >
                   <span
                     style={{
                       fontSize: 10,
@@ -1257,10 +1313,19 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
               {SEED_ANOMALIES.map((a) => {
                 const sev =
                   a.severity === "high"
-                    ? { color: "var(--badge-danger-text)", bg: "var(--badge-danger-bg)" }
+                    ? {
+                        color: "var(--badge-danger-text)",
+                        bg: "var(--badge-danger-bg)",
+                      }
                     : a.severity === "medium"
-                      ? { color: "var(--badge-warning-text)", bg: "var(--badge-warning-bg)" }
-                      : { color: "var(--text-secondary)", bg: "var(--content-secondary)" };
+                      ? {
+                          color: "var(--badge-warning-text)",
+                          bg: "var(--badge-warning-bg)",
+                        }
+                      : {
+                          color: "var(--text-secondary)",
+                          bg: "var(--content-secondary)",
+                        };
                 return (
                   <div
                     key={a.id}
@@ -1364,7 +1429,9 @@ function RecogStat({
         padding: 14,
         borderRadius: 10,
         border: `1px solid ${accent ? "var(--badge-success-text)" : "var(--content-border)"}`,
-        background: accent ? "var(--badge-success-bg)" : "var(--content-secondary)",
+        background: accent
+          ? "var(--badge-success-bg)"
+          : "var(--content-secondary)",
       }}
     >
       <div

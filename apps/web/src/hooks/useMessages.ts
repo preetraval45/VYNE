@@ -302,10 +302,17 @@ export function useMessages(channelId: string | null, isDM = false) {
     const fetcher = isDM
       ? messagingApi.listDMMessages(channelId)
       : messagingApi.listMessages(channelId);
+    const stamp = (msgs: MsgMessage[]) =>
+      msgs.map((m) => ({
+        ...m,
+        ...(isDM
+          ? { dmId: m.dmId ?? channelId }
+          : { channelId: m.channelId ?? channelId }),
+      }));
     fetcher
-      .then((r) => setMessages(r.data.messages ?? []))
+      .then((r) => setMessages(stamp(r.data.messages ?? [])))
       .catch(() => {
-        setMessages(MOCK_MESSAGES[channelId] ?? []);
+        setMessages(stamp(MOCK_MESSAGES[channelId] ?? []));
       })
       .finally(() => setLoading(false));
   }, [channelId, isDM]);
@@ -379,34 +386,41 @@ export function useMessages(channelId: string | null, isDM = false) {
         createdAt: new Date().toISOString(),
         parentMessageId,
         attachments,
+        ...(isDM ? { dmId: channelId } : { channelId }),
       };
-      if (!parentMessageId) {
-        setMessages((prev) => [...prev, optimistic]);
-      }
+      setMessages((prev) => {
+        const next = [...prev, optimistic];
+        if (parentMessageId) {
+          return next.map((m) =>
+            m.id === parentMessageId
+              ? { ...m, replyCount: (m.replyCount ?? 0) + 1 }
+              : m,
+          );
+        }
+        return next;
+      });
       try {
         if (isDM) {
           const r = await messagingApi.sendDMMessage(channelId, content);
           setMessages((prev) =>
-            prev.map((m) => (m.id === optimistic.id ? r.data : m)),
+            prev.map((m) =>
+              m.id === optimistic.id
+                ? { ...r.data, dmId: r.data.dmId ?? channelId }
+                : m,
+            ),
           );
         } else {
           const r = await messagingApi.sendMessage(channelId, {
             content,
             parentMessageId,
           });
-          if (!parentMessageId) {
-            setMessages((prev) =>
-              prev.map((m) => (m.id === optimistic.id ? r.data : m)),
-            );
-          } else {
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === parentMessageId
-                  ? { ...m, replyCount: (m.replyCount ?? 0) + 1 }
-                  : m,
-              ),
-            );
-          }
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === optimistic.id
+                ? { ...r.data, channelId: r.data.channelId ?? channelId }
+                : m,
+            ),
+          );
         }
       } catch {
         // keep optimistic in dev (no backend)

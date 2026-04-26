@@ -4,18 +4,27 @@ import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Plus, Pencil, ArrowRight, TrendingUp, Search, Edit2, Check, XCircle } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  ArrowRight,
+  TrendingUp,
+  Search,
+  Edit2,
+  Check,
+  XCircle,
+} from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
-import { PageHeader, Pill, PrimaryLink, type Tone } from "@/components/shared/Kit";
+import {
+  PageHeader,
+  Pill,
+  PrimaryLink,
+  type Tone,
+} from "@/components/shared/Kit";
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
-import {
-  STAGES,
-  MOCK_ACTIVITIES,
-  type Stage,
-  type Deal,
-} from "@/lib/fixtures/crm";
+import { STAGES, type Stage, type Deal } from "@/lib/fixtures/crm";
 import {
   DetailPanel,
   DetailSection,
@@ -69,7 +78,7 @@ function stageColor(stage: Stage): string {
 
 function stageBg(stage: Stage): string {
   const map: Record<Stage, string> = {
-    Lead: "#F4F4F8",
+    Lead: "var(--content-bg-secondary)",
     Qualified: "#EFF6FF",
     Proposal: "#FFFBEB",
     Negotiation: "#F5F3FF",
@@ -109,7 +118,7 @@ function daysSince(isoDate: string): number {
 }
 
 function pillBg(isActive: boolean, s: Stage | "All"): string {
-  if (!isActive) return "#F4F4F8";
+  if (!isActive) return "var(--content-bg-secondary)";
   if (s === "All") return "rgba(6, 182, 212,0.1)";
   return stageBg(s);
 }
@@ -231,7 +240,8 @@ function PipelineTab({
                 const priority = priorityFromDays(days);
                 const daysColor = priorityColor(priority);
                 const showOrange = priority === "urgent";
-                const priorityWeightClass = priority === "normal" ? "font-normal" : "font-semibold";
+                const priorityWeightClass =
+                  priority === "normal" ? "font-normal" : "font-semibold";
 
                 return (
                   <button
@@ -247,20 +257,14 @@ function PipelineTab({
                       boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div
-                      className="text-xs font-bold mb-[3px] truncate text-text-primary"
-                    >
+                    <div className="text-xs font-bold mb-[3px] truncate text-text-primary">
                       {deal.company}
                     </div>
-                    <div
-                      className="text-[11px] mb-2 truncate text-text-secondary"
-                    >
+                    <div className="text-[11px] mb-2 truncate text-text-secondary">
                       {deal.contactName}
                     </div>
                     <div className="flex items-center justify-between">
-                      <span
-                        className="text-[13px] font-bold text-text-primary"
-                      >
+                      <span className="text-[13px] font-bold text-text-primary">
                         {fmt(deal.value)}
                       </span>
                       <span
@@ -271,9 +275,7 @@ function PipelineTab({
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]"
-                      >
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]">
                         {initials(deal.assignee)}
                       </div>
                       <span
@@ -451,42 +453,25 @@ function DealsTableTab({
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-[var(--table-header-bg)]">
-              <th
-                className={thClass}
-                onClick={() => toggleSort("company")}
-              >
+              <th className={thClass} onClick={() => toggleSort("company")}>
                 Company{sortArrow("company")}
               </th>
-              <th
-                className={thNoSortClass}
-              >Contact</th>
-              <th
-                className={thClass}
-                onClick={() => toggleSort("value")}
-              >
+              <th className={thNoSortClass}>Contact</th>
+              <th className={thClass} onClick={() => toggleSort("value")}>
                 Value{sortArrow("value")}
               </th>
-              <th
-                className={thClass}
-                onClick={() => toggleSort("stage")}
-              >
+              <th className={thClass} onClick={() => toggleSort("stage")}>
                 Stage{sortArrow("stage")}
               </th>
-              <th
-                className={thNoSortClass}
-              >Source</th>
-              <th
-                className={thNoSortClass}
-              >Assignee</th>
+              <th className={thNoSortClass}>Source</th>
+              <th className={thNoSortClass}>Assignee</th>
               <th
                 className={thClass}
                 onClick={() => toggleSort("lastActivity")}
               >
                 Last Activity{sortArrow("lastActivity")}
               </th>
-              <th
-                className={thNoSortClass}
-              >Actions</th>
+              <th className={thNoSortClass}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -494,7 +479,8 @@ function DealsTableTab({
               const days = daysSince(deal.lastActivity);
               const priority = priorityFromDays(days);
               const daysColor = priorityColor(priority);
-              const priorityWeightClass = priority === "normal" ? "font-normal" : "font-semibold";
+              const priorityWeightClass =
+                priority === "normal" ? "font-normal" : "font-semibold";
 
               return (
                 <tr
@@ -533,9 +519,7 @@ function DealsTableTab({
                       />
                     </span>
                   </td>
-                  <td
-                    className="px-[14px] py-[10px] text-xs text-text-secondary"
-                  >
+                  <td className="px-[14px] py-[10px] text-xs text-text-secondary">
                     <EditableCell
                       value={deal.contactName}
                       onSave={(v) => {
@@ -545,9 +529,7 @@ function DealsTableTab({
                       label="Contact name"
                     />
                   </td>
-                  <td
-                    className="px-[14px] py-[10px] text-xs font-bold whitespace-nowrap text-text-primary"
-                  >
+                  <td className="px-[14px] py-[10px] text-xs font-bold whitespace-nowrap text-text-primary">
                     <EditableCell
                       value={deal.value}
                       onSave={(v) => {
@@ -578,21 +560,15 @@ function DealsTableTab({
                       render={(v) => <StagePill stage={v as Stage} />}
                     />
                   </td>
-                  <td
-                    className="px-[14px] py-[10px] text-[11px] capitalize text-text-tertiary"
-                  >
+                  <td className="px-[14px] py-[10px] text-[11px] capitalize text-text-tertiary">
                     {deal.source}
                   </td>
                   <td className="px-[14px] py-[10px]">
                     <div className="flex items-center gap-1.5">
-                      <div
-                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]"
-                      >
+                      <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]">
                         {initials(deal.assignee)}
                       </div>
-                      <span
-                        className="text-xs text-text-primary"
-                      >
+                      <span className="text-xs text-text-primary">
                         {deal.assignee}
                       </span>
                     </div>
@@ -648,9 +624,7 @@ function DealsTableTab({
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <div
-            className="p-8 text-center text-[13px] text-text-tertiary"
-          >
+          <div className="p-8 text-center text-[13px] text-text-tertiary">
             No deals match your filters.
           </div>
         )}
@@ -731,21 +705,13 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
                 style={{ background: color }}
               />
             </div>
-            <div
-              className="text-2xl font-bold text-text-primary tracking-[-0.04em]" 
-            >
+            <div className="text-2xl font-bold text-text-primary tracking-[-0.04em]">
               {value}
             </div>
-            <div
-              className="text-xs font-semibold mt-1 text-text-primary"
-            >
+            <div className="text-xs font-semibold mt-1 text-text-primary">
               {label}
             </div>
-            <div
-              className="text-[11px] mt-0.5 text-text-tertiary"
-            >
-              {sub}
-            </div>
+            <div className="text-[11px] mt-0.5 text-text-tertiary">{sub}</div>
           </div>
         ))}
       </div>
@@ -759,9 +725,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
             border: "1px solid var(--content-border)",
           }}
         >
-          <div
-            className="text-[13px] font-bold mb-4 text-text-primary"
-          >
+          <div className="text-[13px] font-bold mb-4 text-text-primary">
             Pipeline by Stage
           </div>
           <div className="flex flex-col gap-3">
@@ -775,26 +739,18 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
                         className="w-2 h-2 rounded-full"
                         style={{ background: stageColor(stage) }}
                       />
-                      <span
-                        className="text-xs font-medium text-text-primary"
-                      >
+                      <span className="text-xs font-medium text-text-primary">
                         {stage}
                       </span>
-                      <span
-                        className="text-[11px] text-text-tertiary"
-                      >
+                      <span className="text-[11px] text-text-tertiary">
                         ({count})
                       </span>
                     </div>
-                    <span
-                      className="text-xs font-bold text-text-primary"
-                    >
+                    <span className="text-xs font-bold text-text-primary">
                       {fmt(total)}
                     </span>
                   </div>
-                  <div
-                    className="h-2 rounded overflow-hidden bg-[#F0F0F8]"
-                  >
+                  <div className="h-2 rounded overflow-hidden bg-[var(--content-bg-secondary)]">
                     <div
                       className="h-full rounded transition-[width] duration-[0.6s] ease-in-out"
                       style={{
@@ -817,9 +773,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
             border: "1px solid var(--content-border)",
           }}
         >
-          <div
-            className="text-[13px] font-bold mb-4 text-text-primary"
-          >
+          <div className="text-[13px] font-bold mb-4 text-text-primary">
             Top Deals by Value
           </div>
           <div className="flex flex-col">
@@ -827,29 +781,24 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
               <div
                 key={deal.id}
                 className="flex items-center gap-3 py-2.5"
-                style={{ borderTop: i === 0 ? "none" : "1px solid var(--content-border)" }}
+                style={{
+                  borderTop:
+                    i === 0 ? "none" : "1px solid var(--content-border)",
+                }}
               >
-                <span
-                  className="text-xs font-bold w-[18px] text-center text-text-tertiary"
-                >
+                <span className="text-xs font-bold w-[18px] text-center text-text-tertiary">
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div
-                    className="text-xs font-bold truncate text-text-primary"
-                  >
+                  <div className="text-xs font-bold truncate text-text-primary">
                     {deal.company}
                   </div>
-                  <div
-                    className="text-[11px] mt-px text-text-tertiary"
-                  >
+                  <div className="text-[11px] mt-px text-text-tertiary">
                     {deal.contactName}
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div
-                    className="text-[13px] font-bold text-text-primary"
-                  >
+                  <div className="text-[13px] font-bold text-text-primary">
                     {fmt(deal.value)}
                   </div>
                   <StagePill stage={deal.stage} />
@@ -870,7 +819,9 @@ function CRMPageInner() {
   const setDeals = useCRMStore((s) => s.setDeals);
   const updateDealInStore = useCRMStore((s) => s.updateDeal);
   const detail = useDetailParam();
-  const selectedDeal = detail.id ? deals.find((d) => d.id === detail.id) : undefined;
+  const selectedDeal = detail.id
+    ? deals.find((d) => d.id === detail.id)
+    : undefined;
 
   const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
     "pipeline",
@@ -1126,7 +1077,14 @@ function DealDetailPanel({
       {!deal ? null : (
         <>
           <DetailSection title="Deal value">
-            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
               <div>
                 <div
                   style={{
@@ -1139,18 +1097,34 @@ function DealDetailPanel({
                 >
                   ${deal.value.toLocaleString()}
                 </div>
-                <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 4,
+                  }}
+                >
                   {deal.probability}% probability
                 </div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div
                   className="text-aurora"
-                  style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-0.015em" }}
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                    letterSpacing: "-0.015em",
+                  }}
                 >
                   ${weighted.toLocaleString()}
                 </div>
-                <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "var(--text-tertiary)",
+                    marginTop: 2,
+                  }}
+                >
                   Weighted
                 </div>
               </div>
@@ -1159,10 +1133,16 @@ function DealDetailPanel({
 
           <DetailSection title="Details">
             <DetailRow label="Contact" value={deal.contactName} />
-            <DetailRow label="Email" value={deal.email || "—"} mono={!!deal.email} />
+            <DetailRow
+              label="Email"
+              value={deal.email || "—"}
+              mono={!!deal.email}
+            />
             <DetailRow label="Source" value={deal.source} />
             <DetailRow label="Assignee" value={deal.assignee} />
-            {deal.nextAction && <DetailRow label="Next action" value={deal.nextAction} />}
+            {deal.nextAction && (
+              <DetailRow label="Next action" value={deal.nextAction} />
+            )}
             <DetailRow
               label="Last activity"
               value={new Date(deal.lastActivity).toLocaleDateString()}

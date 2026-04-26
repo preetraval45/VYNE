@@ -45,7 +45,9 @@ function ViewToggleButton({
         fontSize: 12,
         fontWeight: active ? 600 : 400,
         background: active ? "rgba(6, 182, 212,0.1)" : "transparent",
-        color: active ? "#06B6D4" : "var(--text-secondary, #6B6B8A)",
+        color: active
+          ? "#06B6D4"
+          : "var(--text-secondary, var(--text-secondary))",
         cursor: "pointer",
         transition: "all 0.15s ease",
       }}
@@ -76,8 +78,10 @@ function FilterPill({
         borderRadius: 20,
         fontSize: 11,
         fontWeight: active ? 600 : 400,
-        background: active ? "#06B6D4" : "var(--content-secondary, #F8F8FC)",
-        color: active ? "#fff" : "var(--text-secondary, #6B6B8A)",
+        background: active
+          ? "#06B6D4"
+          : "var(--content-secondary, var(--content-bg-secondary))",
+        color: active ? "#fff" : "var(--text-secondary, var(--text-secondary))",
         border: "none",
         cursor: "pointer",
         display: "flex",
@@ -196,7 +200,7 @@ export default function RoadmapPage() {
     toast.success("Feature request submitted!", {
       style: {
         borderRadius: 10,
-        background: "#1A1A2E",
+        background: "var(--text-primary)",
         color: "#fff",
         fontSize: 13,
       },
@@ -300,7 +304,7 @@ export default function RoadmapPage() {
           <StatCard
             label="Planned"
             count={counts.planned}
-            dotColor="#A0A0B8"
+            dotColor="var(--text-tertiary)"
             bgColor="rgba(255,255,255,0.15)"
             textColor="#fff"
           />
@@ -318,7 +322,8 @@ export default function RoadmapPage() {
       <div
         style={{
           padding: "12px 28px",
-          borderBottom: "1px solid var(--content-border, #E8E8F0)",
+          borderBottom:
+            "1px solid var(--content-border, var(--content-border))",
           display: "flex",
           alignItems: "center",
           gap: 12,
@@ -331,7 +336,7 @@ export default function RoadmapPage() {
           style={{
             display: "flex",
             gap: 2,
-            background: "var(--content-secondary, #F8F8FC)",
+            background: "var(--content-secondary, var(--content-bg-secondary))",
             borderRadius: 10,
             padding: 3,
           }}
@@ -361,7 +366,7 @@ export default function RoadmapPage() {
           style={{
             width: 1,
             height: 24,
-            background: "var(--content-border, #E8E8F0)",
+            background: "var(--content-border, var(--content-border))",
           }}
         />
 
@@ -369,7 +374,7 @@ export default function RoadmapPage() {
         <div style={{ position: "relative" }}>
           <Search
             size={13}
-            color="var(--text-tertiary, #A0A0B8)"
+            color="var(--text-tertiary, var(--text-tertiary))"
             style={{
               position: "absolute",
               left: 10,
@@ -384,12 +389,13 @@ export default function RoadmapPage() {
             style={{
               padding: "6px 12px 6px 30px",
               borderRadius: 8,
-              border: "1px solid var(--content-border, #E8E8F0)",
+              border: "1px solid var(--content-border, var(--content-border))",
               fontSize: 12,
               outline: "none",
               width: 200,
-              background: "var(--content-secondary, #F8F8FC)",
-              color: "var(--text-primary, #1A1A2E)",
+              background:
+                "var(--content-secondary, var(--content-bg-secondary))",
+              color: "var(--text-primary, var(--text-primary))",
             }}
           />
         </div>
@@ -399,7 +405,7 @@ export default function RoadmapPage() {
           style={{
             width: 1,
             height: 24,
-            background: "var(--content-border, #E8E8F0)",
+            background: "var(--content-border, var(--content-border))",
           }}
         />
 
@@ -426,7 +432,7 @@ export default function RoadmapPage() {
           style={{
             width: 1,
             height: 24,
-            background: "var(--content-border, #E8E8F0)",
+            background: "var(--content-border, var(--content-border))",
           }}
         />
 
@@ -456,12 +462,13 @@ export default function RoadmapPage() {
         <div
           style={{
             padding: "6px 28px",
-            borderBottom: "1px solid var(--content-border, #E8E8F0)",
+            borderBottom:
+              "1px solid var(--content-border, var(--content-border))",
             display: "flex",
             alignItems: "center",
             gap: 8,
             fontSize: 12,
-            color: "var(--text-secondary, #6B6B8A)",
+            color: "var(--text-secondary, var(--text-secondary))",
             flexShrink: 0,
           }}
         >

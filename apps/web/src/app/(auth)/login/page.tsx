@@ -46,7 +46,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  function enterDemo() {
+  async function enterDemo() {
     setUser({
       id: "demo",
       name: "Preet Raval",
@@ -57,6 +57,19 @@ export default function LoginPage() {
     });
     setToken("demo-token");
     setRefreshToken("demo-refresh-token");
+    // Wait for the HttpOnly demo cookie to be issued by /api/auth/session
+    // before navigating; otherwise the middleware on /home will redirect
+    // back to /login because it can't see the cookie yet.
+    try {
+      await fetch("/api/auth/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ demo: true }),
+      });
+    } catch {
+      // Network failure is non-fatal — the user just has to retry.
+    }
     router.push("/home");
   }
 
@@ -89,14 +102,24 @@ export default function LoginPage() {
         <div
           aria-hidden="true"
           className="aurora-halo aurora-drift"
-          style={{ width: 720, height: 720, top: '10%', left: '50%', transform: 'translateX(-50%)' }}
+          style={{
+            width: 720,
+            height: 720,
+            top: "10%",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
         />
         <div
           aria-hidden="true"
           className="aurora-halo"
           style={{
-            width: 360, height: 360, bottom: '5%', right: '10%',
-            background: 'radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)',
+            width: 360,
+            height: 360,
+            bottom: "5%",
+            right: "10%",
+            background:
+              "radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)",
             opacity: 0.35,
           }}
         />
@@ -105,8 +128,10 @@ export default function LoginPage() {
           aria-hidden="true"
           className="absolute inset-0 grid-bg pointer-events-none"
           style={{
-            maskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
+            maskImage:
+              "radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)",
           }}
         />
 
@@ -119,14 +144,18 @@ export default function LoginPage() {
           {/* Logo + Heading */}
           <div className="flex flex-col items-center mb-10">
             <Link href="/" className="mb-5">
-              <VyneLogo variant="stacked" markSize={48} className="auth-logo text-white" />
+              <VyneLogo
+                variant="stacked"
+                markSize={48}
+                className="auth-logo text-white"
+              />
             </Link>
             <h1
               className="text-white"
               style={{
                 fontSize: 30,
                 fontWeight: 700,
-                letterSpacing: '-0.03em',
+                letterSpacing: "-0.03em",
                 lineHeight: 1.15,
               }}
             >
@@ -137,7 +166,7 @@ export default function LoginPage() {
               style={{
                 color: "rgba(255,255,255,0.55)",
                 fontSize: 14,
-                letterSpacing: '-0.005em',
+                letterSpacing: "-0.005em",
               }}
             >
               Sign in to your VYNE workspace
@@ -145,10 +174,7 @@ export default function LoginPage() {
           </div>
 
           {/* Card — glass + gradient hairline */}
-          <div
-            className="glass-panel"
-            style={{ padding: 32 }}
-          >
+          <div className="glass-panel" style={{ padding: 32 }}>
             {error && (
               <motion.div
                 key={error}
@@ -241,7 +267,7 @@ export default function LoginPage() {
                       showPassword ? "Hide password" : "Show password"
                     }
                     className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-white"
-                    style={{ color: "#6B6B8A" }}
+                    style={{ color: "var(--text-secondary)" }}
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -259,7 +285,7 @@ export default function LoginPage() {
                   "disabled:opacity-60 disabled:cursor-not-allowed",
                 )}
                 style={{
-                  padding: '12px 20px',
+                  padding: "12px 20px",
                   fontSize: 14,
                 }}
               >
@@ -303,7 +329,8 @@ export default function LoginPage() {
                 "hover:scale-[1.01] active:scale-[0.99]",
               )}
               style={{
-                background: "linear-gradient(135deg, rgba(6,182,212,0.10), rgba(6,182,212,0.04))",
+                background:
+                  "linear-gradient(135deg, rgba(6,182,212,0.10), rgba(6,182,212,0.04))",
                 border: "1px solid rgba(6,182,212,0.35)",
                 color: "#67E8F9",
                 boxShadow: "0 0 0 1px rgba(6,182,212,0.05) inset",
@@ -319,13 +346,13 @@ export default function LoginPage() {
             className="text-center text-sm mt-6"
             style={{ color: "rgba(255,255,255,0.5)" }}
           >
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account yet?{" "}
             <Link
               href="/signup"
               className="font-medium transition-colors hover:underline"
               style={{ color: "#67E8F9" }}
             >
-              Create workspace
+              Join the waitlist
             </Link>
           </p>
         </motion.div>

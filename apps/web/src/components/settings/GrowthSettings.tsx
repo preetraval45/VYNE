@@ -308,8 +308,8 @@ export default function GrowthSettings({ onToast }: Props) {
             lineHeight: 1.5,
           }}
         >
-          Customise the public sign-in page that visitors hit when they
-          navigate to your custom domain.
+          Customise the public sign-in page that visitors hit when they navigate
+          to your custom domain.
         </p>
         <Field label="Tagline">
           <input
@@ -406,7 +406,7 @@ export default function GrowthSettings({ onToast }: Props) {
               lineHeight: 1.5,
             }}
           >
-{embedSnippet}
+            {embedSnippet}
           </pre>
           <button
             type="button"
@@ -423,7 +423,7 @@ export default function GrowthSettings({ onToast }: Props) {
               borderRadius: 5,
               background: "rgba(255,255,255,0.1)",
               border: "1px solid rgba(255,255,255,0.15)",
-              color: copiedKey === "embed" ? "#4ADE80" : "#A0A0B8",
+              color: copiedKey === "embed" ? "#4ADE80" : "var(--text-tertiary)",
               fontSize: 10,
               fontWeight: 600,
               cursor: "pointer",
@@ -519,7 +519,11 @@ export default function GrowthSettings({ onToast }: Props) {
         >
           <Stat label="Tracked clicks" value="284" />
           <Stat label="Sign-ups" value="42" />
-          <Stat label="Paid conversions" value="11" sub="$1,250 in credit issued" />
+          <Stat
+            label="Paid conversions"
+            value="11"
+            sub="$1,250 in credit issued"
+          />
         </div>
 
         <div

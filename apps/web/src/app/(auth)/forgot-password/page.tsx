@@ -37,14 +37,22 @@ export default function ForgotPasswordPage() {
       <div
         aria-hidden="true"
         className="aurora-halo aurora-drift"
-        style={{ width: 620, height: 620, top: '15%', left: '50%', transform: 'translateX(-50%)' }}
+        style={{
+          width: 620,
+          height: 620,
+          top: "15%",
+          left: "50%",
+          transform: "translateX(-50%)",
+        }}
       />
       <div
         aria-hidden="true"
         className="absolute inset-0 grid-bg pointer-events-none"
         style={{
-          maskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)',
+          maskImage:
+            "radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 60% 60% at 50% 45%, #000 25%, transparent 75%)",
         }}
       />
 
@@ -56,11 +64,18 @@ export default function ForgotPasswordPage() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <VyneLogo variant="stacked" markSize={44} className="auth-logo text-white mb-1" />
+          <VyneLogo
+            variant="stacked"
+            markSize={44}
+            className="auth-logo text-white mb-1"
+          />
           <h1 className="text-2xl font-semibold text-white tracking-tight">
             {sent ? "Check your email" : "Reset your password"}
           </h1>
-          <p className="text-sm mt-1 text-center" style={{ color: "#A0A0B8" }}>
+          <p
+            className="text-sm mt-1 text-center"
+            style={{ color: "var(--text-tertiary)" }}
+          >
             {sent
               ? "We sent a password reset link to your email"
               : "Enter your email and we'll send you a reset link"}
@@ -87,12 +102,15 @@ export default function ForgotPasswordPage() {
               </div>
               <p
                 className="text-sm text-center mb-1"
-                style={{ color: "#A0A0B8" }}
+                style={{ color: "var(--text-tertiary)" }}
               >
                 We sent a reset link to
               </p>
               <p className="text-sm font-medium text-white mb-6">{email}</p>
-              <p className="text-xs text-center" style={{ color: "var(--text-secondary)" }}>
+              <p
+                className="text-xs text-center"
+                style={{ color: "var(--text-secondary)" }}
+              >
                 Didn&apos;t receive the email? Check your spam folder or{" "}
                 <button
                   onClick={() => {
@@ -131,7 +149,7 @@ export default function ForgotPasswordPage() {
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium mb-1.5"
-                    style={{ color: "#A0A0B8" }}
+                    style={{ color: "var(--text-tertiary)" }}
                   >
                     Email
                   </label>
@@ -169,7 +187,7 @@ export default function ForgotPasswordPage() {
                     "flex items-center justify-center gap-2",
                     "disabled:opacity-60 disabled:cursor-not-allowed",
                   )}
-                  style={{ padding: '11px 18px', fontSize: 14 }}
+                  style={{ padding: "11px 18px", fontSize: 14 }}
                 >
                   {isLoading ? (
                     <>

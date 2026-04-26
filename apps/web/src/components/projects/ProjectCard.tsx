@@ -150,7 +150,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* ─── Footer ──────────────────────────────── */}
       <div
         className="flex items-center justify-between pt-3"
-        style={{ borderTop: "1px solid #F0F0F8" }}
+        style={{ borderTop: "1px solid var(--content-bg-secondary)" }}
       >
         {/* Lead */}
         <div className="flex items-center gap-2">
