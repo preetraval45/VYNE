@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sunrise, ArrowRight, AlertTriangle } from "lucide-react";
+import { Sunrise, ArrowRight, AlertTriangle, CalendarCheck, Flame } from "lucide-react";
 import {
   STAT_CARDS,
   RECENT_ACTIVITY,

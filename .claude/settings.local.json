@@ -143,7 +143,15 @@
       "Bash(xargs -I{} ls -la {})",
       "Bash(sort -k5 -rn)",
       "Bash(awk '{print $5, $9}')",
-      "Bash(grep -n \"CRM Pipeline\\\\|Sales\\\\\" *$\\\\|Sales</h1\\\\|<h1\" apps/web/src/app/\\\\\\(dashboard\\\\\\)/sales/page.tsx)"
+      "Bash(grep -n \"CRM Pipeline\\\\|Sales\\\\\" *$\\\\|Sales</h1\\\\|<h1\" apps/web/src/app/\\\\\\(dashboard\\\\\\)/sales/page.tsx)",
+      "Bash(where vercel *)",
+      "Bash(vercel teams *)",
+      "Bash(sed -i 's/useState<\"table\" | \"kanban\">\\(\"table\"\\)/useState<\"table\" | \"kanban\">\\(\"kanban\"\\)/g' app/\\\\\\(dashboard\\\\\\)/manufacturing/page.tsx)",
+      "Bash(sed -i 's/useState<ViewMode>\\(\"timeline\"\\)/useState<ViewMode>\\(\"kanban\"\\)/g' app/\\\\\\(dashboard\\\\\\)/roadmap/page.tsx)",
+      "Bash(grep -rEn '<button\\(\\\\b[^>]*\\)?>$' --include=\"*.tsx\" .)",
+      "Bash(git commit -m 'feat\\(ui\\): teal-tinted surfaces + gradient layering in both themes *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
