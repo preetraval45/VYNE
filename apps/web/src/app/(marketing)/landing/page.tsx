@@ -441,7 +441,7 @@ function Hero() {
           }}
         >
           <Sparkles size={13} style={{ color: "#67E8F9" }} />
-          AI-native company OS
+          Team chat that knows your business
           <span
             style={{
               padding: "2px 9px",
@@ -471,9 +471,9 @@ function Hero() {
             marginBottom: 24,
           }}
         >
-          One workspace.
+          Slack for chat.
           <br />
-          <span className="aurora-text">AI that knows your company.</span>
+          <span className="aurora-text">VYNE for everything else.</span>
         </motion.h1>
 
         <motion.p
@@ -484,14 +484,14 @@ function Hero() {
             fontSize: "clamp(16px, 1.9vw, 19px)",
             lineHeight: 1.55,
             color: C.textSub,
-            maxWidth: 620,
+            maxWidth: 640,
             margin: "0 auto 44px",
             letterSpacing: "-0.005em",
           }}
         >
-          VYNE unifies chat, projects, docs, and CRM into one workspace — with a
-          built-in AI that actually reads your company data. ERP, Finance, and
-          HR are on the near roadmap.
+          Chat with built-in voice, video, screen-share, and AI that takes
+          meeting notes for you. Your CRM, projects, and docs live one click
+          away — every conversation can become a deal, task, or call log.
         </motion.p>
 
         <motion.div
@@ -578,45 +578,45 @@ function Hero() {
 const features = [
   {
     icon: MessageSquare,
-    title: "Team Messaging",
-    desc: "Channels, DMs, threads, and file sharing with AI-powered thread summaries.",
-    replaces: "Slack",
+    title: "Chat with calls built in",
+    desc: "Voice, video, and screen-share inside every channel and DM. Hold-to-record voice notes. No app switching, no Zoom links.",
+    replaces: "Slack + Zoom",
     color: "#06B6D4",
   },
   {
+    icon: Bot,
+    title: "VYNE AI takes notes for you",
+    desc: "Live transcription during calls, action-item detection, post-meeting recap with summary + decisions. Smart-reply chips for chat.",
+    replaces: "Otter + Fireflies",
+    color: "#EC4899",
+  },
+  {
     icon: FolderKanban,
-    title: "Project Management",
-    desc: "Kanban boards, sprints, issue tracking, and roadmaps for engineering teams.",
-    replaces: "Jira",
+    title: "CRM lives one click away",
+    desc: "Type /contact, /deal, or /log-call in chat. Every conversation flows into your pipeline. Bookmark messages, translate inline.",
+    replaces: "HubSpot + Slack",
     color: "#0891B2",
   },
   {
     icon: FileText,
-    title: "Documents & Wiki",
-    desc: "Rich text editor, nested pages, databases, and search across everything.",
-    replaces: "Notion",
-    color: "#06B6D4",
-  },
-  {
-    icon: Package,
-    title: "ERP & Inventory",
-    desc: "Purchase orders, vendors, stock levels, and fulfillment — real-time alerts.",
-    replaces: "NetSuite",
-    color: "#F59E0B",
-  },
-  {
-    icon: BarChart3,
-    title: "Finance & Invoicing",
-    desc: "General ledger, invoicing, expenses, and financial reports in one place.",
-    replaces: "QuickBooks",
+    title: "Projects + Docs unified",
+    desc: "Kanban boards, sprints, and rich docs share the same database. Tasks created from chat appear instantly on your board.",
+    replaces: "Jira + Notion",
     color: "#22C55E",
   },
   {
-    icon: Bot,
-    title: "AI Command Center",
-    desc: "Cross-domain intelligence that connects chat, tasks, code, and revenue data.",
-    replaces: "Datadog",
-    color: "#EC4899",
+    icon: Package,
+    title: "ERP + Finance for SMBs",
+    desc: "Inventory, orders, invoicing, and a basic ledger — for teams who outgrew spreadsheets but aren't ready for NetSuite.",
+    replaces: "QuickBooks",
+    color: "#F59E0B",
+  },
+  {
+    icon: Sparkles,
+    title: "AI that knows your business",
+    desc: "Cross-domain agent connects chat, deals, projects, and finance. Ask 'where are we on Acme?' and get a real answer.",
+    replaces: "Datadog AI",
+    color: "#A78BFA",
   },
 ];
 
@@ -632,15 +632,15 @@ function Features() {
     >
       <div style={{ maxWidth: 1120, margin: "0 auto" }}>
         <SectionHeader
-          eyebrow="Modules"
+          eyebrow="What's in the box"
           title={
             <>
-              Six tools.
+              Chat that does what
               <br />
-              <span className="aurora-text">One platform.</span>
+              <span className="aurora-text">Slack and Teams can't.</span>
             </>
           }
-          subtitle="Every module shares the same database, the same AI, and the same context."
+          subtitle="Voice, video, screen-share, AI meeting notes, and live transcripts — built in. Slash commands turn any message into a CRM contact, deal, or call log."
         />
 
         <div
