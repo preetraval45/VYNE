@@ -509,7 +509,7 @@ function OverviewTab({
   // Dev looks quieter than Production, 7d denser than 1h.
   const eMul = env ? envMultiplier(env) : 1;
   const rMul = timeRange ? Math.min(2, 0.6 + rangeMultiplier(timeRange) / 80) : 1;
-  const scaleBars = (bars: number[]) =>
+  const scaleBars = (bars: readonly number[]) =>
     bars.map((b) => Math.max(2, Math.min(100, b * eMul * rMul)));
   const scaledRequestBars = scaleBars(REQUEST_BARS);
   const scaledErrorBars = scaleBars(ERROR_BARS);

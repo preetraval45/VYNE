@@ -50,6 +50,15 @@ export function IssueCard({ issue, isDragging = false }: IssueCardProps) {
           whileHover={{ boxShadow: "0 4px 12px rgba(0,0,0,0.1)", y: -1 }}
           transition={{ duration: 0.12 }}
           onClick={() => setPanelOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setPanelOpen(true);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open issue ${issue.identifier} — ${issue.title}`}
           className={cn(
             "group p-3 rounded-lg cursor-pointer select-none",
             isSortableDragging && "opacity-40",

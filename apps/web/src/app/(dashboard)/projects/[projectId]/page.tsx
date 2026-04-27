@@ -831,6 +831,15 @@ function TaskListView({
                 className="group cursor-pointer"
                 style={{ borderBottom: "1px solid var(--content-border)" }}
                 onClick={() => onTaskClick(task.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onTaskClick(task.id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open task ${task.key} — ${task.title}`}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
                     "var(--content-secondary)";
@@ -1347,6 +1356,15 @@ function BoardCard({
       }}
       transition={{ duration: 0.15 }}
       onClick={() => onTaskClick(task.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onTaskClick(task.id);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open task ${task.key} — ${task.title}`}
       className="group p-3.5 rounded-xl cursor-pointer select-none"
       style={{
         background: "var(--content-bg)",

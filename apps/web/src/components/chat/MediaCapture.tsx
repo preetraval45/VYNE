@@ -129,7 +129,26 @@ export function MediaCaptureRecorder({ kind, onComplete, onCancel }: Props) {
       setState("recording");
       setElapsed(0);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not access device");
+      const err = e as DOMException & { name?: string; message?: string };
+      const name = err.name ?? "";
+      let msg: string;
+      if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+        msg =
+          kind === "audio"
+            ? "Mic permission was blocked. Click the camera/mic icon in your browser's address bar → Allow, then try again."
+            : "Screen-share permission was blocked or canceled. Try again and pick a window/tab to share.";
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        msg = "No microphone was found. Connect a device and try again.";
+      } else if (name === "NotReadableError" || name === "TrackStartError") {
+        msg = "Mic is in use by another app (Zoom, Meet, Teams). Close it and try again.";
+      } else if (name === "AbortError") {
+        msg = "Recording was canceled.";
+      } else if (name === "SecurityError") {
+        msg = "Browser blocked media access — this usually means the page isn't on HTTPS.";
+      } else {
+        msg = err.message || "Could not access device";
+      }
+      setError(msg);
       setState("error");
     }
   }, [kind, onComplete]);

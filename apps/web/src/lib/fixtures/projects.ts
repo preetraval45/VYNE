@@ -8,6 +8,7 @@ export interface TeamMember {
   role: string;
   color: string;
   avatarUrl?: string;
+  email?: string;
 }
 
 export interface Subtask {
@@ -123,6 +124,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "PR",
     role: "Founder / Lead",
     color: "#06B6D4",
+    email: "preet@vyne.app",
   },
   {
     id: "u2",
@@ -130,6 +132,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "SK",
     role: "Frontend Engineer",
     color: "#22C55E",
+    email: "sarah@vyne.app",
   },
   {
     id: "u3",
@@ -137,6 +140,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "TM",
     role: "Backend Engineer",
     color: "#F59E0B",
+    email: "tony@vyne.app",
   },
   {
     id: "u4",
@@ -144,6 +148,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "AR",
     role: "DevOps Engineer",
     color: "#3B82F6",
+    email: "alex@vyne.app",
   },
   {
     id: "u5",
@@ -151,6 +156,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "EW",
     role: "Designer",
     color: "#EC4899",
+    email: "emma@vyne.app",
   },
   {
     id: "u6",
@@ -158,6 +164,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     initials: "JC",
     role: "ML Engineer",
     color: "#8B5CF6",
+    email: "james@vyne.app",
   },
 ];
 

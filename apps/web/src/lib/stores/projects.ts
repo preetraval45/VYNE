@@ -251,8 +251,13 @@ export const useProjectsStore = create<ProjectsState>()(
 
 export const useProjects = () => useProjectsStore((s) => s.projects);
 
-export const useProject = (id: string) =>
-  useProjectsStore((s) => s.projects.find((p) => p.id === id));
+// Subscribe to the stable `projects` array, then derive with useMemo —
+// future-proofs against any store change that rebuilds items on each set
+// (e.g. immer in patches mode), which would otherwise trip React #185.
+export const useProject = (id: string) => {
+  const projects = useProjectsStore((s) => s.projects);
+  return useMemo(() => projects.find((p) => p.id === id), [projects, id]);
+};
 
 // IMPORTANT: select the stable `tasks` array first, then derive with useMemo.
 // Returning `s.tasks.filter(...)` directly produces a new array per call,
@@ -263,7 +268,9 @@ export const useProjectTasks = (projectId: string) => {
   return useMemo(() => tasks.filter((t) => t.projectId === projectId), [tasks, projectId]);
 };
 
-export const useTask = (taskId: string) =>
-  useProjectsStore((s) => s.tasks.find((t) => t.id === taskId));
+export const useTask = (taskId: string) => {
+  const tasks = useProjectsStore((s) => s.tasks);
+  return useMemo(() => tasks.find((t) => t.id === taskId), [tasks, taskId]);
+};
 
 export const useTeamMembers = () => useProjectsStore((s) => s.teamMembers);

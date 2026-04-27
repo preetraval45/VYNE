@@ -159,7 +159,11 @@ export async function rateLimit(
       await redis.expire(bucketKey, opts.windowSec);
       ttl = opts.windowSec;
     } else {
-      const t = await redis.ttl(bucketKey);
+      // @upstash/redis exposes `ttl` at runtime but the bundled types in some
+      // versions omit it — cast through the runtime shape to keep accurate
+      // reset-in-sec without bumping the package.
+      const ttlFn = (redis as unknown as { ttl: (k: string) => Promise<number> }).ttl;
+      const t = ttlFn ? await ttlFn.call(redis, bucketKey) : -1;
       ttl = typeof t === "number" && t > 0 ? t : opts.windowSec;
     }
   } else {

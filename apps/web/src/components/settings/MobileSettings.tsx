@@ -833,7 +833,21 @@ function QrScannerModal({
         };
         requestAnimationFrame(tick);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Camera access denied";
+        const err = e as DOMException & { name?: string; message?: string };
+        const name = err.name ?? "";
+        let msg: string;
+        if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+          msg =
+            "Camera permission was blocked. Tap the camera icon in your browser's address bar → Allow, then reopen the scanner.";
+        } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+          msg = "No camera was found on this device.";
+        } else if (name === "NotReadableError") {
+          msg = "Camera is in use by another app. Close it and try again.";
+        } else if (name === "SecurityError") {
+          msg = "Camera blocked — the page must be on HTTPS.";
+        } else {
+          msg = err.message || "Camera access denied";
+        }
         setError(msg);
       }
     }
