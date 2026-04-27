@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUnreadStore } from "@/lib/stores/unread";
+import { useSentMessagesStore } from "@/lib/stores/sentMessages";
 import {
   messagingApi,
   type MsgChannel,
@@ -97,7 +98,28 @@ const MOCK_MESSAGES: Record<string, MsgMessage[]> = {
         { emoji: "🎉", count: 4, userReacted: false },
         { emoji: "👍", count: 2, userReacted: true },
       ],
-      replyCount: 3,
+    },
+    // Real reply messages threaded under m1 — count is computed live
+    {
+      id: "m1-r1",
+      author: { id: "u3", name: "Tony M." },
+      content: "Big win 🚀 — what slipped to next sprint?",
+      createdAt: new Date(Date.now() - 3500000).toISOString(),
+      parentMessageId: "m1",
+    },
+    {
+      id: "m1-r2",
+      author: { id: "u2", name: "Sarah K." },
+      content: "Just the billing API polish — moved to v1.5.",
+      createdAt: new Date(Date.now() - 3450000).toISOString(),
+      parentMessageId: "m1",
+    },
+    {
+      id: "m1-r3",
+      author: { id: "u4", name: "Alex R." },
+      content: "Let's celebrate at lunch 🍕",
+      createdAt: new Date(Date.now() - 3400000).toISOString(),
+      parentMessageId: "m1",
     },
     {
       id: "m2",
@@ -118,7 +140,14 @@ const MOCK_MESSAGES: Record<string, MsgMessage[]> = {
       content:
         "Nice work Tony! Can we do a quick post-mortem on yesterday's IAM issue?",
       createdAt: new Date(Date.now() - 1800000).toISOString(),
-      replyCount: 1,
+    },
+    // Real reply under m4
+    {
+      id: "m4-r1",
+      author: { id: "u3", name: "Tony M." },
+      content: "Yes — sharing the timeline now. Root cause was the IAM role.",
+      createdAt: new Date(Date.now() - 1750000).toISOString(),
+      parentMessageId: "m4",
     },
     {
       id: "m5",
@@ -325,7 +354,7 @@ export function useMessages(channelId: string | null, isDM = false) {
   const socketRef = useRef<Socket | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load initial messages
+  // Load initial messages — merges API/mock + previously-sent (persisted) messages
   useEffect(() => {
     if (!channelId) {
       setMessages([]);
@@ -342,10 +371,16 @@ export function useMessages(channelId: string | null, isDM = false) {
           ? { dmId: m.dmId ?? channelId }
           : { channelId: m.channelId ?? channelId }),
       }));
+    const sent = useSentMessagesStore.getState().forChannel(channelId);
+    const mergeWithSent = (base: MsgMessage[]) => {
+      // Sent messages take priority (they're "ours") — append to base, avoid id collisions
+      const baseIds = new Set(base.map((m) => m.id));
+      return [...base, ...sent.filter((m) => !baseIds.has(m.id))];
+    };
     fetcher
-      .then((r) => setMessages(stamp(r.data.messages ?? [])))
+      .then((r) => setMessages(mergeWithSent(stamp(r.data.messages ?? []))))
       .catch(() => {
-        setMessages(stamp(MOCK_MESSAGES[channelId] ?? []));
+        setMessages(mergeWithSent(stamp(MOCK_MESSAGES[channelId] ?? [])));
       })
       .finally(() => setLoading(false));
   }, [channelId, isDM]);
@@ -432,31 +467,36 @@ export function useMessages(channelId: string | null, isDM = false) {
         }
         return next;
       });
+      // Persist so the message survives a refresh (demo mode w/o real backend)
+      useSentMessagesStore.getState().push(channelId, optimistic);
       try {
         if (isDM) {
           const r = await messagingApi.sendDMMessage(channelId, content);
+          const echo = { ...r.data, dmId: r.data.dmId ?? channelId };
           setMessages((prev) =>
-            prev.map((m) =>
-              m.id === optimistic.id
-                ? { ...r.data, dmId: r.data.dmId ?? channelId }
-                : m,
-            ),
+            prev.map((m) => (m.id === optimistic.id ? echo : m)),
           );
+          useSentMessagesStore
+            .getState()
+            .replace(channelId, optimistic.id, echo);
         } else {
           const r = await messagingApi.sendMessage(channelId, {
             content,
             parentMessageId,
           });
+          const echo = {
+            ...r.data,
+            channelId: r.data.channelId ?? channelId,
+          };
           setMessages((prev) =>
-            prev.map((m) =>
-              m.id === optimistic.id
-                ? { ...r.data, channelId: r.data.channelId ?? channelId }
-                : m,
-            ),
+            prev.map((m) => (m.id === optimistic.id ? echo : m)),
           );
+          useSentMessagesStore
+            .getState()
+            .replace(channelId, optimistic.id, echo);
         }
       } catch {
-        // keep optimistic in dev (no backend)
+        // keep optimistic in dev (no backend) — already persisted above
       }
     },
     [channelId, isDM],
