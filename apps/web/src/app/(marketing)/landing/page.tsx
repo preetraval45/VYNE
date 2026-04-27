@@ -211,7 +211,7 @@ function Nav() {
         {(
           [
             ["#features", "Features"],
-            ["#comparison", "Compare"],
+            ["#comparison", "Integrations"],
             ["#pricing", "Pricing"],
             ["#faq", "FAQ"],
           ] as const
@@ -321,7 +321,7 @@ function Nav() {
           >
             {[
               ["#features", "Features"],
-              ["#comparison", "Compare"],
+              ["#comparison", "Integrations"],
               ["#pricing", "Pricing"],
               ["#faq", "FAQ"],
             ].map(([href, label]) => (
@@ -933,94 +933,52 @@ function AIDifferentiator() {
   );
 }
 
-/* ─── Comparison Table ───────────────────────────────────────── */
-const comparisonRows = [
+/* ─── How VYNE fits in your stack ─────────────────────────────
+ * Replaces the old "Why pay for 6 tools" comparison. VYNE doesn't
+ * displace these systems — it plugs into them and pulls events
+ * onto one correlated timeline. */
+const integrationRows = [
   {
-    feature: "Team Messaging",
-    vyne: true,
-    slack: true,
-    jira: false,
-    notion: false,
+    tool: "GitHub",
+    pulls: "Pushes, PRs, deploys, workflow runs",
+    asks: "“Which deploy preceded the alert that paged me?”",
   },
   {
-    feature: "Project Management",
-    vyne: true,
-    slack: false,
-    jira: true,
-    notion: "Partial",
+    tool: "Sentry",
+    pulls: "Errors, alert firings, regressions",
+    asks: "“Which customers were affected by this error spike?”",
   },
   {
-    feature: "Documents & Wiki",
-    vyne: true,
-    slack: false,
-    jira: false,
-    notion: true,
+    tool: "Datadog",
+    pulls: "Metrics, anomalies, SLO breaches",
+    asks: "“What shipped 30 min before this latency spike?”",
   },
   {
-    feature: "ERP / Inventory",
-    vyne: true,
-    slack: false,
-    jira: false,
-    notion: false,
+    tool: "HubSpot",
+    pulls: "Deals, contacts, lifecycle events",
+    asks: "“Did our new release affect deal velocity?”",
   },
   {
-    feature: "Finance & Invoicing",
-    vyne: true,
-    slack: false,
-    jira: false,
-    notion: false,
+    tool: "Stripe",
+    pulls: "Charges, subscriptions, churn signals",
+    asks: "“Which incidents preceded this MRR drop?”",
   },
   {
-    feature: "AI Cross-Domain Alerts",
-    vyne: true,
-    slack: false,
-    jira: false,
-    notion: false,
+    tool: "Linear",
+    pulls: "Issues, cycles, blockers",
+    asks: "“Which tickets are blocking which customers?”",
   },
   {
-    feature: "Single Sign-On",
-    vyne: true,
-    slack: "Paid",
-    jira: "Paid",
-    notion: "Paid",
+    tool: "PagerDuty",
+    pulls: "Incidents, on-call schedules",
+    asks: "“What was happening when this incident fired?”",
   },
   {
-    feature: "Cost (10 users/mo)",
-    vyne: "$120",
-    slack: "$88",
-    jira: "$78",
-    notion: "$100",
-  },
-  {
-    feature: "Total (all tools)",
-    vyne: "$120",
-    slack: "",
-    jira: "",
-    notion: "$366+",
+    tool: "Slack",
+    pulls: "Channel + DM activity (read-only)",
+    asks: "“Did anyone mention this customer in the last week?”",
   },
 ];
-
-function CellValue({ value }: { value: boolean | string }) {
-  if (value === true)
-    return (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Check size={16} color={C.success} strokeWidth={2.5} />
-      </div>
-    );
-  if (value === false)
-    return (
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <X size={16} color={C.textMuted} strokeWidth={2} />
-      </div>
-    );
-  return (
-    <span
-      style={{ fontSize: 13, color: C.textSub, fontFamily: "var(--font-mono)" }}
-    >
-      {value}
-    </span>
-  );
-}
 
 function Comparison() {
   return (
@@ -1028,15 +986,17 @@ function Comparison() {
       id="comparison"
       style={{ padding: "120px 24px", background: C.bg }}
     >
-      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div style={{ maxWidth: 1040, margin: "0 auto" }}>
         <SectionHeader
-          eyebrow="Comparison"
+          eyebrow="How VYNE fits in your stack"
           title={
             <>
-              Why pay for <span className="aurora-text">six tools?</span>
+              Keep what works.
+              <br />
+              <span className="aurora-text">Add the layer that makes it talk.</span>
             </>
           }
-          subtitle="VYNE gives you everything in one subscription."
+          subtitle="Customers don't rip out Jira on a deploy day. VYNE plugs into the systems you already run, pulls every event onto one timeline, and lets AI answer cross-system questions you couldn't even ask before."
         />
 
         <div
@@ -1056,59 +1016,65 @@ function Comparison() {
             <thead>
               <tr
                 style={{
-                  background: "rgba(6,182,212,0.08)",
+                  background: "rgba(108, 71, 255, 0.08)",
                   borderBottom: `1px solid ${C.border}`,
                 }}
               >
-                <th style={thCell("left")}>Feature</th>
-                <th
-                  style={{
-                    ...thCell("center"),
-                    color: "#A5F3FC",
-                    fontWeight: 700,
-                    fontSize: 14,
-                  }}
-                >
-                  <span className="aurora-text" style={{ fontWeight: 700 }}>
-                    VYNE
-                  </span>
-                </th>
-                <th style={thCell("center")}>Slack</th>
-                <th style={thCell("center")}>Jira</th>
-                <th style={thCell("center")}>Notion</th>
+                <th style={thCell("left")}>Tool</th>
+                <th style={thCell("left")}>What VYNE pulls in</th>
+                <th style={thCell("left")}>Questions you can ask</th>
               </tr>
             </thead>
             <tbody>
-              {comparisonRows.map((row, i) => (
+              {integrationRows.map((row, i) => (
                 <tr
-                  key={row.feature}
+                  key={row.tool}
                   style={{
                     borderBottom:
-                      i < comparisonRows.length - 1
+                      i < integrationRows.length - 1
                         ? `1px solid ${C.border}`
                         : "none",
                     background:
                       i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)",
                   }}
                 >
-                  <td style={tdCell("left", C.text)}>{row.feature}</td>
-                  <td style={tdCell("center")}>
-                    <CellValue value={row.vyne} />
+                  <td
+                    style={{
+                      ...tdCell("left", C.text),
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {row.tool}
                   </td>
-                  <td style={tdCell("center")}>
-                    <CellValue value={row.slack} />
-                  </td>
-                  <td style={tdCell("center")}>
-                    <CellValue value={row.jira} />
-                  </td>
-                  <td style={tdCell("center")}>
-                    <CellValue value={row.notion} />
+                  <td style={tdCell("left")}>{row.pulls}</td>
+                  <td
+                    style={{
+                      ...tdCell("left"),
+                      color: "#C4B5FD",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    {row.asks}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        <p
+          style={{
+            marginTop: 24,
+            fontSize: 13,
+            color: C.textMuted,
+            textAlign: "center",
+            letterSpacing: "-0.005em",
+          }}
+        >
+          Two-way sync where it matters · read-only where you want
+          observability without disruption · zero migration required.
+        </p>
       </div>
     </section>
   );

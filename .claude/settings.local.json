@@ -166,7 +166,12 @@
       "Bash(node -e \"console.log\\(JSON.parse\\(require\\('fs'\\).readFileSync\\('C:/Users/preet/AppData/Roaming/com.vercel.cli/Data/auth.json','utf8'\\)\\).token\\)\")",
       "Bash(vercel --prod --yes --force)",
       "Bash(python3 -)",
-      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); const e=\\(d.envs||[]\\).find\\(x=>x.key==='GROQ_API_KEY'\\); console.log\\(e?'GROQ_API_KEY present, targets:'+JSON.stringify\\(e.target\\):'NOT FOUND'\\)\")"
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); const e=\\(d.envs||[]\\).find\\(x=>x.key==='GROQ_API_KEY'\\); console.log\\(e?'GROQ_API_KEY present, targets:'+JSON.stringify\\(e.target\\):'NOT FOUND'\\)\")",
+      "Bash(grep -n \"<button$\" \"apps/web/src/components/chat/ChatArea.tsx\")",
+      "Bash(grep -n \"<button$\" \"apps/web/src/components/chat/CallPanel.tsx\")",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(kill %1)",
+      "Bash(vercel ls *)"
     ]
   }
 }
