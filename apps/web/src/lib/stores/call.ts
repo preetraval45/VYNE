@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-export type CallMode = "voice" | "video";
+export type CallMode = "voice" | "video" | "solo";
 export type CallStatus = "idle" | "connecting" | "active" | "ended";
 
 export interface CallParticipant {
@@ -80,6 +80,7 @@ interface CallState {
     channelName: string,
     mode: CallMode,
   ) => Promise<void>;
+  startSoloRecording: () => Promise<void>;
   endCall: () => void;
   toggleMute: () => void;
   toggleVideo: () => Promise<void>;
@@ -186,6 +187,7 @@ export const useCallStore = create<CallState>((set, get) => ({
     // If already in a call, ignore
     if (get().status !== "idle" && get().status !== "ended") return;
 
+    const isSolo = mode === "solo";
     set({
       status: "connecting",
       mode,
@@ -212,13 +214,19 @@ export const useCallStore = create<CallState>((set, get) => ({
       }
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
-        video: mode === "video" ? { width: 640, height: 480 } : false,
+        video:
+          mode === "video" || mode === "solo"
+            ? { width: 640, height: 480 }
+            : false,
       });
 
-      const participants = DEMO_PARTICIPANTS.map((p) => ({
-        ...p,
-        isSpeaking: false,
-      }));
+      // Solo mode = no simulated participants — it's just the user
+      const participants = isSolo
+        ? []
+        : DEMO_PARTICIPANTS.map((p) => ({
+            ...p,
+            isSpeaking: false,
+          }));
 
       set({
         localStream: stream,
@@ -264,6 +272,18 @@ export const useCallStore = create<CallState>((set, get) => ({
         error: friendly,
       });
     }
+  },
+
+  startSoloRecording: async () => {
+    // Spin up a "self call" — user records themselves (camera + screen share + voice)
+    // for presentation videos, demo recordings, async standups, etc.
+    await get().startCall("__solo__", "Solo Recording", "solo");
+    // Once connected, auto-enable transcription
+    setTimeout(() => {
+      const cur = get();
+      if (cur.status !== "active" && cur.status !== "connecting") return;
+      if (!cur.isTranscribing) cur.toggleTranscription();
+    }, 1000);
   },
 
   endCall: () => {

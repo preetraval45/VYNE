@@ -183,6 +183,7 @@ function CallOverlay() {
   }, [transcript.length]);
 
   const totalParticipants = remoteParticipants.length + 1;
+  const isSolo = mode === "solo";
 
   // ── Minimized pill ──────────────────────────────────────────────
   if (isMinimized) {
@@ -239,7 +240,9 @@ function CallOverlay() {
           <div style={{ fontSize: 10, color: "var(--text-tertiary)" }}>
             {status === "connecting"
               ? "Connecting…"
-              : `${formatDuration(durationSec)} · ${totalParticipants} on call`}
+              : isSolo
+                ? `${formatDuration(durationSec)} · Solo`
+                : `${formatDuration(durationSec)} · ${totalParticipants} on call`}
           </div>
         </div>
         <button
@@ -322,7 +325,9 @@ function CallOverlay() {
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)" }}>
             {status === "connecting"
               ? "Connecting…"
-              : `${formatDuration(durationSec)} · ${totalParticipants} participant${totalParticipants > 1 ? "s" : ""}`}
+              : isSolo
+                ? `${formatDuration(durationSec)} · Solo session`
+                : `${formatDuration(durationSec)} · ${totalParticipants} participant${totalParticipants > 1 ? "s" : ""}`}
             {isRecording && (
               <span style={{ color: "#FCA5A5", marginLeft: 8 }}>
                 ● Recording
