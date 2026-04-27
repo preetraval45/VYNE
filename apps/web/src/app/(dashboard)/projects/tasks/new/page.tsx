@@ -46,6 +46,7 @@ export default function NewTaskPage() {
     status: "todo" as TaskStatus,
     priority: "medium" as TaskPriority,
     assigneeId: "",
+    startDate: "",
     dueDate: "",
     estimatedHours: "",
     tags: "",
@@ -68,7 +69,9 @@ export default function NewTaskPage() {
       status: form.status,
       priority: form.priority,
       assigneeId: form.assigneeId || null,
-      startDate: null,
+      startDate: form.startDate
+        ? new Date(form.startDate).toISOString()
+        : null,
       dueDate: form.dueDate ? new Date(form.dueDate).toISOString() : null,
       estimatedHours: form.estimatedHours ? Number(form.estimatedHours) : null,
       timeSpent: null,
@@ -262,13 +265,13 @@ export default function NewTaskPage() {
               ))}
             </select>
           </Field>
-          <Field label="Due date">
+          <Field label="Start date">
             <input
               type="date"
-              title="Due date"
-              aria-label="Due date"
-              value={form.dueDate}
-              onChange={(e) => set("dueDate", e.target.value)}
+              title="Start date"
+              aria-label="Start date"
+              value={form.startDate}
+              onChange={(e) => set("startDate", e.target.value)}
               style={inputStyle}
             />
           </Field>
@@ -277,6 +280,17 @@ export default function NewTaskPage() {
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
         >
+          <Field label="Due date">
+            <input
+              type="date"
+              title="Due date"
+              aria-label="Due date"
+              value={form.dueDate}
+              onChange={(e) => set("dueDate", e.target.value)}
+              min={form.startDate || undefined}
+              style={inputStyle}
+            />
+          </Field>
           <Field label="Estimate (hours)">
             <input
               type="number"
@@ -288,7 +302,15 @@ export default function NewTaskPage() {
               style={inputStyle}
             />
           </Field>
-          <Field label="Tags">
+        </div>
+
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}
+        >
+          <Field
+            label="Tags"
+            hint="Comma-separated, e.g. bug, frontend, customer-ask"
+          >
             <input
               type="text"
               value={form.tags}
@@ -410,10 +432,12 @@ export default function NewTaskPage() {
 function Field({
   label,
   required,
+  hint,
   children,
 }: {
   label: string;
   required?: boolean;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -432,6 +456,17 @@ function Field({
         {required && <span style={{ color: "var(--status-danger)" }}>*</span>}
       </span>
       {children}
+      {hint && (
+        <span
+          style={{
+            fontSize: 10.5,
+            color: "var(--text-tertiary)",
+            marginTop: -2,
+          }}
+        >
+          {hint}
+        </span>
+      )}
     </label>
   );
 }

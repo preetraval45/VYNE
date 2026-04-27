@@ -16,6 +16,12 @@ export interface Subtask {
   done: boolean;
   assigneeId: string | null;
   dueDate: string | null;
+  /** Optional richer fields for the new-subtask form */
+  description?: string;
+  priority?: TaskPriority;
+  startDate?: string | null;
+  estimatedHours?: number | null;
+  tags?: string[];
 }
 
 export interface TaskComment {
@@ -88,8 +94,24 @@ export interface ProjectDetail {
   status: "active" | "paused" | "completed";
   memberIds: string[];
   leadId: string;
+  /** Optional richer fields — added so forms can capture more context */
+  startDate?: string | null;
+  endDate?: string | null;
+  priority?: TaskPriority;
+  tags?: string[];
+  /** Optional total budget / spend (USD) for finance-aware projects */
+  budgetUSD?: number | null;
+  /** Where the project's primary discussion lives */
+  channelId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SubtaskInput {
+  title: string;
+  done?: boolean;
+  assigneeId?: string | null;
+  dueDate?: string | null;
 }
 
 // ─── Team Members ────────────────────────────────────────────────
