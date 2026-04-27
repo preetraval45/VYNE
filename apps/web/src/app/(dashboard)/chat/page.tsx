@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ArrowLeft } from "lucide-react";
 import { useChannels } from "@/hooks/useMessages";
 import type { MsgMessage } from "@/lib/api/client";
 import { ChannelSidebar } from "@/components/chat/ChannelSidebar";
@@ -11,12 +11,28 @@ import { ChatArea } from "@/components/chat/ChatArea";
 import { ThreadPanel } from "@/components/chat/ThreadPanel";
 import { SkeletonList } from "@/components/shared/Skeleton";
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export default function ChatPage() {
   const router = useRouter();
   const { channels, dms, loading } = useChannels();
   const [selectedId, setSelectedId] = useState<string | null>("1");
   const [isDM, setIsDM] = useState(false);
   const [threadMsg, setThreadMsg] = useState<MsgMessage | null>(null);
+  const isMobile = useIsMobile();
+  // On mobile, default to showing the channel list (no chat selected)
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
 
   const channelName = isDM
     ? (dms.find((d) => d.id === selectedId)?.participant.name ?? "")
@@ -30,7 +46,12 @@ export default function ChatPage() {
     setSelectedId(id);
     setIsDM(dm);
     setThreadMsg(null);
+    if (isMobile) setMobileView("chat");
   }
+
+  // Mobile: show channel list OR chat, never both. Desktop: show both side-by-side.
+  const showSidebar = !isMobile || mobileView === "list";
+  const showChat = !isMobile || mobileView === "chat";
 
   return (
     <div
@@ -41,51 +62,105 @@ export default function ChatPage() {
       }}
     >
       {/* ── Channel sidebar (or skeleton while loading) ───────── */}
-      {loading && channels.length === 0 ? (
-        <div
-          style={{
-            width: 260,
-            borderRight: "1px solid var(--content-border)",
-            padding: 14,
-            background: "var(--content-bg)",
-          }}
-        >
-          <SkeletonList items={6} avatarSize={20} />
-        </div>
-      ) : (
-        <ChannelSidebar
-          channels={channels}
-          dms={dms}
-          selectedId={selectedId}
-          isDM={isDM}
-          onSelectChannel={selectChannel}
-          onCreateChannel={() => router.push("/chat/new")}
-        />
+      {showSidebar && (
+        loading && channels.length === 0 ? (
+          <div
+            className="chat-channel-list"
+            style={{
+              width: isMobile ? "100%" : 260,
+              borderRight: "1px solid var(--content-border)",
+              padding: 14,
+              background: "var(--content-bg)",
+            }}
+          >
+            <SkeletonList items={6} avatarSize={20} />
+          </div>
+        ) : (
+          <div
+            className="chat-channel-list"
+            style={{
+              width: isMobile ? "100%" : "auto",
+              flexShrink: 0,
+              display: "flex",
+            }}
+          >
+            <ChannelSidebar
+              channels={channels}
+              dms={dms}
+              selectedId={selectedId}
+              isDM={isDM}
+              onSelectChannel={selectChannel}
+              onCreateChannel={() => router.push("/chat/new")}
+            />
+          </div>
+        )
       )}
 
       {/* ── Main area ─────────────────────────────────── */}
-      {selectedId ? (
-        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-          <ChatArea
-            channelId={selectedId}
-            channelName={channelName}
-            isDM={isDM}
-            description={channelDescription}
-            onOpenThread={(msg) => setThreadMsg(msg)}
-            threadMsg={threadMsg}
-          />
+      {showChat && selectedId ? (
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            overflow: "hidden",
+            minWidth: 0,
+            flexDirection: "column",
+          }}
+        >
+          {isMobile && (
+            <button
+              type="button"
+              onClick={() => setMobileView("list")}
+              aria-label="Back to channels"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "10px 14px",
+                background: "var(--content-secondary)",
+                border: "none",
+                borderBottom: "1px solid var(--content-border)",
+                color: "var(--text-secondary)",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                width: "100%",
+                textAlign: "left",
+                flexShrink: 0,
+              }}
+            >
+              <ArrowLeft size={15} /> Channels
+            </button>
+          )}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              overflow: "hidden",
+              minWidth: 0,
+            }}
+          >
+            <ChatArea
+              channelId={selectedId}
+              channelName={channelName}
+              isDM={isDM}
+              description={channelDescription}
+              onOpenThread={(msg) => setThreadMsg(msg)}
+              threadMsg={threadMsg}
+            />
 
-          {/* Thread panel */}
-          <AnimatePresence>
-            {threadMsg && (
-              <ThreadPanel
-                parentMsg={threadMsg}
-                onClose={() => setThreadMsg(null)}
-              />
-            )}
-          </AnimatePresence>
+            {/* Thread panel */}
+            <AnimatePresence>
+              {threadMsg && (
+                <ThreadPanel
+                  parentMsg={threadMsg}
+                  onClose={() => setThreadMsg(null)}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      ) : (
+      ) : showChat && !isMobile ? (
         <div
           style={{
             flex: 1,
@@ -125,8 +200,7 @@ export default function ChatPage() {
             </p>
           </div>
         </div>
-      )}
-
+      ) : null}
     </div>
   );
 }

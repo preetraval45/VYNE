@@ -1033,6 +1033,113 @@ textarea {
   .hide-desktop { display: none !important; }
 }
 
+/* ─── Chat page mobile patterns ───────────────────────────────────
+ * On phones, the chat lays out as a single column. The channel list
+ * and chat area swap based on selection (handled by chat/page.tsx).
+ * Force the inner ChannelSidebar to fill the full width of its
+ * mobile parent container. */
+@media (max-width: 768px) {
+  .chat-channel-list {
+    width: 100% !important;
+    flex: 1;
+    min-width: 0;
+  }
+  .chat-channel-list .chat-channel-sidebar {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 1;
+    border-right: none !important;
+  }
+
+  /* Chat area must shrink to fit when sibling list is visible */
+  [class*="ChatArea"], .chat-area-root {
+    min-width: 0;
+  }
+
+  /* Composer + message rows shouldn't have a hard min-width */
+  textarea, [contenteditable="true"] {
+    max-width: 100%;
+  }
+}
+
+/* ─── Generic inline-styled fixed-width panels: collapse on mobile ─
+ * Many components ship inline `width: 360`/`minWidth: 320`/etc. that
+ * blow out a 375px viewport. Catch the most common cases. */
+@media (max-width: 768px) {
+  /* Right-side detail/preview/thread panels — let them take full width */
+  aside[role="complementary"],
+  [data-panel],
+  [aria-label*="panel" i],
+  [aria-label*="details" i],
+  [aria-label*="thread" i] {
+    max-width: 100vw !important;
+  }
+
+  /* Generic page wrappers that use inline grid-template-columns with
+     fixed sidebars (e.g. "260px 1fr") collapse to single column. */
+  [style*="grid-template-columns: 260px"],
+  [style*="grid-template-columns:260px"],
+  [style*="grid-template-columns: 280px"],
+  [style*="grid-template-columns:280px"],
+  [style*="grid-template-columns: 300px"],
+  [style*="grid-template-columns:300px"],
+  [style*="grid-template-columns: 320px"],
+  [style*="grid-template-columns:320px"],
+  [style*="grid-template-columns: 240px"],
+  [style*="grid-template-columns:240px"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons grouped horizontally in headers — wrap instead of clipping */
+  header button,
+  [class*="Header"] button {
+    flex-shrink: 0;
+  }
+
+  /* Make any horizontally-scrolling container show a thin scrollbar */
+  *::-webkit-scrollbar { height: 6px; width: 6px; }
+
+  /* Long horizontal pill bars — let them scroll horizontally */
+  [role="tablist"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    max-width: 100vw;
+  }
+}
+
+/* ─── Mobile typography & spacing tightening ──────────────────── */
+@media (max-width: 480px) {
+  /* Cards with inline 18px/20px padding — tighten to 12px */
+  [style*="padding: 18px"],
+  [style*="padding:18px"],
+  [style*="padding: 20px"],
+  [style*="padding:20px"],
+  [style*="padding: 22px"],
+  [style*="padding:22px"] {
+    padding: 12px !important;
+  }
+
+  /* Reduce gigantic h1 inline font sizes to fit narrow screens */
+  h1[style*="fontSize: 28"],
+  h1[style*="fontSize:28"],
+  h1[style*="fontSize: 32"],
+  h1[style*="fontSize:32"],
+  h1[style*="fontSize: 36"],
+  h1[style*="fontSize:36"] {
+    font-size: 22px !important;
+  }
+}
+
+/* ─── Make the floating hamburger sit beside other fixed UI ─────── */
+@media (max-width: 768px) {
+  /* Don't apply the 56px nudge to the chat page (it has its own back-bar
+     pattern) — chat page should fill the viewport. */
+  body:has([data-page="chat"]) main > *:first-child {
+    margin-left: 0 !important;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════════
  * Aesthetic layer v2 — elevation, glow, depth, micro-interactions
  * All additive — does NOT modify existing tokens or classes.

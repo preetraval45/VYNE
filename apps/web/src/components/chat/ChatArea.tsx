@@ -2,8 +2,18 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Hash, Search, Settings, Sparkles, Zap, Bell } from "lucide-react";
+import {
+  Hash,
+  Search,
+  Settings,
+  Sparkles,
+  Zap,
+  Bell,
+  Phone,
+  Video,
+} from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
+import { useCall } from "@/hooks/useCall";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
 import type { LocalMsg } from "./constants";
@@ -13,6 +23,8 @@ import { MessageComposer } from "./MessageComposer";
 import { SummaryPanel } from "./SummaryPanel";
 import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
+import { CallPanel } from "./CallPanel";
+import { MeetingRecapModal } from "./MeetingRecapModal";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
 
@@ -44,6 +56,8 @@ export function ChatArea({
   const [cmdMessages, setCmdMessages] = useState<LocalMsg[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const call = useCall();
+  const [callMinimized, setCallMinimized] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
 
@@ -233,6 +247,53 @@ export function ChatArea({
           )}
           <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
             <button
+              type="button"
+              onClick={() => call.startCall(channelId, channelName, "voice")}
+              disabled={call.status !== "idle"}
+              title="Start voice call"
+              aria-label="Start voice call"
+              style={{
+                padding: "5px 9px",
+                borderRadius: 7,
+                border: "1px solid transparent",
+                background: "transparent",
+                cursor: call.status === "idle" ? "pointer" : "not-allowed",
+                color: "var(--text-tertiary)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontSize: 11,
+                fontWeight: 500,
+                opacity: call.status === "idle" ? 1 : 0.5,
+              }}
+            >
+              <Phone size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={() => call.startCall(channelId, channelName, "video")}
+              disabled={call.status !== "idle"}
+              title="Start video call"
+              aria-label="Start video call"
+              style={{
+                padding: "5px 9px",
+                borderRadius: 7,
+                border: "1px solid transparent",
+                background: "transparent",
+                cursor: call.status === "idle" ? "pointer" : "not-allowed",
+                color: "var(--text-tertiary)",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                fontSize: 11,
+                fontWeight: 500,
+                opacity: call.status === "idle" ? 1 : 0.5,
+              }}
+            >
+              <Video size={13} />
+            </button>
+            <button
+              type="button"
               onClick={() => setSummaryOpen((o) => !o)}
               title="AI Summary"
               style={{
@@ -256,6 +317,7 @@ export function ChatArea({
               <Sparkles size={13} /> Summarize
             </button>
             <button
+              type="button"
               onClick={() => setNotifOpen((o) => !o)}
               title="Smart Notifications"
               style={{
@@ -289,6 +351,7 @@ export function ChatArea({
               />
             </button>
             <button
+              type="button"
               aria-label="Search"
               style={{
                 padding: "5px",
@@ -304,6 +367,7 @@ export function ChatArea({
               <Search size={15} />
             </button>
             <button
+              type="button"
               aria-label="Settings"
               style={{
                 padding: "5px",
@@ -510,6 +574,27 @@ export function ChatArea({
           />
         </div>
       </div>
+
+      <AnimatePresence>
+        {call.status !== "idle" && call.status !== "ended" && (
+          <CallPanel
+            call={call}
+            minimized={callMinimized}
+            onToggleMinimize={() => setCallMinimized((m) => !m)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {call.recap && (
+          <MeetingRecapModal
+            recap={call.recap}
+            onDismiss={call.dismissRecap}
+            onToggleActionItem={call.toggleActionItem}
+            onShareToChat={(text) => sendMessage(text)}
+          />
+        )}
+      </AnimatePresence>
     </FileUploadZone>
   );
 }

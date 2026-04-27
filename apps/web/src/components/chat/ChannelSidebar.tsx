@@ -39,6 +39,7 @@ export function ChannelSidebar({
 
   return (
     <aside
+      className="chat-channel-sidebar"
       style={{
         width: 240,
         minWidth: 240,
