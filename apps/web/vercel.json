@@ -46,7 +46,7 @@
 
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.app https://*.public.blob.vercel-storage.com https://api.anthropic.com wss://*.vercel.app; frame-src https://js.stripe.com https://hooks.stripe.com; object-src 'none'; base-uri 'self'; form-action 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss: ws: https://*.vercel.app https://*.public.blob.vercel-storage.com https://api.anthropic.com https://api.groq.com https://api.stripe.com wss://*.vercel.app wss://*.livekit.cloud; frame-src https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self';"
         }
       ]
     }
