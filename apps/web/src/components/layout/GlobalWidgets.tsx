@@ -106,8 +106,8 @@ function PomodoroWidget() {
       aria-label="Pomodoro timer"
       style={{
         position: "fixed",
-        right: 18,
-        bottom: 82,
+        right: 280,
+        top: 8,
         zIndex: 180,
       }}
     >

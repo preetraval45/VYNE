@@ -10,6 +10,7 @@ import { FocusModeToast } from "@/components/layout/FocusModeToast";
 import { UndoToast } from "@/components/layout/UndoToast";
 import { ProductTour } from "@/components/layout/ProductTour";
 import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
+import { GlobalCallPanel } from "@/components/layout/GlobalCallPanel";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
@@ -80,6 +81,9 @@ export default function DashboardLayout({
 
       {/* Pomodoro timer + Quick-note FAB + Workspace switcher (⌘⇧O) */}
       <GlobalWidgets />
+
+      {/* Global call overlay — survives across page navigation, channel switches */}
+      <GlobalCallPanel />
     </div>
   );
 }
