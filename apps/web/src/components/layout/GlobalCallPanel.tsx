@@ -16,15 +16,14 @@ import {
   Sparkles,
   Circle,
   FileText,
-  CheckSquare,
-  Square,
   X,
   AlertCircle,
 } from "lucide-react";
-import { useCallStore, type CallParticipant } from "@/lib/stores/call";
+import { useCallStore } from "@/lib/stores/call";
 import { UserAvatar } from "@/components/chat/UserAvatar";
 import { MeetingRecapModal } from "@/components/chat/MeetingRecapModal";
 import { useMessages } from "@/hooks/useMessages";
+import { AINotesPanel } from "./AINotesPanel";
 
 function formatDuration(s: number): string {
   const m = Math.floor(s / 60);
@@ -148,8 +147,6 @@ function CallOverlay() {
   const localStream = useCallStore((s) => s.localStream);
   const screenStream = useCallStore((s) => s.screenStream);
   const remoteParticipants = useCallStore((s) => s.remoteParticipants);
-  const transcript = useCallStore((s) => s.transcript);
-  const liveActionItems = useCallStore((s) => s.liveActionItems);
   const endCall = useCallStore((s) => s.endCall);
   const toggleMute = useCallStore((s) => s.toggleMute);
   const toggleVideo = useCallStore((s) => s.toggleVideo);
@@ -157,11 +154,9 @@ function CallOverlay() {
   const toggleRecording = useCallStore((s) => s.toggleRecording);
   const toggleTranscription = useCallStore((s) => s.toggleTranscription);
   const toggleMinimize = useCallStore((s) => s.toggleMinimize);
-  const toggleActionItem = useCallStore((s) => s.toggleActionItem);
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
   const screenVideoRef = useRef<HTMLVideoElement | null>(null);
-  const transcriptScrollRef = useRef<HTMLDivElement | null>(null);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
 
@@ -175,12 +170,6 @@ function CallOverlay() {
       screenVideoRef.current.srcObject = screenStream;
     }
   }, [screenStream]);
-  useEffect(() => {
-    if (transcriptScrollRef.current) {
-      transcriptScrollRef.current.scrollTop =
-        transcriptScrollRef.current.scrollHeight;
-    }
-  }, [transcript.length]);
 
   const totalParticipants = remoteParticipants.length + 1;
   const isSolo = mode === "solo";
@@ -494,104 +483,9 @@ function CallOverlay() {
           ))}
         </div>
 
-        {/* AI Notes panel */}
+        {/* AI Notes panel — tabbed Notes / Transcript / Actions */}
         {aiPanelOpen && (
-          <SidePanel
-            title="VYNE AI Notes"
-            icon={<Sparkles size={14} style={{ color: "#A78BFA" }} />}
-            onClose={() => setAiPanelOpen(false)}
-          >
-            {liveActionItems.length > 0 && (
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <SectionLabel>Detected action items</SectionLabel>
-                {liveActionItems.map((a) => (
-                  <div
-                    key={a.id}
-                    style={{
-                      display: "flex",
-                      gap: 8,
-                      alignItems: "flex-start",
-                      padding: "4px 0",
-                      fontSize: 12,
-                      color: a.done
-                        ? "rgba(255,255,255,0.4)"
-                        : "rgba(255,255,255,0.85)",
-                      textDecoration: a.done ? "line-through" : "none",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleActionItem(a.id)}
-                      aria-label="Toggle action item"
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        color: a.done ? "#10B981" : "rgba(255,255,255,0.5)",
-                        padding: 0,
-                        display: "flex",
-                        marginTop: 2,
-                      }}
-                    >
-                      {a.done ? <CheckSquare size={13} /> : <Square size={13} />}
-                    </button>
-                    <span>{a.text}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div
-              ref={transcriptScrollRef}
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "10px 14px",
-                fontSize: 12,
-                color: "rgba(255,255,255,0.85)",
-                lineHeight: 1.5,
-              }}
-            >
-              <SectionLabel>Live transcript</SectionLabel>
-              {transcript.length === 0 ? (
-                <div
-                  style={{
-                    color: "rgba(255,255,255,0.4)",
-                    fontStyle: "italic",
-                  }}
-                >
-                  {isTranscribing
-                    ? "Listening… speak to populate the transcript."
-                    : "Click 'AI Notes' to start live transcription."}
-                </div>
-              ) : (
-                transcript.map((t) => (
-                  <div
-                    key={t.id}
-                    style={{
-                      marginBottom: 8,
-                      opacity: t.isFinal ? 1 : 0.55,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontWeight: 600,
-                        color: "#C4B5FD",
-                        marginRight: 6,
-                      }}
-                    >
-                      {t.speaker}:
-                    </span>
-                    {t.text}
-                  </div>
-                ))
-              )}
-            </div>
-          </SidePanel>
+          <AINotesPanel onClose={() => setAiPanelOpen(false)} />
         )}
 
         {/* In-call chat panel */}
@@ -933,23 +827,6 @@ function SidePanel({
       </div>
       {children}
     </motion.div>
-  );
-}
-
-function SectionLabel({ children }: { readonly children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        fontSize: 10,
-        fontWeight: 600,
-        color: "#A78BFA",
-        textTransform: "uppercase",
-        letterSpacing: 0.5,
-        marginBottom: 8,
-      }}
-    >
-      {children}
-    </div>
   );
 }
 
