@@ -367,6 +367,8 @@ export function MessageComposer({
           multiple
           accept={ACCEPTED_EXTENSIONS}
           onChange={handleFileInputChange}
+          aria-label="Attach files"
+          title="Attach files"
           style={{ display: "none" }}
         />
 

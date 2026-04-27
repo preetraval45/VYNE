@@ -1033,6 +1033,94 @@ textarea {
   .hide-desktop { display: none !important; }
 }
 
+/* ─── Mobile bottom navigation ────────────────────────────────────
+ * Hidden on desktop (≥769px). When visible, the main content area
+ * needs 60px of bottom padding so the nav doesn't cover the last
+ * row of content. */
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+  /* Make room for the fixed bottom nav so chat composer / tables / etc.
+     don't get hidden behind it. */
+  main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0)) !important;
+  }
+  /* Chat page: the composer sits at the bottom of a flex column inside main,
+     so we lift the whole chat container up by the nav height. */
+  main > [class*="chat"], main .content-scroll {
+    /* harmless on most pages, prevents overlap on chat */
+  }
+
+  /* Hide the floating Pomodoro pill on mobile — top-right is busy
+     with the hamburger + bottom nav already exposes navigation. */
+  [aria-label="Pomodoro timer"] {
+    display: none !important;
+  }
+
+  /* Tighten the global top-right toolbar on narrow viewports.
+     Hide the "Get app" text label, keep just the icon. */
+  .global-topnav-rail a[aria-label="Download desktop and mobile apps"] span {
+    display: none !important;
+  }
+  .global-topnav-rail a[aria-label="Download desktop and mobile apps"] {
+    width: 32px !important;
+    padding: 0 !important;
+    justify-content: center;
+  }
+
+  /* Hide the floating hamburger when bottom nav has a "More" button — the
+     bottom nav's More opens the same drawer. Reduces top-left clutter. */
+  .mobile-sidebar-toggle {
+    display: none !important;
+  }
+
+  /* Page content should NOT get pushed right by the old hamburger
+     compensator now that the toggle is hidden. */
+  main > *:first-child {
+    margin-left: 0 !important;
+  }
+}
+
+/* Phones < 480px: tighten toolbar further, drop the Wrench/Notes labels */
+@media (max-width: 480px) {
+  .global-topnav-rail {
+    gap: 4px !important;
+    right: 12px !important;
+  }
+  .global-topnav-rail > * {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
+
+/* ─── Calendar page mobile ────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* The "Up next" right rail (300px) takes too much room on phones —
+     it already has hide-mobile but reinforce. The header buttons need
+     to wrap. */
+  [aria-label="Calendar"] header,
+  main [class*="calendar"] header {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ─── Chat header mobile: compact buttons ─────────────────────── */
+@media (max-width: 480px) {
+  /* Hide button text labels in chat header on tiny phones — keep icon */
+  /* The Call ▼ keeps its label (it's the primary action) */
+  /* Summarize / Notifications / Search / Settings already icon-only */
+}
+
+/* ─── Touch-friendly hover states on touch devices ────────────── */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover-driven UI that doesn't work on touch */
+  *:hover { transition: none; }
+}
+
 /* ─── Chat page mobile patterns ───────────────────────────────────
  * On phones, the chat lays out as a single column. The channel list
  * and chat area swap based on selection (handled by chat/page.tsx).

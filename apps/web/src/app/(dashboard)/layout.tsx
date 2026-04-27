@@ -11,6 +11,7 @@ import { UndoToast } from "@/components/layout/UndoToast";
 import { ProductTour } from "@/components/layout/ProductTour";
 import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { GlobalCallPanel } from "@/components/layout/GlobalCallPanel";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
@@ -84,6 +85,9 @@ export default function DashboardLayout({
 
       {/* Global call overlay — survives across page navigation, channel switches */}
       <GlobalCallPanel />
+
+      {/* Mobile bottom navigation (≤768px) */}
+      {!focusMode && <MobileBottomNav />}
     </div>
   );
 }
