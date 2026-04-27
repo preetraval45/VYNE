@@ -1,8 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Providers } from "./providers";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#06B6D4",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +30,6 @@ export const metadata: Metadata = {
     title: "VYNE",
     statusBarStyle: "black-translucent",
   },
-  themeColor: "#06B6D4",
   openGraph: {
     title: "VYNE — AI-native Company OS",
     description:
