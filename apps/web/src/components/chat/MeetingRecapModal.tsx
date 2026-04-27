@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Sparkles,
@@ -11,6 +12,9 @@ import {
   Clock,
   FileText,
   Send,
+  Mail,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { MeetingRecap, AiActionItem } from "@/hooks/useCall";
 
@@ -66,6 +70,57 @@ export function MeetingRecapModal({
     recap.recordingMime === "video/webm"
       ? "vyne-meeting.webm"
       : "vyne-meeting.webm";
+
+  const [followupDraft, setFollowupDraft] = useState<{
+    subject?: string;
+    body: string;
+  } | null>(null);
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [draftCopied, setDraftCopied] = useState(false);
+
+  async function generateFollowup() {
+    setDraftLoading(true);
+    try {
+      const context = [
+        recap.summary,
+        recap.decisions.length > 0
+          ? "Decisions:\n" + recap.decisions.map((d) => "- " + d).join("\n")
+          : "",
+        recap.actionItems.length > 0
+          ? "Action items:\n" +
+            recap.actionItems.map((a) => "- " + a.text).join("\n")
+          : "",
+        `Participants: ${recap.participants.join(", ")}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n");
+      const res = await fetch("/api/ai/followup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          context,
+          channel: "email",
+          tone: "concise",
+          recipient: recap.participants.find((p) => p !== "You") ?? "team",
+        }),
+      });
+      if (!res.ok) return;
+      const json = (await res.json()) as { subject?: string; body: string };
+      setFollowupDraft(json);
+    } finally {
+      setDraftLoading(false);
+    }
+  }
+
+  function copyFollowup() {
+    if (!followupDraft) return;
+    const txt = followupDraft.subject
+      ? `Subject: ${followupDraft.subject}\n\n${followupDraft.body}`
+      : followupDraft.body;
+    void navigator.clipboard.writeText(txt);
+    setDraftCopied(true);
+    setTimeout(() => setDraftCopied(false), 1800);
+  }
 
   return (
     <motion.div
@@ -242,6 +297,148 @@ export function MeetingRecapModal({
               </div>
             </Section>
           )}
+
+          {/* AI follow-up email drafter */}
+          <Section title="Follow-up draft">
+            {!followupDraft && (
+              <button
+                type="button"
+                onClick={generateFollowup}
+                disabled={draftLoading}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "1px solid var(--vyne-purple)",
+                  background: "rgba(108, 71, 255, 0.1)",
+                  color: "var(--vyne-purple)",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: draftLoading ? "default" : "pointer",
+                  opacity: draftLoading ? 0.6 : 1,
+                }}
+              >
+                <Mail size={13} />
+                {draftLoading
+                  ? "Drafting…"
+                  : "Draft a follow-up email with VYNE AI"}
+              </button>
+            )}
+            {followupDraft && (
+              <div
+                style={{
+                  border: "1px solid var(--content-border)",
+                  borderRadius: 10,
+                  padding: 12,
+                  background: "var(--content-secondary)",
+                }}
+              >
+                {followupDraft.subject && (
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: "var(--text-tertiary)",
+                      marginBottom: 4,
+                      textTransform: "uppercase",
+                      fontWeight: 700,
+                      letterSpacing: 0.4,
+                    }}
+                  >
+                    Subject
+                  </div>
+                )}
+                {followupDraft.subject && (
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    {followupDraft.subject}
+                  </div>
+                )}
+                <pre
+                  style={{
+                    margin: 0,
+                    padding: 0,
+                    fontSize: 12.5,
+                    color: "var(--text-primary)",
+                    whiteSpace: "pre-wrap",
+                    lineHeight: 1.55,
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {followupDraft.body}
+                </pre>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 6,
+                    marginTop: 10,
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setFollowupDraft(null)}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: "1px solid var(--content-border)",
+                      background: "transparent",
+                      color: "var(--text-secondary)",
+                      fontSize: 11,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={generateFollowup}
+                    disabled={draftLoading}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: "1px solid var(--content-border)",
+                      background: "transparent",
+                      color: "var(--text-secondary)",
+                      fontSize: 11,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Regenerate
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copyFollowup}
+                    style={{
+                      padding: "5px 10px",
+                      borderRadius: 6,
+                      border: "none",
+                      background: draftCopied
+                        ? "rgba(16,185,129,0.18)"
+                        : "var(--vyne-purple)",
+                      color: draftCopied ? "#10B981" : "#fff",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    {draftCopied ? <Check size={11} /> : <Copy size={11} />}
+                    {draftCopied ? "Copied" : "Copy"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </Section>
 
           {/* Recording preview */}
           {recap.recordingUrl && (

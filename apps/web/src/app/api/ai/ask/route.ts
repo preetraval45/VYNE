@@ -246,42 +246,8 @@ export async function POST(req: Request) {
   }
   history.push({ role: "user", content: userPrompt });
 
-  // Try Claude first when configured, then fall back to Groq's free
-  // Llama-3 endpoint, then to the deterministic local answer.
-  if (claudeKey) {
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": claudeKey,
-          "anthropic-version": "2023-06-01",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-latest",
-          max_tokens: 700,
-          system: SYSTEM_PROMPT,
-          messages: history,
-        }),
-      });
-      if (res.ok) {
-        const body = (await res.json()) as {
-          content?: Array<{ type: string; text?: string }>;
-        };
-        const text = body.content?.find((c) => c.type === "text")?.text?.trim();
-        if (text) {
-          return NextResponse.json({
-            answer: text,
-            citations: extractCitations(text),
-            provider: "vyne",
-          } satisfies AskResponse);
-        }
-      }
-    } catch {
-      // fall through to Groq / local
-    }
-  }
-
+  // Llama (Groq) first — free + fast — fall back to Claude only if a key
+  // is configured, otherwise to the deterministic local answer.
   if (groqKey) {
     try {
       const res = await fetch(
@@ -304,6 +270,40 @@ export async function POST(req: Request) {
           choices?: Array<{ message?: { content?: string } }>;
         };
         const text = body.choices?.[0]?.message?.content?.trim();
+        if (text) {
+          return NextResponse.json({
+            answer: text,
+            citations: extractCitations(text),
+            provider: "vyne",
+          } satisfies AskResponse);
+        }
+      }
+    } catch {
+      // fall through to Claude / local
+    }
+  }
+
+  if (claudeKey) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": claudeKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-3-5-haiku-latest",
+          max_tokens: 700,
+          system: SYSTEM_PROMPT,
+          messages: history,
+        }),
+      });
+      if (res.ok) {
+        const body = (await res.json()) as {
+          content?: Array<{ type: string; text?: string }>;
+        };
+        const text = body.content?.find((c) => c.type === "text")?.text?.trim();
         if (text) {
           return NextResponse.json({
             answer: text,

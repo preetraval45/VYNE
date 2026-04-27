@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/api/security";
-import { callClaudeJson } from "@/lib/ai/claude";
+import { callLlamaJson } from "@/lib/ai/claude";
 
 export const runtime = "edge";
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
   const userPrompt = `Create a concise daily digest for ${body.audience ?? "the team"} based on these recent highlights:\n${(body.highlights ?? ["Sprint 12 progress", "Order volume up", "No outages"]).map((h) => `- ${h}`).join("\n")}\n\nReturn JSON with fields: headline (string, <60 chars), summary (1 sentence), bullets (array of 3-5 strings, each ≤90 chars, start with an emoji), callToAction (1 sentence pointing to the most urgent thing).`;
 
-  const real = await callClaudeJson<DigestResponse>(
+  const real = await callLlamaJson<DigestResponse>(
     "You are the daily digest writer for VYNE — punchy, factual, no fluff.",
     userPrompt,
     { maxTokens: 600 },

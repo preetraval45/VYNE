@@ -17,6 +17,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 import { useAiMemoryStore } from "@/lib/stores/aiMemory";
 import { useProjectsStore } from "@/lib/stores/projects";
+import { DailyDigestCard } from "@/components/home/DailyDigestCard";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -468,6 +469,11 @@ export default function HomePage() {
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: 20 }}
       >
+        {/* ── AI Daily Digest ────────────────────────── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <DailyDigestCard />
+        </div>
+
         {/* ── Module Grid (App Drawer) ────────────────── */}
         <section
           aria-label="Modules"
