@@ -17,6 +17,7 @@ import {
 import { useMessages } from "@/hooks/useMessages";
 import { useCallStore } from "@/lib/stores/call";
 import { useUnreadStore } from "@/lib/stores/unread";
+import { useSentMessagesStore } from "@/lib/stores/sentMessages";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
@@ -69,6 +70,12 @@ export function ChatArea({
   const callMenuRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
+  // Subscribe to the persist store for THIS channel so a reply sent from
+  // the ThreadPanel (different useMessages instance) immediately refreshes
+  // ChatArea's reply-count badge.
+  const persistedForChannel = useSentMessagesStore(
+    (s) => s.byChannel[channelId] ?? [],
+  );
 
   // Close call menu on outside click
   useEffect(() => {
@@ -778,11 +785,17 @@ export function ChatArea({
           ) : (
             <>
               {(() => {
-                // Build a live reply-count map from actual reply messages
-                // so the "X replies" badge always reflects what's really
-                // in the thread, not a stale hardcoded value.
+                // Build a live reply-count map. Combine local useMessages
+                // state with the persistent sent-messages store so a reply
+                // typed in the ThreadPanel (separate hook instance) ticks
+                // up the count here without a refresh.
+                const seen = new Set(messages.map((m) => m.id));
+                const allMessages = [
+                  ...messages,
+                  ...persistedForChannel.filter((m) => !seen.has(m.id)),
+                ];
                 const liveReplyCount: Record<string, number> = {};
-                for (const m of messages) {
+                for (const m of allMessages) {
                   if (m.parentMessageId) {
                     liveReplyCount[m.parentMessageId] =
                       (liveReplyCount[m.parentMessageId] ?? 0) + 1;
