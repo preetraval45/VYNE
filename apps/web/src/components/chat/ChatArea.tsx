@@ -90,14 +90,9 @@ export function ChatArea({
     setCmdMessages([]);
     setSummaryOpen(false);
     setNotifOpen(false);
-    // Auto mark-as-read: clear the unread badge for this channel/DM.
-    // Brief delay so the user actually sees the unread count flicker
-    // to confirm the read happened (UX nicety).
+    // Auto mark-as-read: clear immediately when a chat opens.
     if (channelId) {
-      const timer = setTimeout(() => {
-        useUnreadStore.getState().markRead(channelId);
-      }, 300);
-      return () => clearTimeout(timer);
+      useUnreadStore.getState().markRead(channelId);
     }
   }, [channelId]);
 
@@ -782,12 +777,26 @@ export function ChatArea({
             </div>
           ) : (
             <>
-              {messages
-                .filter((m) => !m.parentMessageId)
-                .map((msg, i, arr) => (
+              {(() => {
+                // Build a live reply-count map from actual reply messages
+                // so the "X replies" badge always reflects what's really
+                // in the thread, not a stale hardcoded value.
+                const liveReplyCount: Record<string, number> = {};
+                for (const m of messages) {
+                  if (m.parentMessageId) {
+                    liveReplyCount[m.parentMessageId] =
+                      (liveReplyCount[m.parentMessageId] ?? 0) + 1;
+                  }
+                }
+                const parents = messages.filter((m) => !m.parentMessageId);
+                return parents.map((msg, i, arr) => (
                   <MessageRow
                     key={msg.id}
-                    msg={msg}
+                    msg={{
+                      ...msg,
+                      // Live count beats the seeded mock value
+                      replyCount: liveReplyCount[msg.id] ?? 0,
+                    }}
                     prevMsg={arr[i - 1]}
                     onReaction={addReaction}
                     onReply={onOpenThread}
@@ -798,7 +807,8 @@ export function ChatArea({
                     channelId={channelId}
                     channelName={channelName}
                   />
-                ))}
+                ));
+              })()}
               {cmdMessages.map((cm) => (
                 <div
                   key={cm.id}

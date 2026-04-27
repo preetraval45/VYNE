@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import { useChannels } from "@/hooks/useMessages";
+import { useUnreadStore } from "@/lib/stores/unread";
 import type { MsgMessage } from "@/lib/api/client";
 import { ChannelSidebar } from "@/components/chat/ChannelSidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
@@ -46,6 +47,8 @@ export default function ChatPage() {
     setSelectedId(id);
     setIsDM(dm);
     setThreadMsg(null);
+    // Mark immediately so the badge clears the second the user clicks.
+    useUnreadStore.getState().markRead(id);
     if (isMobile) setMobileView("chat");
   }
 
