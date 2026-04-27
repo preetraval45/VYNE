@@ -57,7 +57,10 @@ export default function NewSubtaskPage() {
   }
 
   function removeTag(t: string) {
-    set("tags", form.tags.filter((x) => x !== t));
+    set(
+      "tags",
+      form.tags.filter((x) => x !== t),
+    );
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -139,230 +142,280 @@ export default function NewSubtaskPage() {
         onSubmit={onSubmit}
         className="flex-1 overflow-auto content-scroll"
         style={{
-          padding: 24,
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          maxWidth: 720,
+          padding: "16px 20px",
+          maxWidth: 1100,
           margin: "0 auto",
           width: "100%",
         }}
       >
-        <Field label="Parent task" required>
-          <select
-            value={form.taskId}
-            onChange={(e) => set("taskId", e.target.value)}
-            title="Parent task"
-            aria-label="Parent task"
-            style={inputStyle}
-            required
-          >
-            {allTasks.length === 0 ? (
-              <option value="">No tasks yet</option>
-            ) : (
-              allTasks.map((t) => {
-                const p = projects.find((pr) => pr.id === t.projectId);
-                return (
-                  <option key={t.id} value={t.id}>
-                    {p?.name ? `${p.name} · ` : ""}{t.key} — {t.title}
-                  </option>
-                );
-              })
-            )}
-          </select>
-        </Field>
-        <Field label="Title" required>
-          <input
-            type="text"
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            placeholder="e.g. Draft the API spec"
-            autoFocus
-            required
-            style={inputStyle}
-          />
-        </Field>
-
-        <Field label="Description">
-          <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            placeholder="Optional — what needs to happen?"
-            rows={3}
-            style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
-          />
-        </Field>
-
-        <Field label="Priority">
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {PRIORITY_OPTIONS.map((p) => (
-              <button
-                key={p.value}
-                type="button"
-                onClick={() => set("priority", p.value)}
-                style={{
-                  padding: "7px 12px",
-                  borderRadius: 99,
-                  border:
-                    form.priority === p.value
-                      ? `1px solid ${p.color}`
-                      : "1px solid var(--content-border)",
-                  background:
-                    form.priority === p.value
-                      ? `${p.color}22`
-                      : "transparent",
-                  color:
-                    form.priority === p.value
-                      ? p.color
-                      : "var(--text-secondary)",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <Field label="Assigned to" hint="Anyone on the team">
-            <select
-              value={form.assigneeId}
-              onChange={(e) => set("assigneeId", e.target.value)}
-              title="Assigned to"
-              aria-label="Assigned to"
-              style={inputStyle}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.3fr 1fr",
+            gap: 16,
+            alignItems: "start",
+          }}
+        >
+          {/* ── Left column: parent + title + description ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
             >
-              <option value="">— Unassigned —</option>
-              {teamMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Estimate (hours)">
-            <input
-              type="number"
-              min={0}
-              step={0.25}
-              value={form.estimatedHours}
-              onChange={(e) => set("estimatedHours", e.target.value)}
-              placeholder="—"
-              style={inputStyle}
-            />
-          </Field>
-        </div>
+              <Field label="Parent task" required>
+                <select
+                  value={form.taskId}
+                  onChange={(e) => set("taskId", e.target.value)}
+                  title="Parent task"
+                  aria-label="Parent task"
+                  style={inputStyle}
+                  required
+                >
+                  {allTasks.length === 0 ? (
+                    <option value="">No tasks yet</option>
+                  ) : (
+                    allTasks.map((t) => {
+                      const p = projects.find((pr) => pr.id === t.projectId);
+                      return (
+                        <option key={t.id} value={t.id}>
+                          {p?.name ? `${p.name} · ` : ""}
+                          {t.key} — {t.title}
+                        </option>
+                      );
+                    })
+                  )}
+                </select>
+              </Field>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <Field label="Start date">
-            <input
-              type="date"
-              title="Start date"
-              aria-label="Start date"
-              value={form.startDate}
-              onChange={(e) => set("startDate", e.target.value)}
-              style={inputStyle}
-            />
-          </Field>
-          <Field label="Due date">
-            <input
-              type="date"
-              title="Due date"
-              aria-label="Due date"
-              value={form.dueDate}
-              onChange={(e) => set("dueDate", e.target.value)}
-              min={form.startDate || undefined}
-              style={inputStyle}
-            />
-          </Field>
-        </div>
+              <Field label="Title" required>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  placeholder="e.g. Draft the API spec"
+                  autoFocus
+                  required
+                  style={inputStyle}
+                />
+              </Field>
 
-        <Field label="Tags">
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 6,
-              padding: 6,
-              borderRadius: 8,
-              border: "1px solid var(--content-border)",
-              background: "var(--content-bg)",
-              minHeight: 40,
-            }}
-          >
-            {form.tags.map((t) => (
-              <span
-                key={t}
+              <Field label="Description">
+                <textarea
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  placeholder="Optional — what needs to happen?"
+                  rows={4}
+                  style={{
+                    ...inputStyle,
+                    resize: "vertical",
+                    fontFamily: "inherit",
+                  }}
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* ── Right column: metadata ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <Field label="Priority">
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {PRIORITY_OPTIONS.map((p) => (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => set("priority", p.value)}
+                      style={{
+                        padding: "6px 10px",
+                        borderRadius: 99,
+                        border:
+                          form.priority === p.value
+                            ? `1px solid ${p.color}`
+                            : "1px solid var(--content-border)",
+                        background:
+                          form.priority === p.value
+                            ? `${p.color}22`
+                            : "transparent",
+                        color:
+                          form.priority === p.value
+                            ? p.color
+                            : "var(--text-secondary)",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <Field label="Assigned to" hint="Anyone on the team">
+                <select
+                  value={form.assigneeId}
+                  onChange={(e) => set("assigneeId", e.target.value)}
+                  title="Assigned to"
+                  aria-label="Assigned to"
+                  style={inputStyle}
+                >
+                  <option value="">— Unassigned —</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <div
                 style={{
-                  padding: "3px 8px 3px 10px",
-                  borderRadius: 99,
-                  background: "rgba(108, 71, 255, 0.12)",
-                  color: "var(--vyne-purple)",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
                 }}
               >
-                <Tag size={10} />
-                {t}
-                <button
-                  type="button"
-                  onClick={() => removeTag(t)}
-                  aria-label={`Remove tag ${t}`}
+                <Field label="Start date">
+                  <input
+                    type="date"
+                    title="Start date"
+                    aria-label="Start date"
+                    value={form.startDate}
+                    onChange={(e) => set("startDate", e.target.value)}
+                    style={inputStyle}
+                  />
+                </Field>
+                <Field label="Due date">
+                  <input
+                    type="date"
+                    title="Due date"
+                    aria-label="Due date"
+                    value={form.dueDate}
+                    onChange={(e) => set("dueDate", e.target.value)}
+                    min={form.startDate || undefined}
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Estimate (hours)">
+                <input
+                  type="number"
+                  min={0}
+                  step={0.25}
+                  value={form.estimatedHours}
+                  onChange={(e) => set("estimatedHours", e.target.value)}
+                  placeholder="—"
+                  style={inputStyle}
+                />
+              </Field>
+
+              <Field label="Tags">
+                <div
                   style={{
-                    width: 14,
-                    height: 14,
-                    borderRadius: "50%",
-                    border: "none",
-                    background: "rgba(108, 71, 255, 0.25)",
-                    color: "#fff",
-                    cursor: "pointer",
                     display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    padding: 6,
+                    borderRadius: 8,
+                    border: "1px solid var(--content-border)",
+                    background: "var(--content-bg)",
+                    minHeight: 38,
                   }}
                 >
-                  <X size={9} />
-                </button>
-              </span>
-            ))}
-            <input
-              type="text"
-              value={tagDraft}
-              onChange={(e) => setTagDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === ",") {
-                  e.preventDefault();
-                  addTag(tagDraft);
-                } else if (
-                  e.key === "Backspace" &&
-                  tagDraft === "" &&
-                  form.tags.length > 0
-                ) {
-                  removeTag(form.tags[form.tags.length - 1]);
-                }
-              }}
-              onBlur={() => addTag(tagDraft)}
-              placeholder={form.tags.length === 0 ? "Type and press Enter" : ""}
-              aria-label="Add tag"
-              style={{
-                flex: 1,
-                minWidth: 100,
-                border: "none",
-                background: "transparent",
-                color: "var(--text-primary)",
-                fontSize: 13,
-                outline: "none",
-                padding: "4px 6px",
-              }}
-            />
+                  {form.tags.map((t) => (
+                    <span
+                      key={t}
+                      style={{
+                        padding: "3px 8px 3px 10px",
+                        borderRadius: 99,
+                        background: "rgba(108, 71, 255, 0.12)",
+                        color: "var(--vyne-purple)",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                      }}
+                    >
+                      <Tag size={10} />
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(t)}
+                        aria-label={`Remove tag ${t}`}
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: "50%",
+                          border: "none",
+                          background: "rgba(108, 71, 255, 0.25)",
+                          color: "#fff",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <X size={9} />
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={tagDraft}
+                    onChange={(e) => setTagDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addTag(tagDraft);
+                      } else if (
+                        e.key === "Backspace" &&
+                        tagDraft === "" &&
+                        form.tags.length > 0
+                      ) {
+                        removeTag(form.tags[form.tags.length - 1]);
+                      }
+                    }}
+                    onBlur={() => addTag(tagDraft)}
+                    placeholder={
+                      form.tags.length === 0 ? "Type and press Enter" : ""
+                    }
+                    aria-label="Add tag"
+                    style={{
+                      flex: 1,
+                      minWidth: 100,
+                      border: "none",
+                      background: "transparent",
+                      color: "var(--text-primary)",
+                      fontSize: 13,
+                      outline: "none",
+                      padding: "4px 6px",
+                    }}
+                  />
+                </div>
+              </Field>
+            </div>
           </div>
-        </Field>
+        </div>
+
         <footer
           style={{
             display: "flex",
@@ -404,10 +457,12 @@ export default function NewSubtaskPage() {
 function Field({
   label,
   required,
+  hint,
   children,
 }: {
   label: string;
   required?: boolean;
+  hint?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -426,6 +481,17 @@ function Field({
         {required && <span style={{ color: "var(--status-danger)" }}>*</span>}
       </span>
       {children}
+      {hint && (
+        <span
+          style={{
+            fontSize: 10.5,
+            color: "var(--text-tertiary)",
+            marginTop: -2,
+          }}
+        >
+          {hint}
+        </span>
+      )}
     </label>
   );
 }

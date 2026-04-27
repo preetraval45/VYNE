@@ -159,166 +159,215 @@ export default function NewTaskPage() {
         onSubmit={onSubmit}
         className="flex-1 overflow-auto content-scroll"
         style={{
-          padding: "24px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          maxWidth: 720,
+          padding: "16px 20px",
+          maxWidth: 1100,
           margin: "0 auto",
           width: "100%",
         }}
       >
-        <Field label="Project" required>
-          <select
-            title="Project"
-            aria-label="Project"
-            value={form.projectId}
-            onChange={(e) => set("projectId", e.target.value)}
-            style={inputStyle}
-            required
-          >
-            {projects.length === 0 ? (
-              <option value="">No projects yet</option>
-            ) : (
-              projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.icon ?? "📋"} {p.name}
-                </option>
-              ))
-            )}
-          </select>
-        </Field>
-
-        <Field label="Title" required>
-          <input
-            type="text"
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            placeholder="Short, action-oriented title"
-            autoFocus
-            required
-            style={inputStyle}
-          />
-        </Field>
-
-        <Field label="Description">
-          <textarea
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            rows={5}
-            placeholder="What needs to happen? Link docs, tickets, or screenshots."
-            style={{ ...inputStyle, resize: "vertical" }}
-          />
-        </Field>
-
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.3fr 1fr",
+            gap: 16,
+            alignItems: "start",
+          }}
         >
-          <Field label="Status">
-            <select
-              title="Status"
-              aria-label="Status"
-              value={form.status}
-              onChange={(e) => set("status", e.target.value as TaskStatus)}
-              style={inputStyle}
+          {/* ── Left column: title + description ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
             >
-              {(Object.keys(TASK_STATUS_META) as TaskStatus[]).map((s) => (
-                <option key={s} value={s}>
-                  {TASK_STATUS_META[s].label}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Priority">
-            <select
-              title="Priority"
-              aria-label="Priority"
-              value={form.priority}
-              onChange={(e) => set("priority", e.target.value as TaskPriority)}
-              style={inputStyle}
+              <Field label="Project" required>
+                <select
+                  title="Project"
+                  aria-label="Project"
+                  value={form.projectId}
+                  onChange={(e) => set("projectId", e.target.value)}
+                  style={inputStyle}
+                  required
+                >
+                  {projects.length === 0 ? (
+                    <option value="">No projects yet</option>
+                  ) : (
+                    projects.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.icon ?? "📋"} {p.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </Field>
+
+              <Field label="Title" required>
+                <input
+                  type="text"
+                  value={form.title}
+                  onChange={(e) => set("title", e.target.value)}
+                  placeholder="Short, action-oriented title"
+                  autoFocus
+                  required
+                  style={inputStyle}
+                />
+              </Field>
+
+              <Field label="Description">
+                <textarea
+                  value={form.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  rows={4}
+                  placeholder="What needs to happen? Link docs, tickets, or screenshots."
+                  style={{ ...inputStyle, resize: "vertical" }}
+                />
+              </Field>
+            </div>
+          </div>
+
+          {/* ── Right column: metadata ── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              style={{
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
             >
-              {(Object.keys(TASK_PRIORITY_META) as TaskPriority[]).map((p) => (
-                <option key={p} value={p}>
-                  {TASK_PRIORITY_META[p].label}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <Field label="Status">
+                  <select
+                    title="Status"
+                    aria-label="Status"
+                    value={form.status}
+                    onChange={(e) =>
+                      set("status", e.target.value as TaskStatus)
+                    }
+                    style={inputStyle}
+                  >
+                    {(Object.keys(TASK_STATUS_META) as TaskStatus[]).map(
+                      (s) => (
+                        <option key={s} value={s}>
+                          {TASK_STATUS_META[s].label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </Field>
+                <Field label="Priority">
+                  <select
+                    title="Priority"
+                    aria-label="Priority"
+                    value={form.priority}
+                    onChange={(e) =>
+                      set("priority", e.target.value as TaskPriority)
+                    }
+                    style={inputStyle}
+                  >
+                    {(Object.keys(TASK_PRIORITY_META) as TaskPriority[]).map(
+                      (p) => (
+                        <option key={p} value={p}>
+                          {TASK_PRIORITY_META[p].label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </Field>
+              </div>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
-        >
-          <Field label="Assigned to" hint="Anyone on the team">
-            <select
-              title="Assignee"
-              aria-label="Assignee"
-              value={form.assigneeId}
-              onChange={(e) => set("assigneeId", e.target.value)}
-              style={inputStyle}
-            >
-              <option value="">Unassigned</option>
-              {teamMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Start date">
-            <input
-              type="date"
-              title="Start date"
-              aria-label="Start date"
-              value={form.startDate}
-              onChange={(e) => set("startDate", e.target.value)}
-              style={inputStyle}
-            />
-          </Field>
-        </div>
+              <Field label="Assigned to" hint="Anyone on the team">
+                <select
+                  title="Assignee"
+                  aria-label="Assignee"
+                  value={form.assigneeId}
+                  onChange={(e) => set("assigneeId", e.target.value)}
+                  style={inputStyle}
+                >
+                  <option value="">— Unassigned —</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
-        >
-          <Field label="Due date">
-            <input
-              type="date"
-              title="Due date"
-              aria-label="Due date"
-              value={form.dueDate}
-              onChange={(e) => set("dueDate", e.target.value)}
-              min={form.startDate || undefined}
-              style={inputStyle}
-            />
-          </Field>
-          <Field label="Estimate (hours)">
-            <input
-              type="number"
-              min={0}
-              step={0.25}
-              value={form.estimatedHours}
-              onChange={(e) => set("estimatedHours", e.target.value)}
-              placeholder="—"
-              style={inputStyle}
-            />
-          </Field>
-        </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <Field label="Start date">
+                  <input
+                    type="date"
+                    title="Start date"
+                    aria-label="Start date"
+                    value={form.startDate}
+                    onChange={(e) => set("startDate", e.target.value)}
+                    style={inputStyle}
+                  />
+                </Field>
+                <Field label="Due date">
+                  <input
+                    type="date"
+                    title="Due date"
+                    aria-label="Due date"
+                    value={form.dueDate}
+                    onChange={(e) => set("dueDate", e.target.value)}
+                    min={form.startDate || undefined}
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}
-        >
-          <Field
-            label="Tags"
-            hint="Comma-separated, e.g. bug, frontend, customer-ask"
-          >
-            <input
-              type="text"
-              value={form.tags}
-              onChange={(e) => set("tags", e.target.value)}
-              placeholder="bug, frontend, urgent"
-              style={inputStyle}
-            />
-          </Field>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <Field label="Estimate (hours)">
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.25}
+                    value={form.estimatedHours}
+                    onChange={(e) => set("estimatedHours", e.target.value)}
+                    placeholder="—"
+                    style={inputStyle}
+                  />
+                </Field>
+                <Field label="Tags" hint="Comma-separated">
+                  <input
+                    type="text"
+                    value={form.tags}
+                    onChange={(e) => set("tags", e.target.value)}
+                    placeholder="bug, frontend, urgent"
+                    style={inputStyle}
+                  />
+                </Field>
+              </div>
+            </div>
+          </div>
         </div>
 
         {customFields.length > 0 && (
