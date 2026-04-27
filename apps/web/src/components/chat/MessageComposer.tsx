@@ -46,9 +46,33 @@ export function MessageComposer({
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionIdx, setMentionIdx] = useState(0);
   const [capturing, setCapturing] = useState<"audio" | "video" | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Mention candidates — eventually wire to org members; demo data for now.
+  const mentionPool = [
+    { id: "u2", name: "Sarah K." },
+    { id: "u3", name: "Tony M." },
+    { id: "u4", name: "Alex R." },
+    { id: "u5", name: "Jordan B." },
+    { id: "p-priya", name: "Priya Shah" },
+    { id: "p-marcus", name: "Marcus Johnson" },
+    { id: "p-amit", name: "Amit Patel" },
+    { id: "channel", name: "channel" },
+    { id: "here", name: "here" },
+  ];
+
+  const mentionMatches =
+    mentionQuery !== null
+      ? mentionPool
+          .filter((m) =>
+            m.name.toLowerCase().startsWith(mentionQuery.toLowerCase()),
+          )
+          .slice(0, 6)
+      : [];
 
   function handleCaptureComplete(media: CapturedMedia) {
     const extension = media.kind === "audio" ? "webm" : "webm";
@@ -150,6 +174,30 @@ export function MessageComposer({
       setSlashMenuOpen(false);
       return;
     }
+    // Mention picker keyboard nav
+    if (mentionQuery !== null && mentionMatches.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionIdx((i) => (i + 1) % mentionMatches.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionIdx(
+          (i) => (i - 1 + mentionMatches.length) % mentionMatches.length,
+        );
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(mentionMatches[mentionIdx].name);
+        return;
+      }
+      if (e.key === "Escape") {
+        setMentionQuery(null);
+        return;
+      }
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit();
@@ -161,9 +209,40 @@ export function MessageComposer({
     setText(val);
     onTyping();
     setSlashMenuOpen(val.startsWith("/") && !val.includes(" "));
+
+    // Detect a fresh @ token at the cursor → open mention picker.
+    // We look back from the caret for an @ not preceded by another word char.
+    const caret = e.target.selectionStart ?? val.length;
+    const before = val.slice(0, caret);
+    const m = before.match(/(?:^|\s)@([\w.-]*)$/);
+    if (m) {
+      setMentionQuery(m[1]);
+      setMentionIdx(0);
+    } else {
+      setMentionQuery(null);
+    }
+
     const el = e.target;
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
+  }
+
+  function insertMention(name: string) {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const caret = ta.selectionStart ?? text.length;
+    const before = text.slice(0, caret);
+    const after = text.slice(caret);
+    // Replace the trailing `@partial` we matched with `@FullName `
+    const updated = before.replace(/@([\w.-]*)$/, `@${name} `) + after;
+    setText(updated);
+    setMentionQuery(null);
+    requestAnimationFrame(() => {
+      ta.focus();
+      const newCaret =
+        before.replace(/@([\w.-]*)$/, `@${name} `).length;
+      ta.setSelectionRange(newCaret, newCaret);
+    });
   }
 
   function insertEmoji(emoji: string) {
@@ -252,6 +331,116 @@ export function MessageComposer({
             onSelect={selectSlashCmd}
             onClose={() => setSlashMenuOpen(false)}
           />
+        )}
+
+        {/* @mention autocomplete */}
+        {mentionQuery !== null && mentionMatches.length > 0 && (
+          <div
+            role="listbox"
+            aria-label="Mention picker"
+            style={{
+              position: "absolute",
+              bottom: "calc(100% + 6px)",
+              left: 0,
+              minWidth: 240,
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              borderRadius: 10,
+              boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+              padding: 4,
+              zIndex: 50,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                color: "var(--text-tertiary)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                padding: "6px 10px 4px",
+              }}
+            >
+              Mention
+            </div>
+            {mentionMatches.map((m, i) => (
+              <button
+                key={m.id}
+                type="button"
+                role="option"
+                aria-selected={i === mentionIdx}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  insertMention(m.name);
+                }}
+                onMouseEnter={() => setMentionIdx(i)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "7px 10px",
+                  borderRadius: 7,
+                  border: "none",
+                  background:
+                    i === mentionIdx
+                      ? "rgba(108, 71, 255, 0.12)"
+                      : "transparent",
+                  color: "var(--text-primary)",
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <span
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: "50%",
+                    background:
+                      m.id === "channel" || m.id === "here"
+                        ? "rgba(245,158,11,0.15)"
+                        : "rgba(108, 71, 255, 0.15)",
+                    color:
+                      m.id === "channel" || m.id === "here"
+                        ? "#F59E0B"
+                        : "var(--vyne-purple)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  @
+                </span>
+                {m.name}
+                {(m.id === "channel" || m.id === "here") && (
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      fontSize: 10,
+                      color: "var(--text-tertiary)",
+                    }}
+                  >
+                    {m.id === "channel"
+                      ? "Notify everyone"
+                      : "Notify online users"}
+                  </span>
+                )}
+              </button>
+            ))}
+            <div
+              style={{
+                fontSize: 9,
+                color: "var(--text-tertiary)",
+                padding: "4px 10px 6px",
+              }}
+            >
+              ↑↓ navigate · ↵ insert · esc close
+            </div>
+          </div>
         )}
         {/* Toolbar */}
         <div

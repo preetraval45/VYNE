@@ -22,6 +22,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import { FileAttachment } from "./FileAttachment";
 import { useSavedStore } from "@/lib/stores/saved";
 import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
+import { renderWithMentions, isUserMentioned } from "@/lib/utils/mentions";
 
 interface MessageRowProps {
   readonly msg: MsgMessage;
@@ -207,9 +208,17 @@ export function MessageRow({
               lineHeight: 1.6,
               margin: 0,
               wordBreak: "break-word",
+              ...(isUserMentioned(msg.content, ["Preet", "You"])
+                ? {
+                    paddingLeft: 8,
+                    borderLeft: "3px solid var(--vyne-purple)",
+                    background: "rgba(108, 71, 255, 0.04)",
+                    borderRadius: "0 4px 4px 0",
+                  }
+                : {}),
             }}
           >
-            {msg.content}
+            {renderWithMentions(msg.content)}
             {msg.updatedAt && (
               <span
                 style={{
