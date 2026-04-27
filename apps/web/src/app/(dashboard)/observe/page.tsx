@@ -29,6 +29,23 @@ type Environment = "Production" | "Staging" | "Dev";
 type TimeRange = "1h" | "6h" | "24h" | "7d";
 type LogFilter = "All" | "Error" | "Warn" | "Info" | "Debug";
 
+/** Per-environment + per-time-range multipliers used by tabs to vary
+ *  the displayed mock data. Production has the most traffic, Dev the
+ *  least, etc. Means the user sees the filter applied even though the
+ *  underlying numbers are seeded.
+ */
+function envMultiplier(env: Environment): number {
+  if (env === "Production") return 1;
+  if (env === "Staging") return 0.18;
+  return 0.04; // Dev
+}
+function rangeMultiplier(r: TimeRange): number {
+  if (r === "1h") return 1;
+  if (r === "6h") return 6;
+  if (r === "24h") return 24;
+  return 24 * 7; // 7d
+}
+
 // ─── Helper functions (no nested ternaries) ───────────────────────
 function getStatusColor(status: ServiceStatus): string {
   if (status === "healthy") {
@@ -477,7 +494,25 @@ function ProgressBar({
   );
 }
 
-function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
+function OverviewTab({
+  animated,
+  env,
+  timeRange,
+}: Readonly<{
+  animated: boolean;
+  env?: Environment;
+  timeRange?: TimeRange;
+}>) {
+  // Apply env + time-range multipliers to the mock bars so charts
+  // visibly change when filters are clicked. Bars come from fixtures
+  // as percentages 0..100 — we keep the shape but scale amplitude so
+  // Dev looks quieter than Production, 7d denser than 1h.
+  const eMul = env ? envMultiplier(env) : 1;
+  const rMul = timeRange ? Math.min(2, 0.6 + rangeMultiplier(timeRange) / 80) : 1;
+  const scaleBars = (bars: number[]) =>
+    bars.map((b) => Math.max(2, Math.min(100, b * eMul * rMul)));
+  const scaledRequestBars = scaleBars(REQUEST_BARS);
+  const scaledErrorBars = scaleBars(ERROR_BARS);
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -489,7 +524,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
             padding: "16px 18px",
           }}
         >
-          <RequestRateChart bars={REQUEST_BARS} animated={animated} />
+          <RequestRateChart bars={scaledRequestBars} animated={animated} />
         </div>
         <div
           style={{
@@ -499,7 +534,7 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
             padding: "16px 18px",
           }}
         >
-          <ErrorRateChart bars={ERROR_BARS} />
+          <ErrorRateChart bars={scaledErrorBars} />
         </div>
       </div>
 
@@ -716,7 +751,9 @@ function OverviewTab({ animated }: Readonly<{ animated: boolean }>) {
   );
 }
 
-function MetricsTab() {
+function MetricsTab(
+  _props: Readonly<{ env?: Environment; timeRange?: TimeRange }> = {},
+) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -955,7 +992,7 @@ function MetricsTab() {
   );
 }
 
-function LogsTab() {
+function LogsTab(_props: Readonly<{ env?: Environment }> = {}) {
   const [filter, setFilter] = useState<LogFilter>("All");
   const [search, setSearch] = useState("");
   const [serviceFilter, setServiceFilter] = useState("All Services");
@@ -1248,7 +1285,7 @@ function AlertBanner({ alert }: Readonly<{ alert: AlertEntry }>) {
   );
 }
 
-function AlertsTab() {
+function AlertsTab(_props: Readonly<{ env?: Environment }> = {}) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div>
@@ -1403,7 +1440,7 @@ function AlertsTab() {
   );
 }
 
-function TracesTab() {
+function TracesTab(_props: Readonly<{ env?: Environment }> = {}) {
   return (
     <div
       style={{
@@ -1722,18 +1759,31 @@ export default function ObservePage() {
             {ENVS.map((e) => (
               <button
                 key={e}
+                type="button"
                 onClick={() => setEnv(e)}
+                aria-pressed={env === e}
                 style={{
-                  padding: "3px 10px",
+                  padding: "5px 12px",
                   borderRadius: 6,
                   fontSize: 11,
-                  fontWeight: 500,
+                  fontWeight: 600,
                   border: "none",
                   cursor: "pointer",
-                  background: env === e ? "#fff" : "transparent",
+                  // Active = brand purple bg + white text (consistent with TimeRange pills below
+                  // and readable in BOTH light + dark mode — fixes the prior white-on-white bug
+                  // where active text inherited --text-primary which is white in dark mode).
+                  background:
+                    env === e
+                      ? "var(--vyne-purple)"
+                      : "transparent",
                   color:
-                    env === e ? "var(--text-primary)" : "var(--text-secondary)",
-                  boxShadow: env === e ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                    env === e
+                      ? "#fff"
+                      : "var(--text-secondary)",
+                  boxShadow:
+                    env === e
+                      ? "0 2px 8px rgba(108, 71, 255, 0.35)"
+                      : "none",
                   transition: "all 0.15s",
                 }}
               >
@@ -1991,13 +2041,74 @@ export default function ObservePage() {
             ))}
           </div>
 
+          {/* Active filters banner — confirms env + time range are applied
+              so users see the filter responding even when underlying data
+              is mock. */}
+          <div
+            style={{
+              padding: "10px 18px",
+              borderBottom: "1px solid var(--content-border)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 11.5,
+              color: "var(--text-secondary)",
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                color: "var(--text-tertiary)",
+                marginRight: 4,
+              }}
+            >
+              Showing
+            </span>
+            <span
+              style={{
+                padding: "2px 8px",
+                borderRadius: 99,
+                background: "rgba(108, 71, 255, 0.12)",
+                color: "var(--vyne-purple)",
+                fontWeight: 600,
+              }}
+            >
+              {env}
+            </span>
+            <span style={{ color: "var(--text-tertiary)" }}>·</span>
+            <span
+              style={{
+                padding: "2px 8px",
+                borderRadius: 99,
+                background: "rgba(6, 182, 212, 0.12)",
+                color: "#06B6D4",
+                fontWeight: 600,
+              }}
+            >
+              last {timeRange}
+            </span>
+            <span style={{ color: "var(--text-tertiary)", marginLeft: "auto" }}>
+              {env === "Production"
+                ? "All systems operational · 47 services"
+                : env === "Staging"
+                  ? "12 services · 1 deploy in flight"
+                  : "Dev sandbox · 3 services"}
+            </span>
+          </div>
+
           {/* Tab Content */}
           <div style={{ padding: 18 }}>
-            {activeTab === "overview" && <OverviewTab animated={animated} />}
-            {activeTab === "metrics" && <MetricsTab />}
-            {activeTab === "logs" && <LogsTab />}
-            {activeTab === "alerts" && <AlertsTab />}
-            {activeTab === "traces" && <TracesTab />}
+            {activeTab === "overview" && (
+              <OverviewTab animated={animated} env={env} timeRange={timeRange} />
+            )}
+            {activeTab === "metrics" && <MetricsTab env={env} timeRange={timeRange} />}
+            {activeTab === "logs" && <LogsTab env={env} />}
+            {activeTab === "alerts" && <AlertsTab env={env} />}
+            {activeTab === "traces" && <TracesTab env={env} />}
           </div>
         </div>
 
