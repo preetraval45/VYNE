@@ -25,7 +25,9 @@ import { FileAttachment } from "./FileAttachment";
 import { useSavedStore } from "@/lib/stores/saved";
 import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
 import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
-import { renderWithMentions, isUserMentioned } from "@/lib/utils/mentions";
+import { isUserMentioned } from "@/lib/utils/mentions";
+import { renderMessageContent } from "@/lib/utils/messageRender";
+import { LinkPreviews } from "./LinkPreview";
 
 interface MessageRowProps {
   readonly msg: MsgMessage;
@@ -235,7 +237,7 @@ export function MessageRow({
                 : {}),
             }}
           >
-            {renderWithMentions(msg.content)}
+            {renderMessageContent(msg.content)}
             {msg.updatedAt && (
               <span
                 style={{
@@ -350,6 +352,9 @@ export function MessageRow({
             </div>
           </div>
         )}
+
+        {/* Open Graph link previews */}
+        {msg.content && !editing && <LinkPreviews text={msg.content} />}
 
         {/* Read receipts on own messages — WhatsApp-style ✓ / ✓✓ */}
         {isCurrentUser && msg.content && !editing && (

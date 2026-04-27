@@ -34,6 +34,7 @@ import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
 import { SmartReplies } from "./SmartReplies";
 import { PinnedBar } from "./PinnedBar";
+import { ChatSearch } from "./ChatSearch";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
 
@@ -74,6 +75,7 @@ export function ChatArea({
   const callMenuRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
+  const [searchOpen, setSearchOpen] = useState(false);
   // Subscribe to the persist store for THIS channel so a reply sent from
   // the ThreadPanel (different useMessages instance) immediately refreshes
   // ChatArea's reply-count badge.
@@ -701,7 +703,8 @@ export function ChatArea({
             </button>
             <button
               type="button"
-              aria-label="Search"
+              aria-label="Search messages"
+              onClick={() => setSearchOpen(true)}
               style={{
                 padding: "5px",
                 borderRadius: 7,
@@ -711,7 +714,7 @@ export function ChatArea({
                 color: "var(--text-tertiary)",
                 display: "flex",
               }}
-              title="Search"
+              title="Search messages (⌘K to scope to this channel)"
             >
               <Search size={15} />
             </button>
@@ -979,6 +982,13 @@ export function ChatArea({
             `📅 *Meeting scheduled* — ${ev.title}\n${when}${attendeeList}${ev.videoCall ? "\n🎥 Video call · join from /calendar" : ""}`,
           );
         }}
+      />
+
+      <ChatSearch
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        scopedChannelId={channelId}
+        channelNameById={{ [channelId]: channelName }}
       />
 
       {/* Call overlay + recap modal are mounted globally in DashboardLayout

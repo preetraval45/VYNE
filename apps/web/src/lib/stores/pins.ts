@@ -16,6 +16,8 @@ interface PinsStore {
   pin: (item: PinnedItem) => void;
   unpin: (href: string) => void;
   togglePin: (item: PinnedItem) => void;
+  /** Reorder a pinned item from index `from` to index `to`. */
+  movePin: (fromIdx: number, toIdx: number) => void;
 
   trackVisit: (item: PinnedItem) => void;
   clearRecent: () => void;
@@ -47,6 +49,23 @@ export const usePinsStore = create<PinsStore>()(
         if (isPinned(item.href)) unpin(item.href);
         else pin(item);
       },
+
+      movePin: (fromIdx, toIdx) =>
+        set((state) => {
+          if (
+            fromIdx === toIdx ||
+            fromIdx < 0 ||
+            toIdx < 0 ||
+            fromIdx >= state.pinned.length ||
+            toIdx >= state.pinned.length
+          ) {
+            return state;
+          }
+          const next = [...state.pinned];
+          const [moved] = next.splice(fromIdx, 1);
+          next.splice(toIdx, 0, moved);
+          return { pinned: next };
+        }),
 
       trackVisit: (item) =>
         set((state) => {

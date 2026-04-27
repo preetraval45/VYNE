@@ -1126,6 +1126,9 @@ export function Sidebar() {
   const recent = usePinsStore((s) => s.recent);
   const unpin = usePinsStore((s) => s.unpin);
   const togglePin = usePinsStore((s) => s.togglePin);
+  const movePin = usePinsStore((s) => s.movePin);
+  const [pinDragIdx, setPinDragIdx] = useState<number | null>(null);
+  const [pinOverIdx, setPinOverIdx] = useState<number | null>(null);
   const isPinned = usePinsStore((s) => s.isPinned);
   const trackVisit = usePinsStore((s) => s.trackVisit);
 
@@ -1346,10 +1349,38 @@ export function Sidebar() {
               <Star size={11} fill="currentColor" />
               Pinned
             </div>
-            {pinned.map((p) => (
+            {pinned.map((p, idx) => (
               <div
                 key={p.href}
                 role="none"
+                draggable
+                onDragStart={(e) => {
+                  setPinDragIdx(idx);
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", String(idx));
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = "move";
+                  setPinOverIdx(idx);
+                }}
+                onDragLeave={() => {
+                  setPinOverIdx((cur) => (cur === idx ? null : cur));
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const from =
+                    pinDragIdx ?? Number(e.dataTransfer.getData("text/plain"));
+                  if (Number.isFinite(from) && from !== idx) {
+                    movePin(from, idx);
+                  }
+                  setPinDragIdx(null);
+                  setPinOverIdx(null);
+                }}
+                onDragEnd={() => {
+                  setPinDragIdx(null);
+                  setPinOverIdx(null);
+                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1357,9 +1388,20 @@ export function Sidebar() {
                   padding: "2px 4px",
                   borderRadius: 6,
                   marginBottom: 2,
+                  cursor: pinDragIdx === idx ? "grabbing" : "grab",
+                  opacity: pinDragIdx === idx ? 0.4 : 1,
+                  borderTop:
+                    pinOverIdx === idx && pinDragIdx !== null && pinDragIdx > idx
+                      ? "2px solid var(--vyne-purple)"
+                      : "2px solid transparent",
+                  borderBottom:
+                    pinOverIdx === idx && pinDragIdx !== null && pinDragIdx < idx
+                      ? "2px solid var(--vyne-purple)"
+                      : "2px solid transparent",
                   background: isActive(p.href)
                     ? "rgba(255,255,255,0.06)"
                     : "transparent",
+                  transition: "border-color 0.1s",
                 }}
               >
                 <button
