@@ -249,7 +249,7 @@ export default function NewTaskPage() {
         <div
           style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
         >
-          <Field label="Assignee">
+          <Field label="Assigned to" hint="Anyone on the team">
             <select
               title="Assignee"
               aria-label="Assignee"

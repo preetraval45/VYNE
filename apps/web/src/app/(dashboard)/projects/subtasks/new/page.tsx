@@ -227,15 +227,15 @@ export default function NewSubtaskPage() {
         </Field>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <Field label="Assignee">
+          <Field label="Assigned to" hint="Anyone on the team">
             <select
               value={form.assigneeId}
               onChange={(e) => set("assigneeId", e.target.value)}
-              title="Assignee"
-              aria-label="Assignee"
+              title="Assigned to"
+              aria-label="Assigned to"
               style={inputStyle}
             >
-              <option value="">Unassigned</option>
+              <option value="">— Unassigned —</option>
               {teamMembers.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}

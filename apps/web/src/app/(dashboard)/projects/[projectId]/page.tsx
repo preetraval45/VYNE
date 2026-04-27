@@ -22,6 +22,7 @@ import {
   CheckSquare,
   Square,
   Trash2,
+  Pencil,
   Send,
   SlidersHorizontal,
 } from "lucide-react";
@@ -600,6 +601,52 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             <SlidersHorizontal size={13} />
             Edit fields
           </button>
+          <Link
+            href={`/projects/${projectId}/edit`}
+            aria-label="Edit project settings"
+            title="Edit project"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              height: 32,
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "var(--text-secondary)",
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+              cursor: "pointer",
+              textDecoration: "none",
+            }}
+          >
+            <Pencil size={13} />
+            Edit project
+          </Link>
+          <Link
+            href={`/projects/${projectId}/delete`}
+            aria-label="Delete project"
+            title="Delete project"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              height: 32,
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              color: "var(--status-danger)",
+              background: "rgba(239, 68, 68, 0.06)",
+              border: "1px solid rgba(239, 68, 68, 0.25)",
+              cursor: "pointer",
+              textDecoration: "none",
+            }}
+          >
+            <Trash2 size={13} />
+            Delete
+          </Link>
           <Link
             href={`/projects/tasks/new?project=${projectId}`}
             aria-label="Create new task (C)"

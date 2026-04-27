@@ -351,18 +351,23 @@ export default function NewProjectPage() {
 
         <FormSection
           title="Team"
-          description="Who's leading the project and who's involved."
+          description="Anyone on the team can be assigned. Pick a lead and (optionally) additional members."
         >
-          <FormField label="Lead" htmlFor="new-project-lead">
+          <FormField
+            label="Assigned to (lead)"
+            htmlFor="new-project-lead"
+            hint="Anyone on the team — leave Unassigned if no owner yet"
+          >
             <select
               id="new-project-lead"
-              title="Project lead"
+              title="Project lead — who's responsible"
               aria-label="Project lead"
               value={form.leadId}
               onChange={(e) => update("leadId", e.target.value)}
               className={inputClass}
               style={inputStyle}
             >
+              <option value="">— Unassigned —</option>
               {teamMembers.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name} — {m.role}
