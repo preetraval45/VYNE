@@ -247,7 +247,7 @@ export function DailyDigestCard() {
               gap: 5,
             }}
           >
-            {data.bullets.map((b) => (
+            {(Array.isArray(data.bullets) ? data.bullets : []).map((b) => (
               <li
                 key={b}
                 style={{
