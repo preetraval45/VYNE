@@ -185,6 +185,18 @@ const NAV_ITEMS: NavItemDef[] = [
     ],
   },
   {
+    icon: Activity,
+    label: "Timeline",
+    href: "/timeline",
+    color: "#A78BFA",
+    subs: [
+      { label: "All events", href: "/timeline" },
+      { label: "GitHub", href: "/timeline" },
+      { label: "Stripe", href: "/timeline" },
+      { label: "Sentry", href: "/timeline" },
+    ],
+  },
+  {
     icon: FolderKanban,
     label: "Projects",
     href: "/projects",
