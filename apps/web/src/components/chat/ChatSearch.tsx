@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, MessageSquare, Hash, Pin } from "lucide-react";
+import { Search, X, MessageSquare, Hash, Pin, Sparkles } from "lucide-react";
 import { useSentMessagesStore } from "@/lib/stores/sentMessages";
 import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
 import { useSavedStore } from "@/lib/stores/saved";
@@ -54,6 +54,9 @@ export function ChatSearch({
   const saved = useSavedStore((s) => s.saved);
   const [query, setQuery] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  const [aiMode, setAiMode] = useState(false);
+  const [aiHits, setAiHits] = useState<SearchHit[] | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -73,72 +76,120 @@ export function ChatSearch({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const hits = useMemo<SearchHit[]>(() => {
-    if (!query.trim()) return [];
+  // All searchable messages flattened — used both by fuzzy + AI mode
+  const allCandidates = useMemo<SearchHit[]>(() => {
     const out: SearchHit[] = [];
-
-    // Sent messages
     for (const [cid, list] of Object.entries(sent)) {
       if (scopedChannelId && cid !== scopedChannelId) continue;
       for (const m of list) {
-        const score = fuzzyScore(m.content || "", query);
-        if (score > 0) {
-          out.push({
-            channelId: cid,
-            channelName: channelNameById?.[cid] ?? cid,
-            message: m,
-            score,
-            source: "sent",
-          });
-        }
-      }
-    }
-    // Pinned
-    for (const [cid, list] of Object.entries(pinned)) {
-      if (scopedChannelId && cid !== scopedChannelId) continue;
-      for (const p of list) {
-        const score = fuzzyScore(p.message.content || "", query);
-        if (score > 0) {
-          out.push({
-            channelId: cid,
-            channelName: channelNameById?.[cid] ?? cid,
-            message: p.message,
-            score: score + 5, // pinned items get a small boost
-            source: "pinned",
-          });
-        }
-      }
-    }
-    // Saved
-    for (const s of saved) {
-      if (scopedChannelId && s.channelId !== scopedChannelId) continue;
-      const score = fuzzyScore(s.content || "", query);
-      if (score > 0) {
         out.push({
-          channelId: s.channelId,
-          channelName: s.channelName,
-          message: {
-            id: s.messageId,
-            author: { id: "—", name: s.authorName },
-            content: s.content,
-            createdAt: s.savedAt,
-          },
-          score,
-          source: "saved",
+          channelId: cid,
+          channelName: channelNameById?.[cid] ?? cid,
+          message: m,
+          score: 0,
+          source: "sent",
         });
       }
     }
+    for (const [cid, list] of Object.entries(pinned)) {
+      if (scopedChannelId && cid !== scopedChannelId) continue;
+      for (const p of list) {
+        out.push({
+          channelId: cid,
+          channelName: channelNameById?.[cid] ?? cid,
+          message: p.message,
+          score: 0,
+          source: "pinned",
+        });
+      }
+    }
+    for (const s of saved) {
+      if (scopedChannelId && s.channelId !== scopedChannelId) continue;
+      out.push({
+        channelId: s.channelId,
+        channelName: s.channelName,
+        message: {
+          id: s.messageId,
+          author: { id: "—", name: s.authorName },
+          content: s.content,
+          createdAt: s.savedAt,
+        },
+        score: 0,
+        source: "saved",
+      });
+    }
+    return out;
+  }, [sent, pinned, saved, scopedChannelId, channelNameById]);
 
-    // Dedupe by message id, keep highest score
+  const fuzzyHits = useMemo<SearchHit[]>(() => {
+    if (!query.trim() || aiMode) return [];
+    const scored = allCandidates
+      .map((h) => ({ ...h, score: fuzzyScore(h.message.content || "", query) }))
+      .filter((h) => h.score > 0);
     const byId = new Map<string, SearchHit>();
-    for (const h of out) {
+    for (const h of scored) {
       const cur = byId.get(h.message.id);
       if (!cur || h.score > cur.score) byId.set(h.message.id, h);
     }
     return Array.from(byId.values())
       .sort((a, b) => b.score - a.score)
       .slice(0, 30);
-  }, [query, sent, pinned, saved, scopedChannelId, channelNameById]);
+  }, [query, allCandidates, aiMode]);
+
+  const hits: SearchHit[] = aiMode && aiHits ? aiHits : fuzzyHits;
+
+  // When AI mode is on, debounce the query and call /api/ai/search-messages
+  useEffect(() => {
+    if (!aiMode) {
+      setAiHits(null);
+      setAiLoading(false);
+      return;
+    }
+    const q = query.trim();
+    if (!q) {
+      setAiHits([]);
+      return;
+    }
+    setAiLoading(true);
+    const handle = setTimeout(async () => {
+      try {
+        const idToHit = new Map(allCandidates.map((h) => [h.message.id, h]));
+        const candidates = allCandidates.slice(-200).map((h) => ({
+          id: h.message.id,
+          channelId: h.channelId,
+          channelName: h.channelName,
+          author: h.message.author.name,
+          content: h.message.content,
+          timestamp: h.message.createdAt,
+        }));
+        const res = await fetch("/api/ai/search-messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: q, messages: candidates }),
+        });
+        if (!res.ok) {
+          setAiHits([]);
+          return;
+        }
+        const data = (await res.json()) as {
+          hits: Array<{ id: string; reason: string; relevance: number }>;
+        };
+        const results = data.hits
+          .map((h) => {
+            const base = idToHit.get(h.id);
+            if (!base) return null;
+            return { ...base, score: h.relevance };
+          })
+          .filter(Boolean) as SearchHit[];
+        setAiHits(results);
+      } catch {
+        setAiHits([]);
+      } finally {
+        setAiLoading(false);
+      }
+    }, 350);
+    return () => clearTimeout(handle);
+  }, [query, aiMode, allCandidates]);
 
   function handleSelect(hit: SearchHit) {
     onSelectHit?.(hit);
@@ -213,9 +264,13 @@ export function ChatSearch({
                 }
               }}
               placeholder={
-                scopedChannelId
-                  ? "Search this channel…"
-                  : "Search across all channels, DMs, pinned, saved…"
+                aiMode
+                  ? scopedChannelId
+                    ? "Ask AI to find messages in this channel…"
+                    : "Ask AI: 'find the message about Acme renewal'…"
+                  : scopedChannelId
+                    ? "Search this channel…"
+                    : "Search across all channels, DMs, pinned, saved…"
               }
               aria-label="Search messages"
               style={{
@@ -227,6 +282,34 @@ export function ChatSearch({
                 outline: "none",
               }}
             />
+            <button
+              type="button"
+              onClick={() => {
+                setAiMode((v) => !v);
+                setAiHits(null);
+              }}
+              title={aiMode ? "Switch to fuzzy search" : "Ask AI to find messages"}
+              style={{
+                padding: "5px 10px",
+                borderRadius: 99,
+                border: aiMode
+                  ? "1px solid var(--vyne-purple)"
+                  : "1px solid var(--content-border)",
+                background: aiMode
+                  ? "rgba(108, 71, 255, 0.15)"
+                  : "transparent",
+                color: aiMode ? "var(--vyne-purple)" : "var(--text-secondary)",
+                fontSize: 11,
+                fontWeight: 600,
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <Sparkles size={11} />
+              {aiMode ? "AI on" : "Ask AI"}
+            </button>
             <kbd
               style={{
                 padding: "2px 7px",
@@ -277,13 +360,33 @@ export function ChatSearch({
                   lineHeight: 1.5,
                 }}
               >
-                Type to search messages across all channels, DMs, pinned, and saved.
+                {aiMode
+                  ? "Ask in plain English — VYNE AI finds the most relevant messages."
+                  : "Type to search across channels, DMs, pinned, and saved."}
                 <div style={{ marginTop: 8, fontSize: 11 }}>
                   ↑↓ navigate · ↵ open · esc close
                 </div>
               </div>
             )}
-            {query.trim() && hits.length === 0 && (
+            {query.trim() && aiMode && aiLoading && (
+              <div
+                style={{
+                  padding: "30px 20px",
+                  textAlign: "center",
+                  fontSize: 13,
+                  color: "var(--vyne-purple)",
+                  lineHeight: 1.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <Sparkles size={18} />
+                VYNE AI is thinking…
+              </div>
+            )}
+            {query.trim() && !aiLoading && hits.length === 0 && (
               <div
                 style={{
                   padding: "30px 20px",
@@ -293,6 +396,11 @@ export function ChatSearch({
                 }}
               >
                 No matches for &ldquo;{query}&rdquo;
+                {aiMode && (
+                  <div style={{ marginTop: 6, fontSize: 11 }}>
+                    Try a fuzzy search instead — toggle &quot;Ask AI&quot; off.
+                  </div>
+                )}
               </div>
             )}
             {hits.map((h, i) => (

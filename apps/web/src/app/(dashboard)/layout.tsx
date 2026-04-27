@@ -18,6 +18,8 @@ import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 import { useTabSync } from "@/hooks/useTabSync";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -26,8 +28,23 @@ export default function DashboardLayout({
 }) {
   const focusMode = useUIStore((s) => s.focusMode);
   const pathname = usePathname();
+  const router = useRouter();
   // Cross-tab sync: when the user sends/edits/reads in one tab, others update.
   useTabSync();
+
+  // First-run onboarding: if user hasn't completed the wizard, push them
+  // through it once. Skipped if they're already on /onboarding or it's
+  // a deep-link they explicitly came back to.
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (onboardingChecked) return;
+    const done = localStorage.getItem("vyne-onboarding");
+    if (!done && pathname && !pathname.startsWith("/onboarding")) {
+      router.push("/onboarding");
+    }
+    setOnboardingChecked(true);
+  }, [onboardingChecked, pathname, router]);
   // Derive a module key from the first path segment so the error boundary
   // resets automatically when the user navigates to a different module.
   const moduleKey = pathname?.split("/")[1] ?? "root";
