@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useUnreadStore } from "@/lib/stores/unread";
 
 interface NavItem {
   href: string;
@@ -69,6 +70,10 @@ export function MobileBottomNav() {
     setOpenSidebar(false);
   }, [pathname]);
 
+  const chatUnread = useUnreadStore((s) =>
+    Object.values(s.counts).reduce((a, b) => a + b, 0),
+  );
+
   return (
     <nav
       className="mobile-bottom-nav"
@@ -92,6 +97,7 @@ export function MobileBottomNav() {
       {NAV_ITEMS.map((item) => {
         const active = item.match(pathname);
         const Icon = item.icon;
+        const badge = item.label === "Chat" && chatUnread > 0 ? chatUnread : 0;
         return (
           <Link
             key={item.href}
@@ -127,7 +133,34 @@ export function MobileBottomNav() {
                 }}
               />
             )}
-            <Icon size={20} strokeWidth={active ? 2.4 : 2} />
+            <div style={{ position: "relative" }}>
+              <Icon size={20} strokeWidth={active ? 2.4 : 2} />
+              {badge > 0 && (
+                <span
+                  aria-label={`${badge} unread`}
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -8,
+                    minWidth: 16,
+                    height: 16,
+                    padding: "0 4px",
+                    borderRadius: 8,
+                    background: "#EF4444",
+                    color: "#fff",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: 1,
+                    boxShadow: "0 0 0 2px var(--content-bg)",
+                  }}
+                >
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
+            </div>
             <span
               style={{
                 fontSize: 10,

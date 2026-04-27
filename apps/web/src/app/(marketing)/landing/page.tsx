@@ -441,7 +441,7 @@ function Hero() {
           }}
         >
           <Sparkles size={13} style={{ color: "#67E8F9" }} />
-          Team chat that knows your business
+          The correlation layer for your business
           <span
             style={{
               padding: "2px 9px",
@@ -471,9 +471,9 @@ function Hero() {
             marginBottom: 24,
           }}
         >
-          Slack for chat.
+          Connect what shipped to
           <br />
-          <span className="aurora-text">VYNE for everything else.</span>
+          <span className="aurora-text">what it changed.</span>
         </motion.h1>
 
         <motion.p
@@ -484,14 +484,15 @@ function Hero() {
             fontSize: "clamp(16px, 1.9vw, 19px)",
             lineHeight: 1.55,
             color: C.textSub,
-            maxWidth: 640,
+            maxWidth: 660,
             margin: "0 auto 44px",
             letterSpacing: "-0.005em",
           }}
         >
-          Chat with built-in voice, video, screen-share, and AI that takes
-          meeting notes for you. Your CRM, projects, and docs live one click
-          away — every conversation can become a deal, task, or call log.
+          VYNE sits on top of the tools you already use and ties business
+          events to infra events. When a deploy fails, see which deals it
+          blocks. When a customer churns, see what shipped that week. AI
+          stitches the timeline together so you stop guessing what caused what.
         </motion.p>
 
         <motion.div
@@ -535,7 +536,7 @@ function Hero() {
               marginBottom: 16,
             }}
           >
-            Replaces
+            Connects to
           </p>
           <div
             style={{
@@ -545,28 +546,32 @@ function Hero() {
               gap: 8,
             }}
           >
-            {["Slack", "Jira", "Notion", "ClickUp", "Linear", "HubSpot"].map(
-              (tool) => (
-                <div
-                  key={tool}
-                  style={{
-                    padding: "6px 14px",
-                    borderRadius: 8,
-                    border: `1px solid ${C.border}`,
-                    background: C.surface,
-                    color: C.textSub,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    letterSpacing: "-0.005em",
-                    textDecoration: "line-through",
-                    textDecorationColor: "rgba(239,68,68,0.45)",
-                    textDecorationThickness: 1.5,
-                  }}
-                >
-                  {tool}
-                </div>
-              ),
-            )}
+            {[
+              "GitHub",
+              "Sentry",
+              "Datadog",
+              "HubSpot",
+              "Stripe",
+              "Linear",
+              "PagerDuty",
+              "Slack",
+            ].map((tool) => (
+              <div
+                key={tool}
+                style={{
+                  padding: "6px 14px",
+                  borderRadius: 8,
+                  border: `1px solid ${C.border}`,
+                  background: C.surface,
+                  color: C.textSub,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {tool}
+              </div>
+            ))}
           </div>
         </motion.div>
       </div>
@@ -577,46 +582,46 @@ function Hero() {
 /* ─── Features Grid ──────────────────────────────────────────── */
 const features = [
   {
-    icon: MessageSquare,
-    title: "Chat with calls built in",
-    desc: "Voice, video, and screen-share inside every channel and DM. Hold-to-record voice notes. No app switching, no Zoom links.",
-    replaces: "Slack + Zoom",
-    color: "#06B6D4",
+    icon: Sparkles,
+    title: "One timeline for every event",
+    desc: "Deploys, PR merges, customer messages, deals, alerts — all flow into a single chronological feed. Filter by team, customer, or service and you'll never have to ask 'what was happening when X broke?' again.",
+    replaces: "",
+    color: "#A78BFA",
   },
   {
     icon: Bot,
-    title: "VYNE AI takes notes for you",
-    desc: "Live transcription during calls, action-item detection, post-meeting recap with summary + decisions. Smart-reply chips for chat.",
-    replaces: "Otter + Fireflies",
+    title: "Causal AI: 'what changed before this?'",
+    desc: "Point at any incident, churn event, or revenue dip. AI walks back through the timeline and surfaces the deploys, config changes, and customer signals that correlate with it.",
+    replaces: "",
     color: "#EC4899",
   },
   {
+    icon: MessageSquare,
+    title: "Native chat with calls + AI notes",
+    desc: "Voice, video, screen-share, and live transcription — all in the same workspace where the events live. Meetings get auto-recapped and linked to the relevant project, deal, or incident.",
+    replaces: "",
+    color: "#06B6D4",
+  },
+  {
     icon: FolderKanban,
-    title: "CRM lives one click away",
-    desc: "Type /contact, /deal, or /log-call in chat. Every conversation flows into your pipeline. Bookmark messages, translate inline.",
-    replaces: "HubSpot + Slack",
+    title: "Two-way sync with your stack",
+    desc: "GitHub, Sentry, Datadog, HubSpot, Stripe, Linear — connect the systems you already run. VYNE doesn't replace them, it correlates them.",
+    replaces: "",
     color: "#0891B2",
   },
   {
     icon: FileText,
-    title: "Projects + Docs unified",
-    desc: "Kanban boards, sprints, and rich docs share the same database. Tasks created from chat appear instantly on your board.",
-    replaces: "Jira + Notion",
+    title: "Customer-aware ops",
+    desc: "An alert isn't 'CPU at 95%' — it's 'the alert that just woke you up affects 3 enterprise customers totaling $480K ARR.' Every infra event is annotated with the business impact.",
+    replaces: "",
     color: "#22C55E",
   },
   {
     icon: Package,
-    title: "ERP + Finance for SMBs",
-    desc: "Inventory, orders, invoicing, and a basic ledger — for teams who outgrew spreadsheets but aren't ready for NetSuite.",
-    replaces: "QuickBooks",
+    title: "Built for the team that lives in 10 tools",
+    desc: "If your team already runs Jira, Notion, Slack, GitHub, Datadog, HubSpot, and a spreadsheet — keep them. VYNE plugs in and gives you the cross-cutting view you've never had.",
+    replaces: "",
     color: "#F59E0B",
-  },
-  {
-    icon: Sparkles,
-    title: "AI that knows your business",
-    desc: "Cross-domain agent connects chat, deals, projects, and finance. Ask 'where are we on Acme?' and get a real answer.",
-    replaces: "Datadog AI",
-    color: "#A78BFA",
   },
 ];
 
@@ -632,15 +637,15 @@ function Features() {
     >
       <div style={{ maxWidth: 1120, margin: "0 auto" }}>
         <SectionHeader
-          eyebrow="What's in the box"
+          eyebrow="The correlation layer"
           title={
             <>
-              Chat that does what
+              Stop swivel-chairing across
               <br />
-              <span className="aurora-text">Slack and Teams can't.</span>
+              <span className="aurora-text">six dashboards.</span>
             </>
           }
-          subtitle="Voice, video, screen-share, AI meeting notes, and live transcripts — built in. Slash commands turn any message into a CRM contact, deal, or call log."
+          subtitle="VYNE plugs into the systems you already run — chat, code, monitoring, CRM, billing — and pulls every event onto one timeline. Ask AI 'what changed before this customer churned?' and get a real answer."
         />
 
         <div
@@ -710,23 +715,25 @@ function Features() {
               >
                 {f.desc}
               </p>
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  fontSize: 11,
-                  fontWeight: 600,
-                  color: f.color,
-                  padding: "3px 9px",
-                  borderRadius: 5,
-                  background: `${f.color}14`,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                Replaces {f.replaces}
-              </span>
+              {f.replaces && (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: f.color,
+                    padding: "3px 9px",
+                    borderRadius: 5,
+                    background: `${f.color}14`,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  {f.replaces}
+                </span>
+              )}
             </motion.div>
           ))}
         </div>

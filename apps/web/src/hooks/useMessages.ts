@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useUnreadStore } from "@/lib/stores/unread";
 import {
   messagingApi,
   type MsgChannel,
@@ -238,6 +239,19 @@ export function useChannels() {
   const [channels, setChannels] = useState<MsgChannel[]>([]);
   const [dms, setDMs] = useState<MsgDM[]>([]);
   const [loading, setLoading] = useState(true);
+  // Subscribe to the unread store so badges update reactively when
+  // the user opens a channel (markRead) or a new message lands.
+  const unreadCounts = useUnreadStore((s) => s.counts);
+
+  // Overlay store-tracked unread counts onto the channel + DM lists
+  const channelsWithUnread = channels.map((c) => ({
+    ...c,
+    unreadCount: unreadCounts[c.id] ?? c.unreadCount ?? 0,
+  }));
+  const dmsWithUnread = dms.map((d) => ({
+    ...d,
+    unreadCount: unreadCounts[d.id] ?? d.unreadCount ?? 0,
+  }));
 
   useEffect(() => {
     Promise.all([
@@ -247,6 +261,20 @@ export function useChannels() {
       .then(([chRes, dmRes]) => {
         setChannels(chRes.data);
         setDMs(dmRes.data);
+        // Seed the unread store from the source data so the
+        // sidebar/bottom-nav badges stay in sync. Existing reads
+        // (already-zeroed entries) are preserved.
+        const seed = [
+          ...chRes.data.map((c) => ({
+            id: c.id,
+            count: c.unreadCount ?? 0,
+          })),
+          ...dmRes.data.map((d) => ({
+            id: d.id,
+            count: d.unreadCount ?? 0,
+          })),
+        ];
+        useUnreadStore.getState().seed(seed);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -275,7 +303,12 @@ export function useChannels() {
     [],
   );
 
-  return { channels, dms, loading, createChannel };
+  return {
+    channels: channelsWithUnread,
+    dms: dmsWithUnread,
+    loading,
+    createChannel,
+  };
 }
 
 // ── useMessages ───────────────────────────────────────────────────

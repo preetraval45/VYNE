@@ -42,6 +42,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
+import { useUnreadStore } from "@/lib/stores/unread";
 import {
   useProjects,
   useProjectsStore,
@@ -163,7 +164,8 @@ const NAV_ITEMS: NavItemDef[] = [
     label: "Chat",
     href: "/chat",
     color: "#3498DB",
-    badge: 3,
+    // badge is computed from useUnreadStore at render time — see
+    // visibleNavItems below.
     moduleId: "chat",
     subs: [
       { label: "Channels", href: "/chat" },
@@ -1100,12 +1102,24 @@ export function Sidebar() {
   }, []);
 
   // Filter items: keep items with no moduleId (always shown) or enabled module
-  const visibleNavItems =
+  const baseNavItems =
     enabledModules === null
       ? NAV_ITEMS
       : NAV_ITEMS.filter(
           (item) => !item.moduleId || enabledModules.has(item.moduleId),
         );
+
+  // Live unread count from the store powers the Chat badge so it
+  // ticks down to 0 the moment a channel is opened.
+  const totalUnread = useUnreadStore((s) =>
+    Object.values(s.counts).reduce((a, b) => a + b, 0),
+  );
+
+  const visibleNavItems = baseNavItems.map((item) =>
+    item.label === "Chat"
+      ? { ...item, badge: totalUnread > 0 ? totalUnread : undefined }
+      : item,
+  );
 
   // ── Pins & recents ─────────────────────────────────────────────
   const pinned = usePinsStore((s) => s.pinned);
