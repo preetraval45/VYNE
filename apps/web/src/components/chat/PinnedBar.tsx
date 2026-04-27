@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Pin, ChevronDown, X as XIcon } from "lucide-react";
-import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
+import { usePinnedMessagesStore, type PinnedMessage } from "@/lib/stores/pinnedMessages";
 
 interface PinnedBarProps {
   readonly channelId: string;
 }
+
+// Stable empty default — selectors must never return a fresh `[]` per
+// render or React infinite-loops (#185).
+const EMPTY: PinnedMessage[] = [];
 
 /**
  * Compact horizontal bar at the top of a chat channel showing pinned
@@ -15,7 +19,8 @@ interface PinnedBarProps {
  * a dropdown with all pins on click.
  */
 export function PinnedBar({ channelId }: PinnedBarProps) {
-  const pinned = usePinnedMessagesStore((s) => s.byChannel[channelId] ?? []);
+  const pinned =
+    usePinnedMessagesStore((s) => s.byChannel[channelId]) ?? EMPTY;
   const unpin = usePinnedMessagesStore((s) => s.unpin);
   const [open, setOpen] = useState(false);
 

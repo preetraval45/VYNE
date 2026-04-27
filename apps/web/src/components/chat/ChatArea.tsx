@@ -39,6 +39,13 @@ import { PinnedBar } from "./PinnedBar";
 import { ChatSearch } from "./ChatSearch";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
+import type { MsgMessage as MsgM } from "@/lib/api/client";
+
+// Stable empty array reference — used as the default for Zustand selectors
+// where the keyed value is sometimes undefined. Returning `[]` from the
+// selector itself creates a new array each render and triggers an infinite
+// re-render loop (React #185).
+const EMPTY_PERSISTED: MsgM[] = [];
 
 interface ChatAreaProps {
   readonly channelId: string;
@@ -81,9 +88,13 @@ export function ChatArea({
   // Subscribe to the persist store for THIS channel so a reply sent from
   // the ThreadPanel (different useMessages instance) immediately refreshes
   // ChatArea's reply-count badge.
-  const persistedForChannel = useSentMessagesStore(
-    (s) => s.byChannel[channelId] ?? [],
+  // NOTE: must NOT create a new array in the selector (`?? []`), that
+  // breaks Zustand's referential equality and triggers infinite renders.
+  // Select the underlying value, default to a stable EMPTY_PERSISTED below.
+  const persistedRaw = useSentMessagesStore(
+    (s) => s.byChannel[channelId],
   );
+  const persistedForChannel = persistedRaw ?? EMPTY_PERSISTED;
 
   // Close call menu on outside click
   useEffect(() => {
