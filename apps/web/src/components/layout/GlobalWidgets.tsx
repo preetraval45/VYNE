@@ -525,6 +525,7 @@ function QuickNoteFab() {
   }, []);
 
   // Keyboard: N opens a new quick note (when not typing)
+  // Also listens for "vyne:open-notes" custom event from the top-right toolbar.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLElement) {
@@ -537,8 +538,19 @@ function QuickNoteFab() {
         setTimeout(() => textareaRef.current?.focus(), 60);
       }
     }
+    function onOpenEvent() {
+      setOpen(true);
+      setTimeout(() => textareaRef.current?.focus(), 60);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("vyne:open-notes", onOpenEvent as EventListener);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(
+        "vyne:open-notes",
+        onOpenEvent as EventListener,
+      );
+    };
   }, []);
 
   function saveDraft() {
@@ -575,35 +587,6 @@ function QuickNoteFab() {
 
   return (
     <>
-      <button
-        type="button"
-        aria-label="Quick note (N)"
-        onClick={() => {
-          setOpen(true);
-          setTimeout(() => textareaRef.current?.focus(), 60);
-        }}
-        title="Jot a quick note · press N anywhere"
-        style={{
-          position: "fixed",
-          right: 18,
-          bottom: 20,
-          zIndex: 180,
-          width: 50,
-          height: 50,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
-          color: "#fff",
-          border: "none",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(6, 182, 212,0.4)",
-        }}
-      >
-        <StickyNote size={20} />
-      </button>
-
       {open && (
         <div
           role="dialog"

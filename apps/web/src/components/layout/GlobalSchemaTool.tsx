@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Wrench, Download as DownloadIcon } from "lucide-react";
+import {
+  Wrench,
+  Download as DownloadIcon,
+  MessageSquare,
+  StickyNote,
+} from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import { useUser } from "@/lib/stores/auth";
 
@@ -87,6 +92,66 @@ export function GlobalSchemaTool() {
           pointerEvents: "none",
         }}
       >
+        <Link
+          href="/chat"
+          aria-label="Open messages"
+          title="Messages (chat & DMs)"
+          style={{
+            pointerEvents: "auto",
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--content-secondary)",
+            border: "1px solid var(--content-border)",
+            color: "var(--vyne-purple)",
+            transition: "color 0.15s, border-color 0.15s",
+            textDecoration: "none",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--vyne-purple)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--content-border)";
+          }}
+        >
+          <MessageSquare size={14} />
+        </Link>
+        <button
+          type="button"
+          onClick={() => {
+            globalThis.dispatchEvent(new CustomEvent("vyne:open-notes"));
+          }}
+          aria-label="Open quick notes"
+          title="Quick notes (press N anywhere)"
+          style={{
+            pointerEvents: "auto",
+            width: 32,
+            height: 32,
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--content-secondary)",
+            border: "1px solid var(--content-border)",
+            color: "#06B6D4",
+            cursor: "pointer",
+            transition: "color 0.15s, border-color 0.15s",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor = "#06B6D4";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLElement).style.borderColor =
+              "var(--content-border)";
+          }}
+        >
+          <StickyNote size={14} />
+        </button>
         <Link
           href="/download"
           aria-label="Download desktop and mobile apps"
