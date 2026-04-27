@@ -11,6 +11,7 @@ import {
   Image as ImageIcon,
   ZoomIn,
 } from "lucide-react";
+import { VoiceMessage } from "./VoiceMessage";
 
 // ─── Types ───────────────────────────────────────────────────────
 export interface MessageAttachment {
@@ -291,17 +292,46 @@ function DocAttachment({
   );
 }
 
+function isAudio(att: MessageAttachment): boolean {
+  if (att.contentType?.startsWith("audio/")) return true;
+  // Voice notes recorded by MediaCapture get filename prefix "voice-note-"
+  if (/voice-note/i.test(att.filename)) return true;
+  // Some browsers report the recording as video/webm even when audio-only
+  if (
+    att.contentType === "video/webm" &&
+    /voice|audio/i.test(att.filename)
+  ) {
+    return true;
+  }
+  return false;
+}
+
 // ─── Main component ──────────────────────────────────────────────
 export function FileAttachment({ attachments }: FileAttachmentProps) {
   if (!attachments || attachments.length === 0) return null;
 
-  const images = attachments.filter((a) => isImage(a.contentType));
-  const docs = attachments.filter((a) => !isImage(a.contentType));
+  const audios = attachments.filter(isAudio);
+  const images = attachments.filter(
+    (a) => !isAudio(a) && isImage(a.contentType),
+  );
+  const docs = attachments.filter(
+    (a) => !isAudio(a) && !isImage(a.contentType),
+  );
 
   return (
     <div
       style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}
     >
+      {/* Voice messages */}
+      {audios.map((a) => (
+        <VoiceMessage
+          key={a.id}
+          url={a.url}
+          filename={a.filename}
+          sizeBytes={a.size}
+        />
+      ))}
+
       {/* Image grid */}
       {images.length > 0 && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
