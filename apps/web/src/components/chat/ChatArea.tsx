@@ -12,9 +12,11 @@ import {
   Phone,
   Video,
   Calendar,
+  ChevronDown,
 } from "lucide-react";
 import { useMessages } from "@/hooks/useMessages";
 import { useCallStore } from "@/lib/stores/call";
+import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
 import { useContactsStore } from "@/lib/stores/contacts";
@@ -61,8 +63,26 @@ export function ChatArea({
   const [notifOpen, setNotifOpen] = useState(false);
   const callStatus = useCallStore((s) => s.status);
   const startCall = useCallStore((s) => s.startCall);
+  const [callMenuOpen, setCallMenuOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const callMenuRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevCount = useRef(0);
+
+  // Close call menu on outside click
+  useEffect(() => {
+    if (!callMenuOpen) return;
+    function onClick(e: MouseEvent) {
+      if (
+        callMenuRef.current &&
+        !callMenuRef.current.contains(e.target as Node)
+      ) {
+        setCallMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [callMenuOpen]);
 
   // Reset local state when switching channels
   useEffect(() => {
@@ -224,6 +244,10 @@ export function ChatArea({
   async function handleCommand(cmd: string, args: string) {
     if (cmd === "summarize") {
       setSummaryOpen(true);
+      return;
+    }
+    if (cmd === "schedule") {
+      setScheduleOpen(true);
       return;
     }
 
@@ -399,54 +423,198 @@ export function ChatArea({
             </div>
           )}
           <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
-            <button
-              type="button"
-              onClick={() => startCall(channelId, channelName, "voice")}
-              disabled={callStatus !== "idle"}
-              title="Start voice call"
-              aria-label="Start voice call"
-              style={{
-                padding: "6px 12px",
-                borderRadius: 8,
-                border: "1px solid rgba(34,197,94,0.4)",
-                background: "rgba(34,197,94,0.12)",
-                cursor: callStatus === "idle" ? "pointer" : "not-allowed",
-                color: "#22C55E",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 11,
-                fontWeight: 600,
-                opacity: callStatus === "idle" ? 1 : 0.5,
-                transition: "all 0.15s",
-              }}
-            >
-              <Phone size={13} /> Call
-            </button>
-            <button
-              type="button"
-              onClick={() => startCall(channelId, channelName, "video")}
-              disabled={callStatus !== "idle"}
-              title="Start video call"
-              aria-label="Start video call"
-              style={{
-                padding: "6px 12px",
-                borderRadius: 8,
-                border: "1px solid rgba(108, 71, 255, 0.4)",
-                background: "rgba(108, 71, 255, 0.12)",
-                cursor: callStatus === "idle" ? "pointer" : "not-allowed",
-                color: "var(--vyne-purple)",
-                display: "flex",
-                alignItems: "center",
-                gap: 5,
-                fontSize: 11,
-                fontWeight: 600,
-                opacity: callStatus === "idle" ? 1 : 0.5,
-                transition: "all 0.15s",
-              }}
-            >
-              <Video size={13} /> Video
-            </button>
+            {/* Call dropdown — Audio / Video options */}
+            <div ref={callMenuRef} style={{ position: "relative" }}>
+              <button
+                type="button"
+                onClick={() => setCallMenuOpen((o) => !o)}
+                disabled={callStatus !== "idle"}
+                title="Start a call"
+                aria-label="Start a call"
+                aria-haspopup="menu"
+                aria-expanded={callMenuOpen}
+                style={{
+                  padding: "6px 10px 6px 12px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(108, 71, 255, 0.4)",
+                  background: callMenuOpen
+                    ? "rgba(108, 71, 255, 0.2)"
+                    : "rgba(108, 71, 255, 0.12)",
+                  cursor: callStatus === "idle" ? "pointer" : "not-allowed",
+                  color: "var(--vyne-purple)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
+                  fontSize: 11,
+                  fontWeight: 600,
+                  opacity: callStatus === "idle" ? 1 : 0.5,
+                  transition: "all 0.15s",
+                }}
+              >
+                <Phone size={13} /> Call
+                <ChevronDown
+                  size={12}
+                  style={{
+                    transform: callMenuOpen ? "rotate(180deg)" : "none",
+                    transition: "transform 0.15s",
+                  }}
+                />
+              </button>
+              {callMenuOpen && callStatus === "idle" && (
+                <div
+                  role="menu"
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
+                    right: 0,
+                    minWidth: 200,
+                    background: "var(--content-bg)",
+                    border: "1px solid var(--content-border)",
+                    borderRadius: 10,
+                    boxShadow: "0 12px 32px rgba(0,0,0,0.18)",
+                    padding: 4,
+                    zIndex: 50,
+                  }}
+                >
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setCallMenuOpen(false);
+                      startCall(channelId, channelName, "voice");
+                    }}
+                    style={menuItemStyle("#22C55E")}
+                  >
+                    <span
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 7,
+                        background: "rgba(34,197,94,0.15)",
+                        color: "#22C55E",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Phone size={13} />
+                    </span>
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        Audio call
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "var(--text-tertiary)",
+                        }}
+                      >
+                        Voice only · uses mic
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setCallMenuOpen(false);
+                      startCall(channelId, channelName, "video");
+                    }}
+                    style={menuItemStyle("var(--vyne-purple)")}
+                  >
+                    <span
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 7,
+                        background: "rgba(108, 71, 255, 0.15)",
+                        color: "var(--vyne-purple)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Video size={13} />
+                    </span>
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        Video call
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "var(--text-tertiary)",
+                        }}
+                      >
+                        Camera + mic + screen share
+                      </div>
+                    </div>
+                  </button>
+                  <div
+                    style={{
+                      height: 1,
+                      background: "var(--content-border)",
+                      margin: "4px 6px",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setCallMenuOpen(false);
+                      setScheduleOpen(true);
+                    }}
+                    style={menuItemStyle("#06B6D4")}
+                  >
+                    <span
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 7,
+                        background: "rgba(6, 182, 212, 0.15)",
+                        color: "#06B6D4",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Calendar size={13} />
+                    </span>
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <div
+                        style={{
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        Schedule for later
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "var(--text-tertiary)",
+                        }}
+                      >
+                        Pick a time + invite attendees
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => setSummaryOpen((o) => !o)}
@@ -736,8 +904,49 @@ export function ChatArea({
         </div>
       </div>
 
+      <ScheduleMeetingModal
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        defaultChannelId={channelId}
+        defaultChannelName={channelName}
+        onScheduled={(ev) => {
+          // Drop a meeting card into the chat
+          const startD = new Date(ev.startsAt);
+          const when = startD.toLocaleString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          const attendeeList =
+            ev.attendees.length > 0
+              ? `\nAttendees: ${ev.attendees.map((a) => a.name).join(", ")}`
+              : "";
+          sendMessage(
+            `📅 *Meeting scheduled* — ${ev.title}\n${when}${attendeeList}${ev.videoCall ? "\n🎥 Video call · join from /calendar" : ""}`,
+          );
+        }}
+      />
+
       {/* Call overlay + recap modal are mounted globally in DashboardLayout
           via <GlobalCallPanel /> so they survive page navigation. */}
     </FileUploadZone>
   );
+}
+
+function menuItemStyle(_accent: string): React.CSSProperties {
+  return {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 10px",
+    borderRadius: 7,
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    textAlign: "left",
+    transition: "background 0.12s",
+  };
 }

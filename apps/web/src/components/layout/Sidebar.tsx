@@ -37,6 +37,7 @@ import {
   Download as DownloadIcon,
   X as XIcon,
   PanelLeftClose,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -168,6 +169,17 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Channels", href: "/chat" },
       { label: "Direct Messages", href: "/chat" },
       { label: "Threads", href: "/chat" },
+    ],
+  },
+  {
+    icon: CalendarIcon,
+    label: "Calendar",
+    href: "/calendar",
+    color: "#6C47FF",
+    subs: [
+      { label: "Today", href: "/calendar" },
+      { label: "Week view", href: "/calendar" },
+      { label: "Schedule meeting", href: "/calendar" },
     ],
   },
   {
