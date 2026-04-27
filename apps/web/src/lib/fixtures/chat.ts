@@ -13,6 +13,12 @@ export type SlashCmd = { cmd: string; args: string; icon: string; desc: string; 
 
 export const SLASH_COMMANDS: SlashCmd[] = [
   { cmd: 'schedule',      args: '<title> [tomorrow 2pm]', icon: '📅', desc: 'Schedule a meeting in this channel', category: 'Calendar' },
+  { cmd: 'workflow',      args: '<template>', icon: '⚙️', desc: 'Spawn a workflow checklist (onboarding, release, incident...)', category: 'Workflows' },
+  { cmd: 'standup',       args: '[blockers]', icon: '🧱', desc: 'AI: write a daily standup post', category: 'AI templates' },
+  { cmd: 'incident',      args: '<title>', icon: '🚨', desc: 'AI: open an incident response template', category: 'AI templates' },
+  { cmd: 'postmortem',    args: '<incident or summary>', icon: '🔍', desc: 'AI: draft a blameless post-mortem', category: 'AI templates' },
+  { cmd: 'pr-summary',    args: '<branch or PR url>', icon: '🔀', desc: 'AI: summarize a pull request for non-engineers', category: 'AI templates' },
+  { cmd: 'customer-update', args: '<customer>', icon: '💬', desc: 'AI: status update for a specific customer', category: 'AI templates' },
   { cmd: 'contact',       args: '<email or name>', icon: '👤', desc: 'Look up a contact in CRM (creates if missing)', category: 'CRM' },
   { cmd: 'deal',          args: '<name> @ <company> $<value>', icon: '💼', desc: 'Create a deal in the sales pipeline', category: 'CRM' },
   { cmd: 'log-call',      args: '<contact> | <notes>', icon: '📞', desc: 'Log a call activity against a contact', category: 'CRM' },

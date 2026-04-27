@@ -53,6 +53,54 @@ export function ThreadPanel({
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesProvider, setNotesProvider] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [threadSummary, setThreadSummary] = useState<string | null>(null);
+  const [summaryProvider, setSummaryProvider] = useState<string | null>(null);
+  const lastSummarizedCountRef = useRef(0);
+
+  // Auto-generate a 1-line thread summary when the thread is long enough.
+  // Refreshes every 5 replies so latecomers always see a current snapshot.
+  useEffect(() => {
+    const SUMMARY_THRESHOLD = 5;
+    const REFRESH_EVERY = 5;
+    const count = replies.length;
+    if (count < SUMMARY_THRESHOLD) {
+      setThreadSummary(null);
+      lastSummarizedCountRef.current = 0;
+      return;
+    }
+    if (count - lastSummarizedCountRef.current < REFRESH_EVERY && threadSummary) {
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/ai/thread-summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parent: {
+          speaker: parentMsg.author.name,
+          text: parentMsg.content,
+          ts: parentMsg.createdAt,
+        },
+        replies: replies.map((r) => ({
+          speaker: r.author.name,
+          text: r.content,
+          ts: r.createdAt,
+        })),
+      }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.summary) return;
+        setThreadSummary(data.summary);
+        setSummaryProvider(data.provider);
+        lastSummarizedCountRef.current = count;
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [replies.length, parentMsg.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -480,6 +528,63 @@ export function ThreadPanel({
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}
       >
+        {threadSummary && (
+          <div
+            style={{
+              padding: "8px 10px",
+              borderRadius: 8,
+              background: "rgba(108, 71, 255, 0.07)",
+              border: "1px solid rgba(108, 71, 255, 0.25)",
+              marginBottom: 12,
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 8,
+            }}
+          >
+            <Sparkles
+              size={11}
+              style={{ color: "var(--vyne-purple)", marginTop: 2, flexShrink: 0 }}
+            />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 9,
+                  fontWeight: 700,
+                  color: "var(--vyne-purple)",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.4,
+                  marginBottom: 2,
+                  display: "flex",
+                  gap: 5,
+                  alignItems: "center",
+                }}
+              >
+                Thread summary
+                {summaryProvider && (
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      color: "var(--text-tertiary)",
+                      letterSpacing: 0,
+                      textTransform: "lowercase",
+                    }}
+                  >
+                    · {summaryProvider}
+                  </span>
+                )}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-primary)",
+                  lineHeight: 1.5,
+                }}
+              >
+                {threadSummary}
+              </div>
+            </div>
+          </div>
+        )}
         {replies.map((r, i) => (
           <MessageRow
             key={r.id}

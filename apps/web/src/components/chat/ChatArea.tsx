@@ -19,6 +19,8 @@ import { useCallStore } from "@/lib/stores/call";
 import { useUnreadStore } from "@/lib/stores/unread";
 import { useSentMessagesStore } from "@/lib/stores/sentMessages";
 import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
+import { useSlashTemplatesStore } from "@/lib/stores/slashTemplates";
+import { useWorkflowsStore } from "@/lib/stores/workflows";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
@@ -276,6 +278,84 @@ export function ChatArea({
     }
     if (cmd === "schedule") {
       setScheduleOpen(true);
+      return;
+    }
+
+    // /workflow <template-id> — spawn a checklist into chat
+    if (cmd === "workflow") {
+      const trimmed = args.trim();
+      const templates = useWorkflowsStore.getState().templates;
+      if (!trimmed) {
+        sendMessage(
+          "*Available workflows:*\n" +
+            templates
+              .map(
+                (t) =>
+                  `${t.emoji} \`/workflow ${t.id}\` — ${t.name}: ${t.description}`,
+              )
+              .join("\n"),
+        );
+        return;
+      }
+      const tpl =
+        templates.find((t) => t.id === trimmed) ??
+        templates.find((t) => t.id.startsWith(trimmed)) ??
+        templates.find((t) =>
+          t.name.toLowerCase().includes(trimmed.toLowerCase()),
+        );
+      if (!tpl) {
+        sendMessage(
+          `Couldn't find a workflow matching "${trimmed}". Try \`/workflow\` to list options.`,
+        );
+        return;
+      }
+      const inst = useWorkflowsStore
+        .getState()
+        .spawnInstance(tpl.id, channelId, "You");
+      if (!inst) {
+        sendMessage(`Failed to spawn workflow "${tpl.name}".`);
+        return;
+      }
+      const stepLines = inst.steps
+        .map((s, i) => `${i + 1}. [ ] ${s.title}${s.detail ? ` _(${s.detail})_` : ""}`)
+        .join("\n");
+      sendMessage(
+        `${tpl.emoji} **${tpl.name}** — workflow started\n${tpl.description}\n\n${stepLines}\n\n_View + check off steps in the workflow drawer (coming soon — for now, edit this message to update)._`,
+      );
+      return;
+    }
+
+    // AI templates — match against the slash-templates store
+    const aiTemplate = useSlashTemplatesStore
+      .getState()
+      .templates.find((t) => t.cmd === cmd && t.kind === "ai");
+    if (aiTemplate?.prompt) {
+      const userArgs = args.trim();
+      const placeholder = `Generating ${aiTemplate.cmd}…`;
+      sendMessage(`/${aiTemplate.cmd} ${userArgs}\n\n_${placeholder}_`);
+      try {
+        const res = await fetch("/api/ai/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: `${aiTemplate.prompt}\n\nUser-provided args: ${userArgs || "(none)"}`,
+            history: [],
+            context: {},
+          }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { answer?: string };
+          if (data.answer) {
+            sendMessage(
+              `${aiTemplate.icon} **/${aiTemplate.cmd}** ${userArgs ? `· ${userArgs}` : ""}\n\n${data.answer}`,
+            );
+          }
+        }
+      } catch {
+        sendMessage(
+          `Couldn't generate /${aiTemplate.cmd} — set GROQ_API_KEY to enable AI templates.`,
+        );
+      }
       return;
     }
 
