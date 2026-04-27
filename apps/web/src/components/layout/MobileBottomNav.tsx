@@ -13,6 +13,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useUnreadStore } from "@/lib/stores/unread";
 import { useMounted } from "@/hooks/useMounted";
+import { MobileMoreSheet } from "./MobileMoreSheet";
 
 interface NavItem {
   href: string;
@@ -49,26 +50,18 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 /**
- * Mobile-only bottom navigation bar (≤768px). Five tabs for the main flows
- * + a More button that opens the full sidebar. Hidden on desktop via CSS.
+ * Mobile bottom navigation bar (≤768px and tablet portrait). Five tabs:
+ * four primary modules + a "More" button that opens MobileMoreSheet — a
+ * 4-column grid of every module so the user can reach any page without
+ * the sliding sidebar drawer.
  */
 export function MobileBottomNav() {
   const pathname = usePathname() ?? "";
-  const [openSidebar, setOpenSidebar] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  // Open the existing sidebar drawer when "More" is tapped.
-  function toggleSidebar() {
-    const nav = document.querySelector<HTMLElement>(".sidebar-nav");
-    if (!nav) return;
-    const next = nav.getAttribute("data-mobile-open") !== "true";
-    nav.setAttribute("data-mobile-open", next ? "true" : "false");
-    document.body.style.overflow = next ? "hidden" : "";
-    setOpenSidebar(next);
-  }
-
-  // Close drawer state when route changes
+  // Close the sheet whenever the route changes (Link tap navigates).
   useEffect(() => {
-    setOpenSidebar(false);
+    setSheetOpen(false);
   }, [pathname]);
 
   const mounted = useMounted();
@@ -79,134 +72,148 @@ export function MobileBottomNav() {
   const chatUnread = mounted ? rawUnread : 0;
 
   return (
-    <nav
-      className="mobile-bottom-nav"
-      aria-label="Main navigation"
-      style={{
-        position: "fixed",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 95,
-        height: 60,
-        background: "var(--content-bg)",
-        borderTop: "1px solid var(--content-border)",
-        display: "flex",
-        alignItems: "stretch",
-        boxShadow: "0 -8px 24px rgba(0, 0, 0, 0.08)",
-        // Safe area for phones with home indicator
-        paddingBottom: "env(safe-area-inset-bottom, 0)",
-      }}
-    >
-      {NAV_ITEMS.map((item) => {
-        const active = item.match(pathname);
-        const Icon = item.icon;
-        const badge = item.label === "Chat" && chatUnread > 0 ? chatUnread : 0;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              textDecoration: "none",
-              color: active
-                ? "var(--vyne-purple)"
-                : "var(--text-tertiary)",
-              transition: "color 0.15s",
-              position: "relative",
-            }}
-          >
-            {active && (
-              <span
-                aria-hidden="true"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: 28,
-                  height: 3,
-                  borderRadius: "0 0 3px 3px",
-                  background: "var(--vyne-purple)",
-                }}
-              />
-            )}
-            <div style={{ position: "relative" }}>
-              <Icon size={20} strokeWidth={active ? 2.4 : 2} />
-              {badge > 0 && (
-                <span
-                  aria-label={`${badge} unread`}
-                  style={{
-                    position: "absolute",
-                    top: -5,
-                    right: -8,
-                    minWidth: 16,
-                    height: 16,
-                    padding: "0 4px",
-                    borderRadius: 8,
-                    background: "#EF4444",
-                    color: "#fff",
-                    fontSize: 9,
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    lineHeight: 1,
-                    boxShadow: "0 0 0 2px var(--content-bg)",
-                  }}
-                >
-                  {badge > 99 ? "99+" : badge}
-                </span>
-              )}
-            </div>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: active ? 700 : 500,
-                letterSpacing: "-0.005em",
-              }}
-            >
-              {item.label}
-            </span>
-          </Link>
-        );
-      })}
-      <button
-        type="button"
-        onClick={toggleSidebar}
-        aria-label="Open more menu"
-        aria-expanded={openSidebar}
+    <>
+      <MobileMoreSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+      />
+      <nav
+        className="mobile-bottom-nav"
+        aria-label="Main navigation"
         style={{
-          flex: 1,
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          // Above page content; below the More sheet (z=85) and its
+          // backdrop (z=80) so taps on the sheet always land correctly.
+          zIndex: 70,
+          height: 60,
+          background: "var(--content-bg)",
+          borderTop: "1px solid var(--content-border)",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 2,
-          color: openSidebar ? "var(--vyne-purple)" : "var(--text-tertiary)",
-          transition: "color 0.15s",
+          alignItems: "stretch",
+          boxShadow: "0 -8px 24px rgba(0, 0, 0, 0.08)",
+          // Safe area for phones with home indicator
+          paddingBottom: "env(safe-area-inset-bottom, 0)",
+          pointerEvents: "auto",
+          touchAction: "manipulation",
         }}
       >
-        <MoreHorizontal size={20} strokeWidth={openSidebar ? 2.4 : 2} />
-        <span
+        {NAV_ITEMS.map((item) => {
+          const active = item.match(pathname);
+          const Icon = item.icon;
+          const badge =
+            item.label === "Chat" && chatUnread > 0 ? chatUnread : 0;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              onClick={() => setSheetOpen(false)}
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+                textDecoration: "none",
+                color: active
+                  ? "var(--vyne-purple)"
+                  : "var(--text-tertiary)",
+                transition: "color 0.15s",
+                position: "relative",
+              }}
+            >
+              {active && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 28,
+                    height: 3,
+                    borderRadius: "0 0 3px 3px",
+                    background: "var(--vyne-purple)",
+                  }}
+                />
+              )}
+              <div style={{ position: "relative" }}>
+                <Icon size={20} strokeWidth={active ? 2.4 : 2} />
+                {badge > 0 && (
+                  <span
+                    aria-label={`${badge} unread`}
+                    style={{
+                      position: "absolute",
+                      top: -5,
+                      right: -8,
+                      minWidth: 16,
+                      height: 16,
+                      padding: "0 4px",
+                      borderRadius: 8,
+                      background: "#EF4444",
+                      color: "#fff",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      lineHeight: 1,
+                      boxShadow: "0 0 0 2px var(--content-bg)",
+                    }}
+                  >
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
+              </div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: active ? 700 : 500,
+                  letterSpacing: "-0.005em",
+                }}
+              >
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setSheetOpen((v) => !v)}
+          aria-label="Open all modules"
+          aria-expanded={sheetOpen}
           style={{
-            fontSize: 10,
-            fontWeight: openSidebar ? 700 : 500,
-            letterSpacing: "-0.005em",
+            flex: 1,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            color: sheetOpen
+              ? "var(--vyne-purple)"
+              : "var(--text-tertiary)",
+            transition: "color 0.15s",
           }}
         >
-          More
-        </span>
-      </button>
-    </nav>
+          <MoreHorizontal size={20} strokeWidth={sheetOpen ? 2.4 : 2} />
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: sheetOpen ? 700 : 500,
+              letterSpacing: "-0.005em",
+            }}
+          >
+            More
+          </span>
+        </button>
+      </nav>
+    </>
   );
 }

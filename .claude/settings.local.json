@@ -171,7 +171,28 @@
       "Bash(grep -n \"<button$\" \"apps/web/src/components/chat/CallPanel.tsx\")",
       "Bash(node_modules/.bin/tsc --noEmit)",
       "Bash(kill %1)",
-      "Bash(vercel ls *)"
+      "Bash(vercel ls *)",
+      "Bash(git commit -m 'feat\\(chat\\): #3 read receipts \\(sent / seen with ✓ ✓✓\\) *)",
+      "Bash(git commit -m 'feat\\(chat\\): #4 @mention autocomplete + highlighted render *)",
+      "Bash(git commit -m 'feat\\(chat\\): #5 pin a message to channel *)",
+      "Bash(git commit -m 'feat\\(chat\\): #6 voice message waveform player *)",
+      "Bash(git commit -m 'feat: #30 GitHub webhook integration + cross-system timeline page *)",
+      "Bash(git commit -m 'fix\\(observe\\): readable env filter pills + visible filter feedback *)",
+      "Bash(git commit -m 'fix\\(home\\): defensive Array.isArray on cached digest bullets *)",
+      "Bash(git commit -m 'fix\\(chat\\): React #185 infinite loop — Zustand selectors created fresh arrays *)",
+      "Bash(git commit -m 'fix\\(home\\): defensive Array.isArray on tasks/projects/events *)",
+      "Bash(git commit -m 'fix\\(csp\\): allow Google Fonts + websockets + Groq/Stripe APIs *)",
+      "Bash(git commit -m 'fix\\(hydration\\): gate persist-derived UI behind useMounted to fix React #418 *)",
+      "Bash(git commit -m 'feat\\(forms\\): rich create-project / task / subtask forms with assignee, dates, tags, priority *)",
+      "Bash(git commit -m 'feat\\(projects\\): full edit page + Edit/Delete buttons + '\\\\''Assigned to'\\\\'' clarity *)",
+      "Bash(awk 'BEGIN{o=0;c=0} {for\\(i=1;i<=length\\($0\\);i++\\){ch=substr\\($0,i,1\\);if\\(ch==\"{\"\\)o++;else if\\(ch==\"}\"\\)c++}} END{print \"open=\"o\" close=\"c}' \"apps/web/src/app/globals.css\")",
+      "Bash(awk 'BEGIN{o=0;c=0} {for\\(i=1;i<=length\\($0\\);i++\\){ch=substr\\($0,i,1\\);if\\(ch==\"{\"\\)o++;else if\\(ch==\"}\"\\)c++}} END{print \"open=\"o\" close=\"c}' apps/web/src/app/globals.css)",
+      "Bash(awk 'BEGIN{o=0;c=0} {for\\(i=1;i<=length\\($0\\);i++\\){ch=substr\\($0,i,1\\);if\\(ch==\"{\"\\)o++;else if\\(ch==\"}\"\\)c++}} END{print \"open=\"o\" close=\"c}' src/app/globals.css)",
+      "Bash(\"apps/web/node_modules/.bin/tsc\" -p apps/web --noEmit)",
+      "Bash(\"apps/web/node_modules/.bin/grep\" -rn --include=\"*.tsx\" -E \"<input\\\\s\" \"apps/web/src\")",
+      "Bash(xargs -0 awk ' *)",
+      "Bash(xargs awk ' *)",
+      "Bash(node -e ' *)"
     ]
   }
 }

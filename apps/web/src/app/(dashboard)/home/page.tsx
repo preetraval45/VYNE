@@ -18,6 +18,7 @@ import { VyneLogo } from "@/components/brand/VyneLogo";
 import { useAiMemoryStore } from "@/lib/stores/aiMemory";
 import { useProjectsStore } from "@/lib/stores/projects";
 import { DailyDigestCard } from "@/components/home/DailyDigestCard";
+import { useMounted } from "@/hooks/useMounted";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -377,8 +378,20 @@ function HomeFocusCard() {
 export default function HomePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const firstName = (user?.name ?? "there").split(" ")[0];
-  const greeting = greetingFor(new Date().getHours());
+  const mounted = useMounted();
+  // Gate locale/time-dependent content: server renders neutral defaults so
+  // the first client render matches, then a re-render after mount fills in
+  // the localized greeting + name. Without this React fires error #418.
+  const firstName = mounted ? (user?.name ?? "there").split(" ")[0] : "there";
+  const greeting = mounted ? greetingFor(new Date().getHours()) : "Welcome";
+  const todayLabel = mounted
+    ? new Date().toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
 
   return (
     <div
@@ -391,18 +404,28 @@ export default function HomePage() {
     >
       {/* Topbar */}
       <header
+        className="home-topbar"
         style={{
-          height: 44,
+          minHeight: 44,
           borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
-          padding: "0 18px",
+          padding: "8px 18px",
           gap: 8,
           flexShrink: 0,
+          flexWrap: "wrap",
           background: "var(--content-bg)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            minWidth: 0,
+            flex: "1 1 auto",
+          }}
+        >
           <VyneLogo variant="mark" markSize={20} />
           <h1
             style={{
@@ -410,6 +433,9 @@ export default function HomePage() {
               fontWeight: 600,
               color: "var(--text-primary)",
               margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {greeting}, {firstName} 👋
@@ -421,15 +447,15 @@ export default function HomePage() {
             display: "flex",
             alignItems: "center",
             gap: 8,
+            flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "short",
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+          <span
+            className="home-topbar-date"
+            style={{ fontSize: 11, color: "var(--text-tertiary)" }}
+            suppressHydrationWarning
+          >
+            {todayLabel}
           </span>
           <button
             type="button"
@@ -444,6 +470,7 @@ export default function HomePage() {
               fontSize: 11,
               fontWeight: 500,
               cursor: "pointer",
+              whiteSpace: "nowrap",
             }}
           >
             + New Issue
@@ -461,6 +488,7 @@ export default function HomePage() {
               fontSize: 9,
               fontWeight: 600,
               color: "#fff",
+              flexShrink: 0,
             }}
           >
             PR
@@ -487,11 +515,13 @@ export default function HomePage() {
           }}
         >
           <div
+            className="home-module-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
               gap: 12,
               maxWidth: 800,
+              width: "100%",
               margin: "0 auto",
             }}
           >

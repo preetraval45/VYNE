@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { MobileSidebarToggle } from "@/components/layout/MobileSidebarToggle";
 import { GlobalSchemaTool } from "@/components/layout/GlobalSchemaTool";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
@@ -13,6 +12,7 @@ import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { GlobalCallPanel } from "@/components/layout/GlobalCallPanel";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PWAInstallBanner } from "@/components/layout/PWAInstallBanner";
+import { A11yEnhancer } from "@/components/layout/A11yEnhancer";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
@@ -62,9 +62,6 @@ export default function DashboardLayout({
       {/* Fixed Sidebar (hidden in focus mode) */}
       {!focusMode && <Sidebar />}
 
-      {/* Mobile drawer toggle (hidden ≥769px via CSS) */}
-      {!focusMode && <MobileSidebarToggle />}
-
       {/* Top-nav admin rail — schema tool, visible on every page */}
       {!focusMode && <GlobalSchemaTool />}
 
@@ -112,6 +109,9 @@ export default function DashboardLayout({
 
       {/* PWA install prompt — shows when browser supports it + user hasn't dismissed */}
       {!focusMode && <PWAInstallBanner />}
+
+      {/* Runtime a11y safety net: labels any unlabeled form element. */}
+      <A11yEnhancer />
     </div>
   );
 }

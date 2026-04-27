@@ -181,7 +181,16 @@ export function PageHeader({
         </div>
       </div>
       {actions && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            flexWrap: "wrap",
+            justifyContent: "flex-end",
+            minWidth: 0,
+          }}
+        >
           {actions}
         </div>
       )}

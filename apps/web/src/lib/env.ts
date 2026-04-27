@@ -32,9 +32,26 @@ const envSchema = z.object({
 // ─── Parse & Export ─────────────────────────────────────────────
 
 function parseEnv() {
+  // In production builds (Vercel) where no API URL is configured, fall back
+  // to a same-origin URL so requests stay within the deployment instead of
+  // hitting localhost:4000 (which gets blocked by CSP on .vercel.app). The
+  // expectation is that production deployments either set NEXT_PUBLIC_API_URL
+  // explicitly OR ship the backend behind /api on the same origin.
+  const isProd = process.env.NODE_ENV === "production";
+  const apiFallback = isProd
+    ? typeof window !== "undefined"
+      ? window.location.origin
+      : "https://vyne.vercel.app"
+    : "http://localhost:4000";
+  const wsFallback = isProd
+    ? typeof window !== "undefined"
+      ? window.location.origin.replace(/^http/, "ws")
+      : "wss://vyne.vercel.app"
+    : "ws://localhost:4000";
+
   const raw = {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL ?? apiFallback,
+    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL ?? wsFallback,
     NEXT_PUBLIC_DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE,
     POSTGRES_URL: process.env.POSTGRES_URL,
     POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,
@@ -60,8 +77,8 @@ function parseEnv() {
 
     // Return defaults so the app can still boot in demo mode
     return {
-      NEXT_PUBLIC_API_URL: 'http://localhost:4000',
-      NEXT_PUBLIC_WS_URL: 'ws://localhost:4000',
+      NEXT_PUBLIC_API_URL: apiFallback,
+      NEXT_PUBLIC_WS_URL: wsFallback,
       NEXT_PUBLIC_DEMO_MODE: false,
       POSTGRES_URL: process.env.POSTGRES_URL,
       POSTGRES_URL_NON_POOLING: process.env.POSTGRES_URL_NON_POOLING,

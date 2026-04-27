@@ -807,9 +807,22 @@ textarea:focus-visible {
  * panels into stackable blocks.
  */
 
-/* Below 1024px: hide the top-right floating toolbar so it doesn't
-   collide with page headers that already host their own action bars. */
+/* Tablet (769–1024px): keep the top-right toolbar visible but compress it.
+   Hide the "Get app" CTA (mobile users get the PWA banner instead) and
+   keep the icon buttons so timer / chat / notes stay reachable. */
 @media (max-width: 1024px) {
+  .global-topnav-rail a[aria-label="Download desktop and mobile apps"] {
+    display: none !important;
+  }
+  .global-topnav-rail {
+    right: 16px !important;
+    gap: 6px !important;
+  }
+}
+
+/* Phones (≤768px): the top-right rail collapses entirely — everything
+   it surfaces is reachable from the sidebar / bottom nav. */
+@media (max-width: 768px) {
   .global-topnav-rail {
     display: none !important;
   }
@@ -872,12 +885,22 @@ textarea:focus-visible {
     flex-wrap: wrap;
   }
 
-  /* Leave breathing room for the floating hamburger at top-left. */
-  main {
-    padding-top: 8px;
+  /* PageHeader actions wrap their search input — force the fixed-width
+     220/240/280px wrapper to shrink so the wrap happens cleanly. */
+  header > div:last-child > div[style*="width: 220"],
+  header > div:last-child > div[style*="width:220"],
+  header > div:last-child > div[style*="width: 240"],
+  header > div:last-child > div[style*="width:240"],
+  header > div:last-child > div[style*="width: 280"],
+  header > div:last-child > div[style*="width:280"] {
+    width: 100% !important;
+    order: 99;
   }
-  main > *:first-child {
-    margin-left: 56px;
+
+  /* No left-side reservation needed — the floating hamburger is hidden
+     on mobile (bottom nav's "More" tab opens the same drawer). */
+  main {
+    padding-top: 0;
   }
 }
 
@@ -887,6 +910,112 @@ textarea:focus-visible {
   main {
     padding-left: 12px !important;
     padding-right: 12px !important;
+  }
+}
+
+/* ─── Defensive: prevent broken layouts from pushing content off-screen ─
+ * Even if a stray inline grid pattern slips through the collapse rules,
+ * cap the dashboard main content to the viewport width so no page can
+ * cause horizontal scroll. Last-resort guardrail. */
+@media (max-width: 768px) {
+  main, main > *, main > div {
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+ * Orientation-aware overrides
+ *
+ *   Width-only breakpoints are not enough — a phone in landscape is
+ *   ~800x375, a portrait monitor is 1080x1920, an iPad in landscape
+ *   is 1024x768. Each needs different chrome / spacing / layout.
+ * ════════════════════════════════════════════════════════════════ */
+
+/* ─── Phone landscape (short viewport) ──────────────────────────
+ * Detected by `landscape` orientation + max-height ≤ 500px.
+ * Covers iPhone landscape (~375h), iPhone Pro Max landscape (~430h),
+ * small Android phones in landscape, foldables half-open. The vertical
+ * room is too tight for both a sticky page header AND a 60px bottom nav,
+ * so swap to a top hamburger drawer + no bottom nav. */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Replace bottom nav with the hamburger drawer */
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+  .mobile-sidebar-toggle {
+    display: flex !important;
+  }
+  /* Reclaim the bottom space the nav was reserving */
+  main {
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+  }
+  /* Compact the home page top bar so it eats less vertical room */
+  .home-topbar {
+    min-height: 36px !important;
+    padding: 4px 14px !important;
+  }
+  /* Page-section padding tightens up */
+  main > div {
+    padding-top: 8px !important;
+  }
+}
+
+/* ─── Tablet landscape (e.g., iPad 1024x768) ────────────────────
+ * iPad in landscape gets the full desktop sidebar — feels native to
+ * larger screens. Bottom nav and More sheet hidden. */
+@media (min-width: 769px) and (orientation: landscape) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+  .sidebar-nav {
+    display: flex !important;
+  }
+}
+
+/* ─── Tablet portrait (iPad 768×1024 etc.) ──────────────────────
+ * Hide the sidebar entirely; the bottom nav + More-sheet 4-col
+ * grid is the only navigation. Page content takes the full width. */
+@media (max-width: 1024px) and (orientation: portrait) {
+  .sidebar-nav {
+    display: none !important;
+  }
+  /* Reclaim the column the sidebar was occupying */
+  :root {
+    --sidebar-width: 0px;
+  }
+  main {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Tablet-class portrait viewports get a touch more padding than phones */
+@media (min-width: 700px) and (max-width: 1024px) and (orientation: portrait) {
+  main {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+
+/* ─── Portrait desktop monitor (rotated 1080×1920, etc.) ────────
+ * A tall monitor renders the dashboard fine, but unconstrained
+ * `100%` content sections become unreadable line-lengths at 1080px+
+ * with very tall pages. Cap the readable column and center it. */
+@media (orientation: portrait) and (min-width: 1024px) and (min-height: 1024px) {
+  main {
+    /* Don't let any single column stretch past comfortable reading width */
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* ─── Short landscape on tablet (rare, e.g. small Chromebook) ──
+ * If the viewport is wide-ish but shallow (≤600 height), drop
+ * sticky page headers' padding and squeeze the calendar grids. */
+@media (orientation: landscape) and (max-height: 600px) {
+  header {
+    position: static !important;
   }
 }
 
@@ -962,59 +1091,22 @@ textarea {
     --sidebar-width: 0px;
   }
 
-  /* ── Mobile sidebar drawer ──────────────────────────────────
-   * Below 768px the sidebar slides in as an overlay instead of
-   * taking its own column, so content pages get the full width.
-   * Tap anywhere on the backdrop to close.
-   * ───────────────────────────────────────────────────────── */
-  .sidebar-nav {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 260px !important;
-    min-width: 260px !important;
-    z-index: 60;
-    transform: translateX(-100%);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-    transition: transform 0.22s var(--ease-out-quart);
-  }
-  .sidebar-nav[data-mobile-open="true"] {
-    transform: translateX(0);
-  }
-
-  /* Backdrop — rendered by MobileSidebarToggle when open */
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 55;
-    animation: fadeIn 0.18s ease-out both;
-  }
-
-  /* Floating hamburger shown only on mobile */
+  /* Mobile no longer uses the sidebar drawer pattern — the bottom
+     nav's "More" tab opens MobileMoreSheet, a 4-col grid of every
+     module. Hide the sidebar entirely. */
+  .sidebar-nav,
+  .sidebar-backdrop,
   .mobile-sidebar-toggle {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    z-index: 50;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--content-bg);
-    border: 1px solid var(--content-border);
-    color: var(--text-primary);
-    box-shadow: var(--elev-2);
-    cursor: pointer;
+    display: none !important;
   }
+
   @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 }
-@media (min-width: 769px) {
-  .mobile-sidebar-toggle { display: none; }
-  .sidebar-backdrop { display: none; }
+
+/* The legacy hamburger + sidebar drawer are retired on mobile — hide
+   them on every viewport so they never accidentally render. */
+.mobile-sidebar-toggle, .sidebar-backdrop {
+  display: none !important;
 }
 
 @media (max-width: 640px) {
@@ -1034,10 +1126,15 @@ textarea {
 }
 
 /* ─── Mobile bottom navigation ────────────────────────────────────
- * Hidden on desktop (≥769px). When visible, the main content area
- * needs 60px of bottom padding so the nav doesn't cover the last
- * row of content. */
-@media (min-width: 769px) {
+ * Visible whenever the sidebar is hidden — i.e. phones (≤768px any
+ * orientation) AND tablet portrait (≤1024px portrait). Hidden on
+ * tablet/desktop landscape and desktop where the sidebar handles nav. */
+@media (min-width: 1025px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+@media (min-width: 769px) and (orientation: landscape) {
   .mobile-bottom-nav {
     display: none !important;
   }
@@ -1048,6 +1145,14 @@ textarea {
   main {
     padding-bottom: calc(60px + env(safe-area-inset-bottom, 0)) !important;
   }
+}
+/* Tablet portrait also shows the bottom nav and needs the same padding. */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
+  main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0)) !important;
+  }
+}
+@media (max-width: 768px) {
   /* Chat page: the composer sits at the bottom of a flex column inside main,
      so we lift the whole chat container up by the nav height. */
   main > [class*="chat"], main .content-scroll {
@@ -1071,28 +1176,43 @@ textarea {
     justify-content: center;
   }
 
-  /* Hide the floating hamburger when bottom nav has a "More" button — the
-     bottom nav's More opens the same drawer. Reduces top-left clutter. */
+  /* Hide the floating hamburger — the bottom nav's "More" tab is the
+     mobile drawer trigger and a top-left hamburger would overlap page
+     headers (greeting, logo, title) on most pages. */
   .mobile-sidebar-toggle {
     display: none !important;
   }
+}
 
-  /* Page content should NOT get pushed right by the old hamburger
-     compensator now that the toggle is hidden. */
-  main > *:first-child {
-    margin-left: 0 !important;
+/* `.global-topnav-rail` is `display: none` below 768px (see above), so
+   any further size tweaks for narrower phones are dead CSS. */
+
+/* ─── Kanban / Board horizontal scroll guard at tablet ───────────
+ * Boards built as flex rows (Sales, CRM, Projects) need a min-width on
+ * each column so they don't compress to unreadable widths between
+ * 768–900px. Pages already set min-width on their column wrappers; this
+ * acts as a fallback for any board that forgot. */
+@media (max-width: 1024px) {
+  [data-board="kanban"] > * {
+    min-width: 240px;
   }
 }
 
-/* Phones < 480px: tighten toolbar further, drop the Wrench/Notes labels */
+/* ─── Home page topbar — hide secondary date label on narrow phones ─ */
 @media (max-width: 480px) {
-  .global-topnav-rail {
-    gap: 4px !important;
-    right: 12px !important;
+  .home-topbar-date {
+    display: none !important;
   }
-  .global-topnav-rail > * {
-    width: 30px !important;
-    height: 30px !important;
+}
+
+/* ─── Home page module-launcher grid ─────────────────────────────
+ * Uses `auto-fill` + minmax(100px, 1fr) so it auto-collapses, but on
+ * very narrow phones a 100px floor makes 3 columns barely fit at 375px.
+ * Drop the floor on narrow viewports so cards remain comfortable. */
+@media (max-width: 480px) {
+  .home-module-grid {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)) !important;
+    gap: 8px !important;
   }
 }
 
@@ -1105,6 +1225,28 @@ textarea {
   main [class*="calendar"] header {
     flex-wrap: wrap !important;
     gap: 8px !important;
+  }
+}
+
+/* Below 480px, the 7-col calendar grid would clip Th/Fr/Sa/Su without
+   a horizontal scroll wrapper. Make the grid scroll its parent and set
+   a min cell width so day numbers stay legible. */
+@media (max-width: 480px) {
+  [data-calendar-grid="month"],
+  [data-calendar-grid="week"] {
+    min-width: 560px;
+  }
+  [data-calendar-grid="month"],
+  [data-calendar-grid="week"] {
+    /* The grid itself doesn't scroll; its direct parent does (via the
+       generic *:has(> table)-style overflow rule isn't enough here, so
+       force it on the immediate parent). */
+  }
+  *:has(> [data-calendar-grid="month"]),
+  *:has(> [data-calendar-grid="week"]) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
   }
 }
 
@@ -1209,14 +1351,34 @@ textarea {
   }
 
   /* Reduce gigantic h1 inline font sizes to fit narrow screens */
+  h1[style*="fontSize: 24"],
+  h1[style*="fontSize:24"],
   h1[style*="fontSize: 28"],
   h1[style*="fontSize:28"],
   h1[style*="fontSize: 32"],
   h1[style*="fontSize:32"],
   h1[style*="fontSize: 36"],
-  h1[style*="fontSize:36"] {
+  h1[style*="fontSize:36"],
+  h1[style*="fontSize: 40"],
+  h1[style*="fontSize:40"],
+  h1[style*="fontSize: 48"],
+  h1[style*="fontSize:48"] {
     font-size: 22px !important;
+    line-height: 1.2 !important;
   }
+  h2[style*="fontSize: 22"],
+  h2[style*="fontSize:22"],
+  h2[style*="fontSize: 24"],
+  h2[style*="fontSize:24"],
+  h2[style*="fontSize: 28"],
+  h2[style*="fontSize:28"] {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+  }
+  /* Tailwind-class headings — scale down without inline overrides */
+  h1.text-4xl, h1.text-5xl { font-size: 1.5rem !important; line-height: 1.2 !important; }
+  h2.text-3xl, h2.text-4xl { font-size: 1.25rem !important; line-height: 1.25 !important; }
+  h3.text-2xl, h3.text-3xl { font-size: 1.125rem !important; line-height: 1.3 !important; }
 }
 
 /* ─── Make the floating hamburger sit beside other fixed UI ─────── */
@@ -1230,27 +1392,52 @@ textarea {
 
 /* ─── React inline-style grid patterns: collapse on mobile ────────
  * React's `style={{ gridTemplateColumns: "X" }}` renders as the literal
- * string in the DOM `style` attribute. Catch the common "main + side"
- * patterns used for detail panels, dashboards, and form-with-aside. */
+ * string in the DOM `style` attribute. Catch every common "main + side"
+ * pattern used for detail panels, dashboards, and form-with-aside. */
 @media (max-width: 768px) {
-  /* Detail panels: "1fr 320px", "1fr 360px", "minmax(0, 1fr) 360px" */
-  [style*="grid-template-columns: 1fr 320px"],
-  [style*="grid-template-columns:1fr 320px"],
-  [style*="grid-template-columns: 1fr 340px"],
-  [style*="grid-template-columns:1fr 340px"],
-  [style*="grid-template-columns: 1fr 360px"],
-  [style*="grid-template-columns:1fr 360px"],
-  [style*="grid-template-columns: 1fr 380px"],
-  [style*="grid-template-columns:1fr 380px"],
-  [style*="grid-template-columns: 1fr 400px"],
-  [style*="grid-template-columns:1fr 400px"],
-  [style*="grid-template-columns: 1fr 420px"],
-  [style*="grid-template-columns:1fr 420px"],
-  [style*="grid-template-columns: 1fr 440px"],
-  [style*="grid-template-columns:1fr 440px"],
-  [style*="minmax(0, 1fr) 360px"],
-  [style*="minmax(0,1fr) 360px"],
+  /* Sweeping match: any 2-column inline grid that starts with "1fr "
+     followed by a fixed-px or minmax sidebar — the trailing space makes
+     this match "1fr 320px", "1fr 360px", "1fr minmax(...)", etc. */
+  [style*="grid-template-columns: 1fr "],
+  [style*="grid-template-columns:1fr "],
+  /* Reverse-order: fixed sidebar on the LEFT then 1fr (e.g. Finance P&L
+     "240px 1fr", "260px 1fr", "1fr minmax(0, 320px)" rendering). */
+  [style*="grid-template-columns: 200px 1fr"],
+  [style*="grid-template-columns:200px 1fr"],
+  [style*="grid-template-columns: 220px 1fr"],
+  [style*="grid-template-columns:220px 1fr"],
+  [style*="grid-template-columns: 240px 1fr"],
+  [style*="grid-template-columns:240px 1fr"],
+  [style*="grid-template-columns: 260px 1fr"],
+  [style*="grid-template-columns:260px 1fr"],
+  [style*="grid-template-columns: 280px 1fr"],
+  [style*="grid-template-columns:280px 1fr"],
+  [style*="grid-template-columns: 300px 1fr"],
+  [style*="grid-template-columns:300px 1fr"],
+  [style*="grid-template-columns: 320px 1fr"],
+  [style*="grid-template-columns:320px 1fr"],
+  /* Minmax-on-left patterns */
+  [style*="grid-template-columns: minmax(0, 1fr) "],
+  [style*="grid-template-columns:minmax(0,1fr) "],
+  /* Inline values without the property prefix (matches the literal
+     pixel-px-1fr and 1fr-pixel-px substrings inside `style="..."`). */
+  [style*="110px 1fr"],
   [style*="220px 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tablet sidebars on tablet-first layouts: collapse 80–340px fixed
+     left rails to a horizontal nav strip (or hide) on mobile. Many P&L
+     and finance pages render a "category list | main" split where the
+     left rail crushes to one character per line on phones. */
+  [style*="grid-template-columns: 80px 1fr"],
+  [style*="grid-template-columns:80px 1fr"],
+  [style*="grid-template-columns: 120px 1fr"],
+  [style*="grid-template-columns:120px 1fr"],
+  [style*="grid-template-columns: 160px 1fr"],
+  [style*="grid-template-columns:160px 1fr"],
+  [style*="grid-template-columns: 180px 1fr"],
+  [style*="grid-template-columns:180px 1fr"] {
     grid-template-columns: 1fr !important;
   }
 
@@ -1575,12 +1762,24 @@ textarea {
 /* ─── Global top-nav rail reservation ───────────────────────
  * The fixed .global-topnav-rail sits in the top-right corner.
  * Reserve horizontal room on every dashboard page header so
- * page-level "+ New" / search buttons never slide under it. */
-main > div > header,
-main > div > div > header,
-main [class*="PageHeader"],
-main [class*="page-header"] {
-  padding-right: 56px !important;
+ * page-level "+ New" / search buttons never slide under it.
+ * Only applies on tablet/desktop — the rail is hidden ≤768px. */
+@media (min-width: 769px) {
+  main > div > header,
+  main > div > div > header,
+  main [class*="PageHeader"],
+  main [class*="page-header"] {
+    padding-right: 56px !important;
+  }
+}
+@media (min-width: 1025px) {
+  /* Desktop has the full rail (Get app + icons), needs more room. */
+  main > div > header,
+  main > div > div > header,
+  main [class*="PageHeader"],
+  main [class*="page-header"] {
+    padding-right: 220px !important;
+  }
 }
 
 /* ─── Drag-and-drop polish (opt-in via data-drag-over) ──────── */

@@ -232,8 +232,11 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             {project.identifier}
           </span>
         </nav>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3 min-w-0">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div
+            className="flex items-start gap-3 flex-1"
+            style={{ minWidth: 200 }}
+          >
             <div
               className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
               style={{
@@ -243,7 +246,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             >
               {project.icon}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1
                   style={{
@@ -253,6 +256,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                     letterSpacing: "-0.015em",
                     margin: 0,
                     lineHeight: 1.2,
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {project.name}
@@ -269,6 +273,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                     margin: "4px 0 0",
                     lineHeight: 1.5,
                     maxWidth: 720,
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {project.description}
@@ -276,7 +281,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="flex items-center gap-4 flex-shrink-0 flex-wrap">
             <div className="flex -space-x-2">
               {members.slice(0, 5).map(
                 (member) =>

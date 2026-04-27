@@ -476,9 +476,10 @@ function MonthView({
 
   return (
     <div
+      data-calendar-grid="month"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(7, 1fr)",
+        gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
         gap: 1,
         background: "var(--content-border)",
         borderRadius: 10,
@@ -637,9 +638,10 @@ function WeekView({
 
   return (
     <div
+      data-calendar-grid="week"
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(7, 1fr)",
+        gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
         gap: 8,
       }}
     >

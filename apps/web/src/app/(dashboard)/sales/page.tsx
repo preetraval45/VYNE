@@ -1636,6 +1636,7 @@ function OpportunitiesTab() {
 
       {/* Kanban Board */}
       <div
+        data-board="kanban"
         style={{
           display: "flex",
           gap: 14,
