@@ -258,13 +258,38 @@ export const useCallStore = create<CallState>((set, get) => ({
         cur._rotateSpeaker();
       }, 1500);
     } catch (e) {
-      const raw = e instanceof Error ? e.message : "Failed to start call";
-      const friendly =
-        raw.includes("Permission") || raw.includes("denied")
-          ? "Microphone/camera access denied. Please allow permissions in your browser and try again."
-          : raw.includes("not available") || raw.includes("not supported")
-            ? raw
-            : `Couldn't start call: ${raw}`;
+      const err = e as DOMException & { name?: string; message?: string };
+      const name = err.name ?? "";
+      const raw = err.message ?? "Failed to start call";
+      let friendly: string;
+      // Specific DOMException names from getUserMedia
+      if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+        friendly =
+          "Camera/mic permission was blocked. Click the camera icon in your browser's address bar (left of the URL) → Allow, then click Call again.";
+      } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        friendly =
+          "No camera or microphone was found. Make sure a device is connected and try again.";
+      } else if (name === "NotReadableError" || name === "TrackStartError") {
+        friendly =
+          "Your camera or mic is in use by another app (Zoom, Meet, Teams). Close it and try again.";
+      } else if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
+        friendly =
+          "Your camera doesn't support the requested settings. Try again with voice only.";
+      } else if (name === "SecurityError") {
+        friendly =
+          "Browser blocked media access. This usually means the site isn't on HTTPS — refresh and try again.";
+      } else if (name === "AbortError") {
+        friendly = "Media access was aborted. Try again.";
+      } else if (name === "TypeError") {
+        friendly =
+          "Browser doesn't support this kind of call. Try Chrome, Edge, Firefox, or Safari.";
+      } else {
+        friendly = `Couldn't start call: ${raw}`;
+      }
+      // Append diagnostic name for debugging
+      if (name && process.env.NODE_ENV !== "production") {
+        friendly += ` [${name}]`;
+      }
       set({
         status: "idle",
         channelId: null,

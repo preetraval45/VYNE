@@ -8,11 +8,9 @@ import {
   Download as DownloadIcon,
   MessageSquare,
   StickyNote,
-  Video,
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import { useUser } from "@/lib/stores/auth";
-import { useCallStore } from "@/lib/stores/call";
 
 // Modules whose record shape admins may customize. Keep labels friendly.
 const MODULES: Array<{ id: string; label: string }> = [
@@ -52,9 +50,6 @@ export function GlobalSchemaTool() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [editorModule, setEditorModule] = useState<string | null>(null);
-  const callStatus = useCallStore((s) => s.status);
-  const startSoloRecording = useCallStore((s) => s.startSoloRecording);
-
   const isAdmin = user ? ADMIN_ROLES.has(user.role) : false;
 
   function handleClick() {
@@ -96,36 +91,6 @@ export function GlobalSchemaTool() {
           pointerEvents: "none",
         }}
       >
-        <button
-          type="button"
-          onClick={() => startSoloRecording()}
-          disabled={callStatus !== "idle"}
-          aria-label="Record presentation"
-          title="Record presentation (camera + screen + voice + AI notes)"
-          style={{
-            pointerEvents: "auto",
-            height: 32,
-            padding: "0 12px",
-            borderRadius: 8,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            background:
-              callStatus === "idle"
-                ? "linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.08))"
-                : "var(--content-secondary)",
-            color: callStatus === "idle" ? "#EF4444" : "var(--text-tertiary)",
-            border: `1px solid ${callStatus === "idle" ? "rgba(239,68,68,0.45)" : "var(--content-border)"}`,
-            cursor: callStatus === "idle" ? "pointer" : "not-allowed",
-            opacity: callStatus === "idle" ? 1 : 0.5,
-            fontSize: 12,
-            fontWeight: 600,
-            transition: "all 0.15s",
-          }}
-        >
-          <Video size={13} strokeWidth={2.25} />
-          <span>Record</span>
-        </button>
         <Link
           href="/chat"
           aria-label="Open messages"
