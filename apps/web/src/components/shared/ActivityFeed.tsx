@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Clock } from "lucide-react";
 import {
   timeAgo,
@@ -26,10 +27,17 @@ export function ActivityFeed({
   title?: string;
   compact?: boolean;
 }) {
-  const entries = useActivityStore((s) =>
-    s.entries.filter(
-      (e) => e.recordType === recordType && e.recordId === recordId,
-    ),
+  // Subscribe to the stable entries array, then derive with useMemo —
+  // returning `s.entries.filter(...)` directly produces a new array on
+  // every render and trips React 19's useSyncExternalStore consistency
+  // check (Minified React error #185).
+  const allEntries = useActivityStore((s) => s.entries);
+  const entries = useMemo(
+    () =>
+      allEntries.filter(
+        (e) => e.recordType === recordType && e.recordId === recordId,
+      ),
+    [allEntries, recordType, recordId],
   );
   const visible = entries.slice(0, limit);
 
