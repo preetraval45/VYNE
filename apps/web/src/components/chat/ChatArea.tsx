@@ -18,6 +18,7 @@ import { useMessages } from "@/hooks/useMessages";
 import { useCallStore } from "@/lib/stores/call";
 import { useUnreadStore } from "@/lib/stores/unread";
 import { useSentMessagesStore } from "@/lib/stores/sentMessages";
+import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
@@ -102,6 +103,9 @@ export function ChatArea({
     // Auto mark-as-read: clear immediately when a chat opens.
     if (channelId) {
       useUnreadStore.getState().markRead(channelId);
+      // Also mark the current user as having read up to "now" in this
+      // channel for the read-receipts overlay (✓✓ on own messages).
+      useReadReceiptsStore.getState().markSeen(channelId, "me", "You");
     }
   }, [channelId]);
 

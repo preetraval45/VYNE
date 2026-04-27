@@ -12,6 +12,7 @@ import {
   Pencil,
   Trash2,
   Check,
+  CheckCheck,
   X,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
@@ -20,6 +21,7 @@ import { UserAvatar } from "./UserAvatar";
 import { EmojiPicker } from "./EmojiPicker";
 import { FileAttachment } from "./FileAttachment";
 import { useSavedStore } from "@/lib/stores/saved";
+import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
 
 interface MessageRowProps {
   readonly msg: MsgMessage;
@@ -77,6 +79,13 @@ export function MessageRow({
   const editRef = useRef<HTMLTextAreaElement>(null);
   const isSaved = useSavedStore((s) => s.isSaved(msg.id));
   const toggleSave = useSavedStore((s) => s.toggleSave);
+  // Subscribe to receipts store so the ✓/✓✓ indicator updates live
+  // (cross-tab sync triggers re-render, plus simulated peer reads tick).
+  const seenPeers = useReadReceiptsStore((s) =>
+    isCurrentUser && channelId
+      ? s.seenCount(channelId, msg.createdAt, "me")
+      : 0,
+  );
 
   // Reset draft if msg.content changes externally (e.g. server echo)
   useEffect(() => {
@@ -313,6 +322,38 @@ export function MessageRow({
             >
               Enter to save · Esc to cancel
             </div>
+          </div>
+        )}
+
+        {/* Read receipts on own messages — WhatsApp-style ✓ / ✓✓ */}
+        {isCurrentUser && msg.content && !editing && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              marginTop: 3,
+              fontSize: 10,
+              color:
+                seenPeers > 0 ? "var(--vyne-purple)" : "var(--text-tertiary)",
+              fontWeight: 500,
+            }}
+            title={
+              seenPeers > 0
+                ? `Seen by ${seenPeers} ${seenPeers === 1 ? "person" : "people"}`
+                : "Sent"
+            }
+          >
+            {seenPeers > 0 ? (
+              <CheckCheck size={11} strokeWidth={2.5} />
+            ) : (
+              <Check size={11} strokeWidth={2.5} />
+            )}
+            <span>
+              {seenPeers > 0
+                ? `Seen${seenPeers > 1 ? ` · ${seenPeers}` : ""}`
+                : "Sent"}
+            </span>
           </div>
         )}
 
