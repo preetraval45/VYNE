@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Smile, MessageSquare, MoreHorizontal } from "lucide-react";
+import {
+  Smile,
+  MessageSquare,
+  MoreHorizontal,
+  Bookmark,
+  BookmarkCheck,
+  Languages,
+} from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 import type { MsgMessage } from "@/lib/api/client";
 import { UserAvatar } from "./UserAvatar";
 import { EmojiPicker } from "./EmojiPicker";
 import { FileAttachment } from "./FileAttachment";
+import { useSavedStore } from "@/lib/stores/saved";
 
 interface MessageRowProps {
   readonly msg: MsgMessage;
@@ -15,6 +23,32 @@ interface MessageRowProps {
   readonly onReaction: (msgId: string, emoji: string) => void;
   readonly onReply: (msg: MsgMessage) => void;
   readonly isCurrentUser: boolean;
+  readonly channelId?: string;
+  readonly channelName?: string;
+}
+
+// ── Demo translation: maps common phrases. Wire to ai-service later. ──
+const TRANSLATIONS: Record<string, string> = {
+  hello: "Hola / Bonjour / こんにちは",
+  hi: "Hola / Salut / やあ",
+  thanks: "Gracias / Merci / ありがとう",
+  "thank you": "Gracias / Merci / ありがとうございます",
+  yes: "Sí / Oui / はい",
+  no: "No / Non / いいえ",
+  ok: "Vale / D'accord / OK",
+  okay: "Vale / D'accord / OK",
+  sorry: "Lo siento / Désolé / ごめんなさい",
+  goodbye: "Adiós / Au revoir / さようなら",
+  bye: "Adiós / Au revoir / バイバイ",
+};
+
+function generateTranslation(text: string): string {
+  const lower = text.toLowerCase().trim();
+  if (TRANSLATIONS[lower]) {
+    return TRANSLATIONS[lower];
+  }
+  // Heuristic stub — in real product, call ai-service /translate endpoint
+  return `[ES] ${text}\n[FR] ${text}\n[JP] ${text}\n\n(VYNE AI translation — demo mode)`;
 }
 
 export function MessageRow({
@@ -23,9 +57,33 @@ export function MessageRow({
   onReaction,
   onReply,
   isCurrentUser,
+  channelId,
+  channelName,
 }: MessageRowProps) {
   const [hovering, setHovering] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [translation, setTranslation] = useState<string | null>(null);
+  const isSaved = useSavedStore((s) => s.isSaved(msg.id));
+  const toggleSave = useSavedStore((s) => s.toggleSave);
+
+  function handleSave() {
+    toggleSave({
+      messageId: msg.id,
+      channelId: channelId ?? "unknown",
+      channelName: channelName ?? "Unknown channel",
+      authorName: msg.author.name,
+      content: msg.content || "(attachment)",
+    });
+  }
+
+  function handleTranslate() {
+    if (translation) {
+      setTranslation(null);
+      return;
+    }
+    if (!msg.content) return;
+    setTranslation(generateTranslation(msg.content));
+  }
   const sameAuthor =
     prevMsg?.author.id === msg.author.id &&
     new Date(msg.createdAt).getTime() - new Date(prevMsg.createdAt).getTime() <
@@ -92,6 +150,61 @@ export function MessageRow({
           </p>
         )}
 
+        {/* Inline translation panel */}
+        {translation && (
+          <div
+            style={{
+              marginTop: 6,
+              padding: "8px 10px",
+              borderLeft: "3px solid var(--vyne-purple)",
+              background: "rgba(108, 71, 255, 0.06)",
+              borderRadius: 6,
+              fontSize: 12,
+              color: "var(--text-secondary)",
+              whiteSpace: "pre-line",
+              lineHeight: 1.5,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: "var(--vyne-purple)",
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+                marginBottom: 4,
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <Languages size={11} /> VYNE AI Translation
+            </div>
+            {translation}
+          </div>
+        )}
+
+        {/* Saved indicator */}
+        {isSaved && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              marginTop: 4,
+              padding: "2px 7px",
+              borderRadius: 99,
+              background: "rgba(245, 158, 11, 0.12)",
+              color: "#D97706",
+              fontSize: 10,
+              fontWeight: 600,
+            }}
+          >
+            <BookmarkCheck size={10} />
+            Saved
+          </div>
+        )}
+
         {/* File attachments */}
         {msg.attachments && msg.attachments.length > 0 && (
           <FileAttachment attachments={msg.attachments} />
@@ -104,6 +217,7 @@ export function MessageRow({
           >
             {msg.reactions.map((r) => (
               <button
+                type="button"
                 key={r.emoji}
                 onClick={() => onReaction(msg.id, r.emoji)}
                 style={{
@@ -127,6 +241,7 @@ export function MessageRow({
               </button>
             ))}
             <button
+              type="button"
               onClick={() => setEmojiOpen(true)}
               style={{
                 padding: "2px 6px",
@@ -146,6 +261,7 @@ export function MessageRow({
         {/* Reply count */}
         {(msg.replyCount ?? 0) > 0 && (
           <button
+            type="button"
             onClick={() => onReply(msg)}
             style={{
               display: "flex",
@@ -199,6 +315,7 @@ export function MessageRow({
           >
             <div style={{ position: "relative" }}>
               <button
+                type="button"
                 onClick={() => setEmojiOpen(!emojiOpen)}
                 title="React"
                 style={{
@@ -233,6 +350,7 @@ export function MessageRow({
               )}
             </div>
             <button
+              type="button"
               onClick={() => onReply(msg)}
               title="Reply in thread"
               style={{
@@ -260,7 +378,80 @@ export function MessageRow({
               <MessageSquare size={13} />
             </button>
             <button
+              type="button"
+              onClick={handleSave}
+              title={isSaved ? "Remove from saved" : "Save for later"}
+              aria-label={isSaved ? "Remove from saved" : "Save for later"}
+              style={{
+                padding: "4px 6px",
+                borderRadius: 6,
+                border: "none",
+                background: isSaved ? "rgba(245, 158, 11, 0.15)" : "transparent",
+                cursor: "pointer",
+                color: isSaved ? "#D97706" : "var(--text-secondary)",
+                display: "flex",
+                alignItems: "center",
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaved) {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--content-secondary)";
+                  (e.currentTarget as HTMLElement).style.color = "#D97706";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaved) {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-secondary)";
+                }
+              }}
+            >
+              {isSaved ? <BookmarkCheck size={13} /> : <Bookmark size={13} />}
+            </button>
+            {msg.content && (
+              <button
+                type="button"
+                onClick={handleTranslate}
+                title={translation ? "Hide translation" : "Translate"}
+                aria-label="Translate message"
+                style={{
+                  padding: "4px 6px",
+                  borderRadius: 6,
+                  border: "none",
+                  background: translation
+                    ? "rgba(108, 71, 255, 0.12)"
+                    : "transparent",
+                  cursor: "pointer",
+                  color: translation ? "var(--vyne-purple)" : "var(--text-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  if (!translation) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "var(--content-secondary)";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--vyne-purple)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!translation) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "transparent";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-secondary)";
+                  }
+                }}
+              >
+                <Languages size={13} />
+              </button>
+            )}
+            <button
+              type="button"
               title="More"
+              aria-label="More actions"
               style={{
                 padding: "4px 6px",
                 borderRadius: 6,

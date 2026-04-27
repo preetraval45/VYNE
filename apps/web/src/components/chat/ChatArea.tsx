@@ -16,6 +16,9 @@ import { useMessages } from "@/hooks/useMessages";
 import { useCall } from "@/hooks/useCall";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
+import { useContactsStore } from "@/lib/stores/contacts";
+import { useSalesStore } from "@/lib/stores/sales";
+import { useActivityStore } from "@/lib/stores/activity";
 import type { LocalMsg } from "./constants";
 import { UserAvatar } from "./UserAvatar";
 import { MessageRow } from "./MessageRow";
@@ -25,6 +28,7 @@ import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
 import { CallPanel } from "./CallPanel";
 import { MeetingRecapModal } from "./MeetingRecapModal";
+import { SmartReplies } from "./SmartReplies";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
 
@@ -77,6 +81,147 @@ export function ChatArea({
     }
   }, [messages.length]);
 
+  // ── CRM bridge: read/write Zustand stores synchronously ─────────
+  function handleContactLookup(arg: string) {
+    const query = arg.toLowerCase();
+    const { contacts, addContact } = useContactsStore.getState();
+    if (!query) {
+      return {
+        success: false,
+        data: null,
+        message: "Usage: /contact <email or name>",
+      };
+    }
+    const found = contacts.find(
+      (c) =>
+        c.email.toLowerCase().includes(query) ||
+        c.name.toLowerCase().includes(query),
+    );
+    if (found) {
+      return {
+        success: true,
+        data: {
+          mode: "found" as const,
+          contact: found,
+        },
+        message: `Found ${found.name} (${found.email}) at ${found.company}.`,
+      };
+    }
+    // Not found — create stub
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(arg);
+    const guessName = isEmail
+      ? arg
+          .split("@")[0]
+          .replace(/[._-]/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase())
+      : arg
+          .split(/\s+/)
+          .map((w) => w[0].toUpperCase() + w.slice(1))
+          .join(" ");
+    addContact({
+      name: guessName,
+      email: isEmail ? arg : `${guessName.toLowerCase().replace(/\s+/g, ".")}@unknown.com`,
+      phone: "",
+      company: "Unknown",
+      accountId: "",
+      title: "—",
+      department: "—",
+      lastContact: new Date().toISOString().slice(0, 10),
+      tags: [],
+    });
+    return {
+      success: true,
+      data: {
+        mode: "created" as const,
+        name: guessName,
+        email: isEmail ? arg : "—",
+      },
+      message: `Created new contact stub for ${guessName}. Open CRM to enrich.`,
+    };
+  }
+
+  function handleCreateDeal(arg: string) {
+    if (!arg) {
+      return {
+        success: false,
+        data: null,
+        message: "Usage: /deal <name> @ <company> $<value>",
+      };
+    }
+    // Parse: "Acme renewal @ Acme Corp $25000" — flexible
+    const valueMatch = arg.match(/\$\s*([\d,]+(?:\.\d+)?)/);
+    const value = valueMatch
+      ? Math.round(parseFloat(valueMatch[1].replace(/,/g, "")))
+      : 0;
+    const withoutValue = arg.replace(/\$\s*[\d,]+(?:\.\d+)?/, "").trim();
+    const [name, company] = withoutValue.includes("@")
+      ? withoutValue.split("@").map((s) => s.trim())
+      : [withoutValue, "Unknown"];
+    const dealName = name || "Untitled deal";
+    const expected = new Date(Date.now() + 30 * 86400000)
+      .toISOString()
+      .slice(0, 10);
+    useSalesStore.getState().addDeal({
+      name: dealName,
+      company: company || "Unknown",
+      contact: "—",
+      value,
+      probability: 25,
+      stage: "Qualification",
+      expectedClose: expected,
+      assignee: "You",
+    });
+    return {
+      success: true,
+      data: {
+        name: dealName,
+        company: company || "Unknown",
+        value,
+        stage: "Qualification",
+        expectedClose: expected,
+      },
+      message: `Deal "${dealName}" added to pipeline.`,
+    };
+  }
+
+  function handleLogCall(arg: string) {
+    if (!arg) {
+      return {
+        success: false,
+        data: null,
+        message: "Usage: /log-call <contact> | <notes>",
+      };
+    }
+    const [contactPart, notesPart] = arg.includes("|")
+      ? arg.split("|").map((s) => s.trim())
+      : [arg, "Call logged from chat"];
+    const { contacts } = useContactsStore.getState();
+    const contact = contacts.find(
+      (c) =>
+        c.name.toLowerCase().includes(contactPart.toLowerCase()) ||
+        c.email.toLowerCase().includes(contactPart.toLowerCase()),
+    );
+    const recordId = contact?.id ?? `unknown-${Date.now()}`;
+    useActivityStore.getState().log({
+      recordType: "contact",
+      recordId,
+      verb: "called",
+      summary: `📞 Call with ${contact?.name ?? contactPart}: ${notesPart}`,
+    });
+    return {
+      success: true,
+      data: {
+        contactName: contact?.name ?? contactPart,
+        notes: notesPart,
+        ts: new Date().toISOString(),
+        matched: Boolean(contact),
+      },
+      message: contact
+        ? `Call logged on ${contact.name}'s timeline.`
+        : `Call logged (unmatched contact "${contactPart}").`,
+    };
+  }
+
   async function handleCommand(cmd: string, args: string) {
     if (cmd === "summarize") {
       setSummaryOpen(true);
@@ -120,6 +265,15 @@ export function ChatArea({
           break;
         case "assign-lead":
           result = await slashCommandApi.assignLead(args.trim() || "New Lead");
+          break;
+        case "contact":
+          result = handleContactLookup(args.trim());
+          break;
+        case "deal":
+          result = handleCreateDeal(args.trim());
+          break;
+        case "log-call":
+          result = handleLogCall(args.trim());
           break;
       }
 
@@ -455,6 +609,8 @@ export function ChatArea({
                       msg.author.id === "me" ||
                       msg.author.name === "Preet Raval"
                     }
+                    channelId={channelId}
+                    channelName={channelName}
                   />
                 ))}
               {cmdMessages.map((cm) => (
@@ -563,6 +719,10 @@ export function ChatArea({
               <NotificationPanel onClose={() => setNotifOpen(false)} />
             )}
           </AnimatePresence>
+          <SmartReplies
+            messages={messages}
+            onPick={(text) => sendMessage(text)}
+          />
           <MessageComposer
             placeholder={
               isDM ? `Message ${channelName}` : `Message #${channelName}`

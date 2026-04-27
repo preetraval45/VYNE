@@ -367,6 +367,328 @@ function PollCard({
   );
 }
 
+// ─── CRM cards ──────────────────────────────────────────────────
+
+interface ContactLookupData {
+  mode: "found" | "created";
+  contact?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    company: string;
+    title: string;
+    lastContact: string;
+  };
+  name?: string;
+  email?: string;
+}
+
+function ContactCard({
+  args,
+  apiResult,
+}: Readonly<{
+  args: string;
+  apiResult?: { success: boolean; data: unknown; message: string } | null;
+}>) {
+  if (!apiResult) {
+    return (
+      <div
+        style={{
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "var(--text-secondary)",
+        }}
+      >
+        Looking up &quot;{args}&quot;…
+      </div>
+    );
+  }
+  if (!apiResult.success) {
+    return (
+      <div
+        style={{
+          background: "#FFF1F2",
+          border: "1px solid #FECDD3",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "#9F1239",
+        }}
+      >
+        {apiResult.message}
+      </div>
+    );
+  }
+  const data = apiResult.data as ContactLookupData;
+  if (data.mode === "found" && data.contact) {
+    const c = data.contact;
+    return (
+      <div
+        style={{
+          background: "#EEF2FF",
+          border: "1px solid #C7D2FE",
+          borderRadius: 8,
+          padding: "10px 12px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 6,
+          }}
+        >
+          <span style={{ fontSize: 14 }}>👤</span>
+          <span style={{ fontWeight: 600, fontSize: 12, color: "#3730A3" }}>
+            Contact found
+          </span>
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+          {c.name}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
+          {c.title} · {c.company}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 4 }}>
+          {c.email}
+          {c.phone ? ` · ${c.phone}` : ""}
+        </div>
+        <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginTop: 6 }}>
+          Last contact: {c.lastContact}
+        </div>
+      </div>
+    );
+  }
+  // Created stub
+  return (
+    <div
+      style={{
+        background: "#FFFBEB",
+        border: "1px solid #FDE68A",
+        borderRadius: 8,
+        padding: "10px 12px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>✨</span>
+        <span style={{ fontWeight: 600, fontSize: 12, color: "#92400E" }}>
+          New contact stub created
+        </span>
+      </div>
+      <p style={{ fontSize: 12, color: "#B45309", margin: 0 }}>
+        <strong>{data.name}</strong>
+        {data.email && data.email !== "—" ? ` (${data.email})` : ""} — open CRM
+        to add company, title, and tags.
+      </p>
+    </div>
+  );
+}
+
+interface DealCardData {
+  name: string;
+  company: string;
+  value: number;
+  stage: string;
+  expectedClose: string;
+}
+
+function DealCard({
+  args,
+  apiResult,
+}: Readonly<{
+  args: string;
+  apiResult?: { success: boolean; data: unknown; message: string } | null;
+}>) {
+  if (!apiResult) {
+    return (
+      <div
+        style={{
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "var(--text-secondary)",
+        }}
+      >
+        Creating deal &quot;{args}&quot;…
+      </div>
+    );
+  }
+  if (!apiResult.success) {
+    return (
+      <div
+        style={{
+          background: "#FFF1F2",
+          border: "1px solid #FECDD3",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "#9F1239",
+        }}
+      >
+        {apiResult.message}
+      </div>
+    );
+  }
+  const d = apiResult.data as DealCardData;
+  return (
+    <div
+      style={{
+        background: "#F0FFF4",
+        border: "1px solid #BBF7D0",
+        borderRadius: 8,
+        padding: "10px 12px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 6,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>💼</span>
+        <span style={{ fontWeight: 600, fontSize: 12, color: "#065F46" }}>
+          Deal added to pipeline
+        </span>
+      </div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
+        {d.name}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          fontSize: 11,
+          color: "#047857",
+          marginTop: 6,
+          flexWrap: "wrap",
+        }}
+      >
+        <span>
+          🏢 <strong>{d.company}</strong>
+        </span>
+        {d.value > 0 && (
+          <span>
+            💰 <strong>${d.value.toLocaleString()}</strong>
+          </span>
+        )}
+        <span>
+          📍 {d.stage}
+        </span>
+        <span>
+          📅 {d.expectedClose}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+interface LogCallData {
+  contactName: string;
+  notes: string;
+  ts: string;
+  matched: boolean;
+}
+
+function LogCallCard({
+  args,
+  apiResult,
+}: Readonly<{
+  args: string;
+  apiResult?: { success: boolean; data: unknown; message: string } | null;
+}>) {
+  if (!apiResult) {
+    return (
+      <div
+        style={{
+          background: "var(--content-secondary)",
+          border: "1px solid var(--content-border)",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "var(--text-secondary)",
+        }}
+      >
+        Logging call: {args}
+      </div>
+    );
+  }
+  if (!apiResult.success) {
+    return (
+      <div
+        style={{
+          background: "#FFF1F2",
+          border: "1px solid #FECDD3",
+          borderRadius: 8,
+          padding: "10px 12px",
+          fontSize: 12,
+          color: "#9F1239",
+        }}
+      >
+        {apiResult.message}
+      </div>
+    );
+  }
+  const d = apiResult.data as LogCallData;
+  return (
+    <div
+      style={{
+        background: "#EEF2FF",
+        border: "1px solid #C7D2FE",
+        borderRadius: 8,
+        padding: "10px 12px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>📞</span>
+        <span style={{ fontWeight: 600, fontSize: 12, color: "#3730A3" }}>
+          Call logged · {d.matched ? "Matched" : "Unmatched"} contact
+        </span>
+      </div>
+      <p
+        style={{
+          fontSize: 12,
+          color: "#4338CA",
+          margin: "2px 0 0",
+        }}
+      >
+        <strong>{d.contactName}</strong>: {d.notes}
+      </p>
+      <div
+        style={{
+          fontSize: 10,
+          color: "var(--text-tertiary)",
+          marginTop: 6,
+        }}
+      >
+        Logged at {new Date(d.ts).toLocaleString()}
+      </div>
+    </div>
+  );
+}
+
 // ─── Loading Card ───────────────────────────────────────────────
 
 function LoadingCard({ cmd }: Readonly<{ cmd: string }>) {
@@ -420,6 +742,12 @@ export function cmdOutput(
     return <AssignLeadCard args={msg.args.trim()} />;
   if (msg.cmd === "remind") return <RemindCard args={msg.args.trim()} />;
   if (msg.cmd === "poll") return <PollCard msg={msg} onVote={onVote} />;
+  if (msg.cmd === "contact")
+    return <ContactCard args={msg.args.trim()} apiResult={msg.apiResult} />;
+  if (msg.cmd === "deal")
+    return <DealCard args={msg.args.trim()} apiResult={msg.apiResult} />;
+  if (msg.cmd === "log-call")
+    return <LogCallCard args={msg.args.trim()} apiResult={msg.apiResult} />;
   if (msg.cmd === "summarize") return null;
   return (
     <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>

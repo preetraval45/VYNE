@@ -1140,6 +1140,124 @@ textarea {
   }
 }
 
+/* ─── React inline-style grid patterns: collapse on mobile ────────
+ * React's `style={{ gridTemplateColumns: "X" }}` renders as the literal
+ * string in the DOM `style` attribute. Catch the common "main + side"
+ * patterns used for detail panels, dashboards, and form-with-aside. */
+@media (max-width: 768px) {
+  /* Detail panels: "1fr 320px", "1fr 360px", "minmax(0, 1fr) 360px" */
+  [style*="grid-template-columns: 1fr 320px"],
+  [style*="grid-template-columns:1fr 320px"],
+  [style*="grid-template-columns: 1fr 340px"],
+  [style*="grid-template-columns:1fr 340px"],
+  [style*="grid-template-columns: 1fr 360px"],
+  [style*="grid-template-columns:1fr 360px"],
+  [style*="grid-template-columns: 1fr 380px"],
+  [style*="grid-template-columns:1fr 380px"],
+  [style*="grid-template-columns: 1fr 400px"],
+  [style*="grid-template-columns:1fr 400px"],
+  [style*="grid-template-columns: 1fr 420px"],
+  [style*="grid-template-columns:1fr 420px"],
+  [style*="grid-template-columns: 1fr 440px"],
+  [style*="grid-template-columns:1fr 440px"],
+  [style*="minmax(0, 1fr) 360px"],
+  [style*="minmax(0,1fr) 360px"],
+  [style*="220px 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* repeat(N, 1fr) where N >= 3 — collapse to 2 columns to keep
+     KPI strips dense but readable. */
+  [style*="repeat(3, 1fr)"],
+  [style*="repeat(3,1fr)"],
+  [style*="repeat(4, 1fr)"],
+  [style*="repeat(4,1fr)"],
+  [style*="repeat(5, 1fr)"],
+  [style*="repeat(5,1fr)"],
+  [style*="repeat(6, 1fr)"],
+  [style*="repeat(6,1fr)"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ─── Sub-480 viewport: most repeat() KPI grids should be 1 column ─ */
+@media (max-width: 480px) {
+  [style*="repeat(3, 1fr)"],
+  [style*="repeat(3,1fr)"],
+  [style*="repeat(4, 1fr)"],
+  [style*="repeat(4,1fr)"],
+  [style*="repeat(5, 1fr)"],
+  [style*="repeat(5,1fr)"],
+  [style*="repeat(6, 1fr)"],
+  [style*="repeat(6,1fr)"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Form 2-col rows already covered upstream, but reinforce */
+  [style*="grid-template-columns: 1fr 1fr"],
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Inline-style fixed-height panels: relax on mobile ──────────── */
+@media (max-width: 768px) {
+  /* Let cards with inline minHeight: 480/520/600 shrink to content */
+  [style*="min-height: 480px"],
+  [style*="minHeight: 480px"],
+  [style*="min-height: 520px"],
+  [style*="minHeight: 520px"],
+  [style*="min-height: 600px"],
+  [style*="minHeight: 600px"] {
+    min-height: 0 !important;
+  }
+
+  /* Inline width: 320/360/400 sidebars/panels become full width */
+  [style*="width: 320px"],
+  [style*="width:320px"],
+  [style*="width: 340px"],
+  [style*="width:340px"],
+  [style*="width: 360px"],
+  [style*="width:360px"],
+  [style*="width: 380px"],
+  [style*="width:380px"],
+  [style*="width: 400px"],
+  [style*="width:400px"] {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  [style*="min-width: 320px"],
+  [style*="minWidth: 320px"],
+  [style*="min-width: 340px"],
+  [style*="minWidth: 340px"],
+  [style*="min-width: 360px"],
+  [style*="minWidth: 360px"],
+  [style*="min-width: 400px"],
+  [style*="minWidth: 400px"] {
+    min-width: 0 !important;
+  }
+}
+
+/* ─── Page-header action rails: wrap & tighten on mobile ────────── */
+@media (max-width: 640px) {
+  /* Common page-header pattern: title left + buttons right.
+     Allow buttons to wrap to next line. */
+  header,
+  [role="banner"],
+  [class*="page-header"],
+  [class*="PageHeader"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Search inputs that hardcode width: 280-360px */
+  input[type="search"],
+  input[type="text"][placeholder*="Search" i] {
+    min-width: 0 !important;
+    flex: 1 1 100% !important;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════════════
  * Aesthetic layer v2 — elevation, glow, depth, micro-interactions
  * All additive — does NOT modify existing tokens or classes.

@@ -12,6 +12,9 @@ export const PRESENCE_COLORS: Record<string, string> = {
 export type SlashCmd = { cmd: string; args: string; icon: string; desc: string; category: string }
 
 export const SLASH_COMMANDS: SlashCmd[] = [
+  { cmd: 'contact',       args: '<email or name>', icon: '👤', desc: 'Look up a contact in CRM (creates if missing)', category: 'CRM' },
+  { cmd: 'deal',          args: '<name> @ <company> $<value>', icon: '💼', desc: 'Create a deal in the sales pipeline', category: 'CRM' },
+  { cmd: 'log-call',      args: '<contact> | <notes>', icon: '📞', desc: 'Log a call activity against a contact', category: 'CRM' },
   { cmd: 'approve-order', args: '<order-id>', icon: '✅', desc: 'Approve a purchase or sales order', category: 'ERP' },
   { cmd: 'create-task',   args: '<title>',    icon: '📋', desc: 'Create a task in the active project', category: 'Projects' },
   { cmd: 'stock-check',   args: '<sku>',      icon: '📦', desc: 'Check inventory levels for a SKU', category: 'ERP' },
