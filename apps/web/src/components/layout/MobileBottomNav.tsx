@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useUnreadStore } from "@/lib/stores/unread";
+import { useMounted } from "@/hooks/useMounted";
 
 interface NavItem {
   href: string;
@@ -70,9 +71,12 @@ export function MobileBottomNav() {
     setOpenSidebar(false);
   }, [pathname]);
 
-  const chatUnread = useUnreadStore((s) =>
+  const mounted = useMounted();
+  const rawUnread = useUnreadStore((s) =>
     Object.values(s.counts).reduce((a, b) => a + b, 0),
   );
+  // Gate persist-derived state until after mount or React hydration #418 fires
+  const chatUnread = mounted ? rawUnread : 0;
 
   return (
     <nav

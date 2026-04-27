@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Sparkles, AlertCircle, RefreshCw } from "lucide-react";
 import { useCalendarStore } from "@/lib/stores/calendar";
 import { useSentMessagesStore } from "@/lib/stores/sentMessages";
+import { useMounted } from "@/hooks/useMounted";
 
 interface DigestResponse {
   headline: string;
@@ -31,6 +32,7 @@ export function DailyDigestCard() {
   const sent = useSentMessagesStore((s) => s.byChannel);
   const [data, setData] = useState<DigestResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const mounted = useMounted();
 
   function todayKey(): string {
     const d = new Date();
@@ -140,6 +142,9 @@ export function DailyDigestCard() {
     void generateDigest();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Don't render persist-derived UI on the server — would mismatch hydration.
+  if (!mounted) return null;
 
   return (
     <motion.div

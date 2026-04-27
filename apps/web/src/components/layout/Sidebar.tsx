@@ -43,6 +43,7 @@ import type { LucideIcon } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
 import { useUnreadStore } from "@/lib/stores/unread";
+import { useMounted } from "@/hooks/useMounted";
 import {
   useProjects,
   useProjectsStore,
@@ -1123,9 +1124,13 @@ export function Sidebar() {
 
   // Live unread count from the store powers the Chat badge so it
   // ticks down to 0 the moment a channel is opened.
-  const totalUnread = useUnreadStore((s) =>
+  // Gated on mount to prevent hydration mismatch (#418): server has
+  // empty store, client first render reads localStorage.
+  const sidebarMounted = useMounted();
+  const rawTotalUnread = useUnreadStore((s) =>
     Object.values(s.counts).reduce((a, b) => a + b, 0),
   );
+  const totalUnread = sidebarMounted ? rawTotalUnread : 0;
 
   const visibleNavItems = baseNavItems.map((item) =>
     item.label === "Chat"
