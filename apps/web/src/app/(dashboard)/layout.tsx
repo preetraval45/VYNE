@@ -12,6 +12,7 @@ import { ProductTour } from "@/components/layout/ProductTour";
 import { GlobalWidgets } from "@/components/layout/GlobalWidgets";
 import { GlobalCallPanel } from "@/components/layout/GlobalCallPanel";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { PWAInstallBanner } from "@/components/layout/PWAInstallBanner";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
@@ -91,6 +92,9 @@ export default function DashboardLayout({
 
       {/* Mobile bottom navigation (≤768px) */}
       {!focusMode && <MobileBottomNav />}
+
+      {/* PWA install prompt — shows when browser supports it + user hasn't dismissed */}
+      {!focusMode && <PWAInstallBanner />}
     </div>
   );
 }

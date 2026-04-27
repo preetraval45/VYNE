@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUnreadStore } from "@/lib/stores/unread";
 import { useSentMessagesStore } from "@/lib/stores/sentMessages";
+import { fireNotification } from "@/hooks/useNotifications";
 import {
   messagingApi,
   type MsgChannel,
@@ -415,6 +416,17 @@ export function useMessages(channelId: string | null, isDM = false) {
         setMessages((prev) =>
           prev.some((m) => m.id === msg.id) ? prev : [...prev, msg],
         );
+        // Fire a browser notification if the tab is hidden + user has
+        // notifications enabled. Skip own messages.
+        const me = useAuthStore.getState().user;
+        const isOwn =
+          msg.author.id === me?.id || msg.author.name === me?.name;
+        if (!isOwn) {
+          fireNotification(`${msg.author.name}`, msg.content?.slice(0, 140) ?? "(new message)", {
+            tag: `msg-${channelId}`,
+            url: "/chat",
+          });
+        }
       }
     };
     const onReaction = (data: {
