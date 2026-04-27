@@ -1352,54 +1352,128 @@ function Pricing() {
                   ))}
                 </ul>
 
-                <a
-                  href="#waitlist"
-                  aria-label={`${plan.cta} — ${plan.name} plan`}
-                  className={
-                    plan.highlight
-                      ? "btn-aurora"
-                      : tealAccent
-                        ? "btn-teal"
-                        : undefined
-                  }
-                  style={
-                    plan.highlight
-                      ? {
-                          display: "block",
-                          textAlign: "center",
-                          padding: "11px 20px",
-                          fontSize: 14,
-                        }
-                      : tealAccent
-                        ? {
-                            display: "block",
-                            textAlign: "center",
-                            padding: "11px 20px",
-                            fontSize: 14,
-                          }
-                        : {
-                            display: "block",
-                            textAlign: "center",
-                            padding: "11px 20px",
-                            borderRadius: 10,
-                            fontWeight: 600,
-                            fontSize: 13.5,
-                            background: C.surface,
-                            color: C.text,
-                            border: `1px solid ${C.borderHi}`,
-                            transition: "all 0.2s",
-                            letterSpacing: "-0.005em",
-                          }
-                  }
-                >
-                  {plan.cta}
-                </a>
+                <PlanCta plan={plan} tealAccent={tealAccent} />
               </motion.div>
             );
           })}
         </div>
       </div>
     </section>
+  );
+}
+
+/* ─── Plan CTA — calls Stripe checkout when configured, falls back to waitlist */
+function PlanCta({
+  plan,
+  tealAccent,
+}: {
+  readonly plan: Plan;
+  readonly tealAccent: boolean;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const planKey = plan.name.toLowerCase();
+  const isPaid =
+    planKey === "starter" ||
+    planKey === "business" ||
+    planKey === "enterprise";
+
+  async function handleClick(e: React.MouseEvent) {
+    if (!isPaid) return; // Free plan — let the link scroll to waitlist
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey, seats: 1 }),
+      });
+      if (res.status === 503) {
+        // Stripe not configured yet — fall back to waitlist
+        window.location.href = "#waitlist";
+        return;
+      }
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setError(d.error ?? "Checkout failed");
+        return;
+      }
+      const data = (await res.json()) as { url: string };
+      if (data.url) window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Network error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const className = plan.highlight
+    ? "btn-aurora"
+    : tealAccent
+      ? "btn-teal"
+      : undefined;
+  const baseStyle: React.CSSProperties = plan.highlight
+    ? {
+        display: "block",
+        textAlign: "center",
+        padding: "11px 20px",
+        fontSize: 14,
+        width: "100%",
+      }
+    : tealAccent
+      ? {
+          display: "block",
+          textAlign: "center",
+          padding: "11px 20px",
+          fontSize: 14,
+          width: "100%",
+        }
+      : {
+          display: "block",
+          textAlign: "center",
+          padding: "11px 20px",
+          borderRadius: 10,
+          fontWeight: 600,
+          fontSize: 13.5,
+          background: C.surface,
+          color: C.text,
+          border: `1px solid ${C.borderHi}`,
+          transition: "all 0.2s",
+          letterSpacing: "-0.005em",
+          width: "100%",
+        };
+
+  return (
+    <>
+      <a
+        href="#waitlist"
+        onClick={handleClick}
+        aria-label={`${plan.cta} — ${plan.name} plan`}
+        className={className}
+        style={{
+          ...baseStyle,
+          cursor: loading ? "default" : "pointer",
+          opacity: loading ? 0.7 : 1,
+        }}
+      >
+        {loading ? "Opening checkout…" : plan.cta}
+      </a>
+      {error && (
+        <div
+          role="alert"
+          style={{
+            marginTop: 8,
+            fontSize: 11,
+            color: "#FCA5A5",
+            textAlign: "center",
+          }}
+        >
+          {error}
+        </div>
+      )}
+    </>
   );
 }
 
