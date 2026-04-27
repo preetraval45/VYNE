@@ -33,6 +33,7 @@ import { SummaryPanel } from "./SummaryPanel";
 import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
 import { SmartReplies } from "./SmartReplies";
+import { PinnedBar } from "./PinnedBar";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
 
@@ -732,6 +733,9 @@ export function ChatArea({
             </button>
           </div>
         </div>
+
+        {/* Pinned messages bar */}
+        {channelId && <PinnedBar channelId={channelId} />}
 
         {/* Messages */}
         <div

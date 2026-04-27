@@ -13,6 +13,8 @@ import {
   Trash2,
   Check,
   CheckCheck,
+  Pin,
+  PinOff,
   X,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
@@ -22,6 +24,7 @@ import { EmojiPicker } from "./EmojiPicker";
 import { FileAttachment } from "./FileAttachment";
 import { useSavedStore } from "@/lib/stores/saved";
 import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
+import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
 import { renderWithMentions, isUserMentioned } from "@/lib/utils/mentions";
 
 interface MessageRowProps {
@@ -80,6 +83,11 @@ export function MessageRow({
   const editRef = useRef<HTMLTextAreaElement>(null);
   const isSaved = useSavedStore((s) => s.isSaved(msg.id));
   const toggleSave = useSavedStore((s) => s.toggleSave);
+  const isPinned = usePinnedMessagesStore((s) =>
+    channelId ? s.isPinned(channelId, msg.id) : false,
+  );
+  const pinAction = usePinnedMessagesStore((s) => s.pin);
+  const unpinAction = usePinnedMessagesStore((s) => s.unpin);
   // Subscribe to receipts store so the ✓/✓✓ indicator updates live
   // (cross-tab sync triggers re-render, plus simulated peer reads tick).
   const seenPeers = useReadReceiptsStore((s) =>
@@ -147,6 +155,15 @@ export function MessageRow({
     }
     onDelete?.(msg.id);
     setConfirmingDelete(false);
+  }
+
+  function handleTogglePin() {
+    if (!channelId) return;
+    if (isPinned) {
+      unpinAction(channelId, msg.id);
+    } else {
+      pinAction(channelId, msg, "You");
+    }
   }
   const sameAuthor =
     prevMsg?.author.id === msg.author.id &&
@@ -662,6 +679,43 @@ export function MessageRow({
                 }}
               >
                 <Languages size={13} />
+              </button>
+            )}
+            {channelId && (
+              <button
+                type="button"
+                onClick={handleTogglePin}
+                title={isPinned ? "Unpin from channel" : "Pin to channel"}
+                aria-label={isPinned ? "Unpin message" : "Pin message"}
+                style={{
+                  padding: "4px 6px",
+                  borderRadius: 6,
+                  border: "none",
+                  background: isPinned
+                    ? "rgba(245, 158, 11, 0.15)"
+                    : "transparent",
+                  cursor: "pointer",
+                  color: isPinned ? "#F59E0B" : "var(--text-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isPinned) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "var(--content-secondary)";
+                    (e.currentTarget as HTMLElement).style.color = "#F59E0B";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isPinned) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "transparent";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-secondary)";
+                  }
+                }}
+              >
+                {isPinned ? <PinOff size={13} /> : <Pin size={13} />}
               </button>
             )}
             {isCurrentUser && onEdit && msg.content && (
