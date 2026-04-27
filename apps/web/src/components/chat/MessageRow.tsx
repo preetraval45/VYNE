@@ -41,28 +41,44 @@ interface MessageRowProps {
   readonly onDelete?: (msgId: string) => void;
 }
 
-// ── Demo translation: maps common phrases. Wire to ai-service later. ──
-const TRANSLATIONS: Record<string, string> = {
-  hello: "Hola / Bonjour / こんにちは",
-  hi: "Hola / Salut / やあ",
-  thanks: "Gracias / Merci / ありがとう",
-  "thank you": "Gracias / Merci / ありがとうございます",
-  yes: "Sí / Oui / はい",
-  no: "No / Non / いいえ",
-  ok: "Vale / D'accord / OK",
-  okay: "Vale / D'accord / OK",
-  sorry: "Lo siento / Désolé / ごめんなさい",
-  goodbye: "Adiós / Au revoir / さようなら",
-  bye: "Adiós / Au revoir / バイバイ",
-};
+interface TranslationLine {
+  lang: string;
+  flag?: string;
+  text: string;
+}
 
-function generateTranslation(text: string): string {
-  const lower = text.toLowerCase().trim();
-  if (TRANSLATIONS[lower]) {
-    return TRANSLATIONS[lower];
+interface TranslationResult {
+  detectedLang?: string;
+  translations: TranslationLine[];
+  provider: "groq" | "claude" | "demo";
+}
+
+// In-memory cache so translating the same message twice doesn't re-call the API
+const translationCache = new Map<string, TranslationResult>();
+
+async function fetchTranslation(text: string): Promise<TranslationResult> {
+  const cached = translationCache.get(text);
+  if (cached) return cached;
+  try {
+    const res = await fetch("/api/ai/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) throw new Error("translate failed");
+    const data = (await res.json()) as TranslationResult;
+    translationCache.set(text, data);
+    return data;
+  } catch {
+    const demo: TranslationResult = {
+      detectedLang: "English",
+      translations: [
+        { lang: "Spanish", flag: "🇪🇸", text: `(Translation unavailable — set GROQ_API_KEY)` },
+      ],
+      provider: "demo",
+    };
+    return demo;
   }
-  // Heuristic stub — in real product, call ai-service /translate endpoint
-  return `[ES] ${text}\n[FR] ${text}\n[JP] ${text}\n\n(VYNE AI translation — demo mode)`;
 }
 
 export function MessageRow({
@@ -78,7 +94,8 @@ export function MessageRow({
 }: MessageRowProps) {
   const [hovering, setHovering] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [translation, setTranslation] = useState<string | null>(null);
+  const [translation, setTranslation] = useState<TranslationResult | null>(null);
+  const [translationLoading, setTranslationLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(msg.content);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -124,13 +141,19 @@ export function MessageRow({
     });
   }
 
-  function handleTranslate() {
+  async function handleTranslate() {
     if (translation) {
       setTranslation(null);
       return;
     }
     if (!msg.content) return;
-    setTranslation(generateTranslation(msg.content));
+    setTranslationLoading(true);
+    try {
+      const result = await fetchTranslation(msg.content);
+      setTranslation(result);
+    } finally {
+      setTranslationLoading(false);
+    }
   }
 
   function handleSaveEdit() {
@@ -399,7 +422,6 @@ export function MessageRow({
               borderRadius: 6,
               fontSize: 12,
               color: "var(--text-secondary)",
-              whiteSpace: "pre-line",
               lineHeight: 1.5,
             }}
           >
@@ -410,15 +432,82 @@ export function MessageRow({
                 color: "var(--vyne-purple)",
                 textTransform: "uppercase",
                 letterSpacing: 0.5,
-                marginBottom: 4,
+                marginBottom: 6,
                 display: "flex",
                 alignItems: "center",
                 gap: 4,
               }}
             >
-              <Languages size={11} /> VYNE AI Translation
+              <Languages size={11} />
+              VYNE AI Translation
+              {translation.detectedLang && (
+                <span
+                  style={{
+                    color: "var(--text-tertiary)",
+                    fontWeight: 400,
+                    textTransform: "none",
+                    letterSpacing: 0,
+                    marginLeft: 6,
+                  }}
+                >
+                  · detected {translation.detectedLang}
+                </span>
+              )}
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: 9,
+                  color: "var(--text-tertiary)",
+                  fontWeight: 400,
+                  textTransform: "uppercase",
+                }}
+              >
+                {translation.provider}
+              </span>
             </div>
-            {translation}
+            {translation.translations.map((t) => (
+              <div
+                key={t.lang}
+                style={{
+                  display: "flex",
+                  gap: 6,
+                  alignItems: "flex-start",
+                  marginBottom: 3,
+                }}
+              >
+                <span style={{ fontSize: 11, flexShrink: 0 }}>
+                  {t.flag ?? "•"}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                    minWidth: 60,
+                    flexShrink: 0,
+                  }}
+                >
+                  {t.lang}
+                </span>
+                <span style={{ flex: 1 }}>{t.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {translationLoading && !translation && (
+          <div
+            style={{
+              marginTop: 6,
+              padding: "6px 10px",
+              borderLeft: "3px solid var(--vyne-purple)",
+              background: "rgba(108, 71, 255, 0.06)",
+              borderRadius: 6,
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+              fontStyle: "italic",
+            }}
+          >
+            Translating…
           </div>
         )}
 

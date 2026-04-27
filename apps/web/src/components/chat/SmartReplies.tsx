@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import type { MsgMessage } from "@/lib/api/client";
@@ -9,6 +9,7 @@ interface SmartRepliesProps {
   readonly messages: MsgMessage[];
   readonly onPick: (text: string) => void;
   readonly currentUserNames?: string[];
+  readonly channelName?: string;
 }
 
 interface ReplySet {
@@ -25,10 +26,10 @@ export function SmartReplies({
   messages,
   onPick,
   currentUserNames = ["Preet Raval", "You"],
+  channelName,
 }: SmartRepliesProps) {
-  const suggestions = useMemo<ReplySet[]>(() => {
+  const heuristicSuggestions = useMemo<ReplySet[]>(() => {
     if (messages.length === 0) return [];
-    // Find the last *incoming* message
     const last = [...messages]
       .reverse()
       .find(
@@ -40,6 +41,68 @@ export function SmartReplies({
     if (!last) return [];
     return suggestRepliesFor(last.content);
   }, [messages, currentUserNames]);
+
+  const [aiSuggestions, setAiSuggestions] = useState<ReplySet[] | null>(null);
+
+  // Fingerprint the last incoming message so we only refetch when it changes.
+  const lastIncomingId = useMemo(() => {
+    const last = [...messages]
+      .reverse()
+      .find(
+        (m) =>
+          m.author.id !== "me" &&
+          !currentUserNames.includes(m.author.name) &&
+          m.content?.trim(),
+      );
+    return last?.id ?? null;
+  }, [messages, currentUserNames]);
+
+  useEffect(() => {
+    if (!lastIncomingId) {
+      setAiSuggestions(null);
+      return;
+    }
+    let cancelled = false;
+    const previewMessages = messages
+      .slice(-6)
+      .map((m) => ({
+        author: m.author.name,
+        content: m.content,
+        ts: m.createdAt,
+      }))
+      .filter((m) => m.content);
+    fetch("/api/ai/smart-replies", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: previewMessages,
+        userNames: currentUserNames,
+        channelName,
+      }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        if (
+          data.suggestions &&
+          Array.isArray(data.suggestions) &&
+          data.suggestions.length > 0 &&
+          data.provider !== "demo"
+        ) {
+          setAiSuggestions(data.suggestions);
+        } else {
+          setAiSuggestions(null); // fall back to heuristic
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAiSuggestions(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [lastIncomingId, channelName, messages, currentUserNames]);
+
+  const suggestions = aiSuggestions ?? heuristicSuggestions;
 
   return (
     <AnimatePresence>

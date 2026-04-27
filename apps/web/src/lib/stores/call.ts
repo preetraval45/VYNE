@@ -386,6 +386,59 @@ export const useCallStore = create<CallState>((set, get) => ({
         durationSec: 0,
         recap: hasContent ? recap : null,
       });
+      // Async upgrade: ask the recap API to replace the heuristic summary
+      // + decisions + action items with AI-generated ones. The user already
+      // sees the basic recap; this fills in better content if Llama's
+      // available.
+      if (hasContent && s.transcript.filter((t) => t.isFinal).length > 0) {
+        const transcriptForAi = s.transcript
+          .filter((t) => t.isFinal)
+          .map((t) => ({
+            speaker: t.speaker,
+            text: t.text,
+            ts: t.timestamp,
+          }));
+        fetch("/api/ai/recap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transcript: transcriptForAi,
+            participants: recap.participants,
+            durationSec: recap.durationSec,
+            channelName: s.channelName,
+          }),
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => {
+            if (!data || data.provider === "demo" || !data.summary) return;
+            set((cur) => {
+              if (!cur.recap) return {};
+              return {
+                recap: {
+                  ...cur.recap,
+                  summary: data.summary,
+                  decisions:
+                    data.decisions?.length > 0
+                      ? data.decisions
+                      : cur.recap.decisions,
+                  actionItems:
+                    data.actionItems?.length > 0
+                      ? data.actionItems.map(
+                          (a: { owner: string; task: string; due?: string }, i: number) => ({
+                            id: `ai-recap-${Date.now()}-${i}`,
+                            text: `${a.owner ? a.owner + ": " : ""}${a.task}${a.due ? ` (due ${a.due})` : ""}`,
+                            done: false,
+                          }),
+                        )
+                      : cur.recap.actionItems,
+                },
+              };
+            });
+          })
+          .catch(() => {
+            // Heuristic recap is already showing — silent failure is fine
+          });
+      }
     }, 250);
   },
 

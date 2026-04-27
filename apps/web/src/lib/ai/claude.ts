@@ -180,3 +180,96 @@ export async function callLlmText(
   if (fromClaude) return fromClaude;
   return callGroqText(systemPrompt, userPrompt, opts);
 }
+
+/**
+ * Llama-first JSON helper. Tries Groq Llama 3.3 first (free + fast),
+ * falls through to Claude if Groq isn't configured, returns null
+ * otherwise so the caller can use a heuristic fallback.
+ *
+ * Used for the chat AI features (smart replies, translation, meeting
+ * recap) where Llama's quality is plenty and the cost savings + lower
+ * latency dominate.
+ */
+export async function callLlamaJson<T>(
+  systemPrompt: string,
+  userPrompt: string,
+  opts: { maxTokens?: number; model?: string } = {},
+): Promise<T | null> {
+  const groqKey = process.env.GROQ_API_KEY;
+  const claudeKey = process.env.ANTHROPIC_API_KEY;
+  const jsonHardener = `${systemPrompt}\n\nRespond with raw JSON only — no prose, no code fences.`;
+
+  if (groqKey) {
+    try {
+      const res = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${groqKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: opts.model ?? "llama-3.3-70b-versatile",
+            max_tokens: opts.maxTokens ?? 512,
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: jsonHardener },
+              { role: "user", content: userPrompt },
+            ],
+          }),
+        },
+      );
+      if (res.ok) {
+        const body = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
+        const text = body.choices?.[0]?.message?.content;
+        if (text) return parseJsonStrict<T>(text);
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  if (claudeKey) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "x-api-key": claudeKey,
+          "anthropic-version": "2023-06-01",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "claude-3-5-haiku-latest",
+          max_tokens: opts.maxTokens ?? 512,
+          system: jsonHardener,
+          messages: [{ role: "user", content: userPrompt }],
+        }),
+      });
+      if (res.ok) {
+        const body = (await res.json()) as {
+          content?: Array<{ type: string; text?: string }>;
+        };
+        const text = body.content?.find((c) => c.type === "text")?.text;
+        if (text) return parseJsonStrict<T>(text);
+      }
+    } catch {
+      // fall through
+    }
+  }
+
+  return null;
+}
+
+/** Llama-first plain-text helper. */
+export async function callLlamaText(
+  systemPrompt: string,
+  userPrompt: string,
+  opts: { maxTokens?: number; model?: string } = {},
+): Promise<string | null> {
+  const fromGroq = await callGroqText(systemPrompt, userPrompt, opts);
+  if (fromGroq) return fromGroq;
+  return callClaudeText(systemPrompt, userPrompt, opts);
+}

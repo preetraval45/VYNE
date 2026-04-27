@@ -946,6 +946,7 @@ export function ChatArea({
           <SmartReplies
             messages={messages}
             onPick={(text) => sendMessage(text)}
+            channelName={channelName}
           />
           <MessageComposer
             placeholder={
