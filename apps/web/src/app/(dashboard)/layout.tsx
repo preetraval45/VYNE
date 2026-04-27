@@ -16,6 +16,7 @@ import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
+import { useTabSync } from "@/hooks/useTabSync";
 
 export default function DashboardLayout({
   children,
@@ -24,6 +25,8 @@ export default function DashboardLayout({
 }) {
   const focusMode = useUIStore((s) => s.focusMode);
   const pathname = usePathname();
+  // Cross-tab sync: when the user sends/edits/reads in one tab, others update.
+  useTabSync();
   // Derive a module key from the first path segment so the error boundary
   // resets automatically when the user navigates to a different module.
   const moduleKey = pathname?.split("/")[1] ?? "root";

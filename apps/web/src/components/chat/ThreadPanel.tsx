@@ -39,10 +39,14 @@ export function ThreadPanel({
     channelIdProp ?? parentMsg.channelId ?? parentMsg.dmId ?? null;
   const resolvedIsDM =
     isDMProp ?? Boolean(parentMsg.dmId && !parentMsg.channelId);
-  const { messages, sendMessage, sendTyping, typingUsers } = useMessages(
-    resolvedChannelId,
-    resolvedIsDM,
-  );
+  const {
+    messages,
+    sendMessage,
+    sendTyping,
+    typingUsers,
+    editMessage,
+    deleteMessage,
+  } = useMessages(resolvedChannelId, resolvedIsDM);
   const replies = messages.filter((m) => m.parentMessageId === parentMsg.id);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState<MeetingNotes | null>(null);
@@ -483,7 +487,12 @@ export function ThreadPanel({
             prevMsg={replies[i - 1]}
             onReaction={() => {}}
             onReply={() => {}}
-            isCurrentUser={r.author.id === "me"}
+            isCurrentUser={
+              r.author.id === "me" || r.author.name === "Preet Raval"
+            }
+            channelId={resolvedChannelId ?? undefined}
+            onEdit={editMessage}
+            onDelete={deleteMessage}
           />
         ))}
         {replies.length === 0 && (

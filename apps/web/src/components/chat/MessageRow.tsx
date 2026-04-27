@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Smile,
@@ -9,6 +9,10 @@ import {
   Bookmark,
   BookmarkCheck,
   Languages,
+  Pencil,
+  Trash2,
+  Check,
+  X,
 } from "lucide-react";
 import { formatRelativeTime } from "@/lib/utils";
 import type { MsgMessage } from "@/lib/api/client";
@@ -25,6 +29,8 @@ interface MessageRowProps {
   readonly isCurrentUser: boolean;
   readonly channelId?: string;
   readonly channelName?: string;
+  readonly onEdit?: (msgId: string, newContent: string) => void;
+  readonly onDelete?: (msgId: string) => void;
 }
 
 // ── Demo translation: maps common phrases. Wire to ai-service later. ──
@@ -59,12 +65,34 @@ export function MessageRow({
   isCurrentUser,
   channelId,
   channelName,
+  onEdit,
+  onDelete,
 }: MessageRowProps) {
   const [hovering, setHovering] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [translation, setTranslation] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(msg.content);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const editRef = useRef<HTMLTextAreaElement>(null);
   const isSaved = useSavedStore((s) => s.isSaved(msg.id));
   const toggleSave = useSavedStore((s) => s.toggleSave);
+
+  // Reset draft if msg.content changes externally (e.g. server echo)
+  useEffect(() => {
+    if (!editing) setDraft(msg.content);
+  }, [msg.content, editing]);
+
+  // Focus + size the edit textarea on enter
+  useEffect(() => {
+    if (editing && editRef.current) {
+      editRef.current.focus();
+      editRef.current.setSelectionRange(
+        editRef.current.value.length,
+        editRef.current.value.length,
+      );
+    }
+  }, [editing]);
 
   function handleSave() {
     toggleSave({
@@ -83,6 +111,32 @@ export function MessageRow({
     }
     if (!msg.content) return;
     setTranslation(generateTranslation(msg.content));
+  }
+
+  function handleSaveEdit() {
+    const trimmed = draft.trim();
+    if (!trimmed || trimmed === msg.content) {
+      setEditing(false);
+      setDraft(msg.content);
+      return;
+    }
+    onEdit?.(msg.id, trimmed);
+    setEditing(false);
+  }
+
+  function handleCancelEdit() {
+    setEditing(false);
+    setDraft(msg.content);
+  }
+
+  function handleDelete() {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      setTimeout(() => setConfirmingDelete(false), 4000);
+      return;
+    }
+    onDelete?.(msg.id);
+    setConfirmingDelete(false);
   }
   const sameAuthor =
     prevMsg?.author.id === msg.author.id &&
@@ -136,7 +190,7 @@ export function MessageRow({
           </div>
         )}
 
-        {msg.content && (
+        {msg.content && !editing && (
           <p
             style={{
               fontSize: 13,
@@ -147,7 +201,119 @@ export function MessageRow({
             }}
           >
             {msg.content}
+            {msg.updatedAt && (
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "var(--text-tertiary)",
+                  marginLeft: 6,
+                  fontStyle: "italic",
+                }}
+                title={`Edited ${new Date(msg.updatedAt).toLocaleString()}`}
+              >
+                (edited)
+              </span>
+            )}
           </p>
+        )}
+
+        {editing && (
+          <div
+            style={{
+              border: "1px solid var(--vyne-purple)",
+              borderRadius: 8,
+              padding: 6,
+              background: "var(--content-secondary)",
+              marginTop: 2,
+            }}
+          >
+            <textarea
+              ref={editRef}
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSaveEdit();
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  handleCancelEdit();
+                }
+              }}
+              rows={Math.min(6, Math.max(2, draft.split("\n").length))}
+              style={{
+                width: "100%",
+                resize: "vertical",
+                border: "none",
+                background: "transparent",
+                color: "var(--text-primary)",
+                fontSize: 13,
+                lineHeight: 1.6,
+                outline: "none",
+                fontFamily: "inherit",
+                padding: "4px 6px",
+              }}
+              aria-label="Edit message"
+            />
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                justifyContent: "flex-end",
+                marginTop: 4,
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 6,
+                  border: "1px solid var(--content-border)",
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={!draft.trim() || draft.trim() === msg.content}
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 6,
+                  border: "none",
+                  background:
+                    draft.trim() && draft.trim() !== msg.content
+                      ? "var(--vyne-purple)"
+                      : "var(--content-border)",
+                  color: "#fff",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  cursor:
+                    draft.trim() && draft.trim() !== msg.content
+                      ? "pointer"
+                      : "default",
+                }}
+              >
+                Save
+              </button>
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                color: "var(--text-tertiary)",
+                marginTop: 4,
+                paddingLeft: 6,
+              }}
+            >
+              Enter to save · Esc to cancel
+            </div>
+          </div>
         )}
 
         {/* Inline translation panel */}
@@ -446,6 +612,75 @@ export function MessageRow({
                 }}
               >
                 <Languages size={13} />
+              </button>
+            )}
+            {isCurrentUser && onEdit && msg.content && (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                title="Edit message"
+                aria-label="Edit message"
+                style={{
+                  padding: "4px 6px",
+                  borderRadius: 6,
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "var(--text-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--content-secondary)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-purple)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-secondary)";
+                }}
+              >
+                <Pencil size={13} />
+              </button>
+            )}
+            {isCurrentUser && onDelete && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                title={confirmingDelete ? "Click again to confirm" : "Delete message"}
+                aria-label="Delete message"
+                style={{
+                  padding: "4px 6px",
+                  borderRadius: 6,
+                  border: "none",
+                  background: confirmingDelete
+                    ? "rgba(239,68,68,0.15)"
+                    : "transparent",
+                  cursor: "pointer",
+                  color: confirmingDelete ? "#EF4444" : "var(--text-secondary)",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  if (!confirmingDelete) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "var(--content-secondary)";
+                    (e.currentTarget as HTMLElement).style.color = "#EF4444";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!confirmingDelete) {
+                    (e.currentTarget as HTMLElement).style.background =
+                      "transparent";
+                    (e.currentTarget as HTMLElement).style.color =
+                      "var(--text-secondary)";
+                  }
+                }}
+              >
+                <Trash2 size={13} />
               </button>
             )}
             <button

@@ -59,6 +59,8 @@ export function ChatArea({
     sendMessage,
     sendTyping,
     addReaction,
+    editMessage,
+    deleteMessage,
   } = useMessages(channelId, isDM);
   const [cmdMessages, setCmdMessages] = useState<LocalMsg[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -819,6 +821,8 @@ export function ChatArea({
                     }
                     channelId={channelId}
                     channelName={channelName}
+                    onEdit={editMessage}
+                    onDelete={deleteMessage}
                   />
                 ));
               })()}

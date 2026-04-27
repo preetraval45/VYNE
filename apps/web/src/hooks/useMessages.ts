@@ -355,6 +355,7 @@ export function useMessages(channelId: string | null, isDM = false) {
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load initial messages — merges API/mock + previously-sent (persisted) messages
+  // Also applies edit/delete overlays from the persist store.
   useEffect(() => {
     if (!channelId) {
       setMessages([]);
@@ -371,11 +372,27 @@ export function useMessages(channelId: string | null, isDM = false) {
           ? { dmId: m.dmId ?? channelId }
           : { channelId: m.channelId ?? channelId }),
       }));
-    const sent = useSentMessagesStore.getState().forChannel(channelId);
+    const store = useSentMessagesStore.getState();
+    const sent = store.forChannel(channelId);
+    const applyOverlays = (msgs: MsgMessage[]) => {
+      const out: MsgMessage[] = [];
+      for (const m of msgs) {
+        if (store.deleted[m.id]) continue;
+        const edit = store.edits[m.id];
+        out.push(
+          edit
+            ? { ...m, content: edit.content, updatedAt: edit.updatedAt }
+            : m,
+        );
+      }
+      return out;
+    };
     const mergeWithSent = (base: MsgMessage[]) => {
-      // Sent messages take priority (they're "ours") — append to base, avoid id collisions
       const baseIds = new Set(base.map((m) => m.id));
-      return [...base, ...sent.filter((m) => !baseIds.has(m.id))];
+      return applyOverlays([
+        ...base,
+        ...sent.filter((m) => !baseIds.has(m.id)),
+      ]);
     };
     fetcher
       .then((r) => setMessages(mergeWithSent(stamp(r.data.messages ?? []))))
@@ -548,6 +565,31 @@ export function useMessages(channelId: string | null, isDM = false) {
     [channelId],
   );
 
+  const editMessage = useCallback(
+    (messageId: string, newContent: string) => {
+      const trimmed = newContent.trim();
+      if (!trimmed) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId
+            ? { ...m, content: trimmed, updatedAt: new Date().toISOString() }
+            : m,
+        ),
+      );
+      useSentMessagesStore.getState().editMessage(messageId, trimmed);
+    },
+    [],
+  );
+
+  const deleteMessage = useCallback(
+    (messageId: string) => {
+      if (!channelId) return;
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      useSentMessagesStore.getState().deleteMessage(channelId, messageId);
+    },
+    [channelId],
+  );
+
   return {
     messages,
     loading,
@@ -555,5 +597,7 @@ export function useMessages(channelId: string | null, isDM = false) {
     sendMessage,
     sendTyping,
     addReaction,
+    editMessage,
+    deleteMessage,
   };
 }
