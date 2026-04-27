@@ -163,9 +163,13 @@ function HomeFocusCard() {
 
   const overdue = useMemo(() => {
     const now = Date.now();
+    // Defensive: persisted store can hydrate with undefined fields
+    // when shape changes between deploys. Guard everything.
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    const safeProjects = Array.isArray(projects) ? projects : [];
     const projectName = (pid: string) =>
-      projects.find((p) => p.id === pid)?.name ?? "Project";
-    return tasks
+      safeProjects.find((p) => p.id === pid)?.name ?? "Project";
+    return safeTasks
       .filter(
         (t) =>
           t.status !== "done" &&

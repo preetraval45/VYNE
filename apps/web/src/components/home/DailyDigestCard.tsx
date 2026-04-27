@@ -44,7 +44,9 @@ export function DailyDigestCard() {
     const startOfYesterday = new Date(startOfDay);
     startOfYesterday.setDate(startOfDay.getDate() - 1);
 
-    const todaysEvents = events.filter((e) => {
+    // Defensive: events / sent stores can hydrate with undefined when shape changes
+    const safeEvents = Array.isArray(events) ? events : [];
+    const todaysEvents = safeEvents.filter((e) => {
       const t = new Date(e.startsAt).getTime();
       return t >= startOfDay.getTime() && t < startOfDay.getTime() + 86400000;
     });
