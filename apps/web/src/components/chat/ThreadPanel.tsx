@@ -21,12 +21,27 @@ interface MeetingNotes {
 interface ThreadPanelProps {
   readonly parentMsg: MsgMessage;
   readonly onClose: () => void;
+  /** Optional explicit channel/DM id (preferred — avoids relying on stamping) */
+  readonly channelId?: string | null;
+  readonly isDM?: boolean;
 }
 
-export function ThreadPanel({ parentMsg, onClose }: ThreadPanelProps) {
+export function ThreadPanel({
+  parentMsg,
+  onClose,
+  channelId: channelIdProp,
+  isDM: isDMProp,
+}: ThreadPanelProps) {
+  // Resolve which conversation this thread belongs to. Prefer explicit
+  // props from the parent (ChatArea); fall back to fields stamped onto
+  // the message; finally accept the dmId for DMs.
+  const resolvedChannelId =
+    channelIdProp ?? parentMsg.channelId ?? parentMsg.dmId ?? null;
+  const resolvedIsDM =
+    isDMProp ?? Boolean(parentMsg.dmId && !parentMsg.channelId);
   const { messages, sendMessage, sendTyping, typingUsers } = useMessages(
-    parentMsg.channelId ?? null,
-    false,
+    resolvedChannelId,
+    resolvedIsDM,
   );
   const replies = messages.filter((m) => m.parentMessageId === parentMsg.id);
   const bottomRef = useRef<HTMLDivElement>(null);

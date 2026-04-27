@@ -157,6 +157,8 @@ export default function ChatPage() {
               {threadMsg && (
                 <ThreadPanel
                   parentMsg={threadMsg}
+                  channelId={selectedId}
+                  isDM={isDM}
                   onClose={() => setThreadMsg(null)}
                 />
               )}
