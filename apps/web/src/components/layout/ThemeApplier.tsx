@@ -18,18 +18,37 @@ import { useTheme, useThemeStore, ACCENT_COLORS } from "@/lib/stores/theme";
 export function ThemeApplier() {
   const theme = useTheme();
   const accent = useThemeStore((s) => s.accent);
+  const customAccentHex = useThemeStore((s) => s.customAccentHex);
 
   const applyTheme = useCallback((resolved: "light" | "dark") => {
     document.documentElement.dataset.theme = resolved;
   }, []);
 
-  // Apply accent color as CSS variables
+  // Apply accent color as CSS variables. If the user has set a custom
+  // hex via the picker tool we derive light/dark by lightening/darkening
+  // the primary so every brand surface still recolours coherently.
   useEffect(() => {
-    const colors = ACCENT_COLORS[accent];
-    if (!colors) return;
+    const preset = ACCENT_COLORS[accent];
+    let primary: string;
+    let light: string;
+    let dark: string;
 
-    const rgb = hexToRgb(colors.primary);
+    if (customAccentHex && /^#?[0-9a-f]{6}$/i.test(customAccentHex)) {
+      primary = customAccentHex.startsWith("#") ? customAccentHex : `#${customAccentHex}`;
+      light = mixHex(primary, "#FFFFFF", 0.25);
+      dark = mixHex(primary, "#000000", 0.25);
+    } else if (preset) {
+      primary = preset.primary;
+      light = preset.light;
+      dark = preset.dark;
+    } else {
+      return;
+    }
+
+    const rgb = hexToRgb(primary);
     const rgbStr = rgb ? `${rgb.r}, ${rgb.g}, ${rgb.b}` : "6, 182, 212";
+
+    const colors = { primary, light, dark };
 
     const root = document.documentElement;
 
@@ -84,7 +103,7 @@ export function ThemeApplier() {
       `rgba(${rgbStr}, 0.28)`,
     );
     root.style.setProperty("--alert-purple-text", colors.dark);
-  }, [accent]);
+  }, [accent, customAccentHex]);
 
   // Apply theme mode
   useEffect(() => {
@@ -114,4 +133,17 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   if (!m) return null;
   const n = parseInt(m[1], 16);
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+/** Linear blend in sRGB. amt=0 → a, amt=1 → b. Good enough for picking
+ *  light/dark variants from a user-chosen primary without dragging in
+ *  an HSL conversion. */
+function mixHex(a: string, b: string, amt: number): string {
+  const ra = hexToRgb(a);
+  const rb = hexToRgb(b);
+  if (!ra || !rb) return a;
+  const r = Math.round(ra.r + (rb.r - ra.r) * amt);
+  const g = Math.round(ra.g + (rb.g - ra.g) * amt);
+  const bch = Math.round(ra.b + (rb.b - ra.b) * amt);
+  return `#${[r, g, bch].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 }

@@ -778,6 +778,8 @@ function NavRow({
 function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
   const accent = useThemeStore((s) => s.accent);
   const setAccent = useThemeStore((s) => s.setAccent);
+  const customAccentHex = useThemeStore((s) => s.customAccentHex);
+  const setCustomAccent = useThemeStore((s) => s.setCustomAccent);
 
   return (
     <div
@@ -790,50 +792,85 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
         background: "var(--content-bg)",
         border: "1px solid var(--content-border)",
         borderRadius: 10,
-        padding: "12px 14px",
+        padding: "10px 12px",
         boxShadow: "var(--shadow-lg)",
         zIndex: 100,
       }}
     >
       <div
         style={{
-          fontSize: 11,
-          fontWeight: 600,
-          color: "var(--text-secondary)",
-          marginBottom: 8,
+          display: "grid",
+          gridTemplateColumns: "repeat(5, 1fr)",
+          gap: 6,
+          alignItems: "center",
+          justifyItems: "center",
         }}
       >
-        Accent Color
-      </div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {(Object.keys(ACCENT_COLORS) as AccentColor[]).map((key) => {
           const c = ACCENT_COLORS[key];
-          const isActive = accent === key;
+          const isActive = !customAccentHex && accent === key;
           return (
             <button
               type="button"
               key={key}
               title={c.label}
+              aria-label={`Use ${c.label} accent`}
               onClick={() => {
                 setAccent(key);
                 onClose();
               }}
               style={{
-                width: 28,
-                height: 28,
+                width: 22,
+                height: 22,
                 borderRadius: "50%",
                 background: c.primary,
                 border: isActive
-                  ? "3px solid var(--text-primary)"
-                  : "3px solid transparent",
+                  ? "2px solid var(--text-primary)"
+                  : "2px solid transparent",
                 cursor: "pointer",
                 outline: isActive ? `2px solid ${c.primary}` : "none",
                 outlineOffset: 2,
+                padding: 0,
                 transition: "all 0.15s",
               }}
             />
           );
         })}
+        {/* Native colour picker — gives the user any hex they want.
+            We hide the default chrome and overlay a circular swatch so
+            the row stays visually consistent with the presets. */}
+        <label
+          title="Pick any color"
+          aria-label="Pick a custom accent color"
+          style={{
+            position: "relative",
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            cursor: "pointer",
+            background: customAccentHex ?? "conic-gradient(#EF4444, #F97316, #EAB308, #22C55E, #06B6D4, #3B82F6, #8B5CF6, #EC4899, #EF4444)",
+            border: customAccentHex
+              ? "2px solid var(--text-primary)"
+              : "2px dashed var(--content-border)",
+            display: "inline-block",
+          }}
+        >
+          <input
+            type="color"
+            value={customAccentHex ?? "#06B6D4"}
+            onChange={(e) => setCustomAccent(e.target.value)}
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0,
+              cursor: "pointer",
+              width: "100%",
+              height: "100%",
+              border: 0,
+              padding: 0,
+            }}
+          />
+        </label>
       </div>
     </div>
   );
