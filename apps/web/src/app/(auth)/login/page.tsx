@@ -20,31 +20,31 @@ import {
 import { useAuthStore } from "@/lib/stores/auth";
 import { cn } from "@/lib/utils";
 import { VyneLogo } from "@/components/brand/VyneLogo";
+import type { User } from "@/types";
 
 const PREVIEW_MODULES = [
-  { icon: MessageSquare, label: "Messaging", color: "#06B6D4" },
+  { icon: MessageSquare, label: "Messaging", color: "var(--vyne-accent, #06B6D4)" },
   { icon: FolderKanban, label: "Projects", color: "#3B82F6" },
   { icon: FileText, label: "Docs", color: "#22C55E" },
   { icon: Package, label: "ERP", color: "#F59E0B" },
   { icon: BarChart3, label: "Finance", color: "#EF4444" },
-  { icon: Bot, label: "AI Agents", color: "#22D3EE" },
+  { icon: Bot, label: "AI Agents", color: "var(--vyne-accent-light, #22D3EE)" },
 ];
 
 export default function LoginPage() {
   const router = useRouter();
   const {
-    login,
     setUser,
     setToken,
     setRefreshToken,
-    isLoading,
-    error,
-    clearError,
   } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const clearError = () => setError(null);
 
   async function enterDemo() {
     setUser({
@@ -76,14 +76,43 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     clearError();
+    setIsLoading(true);
     try {
-      await login(email, password);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ email, password }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        token?: string;
+        user?: User & { modules: string[]; companyName: string; plan: string };
+      };
+      if (!res.ok || !data.user || !data.token) {
+        setError(data.error ?? "Login failed. Please try again.");
+        return;
+      }
+      setUser({
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        orgId: data.user.orgId,
+        role: data.user.role,
+        createdAt: data.user.createdAt,
+      });
+      setToken(data.token);
+      setRefreshToken(data.token);
+      // Hydrate the per-account module list so the sidebar matches what
+      // the user picked at signup, even on a fresh device.
+      localStorage.setItem("vyne-modules", JSON.stringify(data.user.modules));
+      localStorage.setItem("vyne-onboarded", "true");
       router.push("/home");
-    } catch {
-      // Real auth error surfaces via `error` in the store — don't
-      // silently enter demo mode (that masked "wrong password" /
-      // "account not found" as a successful demo login).
-      // Users who want the demo should click the explicit button.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -119,7 +148,7 @@ export default function LoginPage() {
             bottom: "5%",
             right: "10%",
             background:
-              "radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)",
+              "radial-gradient(circle, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3) 0%, transparent 70%)",
             opacity: 0.35,
           }}
         />
@@ -236,7 +265,7 @@ export default function LoginPage() {
                   <Link
                     href="/forgot-password"
                     className="text-xs transition-colors hover:underline"
-                    style={{ color: "#22D3EE" }}
+                    style={{ color: "var(--vyne-accent-light, #22D3EE)" }}
                   >
                     Forgot password?
                   </Link>
@@ -278,7 +307,7 @@ export default function LoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading} aria-busy={isLoading}
                 className={cn(
                   "btn-aurora w-full mt-2",
                   "flex items-center justify-center gap-2",
@@ -330,10 +359,10 @@ export default function LoginPage() {
               )}
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(6,182,212,0.10), rgba(6,182,212,0.04))",
-                border: "1px solid rgba(6,182,212,0.35)",
+                  "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04))",
+                border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
                 color: "#67E8F9",
-                boxShadow: "0 0 0 1px rgba(6,182,212,0.05) inset",
+                boxShadow: "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05) inset",
               }}
             >
               <Sparkles size={15} />
@@ -363,7 +392,7 @@ export default function LoginPage() {
         className="hidden lg:flex flex-1 items-center justify-center p-12 relative overflow-hidden"
         style={{
           background:
-            "radial-gradient(ellipse at top right, rgba(6,182,212,0.2) 0%, transparent 50%), linear-gradient(135deg, #15152A 0%, #0F0F20 100%)",
+            "radial-gradient(ellipse at top right, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2) 0%, transparent 50%), linear-gradient(135deg, #15152A 0%, #0F0F20 100%)",
           borderLeft: "1px solid rgba(255,255,255,0.05)",
         }}
       >
@@ -373,7 +402,7 @@ export default function LoginPage() {
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(6,182,212,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.08) 1px, transparent 1px)",
+              "linear-gradient(rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08) 1px, transparent 1px)",
             backgroundSize: "48px 48px",
             maskImage:
               "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
@@ -392,11 +421,11 @@ export default function LoginPage() {
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{
-              background: "rgba(6,182,212,0.1)",
-              border: "1px solid rgba(6,182,212,0.25)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
             }}
           >
-            <Zap size={12} style={{ color: "#22D3EE" }} />
+            <Zap size={12} style={{ color: "var(--vyne-accent-light, #22D3EE)" }} />
             <span
               className="text-xs font-semibold tracking-wide"
               style={{ color: "#67E8F9" }}
@@ -414,7 +443,7 @@ export default function LoginPage() {
             <span
               style={{
                 background:
-                  "linear-gradient(135deg, #06B6D4, #22D3EE, #67E8F9)",
+                  "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE), #67E8F9)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",

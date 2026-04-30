@@ -1,0 +1,76 @@
+// VYNE persistence schema. Currently covers the CRM Deal entity as
+// the flagship for real Postgres persistence. Future entities slot
+// alongside without migration of existing tables.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// Subscription state for the org. Mirrors the relevant Stripe fields
+// so the UI can render plan + status without round-tripping the API.
+model Subscription {
+  id                   String    @id @default(cuid())
+  orgId                String    @unique @map("org_id")
+  plan                 String    @default("free") // free | starter | business | enterprise
+  status               String    @default("inactive") // active | trialing | past_due | canceled | incomplete | inactive
+  stripeCustomerId     String?   @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  stripePriceId        String?   @map("stripe_price_id")
+  currentPeriodEnd     DateTime? @map("current_period_end")
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}
+
+// Real signup-backed user account. Stores PBKDF2-SHA256 password hash
+// (salt + hash separated) plus the modules the user picked at signup so
+// the dashboard renders only what they enabled.
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  companyName   String   @map("company_name")
+  passwordHash  String   @map("password_hash")
+  passwordSalt  String   @map("password_salt")
+  modules       String[] @default([])
+  plan          String   @default("custom")
+  role          String   @default("owner")
+  orgId         String   @default("org-self") @map("org_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("users")
+}
+
+// Single-tenant for now. Multi-tenant scopes to org_id later via RLS.
+model Deal {
+  id            String   @id @default(cuid())
+  orgId         String   @default("demo") @map("org_id")
+  company       String
+  contactName   String   @default("") @map("contact_name")
+  email         String   @default("")
+  stage         String   @default("Lead")
+  value         Int      @default(0)
+  probability   Int      @default(0)
+  assignee      String   @default("Alex")
+  source        String   @default("inbound")
+  nextAction    String   @default("") @map("next_action")
+  notes         String   @default("")
+  customFields  Json?    @map("custom_fields")
+  lastActivity  DateTime @default(now()) @map("last_activity")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([stage])
+  @@map("deals")
+}

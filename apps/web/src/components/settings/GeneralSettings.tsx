@@ -5,6 +5,7 @@ import { Check, Upload, Globe, Palette } from "lucide-react";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { orgsApi } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/auth";
+import { csrfFetch } from "@/lib/api/csrfFetch";
 
 // ─── Shared styles ───────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -136,7 +137,7 @@ function Toggle({
         width: 36,
         height: 20,
         borderRadius: 10,
-        background: checked ? "var(--vyne-purple)" : "var(--content-border)",
+        background: checked ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)",
         border: "none",
         cursor: "pointer",
         position: "relative",
@@ -177,7 +178,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
   const [saved, setSaved] = useState(false);
 
   // ─── Branding state ───────────────────────────────────────────
-  const [accentColor, setAccentColor] = useState("#06B6D4");
+  const [accentColor, setAccentColor] = useState("var(--vyne-accent, #06B6D4)");
   const [customDomain, setCustomDomain] = useState("");
   const [brandingSaved, setBrandingSaved] = useState(false);
   const [brandingSaving, setBrandingSaving] = useState(false);
@@ -247,11 +248,21 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
 
   const saveModules = useCallback(async () => {
     setModulesSaving(true);
+    const modulesArr = Array.from(enabledModules);
     // Persist module toggles locally first so they survive reload.
-    localStorage.setItem(
-      "vyne-modules",
-      JSON.stringify(Array.from(enabledModules)),
-    );
+    localStorage.setItem("vyne-modules", JSON.stringify(modulesArr));
+    // Persist to the user record in Postgres so it follows them across
+    // devices. Demo users have no DB row — that 401s and we silently
+    // fall back to the local copy above, which is the right behaviour.
+    try {
+      await csrfFetch("/api/auth/modules", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ modules: modulesArr }),
+      });
+    } catch {
+      // Network failure — local copy persists; user can retry.
+    }
     try {
       const features: Record<string, boolean> = {};
       for (const m of ALL_MODULES) {
@@ -270,7 +281,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         });
       }
     } catch {
-      // Backend not deployed yet — local persistence above keeps the change.
+      // ERP backend not deployed yet — local persistence above keeps the change.
     }
     setModulesSaved(true);
     onToast("Module settings saved — reload to apply");
@@ -466,7 +477,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
             background: saved
               ? "var(--status-success)"
               : hasChanged
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
             color: saved || hasChanged ? "#fff" : "var(--text-tertiary)",
             cursor: hasChanged ? "pointer" : "default",
@@ -486,6 +497,8 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
           )}
         </button>
       </div>
+
+      <DensityToggleRow />
 
       {/* ── Branding ─────────────────────────────────────────── */}
       <SectionCard title="Branding">
@@ -525,7 +538,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
             <input
               value={accentColor}
               onChange={(e) => setAccentColor(e.target.value)}
-              placeholder="#06B6D4"
+              placeholder="var(--vyne-accent, #06B6D4)"
               style={{ ...inputStyle, maxWidth: 120 }}
               aria-label="Accent color hex"
             />
@@ -565,7 +578,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               padding: "8px 18px",
               borderRadius: 8,
               border: "none",
-              background: brandingSaved ? "#16A34A" : "#06B6D4",
+              background: brandingSaved ? "#16A34A" : "var(--vyne-accent, #06B6D4)",
               color: "#fff",
               cursor: brandingSaving ? "default" : "pointer",
               fontSize: 13,
@@ -620,9 +633,9 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
                     padding: "8px 12px",
                     borderRadius: 8,
                     background: enabledModules.has(mod.id)
-                      ? "rgba(6, 182, 212,0.07)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.07)"
                       : "var(--content-secondary)",
-                    border: `1px solid ${enabledModules.has(mod.id) ? "rgba(6, 182, 212,0.25)" : "var(--content-border)"}`,
+                    border: `1px solid ${enabledModules.has(mod.id) ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)" : "var(--content-border)"}`,
                   }}
                 >
                   <span style={{ fontSize: 13, color: "var(--text-primary)" }}>
@@ -660,7 +673,7 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
               padding: "8px 18px",
               borderRadius: 8,
               border: "none",
-              background: modulesSaved ? "#16A34A" : "#06B6D4",
+              background: modulesSaved ? "#16A34A" : "var(--vyne-accent, #06B6D4)",
               color: "#fff",
               cursor: modulesSaving ? "default" : "pointer",
               fontSize: 13,
@@ -682,5 +695,76 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </div>
       </SectionCard>
     </div>
+  );
+}
+
+// ── DensityToggleRow ────────────────────────────────────────────
+// Three-segment picker: Compact / Comfortable / Spacious. Writes the
+// chosen value to localStorage and to <html data-density="..."> so
+// the CSS variables shipped earlier (--density-row-py / -px / -fs)
+// re-bind site-wide.
+
+function DensityToggleRow() {
+  const [density, setDensity] = useState<"compact" | "comfortable" | "spacious">("comfortable");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("vyne-density");
+    if (saved === "compact" || saved === "comfortable" || saved === "spacious") {
+      setDensity(saved);
+      document.documentElement.dataset.density = saved;
+    }
+  }, []);
+
+  function pick(v: "compact" | "comfortable" | "spacious") {
+    setDensity(v);
+    document.documentElement.dataset.density = v;
+    try {
+      localStorage.setItem("vyne-density", v);
+    } catch {
+      // ignore quota
+    }
+  }
+
+  return (
+    <SectionCard title="Display density">
+      <FieldRow label="Row density" hint="Compact = denser tables; Spacious = larger touch targets">
+        <div
+          role="radiogroup"
+          aria-label="Display density"
+          style={{
+            display: "inline-flex",
+            border: "1px solid var(--input-border)",
+            borderRadius: 8,
+            overflow: "hidden",
+          }}
+        >
+          {(["compact", "comfortable", "spacious"] as const).map((v) => {
+            const active = density === v;
+            return (
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => pick(v)}
+                style={{
+                  padding: "7px 14px",
+                  fontSize: 12,
+                  fontWeight: active ? 600 : 500,
+                  background: active ? "var(--vyne-accent, #5B5BD6)" : "transparent",
+                  color: active ? "#fff" : "var(--text-secondary)",
+                  border: "none",
+                  cursor: "pointer",
+                  textTransform: "capitalize",
+                }}
+              >
+                {v}
+              </button>
+            );
+          })}
+        </div>
+      </FieldRow>
+    </SectionCard>
   );
 }
