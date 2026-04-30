@@ -101,7 +101,7 @@ export default function NewJournalEntryPage() {
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 13,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontWeight: 600,
               marginBottom: 6,
             }}
@@ -181,6 +181,8 @@ export default function NewJournalEntryPage() {
               <input
                 id="je-date"
                 type="date"
+                aria-label="Posting date"
+                title="Posting date"
                 value={form.postingDate}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, postingDate: e.target.value }))
@@ -206,14 +208,14 @@ export default function NewJournalEntryPage() {
                   flex: 1,
                   padding: "10px 14px",
                   borderRadius: 10,
-                  border: `1.5px solid ${form.status === s ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                  border: `1.5px solid ${form.status === s ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                   background:
                     form.status === s
-                      ? "rgba(6, 182, 212,0.06)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)"
                       : "var(--content-bg)",
                   color:
                     form.status === s
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "var(--text-primary)",
                   cursor: "pointer",
                   fontSize: 13,
@@ -229,7 +231,7 @@ export default function NewJournalEntryPage() {
                     fontSize: 11,
                     color:
                       form.status === s
-                        ? "var(--vyne-purple)"
+                        ? "var(--vyne-accent, var(--vyne-purple))"
                         : "var(--text-tertiary)",
                     fontWeight: 400,
                     textTransform: "none",

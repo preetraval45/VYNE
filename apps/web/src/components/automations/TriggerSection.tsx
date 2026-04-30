@@ -27,13 +27,13 @@ export default function TriggerSection(
             width: 24,
             height: 24,
             borderRadius: 6,
-            background: "rgba(6, 182, 212,0.12)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Zap size={12} color="#06B6D4" />
+          <Zap size={12} color="var(--vyne-accent, #06B6D4)" />
         </div>
         <span
           style={{
@@ -83,7 +83,7 @@ export default function TriggerSection(
             cursor: "pointer",
           }}
         >
-          <option value="">\u2014 Select a trigger \u2014</option>
+          <option value="">— Select a trigger —</option>
           {TRIGGER_GROUPS.map((group) => (
             <optgroup key={group.group} label={group.group}>
               {group.options.map((opt) => (

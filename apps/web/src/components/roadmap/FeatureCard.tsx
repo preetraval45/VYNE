@@ -8,6 +8,7 @@ import {
   PRIORITY_CONFIG,
   type RoadmapFeature,
 } from "./roadmapData";
+import { useRoadmapVotesStore } from "@/lib/stores/roadmapVotes";
 
 interface FeatureCardProps {
   readonly feature: RoadmapFeature;
@@ -31,7 +32,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
       }}
       onClick={() => setExpanded(!expanded)}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 2px 8px rgba(6, 182, 212,0.1)";
+        e.currentTarget.style.boxShadow = "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)";
         e.currentTarget.style.borderColor = "#DDD6FE";
       }}
       onMouseLeave={(e) => {
@@ -114,18 +115,7 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
             gap: 4,
           }}
         >
-          <ThumbsUp
-            size={11}
-            color="var(--text-tertiary, var(--text-tertiary))"
-          />
-          <span
-            style={{
-              fontSize: 10,
-              color: "var(--text-tertiary, var(--text-tertiary))",
-            }}
-          >
-            {feature.votes}
-          </span>
+          <VoteButton featureId={feature.id} baseVotes={feature.votes} />
         </div>
       </div>
 
@@ -181,8 +171,8 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
                     fontWeight: 500,
                     padding: "2px 6px",
                     borderRadius: 4,
-                    background: "rgba(6, 182, 212,0.08)",
-                    color: "#06B6D4",
+                    background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                    color: "var(--vyne-accent, #06B6D4)",
                   }}
                 >
                   {issue}
@@ -208,5 +198,44 @@ export function FeatureCard({ feature, compact = false }: FeatureCardProps) {
         )}
       </div>
     </div>
+  );
+}
+
+// ── VoteButton ─────────────────────────────────────────────────
+// Click-to-toggle thumb. The voted state is local (Zustand persisted
+// to localStorage) — no API write yet. Adds 1 to the displayed count
+// when active, accent-tints the icon, swallows click events so the
+// surrounding card's expand toggle doesn't also fire.
+
+function VoteButton({ featureId, baseVotes }: { featureId: string; baseVotes: number }) {
+  const voted = useRoadmapVotesStore((s) => Boolean(s.voted[featureId]));
+  const toggle = useRoadmapVotesStore((s) => s.toggleVote);
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        toggle(featureId);
+      }}
+      aria-pressed={voted}
+      aria-label={voted ? "Remove vote" : "Vote for this feature"}
+      title={voted ? "Remove vote" : "Vote for this feature"}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        padding: "2px 7px",
+        borderRadius: 999,
+        border: `1px solid ${voted ? "var(--vyne-accent-ring, var(--content-border))" : "transparent"}`,
+        background: voted ? "var(--vyne-accent-soft, var(--content-secondary))" : "transparent",
+        color: voted ? "var(--vyne-accent-deep, var(--text-primary))" : "var(--text-tertiary)",
+        cursor: "pointer",
+        fontSize: 10,
+        fontWeight: voted ? 700 : 500,
+      }}
+    >
+      <ThumbsUp size={11} />
+      {baseVotes + (voted ? 1 : 0)}
+    </button>
   );
 }

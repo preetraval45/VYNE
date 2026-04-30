@@ -127,7 +127,7 @@ export function SmartReplies({
               gap: 4,
               fontSize: 10,
               fontWeight: 600,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               textTransform: "uppercase",
               letterSpacing: 0.5,
             }}

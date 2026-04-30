@@ -7,7 +7,23 @@ import { useAuthStore } from '@/lib/stores/auth'
 import { issueKeys } from './useIssues'
 import type { Issue } from '@/types'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
+// Resolve socket URL: explicit env var > same-origin in browser > localhost in dev.
+function resolveApiUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL
+  if (typeof window !== 'undefined') {
+    // In production, websocket back to the same origin (Vercel runs
+    // both the app + API on the same hostname). On dev, fall back to
+    // the local services port.
+    const isDev =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1'
+    if (isDev) return 'http://localhost:4000'
+    return window.location.origin
+  }
+  return 'http://localhost:4000'
+}
+
+const API_URL = resolveApiUrl()
 
 let globalSocket: Socket | null = null
 let reconnectAttempts = 0

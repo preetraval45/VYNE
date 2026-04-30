@@ -71,12 +71,12 @@ const TIER_META: Record<
   { label: string; rps: number; daily: number; color: string }
 > = {
   free: { label: "Free", rps: 1, daily: 1_000, color: "var(--text-secondary)" },
-  starter: { label: "Starter", rps: 5, daily: 10_000, color: "var(--vyne-purple)" },
+  starter: { label: "Starter", rps: 5, daily: 10_000, color: "var(--vyne-accent, var(--vyne-purple))" },
   business: {
     label: "Business",
     rps: 25,
     daily: 100_000,
-    color: "var(--vyne-purple-light)",
+    color: "var(--vyne-accent-light, var(--vyne-purple-light))",
   },
   enterprise: {
     label: "Enterprise",
@@ -305,7 +305,7 @@ export default function DeveloperSettings({ onToast }: Props) {
               padding: "7px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               cursor: "pointer",
               fontSize: 12,
@@ -322,8 +322,8 @@ export default function DeveloperSettings({ onToast }: Props) {
               padding: 14,
               marginBottom: 14,
               borderRadius: 10,
-              border: "1px dashed var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.05)",
+              border: "1px dashed var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)",
               display: "flex",
               flexDirection: "column",
               gap: 10,
@@ -355,14 +355,14 @@ export default function DeveloperSettings({ onToast }: Props) {
                     borderRadius: 8,
                     fontSize: 12,
                     fontWeight: 600,
-                    border: `1px solid ${newKeyScope === s ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                    border: `1px solid ${newKeyScope === s ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                     background:
                       newKeyScope === s
-                        ? "rgba(6, 182, 212,0.1)"
+                        ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                         : "var(--content-bg)",
                     color:
                       newKeyScope === s
-                        ? "var(--vyne-purple)"
+                        ? "var(--vyne-accent, var(--vyne-purple))"
                         : "var(--text-secondary)",
                     textTransform: "capitalize",
                     cursor: "pointer",
@@ -451,7 +451,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                   padding: "7px 14px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   fontSize: 12,
                   fontWeight: 600,
@@ -704,7 +704,7 @@ export default function DeveloperSettings({ onToast }: Props) {
               padding: "7px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               cursor: "pointer",
               fontSize: 12,
@@ -721,8 +721,8 @@ export default function DeveloperSettings({ onToast }: Props) {
               padding: 14,
               marginBottom: 14,
               borderRadius: 10,
-              border: "1px dashed var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.05)",
+              border: "1px dashed var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)",
               display: "flex",
               flexDirection: "column",
               gap: 12,
@@ -780,12 +780,12 @@ export default function DeveloperSettings({ onToast }: Props) {
                         fontWeight: 600,
                         fontFamily:
                           "var(--font-geist-mono), ui-monospace, monospace",
-                        border: `1px solid ${checked ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                        border: `1px solid ${checked ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                         background: checked
-                          ? "rgba(6, 182, 212,0.12)"
+                          ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
                           : "var(--content-bg)",
                         color: checked
-                          ? "var(--vyne-purple)"
+                          ? "var(--vyne-accent, var(--vyne-purple))"
                           : "var(--text-secondary)",
                         cursor: "pointer",
                       }}
@@ -820,7 +820,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                   padding: "7px 14px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   fontSize: 12,
                   fontWeight: 600,
@@ -864,7 +864,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                   marginBottom: 8,
                 }}
               >
-                <Webhook size={15} style={{ color: "var(--vyne-purple)" }} />
+                <Webhook size={15} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
                 <div
                   style={{
                     flex: 1,
@@ -985,7 +985,7 @@ export default function DeveloperSettings({ onToast }: Props) {
                 fontWeight: 500,
               }}
             >
-              <r.icon size={14} style={{ color: "var(--vyne-purple)" }} />
+              <r.icon size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               {r.label}
             </a>
           ))}

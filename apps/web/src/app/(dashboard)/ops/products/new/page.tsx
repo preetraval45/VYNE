@@ -11,6 +11,8 @@ import {
 } from "@/components/shared/FormPageLayout";
 import { useOpsStore } from "@/lib/stores/ops";
 import type { ERPProduct } from "@/lib/api/client";
+import { checkCreateAllowed } from "@/lib/planGate";
+import { AiFormFill } from "@/components/shared/AiFormFill";
 
 const inputClass =
   "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
@@ -52,6 +54,11 @@ export default function NewOpsProductPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const allowed = await checkCreateAllowed(
+      "products",
+      useOpsStore.getState().products.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     const id = `p${Date.now()}`;
     const product: ERPProduct = {
@@ -131,6 +138,48 @@ export default function NewOpsProductPage() {
       }
     >
       <form id="new-ops-product-form" onSubmit={handleSubmit}>
+        <AiFormFill
+          title="Describe the product — AI will fill the form"
+          placeholder="e.g. Wireless mechanical keyboard, SKU KB-200, $149 retail $80 cost, 50 in stock, category Electronics"
+          fields={[
+            { key: "name", label: "Product name" },
+            { key: "sku", label: "SKU", hint: "uppercase letters/numbers" },
+            { key: "price", label: "Price (USD)", hint: "number" },
+            { key: "costPrice", label: "Cost price (USD)", hint: "number" },
+            { key: "stockQty", label: "Stock qty", hint: "number" },
+            { key: "categoryName", label: "Category" },
+          ]}
+          onApply={(values) => {
+            setForm((f) => ({
+              ...f,
+              name: typeof values.name === "string" ? values.name : f.name,
+              sku:
+                typeof values.sku === "string"
+                  ? values.sku.toUpperCase().replace(/[^A-Z0-9-]/g, "")
+                  : f.sku,
+              price:
+                typeof values.price === "number"
+                  ? String(values.price)
+                  : typeof values.price === "string"
+                    ? values.price
+                    : f.price,
+              costPrice:
+                typeof values.costPrice === "number"
+                  ? String(values.costPrice)
+                  : typeof values.costPrice === "string"
+                    ? values.costPrice
+                    : f.costPrice,
+              stockQty:
+                typeof values.stockQty === "number"
+                  ? String(values.stockQty)
+                  : typeof values.stockQty === "string"
+                    ? values.stockQty
+                    : f.stockQty,
+              categoryName:
+                typeof values.categoryName === "string" ? values.categoryName : f.categoryName,
+            }));
+          }}
+        />
         <FormSection title="Product" description="Identification.">
           <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
             <FormField label="Name" htmlFor="op-name" required>
@@ -174,6 +223,8 @@ export default function NewOpsProductPage() {
             <FormField label="Unit of measure" htmlFor="op-uom">
               <select
                 id="op-uom"
+                aria-label="Unit of measure"
+                title="Unit of measure"
                 value={form.uom}
                 onChange={(e) => setForm((f) => ({ ...f, uom: e.target.value }))}
                 className={`${inputClass} cursor-pointer`}

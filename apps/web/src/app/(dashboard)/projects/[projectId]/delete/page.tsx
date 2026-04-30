@@ -12,6 +12,7 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useProjectsStore } from "@/lib/stores/projects";
+import { undoableDelete } from "@/lib/undo";
 
 const inputClass = "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
 const inputStyle: React.CSSProperties = {
@@ -48,7 +49,7 @@ export default function DeleteProjectPage() {
             display: "inline-block",
             padding: "8px 14px",
             borderRadius: 8,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -66,8 +67,43 @@ export default function DeleteProjectPage() {
     e.preventDefault();
     if (!canDelete || !project) return;
     setSubmitting(true);
-    deleteProject(projectId);
-    toast.success(`Project "${project.name}" deleted`);
+    const projectSnapshot = { ...project };
+    const taskSnapshots = allTasks.filter((t) => t.projectId === projectId);
+    undoableDelete({
+      label: `Deleted project — ${projectSnapshot.name}`,
+      mutate: () => deleteProject(projectId),
+      restore: () => {
+        // Re-add project + restore its tasks. addProject and addTask
+        // are the safest paths since the store rebuilds derived fields.
+        useProjectsStore.getState().addProject({
+          id: projectSnapshot.id,
+          name: projectSnapshot.name,
+          identifier: projectSnapshot.identifier,
+          description: projectSnapshot.description,
+          color: projectSnapshot.color,
+          icon: projectSnapshot.icon,
+          status: projectSnapshot.status,
+          memberIds: projectSnapshot.memberIds,
+          leadId: projectSnapshot.leadId,
+        });
+        for (const t of taskSnapshots) {
+          useProjectsStore.getState().addTask(projectSnapshot.id, {
+            title: t.title,
+            description: t.description,
+            status: t.status,
+            priority: t.priority,
+            assigneeId: t.assigneeId,
+            startDate: t.startDate,
+            dueDate: t.dueDate,
+            estimatedHours: t.estimatedHours,
+            timeSpent: t.timeSpent,
+            tags: t.tags,
+            subtasks: t.subtasks,
+            comments: t.comments,
+          });
+        }
+      },
+    });
     router.push("/projects");
   }
 

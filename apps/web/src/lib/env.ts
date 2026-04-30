@@ -60,6 +60,22 @@ function parseEnv() {
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
   }
 
+  // Surface a one-line warning at boot for missing optional-but-recommended
+  // production keys so deployment misconfiguration is visible in logs.
+  if (isProd && typeof window === 'undefined') {
+    const recommended: Array<[string, string | undefined]> = [
+      ['GEMINI_API_KEY', process.env.GEMINI_API_KEY],
+      ['GROQ_API_KEY', process.env.GROQ_API_KEY],
+    ]
+    const missing = recommended.filter(([, v]) => !v).map(([k]) => k)
+    if (missing.length === recommended.length) {
+      console.warn(
+        '[VYNE] No AI provider key set. AI features will return fallback messages. ' +
+          'Configure at least one of: ' + missing.join(', '),
+      )
+    }
+  }
+
   const result = envSchema.safeParse(raw)
 
   if (!result.success) {

@@ -277,9 +277,9 @@ export default function MobileSettings({ onToast }: Props) {
                   style={{
                     padding: "5px 12px",
                     borderRadius: 999,
-                    border: `1px solid ${on ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                    background: on ? "rgba(6, 182, 212,0.1)" : "var(--content-bg)",
-                    color: on ? "var(--vyne-purple)" : "var(--text-secondary)",
+                    border: `1px solid ${on ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                    background: on ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "var(--content-bg)",
+                    color: on ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                     fontSize: 11,
                     fontWeight: 600,
                     cursor: "pointer",
@@ -329,7 +329,7 @@ export default function MobileSettings({ onToast }: Props) {
             padding: "9px 16px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -426,7 +426,7 @@ export default function MobileSettings({ onToast }: Props) {
               value={state.offlineCacheMb}
               onChange={(e) => update("offlineCacheMb", Number(e.target.value))}
               aria-label="Cache budget"
-              style={{ flex: 1, accentColor: "#06B6D4" }}
+              style={{ flex: 1, accentColor: "var(--vyne-accent, #06B6D4)" }}
             />
             <span
               style={{
@@ -464,9 +464,9 @@ export default function MobileSettings({ onToast }: Props) {
                     flex: 1,
                     padding: "10px 8px",
                     borderRadius: 9,
-                    border: `1.5px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                    border: `1.5px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                     background: active
-                      ? "rgba(6, 182, 212,0.05)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                       : "var(--content-bg)",
                     color: "var(--text-primary)",
                     fontSize: 12,
@@ -516,9 +516,9 @@ export default function MobileSettings({ onToast }: Props) {
                 style={{
                   padding: "5px 12px",
                   borderRadius: 999,
-                  border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                  background: active ? "rgba(6, 182, 212,0.1)" : "var(--content-bg)",
-                  color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+                  border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                  background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "var(--content-bg)",
+                  color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                   fontSize: 11,
                   fontWeight: 600,
                   cursor: disabled ? "not-allowed" : "pointer",
@@ -568,7 +568,7 @@ export default function MobileSettings({ onToast }: Props) {
             gap: 12,
           }}
         >
-          <Smartphone size={20} style={{ color: "var(--vyne-purple)", flexShrink: 0 }} />
+          <Smartphone size={20} style={{ color: "var(--vyne-accent, var(--vyne-purple))", flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div
               style={{
@@ -594,7 +594,7 @@ export default function MobileSettings({ onToast }: Props) {
               padding: "5px 10px",
               borderRadius: 6,
               background: "var(--content-bg)",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 11,
               fontWeight: 700,
               fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
@@ -968,7 +968,7 @@ function QrScannerModal({
                 style={{
                   position: "absolute",
                   inset: "20%",
-                  border: "2px solid rgba(6, 182, 212,0.85)",
+                  border: "2px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.85)",
                   borderRadius: 18,
                   boxShadow: "0 0 0 9999px rgba(0,0,0,0.45)",
                   pointerEvents: "none",

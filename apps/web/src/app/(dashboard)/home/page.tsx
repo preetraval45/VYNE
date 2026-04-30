@@ -3,7 +3,17 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sunrise, ArrowRight, AlertTriangle, CalendarCheck, Flame } from "lucide-react";
+import {
+  Sunrise,
+  ArrowRight,
+  AlertTriangle,
+  CalendarCheck,
+  Flame,
+  Sparkles,
+  MessageSquare,
+  StickyNote,
+  Download as DownloadIcon,
+} from "lucide-react";
 import {
   STAT_CARDS,
   RECENT_ACTIVITY,
@@ -18,6 +28,11 @@ import { VyneLogo } from "@/components/brand/VyneLogo";
 import { useAiMemoryStore } from "@/lib/stores/aiMemory";
 import { useProjectsStore } from "@/lib/stores/projects";
 import { DailyDigestCard } from "@/components/home/DailyDigestCard";
+import { ReorderAlertCard } from "@/components/home/ReorderAlertCard";
+import { PlanLimitBanner } from "@/components/home/PlanLimitBanner";
+import { UsageTile } from "@/components/home/UsageTile";
+import { TodayActivityCard } from "@/components/home/TodayActivityCard";
+import { AiOnboardingCards } from "@/components/layout/AiOnboardingCards";
 import { useMounted } from "@/hooks/useMounted";
 
 function greetingFor(hour: number): string {
@@ -212,7 +227,7 @@ function HomeFocusCard() {
           position: "absolute",
           inset: 0,
           background:
-            "radial-gradient(600px 200px at 0% 0%, rgba(6,182,212,0.10), transparent 70%)",
+            "radial-gradient(600px 200px at 0% 0%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -393,8 +408,24 @@ export default function HomePage() {
       })
     : "";
 
+  const iconBtn: React.CSSProperties = {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    background: "var(--content-secondary)",
+    border: "1px solid var(--content-border)",
+    color: "var(--text-secondary)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    textDecoration: "none",
+    flexShrink: 0,
+  };
+
   return (
     <div
+      data-page="home"
       style={{
         height: "100%",
         display: "flex",
@@ -402,105 +433,39 @@ export default function HomePage() {
         overflow: "hidden",
       }}
     >
-      {/* Topbar */}
-      <header
-        className="home-topbar"
-        style={{
-          minHeight: 44,
-          borderBottom: "1px solid var(--content-border)",
-          display: "flex",
-          alignItems: "center",
-          padding: "8px 18px",
-          gap: 8,
-          flexShrink: 0,
-          flexWrap: "wrap",
-          background: "var(--content-bg)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            minWidth: 0,
-            flex: "1 1 auto",
-          }}
-        >
-          <VyneLogo variant="mark" markSize={20} />
-          <h1
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--text-primary)",
-              margin: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {greeting}, {firstName} 👋
-          </h1>
-        </div>
-        <div
-          style={{
-            marginLeft: "auto",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            flexShrink: 0,
-          }}
-        >
-          <span
-            className="home-topbar-date"
-            style={{ fontSize: 11, color: "var(--text-tertiary)" }}
-            suppressHydrationWarning
-          >
-            {todayLabel}
-          </span>
-          <button
-            type="button"
-            onClick={() => router.push("/projects")}
-            aria-label="Create new issue"
-            style={{
-              background: "var(--vyne-purple)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 8,
-              padding: "4px 10px",
-              fontSize: 11,
-              fontWeight: 500,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >
-            + New Issue
-          </button>
-          <div
-            aria-hidden="true"
-            style={{
-              width: 22,
-              height: 22,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg,#06B6D4,#0891B2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 9,
-              fontWeight: 600,
-              color: "#fff",
-              flexShrink: 0,
-            }}
-          >
-            PR
-          </div>
-        </div>
-      </header>
+      {/* Top bar is provided globally by <UnifiedTopBar /> in the
+          dashboard layout — no local bar here. */}
 
       {/* Content */}
       <div
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: 20 }}
       >
+        {/* ── AI Onboarding (dismissible) ────────────── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <AiOnboardingCards />
+        </div>
+
+        {/* ── Inventory reorder alert (only renders when stock is low) ── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <ReorderAlertCard />
+        </div>
+
+        {/* ── Plan-limit hint (only renders when usage >=80% or over) ── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <PlanLimitBanner />
+        </div>
+
+        {/* ── Today's AI usage (only renders after at least 1 call) ── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <UsageTile />
+        </div>
+
+        {/* ── Today's workspace activity (only renders when ≥1 record touched) ── */}
+        <div style={{ maxWidth: 800, margin: "0 auto" }}>
+          <TodayActivityCard />
+        </div>
+
         {/* ── AI Daily Digest ────────────────────────── */}
         <div style={{ maxWidth: 800, margin: "0 auto" }}>
           <DailyDigestCard />
@@ -526,7 +491,7 @@ export default function HomePage() {
             }}
           >
             {[
-              { label: "Home", icon: "🏠", color: "#06B6D4", href: "/home" },
+              { label: "Home", icon: "🏠", color: "var(--vyne-accent, #06B6D4)", href: "/home" },
               {
                 label: "Contacts",
                 icon: "📇",
@@ -578,10 +543,10 @@ export default function HomePage() {
               {
                 label: "Observe",
                 icon: "📊",
-                color: "#06B6D4",
+                color: "var(--vyne-accent, #06B6D4)",
                 href: "/observe",
               },
-              { label: "AI", icon: "🧠", color: "#06B6D4", href: "/ai" },
+              { label: "AI", icon: "🧠", color: "var(--vyne-accent, #06B6D4)", href: "/ai" },
               {
                 label: "Automations",
                 icon: "⚡",
@@ -644,7 +609,7 @@ export default function HomePage() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
-                    `rgba(${mod.color === "#06B6D4" ? "108,71,255" : "0,0,0"}, 0.04)`;
+                    `rgba(${mod.color === "var(--vyne-accent, #06B6D4)" ? "108,71,255" : "0,0,0"}, 0.04)`;
                   (e.currentTarget as HTMLElement).style.borderColor =
                     mod.color;
                   (e.currentTarget as HTMLElement).style.transform =
@@ -726,8 +691,8 @@ export default function HomePage() {
               style={{
                 fontSize: 9,
                 fontWeight: 600,
-                color: "var(--vyne-purple)",
-                background: "rgba(6, 182, 212,0.12)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                 padding: "2px 6px",
                 borderRadius: 4,
                 letterSpacing: "0.05em",
@@ -751,7 +716,7 @@ export default function HomePage() {
           >
             <code
               style={{
-                background: "rgba(6, 182, 212,0.12)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                 padding: "1px 5px",
                 borderRadius: 4,
                 fontSize: 12,
@@ -768,7 +733,7 @@ export default function HomePage() {
             <button
             type="button"
               style={{
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 border: "none",
                 borderRadius: 8,
@@ -880,7 +845,9 @@ export default function HomePage() {
                   Recent Activity
                 </h2>
                 <button
-            type="button"
+                  type="button"
+                  onClick={() => router.push("/activity")}
+                  aria-label="View all activity"
                   style={{
                     background: "transparent",
                     border: "none",
@@ -891,7 +858,7 @@ export default function HomePage() {
                     borderRadius: 8,
                   }}
                 >
-                  View all
+                  View all →
                 </button>
               </div>
               <div
@@ -945,7 +912,7 @@ export default function HomePage() {
                   style={{
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 >
                   77%
@@ -965,7 +932,7 @@ export default function HomePage() {
                   WebkitAppearance: "none",
                   border: "none",
                   background: "var(--content-bg-secondary)",
-                  accentColor: "#06B6D4",
+                  accentColor: "var(--vyne-accent, #06B6D4)",
                 }}
               />
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1027,7 +994,7 @@ export default function HomePage() {
                       aria-label={task}
                       style={{
                         marginTop: 2,
-                        accentColor: "#06B6D4",
+                        accentColor: "var(--vyne-accent, #06B6D4)",
                         cursor: "pointer",
                       }}
                     />
@@ -1095,8 +1062,12 @@ export default function HomePage() {
                 >
                   {AI_RECENT_QUERIES.map((q) => (
                     <button
-            type="button"
+                      type="button"
                       key={q}
+                      onClick={() =>
+                        router.push(`/ai/chat?q=${encodeURIComponent(q)}`)
+                      }
+                      aria-label={`Ask Vyne AI: ${q}`}
                       style={{
                         background: "var(--content-bg)",
                         border: "1px solid var(--content-border)",
@@ -1115,10 +1086,25 @@ export default function HomePage() {
                 </div>
               </div>
               <button
-            type="button"
+                type="button"
+                onClick={() => {
+                  // Trigger the global command palette (registered to ⌘K).
+                  globalThis.dispatchEvent(
+                    new KeyboardEvent("keydown", {
+                      key: "k",
+                      metaKey: true,
+                      ctrlKey: true,
+                      bubbles: true,
+                    }),
+                  );
+                  globalThis.dispatchEvent(
+                    new CustomEvent("vyne:open-command-palette"),
+                  );
+                }}
+                aria-label="Open command palette"
                 style={{
                   width: "100%",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   border: "none",
                   borderRadius: 8,

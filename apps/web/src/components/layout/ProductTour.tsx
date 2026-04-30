@@ -160,7 +160,7 @@ export function ProductTour() {
             style={{
               height: "100%",
               width: `${progress}%`,
-              background: "linear-gradient(90deg, #06B6D4, #22D3EE)",
+              background: "linear-gradient(90deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
               transition: "width 0.25s ease",
             }}
           />
@@ -197,8 +197,8 @@ export function ProductTour() {
               gap: 6,
               padding: "4px 10px",
               borderRadius: 999,
-              background: "rgba(6, 182, 212,0.1)",
-              color: "var(--vyne-purple)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 11,
               fontWeight: 600,
               marginBottom: 14,
@@ -294,12 +294,12 @@ export function ProductTour() {
                 padding: "8px 16px",
                 borderRadius: 8,
                 border: "none",
-                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 color: "#fff",
                 fontSize: 13,
                 fontWeight: 600,
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(6, 182, 212,0.3)",
+                boxShadow: "0 4px 12px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               }}
             >
               {current.cta ?? "Next"}

@@ -1764,23 +1764,8 @@ textarea {
  * Reserve horizontal room on every dashboard page header so
  * page-level "+ New" / search buttons never slide under it.
  * Only applies on tablet/desktop — the rail is hidden ≤768px. */
-@media (min-width: 769px) {
-  main > div > header,
-  main > div > div > header,
-  main [class*="PageHeader"],
-  main [class*="page-header"] {
-    padding-right: 56px !important;
-  }
-}
-@media (min-width: 1025px) {
-  /* Desktop has the full rail (Get app + icons), needs more room. */
-  main > div > header,
-  main > div > div > header,
-  main [class*="PageHeader"],
-  main [class*="page-header"] {
-    padding-right: 220px !important;
-  }
-}
+/* Floating rail removed — no padding-right reservation needed; the
+   unified top bar now lives above page-level headers. */
 
 /* ─── Drag-and-drop polish (opt-in via data-drag-over) ──────── */
 [data-drag-over="true"] {
@@ -1900,4 +1885,854 @@ textarea {
   background: var(--vyne-purple);
   margin-right: 6px;
   animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * ✦ AGGRESSIVE MOBILE NORMALIZATION LAYER (last in cascade) ✦
+ *
+ * This layer catches every page regardless of inline styling. Site-wide
+ * applies on: phones (≤768px any orientation) AND tablet portrait
+ * (≤1024px portrait). Skipped on tablet/desktop landscape and desktop.
+ *
+ * Strategy: target the COMMON failure modes — fixed widths, non-wrapping
+ * flex rows, multi-column inline grids, oversized inline padding/font.
+ * This is intentionally heavy-handed so individual pages don't have to
+ * be touched one-by-one.
+ * ════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px), (max-width: 1024px) and (orientation: portrait) {
+  /* No horizontal scroll allowed at the document level. Last-resort. */
+  html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  /* Any inline-styled `display: grid` element with 2+ columns becomes a
+     single column. Catches every literal `gridTemplateColumns` value
+     including ones not enumerated above. */
+  [style*="display: grid"][style*="grid-template-columns"],
+  [style*="display:grid"][style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Same for inline-grid */
+  [style*="display: inline-grid"][style*="grid-template-columns"],
+  [style*="display:inline-grid"][style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Allow multi-col KPI strips to keep 2 columns since 1fr stretches
+     them too tall. Only force 1fr at very narrow widths. */
+  @media (min-width: 481px) {
+    [style*="repeat(2, 1fr)"],
+    [style*="repeat(2,1fr)"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+  }
+
+  /* Tailwind grid-cols-* — force single column on phones. */
+  [class*="grid-cols-2"],
+  [class*="grid-cols-3"],
+  [class*="grid-cols-4"],
+  [class*="grid-cols-5"],
+  [class*="grid-cols-6"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Any flex row that isn't already wrapping needs to wrap. */
+  [style*="display: flex"]:not([style*="flex-direction: column"]):not([style*="flex-direction:column"]),
+  [style*="display:flex"]:not([style*="flex-direction: column"]):not([style*="flex-direction:column"]) {
+    flex-wrap: wrap;
+  }
+  /* Tailwind: .flex without .flex-col must wrap by default on mobile. */
+  .flex:not(.flex-col):not(.flex-column) {
+    flex-wrap: wrap;
+  }
+
+  /* Strip inline minWidth values that are wider than the viewport. */
+  [style*="min-width: 320"],
+  [style*="minWidth: 320"],
+  [style*="min-width: 360"],
+  [style*="minWidth: 360"],
+  [style*="min-width: 400"],
+  [style*="minWidth: 400"],
+  [style*="min-width: 480"],
+  [style*="minWidth: 480"],
+  [style*="min-width: 520"],
+  [style*="minWidth: 520"],
+  [style*="min-width: 560"],
+  [style*="minWidth: 560"],
+  [style*="min-width: 600"],
+  [style*="minWidth: 600"],
+  [style*="min-width: 640"],
+  [style*="minWidth: 640"],
+  [style*="min-width: 720"],
+  [style*="minWidth: 720"] {
+    min-width: 0 !important;
+  }
+
+  /* Inline fixed widths that exceed viewport collapse to 100%. */
+  [style*="width: 320px"],
+  [style*="width:320px"],
+  [style*="width: 360px"],
+  [style*="width:360px"],
+  [style*="width: 400px"],
+  [style*="width:400px"],
+  [style*="width: 440px"],
+  [style*="width:440px"],
+  [style*="width: 480px"],
+  [style*="width:480px"],
+  [style*="width: 520px"],
+  [style*="width:520px"],
+  [style*="width: 560px"],
+  [style*="width:560px"],
+  [style*="width: 600px"],
+  [style*="width:600px"],
+  [style*="width: 640px"],
+  [style*="width:640px"],
+  [style*="width: 720px"],
+  [style*="width:720px"],
+  [style*="width: 800px"],
+  [style*="width:800px"] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Tailwind w-* and min-w-* utilities that exceed viewport. */
+  .w-96, .w-\[400px\], .w-\[480px\], .w-\[560px\], .w-\[640px\] {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .min-w-\[320px\], .min-w-\[360px\], .min-w-\[400px\], .min-w-\[480px\] {
+    min-width: 0 !important;
+  }
+
+  /* Tables: always horizontally scroll their parent. */
+  table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Inline padding > 24px shrinks to keep cards from eating viewport. */
+  [style*="padding: 24px"],
+  [style*="padding:24px"],
+  [style*="padding: 28px"],
+  [style*="padding:28px"],
+  [style*="padding: 32px"],
+  [style*="padding:32px"],
+  [style*="padding: 40px"],
+  [style*="padding:40px"] {
+    padding: 14px !important;
+  }
+  [style*="padding-left: 24px"], [style*="paddingLeft: 24px"],
+  [style*="padding-left: 32px"], [style*="paddingLeft: 32px"],
+  [style*="padding-right: 24px"], [style*="paddingRight: 24px"],
+  [style*="padding-right: 32px"], [style*="paddingRight: 32px"] {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  /* Buttons / pills with overlong text on cramped buttons */
+  button, a[role="button"] {
+    max-width: 100%;
+  }
+
+  /* Long single-word strings (URLs, IDs) must break instead of overflowing. */
+  p, span, h1, h2, h3, h4, h5, td, th, dt, dd, li, figcaption {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Any sticky header should not cover excess height on mobile. */
+  header[style*="position: sticky"],
+  header[style*="position:sticky"] {
+    position: static !important;
+  }
+
+  /* Modals/dialogs: never wider than viewport. */
+  [role="dialog"], .modal, [class*="Modal"] {
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
+    margin: 8px auto !important;
+  }
+
+  /* Aside sidebars rendered inline (not the main app sidebar) collapse
+     to a stacked block on mobile so detail pages don't split content. */
+  aside:not(.sidebar-nav) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  /* Any element with absolute positioning at fixed pixel offsets that
+     exceed viewport — pin to the right edge instead. */
+  [style*="right: -"][style*="position: absolute"],
+  [style*="right:-"][style*="position:absolute"] {
+    right: 0 !important;
+  }
+}
+
+/* Detail-page layouts: targeted classes that beat inline grid specificity.
+   These exist because some pages set inline `gridTemplateColumns` that
+   don't match the substring patterns above. Adding a class is the safest
+   way to ensure mobile collapse always wins. */
+@media (max-width: 768px), (max-width: 1024px) and (orientation: portrait) {
+  .task-detail-layout,
+  .project-detail-layout,
+  .record-detail-layout,
+  .two-pane-layout {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .task-detail-layout > *,
+  .project-detail-layout > *,
+  .record-detail-layout > *,
+  .two-pane-layout > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * ✦ UI POLISH LAYER — global aesthetic refinements ✦
+ *
+ * Light-touch refinements applied site-wide so every page feels modern
+ * and cohesive. Targets typography, focus states, transitions, tables,
+ * scrollbars, and the mobile bottom nav.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* Typography — tighter heading letter-spacing, optimized font features */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.018em;
+  font-feature-settings: "ss01", "cv02", "cv03", "cv04", "cv11";
+}
+h1 { letter-spacing: -0.025em; }
+h2 { letter-spacing: -0.02em; }
+
+/* Soft brand-tinted focus rings replace harsh outlines */
+*:focus-visible {
+  outline: none !important;
+  box-shadow:
+    0 0 0 2px var(--content-bg),
+    0 0 0 4px rgba(6, 182, 212, 0.45) !important;
+  border-radius: var(--border-radius-md, 8px);
+  transition: box-shadow 0.15s var(--ease-out-quart);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--vyne-teal) !important;
+  box-shadow:
+    0 0 0 3px rgba(6, 182, 212, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Buttons feel tactile — subtle press animation */
+button:not(:disabled),
+a[role="button"]:not(:disabled) {
+  transition:
+    transform 0.12s var(--ease-out-quart),
+    background 0.18s,
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+button:not(:disabled):active,
+a[role="button"]:not(:disabled):active {
+  transform: scale(0.97);
+  transition-duration: 0.06s;
+}
+
+/* Brand-matched selection */
+::selection {
+  background: rgba(6, 182, 212, 0.28);
+  color: var(--text-primary);
+}
+
+/* Refined webkit scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.18);
+  border-radius: 999px;
+  border: 2px solid var(--content-bg);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(6, 182, 212, 0.32);
+}
+
+/* Honest disabled states */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.7);
+}
+
+/* Page fade-in on first paint */
+main {
+  animation: page-fade-in 0.25s var(--ease-out-quart) both;
+}
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Tables — refined header + hover rows */
+thead tr {
+  background: var(--table-header-bg);
+}
+thead th {
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--content-border);
+}
+tbody tr {
+  transition: background 0.15s var(--ease-out-quart);
+}
+tbody tr:hover {
+  background: rgba(6, 182, 212, 0.04);
+}
+tbody td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Mobile bottom nav: frosted glass + tap feedback */
+@media (max-width: 768px), (max-width: 1024px) and (orientation: portrait) {
+  .mobile-bottom-nav {
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    background: color-mix(in srgb, var(--content-bg) 85%, transparent) !important;
+  }
+  .mobile-bottom-nav a,
+  .mobile-bottom-nav button {
+    transition: color 0.18s, transform 0.12s;
+  }
+  .mobile-bottom-nav a:active,
+  .mobile-bottom-nav button:active {
+    transform: scale(0.92);
+    transition-duration: 0.06s;
+  }
+  /* Pills/chips get bigger touch targets */
+  [class*="pill"], [class*="Pill"], [role="status"], .badge-teal {
+    min-height: 28px;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+  /* Page-level cards get a denser, more legible hero density */
+  section, article {
+    border-radius: 12px;
+  }
+}
+
+/* The global UnifiedTopBar replaces the floating .global-topnav-rail
+   and the floating Pomodoro pill — hide both site-wide so there's
+   exactly one navbar on every page. */
+.global-topnav-rail,
+[aria-label="Pomodoro timer"] {
+  display: none !important;
+}
+
+/* Reclaim the black gap above the unified bar — reset body/html
+   default margins (browsers add 8px to body) and push <main> flush
+   to the top so the bar sits at the very top of the viewport. */
+html,
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+main {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+[aria-label="Dashboard"] {
+  margin: 0 !important;
+  padding-top: 0 !important;
+}
+.vyne-unified-topbar {
+  margin-top: 0 !important;
+  padding-top: 6px !important;
+  top: 0 !important;
+}
+
+/* No more right-padding reservation since the rail is gone. */
+main > div > header,
+main > div > div > header,
+main [class*="PageHeader"],
+main [class*="page-header"] {
+  padding-right: 24px !important;
+}
+
+/* Polished tile hover/press for the More sheet on touch devices */
+[role="dialog"][aria-label="All modules"] button {
+  transition:
+    transform 0.12s var(--ease-out-quart),
+    background 0.18s,
+    border-color 0.18s;
+}
+[role="dialog"][aria-label="All modules"] button:active {
+  transform: scale(0.95);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Mobile form & action-button reachability
+ *
+ * On phones / tablet portrait, ensure delete/assign/date inputs are
+ * tap-friendly (min 44px), full-width, never hidden behind nav bars.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px), (max-width: 1024px) and (orientation: portrait) {
+  /* All form controls — minimum 44px tap target + iOS-zoom-prevent font */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  /* Native date/time pickers — taller tap target */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"] {
+    min-height: 48px !important;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 10px 12px !important;
+  }
+  /* Selects — explicit chevron, large tap area */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 36px !important;
+  }
+
+  /* Action buttons: 44px minimum, never cut off */
+  [aria-label*="Delete" i],
+  [aria-label*="Remove" i],
+  [aria-label*="Save" i],
+  [aria-label*="Assign" i],
+  button[type="submit"],
+  .btn-teal,
+  .btn-primary-plus,
+  .btn-aurora {
+    min-height: 44px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Floating "Delete task" / "Delete project" buttons — never absolute */
+  [aria-label="Delete task"],
+  [aria-label="Delete project"],
+  [aria-label="Delete subtask"] {
+    position: static !important;
+    width: auto !important;
+    flex-shrink: 0;
+  }
+
+  /* Detail-page side panels span full width once collapsed */
+  .task-detail-layout > *,
+  .project-detail-layout > *,
+  .two-pane-layout > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Field-row layouts (label / value side-by-side) collapse to stacked */
+  [style*="grid-template-columns: 110px 1fr"],
+  [style*="grid-template-columns: 96px 1fr"],
+  [style*="grid-template-columns: 120px 1fr"],
+  [style*="grid-template-columns: 140px 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phone-only (≤480) extra tightening — denser cards, smaller hero text
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  /* Hero/Marquee headings use Tailwind text-{4xl,5xl,6xl} commonly */
+  .text-6xl, .text-7xl, .text-8xl, .text-9xl {
+    font-size: 1.75rem !important;
+    line-height: 1.15 !important;
+  }
+  .text-5xl { font-size: 1.5rem !important; line-height: 1.2 !important; }
+  .text-4xl { font-size: 1.375rem !important; line-height: 1.2 !important; }
+
+  /* Tailwind paddings beyond p-6 */
+  .p-8, .p-10, .p-12, .p-16 { padding: 12px !important; }
+  .px-8, .px-10, .px-12, .px-16 { padding-left: 12px !important; padding-right: 12px !important; }
+  .py-8, .py-10, .py-12, .py-16 { padding-top: 12px !important; padding-bottom: 12px !important; }
+
+  /* Compact gap between cards */
+  .gap-6, .gap-8, .gap-10 { gap: 10px !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * UI/UX hardening — accessibility, mobile-safe inputs, motion, contrast
+ *
+ * These rules sit at the bottom so they win the cascade against the
+ * many ad-hoc inline styles in module pages. They are intentionally
+ * conservative — we don't want to break existing visual designs, only
+ * fix concrete bugs (zoom-on-focus iOS, no focus rings, motion sickness).
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* Stop iOS Safari from zooming the viewport when the user taps an
+ * input/textarea whose computed font-size is < 16px. The autofill
+ * font-size hack also applies here. We keep the visual size identical
+ * for desktop with a transform-free approach: 16px is fine for forms. */
+@media (max-width: 768px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Visible keyboard-focus ring — many inline-styled buttons remove the
+ * default outline. Use :focus-visible so the ring only appears for
+ * keyboard navigation, not for every mouse click. */
+*:focus-visible {
+  outline: 2px solid var(--vyne-purple, #5B5BD6);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--vyne-purple, #5B5BD6);
+  outline-offset: 2px;
+}
+
+/* Respect the OS reduced-motion setting. Cuts framer-motion durations
+ * to ~0 and disables CSS animations + smooth scroll for users prone
+ * to motion sickness or with vestibular disorders. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Bump dim secondary text in dark mode so it clears WCAG AA on
+ * surfaces that use --content-bg. Light mode is fine. */
+[data-theme="dark"] {
+  --text-tertiary: #9aa6b2;
+}
+
+/* Safe-area utility classes — pages can opt in by adding the class
+ * instead of inlining env(...) every time. */
+.safe-pb {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px) !important;
+}
+.safe-mb {
+  margin-bottom: max(env(safe-area-inset-bottom), 0px) !important;
+}
+
+/* Reserve space above MobileBottomNav (fixed bottom 64px) so the last
+ * row of every dashboard module isn't hidden behind it. The nav is
+ * only rendered ≤768px, so the rule scopes there. */
+@media (max-width: 768px) {
+  .content-scroll {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Replace 100vh with 100dvh (dynamic viewport height) where authors
+ * used the older unit for full-height shells. Targets the container
+ * styles we know exist; doesn't touch unrelated 100vh usages. */
+@supports (height: 100dvh) {
+  [data-vyne-fullshell] {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
+}
+
+/* Long-press hint — disables the iOS Safari text-callout/copy menu
+ * for elements that opt into long-press (chat messages). */
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Tap targets — Apple HIG says 44×44pt minimum hit area on touch.
+ * Visual size stays whatever the inline style sets; we only widen the
+ * invisible click region with a pseudo-element. Authors opt in by
+ * adding the `tap-44` class to icon-only buttons.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  button.tap-44,
+  a.tap-44,
+  [role="button"].tap-44 {
+    position: relative;
+  }
+  button.tap-44::after,
+  a.tap-44::after,
+  [role="button"].tap-44::after {
+    content: "";
+    position: absolute;
+    inset: 50% 50% 50% 50%;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Bottom-sheet animations
+ * ════════════════════════════════════════════════════════════════════ */
+@keyframes vyne-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes vyne-sheet-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes vyne-sheet-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Route fade — 150ms cross-fade between Next.js page transitions. The
+ * .content-scroll element is keyed by route via a data attribute, so
+ * we trigger the animation when the key changes via a small JS hint.
+ * Uses opacity only (cheap); CSS will respect prefers-reduced-motion
+ * via the global rule above.
+ * ════════════════════════════════════════════════════════════════════ */
+@keyframes vyne-route-fade-in {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
+}
+main#main-content > div {
+  animation: vyne-route-fade-in 150ms ease-out;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Tablet (769–1023px) — sidebar auto-collapse, modal max-width,
+ * home-grid breakpoint bump.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1023px) {
+  /* Auto-collapse left sidebar on tablet portrait/landscape. Authors
+   * who use the standard Sidebar component will see icon-only mode. */
+  aside[data-vyne-sidebar],
+  nav[data-vyne-sidebar],
+  [data-vyne-sidebar] {
+    width: var(--sidebar-collapsed-width, 64px) !important;
+    min-width: var(--sidebar-collapsed-width, 64px) !important;
+  }
+  [data-vyne-sidebar] [data-sidebar-label] {
+    display: none !important;
+  }
+  /* Standard ad-hoc modals get capped to 600px / 92vw on tablet. */
+  [role="dialog"] > div[style*="width: 480"],
+  [role="dialog"] > div[style*="width:480"] {
+    max-width: min(600px, 92vw) !important;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Bump home module grid min so iPad doesn't feel cramped. */
+  .home-module-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Density toggle — set via data-density on <html>:
+ *   <html data-density="compact|comfortable|spacious">
+ * Pages opt in by reading var(--density-row-py) on row paddings. The
+ * Settings module can flip the attribute to persist.
+ * ════════════════════════════════════════════════════════════════════ */
+:root {
+  --density-row-py: 10px;
+  --density-row-px: 14px;
+  --density-row-fs: 13px;
+}
+:root[data-density="compact"] {
+  --density-row-py: 6px;
+  --density-row-px: 10px;
+  --density-row-fs: 12px;
+}
+:root[data-density="spacious"] {
+  --density-row-py: 14px;
+  --density-row-px: 18px;
+  --density-row-fs: 14px;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Wide-desktop (≥1440px) — let DetailPanel push content rather than
+ * overlay so users keep both the list and the detail visible.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1440px) {
+  [data-vyne-detail-panel="overlay"][data-open="true"] ~ * {
+    /* If the page sets data-vyne-detail-panel="overlay" on the panel
+     * and the panel is open, we narrow neighbours to make room. The
+     * fallback when authors use overlay-only is unchanged. */
+    transition: padding-right 200ms ease-out;
+  }
+  [data-vyne-detail-panel="push"] {
+    position: relative !important;
+    right: auto !important;
+    box-shadow: none !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Color-only signals → status badges with leading icon dot. Pages
+ * that already use icons can ignore. The .status-pill class adds a
+ * 6×6 round dot using ::before so badges stay color-coded *and*
+ * shape-coded for color-blind users.
+ * ════════════════════════════════════════════════════════════════════ */
+.status-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.status-pill::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status-pill[data-status="success"]::before,
+.status-pill[data-status="active"]::before,
+.status-pill[data-status="done"]::before { background: #16a34a; }
+.status-pill[data-status="warn"]::before,
+.status-pill[data-status="pending"]::before,
+.status-pill[data-status="in_progress"]::before { background: #d97706; }
+.status-pill[data-status="danger"]::before,
+.status-pill[data-status="error"]::before,
+.status-pill[data-status="failed"]::before,
+.status-pill[data-status="lost"]::before { background: #dc2626; }
+.status-pill[data-status="info"]::before,
+.status-pill[data-status="planned"]::before { background: #2563eb; }
+
+/* ════════════════════════════════════════════════════════════════════
+ * Loading button state — `aria-busy="true"` puts a small spinner in
+ * the button's leading slot. Used everywhere a mutation is in flight.
+ * ════════════════════════════════════════════════════════════════════ */
+button[aria-busy="true"],
+[role="button"][aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.65;
+  position: relative;
+}
+button[aria-busy="true"]::before,
+[role="button"][aria-busy="true"]::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  animation: vyne-spin 700ms linear infinite;
+  vertical-align: middle;
+}
+@keyframes vyne-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Mobile tables → cards. Pages opt in with className="m-cards" on the
+ * <table>. Each row becomes a stacked card with the first cell as the
+ * heading; subsequent cells render as label/value rows using the
+ * th text-content (set via data-th if no thead).
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  table.m-cards {
+    display: block;
+    width: 100%;
+  }
+  table.m-cards thead { display: none; }
+  table.m-cards tbody { display: block; width: 100%; }
+  table.m-cards tr {
+    display: block;
+    margin-bottom: 10px;
+    padding: 12px;
+    border: 1px solid var(--content-border);
+    border-radius: 12px;
+    background: var(--content-bg);
+  }
+  table.m-cards td {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    border: none;
+    text-align: right;
+    font-size: 13px;
+  }
+  table.m-cards td::before {
+    content: attr(data-th);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  table.m-cards td:first-child {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--content-border);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    display: block;
+    text-align: left;
+  }
+  table.m-cards td:first-child::before { display: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * 100vh → 100dvh — most app shells use Tailwind's `h-screen`. We
+ * override `h-screen` itself so the dashboard shell doesn't include
+ * the chrome region twice on mobile Safari.
+ * ════════════════════════════════════════════════════════════════════ */
+@supports (height: 100dvh) {
+  .h-screen,
+  .min-h-screen,
+  [data-vyne-fullshell] {
+    height: 100dvh !important;
+  }
+  .min-h-screen {
+    min-height: 100dvh !important;
+  }
 }

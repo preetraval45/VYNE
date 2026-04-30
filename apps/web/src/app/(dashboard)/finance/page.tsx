@@ -19,6 +19,9 @@ import {
   MOCK_ACCOUNTS,
 } from "@/lib/fixtures/finance";
 import { useFinanceStore } from "@/lib/stores/finance";
+import { ARAgingCard } from "@/components/finance/ARAgingCard";
+import { CashFlowSparkline } from "@/components/finance/CashFlowSparkline";
+import { undoableDelete } from "@/lib/undo";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
@@ -49,7 +52,7 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active ? "2px solid #06B6D4" : "2px solid transparent",
         transition: "all 0.15s",
       }}
@@ -99,7 +102,7 @@ function BarChart({
             <div
               style={{
                 flex: 1,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 borderRadius: "3px 3px 0 0",
                 height: `${(d.revenue / maxVal) * 100}%`,
                 opacity: 0.85,
@@ -163,6 +166,7 @@ function PLTab() {
 
   return (
     <div
+      className="two-pane-layout"
       style={{
         display: "grid",
         gridTemplateColumns: "1fr minmax(0, 320px)",
@@ -213,7 +217,7 @@ function PLTab() {
             <FileText size={12} /> Export
           </button>
         </div>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <tbody>
             {rows.map(({ label, value, bold, indent, highlight }) => (
               <tr
@@ -284,9 +288,9 @@ function PLTab() {
             delta: "of revenue",
             up: true,
             icon: (
-              <TrendingUp size={16} style={{ color: "var(--vyne-purple)" }} />
+              <TrendingUp size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             ),
-            bg: "rgba(6, 182, 212,0.08)",
+            bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
           },
           {
             label: "Total Expenses",
@@ -401,7 +405,7 @@ function PLTab() {
                   width: 10,
                   height: 10,
                   borderRadius: 2,
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                 }}
               />{" "}
               Revenue
@@ -464,7 +468,7 @@ function JournalTab() {
             padding: "7px 14px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             cursor: "pointer",
             fontSize: 12,
@@ -483,13 +487,13 @@ function JournalTab() {
           overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
-              {["Entry #", "Description", "Date", "Amount (Dr)", "Status"].map(
-                (h) => (
+              {["Entry #", "Description", "Date", "Amount (Dr)", "Status", ""].map(
+                (h, idx) => (
                   <th
-                    key={h}
+                    key={h || `act-${idx}`}
                     style={{
                       padding: "9px 16px",
                       textAlign: "left",
@@ -525,7 +529,7 @@ function JournalTab() {
                     padding: "10px 16px",
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 >
                   {e.entryNumber}
@@ -571,6 +575,34 @@ function JournalTab() {
                   >
                     {e.status === "posted" ? "Posted" : "Draft"}
                   </span>
+                </td>
+                <td style={{ padding: "10px 16px", textAlign: "right" }}>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${e.entryNumber}`}
+                    onClick={() => {
+                      if (!confirm(`Delete ${e.entryNumber}? You'll have 5 seconds to undo.`)) return;
+                      const snapshot = e;
+                      undoableDelete({
+                        label: `Deleted journal — ${snapshot.entryNumber}`,
+                        mutate: () =>
+                          useFinanceStore.getState().deleteJournalEntry(snapshot.id),
+                        restore: () =>
+                          useFinanceStore.getState().addJournalEntry(snapshot),
+                      });
+                    }}
+                    style={{
+                      padding: "3px 6px",
+                      borderRadius: 6,
+                      border: "1px solid rgba(239,68,68,0.25)",
+                      background: "rgba(239,68,68,0.06)",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      color: "var(--status-danger)",
+                    }}
+                  >
+                    ✕
+                  </button>
                 </td>
               </tr>
             ))}
@@ -792,7 +824,22 @@ export default function FinancePage() {
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: 20 }}
       >
-        {tab === "pl" && <PLTab />}
+        {tab === "pl" && (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 14,
+                marginBottom: 16,
+              }}
+            >
+              <CashFlowSparkline />
+              <ARAgingCard />
+            </div>
+            <PLTab />
+          </>
+        )}
         {tab === "journal" && <JournalTab />}
         {tab === "accounts" && <AccountsTab />}
       </div>

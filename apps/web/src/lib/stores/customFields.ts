@@ -45,7 +45,7 @@ interface CustomFieldsStore {
 // and crashed React with "Maximum update depth exceeded" (error #185).
 const DEFAULT_PROJECT_FIELDS: CustomField[] = [];
 const DEFAULT_PROJECT_STATUSES: CustomStatus[] = [
-  { id: "active", label: "Active", color: "#06B6D4" },
+  { id: "active", label: "Active", color: "var(--vyne-accent, #06B6D4)" },
   { id: "paused", label: "On Hold", color: "#F59E0B" },
   { id: "completed", label: "Completed", color: "#22C55E" },
 ];

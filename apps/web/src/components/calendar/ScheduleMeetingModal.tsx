@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   X,
   Calendar as CalendarIcon,
@@ -14,6 +13,7 @@ import {
   Plus,
   Check,
 } from "lucide-react";
+import { BottomSheetModal } from "@/components/shared/BottomSheetModal";
 import {
   useCalendarStore,
   mockBusyForUser,
@@ -115,7 +115,11 @@ export function ScheduleMeetingModal({
     }
   }, [open, startSeed]);
 
-  if (!open) return null;
+  // NOTE: do NOT early-return on `!open` here — there's a useMemo for
+  // suggestedSlots further down (line ~181). Calling React hooks
+  // conditionally triggers React error #310 ("Rendered fewer hooks than
+  // during the previous render") when the modal opens then closes.
+  // The early return is moved to AFTER all hook calls below.
 
   const allCandidates = [
     ...teamMembers.map((m) => ({
@@ -206,103 +210,23 @@ export function ScheduleMeetingModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attendees, date, duration]);
 
-  return (
-    <div
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(8,8,16,0.7)",
-        backdropFilter: "blur(8px)",
-        zIndex: 9990,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
-      }}
-    >
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        style={{
-          width: "100%",
-          maxWidth: 580,
-          maxHeight: "92vh",
-          background: "var(--content-bg)",
-          border: "1px solid var(--content-border)",
-          borderRadius: 16,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
-        }}
-      >
-        <header
-          style={{
-            padding: "16px 20px",
-            borderBottom: "1px solid var(--content-border)",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: "rgba(108, 71, 255, 0.15)",
-              color: "var(--vyne-purple)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CalendarIcon size={16} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 15,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-              }}
-            >
-              Schedule meeting
-            </h2>
-            <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-              Drops a calendar event + a meeting card in chat
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              border: "1px solid var(--content-border)",
-              background: "transparent",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <X size={14} />
-          </button>
-        </header>
+  // Safe to early-return now — every hook has been called above.
+  if (!open) return null;
 
+  return (
+    <BottomSheetModal
+      open={open}
+      onClose={onClose}
+      title="Schedule meeting"
+      maxWidth={580}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: 14 }}
+      >
         <div
           className="content-scroll"
           style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: 20,
             display: "flex",
             flexDirection: "column",
             gap: 14,
@@ -333,7 +257,7 @@ export function ScheduleMeetingModal({
                     borderRadius: 99,
                     border:
                       type === c.value
-                        ? "1px solid var(--vyne-purple)"
+                        ? "1px solid var(--vyne-accent, var(--vyne-purple))"
                         : "1px solid var(--content-border)",
                     background:
                       type === c.value
@@ -341,7 +265,7 @@ export function ScheduleMeetingModal({
                         : "transparent",
                     color:
                       type === c.value
-                        ? "var(--vyne-purple)"
+                        ? "var(--vyne-accent, var(--vyne-purple))"
                         : "var(--text-secondary)",
                     fontSize: 12,
                     fontWeight: 500,
@@ -368,6 +292,7 @@ export function ScheduleMeetingModal({
             <Field label="Date" icon={<CalendarIcon size={11} />}>
               <input
                 type="date"
+                aria-label="Meeting date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 style={inputStyle}
@@ -376,6 +301,7 @@ export function ScheduleMeetingModal({
             <Field label="Time" icon={<Clock size={11} />}>
               <input
                 type="time"
+                aria-label="Meeting time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
                 step={300}
@@ -384,6 +310,7 @@ export function ScheduleMeetingModal({
             </Field>
             <Field label="Duration">
               <select
+                aria-label="Meeting duration"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
                 style={inputStyle}
@@ -419,7 +346,7 @@ export function ScheduleMeetingModal({
                     padding: "3px 8px 3px 10px",
                     borderRadius: 99,
                     background: "rgba(108, 71, 255, 0.12)",
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     fontSize: 11,
                     fontWeight: 500,
                     display: "inline-flex",
@@ -529,7 +456,7 @@ export function ScheduleMeetingModal({
                           </div>
                         )}
                       </span>
-                      <Plus size={11} style={{ color: "var(--vyne-purple)" }} />
+                      <Plus size={11} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
                     </button>
                   ))}
                 </div>
@@ -554,7 +481,7 @@ export function ScheduleMeetingModal({
                   gap: 5,
                   fontSize: 10,
                   fontWeight: 700,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   textTransform: "uppercase",
                   letterSpacing: 0.5,
                   marginBottom: 6,
@@ -613,13 +540,13 @@ export function ScheduleMeetingModal({
                 padding: 10,
                 borderRadius: 10,
                 border: videoCall
-                  ? "1px solid var(--vyne-purple)"
+                  ? "1px solid var(--vyne-accent, var(--vyne-purple))"
                   : "1px solid var(--content-border)",
                 background: videoCall
                   ? "rgba(108, 71, 255, 0.1)"
                   : "transparent",
                 color: videoCall
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--text-secondary)",
                 fontSize: 12,
                 fontWeight: 500,
@@ -658,7 +585,7 @@ export function ScheduleMeetingModal({
                     borderRadius: 8,
                     border:
                       recurrence === r
-                        ? "1px solid var(--vyne-purple)"
+                        ? "1px solid var(--vyne-accent, var(--vyne-purple))"
                         : "1px solid var(--content-border)",
                     background:
                       recurrence === r
@@ -666,7 +593,7 @@ export function ScheduleMeetingModal({
                         : "transparent",
                     color:
                       recurrence === r
-                        ? "var(--vyne-purple)"
+                        ? "var(--vyne-accent, var(--vyne-purple))"
                         : "var(--text-secondary)",
                     fontSize: 11,
                     fontWeight: 500,
@@ -725,7 +652,7 @@ export function ScheduleMeetingModal({
               borderRadius: 8,
               border: "none",
               background: title.trim()
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               color: "#fff",
               fontSize: 13,
@@ -739,8 +666,8 @@ export function ScheduleMeetingModal({
             <CalendarIcon size={13} /> Schedule
           </button>
         </footer>
-      </motion.form>
-    </div>
+      </form>
+    </BottomSheetModal>
   );
 }
 

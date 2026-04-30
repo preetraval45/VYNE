@@ -157,7 +157,7 @@ export function AiInsightsPanel({
           gap: 8,
         }}
       >
-        <Sparkles size={14} style={{ color: "var(--vyne-purple)" }} />
+        <Sparkles size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 13,
@@ -185,7 +185,7 @@ export function AiInsightsPanel({
           type="button"
           aria-label="Refresh AI insights"
           onClick={refresh}
-          disabled={loading}
+          disabled={loading} aria-busy={loading}
           style={{
             marginLeft: "auto",
             display: "inline-flex",
@@ -193,9 +193,9 @@ export function AiInsightsPanel({
             gap: 4,
             padding: "3px 8px",
             borderRadius: 6,
-            border: "1px solid var(--vyne-purple)",
+            border: "1px solid var(--vyne-accent, var(--vyne-purple))",
             background: "var(--content-bg)",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             fontSize: 11,
             fontWeight: 600,
             cursor: loading ? "default" : "pointer",
@@ -224,7 +224,7 @@ export function AiInsightsPanel({
               marginBottom: 6,
             }}
           >
-            <Tag size={12} style={{ color: "var(--vyne-purple)" }} />
+            <Tag size={12} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             <span
               style={{
                 fontSize: 11,
@@ -244,7 +244,7 @@ export function AiInsightsPanel({
                 padding: "3px 8px",
                 borderRadius: 6,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 11,
                 fontWeight: 600,
@@ -269,7 +269,7 @@ export function AiInsightsPanel({
               style={{
                 padding: "3px 10px",
                 borderRadius: 999,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 11,
                 fontWeight: 600,
@@ -404,8 +404,8 @@ export function AiInsightsPanel({
                       width: 26,
                       height: 26,
                       borderRadius: 7,
-                      background: "rgba(6, 182, 212,0.1)",
-                      color: "var(--vyne-purple)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -452,7 +452,7 @@ export function AiInsightsPanel({
                       border: "none",
                       background: done
                         ? "var(--badge-success-bg)"
-                        : "var(--vyne-purple)",
+                        : "var(--vyne-accent, var(--vyne-purple))",
                       color: done ? "var(--badge-success-text)" : "#fff",
                       fontSize: 11,
                       fontWeight: 600,

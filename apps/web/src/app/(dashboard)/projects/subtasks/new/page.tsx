@@ -19,7 +19,7 @@ const PRIORITY_OPTIONS: Array<{
 }> = [
   { value: "urgent", label: "Urgent", color: "#EF4444" },
   { value: "high", label: "High", color: "#F59E0B" },
-  { value: "medium", label: "Medium", color: "#06B6D4" },
+  { value: "medium", label: "Medium", color: "var(--vyne-accent, #06B6D4)" },
   { value: "low", label: "Low", color: "#6B7280" },
 ];
 
@@ -347,7 +347,7 @@ export default function NewSubtaskPage() {
                         padding: "3px 8px 3px 10px",
                         borderRadius: 99,
                         background: "rgba(108, 71, 255, 0.12)",
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         fontSize: 11,
                         fontWeight: 500,
                         display: "inline-flex",

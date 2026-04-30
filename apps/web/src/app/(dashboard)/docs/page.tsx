@@ -56,7 +56,7 @@ function RecentDocsGrid({
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <div className="w-14 h-14 rounded-2xl bg-[#CFFAFE] flex items-center justify-center">
-          <FileText size={24} style={{ color: "var(--vyne-purple)" }} />
+          <FileText size={24} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         </div>
         <p className="text-[15px] font-semibold text-[var(--text-primary)]">
           No documents yet
@@ -239,7 +239,7 @@ export default function DocsPage() {
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--content-border)]">
-          <FileText size={15} style={{ color: "var(--vyne-purple)" }} />
+          <FileText size={15} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           <span className="text-[13px] font-semibold text-[var(--text-primary)]">
             Docs
           </span>

@@ -153,7 +153,7 @@ export default function TimelinePage() {
               height: 36,
               borderRadius: 10,
               background: "rgba(108, 71, 255, 0.15)",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -237,10 +237,10 @@ export default function TimelinePage() {
                 padding: "5px 10px",
                 borderRadius: 99,
                 border: active
-                  ? "1px solid var(--vyne-purple)"
+                  ? "1px solid var(--vyne-accent, var(--vyne-purple))"
                   : "1px solid var(--content-border)",
                 background: active ? "rgba(108, 71, 255, 0.12)" : meta.bg,
-                color: active ? "var(--vyne-purple)" : meta.color,
+                color: active ? "var(--vyne-accent, var(--vyne-purple))" : meta.color,
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",

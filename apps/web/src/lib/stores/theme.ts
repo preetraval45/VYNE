@@ -16,9 +16,9 @@ export const ACCENT_COLORS: Record<
   { primary: string; light: string; dark: string; label: string }
 > = {
   purple: {
-    primary: "#06B6D4",
-    light: "#22D3EE",
-    dark: "#0E7490",
+    primary: "var(--vyne-accent, #06B6D4)",
+    light: "var(--vyne-accent-light, #22D3EE)",
+    dark: "var(--vyne-accent-deep, #0E7490)",
     label: "Teal",
   },
   blue: {

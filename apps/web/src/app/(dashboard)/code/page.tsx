@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ExternalLink, RotateCcw, Undo2, Plus } from "lucide-react";
 import { codeApi } from "@/lib/api/client";
 import type { Deployment, PullRequest, Repository } from "@/types";
 import { MOCK_DEPLOYMENTS, MOCK_PRS, MOCK_REPOS } from "@/lib/fixtures/code";
@@ -8,6 +11,12 @@ import {
   InlineCodeReview,
   type DiffFile,
 } from "@/components/code/InlineCodeReview";
+import { CodeAiSummary } from "@/components/code/CodeAiSummary";
+import { DoraCard } from "@/components/code/DoraCard";
+import { EnvMatrix } from "@/components/code/EnvMatrix";
+import { computeDora } from "@/lib/dora";
+import { haptics } from "@/lib/haptics";
+import toast from "react-hot-toast";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function timeAgo(iso: string) {
@@ -22,6 +31,35 @@ function timeAgo(iso: string) {
 
 function shortSha(sha: string | null | undefined) {
   return sha ? sha.slice(0, 7) : "—";
+}
+
+// Detect KEY-NUM tokens (e.g. VYN-42, ENG-103) anywhere in a commit
+// message and turn each into a clickable link to /projects?task=KEY-NUM.
+// The rest of the message renders as plain text. Used by the deploys
+// table so commit refs auto-cross-link to the issue tracker.
+function linkifyCommitMessage(msg: string): React.ReactNode {
+  if (!msg) return null;
+  const re = /([A-Z]{2,8}-\d{1,6})/g;
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let i = 0;
+  while ((m = re.exec(msg)) !== null) {
+    if (m.index > last) out.push(msg.slice(last, m.index));
+    const key = m[1];
+    out.push(
+      <a
+        key={`k${i++}`}
+        href={`/projects?task=${encodeURIComponent(key)}`}
+        style={{ color: "var(--vyne-accent, #5B5BD6)", textDecoration: "underline" }}
+      >
+        {key}
+      </a>,
+    );
+    last = m.index + key.length;
+  }
+  if (last < msg.length) out.push(msg.slice(last));
+  return out;
 }
 
 function rateColor(rate: number): string {
@@ -201,7 +239,7 @@ function TabBtn({
         borderRadius: 8,
         fontSize: 13,
         fontWeight: active ? 600 : 400,
-        background: active ? "var(--vyne-purple)" : "transparent",
+        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         border: "none",
         cursor: "pointer",
@@ -337,7 +375,14 @@ const inputStyle: React.CSSProperties = {
 function OverviewTab({
   deployments,
   prs,
-}: Readonly<{ deployments: Deployment[]; prs: PullRequest[] }>) {
+  onRetry,
+  onRollback,
+}: Readonly<{
+  deployments: Deployment[];
+  prs: PullRequest[];
+  onRetry: (d: Deployment) => void;
+  onRollback: (d: Deployment) => void;
+}>) {
   const successCount = deployments.filter((d) => d.status === "success").length;
   const successRate =
     deployments.length > 0
@@ -345,6 +390,18 @@ function OverviewTab({
       : 0;
   const openPRs = prs.filter((p) => p.state === "open").length;
   const mergedPRs = prs.filter((p) => p.state === "merged").length;
+  const dora = useMemo(
+    () =>
+      computeDora(
+        deployments.map((d) => ({
+          status: d.status as "queued" | "in_progress" | "success" | "failed" | "cancelled",
+          environment: d.environment,
+          startedAt: d.startedAt,
+          completedAt: d.completedAt ?? null,
+        })),
+      ),
+    [deployments],
+  );
 
   const services = Array.from(new Set(deployments.map((d) => d.serviceName)));
   const serviceStats = services.map((svc) => {
@@ -363,13 +420,30 @@ function OverviewTab({
 
   return (
     <div>
+      {/* AI synthesis of the last 24h of deploy + PR activity */}
+      <CodeAiSummary
+        deploys={deployments.map((d) => ({
+          serviceName: d.serviceName,
+          environment: d.environment,
+          status: d.status,
+          triggeredBy: d.triggeredBy ?? "—",
+          commitMessage: d.commitMessage ?? null,
+          startedAt: d.startedAt,
+        }))}
+        prs={prs.map((p) => ({
+          title: p.title ?? "",
+          state: p.state,
+          authorName: (p as { authorName?: string | null }).authorName ?? null,
+        }))}
+      />
+
       {/* Stat cards */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(4,1fr)",
           gap: 12,
-          marginBottom: 20,
+          marginBottom: 16,
         }}
       >
         {[
@@ -383,7 +457,7 @@ function OverviewTab({
             label: "Open Pull Requests",
             value: String(openPRs),
             sub: `${mergedPRs} merged this week`,
-            subColor: "var(--vyne-purple)",
+            subColor: "var(--vyne-accent, var(--vyne-purple))",
           },
           {
             label: "Services",
@@ -426,14 +500,38 @@ function OverviewTab({
             >
               {value}
             </div>
-            <div style={{ fontSize: 11, marginTop: 4, color: subColor }}>
-              {sub}
-            </div>
+            {label === "Incidents" && Number(value) > 0 ? (
+              <Link
+                href="/observe"
+                style={{ fontSize: 11, marginTop: 4, color: subColor, textDecoration: "underline" }}
+              >
+                {sub} →
+              </Link>
+            ) : (
+              <div style={{ fontSize: 11, marginTop: 4, color: subColor }}>{sub}</div>
+            )}
           </div>
         ))}
       </div>
 
+      {/* DORA metrics + 14-day deploy frequency sparkline */}
+      <DoraCard summary={dora} />
+
+      {/* Services × Environments matrix — what version is where */}
+      <div style={{ marginBottom: 16 }}>
+        <EnvMatrix
+          deploys={deployments.map((d) => ({
+            serviceName: d.serviceName,
+            environment: d.environment,
+            status: d.status,
+            version: d.version ?? null,
+            startedAt: d.startedAt,
+          }))}
+        />
+      </div>
+
       <div
+        className="two-pane-layout"
         style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 16 }}
       >
         {/* Recent deployments */}
@@ -456,7 +554,7 @@ function OverviewTab({
           >
             Recent Deployments
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--content-secondary)" }}>
                 {[
@@ -466,9 +564,10 @@ function OverviewTab({
                   "Status",
                   "Triggered by",
                   "When",
-                ].map((h) => (
+                  "",
+                ].map((h, i) => (
                   <th
-                    key={h}
+                    key={h || `actions-${i}`}
                     style={{
                       padding: "8px 16px",
                       fontSize: 11,
@@ -484,59 +583,75 @@ function OverviewTab({
               </tr>
             </thead>
             <tbody>
-              {deployments.slice(0, 5).map((d) => (
-                <tr
-                  key={d.id}
-                  style={{
-                    borderBottom: "1px solid var(--content-bg-secondary)",
-                  }}
-                >
-                  <td
-                    style={{
-                      padding: "10px 16px",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "var(--text-primary)",
-                    }}
+              {deployments.slice(0, 5).map((d) => {
+                const isFailed = d.status === "failed";
+                return (
+                  <tr
+                    key={d.id}
+                    style={{ borderBottom: "1px solid var(--content-bg-secondary)" }}
                   >
-                    {d.serviceName}
-                  </td>
-                  <td style={{ padding: "10px 16px" }}>
-                    <EnvBadge env={d.environment} />
-                  </td>
-                  <td
-                    style={{
-                      padding: "10px 16px",
-                      fontSize: 12,
-                      color: "var(--text-secondary)",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {d.version ?? "—"}
-                  </td>
-                  <td style={{ padding: "10px 16px" }}>
-                    <DeployBadge status={d.status} />
-                  </td>
-                  <td
-                    style={{
-                      padding: "10px 16px",
-                      fontSize: 12,
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    {d.triggeredBy ?? "—"}
-                  </td>
-                  <td
-                    style={{
-                      padding: "10px 16px",
-                      fontSize: 12,
-                      color: "var(--text-tertiary)",
-                    }}
-                  >
-                    {timeAgo(d.startedAt)}
-                  </td>
-                </tr>
-              ))}
+                    <td data-th="Service" style={{ padding: "10px 16px", fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+                      {d.serviceName}
+                    </td>
+                    <td data-th="Env" style={{ padding: "10px 16px" }}>
+                      <EnvBadge env={d.environment} />
+                    </td>
+                    <td data-th="Version" style={{ padding: "10px 16px", fontSize: 12, color: "var(--text-secondary)", fontFamily: "monospace" }}>
+                      {d.version ?? "—"}
+                    </td>
+                    <td data-th="Status" style={{ padding: "10px 16px" }}>
+                      <DeployBadge status={d.status} />
+                    </td>
+                    <td data-th="Triggered" style={{ padding: "10px 16px", fontSize: 12, color: "var(--text-secondary)" }}>
+                      {d.triggeredBy ?? "—"}
+                    </td>
+                    <td data-th="When" style={{ padding: "10px 16px", fontSize: 12, color: "var(--text-tertiary)" }}>
+                      {timeAgo(d.startedAt)}
+                    </td>
+                    <td data-th="Actions" style={{ padding: "6px 12px", textAlign: "right" }}>
+                      <div style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                        {isFailed && (
+                          <button
+                            type="button"
+                            className="tap-44"
+                            aria-label="Retry deploy"
+                            title="Retry"
+                            onClick={() => onRetry(d)}
+                            style={iconBtn}
+                          >
+                            <RotateCcw size={13} />
+                          </button>
+                        )}
+                        {isFailed && (
+                          <button
+                            type="button"
+                            className="tap-44"
+                            aria-label="Rollback to last successful deploy"
+                            title="Rollback"
+                            onClick={() => onRollback(d)}
+                            style={iconBtn}
+                          >
+                            <Undo2 size={13} />
+                          </button>
+                        )}
+                        {(d as { url?: string }).url && (
+                          <a
+                            className="tap-44"
+                            href={(d as { url?: string }).url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Open deploy"
+                            title="Open in new tab"
+                            style={iconBtn}
+                          >
+                            <ExternalLink size={13} />
+                          </a>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -563,8 +678,9 @@ function OverviewTab({
           </div>
           <div style={{ padding: "6px 0" }}>
             {serviceStats.map(({ svc, latest, count, rate }) => (
-              <div
+              <Link
                 key={svc}
+                href={`/observe?service=${encodeURIComponent(svc)}`}
                 style={{
                   padding: "10px 18px",
                   borderBottom: "1px solid var(--content-bg-secondary)",
@@ -572,6 +688,8 @@ function OverviewTab({
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 10,
+                  textDecoration: "none",
+                  color: "inherit",
                 }}
               >
                 <div style={{ minWidth: 0 }}>
@@ -618,7 +736,7 @@ function OverviewTab({
                     />
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -626,6 +744,20 @@ function OverviewTab({
     </div>
   );
 }
+
+const iconBtn: React.CSSProperties = {
+  width: 28,
+  height: 28,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  borderRadius: 8,
+  border: "1px solid var(--content-border)",
+  background: "var(--content-bg)",
+  color: "var(--text-secondary)",
+  cursor: "pointer",
+  textDecoration: "none",
+};
 
 // ── Deployments Tab ───────────────────────────────────────────────
 function DeploymentsTab({
@@ -693,7 +825,7 @@ function DeploymentsTab({
                   fontWeight: filter === s ? 600 : 400,
                   background:
                     filter === s
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "var(--content-secondary)",
                   color: filter === s ? "#fff" : "var(--text-secondary)",
                   border: "none",
@@ -728,7 +860,7 @@ function DeploymentsTab({
           onClick={() => setShowModal(true)}
           style={{
             padding: "7px 14px",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -749,7 +881,7 @@ function DeploymentsTab({
           overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--content-secondary)" }}>
               {[
@@ -829,7 +961,7 @@ function DeploymentsTab({
                     style={{
                       fontSize: 11,
                       fontFamily: "monospace",
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {shortSha(d.commitSha)}
@@ -838,13 +970,13 @@ function DeploymentsTab({
                     style={{
                       fontSize: 11,
                       color: "var(--text-tertiary)",
-                      maxWidth: 160,
+                      maxWidth: 220,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                     }}
                   >
-                    {d.commitMessage ?? ""}
+                    {linkifyCommitMessage(d.commitMessage ?? "")}
                   </div>
                 </td>
                 <td style={{ padding: "11px 16px" }}>
@@ -967,7 +1099,7 @@ function DeploymentsTab({
               style={{
                 padding: "8px 16px",
                 borderRadius: 8,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 border: "none",
                 fontSize: 13,
@@ -1030,7 +1162,7 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
                 fontWeight: filter === v ? 600 : 400,
                 background:
                   filter === v
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--content-secondary)",
                 color: filter === v ? "#fff" : "var(--text-secondary)",
                 border: "none",
@@ -1138,7 +1270,7 @@ function PullRequestsTab({ prs }: Readonly<{ prs: PullRequest[] }>) {
               <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
                 <span
                   style={{
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     fontFamily: "monospace",
                   }}
                 >
@@ -1209,7 +1341,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
           onClick={() => setShowConnect(true)}
           style={{
             padding: "7px 14px",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -1291,7 +1423,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
                 <span
                   style={{
                     fontSize: 11,
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     fontWeight: 500,
                   }}
                 >
@@ -1385,7 +1517,7 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
               style={{
                 padding: "8px 16px",
                 borderRadius: 8,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 border: "none",
                 fontSize: 13,
@@ -1405,24 +1537,99 @@ function RepositoriesTab({ repos }: Readonly<{ repos: Repository[] }>) {
 
 // ── Main Code Page ────────────────────────────────────────────────
 export default function CodePage() {
+  const router = useRouter();
   const [tab, setTab] = useState<"overview" | "deployments" | "prs" | "repos">(
     "overview",
   );
   const [deployments, setDeployments] =
     useState<Deployment[]>(MOCK_DEPLOYMENTS);
+  const [provider, setProvider] = useState<"vercel" | "fixture">("fixture");
   const [prs] = useState<PullRequest[]>(MOCK_PRS);
   const [repos] = useState<Repository[]>(MOCK_REPOS);
 
   useEffect(() => {
-    codeApi
-      .listDeployments({ limit: 50 })
-      .then((res) => {
-        if (res.data?.length) setDeployments(res.data);
+    // Prefer real Vercel deploys for this app's own production. Falls
+    // back to the legacy codeApi (multi-service mock) which finally
+    // falls back to MOCK_DEPLOYMENTS already in initial state.
+    fetch("/api/code/deploys")
+      .then((r) => r.json() as Promise<{ deploys: Array<Record<string, unknown>>; provider: "vercel" | "fixture" }>)
+      .then((body) => {
+        if (body.provider === "vercel" && body.deploys.length) {
+          // Adapt NormalizedDeploy → Deployment shape used by tables.
+          setDeployments(
+            body.deploys.map((d) => ({
+              id: String(d.id),
+              orgId: "vercel",
+              serviceName: String(d.serviceName),
+              version: (d.version as string) ?? null,
+              environment: (d.environment as Deployment["environment"]) ?? "production",
+              status: (d.status as Deployment["status"]) ?? "in_progress",
+              triggeredBy: String(d.triggeredBy ?? "Vercel"),
+              commitSha: (d.commitSha as string) ?? null,
+              commitMessage: (d.commitMessage as string) ?? null,
+              branch: (d.branch as string) ?? null,
+              startedAt: String(d.startedAt),
+              completedAt: (d.completedAt as string) ?? null,
+              metadata: { url: d.url },
+              ...((d.url ? { url: d.url } : {}) as object),
+            })) as Deployment[],
+          );
+          setProvider("vercel");
+          return;
+        }
+        return codeApi
+          .listDeployments({ limit: 50 })
+          .then((res) => {
+            if (res.data?.length) setDeployments(res.data);
+          })
+          .catch(() => {
+            /* keep MOCK_DEPLOYMENTS */
+          });
       })
       .catch(() => {
-        /* use mock data */
+        /* keep MOCK_DEPLOYMENTS */
       });
   }, []);
+
+  function handleRetry(d: Deployment) {
+    haptics.bump();
+    toast.success(`Retrying ${d.serviceName} ${d.version ?? ""} → ${d.environment}`);
+    handleDeploy({
+      serviceName: d.serviceName,
+      version: d.version,
+      environment: d.environment,
+      branch: d.branch,
+      commitMessage: `Retry: ${d.commitMessage ?? d.version ?? ""}`,
+      triggeredBy: "Preet R. (retry)",
+    });
+  }
+
+  function handleRollback(d: Deployment) {
+    // Find last successful deploy for the same service/env and queue
+    // a redeploy of that version. If none exists, surface a toast
+    // instead of silently doing nothing.
+    const lastGood = deployments.find(
+      (x) =>
+        x.serviceName === d.serviceName &&
+        x.environment === d.environment &&
+        x.status === "success" &&
+        x.id !== d.id,
+    );
+    if (!lastGood) {
+      toast.error(`No previous successful deploy for ${d.serviceName} (${d.environment}).`);
+      return;
+    }
+    haptics.warn();
+    toast.success(`Rolling back ${d.serviceName} → ${lastGood.version ?? "previous"}`);
+    handleDeploy({
+      serviceName: d.serviceName,
+      version: lastGood.version,
+      environment: d.environment,
+      branch: lastGood.branch,
+      commitMessage: `Rollback to ${lastGood.version ?? "previous"}`,
+      triggeredBy: "Preet R. (rollback)",
+    });
+  }
 
   function handleDeploy(data: Partial<Deployment>) {
     const newDeploy: Deployment = {
@@ -1501,7 +1708,38 @@ export default function CodePage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span
+          {provider === "vercel" ? (
+            <span
+              title="Live data from the Vercel API for vyne.vercel.app"
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                padding: "3px 8px",
+                borderRadius: 6,
+                background: "var(--vyne-accent-soft, rgba(91,91,214,0.10))",
+                color: "var(--vyne-accent-deep, #1d4ed8)",
+              }}
+            >
+              ● Live · Vercel
+            </span>
+          ) : (
+            <span
+              title="Showing fixtures — set VERCEL_TOKEN + VERCEL_PROJECT_ID to wire live data"
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                padding: "3px 8px",
+                borderRadius: 6,
+                background: "var(--content-secondary)",
+                color: "var(--text-tertiary)",
+              }}
+            >
+              Fixtures
+            </span>
+          )}
+          <Link
+            href="/observe"
+            aria-label="View active incident in Observe"
             style={{
               fontSize: 11,
               fontWeight: 600,
@@ -1509,15 +1747,43 @@ export default function CodePage() {
               borderRadius: 6,
               background: "rgba(239,68,68,0.1)",
               color: "#B91C1C",
+              textDecoration: "none",
             }}
           >
-            1 incident active
-          </span>
+            1 incident active →
+          </Link>
           <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
             {openPRs} open PRs ·{" "}
             {deployments.filter((d) => d.status === "in_progress").length}{" "}
             deploying
           </span>
+          <button
+            type="button"
+            className="tap-44"
+            aria-label="Trigger a new deploy"
+            onClick={() => {
+              haptics.tick();
+              router.push(
+                "/ai/chat?prompt=" +
+                  encodeURIComponent("Trigger a new deploy of "),
+              );
+            }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 600,
+              padding: "6px 12px",
+              borderRadius: 8,
+              border: "none",
+              background: "var(--vyne-accent, #5B5BD6)",
+              color: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            <Plus size={13} /> New deploy
+          </button>
         </div>
       </div>
 
@@ -1559,7 +1825,12 @@ export default function CodePage() {
       {/* Content */}
       <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
         {tab === "overview" && (
-          <OverviewTab deployments={deployments} prs={prs} />
+          <OverviewTab
+            deployments={deployments}
+            prs={prs}
+            onRetry={handleRetry}
+            onRollback={handleRollback}
+          />
         )}
         {tab === "deployments" && (
           <DeploymentsTab deployments={deployments} onDeploy={handleDeploy} />

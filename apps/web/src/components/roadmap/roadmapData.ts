@@ -77,12 +77,12 @@ export const PRIORITY_CONFIG: Record<
 
 export const MODULE_COLORS: Record<Module, string> = {
   Chat: "#3B82F6",
-  Projects: "#06B6D4",
+  Projects: "var(--vyne-accent, #06B6D4)",
   Docs: "#EC4899",
   ERP: "#10B981",
   AI: "#F59E0B",
   DevOps: "#EF4444",
-  Mobile: "#06B6D4",
+  Mobile: "var(--vyne-accent, #06B6D4)",
   Platform: "#8B5CF6",
 };
 

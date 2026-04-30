@@ -36,7 +36,7 @@ interface Playbook {
 
 const CHANNEL_META: Record<PlaybookStep["channel"], { label: string; color: string }> = {
   email: { label: "Email", color: "#F59E0B" },
-  "in-app": { label: "In-app", color: "#06B6D4" },
+  "in-app": { label: "In-app", color: "var(--vyne-accent, #06B6D4)" },
   slack: { label: "Slack", color: "#E01E5A" },
   task: { label: "Task", color: "#22C55E" },
   ai: { label: "AI nudge", color: "#EC4899" },
@@ -169,7 +169,7 @@ export default function PlaybooksPage() {
             gap: 8,
           }}
         >
-          <Users size={17} style={{ color: "var(--vyne-purple)" }} />
+          <Users size={17} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           Customer success playbooks
         </h1>
         <p
@@ -185,6 +185,7 @@ export default function PlaybooksPage() {
       </header>
 
       <div
+        className="two-pane-layout"
         style={{
           display: "grid",
           gridTemplateColumns: "300px 1fr",
@@ -213,9 +214,9 @@ export default function PlaybooksPage() {
                     textAlign: "left",
                     padding: 12,
                     borderRadius: 10,
-                    border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                    border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                     background: active
-                      ? "rgba(6, 182, 212,0.08)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                       : "var(--content-bg)",
                     color: "var(--text-primary)",
                     cursor: "pointer",
@@ -230,7 +231,7 @@ export default function PlaybooksPage() {
                       style={{
                         color:
                           p.status === "active"
-                            ? "var(--vyne-purple)"
+                            ? "var(--vyne-accent, var(--vyne-purple))"
                             : "var(--text-tertiary)",
                       }}
                     />
@@ -317,7 +318,7 @@ export default function PlaybooksPage() {
                 style={{
                   fontSize: 11,
                   fontWeight: 700,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   textTransform: "uppercase",
                   letterSpacing: "0.07em",
                 }}
@@ -367,7 +368,7 @@ export default function PlaybooksPage() {
                 background:
                   selected.status === "active"
                     ? "var(--status-warning)"
-                    : "var(--vyne-purple)",
+                    : "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 13,
                 fontWeight: 600,
@@ -510,13 +511,13 @@ export default function PlaybooksPage() {
               gap: 10,
             }}
           >
-            <CheckCircle2 size={16} style={{ color: "var(--vyne-purple)" }} />
+            <CheckCircle2 size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             <span style={{ fontSize: 12, color: "var(--text-primary)" }}>
               Playbooks fire via the Automations engine · see{" "}
               <a
                 href="/automations"
                 style={{
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   fontWeight: 600,
                   textDecoration: "none",
                   display: "inline-flex",

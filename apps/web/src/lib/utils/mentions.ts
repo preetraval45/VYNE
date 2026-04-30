@@ -36,7 +36,7 @@ export function renderWithMentions(content: string): React.ReactNode[] {
             background: isBroadcast
               ? "rgba(245, 158, 11, 0.15)"
               : "rgba(108, 71, 255, 0.15)",
-            color: isBroadcast ? "#F59E0B" : "var(--vyne-purple)",
+            color: isBroadcast ? "#F59E0B" : "var(--vyne-accent, var(--vyne-purple))",
             fontWeight: 600,
             fontSize: "0.95em",
           },

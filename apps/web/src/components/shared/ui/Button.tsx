@@ -18,11 +18,11 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--vyne-purple)] hover:bg-[var(--vyne-purple-dark)] text-white shadow-sm",
+    "bg-[var(--vyne-accent, var(--vyne-purple))] hover:bg-[var(--vyne-accent-deep, var(--vyne-purple-dark))] text-white shadow-sm",
   secondary:
     "bg-[var(--content-secondary)] hover:bg-[var(--content-bg-secondary)] text-[var(--text-primary)] border border-[var(--content-border)]",
   ghost:
-    "bg-transparent hover:bg-[var(--alert-purple-bg)] text-[var(--vyne-purple)]",
+    "bg-transparent hover:bg-[var(--alert-purple-bg)] text-[var(--vyne-accent, var(--vyne-purple))]",
   danger:
     "bg-[var(--status-danger)] hover:opacity-90 text-white shadow-sm",
 };
@@ -56,7 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          "focus-visible:outline-2 focus-visible:outline focus-visible:outline-[var(--vyne-purple)] focus-visible:outline-offset-2",
+          "focus-visible:outline-2 focus-visible:outline focus-visible:outline-[var(--vyne-accent, var(--vyne-purple))] focus-visible:outline-offset-2",
           variantStyles[variant],
           sizeStyles[size],
           fullWidth && "w-full",

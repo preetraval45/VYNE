@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -13,10 +14,12 @@ import {
   Target,
   Tag,
   Clock,
+  Sparkles,
 } from "lucide-react";
 import { useDealById, useCRMStore } from "@/lib/stores/crm";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import { CustomFieldsList } from "@/components/shared/CustomFieldsRenderer";
+import { undoableDelete } from "@/lib/undo";
 import toast from "react-hot-toast";
 
 function stageBg(stage: string): string {
@@ -69,7 +72,7 @@ export default function DealDetailPage() {
             display: "inline-block",
             padding: "8px 14px",
             borderRadius: 8,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -82,10 +85,14 @@ export default function DealDetailPage() {
   }
 
   function handleDelete() {
-    if (!confirm(`Delete deal "${deal!.company}"? This cannot be undone.`))
+    if (!confirm(`Delete deal "${deal!.company}"? You'll have 5 seconds to undo.`))
       return;
-    deleteDeal(deal!.id);
-    toast.success("Deal deleted");
+    const snapshot = { ...deal! };
+    undoableDelete({
+      label: `Deleted deal — ${snapshot.company}`,
+      mutate: () => deleteDeal(snapshot.id),
+      restore: () => useCRMStore.getState().addDeal(snapshot),
+    });
     router.push("/crm");
   }
 
@@ -243,6 +250,7 @@ export default function DealDetailPage() {
         style={{ padding: 28 }}
       >
         <div
+          className="two-pane-layout"
           style={{
             maxWidth: 960,
             margin: "0 auto",
@@ -312,6 +320,8 @@ export default function DealDetailPage() {
                 ))}
               </div>
             </section>
+
+            <DealAIInsights deal={deal} />
 
             {deal.notes && (
               <section
@@ -442,7 +452,7 @@ export default function DealDetailPage() {
                 style={{
                   fontSize: 18,
                   fontWeight: 600,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                 }}
               >
                 $
@@ -457,3 +467,179 @@ export default function DealDetailPage() {
     </div>
   );
 }
+
+// ── DealAIInsights ──────────────────────────────────────────────
+// Two AI buttons: "Why is this stalled?" (uses last-activity timestamp
+// + stage age) and "Next best action" (suggests email/meeting/move).
+// Results render inline in a tinted card. Cached per (dealId, day) so
+// repeated visits don't burn tokens.
+
+interface DealLite {
+  id: string;
+  company: string;
+  contactName: string;
+  email: string;
+  stage: string;
+  value: number;
+  probability: number;
+  assignee: string;
+  lastActivity: string;
+  nextAction: string;
+  source: string;
+  notes: string;
+}
+
+function DealAIInsights({ deal }: { deal: DealLite }) {
+  const [stalled, setStalled] = useState<string | null>(null);
+  const [next, setNext] = useState<string | null>(null);
+  const [loadingKind, setLoadingKind] = useState<"stalled" | "next" | null>(null);
+
+  const daysSinceActivity = Math.max(
+    0,
+    Math.round((Date.now() - new Date(deal.lastActivity).getTime()) / 86400000),
+  );
+
+  async function ask(kind: "stalled" | "next") {
+    const cacheKey = `vyne-deal-ai-${kind}-${deal.id}-${new Date().toISOString().slice(0, 10)}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        if (kind === "stalled") setStalled(cached);
+        else setNext(cached);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    setLoadingKind(kind);
+    try {
+      const question =
+        kind === "stalled"
+          ? `In one short paragraph (3 sentences max), diagnose why this deal is stalled. Be specific — reference stage, days since last activity (${daysSinceActivity}d), and the next-action note. No marketing fluff.`
+          : `Recommend the single most useful next action to advance this deal in the next 48h. One short paragraph (3 sentences max). Be concrete: name the channel (email / call / in-person), give a one-line script if it's an email, and a sensible date if it's a meeting.`;
+      const res = await fetch("/api/ai/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          context: { deals: [deal] },
+        }),
+      });
+      const body = (await res.json()) as { answer?: string };
+      const text = (body.answer ?? "").trim();
+      if (!text) {
+        toast.error("AI didn't return a response.");
+        return;
+      }
+      if (kind === "stalled") setStalled(text);
+      else setNext(text);
+      try {
+        localStorage.setItem(cacheKey, text);
+      } catch {
+        // ignore
+      }
+    } catch (err) {
+      toast.error("Couldn't reach AI: " + (err instanceof Error ? err.message : "unknown"));
+    } finally {
+      setLoadingKind(null);
+    }
+  }
+
+  return (
+    <section
+      style={{
+        background: "var(--vyne-accent-soft, var(--content-bg))",
+        border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+        borderRadius: 14,
+        padding: 18,
+        marginBottom: 16,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--vyne-accent, #5B5BD6)",
+            color: "#fff",
+          }}
+        >
+          <Sparkles size={13} />
+        </span>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Vyne AI insights
+        </h2>
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: stalled || next ? 10 : 0 }}>
+        <button
+          type="button"
+          onClick={() => ask("stalled")}
+          disabled={loadingKind !== null}
+          aria-busy={loadingKind === "stalled"}
+          style={aiBtnStyle}
+        >
+          {loadingKind === "stalled" ? "Diagnosing…" : "Why is this stalled?"}
+        </button>
+        <button
+          type="button"
+          onClick={() => ask("next")}
+          disabled={loadingKind !== null}
+          aria-busy={loadingKind === "next"}
+          style={aiBtnStyle}
+        >
+          {loadingKind === "next" ? "Thinking…" : "Next best action"}
+        </button>
+      </div>
+      {stalled && (
+        <div style={aiOutStyle}>
+          <strong style={{ display: "block", marginBottom: 4, color: "var(--text-primary)" }}>
+            Why stalled
+          </strong>
+          {stalled}
+        </div>
+      )}
+      {next && (
+        <div style={{ ...aiOutStyle, marginTop: stalled ? 8 : 0 }}>
+          <strong style={{ display: "block", marginBottom: 4, color: "var(--text-primary)" }}>
+            Suggested next move
+          </strong>
+          {next}
+        </div>
+      )}
+    </section>
+  );
+}
+
+const aiBtnStyle: React.CSSProperties = {
+  padding: "6px 12px",
+  fontSize: 12,
+  fontWeight: 600,
+  borderRadius: 8,
+  border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+  background: "var(--content-bg)",
+  color: "var(--vyne-accent-deep, var(--text-primary))",
+  cursor: "pointer",
+};
+const aiOutStyle: React.CSSProperties = {
+  padding: "10px 12px",
+  borderRadius: 10,
+  background: "var(--content-bg)",
+  border: "1px solid var(--content-border)",
+  fontSize: 13,
+  lineHeight: 1.55,
+  color: "var(--text-secondary)",
+  whiteSpace: "pre-wrap",
+};

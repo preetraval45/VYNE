@@ -609,9 +609,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -629,9 +629,9 @@ function TabBtn({
             padding: "1px 5px",
             borderRadius: 10,
             background: active
-              ? "rgba(6, 182, 212,0.12)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
               : "var(--content-secondary)",
-            color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+            color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
           }}
         >
           {count}
@@ -767,7 +767,7 @@ function NewButton({
 }: Readonly<{ label: string; onClick?: () => void; href?: string }>) {
   const sharedStyle: React.CSSProperties = {
     padding: "7px 14px",
-    background: "var(--vyne-purple)",
+    background: "var(--vyne-accent, var(--vyne-purple))",
     color: "#fff",
     border: "none",
     borderRadius: 8,
@@ -960,8 +960,8 @@ function BOMTab() {
                           padding: "2px 8px",
                           borderRadius: 4,
                           fontSize: 11,
-                          background: "rgba(6, 182, 212,0.08)",
-                          color: "var(--vyne-purple)",
+                          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                          color: "var(--vyne-accent, var(--vyne-purple))",
                           fontWeight: 600,
                         }}
                       >
@@ -1173,7 +1173,7 @@ function ManufacturingOrdersTab() {
                 viewMode === "table" ? "var(--content-bg)" : "transparent",
               color:
                 viewMode === "table"
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--text-tertiary)",
               boxShadow:
                 viewMode === "table" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
@@ -1194,7 +1194,7 @@ function ManufacturingOrdersTab() {
                 viewMode === "kanban" ? "var(--content-bg)" : "transparent",
               color:
                 viewMode === "kanban"
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--text-tertiary)",
               boxShadow:
                 viewMode === "kanban" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
@@ -1261,7 +1261,7 @@ function ManufacturingOrdersTab() {
                       style={{
                         ...tdStyle,
                         fontWeight: 600,
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                       }}
                     >
                       {mo.moNumber}
@@ -1394,7 +1394,7 @@ function ManufacturingOrdersTab() {
                         style={{
                           fontSize: 11,
                           fontWeight: 600,
-                          color: "var(--vyne-purple)",
+                          color: "var(--vyne-accent, var(--vyne-purple))",
                           marginBottom: 4,
                         }}
                       >
@@ -1717,8 +1717,8 @@ function OperationsTab() {
                       padding: "2px 8px",
                       borderRadius: 4,
                       fontSize: 11,
-                      background: "rgba(6, 182, 212,0.08)",
-                      color: "var(--vyne-purple)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {op.workCenter}
@@ -1854,7 +1854,7 @@ function QualityControlTab() {
                     style={{
                       ...tdStyle,
                       fontWeight: 600,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {qc.checkNumber}
@@ -1988,7 +1988,7 @@ function MfgReportsTab() {
         <KPICard
           label="Total Output"
           value={totalOutput.toLocaleString()}
-          accent="var(--vyne-purple)"
+          accent="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           label="Defect Rate"
@@ -2061,7 +2061,7 @@ function MfgReportsTab() {
                   maxWidth: 48,
                   height: `${(d.output / maxTrend) * 120}px`,
                   background:
-                    "linear-gradient(180deg, var(--vyne-purple), #8B68FF)",
+                    "linear-gradient(180deg, var(--vyne-accent, var(--vyne-purple)), #8B68FF)",
                   borderRadius: "6px 6px 2px 2px",
                   transition: "height 0.4s ease",
                 }}

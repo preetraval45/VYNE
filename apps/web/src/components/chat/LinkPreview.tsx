@@ -116,7 +116,7 @@ function SingleLinkPreview({ url }: { readonly url: string }) {
         padding: 10,
         borderRadius: 10,
         border: "1px solid var(--content-border)",
-        borderLeft: "3px solid var(--vyne-purple)",
+        borderLeft: "3px solid var(--vyne-accent, var(--vyne-purple))",
         background: "var(--content-secondary)",
         color: "var(--text-primary)",
         textDecoration: "none",

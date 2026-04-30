@@ -27,6 +27,7 @@ import {
   FileDown,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { undoableDelete } from "@/lib/undo";
 import { downloadInvoicePdf, type InvoicePayload } from "@/lib/pdf/invoicePdf";
 import {
   useInvoicingStore,
@@ -168,9 +169,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -302,7 +303,7 @@ function SortHeader({
         textAlign: "left",
         fontSize: 10,
         fontWeight: 600,
-        color: isActive ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: isActive ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         textTransform: "uppercase",
         letterSpacing: "0.06em",
         cursor: "pointer",
@@ -382,7 +383,7 @@ function PrimaryBtn({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "var(--vyne-purple)",
+        background: "var(--vyne-accent, var(--vyne-purple))",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
@@ -414,10 +415,10 @@ function FilterBtn({
         padding: "5px 12px",
         borderRadius: 6,
         border: active
-          ? "1px solid var(--vyne-purple)"
+          ? "1px solid var(--vyne-accent, var(--vyne-purple))"
           : "1px solid var(--content-border)",
-        background: active ? "rgba(6, 182, 212,0.08)" : "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         fontSize: 11,
         fontWeight: 500,
         cursor: "pointer",
@@ -434,7 +435,7 @@ function FilterBtn({
             fontSize: 10,
             padding: "0 5px",
             borderRadius: 10,
-            background: active ? "var(--vyne-purple)" : "rgba(0,0,0,0.06)",
+            background: active ? "var(--vyne-accent, var(--vyne-purple))" : "rgba(0,0,0,0.06)",
             color: active ? "#fff" : "var(--text-tertiary)",
             fontWeight: 600,
           }}
@@ -734,7 +735,7 @@ function ModalActions({
           padding: "8px 16px",
           borderRadius: 6,
           border: "none",
-          background: "var(--vyne-purple)",
+          background: "var(--vyne-accent, var(--vyne-purple))",
           color: "#fff",
           fontSize: 12,
           fontWeight: 500,
@@ -943,7 +944,7 @@ function LineItemsEditor({
               cursor: "pointer",
               fontSize: 11,
               fontWeight: 500,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               display: "flex",
               alignItems: "center",
               gap: 4,
@@ -1719,7 +1720,7 @@ function CustomersTab() {
             const st = customerStatusStyle(c.status);
             return (
               <TableRow key={c.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {c.name}
                 </Td>
                 <Td color="var(--text-secondary)">{c.email}</Td>
@@ -1751,7 +1752,7 @@ function CustomersTab() {
                       icon={<Edit2 size={12} />}
                       label="Edit"
                       onClick={() => setModal({ type: "edit", customer: c })}
-                      color="var(--vyne-purple)"
+                      color="var(--vyne-accent, var(--vyne-purple))"
                     />
                     <ActionBtn
                       icon={<Trash2 size={12} />}
@@ -1795,7 +1796,17 @@ function CustomersTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.name}
           onConfirm={() => {
-            deleteCustomer(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted customer — ${snapshot.name}`,
+              mutate: () => deleteCustomer(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addCustomer({
+                  name: snapshot.name,
+                  email: snapshot.email,
+                  phone: snapshot.phone,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -1848,7 +1859,7 @@ function InvoicesTab() {
       name: "VYNE Demo Org",
       email: "billing@vyne.dev",
       address: "Charlotte, NC · https://vyne.vercel.app",
-      accentColor: "#06B6D4",
+      accentColor: "var(--vyne-accent, #06B6D4)",
     });
   }
 
@@ -1896,8 +1907,8 @@ function InvoicesTab() {
         <KpiCard
           label="Total Invoiced"
           value={fmt(totalInvoiced)}
-          icon={<FileText size={16} style={{ color: "var(--vyne-purple)" }} />}
-          iconBg="rgba(6, 182, 212,0.08)"
+          icon={<FileText size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />}
+          iconBg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
           delta={`${counts.Paid + counts.Sent + counts.Draft + (counts.Overdue ?? 0)} invoices total`}
           deltaUp
         />
@@ -2042,7 +2053,7 @@ function InvoicesTab() {
             const st = invoiceStatusStyle(inv.status);
             return (
               <TableRow key={inv.id} onClick={() => invoiceDetail.open(inv.id)}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {inv.number}
                 </Td>
                 <Td>{inv.customer}</Td>
@@ -2093,7 +2104,7 @@ function InvoicesTab() {
                         icon={<Edit2 size={12} />}
                         label="Edit"
                         onClick={() => setModal({ type: "edit", invoice: inv })}
-                        color="var(--vyne-purple)"
+                        color="var(--vyne-accent, var(--vyne-purple))"
                       />
                     )}
                     <ActionBtn
@@ -2141,7 +2152,18 @@ function InvoicesTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.number}
           onConfirm={() => {
-            deleteInvoice(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted invoice — ${snapshot.number}`,
+              mutate: () => deleteInvoice(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addInvoice({
+                  customer: snapshot.customer,
+                  items: snapshot.items,
+                  dueDate: snapshot.dueDate,
+                  notes: snapshot.notes,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -2379,7 +2401,7 @@ function CreditNotesTab() {
             const st = creditNoteStatusStyle(cn.status);
             return (
               <TableRow key={cn.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {cn.number}
                 </Td>
                 <Td>{cn.customer}</Td>
@@ -2433,7 +2455,18 @@ function CreditNotesTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.number}
           onConfirm={() => {
-            deleteCreditNote(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted credit note — ${snapshot.number}`,
+              mutate: () => deleteCreditNote(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addCreditNote({
+                  customer: snapshot.customer,
+                  originalInvoice: snapshot.originalInvoice,
+                  amount: snapshot.amount,
+                  reason: snapshot.reason,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -2581,7 +2614,7 @@ function PaymentsTab() {
             const st = paymentStatusStyle(p.status);
             return (
               <TableRow key={p.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {p.number}
                 </Td>
                 <Td>{p.customer}</Td>
@@ -2596,8 +2629,8 @@ function PaymentsTab() {
                       borderRadius: 6,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: "rgba(6, 182, 212,0.06)",
-                      color: "var(--vyne-purple)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {p.method}
@@ -2649,7 +2682,19 @@ function PaymentsTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.number}
           onConfirm={() => {
-            deletePayment(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted payment — ${snapshot.number}`,
+              mutate: () => deletePayment(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addPayment({
+                  customer: snapshot.customer,
+                  invoice: snapshot.invoice,
+                  amount: snapshot.amount,
+                  method: snapshot.method,
+                  date: snapshot.date,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -2783,7 +2828,7 @@ function VendorsTab() {
             const st = vendorStatusStyle(v.status);
             return (
               <TableRow key={v.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {v.name}
                 </Td>
                 <Td>{v.contact}</Td>
@@ -2810,7 +2855,7 @@ function VendorsTab() {
                       icon={<Edit2 size={12} />}
                       label="Edit"
                       onClick={() => setModal({ type: "edit", vendor: v })}
-                      color="var(--vyne-purple)"
+                      color="var(--vyne-accent, var(--vyne-purple))"
                     />
                     <ActionBtn
                       icon={<Trash2 size={12} />}
@@ -2851,7 +2896,18 @@ function VendorsTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.name}
           onConfirm={() => {
-            deleteVendor(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted vendor — ${snapshot.name}`,
+              mutate: () => deleteVendor(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addVendor({
+                  name: snapshot.name,
+                  contact: snapshot.contact,
+                  email: snapshot.email,
+                  phone: snapshot.phone,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -2913,8 +2969,8 @@ function BillsTab() {
         <KpiCard
           label="Total Billed"
           value={fmt(totalBilled)}
-          icon={<FileText size={16} style={{ color: "var(--vyne-purple)" }} />}
-          iconBg="rgba(6, 182, 212,0.08)"
+          icon={<FileText size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />}
+          iconBg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
         />
         <KpiCard
           label="Paid"
@@ -3053,7 +3109,7 @@ function BillsTab() {
             const st = billStatusStyle(b.status);
             return (
               <TableRow key={b.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {b.number}
                 </Td>
                 <Td>{b.vendor}</Td>
@@ -3084,7 +3140,7 @@ function BillsTab() {
                         icon={<Edit2 size={12} />}
                         label="Edit"
                         onClick={() => setModal({ type: "edit", bill: b })}
-                        color="var(--vyne-purple)"
+                        color="var(--vyne-accent, var(--vyne-purple))"
                       />
                     )}
                     <ActionBtn
@@ -3124,7 +3180,17 @@ function BillsTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.number}
           onConfirm={() => {
-            deleteBill(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted bill — ${snapshot.number}`,
+              mutate: () => deleteBill(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addBill({
+                  vendor: snapshot.vendor,
+                  items: snapshot.items,
+                  dueDate: snapshot.dueDate,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}
@@ -3245,7 +3311,7 @@ function RefundsTab() {
                 : { bg: "#FFF7ED", color: "#9A3412" };
             return (
               <TableRow key={r.id}>
-                <Td bold color="var(--vyne-purple)">
+                <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {r.number}
                 </Td>
                 <Td>{r.customerOrVendor}</Td>
@@ -3310,7 +3376,18 @@ function RefundsTab() {
         <ConfirmDeleteDialog
           name={deleteTarget.number}
           onConfirm={() => {
-            deleteRefund(deleteTarget.id);
+            const snapshot = deleteTarget;
+            undoableDelete({
+              label: `Deleted refund — ${snapshot.number}`,
+              mutate: () => deleteRefund(snapshot.id),
+              restore: () =>
+                useInvoicingStore.getState().addRefund({
+                  customerOrVendor: snapshot.customerOrVendor,
+                  type: snapshot.type,
+                  amount: snapshot.amount,
+                  reason: snapshot.reason,
+                }),
+            });
             setDeleteTarget(null);
           }}
           onCancel={() => setDeleteTarget(null)}

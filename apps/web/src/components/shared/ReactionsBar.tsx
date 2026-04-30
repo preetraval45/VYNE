@@ -148,13 +148,13 @@ export function ReactionsBar({
               gap: 5,
               padding: "2px 9px",
               borderRadius: 999,
-              border: `1px solid ${mine ? "var(--vyne-purple)" : "var(--content-border)"}`,
+              border: `1px solid ${mine ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
               background: mine
-                ? "rgba(6, 182, 212,0.12)"
+                ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
                 : "var(--content-secondary)",
               fontSize: 12,
               fontWeight: 500,
-              color: mine ? "var(--vyne-purple)" : "var(--text-primary)",
+              color: mine ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
               cursor: "pointer",
               lineHeight: 1.4,
             }}

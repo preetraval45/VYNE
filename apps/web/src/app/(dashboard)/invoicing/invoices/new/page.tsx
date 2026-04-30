@@ -11,6 +11,8 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useInvoicingStore, type InvoiceLineItem } from "@/lib/stores/invoicing";
+import { checkCreateAllowed } from "@/lib/planGate";
+import { AiFormFill } from "@/components/shared/AiFormFill";
 
 const inputClass =
   "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
@@ -41,6 +43,11 @@ export default function NewInvoicePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const allowed = await checkCreateAllowed(
+      "invoices",
+      useInvoicingStore.getState().invoices.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     addInvoice({
       customer: customer.trim(),
@@ -96,12 +103,32 @@ export default function NewInvoicePage() {
       }
     >
       <form id="new-invoice-form" onSubmit={handleSubmit}>
+        <AiFormFill
+          title="Describe the invoice — AI will fill customer + due date + notes"
+          placeholder="e.g. Invoice TechCorp due April 30 2026, monthly retainer"
+          fields={[
+            { key: "customer", label: "Customer" },
+            { key: "dueDate", label: "Due date", hint: "ISO YYYY-MM-DD" },
+            { key: "notes", label: "Notes" },
+          ]}
+          onApply={(values) => {
+            if (typeof values.customer === "string") setCustomer(values.customer);
+            if (typeof values.dueDate === "string") setDueDate(values.dueDate);
+            if (typeof values.notes === "string") setNotes(values.notes);
+          }}
+        />
         <FormSection title="Bill to">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: 14 }}>
-            <FormField label="Customer" htmlFor="inv-customer" required>
+            <FormField
+              label="Customer"
+              htmlFor={customers.length > 0 ? "inv-customer-select" : "inv-customer-input"}
+              required
+            >
               {customers.length > 0 ? (
                 <select
-                  id="inv-customer"
+                  id="inv-customer-select"
+                  aria-label="Customer"
+                  title="Customer"
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
                   className={`${inputClass} cursor-pointer`}
@@ -111,7 +138,8 @@ export default function NewInvoicePage() {
                 </select>
               ) : (
                 <input
-                  id="inv-customer"
+                  id="inv-customer-input"
+                  aria-label="Customer name"
                   type="text"
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
@@ -198,9 +226,9 @@ export default function NewInvoicePage() {
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 12px", marginTop: 8,
               fontSize: 12.5, fontWeight: 500,
-              color: "var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.08)",
-              border: "1px dashed rgba(6, 182, 212,0.3)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+              border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 8,
               cursor: "pointer",
               alignSelf: "flex-start",

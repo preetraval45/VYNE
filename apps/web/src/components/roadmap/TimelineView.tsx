@@ -33,7 +33,7 @@ function QuarterColumn({
           padding: "12px 16px",
           borderBottom: "2px solid",
           borderColor: isCurrentQuarter
-            ? "#06B6D4"
+            ? "var(--vyne-accent, #06B6D4)"
             : "var(--content-border, var(--content-border))",
           marginBottom: 12,
           display: "flex",
@@ -46,7 +46,7 @@ function QuarterColumn({
             fontSize: 15,
             fontWeight: 700,
             color: isCurrentQuarter
-              ? "#06B6D4"
+              ? "var(--vyne-accent, #06B6D4)"
               : "var(--text-primary, var(--text-primary))",
           }}
         >
@@ -59,8 +59,8 @@ function QuarterColumn({
               fontWeight: 500,
               padding: "2px 8px",
               borderRadius: 10,
-              background: "rgba(6, 182, 212,0.1)",
-              color: "#06B6D4",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              color: "var(--vyne-accent, #06B6D4)",
             }}
           >
             Current
@@ -164,7 +164,7 @@ export function TimelineView({ features }: TimelineViewProps) {
           style={{
             height: 3,
             background:
-              "linear-gradient(90deg, #06B6D4, #8B5CF6, var(--text-tertiary), #D4D4D8)",
+              "linear-gradient(90deg, var(--vyne-accent, #06B6D4), #8B5CF6, var(--text-tertiary), #D4D4D8)",
             borderRadius: 2,
             margin: "16px 0 8px",
           }}
@@ -183,7 +183,7 @@ export function TimelineView({ features }: TimelineViewProps) {
                 width: 12,
                 height: 12,
                 borderRadius: "50%",
-                background: i === 0 ? "#06B6D4" : "var(--text-tertiary)",
+                background: i === 0 ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
                 border: "2px solid var(--content-bg, #fff)",
                 position: "relative",
                 top: -10,

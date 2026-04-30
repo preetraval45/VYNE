@@ -11,6 +11,7 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useSalesStore, type QuoteLineItem } from "@/lib/stores/sales";
+import { checkCreateAllowed } from "@/lib/planGate";
 
 const inputClass =
   "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
@@ -38,6 +39,11 @@ export default function NewSalesOrderPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const allowed = await checkCreateAllowed(
+      "orders",
+      useSalesStore.getState().salesOrders.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     addSalesOrder({ customer: customer.trim(), lineItems: validItems });
     toast.success(`Sales order for ${customer} created`);
@@ -165,9 +171,9 @@ export default function NewSalesOrderPage() {
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 12px", marginTop: 8,
               fontSize: 12.5, fontWeight: 500,
-              color: "var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.08)",
-              border: "1px dashed rgba(6, 182, 212,0.3)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+              border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 8,
               cursor: "pointer",
               alignSelf: "flex-start",

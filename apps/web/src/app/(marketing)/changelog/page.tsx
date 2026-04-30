@@ -18,7 +18,7 @@ const TAG_STYLE: Record<
 > = {
   launch: {
     label: "Launch",
-    bg: "rgba(6, 182, 212,0.15)",
+    bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
     color: "#67E8F9",
     icon: Rocket,
   },
@@ -218,7 +218,7 @@ export default function ChangelogPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -244,8 +244,8 @@ export default function ChangelogPage() {
               gap: 8,
               padding: "6px 14px",
               borderRadius: 999,
-              background: "rgba(6, 182, 212,0.1)",
-              border: "1px solid rgba(6, 182, 212,0.25)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
               color: "#67E8F9",
               fontSize: 12,
               fontWeight: 600,

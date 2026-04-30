@@ -273,7 +273,7 @@ export function InlineCodeReview({ subjectId, files, className }: Props) {
                           borderRadius: 5,
                           border: "1px solid var(--content-border)",
                           background: isActive
-                            ? "var(--vyne-purple)"
+                            ? "var(--vyne-accent, var(--vyne-purple))"
                             : "var(--content-bg)",
                           color: isActive ? "#fff" : "var(--text-tertiary)",
                           cursor: "pointer",
@@ -389,7 +389,7 @@ export function InlineCodeReview({ subjectId, files, className }: Props) {
                                 <span
                                   key={`${c.id}-${idx}`}
                                   style={{
-                                    color: "var(--vyne-purple)",
+                                    color: "var(--vyne-accent, var(--vyne-purple))",
                                     fontWeight: 600,
                                   }}
                                 >
@@ -471,7 +471,7 @@ export function InlineCodeReview({ subjectId, files, className }: Props) {
                               >
                                 <AtSign
                                   size={11}
-                                  style={{ color: "var(--vyne-purple)" }}
+                                  style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
                                 />
                                 {m}
                               </button>
@@ -504,10 +504,10 @@ export function InlineCodeReview({ subjectId, files, className }: Props) {
                           style={{
                             ...miniBtn,
                             background: draft.trim()
-                              ? "var(--vyne-purple)"
+                              ? "var(--vyne-accent, var(--vyne-purple))"
                               : "var(--content-bg)",
                             color: draft.trim() ? "#fff" : "var(--text-tertiary)",
-                            borderColor: "var(--vyne-purple)",
+                            borderColor: "var(--vyne-accent, var(--vyne-purple))",
                           }}
                         >
                           <Send size={11} /> Comment

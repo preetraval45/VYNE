@@ -734,7 +734,7 @@ function TabBtn({
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 500,
-        background: active ? "var(--vyne-purple)" : "transparent",
+        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         transition: "all 0.15s",
         display: "flex",
@@ -833,7 +833,7 @@ function ActivityFeed() {
           gap: 6,
         }}
       >
-        <Activity size={14} style={{ color: "var(--vyne-purple)" }} />
+        <Activity size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         Recent Activity
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -982,20 +982,20 @@ function AddButton({
     fontSize: 13,
     fontWeight: 600,
     color: "#fff",
-    background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
-    boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
+    background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+    boxShadow: "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
     transition: "all 0.15s",
     whiteSpace: "nowrap" as const,
     textDecoration: "none",
   };
   const onEnter = (e: React.MouseEvent<HTMLElement>) => {
     (e.currentTarget as HTMLElement).style.boxShadow =
-      "0 4px 14px rgba(6, 182, 212,0.45)";
+      "0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)";
     (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
   };
   const onLeave = (e: React.MouseEvent<HTMLElement>) => {
     (e.currentTarget as HTMLElement).style.boxShadow =
-      "0 2px 8px rgba(6, 182, 212,0.3)";
+      "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)";
     (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
   };
 
@@ -1128,8 +1128,8 @@ function EquipmentTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={eq.category}
-                      bg="rgba(6, 182, 212,0.08)"
-                      color="var(--vyne-purple)"
+                      bg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
+                      color="var(--vyne-accent, var(--vyne-purple))"
                     />
                   </td>
                   <td style={{ ...tdStyle, color: "var(--text-secondary)" }}>
@@ -1467,13 +1467,13 @@ function WorkOrdersTab() {
           alignItems: "center",
           gap: 10,
           padding: "12px 16px",
-          background: "rgba(6, 182, 212,0.04)",
-          borderColor: "rgba(6, 182, 212,0.15)",
+          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)",
+          borderColor: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
         }}
       >
         <Calendar
           size={16}
-          style={{ color: "var(--vyne-purple)", flexShrink: 0 }}
+          style={{ color: "var(--vyne-accent, var(--vyne-purple))", flexShrink: 0 }}
         />
         <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
           <strong style={{ color: "var(--text-primary)" }}>
@@ -1733,8 +1733,8 @@ function PartsTab() {
                   <td style={tdStyle}>
                     <Badge
                       label={p.category}
-                      bg="rgba(6, 182, 212,0.08)"
-                      color="var(--vyne-purple)"
+                      bg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
+                      color="var(--vyne-accent, var(--vyne-purple))"
                     />
                   </td>
                   <td
@@ -1812,9 +1812,9 @@ export default function MaintenancePage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(6, 182, 212,0.08)" }}
+            style={{ background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" }}
           >
-            <Wrench size={18} style={{ color: "var(--vyne-purple)" }} />
+            <Wrench size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           </div>
           <div>
             <h1
@@ -1845,7 +1845,7 @@ export default function MaintenancePage() {
             label="Total Equipment"
             value={totalEquipment}
             icon={<Settings2 size={20} />}
-            accent="#06B6D4"
+            accent="var(--vyne-accent, #06B6D4)"
           />
           <KPICard
             label="Active Requests"

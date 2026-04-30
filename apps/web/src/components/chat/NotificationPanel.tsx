@@ -266,8 +266,8 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
             <span
               style={{
                 fontSize: 10,
-                color: "#06B6D4",
-                background: "rgba(6, 182, 212,0.1)",
+                color: "var(--vyne-accent, #06B6D4)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
                 padding: "2px 6px",
                 borderRadius: 4,
                 fontWeight: 600,
@@ -309,10 +309,10 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                 fontWeight: 600,
                 cursor: "pointer",
                 background:
-                  filter === f ? "rgba(6, 182, 212,0.1)" : "transparent",
+                  filter === f ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "transparent",
                 color:
                   filter === f
-                    ? "#06B6D4"
+                    ? "var(--vyne-accent, #06B6D4)"
                     : "var(--text-tertiary, var(--text-tertiary))",
                 textTransform: "capitalize",
               }}
@@ -331,14 +331,14 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
               gap: 4,
               padding: "4px 9px",
               borderRadius: 6,
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               fontSize: 10,
               fontWeight: 600,
               cursor: reranking ? "default" : "pointer",
               background: rerankProvider
-                ? "rgba(6, 182, 212,0.1)"
+                ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                 : "transparent",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               opacity: reranking ? 0.6 : 1,
             }}
             title={
@@ -480,10 +480,10 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                         marginTop: 5,
                         padding: "3px 8px",
                         borderRadius: 5,
-                        background: "rgba(6, 182, 212,0.08)",
-                        border: "1px solid rgba(6, 182, 212,0.18)",
+                        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                        border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
                         fontSize: 10,
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         display: "inline-flex",
                         alignItems: "center",
                         gap: 4,
@@ -513,7 +513,7 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
                       <span
                         style={{
                           fontSize: 10,
-                          color: "#06B6D4",
+                          color: "var(--vyne-accent, #06B6D4)",
                           fontWeight: 500,
                         }}
                       >

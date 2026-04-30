@@ -166,7 +166,7 @@ export const ACTION_CONFIG_FIELDS: Record<
 export const TEMPLATES = [
   {
     id: "tpl-deal-won",
-    label: "Deal Won \u2192 Sales Order",
+    label: "Deal Won → Sales Order",
     description:
       "Automatically create a sales order when a CRM deal is marked as Won.",
     triggerType: "crm_deal_won_lost",
@@ -186,7 +186,7 @@ export const TEMPLATES = [
   },
   {
     id: "tpl-low-stock",
-    label: "Low Stock \u2192 Alert",
+    label: "Low Stock → Alert",
     description:
       "Post a channel alert when any product falls below the stock threshold.",
     triggerType: "erp_low_stock",
@@ -206,7 +206,7 @@ export const TEMPLATES = [
   },
   {
     id: "tpl-onboard",
-    label: "New Employee \u2192 Onboard",
+    label: "New Employee → Onboard",
     description:
       "Kick off onboarding tasks and send a welcome message when an employee joins.",
     triggerType: "hr_employee_onboarded",
@@ -236,7 +236,7 @@ export const TEMPLATES = [
   },
   {
     id: "tpl-pr-merged",
-    label: "PR Merged \u2192 Close Ticket",
+    label: "PR Merged → Close Ticket",
     description:
       "Move linked issues to Done when a pull request is merged into main.",
     triggerType: "projects_pr_merged",
@@ -256,7 +256,7 @@ export const TEMPLATES = [
   },
   {
     id: "tpl-invoice-due",
-    label: "Invoice Due \u2192 Remind",
+    label: "Invoice Due → Remind",
     description:
       "Send an overdue invoice reminder email 7 days after the due date.",
     triggerType: "erp_invoice_overdue",
@@ -328,7 +328,7 @@ export function formatRelativeTime(iso: string): string {
 }
 
 export function formatTimestamp(iso: string): string {
-  if (iso === "") return "\u2014";
+  if (iso === "") return "—";
   return new Date(iso).toLocaleString("en-US", {
     month: "short",
     day: "numeric",

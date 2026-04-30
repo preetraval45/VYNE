@@ -28,7 +28,7 @@ function fmtNetPay(emp: Employee): number {
 // ─── Department chip ──────────────────────────────────────────────
 function DeptChip({ dept }: Readonly<{ dept: Department }>) {
   const colors: Record<Department, { bg: string; color: string }> = {
-    Engineering: { bg: "rgba(6, 182, 212,0.12)", color: "#8B68FF" },
+    Engineering: { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)", color: "#8B68FF" },
     Product: { bg: "rgba(155,89,182,0.12)", color: "#A855F7" },
     Sales: { bg: "rgba(239,68,68,0.1)", color: "var(--status-danger)" },
     Finance: { bg: "rgba(59,130,246,0.1)", color: "var(--status-info)" },
@@ -143,9 +143,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -223,6 +223,7 @@ function EmployeeModal({
 
         {/* Modal body — two columns */}
         <div
+          className="two-pane-layout"
           style={{
             display: "grid",
             gridTemplateColumns: "220px 1fr",
@@ -302,7 +303,7 @@ function EmployeeModal({
                 label="Vacation"
                 remaining={emp.vacationBalance}
                 total={15}
-                color="#06B6D4"
+                color="var(--vyne-accent, #06B6D4)"
               />
               <LeaveBalanceBar
                 label="Sick"
@@ -339,7 +340,7 @@ function EmployeeModal({
               <div
                 style={{
                   fontSize: 12,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   cursor: "pointer",
                   textDecoration: "underline",
                 }}
@@ -374,7 +375,7 @@ function EmployeeModal({
                       style={{
                         marginLeft: "auto",
                         fontSize: 11,
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         background: "transparent",
                         border: "none",
                         cursor: "pointer",
@@ -532,7 +533,7 @@ function EmployeesTab() {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                "0 4px 20px rgba(6, 182, 212,0.12)";
+                "0 4px 20px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)";
               (e.currentTarget as HTMLButtonElement).style.transform =
                 "translateY(-2px)";
             }}
@@ -709,13 +710,13 @@ function leaveRequestBackground(status: LeaveRequestStatus): string {
 }
 
 function leaveTypeBadgeBackground(type: string): string {
-  if (type === "Vacation") return "rgba(6, 182, 212,0.1)";
+  if (type === "Vacation") return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)";
   if (type === "Sick") return "rgba(239,68,68,0.1)";
   return "rgba(245,158,11,0.1)";
 }
 
 function leaveTypeBadgeColor(type: string): string {
-  if (type === "Vacation") return "var(--vyne-purple)";
+  if (type === "Vacation") return "var(--vyne-accent, var(--vyne-purple))";
   if (type === "Sick") return "var(--status-danger)";
   return "var(--status-warning)";
 }
@@ -742,6 +743,7 @@ function LeaveTab() {
   return (
     <div style={{ padding: 20, overflowY: "auto" }}>
       <div
+        className="two-pane-layout"
         style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16 }}
       >
         {/* Left: balances + requests */}
@@ -829,7 +831,7 @@ function LeaveTab() {
                       style={{
                         padding: "10px 14px",
                         fontSize: 12,
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         fontWeight: 600,
                       }}
                     >
@@ -900,7 +902,7 @@ function LeaveTab() {
               {pendingRequests.length > 0 && (
                 <span
                   style={{
-                    background: "var(--vyne-purple)",
+                    background: "var(--vyne-accent, var(--vyne-purple))",
                     color: "#fff",
                     fontSize: 10,
                     fontWeight: 700,
@@ -1182,7 +1184,7 @@ function PayrollTab() {
               border: "none",
               background: payrollRun
                 ? "var(--status-success)"
-                : "var(--vyne-purple)",
+                : "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 13,
               fontWeight: 700,
@@ -1430,7 +1432,7 @@ function PayrollTab() {
                   padding: "11px 16px",
                   fontSize: 14,
                   fontWeight: 700,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                 }}
               >
                 {fmtSalary(totalNet)}

@@ -313,7 +313,7 @@ export default function InviteMemberModal({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: email ? "#06B6D4" : "var(--content-border)",
+              background: email ? "var(--vyne-accent, #06B6D4)" : "var(--content-border)",
               color: email ? "#fff" : "var(--text-tertiary)",
               cursor: email ? "pointer" : "default",
               fontSize: 13,

@@ -9,6 +9,9 @@ export type CapturedMedia = {
   durationMs: number;
   mimeType: string;
   kind: "audio" | "video";
+  /** Auto-transcript captured via Web Speech API while recording.
+   *  Empty string if the API isn't available or didn't return text. */
+  transcript?: string;
 };
 
 interface Props {
@@ -43,6 +46,9 @@ export function MediaCaptureRecorder({ kind, onComplete, onCancel }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef<number | null>(null);
+  // Browser-native transcript capture for voice notes (Web Speech API).
+  const recognitionRef = useRef<{ stop: () => void } | null>(null);
+  const transcriptRef = useRef<string>("");
 
   const stop = useCallback(() => {
     recorderRef.current?.stop();
@@ -116,8 +122,63 @@ export function MediaCaptureRecorder({ kind, onComplete, onCancel }: Props) {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType });
         const url = URL.createObjectURL(blob);
         const durationMs = Date.now() - startedAtRef.current;
-        onComplete({ blob, url, durationMs, mimeType: recorder.mimeType, kind });
+        recognitionRef.current?.stop();
+        onComplete({
+          blob,
+          url,
+          durationMs,
+          mimeType: recorder.mimeType,
+          kind,
+          transcript: transcriptRef.current.trim() || undefined,
+        });
       };
+
+      // Start parallel Web Speech API recognition for audio recordings —
+      // produces a free transcript without sending audio to a backend.
+      if (kind === "audio" && typeof window !== "undefined") {
+        const SR =
+          (window as unknown as { SpeechRecognition?: unknown })
+            .SpeechRecognition ??
+          (window as unknown as { webkitSpeechRecognition?: unknown })
+            .webkitSpeechRecognition;
+        if (SR) {
+          interface RecEvent {
+            resultIndex: number;
+            results: ArrayLike<{
+              isFinal: boolean;
+              0: { transcript: string };
+            }>;
+          }
+          interface Recognition {
+            lang: string;
+            interimResults: boolean;
+            continuous: boolean;
+            onresult: (e: RecEvent) => void;
+            onerror: () => void;
+            start: () => void;
+            stop: () => void;
+          }
+          const rec = new (SR as new () => Recognition)();
+          rec.lang = "en-US";
+          rec.interimResults = false;
+          rec.continuous = true;
+          rec.onresult = (e: RecEvent) => {
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+              const r = e.results[i];
+              if (r.isFinal) {
+                transcriptRef.current += r[0].transcript + " ";
+              }
+            }
+          };
+          rec.onerror = () => {};
+          try {
+            rec.start();
+            recognitionRef.current = rec;
+          } catch {
+            recognitionRef.current = null;
+          }
+        }
+      }
 
       // If the user stops sharing screen from the browser UI, end the recording gracefully.
       stream.getVideoTracks().forEach((t) => {
@@ -262,7 +323,7 @@ export function MediaCaptureRecorder({ kind, onComplete, onCancel }: Props) {
           style={{
             height: "100%",
             width: `${Math.round(level * 100)}%`,
-            background: kind === "audio" ? "var(--status-danger)" : "var(--vyne-purple)",
+            background: kind === "audio" ? "var(--status-danger)" : "var(--vyne-accent, var(--vyne-purple))",
             transition: "width 80ms linear",
           }}
         />

@@ -40,15 +40,15 @@ const C = {
   text: "#EAFBFD",
   textSub: "#8FB2BA",
   textMuted: "#5A7880",
-  purple: "#06B6D4",
+  purple: "var(--vyne-accent, #06B6D4)",
   indigo: "#0891B2",
-  cyan: "#22D3EE",
+  cyan: "var(--vyne-accent-light, #22D3EE)",
   success: "#22C55E",
   danger: "#EF4444",
-  aurora: "linear-gradient(135deg, #22D3EE 0%, #06B6D4 45%, #0E7490 100%)",
+  aurora: "linear-gradient(135deg, var(--vyne-accent-light, #22D3EE) 0%, var(--vyne-accent, #06B6D4) 45%, var(--vyne-accent-deep, #0E7490) 100%)",
   auroraSoft:
-    "linear-gradient(135deg, rgba(34,211,238,0.14), rgba(6,182,212,0.08))",
-  auroraText: "linear-gradient(135deg, #67E8F9 0%, #22D3EE 50%, #06B6D4 100%)",
+    "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.14), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08))",
+  auroraText: "linear-gradient(135deg, #67E8F9 0%, var(--vyne-accent-light, #22D3EE) 50%, var(--vyne-accent, #06B6D4) 100%)",
 } as const;
 
 /* ─── Waitlist Form ──────────────────────────────────────────── */
@@ -389,7 +389,7 @@ function Hero() {
           top: "55%",
           left: "15%",
           background:
-            "radial-gradient(circle, rgba(6,182,212,0.35) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35) 0%, transparent 70%)",
           opacity: 0.4,
         }}
       />
@@ -401,7 +401,7 @@ function Hero() {
           top: "10%",
           right: "10%",
           background:
-            "radial-gradient(circle, rgba(14,116,144,0.35) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(var(--vyne-accent-rgb, 14, 116, 144), 0.35) 0%, transparent 70%)",
           opacity: 0.35,
         }}
       />
@@ -446,7 +446,7 @@ function Hero() {
             style={{
               padding: "2px 9px",
               borderRadius: 999,
-              background: "rgba(6,182,212,0.18)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
               color: "#A5F3FC",
               fontSize: 11,
               fontWeight: 600,
@@ -600,7 +600,7 @@ const features = [
     title: "Native chat with calls + AI notes",
     desc: "Voice, video, screen-share, and live transcription — all in the same workspace where the events live. Meetings get auto-recapped and linked to the relevant project, deal, or incident.",
     replaces: "",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
   },
   {
     icon: FolderKanban,
@@ -1224,11 +1224,11 @@ function Pricing() {
                   position: "relative",
                   border: plan.highlight
                     ? "none"
-                    : `1px solid ${tealAccent ? "rgba(6,182,212,0.25)" : C.border}`,
+                    : `1px solid ${tealAccent ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)" : C.border}`,
                   background: plan.highlight
-                    ? `linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(6,182,212,0.02) 100%), ${C.bg}`
+                    ? `linear-gradient(180deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08) 0%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.02) 100%), ${C.bg}`
                     : tealAccent
-                      ? `linear-gradient(180deg, rgba(6,182,212,0.06) 0%, rgba(6,182,212,0.01) 100%), ${C.surface}`
+                      ? `linear-gradient(180deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06) 0%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.01) 100%), ${C.surface}`
                       : C.surface,
                 }}
               >
@@ -1246,7 +1246,7 @@ function Pricing() {
                       fontSize: 11,
                       fontWeight: 700,
                       letterSpacing: "0.08em",
-                      boxShadow: "0 8px 20px rgba(6,182,212,0.4)",
+                      boxShadow: "0 8px 20px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)",
                       display: "flex",
                       alignItems: "center",
                       gap: 6,
@@ -1264,12 +1264,12 @@ function Pricing() {
                       right: 18,
                       padding: "4px 10px",
                       borderRadius: 999,
-                      background: "linear-gradient(135deg, #06B6D4, #0891B2)",
+                      background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-deep, #0891B2))",
                       color: "#fff",
                       fontSize: 10,
                       fontWeight: 700,
                       letterSpacing: "0.08em",
-                      boxShadow: "0 6px 16px rgba(6,182,212,0.35)",
+                      boxShadow: "0 6px 16px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
                     }}
                   >
                     SCALE
@@ -1518,7 +1518,7 @@ function TrustBar() {
                   fontWeight: 600,
                   letterSpacing: "0.18em",
                   textTransform: "uppercase",
-                  color: "#22D3EE",
+                  color: "var(--vyne-accent-light, #22D3EE)",
                   marginBottom: 8,
                 }}
               >
@@ -1587,8 +1587,8 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
     <div
       style={{
         borderRadius: 14,
-        border: `1px solid ${open ? "rgba(6,182,212,0.35)" : C.border}`,
-        background: open ? "rgba(6,182,212,0.04)" : C.surface,
+        border: `1px solid ${open ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)" : C.border}`,
+        background: open ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)" : C.surface,
         overflow: "hidden",
         transition: "border-color 0.25s, background 0.25s",
       }}
@@ -1623,9 +1623,9 @@ function FAQItem({ q, a, index }: { q: string; a: string; index: number }) {
             alignItems: "center",
             justifyContent: "center",
             background: open
-              ? "rgba(6,182,212,0.15)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)"
               : "rgba(255,255,255,0.04)",
-            color: open ? "#22D3EE" : C.textSub,
+            color: open ? "var(--vyne-accent-light, #22D3EE)" : C.textSub,
             flexShrink: 0,
             marginLeft: 16,
             transition: "background 0.2s, color 0.2s",
@@ -1698,7 +1698,7 @@ function CTAFooter() {
       id="waitlist"
       style={{
         padding: "120px 24px",
-        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(6,182,212,0.22), transparent 70%), ${C.bg}`,
+        background: `radial-gradient(ellipse 80% 60% at 50% 100%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.22), transparent 70%), ${C.bg}`,
         textAlign: "center",
         position: "relative",
         overflow: "hidden",

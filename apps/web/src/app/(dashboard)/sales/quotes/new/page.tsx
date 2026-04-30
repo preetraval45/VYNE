@@ -11,6 +11,8 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useSalesStore, type QuoteLineItem } from "@/lib/stores/sales";
+import { checkCreateAllowed } from "@/lib/planGate";
+import { AiFormFill } from "@/components/shared/AiFormFill";
 
 const inputClass =
   "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
@@ -47,6 +49,11 @@ export default function NewQuotePage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const allowed = await checkCreateAllowed(
+      "quotes",
+      useSalesStore.getState().quotations.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     addQuotation({
       customer: customer.trim(),
@@ -110,6 +117,18 @@ export default function NewQuotePage() {
       }
     >
       <form id="new-quote-form" onSubmit={handleSubmit}>
+        <AiFormFill
+          title="Describe the quote — AI will fill customer + expiry"
+          placeholder="e.g. Quote for Acme Corp, expires April 30 2026"
+          fields={[
+            { key: "customer", label: "Customer" },
+            { key: "expiry", label: "Expiry date", hint: "ISO YYYY-MM-DD" },
+          ]}
+          onApply={(values) => {
+            if (typeof values.customer === "string") setCustomer(values.customer);
+            if (typeof values.expiry === "string") setExpiry(values.expiry);
+          }}
+        />
         <FormSection title="Customer">
           <FormField label="Customer name" htmlFor="quote-customer" required>
             <input
@@ -206,9 +225,9 @@ export default function NewQuotePage() {
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 12px", marginTop: 8,
               fontSize: 12.5, fontWeight: 500,
-              color: "var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.08)",
-              border: "1px dashed rgba(6, 182, 212,0.3)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+              border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 8,
               cursor: "pointer",
               alignSelf: "flex-start",

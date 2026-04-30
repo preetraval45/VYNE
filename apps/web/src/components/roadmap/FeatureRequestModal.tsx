@@ -90,7 +90,7 @@ export function FeatureRequestModal({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "linear-gradient(135deg, #06B6D4 0%, #8B5CF6 100%)",
+            background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, #8B5CF6 100%)",
           }}
         >
           <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>
@@ -219,7 +219,7 @@ export function FeatureRequestModal({
                 padding: "8px 20px",
                 borderRadius: 8,
                 border: "none",
-                background: "linear-gradient(135deg, #06B6D4, #8B5CF6)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), #8B5CF6)",
                 color: "#fff",
                 fontSize: 13,
                 fontWeight: 600,

@@ -42,7 +42,7 @@ const MODULE_META: Record<
   EventModule,
   { label: string; icon: React.ElementType; color: string }
 > = {
-  projects: { label: "Projects", icon: FileText, color: "#06B6D4" },
+  projects: { label: "Projects", icon: FileText, color: "var(--vyne-accent, #06B6D4)" },
   chat: { label: "Chat", icon: MessageSquare, color: "#3B82F6" },
   ops: { label: "ERP", icon: Package, color: "#F59E0B" },
   finance: { label: "Finance", icon: DollarSign, color: "#22C55E" },
@@ -245,7 +245,7 @@ export default function ActivityTimelinePage() {
             gap: 8,
           }}
         >
-          <ActivityIcon size={17} style={{ color: "var(--vyne-purple)" }} />
+          <ActivityIcon size={17} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           Activity timeline
         </h1>
         <p
@@ -545,7 +545,7 @@ export default function ActivityTimelinePage() {
                             <Link
                               href={e.link}
                               style={{
-                                color: "var(--vyne-purple)",
+                                color: "var(--vyne-accent, var(--vyne-purple))",
                                 fontWeight: 600,
                                 textDecoration: "none",
                               }}

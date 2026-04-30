@@ -151,14 +151,14 @@ function StepCompany({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(6, 182, 212,0.1)',
+            background: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Building2 size={28} color="#06B6D4" />
+          <Building2 size={28} color="var(--vyne-accent, #06B6D4)" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Tell us about your company
@@ -236,7 +236,7 @@ function StepCompany({
                   padding: '10px 18px',
                   borderRadius: 10,
                   border: `1.5px solid ${data.size === size ? '#06B6D4' : 'var(--content-border)'}`,
-                  background: data.size === size ? 'rgba(6, 182, 212,0.08)' : 'var(--content-bg)',
+                  background: data.size === size ? 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)' : 'var(--content-bg)',
                   color: data.size === size ? '#06B6D4' : 'var(--text-primary)',
                   fontSize: 14,
                   fontWeight: 600,
@@ -273,7 +273,7 @@ function StepCompany({
                     padding: '11px 14px',
                     borderRadius: 10,
                     border: `1.5px solid ${active ? '#06B6D4' : 'var(--content-border)'}`,
-                    background: active ? 'rgba(6, 182, 212,0.08)' : 'var(--content-bg)',
+                    background: active ? 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)' : 'var(--content-bg)',
                     color: active ? '#06B6D4' : 'var(--text-primary)',
                     fontSize: 14,
                     fontWeight: 500,
@@ -307,14 +307,14 @@ function StepModules({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(6, 182, 212,0.1)',
+            background: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Sparkles size={28} color="#06B6D4" />
+          <Sparkles size={28} color="var(--vyne-accent, #06B6D4)" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Choose your modules
@@ -393,7 +393,7 @@ function StepModules({
                         fontSize: 10,
                         fontWeight: 700,
                         color: '#06B6D4',
-                        background: 'rgba(6, 182, 212,0.1)',
+                        background: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)',
                         padding: '2px 6px',
                         borderRadius: 4,
                       }}
@@ -433,14 +433,14 @@ function StepInvite({
             width: 56,
             height: 56,
             borderRadius: 16,
-            background: 'rgba(6, 182, 212,0.1)',
+            background: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             margin: '0 auto 20px',
           }}
         >
-          <Users size={28} color="#06B6D4" />
+          <Users size={28} color="var(--vyne-accent, #06B6D4)" />
         </div>
         <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
           Invite your team
@@ -546,12 +546,12 @@ function StepDone({ companyName }: { companyName: string }) {
           width: 72,
           height: 72,
           borderRadius: 20,
-          background: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
+          background: 'linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           margin: '0 auto 24px',
-          boxShadow: '0 8px 30px rgba(6, 182, 212,0.3)',
+          boxShadow: '0 8px 30px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)',
         }}
       >
         <PartyPopper size={36} color="#fff" />
@@ -692,7 +692,7 @@ export default function OnboardingPage() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: 'linear-gradient(135deg, #06B6D4, #22D3EE)',
+              background: 'linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -812,13 +812,13 @@ export default function OnboardingPage() {
             padding: '10px 24px',
             borderRadius: 10,
             border: 'none',
-            background: (canAdvance() && !isSaving) ? 'linear-gradient(135deg, #06B6D4, #22D3EE)' : 'var(--content-secondary)',
+            background: (canAdvance() && !isSaving) ? 'linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))' : 'var(--content-secondary)',
             color: (canAdvance() && !isSaving) ? '#fff' : 'var(--text-tertiary)',
             fontSize: 14,
             fontWeight: 600,
             cursor: (canAdvance() && !isSaving) ? 'pointer' : 'default',
             transition: 'all 0.2s',
-            boxShadow: (canAdvance() && !isSaving) ? '0 4px 12px rgba(6, 182, 212,0.3)' : 'none',
+            boxShadow: (canAdvance() && !isSaving) ? '0 4px 12px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)' : 'none',
           }}
         >
           {isSaving ? (

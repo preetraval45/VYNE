@@ -134,7 +134,7 @@ export function GanttChart({ rows, title, dayWidth = 24 }: Props) {
                   width: 8,
                   height: 8,
                   borderRadius: 2,
-                  background: r.color ?? "var(--vyne-purple)",
+                  background: r.color ?? "var(--vyne-accent, var(--vyne-purple))",
                   flexShrink: 0,
                 }}
               />
@@ -225,7 +225,7 @@ export function GanttChart({ rows, title, dayWidth = 24 }: Props) {
                 daysBetween(start, end) + 1,
               );
               const width = widthDays * dayWidth;
-              const color = r.color ?? "var(--vyne-purple)";
+              const color = r.color ?? "var(--vyne-accent, var(--vyne-purple))";
               const progress = Math.min(1, Math.max(0, r.progress ?? 0));
               return (
                 <div

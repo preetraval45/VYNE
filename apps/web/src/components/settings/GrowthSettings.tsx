@@ -292,7 +292,7 @@ export default function GrowthSettings({ onToast }: Props) {
             type="checkbox"
             checked={state.hideVyneBranding}
             onChange={(e) => update("hideVyneBranding", e.target.checked)}
-            style={{ accentColor: "#06B6D4" }}
+            style={{ accentColor: "var(--vyne-accent, #06B6D4)" }}
           />
           Hide &ldquo;Powered by VYNE&rdquo; on customer-facing pages
         </label>
@@ -339,9 +339,9 @@ export default function GrowthSettings({ onToast }: Props) {
             marginTop: 10,
             padding: "7px 14px",
             borderRadius: 8,
-            border: "1px solid var(--vyne-purple)",
+            border: "1px solid var(--vyne-accent, var(--vyne-purple))",
             background: "transparent",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             fontSize: 12,
             fontWeight: 600,
             textDecoration: "none",
@@ -549,9 +549,9 @@ export default function GrowthSettings({ onToast }: Props) {
               gap: 5,
               padding: "8px 12px",
               borderRadius: 7,
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               background: "transparent",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -588,7 +588,7 @@ export default function GrowthSettings({ onToast }: Props) {
             padding: "8px 14px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 12,
             fontWeight: 600,
@@ -627,7 +627,7 @@ export default function GrowthSettings({ onToast }: Props) {
             type="checkbox"
             checked={state.npsEnabled}
             onChange={(e) => update("npsEnabled", e.target.checked)}
-            style={{ accentColor: "#06B6D4" }}
+            style={{ accentColor: "var(--vyne-accent, #06B6D4)" }}
           />
           Enable NPS prompts
         </label>
@@ -640,7 +640,7 @@ export default function GrowthSettings({ onToast }: Props) {
             value={state.npsCadenceDays}
             onChange={(e) => update("npsCadenceDays", Number(e.target.value))}
             aria-label="Survey cadence"
-            style={{ width: "100%", accentColor: "#06B6D4" }}
+            style={{ width: "100%", accentColor: "var(--vyne-accent, #06B6D4)" }}
           />
         </Field>
       </Card>
@@ -660,7 +660,7 @@ export default function GrowthSettings({ onToast }: Props) {
               padding: "5px 12px",
               borderRadius: 7,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 11,
               fontWeight: 600,
@@ -700,7 +700,7 @@ export default function GrowthSettings({ onToast }: Props) {
                     height: 20,
                     borderRadius: 10,
                     background: f.enabled
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "var(--content-border)",
                     border: "none",
                     position: "relative",
@@ -779,7 +779,7 @@ export default function GrowthSettings({ onToast }: Props) {
                     value={f.rollout}
                     onChange={(e) => setRollout(idx, Number(e.target.value))}
                     aria-label={`Rollout for ${f.name}`}
-                    style={{ width: 110, accentColor: "#06B6D4" }}
+                    style={{ width: 110, accentColor: "var(--vyne-accent, #06B6D4)" }}
                   />
                   <span
                     style={{
@@ -889,7 +889,7 @@ function Card({
           gap: 10,
         }}
       >
-        <Icon size={14} style={{ color: "var(--vyne-purple)" }} />
+        <Icon size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 13,

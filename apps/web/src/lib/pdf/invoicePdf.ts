@@ -45,7 +45,7 @@ function money(n: number, currency = "USD"): string {
 }
 
 function renderInvoiceHtml(invoice: InvoicePayload, org: InvoiceOrg): string {
-  const accent = org.accentColor ?? "#06B6D4";
+  const accent = org.accentColor ?? "var(--vyne-accent, #06B6D4)";
   const currency = invoice.currency ?? "USD";
   const subtotal = invoice.lineItems.reduce(
     (s, li) => s + li.quantity * li.unitPrice,

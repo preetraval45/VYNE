@@ -54,7 +54,7 @@ function relative(iso: string): string {
 
 function avatarColor(id: string): string {
   const colors = [
-    "#06B6D4",
+    "var(--vyne-accent, #06B6D4)",
     "#22C55E",
     "#F59E0B",
     "#EF4444",
@@ -161,7 +161,7 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
           borderBottom: "1px solid var(--content-border)",
         }}
       >
-        <MessageCircle size={14} style={{ color: "var(--vyne-purple)" }} />
+        <MessageCircle size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 13,
@@ -273,7 +273,7 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
               gap: 8,
               padding: "4px 8px",
               borderRadius: 6,
-              background: "rgba(6, 182, 212,0.08)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
               fontSize: 11,
               color: "var(--text-secondary)",
             }}
@@ -342,7 +342,7 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
               borderRadius: 8,
               border: "none",
               background: draft.trim()
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               color: "#fff",
               fontSize: 12,

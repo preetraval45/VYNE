@@ -235,9 +235,9 @@ export function ThreadPanel({
             gap: 5,
             padding: "5px 12px",
             borderRadius: 7,
-            border: "1px solid var(--vyne-purple)",
-            background: notes ? "rgba(6, 182, 212,0.08)" : "transparent",
-            color: "var(--vyne-purple)",
+            border: "1px solid var(--vyne-accent, var(--vyne-purple))",
+            background: notes ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             fontSize: 11,
             fontWeight: 600,
             cursor: notesLoading ? "default" : "pointer",
@@ -327,7 +327,7 @@ export function ThreadPanel({
           <p
             style={{
               fontSize: 11,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               marginTop: 8,
               paddingLeft: 40,
             }}
@@ -359,7 +359,7 @@ export function ThreadPanel({
               gap: 6,
             }}
           >
-            <FileText size={13} style={{ color: "var(--vyne-purple)" }} />
+            <FileText size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             <span
               style={{
                 fontSize: 12,
@@ -391,13 +391,13 @@ export function ThreadPanel({
                 gap: 4,
                 padding: "3px 8px",
                 borderRadius: 5,
-                border: "1px solid var(--vyne-purple)",
+                border: "1px solid var(--vyne-accent, var(--vyne-purple))",
                 background: copied
                   ? "var(--badge-success-bg)"
                   : "var(--content-bg)",
                 color: copied
                   ? "var(--badge-success-text)"
-                  : "var(--vyne-purple)",
+                  : "var(--vyne-accent, var(--vyne-purple))",
                 fontSize: 10,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -490,7 +490,7 @@ export function ThreadPanel({
                         width: 10,
                         height: 10,
                         borderRadius: 3,
-                        border: "1.5px solid var(--vyne-purple)",
+                        border: "1.5px solid var(--vyne-accent, var(--vyne-purple))",
                       }}
                     />
                     <strong>{a.owner}</strong> — {a.task}
@@ -543,14 +543,14 @@ export function ThreadPanel({
           >
             <Sparkles
               size={11}
-              style={{ color: "var(--vyne-purple)", marginTop: 2, flexShrink: 0 }}
+              style={{ color: "var(--vyne-accent, var(--vyne-purple))", marginTop: 2, flexShrink: 0 }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   textTransform: "uppercase",
                   letterSpacing: 0.4,
                   marginBottom: 2,

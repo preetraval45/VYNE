@@ -123,7 +123,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     name: "Preet R.",
     initials: "PR",
     role: "Founder / Lead",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
     email: "preet@vyne.app",
   },
   {
@@ -181,7 +181,7 @@ export const DEMO_PROJECT_DETAILS: ProjectDetail[] = [
     identifier: "VYNE",
     description:
       "Core SaaS platform — dashboard, APIs, real-time features, and integrations.",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
     icon: "🚀",
     status: "active",
     memberIds: ["u1", "u2", "u3", "u4", "u5", "u6"],

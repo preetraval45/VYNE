@@ -116,7 +116,7 @@ export function DocTree({
               className="group flex items-center gap-1 py-[3px] px-1 rounded-md cursor-pointer select-none"
               style={{
                 paddingLeft,
-                background: isActive ? "rgba(6, 182, 212,0.08)" : undefined,
+                background: isActive ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : undefined,
               }}
               onClick={() => onSelect(doc.id)}
             >
@@ -221,7 +221,7 @@ export function DocTree({
       {/* New Page button at root level */}
       {depth === 0 && (
         <button
-          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[var(--text-tertiary)] hover:text-[#06B6D4] hover:bg-[rgba(6, 182, 212,0.06)] transition-colors"
+          className="w-full flex items-center gap-2 px-2 py-1.5 mt-1 rounded-md text-[12px] text-[var(--text-tertiary)] hover:text-[#06B6D4] hover:bg-[rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)] transition-colors"
           onClick={onCreateRoot}
         >
           <Plus size={14} />

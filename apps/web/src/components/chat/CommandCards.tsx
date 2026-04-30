@@ -181,9 +181,10 @@ function InvoiceCard({ args }: Readonly<{ args: string }>) {
           {invNum} for <strong>{contact}</strong> created as draft.
         </span>
         <button
+          className="tap-44"
           style={{
             fontSize: 11,
-            color: "#06B6D4",
+            color: "var(--vyne-accent, #06B6D4)",
             background: "transparent",
             border: "none",
             cursor: "pointer",
@@ -345,7 +346,7 @@ function PollCard({
                 style={{
                   height: "100%",
                   width: `${pct}%`,
-                  background: "#06B6D4",
+                  background: "var(--vyne-accent, #06B6D4)",
                   borderRadius: 2,
                   transition: "width 0.3s",
                 }}
@@ -749,9 +750,117 @@ export function cmdOutput(
   if (msg.cmd === "log-call")
     return <LogCallCard args={msg.args.trim()} apiResult={msg.apiResult} />;
   if (msg.cmd === "summarize") return null;
+  if (msg.cmd === "ask") return <AskCard msg={msg} />;
   return (
     <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
       Command /{msg.cmd} executed.
     </span>
+  );
+}
+
+function AskCard({ msg }: { msg: LocalMsg }) {
+  const result = msg.apiResult?.data as
+    | { answer?: string; citations?: Array<{ kind: string; id: string; label: string }> }
+    | undefined;
+  const answer = result?.answer ?? msg.apiResult?.message ?? "";
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10) 0%, rgba(124,77,255,0.06) 100%)",
+        border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)",
+        borderRadius: 12,
+        padding: "12px 14px",
+        position: "relative",
+        maxWidth: 540,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 10.5,
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--vyne-teal)",
+          marginBottom: 6,
+        }}
+      >
+        👁 Only you can see this · Vyne AI inline
+      </div>
+      <div
+        style={{
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+          fontStyle: "italic",
+        }}
+      >
+        /ask {msg.args}
+      </div>
+      <div
+        style={{
+          fontSize: 13,
+          color: "var(--text-primary)",
+          lineHeight: 1.55,
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {answer}
+      </div>
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          marginTop: 8,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            globalThis.dispatchEvent(
+              new CustomEvent("vyne:share-ask", {
+                detail: {
+                  question: msg.args,
+                  answer,
+                },
+              }),
+            );
+          }}
+          style={{
+            padding: "4px 10px",
+            borderRadius: 999,
+            border: "none",
+            background: "var(--vyne-teal)",
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Share with channel
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            navigator.clipboard.writeText(answer);
+          }}
+          style={{
+            padding: "4px 10px",
+            borderRadius: 999,
+            border: "1px solid var(--content-border)",
+            background: "var(--content-secondary)",
+            color: "var(--text-secondary)",
+            fontSize: 11,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Copy
+        </button>
+      </div>
+    </div>
   );
 }

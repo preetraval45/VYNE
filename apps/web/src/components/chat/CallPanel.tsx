@@ -102,7 +102,7 @@ export function CallPanel({ call, minimized, onToggleMinimize }: CallPanelProps)
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
           }}
         >
           {call.mode === "video" ? <Video size={15} /> : <Mic size={15} />}

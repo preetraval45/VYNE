@@ -299,7 +299,7 @@ export default function DashboardPage() {
             borderRadius: 8,
             border: "none",
             background: dirty
-              ? "var(--vyne-purple)"
+              ? "var(--vyne-accent, var(--vyne-purple))"
               : "var(--content-border)",
             color: "#fff",
             fontSize: 12,
@@ -312,6 +312,7 @@ export default function DashboardPage() {
       </header>
 
       <div
+        className="two-pane-layout"
         style={{
           display: "grid",
           gridTemplateColumns: "240px 1fr",
@@ -371,7 +372,7 @@ export default function DashboardPage() {
                   <Icon
                     size={14}
                     style={{
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                       flexShrink: 0,
                       marginTop: 2,
                     }}
@@ -437,6 +438,52 @@ export default function DashboardPage() {
               )),
             )}
 
+            {/* Empty state when no widgets placed */}
+            {sorted.length === 0 && (
+              <div
+                style={{
+                  gridColumn: `1 / span ${COLS}`,
+                  gridRow: "1 / span 4",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: 10,
+                  padding: 32,
+                  border: "1px dashed var(--content-border)",
+                  borderRadius: 14,
+                  background: "var(--content-secondary)",
+                  color: "var(--text-secondary)",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 32, opacity: 0.5 }}>📊</div>
+                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
+                  Your dashboard is empty
+                </h3>
+                <p style={{ margin: 0, fontSize: 13, maxWidth: 360 }}>
+                  Drag a widget from the palette on the left, or click Reset to start with the default layout.
+                </p>
+                <button
+                  type="button"
+                  onClick={resetDashboard}
+                  style={{
+                    marginTop: 6,
+                    padding: "8px 16px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "var(--vyne-accent, #5B5BD6)",
+                    color: "#fff",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Reset to default layout
+                </button>
+              </div>
+            )}
+
             {/* Placed widgets */}
             {sorted.map((w) => (
               <Tile
@@ -493,9 +540,9 @@ function DropSlot({
         gridRow: row + 1,
         borderRadius: 10,
         border: dragging
-          ? `2px dashed ${over ? "var(--vyne-purple)" : "var(--content-border)"}`
+          ? `2px dashed ${over ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`
           : "2px dashed transparent",
-        background: over ? "rgba(6, 182, 212,0.08)" : "transparent",
+        background: over ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
         transition: "background 0.1s, border-color 0.1s",
         pointerEvents: dragging ? "auto" : "none",
       }}
@@ -549,7 +596,7 @@ function Tile({
           size={13}
           style={{ color: "var(--text-tertiary)", cursor: "grab" }}
         />
-        <Icon size={13} style={{ color: "var(--vyne-purple)" }} />
+        <Icon size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 11,
@@ -724,7 +771,7 @@ function RevenueChart() {
               height: `${(v / max) * 100}%`,
               minHeight: 12,
               background:
-                "linear-gradient(180deg, #06B6D4, rgba(6, 182, 212,0.4))",
+                "linear-gradient(180deg, var(--vyne-accent, #06B6D4), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4))",
               borderRadius: "4px 4px 0 0",
             }}
           />
@@ -890,7 +937,7 @@ function AiSummary() {
           alignItems: "center",
           gap: 6,
           marginBottom: 6,
-          color: "var(--vyne-purple)",
+          color: "var(--vyne-accent, var(--vyne-purple))",
           fontSize: 11,
           fontWeight: 700,
           textTransform: "uppercase",
@@ -917,7 +964,7 @@ function AiSummary() {
 
 function TeamPresence() {
   const team = [
-    { name: "Preet", status: "online", color: "#06B6D4" },
+    { name: "Preet", status: "online", color: "var(--vyne-accent, #06B6D4)" },
     { name: "Sarah", status: "online", color: "#22C55E" },
     { name: "Tony", status: "away", color: "#F59E0B" },
     { name: "Maya", status: "online", color: "#EC4899" },

@@ -30,7 +30,7 @@ export function EmptyState({
           className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
           style={{
             background: "var(--alert-purple-bg)",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
           }}
         >
           {icon}

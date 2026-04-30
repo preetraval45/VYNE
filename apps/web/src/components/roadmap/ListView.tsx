@@ -65,7 +65,7 @@ function SortHeader({
         fontSize: 11,
         fontWeight: 600,
         color: isActive
-          ? "#06B6D4"
+          ? "var(--vyne-accent, #06B6D4)"
           : "var(--text-secondary, var(--text-secondary))",
         textTransform: "uppercase",
         letterSpacing: "0.05em",
@@ -311,7 +311,7 @@ export function ListView({ features }: ListViewProps) {
                       textAlign: "right",
                       fontWeight: 600,
                       fontSize: 13,
-                      color: "#06B6D4",
+                      color: "var(--vyne-accent, #06B6D4)",
                     }}
                   >
                     {f.votes}

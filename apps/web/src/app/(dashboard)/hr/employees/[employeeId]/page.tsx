@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Mail, Phone, MessageSquare, Briefcase, Calendar, User, Users as UsersIcon } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MessageSquare, Briefcase, Calendar, User, Users as UsersIcon, Sparkles } from "lucide-react";
 import { EMPLOYEES } from "@/lib/fixtures/hr";
+import { computeAccrual } from "@/lib/hrAccrual";
+import toast from "react-hot-toast";
 
 export default function EmployeeDetailPage() {
   const params = useParams<{ employeeId: string }>();
@@ -23,7 +26,7 @@ export default function EmployeeDetailPage() {
             display: "inline-block",
             padding: "8px 14px",
             borderRadius: 8,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -114,7 +117,7 @@ export default function EmployeeDetailPage() {
       </header>
 
       <div className="flex-1 overflow-auto content-scroll" style={{ padding: 28 }}>
-        <div style={{ maxWidth: 960, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 320px", gap: 24, alignItems: "start" }}>
+        <div className="two-pane-layout" style={{ maxWidth: 960, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 320px", gap: 24, alignItems: "start" }}>
           <div>
             <Section title="Contact">
               <InfoRow icon={<Mail size={14} />} label="Email" value={emp.email} />
@@ -142,6 +145,24 @@ export default function EmployeeDetailPage() {
               <InfoRow label="Personal" value={`${emp.personalBalance} days`} />
               <InfoRow label="Used this year" value={`${emp.usedLeaveThisYear} days`} />
             </Section>
+
+            {(() => {
+              const acc = computeAccrual(emp.joined);
+              const ytdPct = Math.round(acc.ytdFraction * 100);
+              return (
+                <Section title={`Accrual · ${acc.tenureYears}y tenure`}>
+                  <InfoRow
+                    label={`Vacation (${acc.vacationAnnual}/yr)`}
+                    value={`${acc.vacationAccruedYTD} accrued · ${Math.max(0, acc.vacationAccruedYTD - emp.usedLeaveThisYear).toFixed(1)} available`}
+                  />
+                  <InfoRow label="Sick (5/yr)" value={`${acc.sickAccruedYTD} accrued`} />
+                  <InfoRow label="Personal (3/yr)" value={`${acc.personalAccruedYTD} accrued`} />
+                  <InfoRow label="Year progress" value={`${ytdPct}%`} />
+                </Section>
+              );
+            })()}
+
+            <OneOnOnePrepCard employee={emp} />
           </div>
 
           <aside style={{ position: "sticky", top: 24 }}>
@@ -291,5 +312,143 @@ function InfoRow({
         {value}
       </div>
     </div>
+  );
+}
+
+// ── AI 1:1 prep ─────────────────────────────────────────────────
+// Generates 5 talking points for a manager check-in. Cached per
+// (employee, day) in localStorage so it doesn't re-call AI on every
+// visit during the same day.
+
+interface OneOnOneEmp {
+  id: string;
+  name: string;
+  title: string;
+  department: string;
+  joined: string;
+  status: string;
+}
+
+function OneOnOnePrepCard({ employee }: { employee: OneOnOneEmp }) {
+  const [text, setText] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function generate() {
+    const cacheKey = `vyne-1on1-${employee.id}-${new Date().toISOString().slice(0, 10)}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setText(cached);
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question:
+            "Generate 5 concrete talking points for a 1:1 manager check-in. Mix recent wins, blockers, growth questions. Return as a markdown numbered list. Tight, specific to the employee, no fluff.",
+          context: { employee },
+        }),
+      });
+      const body = (await res.json()) as { answer?: string };
+      const ans = (body.answer ?? "").trim();
+      if (!ans) {
+        toast.error("AI returned empty.");
+        return;
+      }
+      setText(ans);
+      try {
+        localStorage.setItem(cacheKey, ans);
+      } catch {
+        /* ignore */
+      }
+    } catch (err) {
+      toast.error("Couldn't reach AI: " + (err instanceof Error ? err.message : "unknown"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section
+      style={{
+        background: "var(--vyne-accent-soft, var(--content-secondary))",
+        border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+        borderRadius: 14,
+        padding: 18,
+        marginTop: 16,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 7,
+            background: "var(--vyne-accent, #5B5BD6)",
+            color: "#fff",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Sparkles size={13} />
+        </span>
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          AI 1:1 prep
+        </h2>
+      </div>
+      <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-secondary)" }}>
+        Talking points tailored to {employee.name.split(" ")[0]} for your next check-in.
+      </p>
+      <button
+        type="button"
+        onClick={generate}
+        disabled={loading}
+        aria-busy={loading}
+        style={{
+          padding: "6px 12px",
+          fontSize: 12,
+          fontWeight: 600,
+          borderRadius: 8,
+          border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+          background: "var(--content-bg)",
+          color: "var(--vyne-accent-deep, var(--text-primary))",
+          cursor: loading ? "wait" : "pointer",
+        }}
+      >
+        {loading ? "Generating…" : text ? "Regenerate" : "Generate talking points"}
+      </button>
+      {text && (
+        <div
+          style={{
+            marginTop: 10,
+            padding: "10px 12px",
+            borderRadius: 10,
+            background: "var(--content-bg)",
+            border: "1px solid var(--content-border)",
+            fontSize: 13,
+            lineHeight: 1.6,
+            color: "var(--text-secondary)",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {text}
+        </div>
+      )}
+    </section>
   );
 }

@@ -182,7 +182,7 @@ export default function HelpCentrePage() {
           style={{
             fontSize: 11,
             fontWeight: 700,
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             textTransform: "uppercase",
             letterSpacing: "0.07em",
           }}
@@ -241,7 +241,7 @@ export default function HelpCentrePage() {
           <Link
             href="/chat"
             style={{
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontWeight: 600,
               textDecoration: "none",
               display: "inline-flex",
@@ -274,7 +274,7 @@ export default function HelpCentrePage() {
             marginBottom: 6,
           }}
         >
-          <LifeBuoy size={22} style={{ color: "var(--vyne-purple)" }} />
+          <LifeBuoy size={22} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           <h1
             style={{
               margin: 0,
@@ -341,7 +341,7 @@ export default function HelpCentrePage() {
           }}
         >
           {[
-            { label: "Ask AI", desc: "Type `?` in ⌘K", icon: Zap, href: "/ai", color: "#06B6D4" },
+            { label: "Ask AI", desc: "Type `?` in ⌘K", icon: Zap, href: "/ai", color: "var(--vyne-accent, #06B6D4)" },
             { label: "Docs", desc: "Long-form guides", icon: BookOpen, href: "/docs", color: "#22C55E" },
             { label: "Community", desc: "#help in chat", icon: MessageCircle, href: "/chat", color: "#3B82F6" },
             { label: "Email us", desc: "support@vyne.dev", icon: Mail, href: "mailto:support@vyne.dev", color: "#F59E0B" },

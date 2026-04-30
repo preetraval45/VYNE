@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useFinanceStore } from "@/lib/stores/finance";
+import { MOCK_ACCOUNTS } from "@/lib/fixtures/finance";
+import type { ERPJournalEntry } from "@/lib/api/client";
 
 // ─── Types ────────────────────────────────────────────────────────
 export type CustomerStatus = "Active" | "Inactive";
@@ -694,10 +697,12 @@ export const useInvoicingStore = create<InvoicingStore>()(
         })),
 
       // ── Invoices ───────────────────────────────────
-      addInvoice: (data) =>
+      addInvoice: (data) => {
+        const amount = data.items.reduce((s, li) => s + li.qty * li.rate, 0);
+        const today = new Date().toISOString().slice(0, 10);
+        let num = "";
         set((state) => {
-          const amount = data.items.reduce((s, li) => s + li.qty * li.rate, 0);
-          const num = nextNumber(state.invoices, "INV-2026-");
+          num = nextNumber(state.invoices, "INV-2026-");
           return {
             invoices: [
               ...state.invoices,
@@ -705,7 +710,7 @@ export const useInvoicingStore = create<InvoicingStore>()(
                 id: genId("i"),
                 number: num,
                 customer: data.customer,
-                date: new Date().toISOString().slice(0, 10),
+                date: today,
                 dueDate: data.dueDate,
                 amount,
                 items: data.items,
@@ -714,7 +719,33 @@ export const useInvoicingStore = create<InvoicingStore>()(
               },
             ],
           };
-        }),
+        });
+
+        // Wire to general ledger: Dr Accounts Receivable / Cr Sales Revenue
+        const finance = useFinanceStore.getState();
+        const arAccount =
+          MOCK_ACCOUNTS.find((a) => a.name === "Accounts Receivable")?.name ??
+          "Accounts Receivable";
+        const revenueAccount =
+          MOCK_ACCOUNTS.find(
+            (a) => a.name === "Sales Revenue" || a.name === "Revenue",
+          )?.name ?? "Revenue";
+        const memo = `Invoice ${num} — ${data.customer}`;
+        const journalEntry: ERPJournalEntry = {
+          id: `j_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          entryNumber: `JE-${String(finance.journalEntries.length + 1).padStart(3, "0")}`,
+          description: memo,
+          postingDate: new Date(today).toISOString(),
+          status: "posted",
+          totalDebits: amount,
+          memo,
+          lines: [
+            { account: arAccount, debit: amount, credit: 0 },
+            { account: revenueAccount, debit: 0, credit: amount },
+          ],
+        };
+        finance.addJournalEntry(journalEntry);
+      },
 
       updateInvoice: (id, data) =>
         set((state) => ({

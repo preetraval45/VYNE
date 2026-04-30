@@ -151,12 +151,12 @@ export function DailyDigestCard() {
       initial={{ y: 8, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       style={{
-        padding: 18,
+        padding: data ? 16 : 12,
         borderRadius: 14,
         background:
-          "linear-gradient(135deg, rgba(108, 71, 255, 0.1), rgba(6, 182, 212, 0.06))",
+          "linear-gradient(135deg, rgba(108, 71, 255, 0.1), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06))",
         border: "1px solid rgba(108, 71, 255, 0.25)",
-        marginBottom: 18,
+        marginBottom: 16,
       }}
     >
       <div
@@ -164,7 +164,7 @@ export function DailyDigestCard() {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          marginBottom: 8,
+          marginBottom: data ? 8 : 0,
         }}
       >
         <div
@@ -173,7 +173,7 @@ export function DailyDigestCard() {
             height: 32,
             borderRadius: 9,
             background: "rgba(108, 71, 255, 0.18)",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -186,7 +186,7 @@ export function DailyDigestCard() {
             style={{
               fontSize: 10,
               fontWeight: 700,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               textTransform: "uppercase",
               letterSpacing: 0.5,
             }}
@@ -201,13 +201,16 @@ export function DailyDigestCard() {
               letterSpacing: "-0.005em",
             }}
           >
-            {data?.headline ?? (loading ? "Generating digest…" : "Today")}
+            {data?.headline ??
+              (loading
+                ? "Generating digest…"
+                : "Click refresh to brief me on today")}
           </div>
         </div>
         <button
           type="button"
           onClick={() => generateDigest(true)}
-          disabled={loading}
+          disabled={loading} aria-busy={loading}
           aria-label="Refresh digest"
           title="Refresh"
           style={{
@@ -273,7 +276,7 @@ export function DailyDigestCard() {
                     width: 4,
                     height: 4,
                     borderRadius: "50%",
-                    background: "var(--vyne-purple)",
+                    background: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 />
                 {b}
@@ -303,19 +306,7 @@ export function DailyDigestCard() {
             </div>
           )}
         </>
-      ) : (
-        <div
-          style={{
-            fontSize: 12,
-            color: "var(--text-tertiary)",
-            fontStyle: "italic",
-          }}
-        >
-          {loading
-            ? "Asking VYNE AI to summarize today…"
-            : "Click refresh to generate today's digest."}
-        </div>
-      )}
+      ) : null}
       <style>
         {`@keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }`}
       </style>

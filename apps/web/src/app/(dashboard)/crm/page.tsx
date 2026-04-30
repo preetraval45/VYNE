@@ -25,6 +25,9 @@ import {
 import { erpApi, type ERPCustomer } from "@/lib/api/client";
 import { useCRMStore } from "@/lib/stores/crm";
 import { STAGES, type Stage, type Deal } from "@/lib/fixtures/crm";
+import { useListKeyboardNav } from "@/hooks/useListKeyboardNav";
+import { undoableDelete } from "@/lib/undo";
+import { EmptyState } from "@/components/shared/EmptyState";
 import {
   DetailPanel,
   DetailSection,
@@ -119,7 +122,7 @@ function daysSince(isoDate: string): number {
 
 function pillBg(isActive: boolean, s: Stage | "All"): string {
   if (!isActive) return "var(--content-bg-secondary)";
-  if (s === "All") return "rgba(6, 182, 212,0.1)";
+  if (s === "All") return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)";
   return stageBg(s);
 }
 
@@ -401,7 +404,7 @@ function DealsTableTab({
           {(["All", ...STAGES] as Array<Stage | "All">).map((s) => {
             const isActive = stageFilter === s;
             const pillColor =
-              s === "All" ? "var(--vyne-purple)" : stageColor(s);
+              s === "All" ? "var(--vyne-accent, var(--vyne-purple))" : stageColor(s);
             return (
               <button
                 key={s}
@@ -450,7 +453,7 @@ function DealsTableTab({
           border: "1px solid var(--content-border)",
         }}
       >
-        <table className="w-full border-collapse">
+        <table className="m-cards w-full border-collapse">
           <thead>
             <tr className="bg-[var(--table-header-bg)]">
               <th className={thClass} onClick={() => toggleSort("company")}>
@@ -494,6 +497,31 @@ function DealsTableTab({
                     (ev.currentTarget as HTMLTableRowElement).style.background =
                       "transparent";
                   }}
+                  onTouchStart={(e) => {
+                    const tr = e.currentTarget;
+                    const timer = window.setTimeout(() => {
+                      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                        navigator.vibrate?.(10);
+                      }
+                      onDealClick(deal);
+                    }, 480);
+                    (tr as unknown as { _vyneLP?: number })._vyneLP = timer;
+                  }}
+                  onTouchEnd={(e) => {
+                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
+                    tr._vyneLP = undefined;
+                  }}
+                  onTouchMove={(e) => {
+                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
+                    tr._vyneLP = undefined;
+                  }}
+                  onTouchCancel={(e) => {
+                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
+                    tr._vyneLP = undefined;
+                  }}
                 >
                   <td className="px-[14px] py-[10px]">
                     <span
@@ -515,7 +543,7 @@ function DealsTableTab({
                           toast.success(`Renamed to "${v}"`);
                         }}
                         label="Company"
-                        style={{ color: "var(--vyne-purple)", fontWeight: 700 }}
+                        style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontWeight: 700 }}
                       />
                     </span>
                   </td>
@@ -670,8 +698,8 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
             label: "Pipeline Total",
             value: fmt(totalPipeline),
             sub: "active deals excl. lost",
-            color: "var(--vyne-purple)",
-            bg: "rgba(6, 182, 212,0.08)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
+            bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
           },
           {
             label: "Expected Close (This Month)",
@@ -818,10 +846,31 @@ function CRMPageInner() {
   const deals = useCRMStore((s) => s.deals);
   const setDeals = useCRMStore((s) => s.setDeals);
   const updateDealInStore = useCRMStore((s) => s.updateDeal);
+  const deleteDealFromStore = useCRMStore((s) => s.deleteDeal);
   const detail = useDetailParam();
   const selectedDeal = detail.id
     ? deals.find((d) => d.id === detail.id)
     : undefined;
+
+  // j/k row navigation, e/Enter to open the focused deal, Backspace to
+  // delete (with 5s undo). Disabled while typing in inputs.
+  useListKeyboardNav({
+    count: deals.length,
+    onOpen: (idx) => {
+      const d = deals[idx];
+      if (d) detail.open(d.id);
+    },
+    onDelete: (idx) => {
+      const d = deals[idx];
+      if (!d) return;
+      const snapshot = { ...d };
+      undoableDelete({
+        label: `Deleted deal — ${snapshot.company}`,
+        mutate: () => deleteDealFromStore(snapshot.id),
+        restore: () => useCRMStore.getState().addDeal(snapshot),
+      });
+    },
+  });
 
   const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
     "pipeline",
@@ -943,22 +992,34 @@ function CRMPageInner() {
           overflowX: tab === "pipeline" ? "auto" : "hidden",
         }}
       >
-        {tab === "pipeline" && (
-          <PipelineTab
-            deals={deals}
-            onDealClick={openDeal}
-            onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
+        {deals.length === 0 ? (
+          <EmptyState
+            icon={<TrendingUp size={20} />}
+            title="No deals yet"
+            description="Track your pipeline by creating a first deal — or have Vyne AI draft it for you in seconds."
+            primary={{ label: "New deal", href: "/crm/deals/new" }}
+            aiPrompt="Create a deal for "
           />
+        ) : (
+          <>
+            {tab === "pipeline" && (
+              <PipelineTab
+                deals={deals}
+                onDealClick={openDeal}
+                onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
+              />
+            )}
+            {tab === "table" && (
+              <DealsTableTab
+                deals={deals}
+                onDealClick={openDeal}
+                onMarkWon={handleMarkWon}
+                onMarkLost={handleMarkLost}
+              />
+            )}
+            {tab === "forecasting" && <ForecastingTab deals={deals} />}
+          </>
         )}
-        {tab === "table" && (
-          <DealsTableTab
-            deals={deals}
-            onDealClick={openDeal}
-            onMarkWon={handleMarkWon}
-            onMarkLost={handleMarkLost}
-          />
-        )}
-        {tab === "forecasting" && <ForecastingTab deals={deals} />}
       </div>
 
       {/* Toast */}

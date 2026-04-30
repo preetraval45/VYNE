@@ -44,9 +44,9 @@ function ViewToggleButton({
         border: "none",
         fontSize: 12,
         fontWeight: active ? 600 : 400,
-        background: active ? "rgba(6, 182, 212,0.1)" : "transparent",
+        background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "transparent",
         color: active
-          ? "#06B6D4"
+          ? "var(--vyne-accent, #06B6D4)"
           : "var(--text-secondary, var(--text-secondary))",
         cursor: "pointer",
         transition: "all 0.15s ease",
@@ -79,7 +79,7 @@ function FilterPill({
         fontSize: 11,
         fontWeight: active ? 600 : 400,
         background: active
-          ? "#06B6D4"
+          ? "var(--vyne-accent, #06B6D4)"
           : "var(--content-secondary, var(--content-bg-secondary))",
         color: active ? "#fff" : "var(--text-secondary, var(--text-secondary))",
         border: "none",
@@ -221,7 +221,7 @@ export default function RoadmapPage() {
       <div
         style={{
           background:
-            "linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #7C3AED 100%)",
+            "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, #8B5CF6 50%, #7C3AED 100%)",
           padding: "20px 28px 18px",
           flexShrink: 0,
         }}
@@ -474,7 +474,7 @@ export default function RoadmapPage() {
         >
           <span>
             Showing{" "}
-            <strong style={{ color: "#06B6D4" }}>{filtered.length}</strong> of{" "}
+            <strong style={{ color: "var(--vyne-accent, #06B6D4)" }}>{filtered.length}</strong> of{" "}
             {FEATURES.length} features
           </span>
           <button
@@ -488,7 +488,7 @@ export default function RoadmapPage() {
               border: "none",
               cursor: "pointer",
               fontSize: 11,
-              color: "#06B6D4",
+              color: "var(--vyne-accent, #06B6D4)",
               fontWeight: 500,
               padding: 0,
               textDecoration: "underline",
@@ -496,6 +496,7 @@ export default function RoadmapPage() {
           >
             Clear filters
           </button>
+          <RoadmapClusterButton features={filtered} />
         </div>
       )}
 
@@ -525,5 +526,166 @@ export default function RoadmapPage() {
         onSubmit={handleFeatureRequest}
       />
     </div>
+  );
+}
+
+// ── RoadmapClusterButton ────────────────────────────────────────
+// Sends the filtered feature titles + descriptions to /api/ai/ask
+// asking for thematic clusters. Renders the result as an inline list
+// the PM can use to spot duplicates and prioritise. Day-cached.
+
+interface ClusterFeature {
+  id: string;
+  title: string;
+  description?: string;
+  module?: string;
+}
+
+function RoadmapClusterButton({ features }: { features: ClusterFeature[] }) {
+  const [clusters, setClusters] = useState<Array<{ theme: string; ids: string[] }> | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  async function run() {
+    if (features.length === 0) return;
+    const cacheKey = `vyne-roadmap-clusters-${new Date().toISOString().slice(0, 10)}-${features.length}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setClusters(JSON.parse(cached) as Array<{ theme: string; ids: string[] }>);
+        setOpen(true);
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question:
+            "Group the features in CONTEXT into 3-7 thematic clusters. Output ONLY a JSON array: [{theme: string, ids: string[]}]. ids must be valid feature ids from CONTEXT. No prose.",
+          context: {
+            features: features.slice(0, 80).map((f) => ({
+              id: f.id,
+              title: f.title,
+              description: f.description?.slice(0, 200),
+              module: f.module,
+            })),
+          },
+        }),
+      });
+      const body = (await res.json()) as { answer?: string };
+      const raw = (body.answer ?? "").trim();
+      const start = raw.indexOf("[");
+      const end = raw.lastIndexOf("]");
+      if (start === -1 || end === -1) throw new Error("no JSON array");
+      const parsed = JSON.parse(raw.slice(start, end + 1)) as Array<{ theme: string; ids: string[] }>;
+      const clean = parsed.filter((c) => c?.theme && Array.isArray(c.ids));
+      setClusters(clean);
+      setOpen(true);
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(clean));
+      } catch {
+        // ignore
+      }
+    } catch {
+      setClusters([]);
+      setOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={run}
+        disabled={loading || features.length === 0}
+        aria-busy={loading}
+        style={{
+          background: "none",
+          border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+          cursor: features.length === 0 ? "not-allowed" : "pointer",
+          fontSize: 11,
+          color: "var(--vyne-accent-deep, var(--vyne-accent, #5B5BD6))",
+          fontWeight: 600,
+          padding: "3px 9px",
+          borderRadius: 6,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        ✨ {loading ? "Clustering…" : "AI cluster"}
+      </button>
+      {open && clusters !== null && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+          onClick={() => setOpen(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              borderRadius: 14,
+              padding: 22,
+              width: "min(560px, 92vw)",
+              maxHeight: "80vh",
+              overflowY: "auto",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "var(--text-primary)" }}>
+                Roadmap clusters
+              </h2>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  fontSize: 18,
+                  color: "var(--text-tertiary)",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            {clusters.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)" }}>
+                Couldn&apos;t cluster — AI returned no usable response.
+              </p>
+            ) : (
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                {clusters.map((c, i) => (
+                  <li key={`${c.theme}-${i}`} style={{ padding: "10px 12px", border: "1px solid var(--content-border)", borderRadius: 10 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
+                      {c.theme} <span style={{ fontWeight: 400, color: "var(--text-tertiary)" }}>· {c.ids.length}</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+                      {c.ids.slice(0, 6).join(", ")}{c.ids.length > 6 ? `, +${c.ids.length - 6} more` : ""}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

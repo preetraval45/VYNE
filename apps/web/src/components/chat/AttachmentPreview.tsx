@@ -23,7 +23,7 @@ function formatSize(bytes: number): string {
 
 function getFileIcon(type: string) {
   if (type.startsWith("image/"))
-    return <ImageIcon size={16} style={{ color: "#06B6D4" }} />;
+    return <ImageIcon size={16} style={{ color: "var(--vyne-accent, #06B6D4)" }} />;
   if (type === "application/pdf")
     return <FileText size={16} style={{ color: "#E74C3C" }} />;
   if (
@@ -89,7 +89,7 @@ export function AttachmentPreview({
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "rgba(6, 182, 212,0.1)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -134,7 +134,7 @@ export function AttachmentPreview({
                   style={{
                     height: "100%",
                     width: `${u.progress}%`,
-                    background: "#06B6D4",
+                    background: "var(--vyne-accent, #06B6D4)",
                     borderRadius: 2,
                     transition: "width 0.2s ease",
                   }}
@@ -202,7 +202,7 @@ export function AttachmentPreview({
                   width: 28,
                   height: 28,
                   borderRadius: 6,
-                  background: "rgba(6, 182, 212,0.08)",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

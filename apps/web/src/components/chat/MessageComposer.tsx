@@ -49,6 +49,7 @@ export function MessageComposer({
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionIdx, setMentionIdx] = useState(0);
   const [capturing, setCapturing] = useState<"audio" | "video" | null>(null);
+  const [critical, setCritical] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -80,6 +81,15 @@ export function MessageComposer({
     const filename = `${prefix}-${Date.now()}.${extension}`;
     const file = new File([media.blob], filename, { type: media.mimeType });
     uploadFiles([file]);
+    // If the recording captured a Web Speech API transcript, prefill the
+    // composer with it so the user can edit + send (or just send) it
+    // alongside the audio attachment.
+    if (media.transcript && media.transcript.length > 0) {
+      setText((prev) => {
+        const sep = prev.trim() ? "\n\n" : "";
+        return `${prev}${sep}🎙 ${media.transcript}`;
+      });
+    }
     setCapturing(null);
   }
 
@@ -97,6 +107,21 @@ export function MessageComposer({
       if (onDroppedFilesRef) onDroppedFilesRef.current = null;
     };
   }, [onDroppedFilesRef, uploadFiles]);
+
+  // Listen for the global drop overlay's "vyne:files-dropped" event
+  // (fired by GlobalDropZone whenever the user drags files anywhere
+  // over the dashboard). The composer is the most-likely intent for a
+  // drop while on /chat; we attach the files as if the user clicked
+  // the paperclip + picked them.
+  useEffect(() => {
+    function onGlobalDrop(e: Event) {
+      const detail = (e as CustomEvent<{ files: File[] }>).detail;
+      if (!detail?.files?.length) return;
+      uploadFiles(detail.files);
+    }
+    window.addEventListener("vyne:files-dropped", onGlobalDrop);
+    return () => window.removeEventListener("vyne:files-dropped", onGlobalDrop);
+  }, [uploadFiles]);
 
   const isSlash = text.startsWith("/") && !text.includes(" ");
 
@@ -156,9 +181,11 @@ export function MessageComposer({
       );
       setScheduledFor(null);
     } else {
-      onSend(trimmed, hasAttachments ? files : undefined);
+      const finalText = critical ? `[!critical] ${trimmed}` : trimmed;
+      onSend(finalText, hasAttachments ? files : undefined);
     }
     setText("");
+    setCritical(false);
     clearFiles();
     setSlashMenuOpen(false);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
@@ -290,8 +317,8 @@ export function MessageComposer({
             gap: 6,
             marginBottom: 6,
             fontSize: 11,
-            color: "#06B6D4",
-            background: "rgba(6, 182, 212,0.08)",
+            color: "var(--vyne-accent, #06B6D4)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
             padding: "4px 10px",
             borderRadius: 6,
           }}
@@ -306,7 +333,7 @@ export function MessageComposer({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#06B6D4",
+              color: "var(--vyne-accent, #06B6D4)",
               display: "flex",
               padding: 0,
             }}
@@ -318,7 +345,7 @@ export function MessageComposer({
       <div
         style={{
           position: "relative",
-          border: `1px solid ${isSlash ? "var(--vyne-purple)" : "var(--content-border)"}`,
+          border: `1px solid ${isSlash ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
           borderRadius: 10,
           background: "var(--content-secondary)",
           overflow: "visible",
@@ -405,7 +432,7 @@ export function MessageComposer({
                     color:
                       m.id === "channel" || m.id === "here"
                         ? "#F59E0B"
-                        : "var(--vyne-purple)",
+                        : "var(--vyne-accent, var(--vyne-purple))",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -493,7 +520,7 @@ export function MessageComposer({
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
@@ -580,13 +607,13 @@ export function MessageComposer({
                 borderRadius: 6,
                 border: "none",
                 background:
-                  files.length > 0 ? "rgba(6, 182, 212,0.1)" : "transparent",
+                  files.length > 0 ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "transparent",
                 cursor: "pointer",
-                color: files.length > 0 ? "#06B6D4" : "var(--text-tertiary)",
+                color: files.length > 0 ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 if (files.length === 0)
@@ -614,7 +641,7 @@ export function MessageComposer({
               onMouseEnter={(e) => {
                 if (capturing === null) {
                   (e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                 }
               }}
               onMouseLeave={(e) => {
@@ -642,7 +669,7 @@ export function MessageComposer({
               onMouseEnter={(e) => {
                 if (capturing === null) {
                   (e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                 }
               }}
               onMouseLeave={(e) => {
@@ -666,7 +693,7 @@ export function MessageComposer({
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
@@ -694,7 +721,7 @@ export function MessageComposer({
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.color =
@@ -712,14 +739,14 @@ export function MessageComposer({
                   borderRadius: 6,
                   border: "none",
                   background: scheduleOpen
-                    ? "rgba(6, 182, 212,0.1)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                     : "transparent",
                   cursor: "pointer",
-                  color: scheduleOpen ? "#06B6D4" : "var(--text-tertiary)",
+                  color: scheduleOpen ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   if (!scheduleOpen)
@@ -792,6 +819,34 @@ export function MessageComposer({
           </div>
 
           <button
+            type="button"
+            onClick={() => setCritical((v) => !v)}
+            aria-pressed={critical}
+            aria-label="Mark as critical (request read receipts)"
+            title={
+              critical
+                ? "Marked critical — read receipts on"
+                : "Mark as critical (track who has read it)"
+            }
+            style={{
+              padding: "5px 9px",
+              borderRadius: 7,
+              border: `1px solid ${critical ? "#EF4444" : "var(--content-border)"}`,
+              cursor: "pointer",
+              background: critical ? "#EF4444" : "transparent",
+              color: critical ? "#fff" : "var(--text-tertiary)",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 11.5,
+              fontWeight: 600,
+              transition: "all 0.1s",
+            }}
+          >
+            🚨 {critical ? "Critical" : ""}
+          </button>
+
+          <button
             onClick={submit}
             disabled={!canSend}
             style={{
@@ -799,7 +854,7 @@ export function MessageComposer({
               borderRadius: 7,
               border: "none",
               cursor: canSend ? "pointer" : "default",
-              background: canSend ? "#06B6D4" : "var(--content-border)",
+              background: canSend ? "var(--vyne-accent, #06B6D4)" : "var(--content-border)",
               color: canSend ? "#fff" : "var(--text-tertiary)",
               display: "flex",
               alignItems: "center",

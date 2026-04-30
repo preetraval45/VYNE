@@ -51,7 +51,7 @@ export default function EditAccountPage() {
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
         <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 16 }}>Account not found.</p>
-        <Link href="/contacts" style={{ display: "inline-block", padding: "8px 14px", borderRadius: 8, background: "var(--vyne-purple)", color: "#fff", fontSize: 13, fontWeight: 600 }}>
+        <Link href="/contacts" style={{ display: "inline-block", padding: "8px 14px", borderRadius: 8, background: "var(--vyne-accent, var(--vyne-purple))", color: "#fff", fontSize: 13, fontWeight: 600 }}>
           Back to contacts
         </Link>
       </div>

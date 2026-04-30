@@ -37,6 +37,7 @@ import {
   useTeamMembers,
   type ProjectDetail,
 } from "@/lib/stores/projects";
+import { undoableDelete } from "@/lib/undo";
 import {
   Pill,
   PrimaryLink,
@@ -153,7 +154,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         <Link
           href="/projects"
           className="flex items-center gap-1.5 text-sm font-medium"
-          style={{ color: "#06B6D4" }}
+          style={{ color: "var(--vyne-accent, #06B6D4)" }}
         >
           <ArrowLeft size={14} />
           Back to projects
@@ -341,7 +342,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                   transition={{ duration: 0.5, ease: "easeOut" }}
                   style={{
                     height: "100%",
-                    background: "var(--vyne-purple)",
+                    background: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 />
               </div>
@@ -351,10 +352,16 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
                   color: "var(--text-tertiary)",
                   marginTop: 4,
                   fontVariantNumeric: "tabular-nums",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                {tasks.filter((t) => t.status === "done").length} of{" "}
-                {tasks.length} tasks
+                <span>
+                  {tasks.filter((t) => t.status === "done").length} of{" "}
+                  {tasks.length} tasks
+                </span>
+                <BurndownSparkline tasks={tasks} />
               </div>
             </div>
           </div>
@@ -666,7 +673,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
               fontSize: 13,
               fontWeight: 500,
               color: "#fff",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               border: "none",
               cursor: "pointer",
               transition: "background 0.12s",
@@ -678,7 +685,7 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background =
-                "var(--vyne-purple)";
+                "var(--vyne-accent, var(--vyne-purple))";
             }}
           >
             <Plus size={14} />
@@ -755,7 +762,7 @@ function ViewBtn({
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
       style={{
         background: active ? "var(--content-bg)" : "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-tertiary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
         boxShadow: active ? "var(--shadow-sm)" : "none",
       }}
     >
@@ -857,7 +864,7 @@ function TaskListView({
                 <td className="px-3 py-2.5">
                   <span
                     className="text-xs font-mono font-semibold"
-                    style={{ color: "var(--vyne-purple)" }}
+                    style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
                   >
                     {task.key}
                   </span>
@@ -966,10 +973,27 @@ function TaskListView({
                     aria-label="Delete"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm("Delete this task?")) {
-                        deleteTask(task.id);
-                        toast.success("Task deleted");
-                      }
+                      if (!confirm("Delete this task? You'll have 5 seconds to undo.")) return;
+                      const snapshot = task;
+                      undoableDelete({
+                        label: `Deleted task — ${snapshot.title}`,
+                        mutate: () => deleteTask(snapshot.id),
+                        restore: () =>
+                          useProjectsStore.getState().addTask(snapshot.projectId, {
+                            title: snapshot.title,
+                            description: snapshot.description,
+                            status: snapshot.status,
+                            priority: snapshot.priority,
+                            assigneeId: snapshot.assigneeId,
+                            startDate: snapshot.startDate,
+                            dueDate: snapshot.dueDate,
+                            estimatedHours: snapshot.estimatedHours,
+                            timeSpent: snapshot.timeSpent,
+                            tags: snapshot.tags,
+                            subtasks: snapshot.subtasks,
+                            comments: snapshot.comments,
+                          }),
+                      });
                     }}
                     className="p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{ color: "var(--text-tertiary)" }}
@@ -1066,7 +1090,7 @@ function TaskBoardView({
       lanes.push({
         key: k,
         label: member?.name ?? (k === "_unassigned" ? "Unassigned" : k),
-        color: member ? "#06B6D4" : "var(--text-secondary)",
+        color: member ? "var(--vyne-accent, #06B6D4)" : "var(--text-secondary)",
         tasks: byAssignee.get(k) ?? [],
       });
     }
@@ -1181,7 +1205,7 @@ function TaskCalendarView({
               ? "#EF4444"
               : t.priority === "high"
                 ? "#F59E0B"
-                : "#06B6D4",
+                : "var(--vyne-accent, #06B6D4)",
           meta: `${t.status} · ${t.priority ?? "medium"}`,
           onClick: () => onTaskClick(t.id),
         })),
@@ -1212,7 +1236,7 @@ function TaskGanttView({ tasks }: { tasks: Task[] }) {
                 ? "#F59E0B"
                 : t.status === "done"
                   ? "#22C55E"
-                  : "#06B6D4",
+                  : "var(--vyne-accent, #06B6D4)",
           progress:
             t.status === "done"
               ? 1
@@ -1355,9 +1379,9 @@ function BoardCard({
         if (e.dataTransfer) e.dataTransfer.effectAllowed = "move";
       }}
       whileHover={{
-        boxShadow: "0 8px 24px rgba(6,182,212,0.12)",
+        boxShadow: "0 8px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
         y: -2,
-        borderColor: "#06B6D4",
+        borderColor: "var(--vyne-accent, #06B6D4)",
       }}
       transition={{ duration: 0.15 }}
       onClick={() => onTaskClick(task.id)}
@@ -1788,7 +1812,7 @@ function AddTaskModal({
                       className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50"
                       style={{
                         background:
-                          "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+                          "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
                       }}
                     >
                       Create task
@@ -2243,7 +2267,7 @@ function TaskDetailPanel({
                 }}
                 onFocus={(e) => {
                   e.target.style.border = "1px solid #06B6D4";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(6, 182, 212,0.08)";
+                  e.target.style.boxShadow = "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                 }}
               />
             </div>
@@ -2264,7 +2288,7 @@ function TaskDetailPanel({
               <button
                 onClick={() => setShowAddSubtask(!showAddSubtask)}
                 className="text-xs font-medium flex items-center gap-1 transition-colors"
-                style={{ color: "#06B6D4" }}
+                style={{ color: "var(--vyne-accent, #06B6D4)" }}
               >
                 <Plus size={12} /> Add
               </button>
@@ -2425,7 +2449,7 @@ function TaskDetailPanel({
                       onClick={handleAddSubtask}
                       disabled={!newSubtaskTitle.trim()}
                       className="px-3 py-1 rounded text-xs font-semibold text-white disabled:opacity-50"
-                      style={{ background: "#06B6D4" }}
+                      style={{ background: "var(--vyne-accent, #06B6D4)" }}
                     >
                       Add
                     </button>
@@ -2465,7 +2489,7 @@ function TaskDetailPanel({
                     <div key={comment.id} className="flex gap-3">
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
-                        style={{ background: author?.color ?? "#06B6D4" }}
+                        style={{ background: author?.color ?? "var(--vyne-accent, #06B6D4)" }}
                       >
                         {author?.initials ?? "?"}
                       </div>
@@ -2532,7 +2556,7 @@ function TaskDetailPanel({
                 type="submit"
                 disabled={!commentText.trim()}
                 className="p-2.5 rounded-lg transition-all disabled:opacity-40"
-                style={{ background: "var(--vyne-purple)", color: "#FFFFFF" }}
+                style={{ background: "var(--vyne-accent, var(--vyne-purple))", color: "#FFFFFF" }}
               >
                 <Send size={16} />
               </button>
@@ -2569,5 +2593,43 @@ function PropRow({
       </div>
       <div>{children}</div>
     </div>
+  );
+}
+
+// ── BurndownSparkline ────────────────────────────────────────────
+// 14-day burn-down indicator: how many tasks finished per day for the
+// last 14 days. Falls back to "no data" when the project has no
+// completed tasks. Uses the existing Sparkline component from /code.
+
+import { Sparkline as _Sparkline } from "@/components/code/Sparkline";
+
+function BurndownSparkline({ tasks }: { tasks: Array<{ status: string; updatedAt?: string }> }) {
+  const series = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const t of tasks) {
+      if (t.status !== "done") continue;
+      const ts = t.updatedAt ? new Date(t.updatedAt).getTime() : NaN;
+      if (!Number.isFinite(ts)) continue;
+      const ageDays = Math.floor((now - ts) / 86400000);
+      if (ageDays >= 0 && ageDays < 14) buckets[13 - ageDays] += 1;
+    }
+    return buckets;
+  })();
+
+  if (series.every((n) => n === 0)) {
+    return (
+      <span style={{ color: "var(--text-tertiary)", fontSize: 10 }}>
+        no completion history yet
+      </span>
+    );
+  }
+  return (
+    <span
+      title="Tasks completed per day, last 14 days"
+      style={{ color: "var(--vyne-accent, #5B5BD6)", display: "inline-flex" }}
+    >
+      <_Sparkline values={series} width={84} height={18} ariaLabel="Burn-down trend" />
+    </span>
   );
 }

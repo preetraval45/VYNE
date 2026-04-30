@@ -10,6 +10,8 @@ import {
   FormFooterButtons,
 } from "@/components/shared/FormPageLayout";
 import { useContactsStore, type ContactTag } from "@/lib/stores/contacts";
+import { checkCreateAllowed } from "@/lib/planGate";
+import { AiFormFill } from "@/components/shared/AiFormFill";
 
 const inputClass =
   "w-full px-3.5 py-2.5 rounded-lg text-sm focus:outline-none transition-all duration-150 placeholder:text-[#C0C0D8]";
@@ -45,6 +47,11 @@ export default function NewContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const allowed = await checkCreateAllowed(
+      "contacts",
+      useContactsStore.getState().contacts.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     addContact({
       name: form.name.trim(),
@@ -89,6 +96,28 @@ export default function NewContactPage() {
       }
     >
       <form id="new-contact-form" onSubmit={handleSubmit}>
+        <AiFormFill
+          title="Describe the contact — AI will fill the form"
+          placeholder="e.g. Jane Smith, VP Marketing at Globex, jane@globex.co, 415-555-0102"
+          fields={[
+            { key: "name", label: "Full name" },
+            { key: "email", label: "Email" },
+            { key: "phone", label: "Phone" },
+            { key: "title", label: "Job title" },
+            { key: "department", label: "Department" },
+          ]}
+          onApply={(values) => {
+            setForm((f) => ({
+              ...f,
+              name: typeof values.name === "string" ? values.name : f.name,
+              email: typeof values.email === "string" ? values.email : f.email,
+              phone: typeof values.phone === "string" ? values.phone : f.phone,
+              title: typeof values.title === "string" ? values.title : f.title,
+              department:
+                typeof values.department === "string" ? values.department : f.department,
+            }));
+          }}
+        />
         <FormSection title="Person" description="Who is this contact?">
           <FormField label="Full name" htmlFor="c-name" required>
             <input
@@ -133,6 +162,8 @@ export default function NewContactPage() {
           <FormField label="Account" htmlFor="c-account">
             <select
               id="c-account"
+              aria-label="Account"
+              title="Account"
               value={form.accountId}
               onChange={(e) => setForm((f) => ({ ...f, accountId: e.target.value }))}
               className={`${inputClass} cursor-pointer`}
@@ -183,9 +214,9 @@ export default function NewContactPage() {
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: "pointer",
-                    border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                    background: active ? "rgba(6, 182, 212,0.08)" : "transparent",
-                    color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+                    border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                    background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
+                    color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                     transition: "all 0.15s",
                   }}
                 >

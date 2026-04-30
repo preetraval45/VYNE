@@ -149,11 +149,24 @@ export default function NewExpensePage() {
       }
     >
       <form id="new-expense-form" onSubmit={handleSubmit}>
+        <ScanReceiptCard
+          onParsed={(values) => {
+            setForm((f) => ({
+              ...f,
+              date: values.date ?? f.date,
+              category: (values.category as ExpenseCategory) ?? f.category,
+              description: values.vendor ?? f.description,
+              amount: values.amount != null ? String(values.amount) : f.amount,
+            }));
+          }}
+        />
         <FormSection title="Expense details">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <FormField label="Date" htmlFor="exp-date">
               <input
                 id="exp-date"
+                aria-label="Expense date"
+                title="Expense date"
                 type="date"
                 value={form.date}
                 onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
@@ -164,6 +177,8 @@ export default function NewExpensePage() {
             <FormField label="Category" htmlFor="exp-category">
               <select
                 id="exp-category"
+                aria-label="Expense category"
+                title="Expense category"
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as ExpenseCategory }))}
                 className={`${inputClass} cursor-pointer`}
@@ -206,6 +221,8 @@ export default function NewExpensePage() {
             <FormField label="Currency" htmlFor="exp-currency">
               <select
                 id="exp-currency"
+                aria-label="Currency"
+                title="Currency"
                 value={form.currency}
                 onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
                 className={`${inputClass} cursor-pointer`}
@@ -235,9 +252,9 @@ export default function NewExpensePage() {
                   flex: 1,
                   padding: "12px 14px",
                   borderRadius: 10,
-                  border: `1.5px solid ${form.submitNow === opt.value ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                  background: form.submitNow === opt.value ? "rgba(6, 182, 212,0.06)" : "var(--content-bg)",
-                  color: form.submitNow === opt.value ? "var(--vyne-purple)" : "var(--text-primary)",
+                  border: `1.5px solid ${form.submitNow === opt.value ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                  background: form.submitNow === opt.value ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)" : "var(--content-bg)",
+                  color: form.submitNow === opt.value ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
                   cursor: "pointer",
                   fontSize: 13,
                   textAlign: "left",
@@ -248,7 +265,7 @@ export default function NewExpensePage() {
                 <div
                   style={{
                     fontSize: 11,
-                    color: form.submitNow === opt.value ? "var(--vyne-purple)" : "var(--text-tertiary)",
+                    color: form.submitNow === opt.value ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
                     fontWeight: 400,
                   }}
                 >
@@ -260,5 +277,105 @@ export default function NewExpensePage() {
         </FormSection>
       </form>
     </FormPageLayout>
+  );
+}
+
+// ── ScanReceiptCard ─────────────────────────────────────────────
+// File picker → reads image as data URL → POSTs /api/ai/receipt →
+// calls back with parsed {vendor, amount, date, category}. Soft-fails
+// when the route returns 503 (no GEMINI_API_KEY) with a clear message.
+
+interface ParsedReceipt {
+  vendor?: string | null;
+  amount?: number | null;
+  date?: string | null;
+  category?: string | null;
+}
+
+function ScanReceiptCard({ onParsed }: { onParsed: (v: ParsedReceipt) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function pick(file: File) {
+    setErr(null);
+    setBusy(true);
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result ?? ""));
+        reader.onerror = () => reject(new Error("read failed"));
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/ai/receipt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageDataUrl: dataUrl }),
+      });
+      const body = (await res.json()) as ParsedReceipt & { error?: string };
+      if (!res.ok) {
+        setErr(body.error ?? `Server error (${res.status})`);
+        return;
+      }
+      onParsed(body);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "OCR failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section
+      style={{
+        background: "var(--vyne-accent-soft, var(--content-secondary))",
+        border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16,
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+          Scan a receipt with AI
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>
+          {err
+            ? err
+            : busy
+              ? "Reading image…"
+              : "Pick a photo and we'll fill vendor, amount, date, and category."}
+        </div>
+      </div>
+      <label
+        style={{
+          padding: "7px 14px",
+          borderRadius: 8,
+          border: "none",
+          background: "var(--vyne-accent, #5B5BD6)",
+          color: "#fff",
+          fontSize: 12,
+          fontWeight: 600,
+          cursor: busy ? "wait" : "pointer",
+          opacity: busy ? 0.6 : 1,
+        }}
+      >
+        {busy ? "Scanning…" : "Pick photo"}
+        <input
+          type="file"
+          accept="image/*"
+          aria-label="Receipt photo"
+          disabled={busy}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void pick(f);
+            e.currentTarget.value = "";
+          }}
+          style={{ display: "none" }}
+        />
+      </label>
+    </section>
   );
 }

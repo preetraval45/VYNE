@@ -22,6 +22,7 @@ import {
   useProjectsStore,
   useTeamMembers,
 } from "@/lib/stores/projects";
+import { undoableDelete } from "@/lib/undo";
 import {
   TASK_PRIORITY_META,
   TASK_STATUS_META,
@@ -154,9 +155,29 @@ export default function TaskDetailPage({ params }: PageProps) {
   }
 
   function onDelete() {
-    if (!confirm("Delete this task? This cannot be undone.")) return;
-    deleteTask(task!.id);
-    toast.success("Task deleted");
+    if (!confirm("Delete this task? You'll have 5 seconds to undo.")) return;
+    const snapshot = task!;
+    const projectSnapshot = projectId;
+    undoableDelete({
+      label: `Deleted task — ${snapshot.title}`,
+      mutate: () => deleteTask(snapshot.id),
+      restore: () => {
+        useProjectsStore.getState().addTask(projectSnapshot, {
+          title: snapshot.title,
+          description: snapshot.description,
+          status: snapshot.status,
+          priority: snapshot.priority,
+          assigneeId: snapshot.assigneeId,
+          startDate: snapshot.startDate,
+          dueDate: snapshot.dueDate,
+          estimatedHours: snapshot.estimatedHours,
+          timeSpent: snapshot.timeSpent,
+          tags: snapshot.tags,
+          subtasks: snapshot.subtasks,
+          comments: snapshot.comments,
+        });
+      },
+    });
     router.push(`/projects/${projectId}`);
   }
 
@@ -217,6 +238,7 @@ export default function TaskDetailPage({ params }: PageProps) {
         style={{ padding: "20px 24px 48px" }}
       >
         <div
+          className="task-detail-layout"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr) 320px",
@@ -294,20 +316,36 @@ export default function TaskDetailPage({ params }: PageProps) {
                 }}
               >
                 <h2 style={sectionTitle}>Subtasks</h2>
-                {totalSubs > 0 && (
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: "var(--vyne-teal)",
-                      background: "var(--vyne-teal-soft)",
-                      padding: "2px 10px",
-                      borderRadius: 999,
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {totalSubs > 0 && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: "var(--vyne-accent, var(--vyne-teal))",
+                        background: "var(--vyne-accent-soft, var(--vyne-teal-soft))",
+                        padding: "2px 10px",
+                        borderRadius: 999,
+                      }}
+                    >
+                      {doneSubs}/{totalSubs} · {subPct}%
+                    </span>
+                  )}
+                  <AiBreakdownButton
+                    task={task}
+                    onPick={(items) => {
+                      for (const t of items) {
+                        addSubtask(task.id, {
+                          title: t,
+                          done: false,
+                          assigneeId: null,
+                          dueDate: null,
+                        });
+                      }
+                      toast.success(`Added ${items.length} subtasks`);
                     }}
-                  >
-                    {doneSubs}/{totalSubs} · {subPct}%
-                  </span>
-                )}
+                  />
+                </div>
               </div>
               <ul
                 style={{
@@ -1001,3 +1039,73 @@ const iconBtn: React.CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
 };
+
+// ── AI subtask breakdown ─────────────────────────────────────────
+// Calls /api/ai/ask asking for 3-7 atomic subtasks for this task,
+// parses the markdown numbered list, returns to caller as `string[]`
+// for the parent to addSubtask() one by one.
+
+interface AiBreakdownProps {
+  task: { id: string; title: string; description: string };
+  onPick: (titles: string[]) => void;
+}
+
+function AiBreakdownButton({ task, onPick }: AiBreakdownProps) {
+  const [loading, setLoading] = useState(false);
+
+  async function run() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question:
+            "Break this task into 3-7 atomic subtasks. Return ONLY a markdown numbered list, one subtask per line, no commentary, no headers.",
+          context: { task: { title: task.title, description: task.description } },
+        }),
+      });
+      const body = (await res.json()) as { answer?: string };
+      const text = (body.answer ?? "").trim();
+      const items = text
+        .split("\n")
+        .map((l) => l.replace(/^\s*\d+[.)]\s*/, "").replace(/^[-*]\s*/, "").trim())
+        .filter((l) => l.length > 0 && l.length < 200);
+      if (items.length === 0) {
+        toast.error("AI didn't return any subtasks.");
+        return;
+      }
+      onPick(items.slice(0, 7));
+    } catch (err) {
+      toast.error("Couldn't reach AI: " + (err instanceof Error ? err.message : "unknown"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={run}
+      disabled={loading}
+      aria-busy={loading}
+      title="Generate subtasks with Vyne AI"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 10px",
+        borderRadius: 8,
+        fontSize: 12,
+        fontWeight: 600,
+        border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+        background: "var(--vyne-accent-soft, var(--content-secondary))",
+        color: "var(--vyne-accent-deep, var(--text-secondary))",
+        cursor: loading ? "wait" : "pointer",
+        opacity: loading ? 0.7 : 1,
+      }}
+    >
+      ✨ {loading ? "Generating…" : "Break down with AI"}
+    </button>
+  );
+}

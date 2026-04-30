@@ -11,6 +11,7 @@ import TableRow from "@tiptap/extension-table-row";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import CharacterCount from "@tiptap/extension-character-count";
+import { CrossLink } from "./CrossLinkExtension";
 import { common, createLowlight } from "lowlight";
 import {
   Bold,
@@ -184,7 +185,7 @@ function VersionHistoryPanel({
                 borderBottom: "1px solid var(--content-bg-secondary)",
                 background:
                   preview?.id === v.id
-                    ? "rgba(6, 182, 212,0.04)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)"
                     : "transparent",
                 border: "none",
                 cursor: "pointer",
@@ -255,7 +256,7 @@ function VersionHistoryPanel({
               padding: "8px 0",
               borderRadius: 8,
               border: "none",
-              background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+              background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -388,7 +389,7 @@ function SlashMenu({
           className="w-full flex items-center gap-3 px-3 py-2 text-left text-[13px] transition-colors"
           style={{
             background: i === active ? "#F5F3FF" : "transparent",
-            color: i === active ? "var(--vyne-purple)" : "var(--text-primary)",
+            color: i === active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
           }}
           onMouseEnter={() => setActive(i)}
         >
@@ -397,10 +398,10 @@ function SlashMenu({
             style={{
               background:
                 i === active
-                  ? "rgba(6, 182, 212,0.12)"
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
                   : "var(--content-bg-secondary)",
               color:
-                i === active ? "var(--vyne-purple)" : "var(--text-secondary)",
+                i === active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
             }}
           >
             {item.icon}
@@ -434,8 +435,8 @@ function TB({
       }}
       className="w-7 h-7 flex items-center justify-center rounded transition-colors"
       style={{
-        background: active ? "rgba(6, 182, 212,0.1)" : undefined,
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : undefined,
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
       }}
       onMouseEnter={(e) => {
         if (!active)
@@ -555,6 +556,7 @@ export function DocEditor({ doc }: DocEditorProps) {
       TableHeader,
       TableCell,
       CharacterCount,
+      CrossLink,
       Collaboration.configure({ document: ydoc }),
       ...(provider
         ? [
@@ -562,7 +564,7 @@ export function DocEditor({ doc }: DocEditorProps) {
               provider,
               user: {
                 name: currentUser?.name ?? "Guest",
-                color: "#06B6D4",
+                color: "var(--vyne-accent, #06B6D4)",
               },
             }),
           ]
@@ -773,6 +775,43 @@ export function DocEditor({ doc }: DocEditorProps) {
           title="Inline code"
         >
           <Code size={14} />
+        </TB>
+        <TB
+          onClick={async () => {
+            if (!editor) return;
+            const { from, to } = editor.state.selection;
+            // If nothing selected, expand to current paragraph.
+            let start = from;
+            let end = to;
+            if (start === end) {
+              const $pos = editor.state.doc.resolve(from);
+              start = $pos.start();
+              end = $pos.end();
+            }
+            const text = editor.state.doc.textBetween(start, end, "\n").trim();
+            if (!text) return;
+            try {
+              const res = await fetch("/api/ai/improve", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text }),
+              });
+              const data = (await res.json()) as { text?: string; error?: string };
+              if (data.text) {
+                editor
+                  .chain()
+                  .focus()
+                  .setTextSelection({ from: start, to: end })
+                  .insertContent(data.text)
+                  .run();
+              }
+            } catch {
+              // ignore — toolbar UI swallows; full-page error reporter logs it
+            }
+          }}
+          title="Improve with AI (rewrites selected paragraph)"
+        >
+          <Sparkles size={14} />
         </TB>
         <div className="w-px h-4 bg-[var(--content-border)] mx-1" />
         <TB
@@ -1022,7 +1061,7 @@ export function DocEditor({ doc }: DocEditorProps) {
               padding: "12px 16px",
               borderRadius: 12,
               background: "var(--content-bg)",
-              border: "1px solid rgba(6, 182, 212,0.3)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
               display: "flex",
               alignItems: "flex-start",
@@ -1033,7 +1072,7 @@ export function DocEditor({ doc }: DocEditorProps) {
             <Sparkles
               size={14}
               style={{
-                color: "var(--vyne-purple)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 marginTop: 2,
                 flexShrink: 0,
               }}
@@ -1043,7 +1082,7 @@ export function DocEditor({ doc }: DocEditorProps) {
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   marginBottom: 4,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
@@ -1070,7 +1109,7 @@ export function DocEditor({ doc }: DocEditorProps) {
                 padding: "6px 12px",
                 borderRadius: 6,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 12,
                 fontWeight: 600,
@@ -1129,7 +1168,7 @@ export function DocEditor({ doc }: DocEditorProps) {
                 gap: 6,
               }}
             >
-              <PencilRuler size={13} style={{ color: "var(--vyne-purple)" }} />
+              <PencilRuler size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               Whiteboard
             </span>
             <button
@@ -1215,7 +1254,7 @@ export function DocEditor({ doc }: DocEditorProps) {
                 gap: 10,
               }}
             >
-              <GitCompare size={16} style={{ color: "var(--vyne-purple)" }} />
+              <GitCompare size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <span
                 style={{
                   flex: 1,
@@ -1331,7 +1370,7 @@ export function DocEditor({ doc }: DocEditorProps) {
                   padding: "8px 16px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   fontSize: 13,
                   fontWeight: 600,
@@ -1375,7 +1414,7 @@ export function DocEditor({ doc }: DocEditorProps) {
         .tiptap-editor .ProseMirror ol { padding-left: 1.4rem; margin: 0.35rem 0; }
         .tiptap-editor .ProseMirror li { margin: 0.2rem 0; }
         .tiptap-editor .ProseMirror blockquote {
-          border-left: 3px solid var(--vyne-purple);
+          border-left: 3px solid var(--vyne-accent, var(--vyne-purple));
           margin: 0.5rem 0;
           padding: 0.25rem 0 0.25rem 1rem;
           color: var(--text-secondary);
@@ -1387,7 +1426,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           font-size: 0.875em;
           padding: 0.15em 0.35em;
           font-family: 'Fira Code', 'Cascadia Code', monospace;
-          color: var(--vyne-purple);
+          color: var(--vyne-accent, var(--vyne-purple));
         }
         .tiptap-editor .ProseMirror pre {
           background: var(--text-primary);
@@ -1427,7 +1466,7 @@ export function DocEditor({ doc }: DocEditorProps) {
           color: var(--text-primary);
         }
         .tiptap-editor .ProseMirror table .selectedCell {
-          background: rgba(6, 182, 212,0.06);
+          background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06);
         }
         .tiptap-editor .ProseMirror .is-empty::before {
           content: attr(data-placeholder);

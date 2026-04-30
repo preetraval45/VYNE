@@ -132,17 +132,17 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             onClick={this.handleReset}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-fast"
             style={{
-              background: 'var(--vyne-purple)',
+              background: 'var(--vyne-accent, var(--vyne-purple))',
               color: '#FFFFFF',
               border: 'none',
               cursor: 'pointer',
               boxShadow: 'var(--shadow-sm)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--vyne-purple-light)'
+              e.currentTarget.style.background = 'var(--vyne-accent-light, var(--vyne-purple-light))'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'var(--vyne-purple)'
+              e.currentTarget.style.background = 'var(--vyne-accent, var(--vyne-purple))'
             }}
           >
             <svg

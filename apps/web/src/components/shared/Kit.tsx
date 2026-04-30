@@ -31,9 +31,9 @@ const TONE_TOKENS: Record<Tone, { fg: string; bg: string; ring: string }> = {
   purple: {
     // Darker teal foreground on teal-soft bg meets WCAG AA (≥4.5:1)
     // against the pill background in both light and dark themes.
-    fg: "#0E7490",
-    bg: "rgba(6, 182, 212, 0.10)",
-    ring: "rgba(6, 182, 212, 0.28)",
+    fg: "var(--vyne-accent-deep, #0E7490)",
+    bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+    ring: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)",
   },
   success: {
     fg: "#0F9D58",
@@ -221,7 +221,7 @@ export function PrimaryLink({
         fontWeight: 500,
         letterSpacing: "-0.005em",
         color: "#fff",
-        background: "var(--vyne-purple)",
+        background: "var(--vyne-accent, var(--vyne-purple))",
         textDecoration: "none",
         boxShadow:
           "inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 0 rgba(16,24,40,0.08)",
@@ -233,7 +233,7 @@ export function PrimaryLink({
           "var(--vyne-purple-dark, #4341B8)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "var(--vyne-purple)";
+        (e.currentTarget as HTMLElement).style.background = "var(--vyne-accent, var(--vyne-purple))";
       }}
     >
       {children}
@@ -317,7 +317,7 @@ export function EmptyState({
             justifyContent: "center",
             marginBottom: 18,
             background:
-              "radial-gradient(circle at 50% 40%, rgba(6, 182, 212, 0.22), rgba(6, 182, 212, 0.04) 70%, transparent)",
+              "radial-gradient(circle at 50% 40%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.22), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04) 70%, transparent)",
             color: "var(--vyne-teal)",
           }}
         >
@@ -327,7 +327,7 @@ export function EmptyState({
               position: "absolute",
               inset: 0,
               borderRadius: 18,
-              border: "1px dashed rgba(6, 182, 212, 0.35)",
+              border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
             }}
           />
           {icon}
@@ -1154,7 +1154,7 @@ export function ModuleRecordHeader({
                       fontSize: 11,
                       fontWeight: 600,
                       color: active ? "var(--vyne-teal)" : "var(--text-tertiary)",
-                      background: active ? "rgba(6,182,212,0.12)" : "var(--content-secondary)",
+                      background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)" : "var(--content-secondary)",
                       padding: "2px 7px",
                       borderRadius: 999,
                       fontVariantNumeric: "tabular-nums",

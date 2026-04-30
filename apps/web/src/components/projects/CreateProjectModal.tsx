@@ -242,7 +242,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                         onFocus={(e) => {
                           e.target.style.border = "1px solid #06B6D4";
                           e.target.style.boxShadow =
-                            "0 0 0 3px rgba(6, 182, 212,0.08)";
+                            "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                         }}
                         onBlur={(e) => {
                           e.target.style.border =
@@ -288,7 +288,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                         onFocus={(e) => {
                           e.target.style.border = "1px solid #06B6D4";
                           e.target.style.boxShadow =
-                            "0 0 0 3px rgba(6, 182, 212,0.08)";
+                            "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                         }}
                         onBlur={(e) => {
                           e.target.style.border =
@@ -334,7 +334,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                       onFocus={(e) => {
                         e.target.style.border = "1px solid #06B6D4";
                         e.target.style.boxShadow =
-                          "0 0 0 3px rgba(6, 182, 212,0.08)";
+                          "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                       }}
                       onBlur={(e) => {
                         e.target.style.border =
@@ -406,8 +406,8 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
                       className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         background:
-                          "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
-                        boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
+                          "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+                        boxShadow: "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
                       }}
                     >
                       {createProject.isPending ? (

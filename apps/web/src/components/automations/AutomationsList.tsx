@@ -64,7 +64,7 @@ export default function AutomationsList(
           <input
             id="automation-search"
             type="text"
-            placeholder="Search automations\u2026"
+            placeholder="Search automations…"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             style={{
@@ -103,7 +103,7 @@ export default function AutomationsList(
               onClick={() => onFilterChange(tab.key)}
               style={{
                 flex: 1,
-                background: isActive ? "#06B6D4" : "transparent",
+                background: isActive ? "var(--vyne-accent, #06B6D4)" : "transparent",
                 color: isActive ? "#fff" : "var(--text-secondary)",
                 border: isActive
                   ? "1px solid #06B6D4"

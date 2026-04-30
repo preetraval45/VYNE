@@ -171,7 +171,7 @@ export function MeetingRecapModal({
               height: 32,
               borderRadius: 8,
               background: "rgba(108, 71, 255, 0.15)",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -311,9 +311,9 @@ export function MeetingRecapModal({
                   gap: 6,
                   padding: "8px 14px",
                   borderRadius: 8,
-                  border: "1px solid var(--vyne-purple)",
+                  border: "1px solid var(--vyne-accent, var(--vyne-purple))",
                   background: "rgba(108, 71, 255, 0.1)",
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: draftLoading ? "default" : "pointer",
@@ -422,7 +422,7 @@ export function MeetingRecapModal({
                       border: "none",
                       background: draftCopied
                         ? "rgba(16,185,129,0.18)"
-                        : "var(--vyne-purple)",
+                        : "var(--vyne-accent, var(--vyne-purple))",
                       color: draftCopied ? "#10B981" : "#fff",
                       fontSize: 11,
                       fontWeight: 600,
@@ -529,7 +529,7 @@ export function MeetingRecapModal({
                 padding: "9px 14px",
                 borderRadius: 8,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 12,
                 fontWeight: 600,
@@ -609,7 +609,7 @@ function Stat({
             ? "rgba(108, 71, 255, 0.12)"
             : "var(--content-secondary)",
         color:
-          tone === "purple" ? "var(--vyne-purple)" : "var(--text-secondary)",
+          tone === "purple" ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         fontSize: 11,
         fontWeight: 500,
         display: "inline-flex",

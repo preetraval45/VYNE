@@ -368,11 +368,11 @@ export function KeyboardShortcutsModal() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              background: "rgba(6, 182, 212,0.1)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
             }}
           >
             <Keyboard size={16} />

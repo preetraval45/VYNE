@@ -40,9 +40,9 @@ const MONTH_NAMES = [
 ];
 
 const TYPE_COLOR: Record<string, { bg: string; fg: string; border: string }> = {
-  meeting: { bg: "rgba(108, 71, 255, 0.15)", fg: "var(--vyne-purple)", border: "rgba(108, 71, 255, 0.4)" },
+  meeting: { bg: "rgba(108, 71, 255, 0.15)", fg: "var(--vyne-accent, var(--vyne-purple))", border: "rgba(108, 71, 255, 0.4)" },
   call: { bg: "rgba(34, 197, 94, 0.15)", fg: "#22C55E", border: "rgba(34, 197, 94, 0.4)" },
-  focus: { bg: "rgba(6, 182, 212, 0.15)", fg: "#06B6D4", border: "rgba(6, 182, 212, 0.4)" },
+  focus: { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)", fg: "var(--vyne-accent, #06B6D4)", border: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)" },
   deadline: { bg: "rgba(239, 68, 68, 0.15)", fg: "#EF4444", border: "rgba(239, 68, 68, 0.4)" },
   other: { bg: "rgba(245, 158, 11, 0.15)", fg: "#F59E0B", border: "rgba(245, 158, 11, 0.4)" },
 };
@@ -155,7 +155,7 @@ export default function CalendarPage() {
                 height: 36,
                 borderRadius: 10,
                 background: "rgba(108, 71, 255, 0.15)",
-                color: "var(--vyne-purple)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -289,7 +289,7 @@ export default function CalendarPage() {
               padding: "8px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -406,7 +406,7 @@ export default function CalendarPage() {
               gap: 6,
               fontSize: 11,
               fontWeight: 700,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               marginBottom: 6,
             }}
           >
@@ -526,7 +526,7 @@ function MonthView({
               textAlign: "left",
               opacity: inMonth ? 1 : 0.45,
               outline: isSelected
-                ? "2px solid var(--vyne-purple)"
+                ? "2px solid var(--vyne-accent, var(--vyne-purple))"
                 : "none",
               outlineOffset: -2,
               transition: "background 0.12s",
@@ -546,7 +546,7 @@ function MonthView({
                   fontSize: 12,
                   fontWeight: isToday ? 700 : 500,
                   color: isToday ? "#fff" : "var(--text-primary)",
-                  background: isToday ? "var(--vyne-purple)" : "transparent",
+                  background: isToday ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
                   borderRadius: 99,
                   padding: isToday ? "2px 8px" : "0",
                   minWidth: 22,
@@ -678,7 +678,7 @@ function WeekView({
               style={{
                 fontSize: 18,
                 fontWeight: 700,
-                color: isToday ? "var(--vyne-purple)" : "var(--text-primary)",
+                color: isToday ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
                 marginBottom: 8,
               }}
             >

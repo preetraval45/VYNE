@@ -20,7 +20,7 @@ const FIELD_TYPES: { value: FieldType; label: string }[] = [
 ];
 
 const STATUS_COLORS = [
-  "#06B6D4", // teal
+  "var(--vyne-accent, #06B6D4)", // teal
   "#22C55E", // green
   "#F59E0B", // amber
   "#EF4444", // red

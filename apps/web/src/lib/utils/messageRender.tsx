@@ -76,7 +76,7 @@ function renderInline(s: string, keyPrefix: string): React.ReactNode[] {
           border: "1px solid var(--content-border)",
           fontSize: "0.9em",
           fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-          color: "var(--vyne-purple)",
+          color: "var(--vyne-accent, var(--vyne-purple))",
         }}
       >
         {m[1]}

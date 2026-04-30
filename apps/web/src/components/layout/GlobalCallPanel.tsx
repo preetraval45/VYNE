@@ -204,11 +204,11 @@ function CallOverlay() {
             height: 36,
             borderRadius: "50%",
             background:
-              "linear-gradient(135deg, rgba(108, 71, 255, 0.3), rgba(6, 182, 212, 0.3))",
+              "linear-gradient(135deg, rgba(108, 71, 255, 0.3), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
           }}
         >
           {mode === "video" ? <Video size={16} /> : <Mic size={16} />}
@@ -929,7 +929,7 @@ function InCallChatPanel({
             borderRadius: 8,
             border: "none",
             background: draft.trim()
-              ? "var(--vyne-purple)"
+              ? "var(--vyne-accent, var(--vyne-purple))"
               : "rgba(255,255,255,0.08)",
             color: "#fff",
             fontSize: 12,

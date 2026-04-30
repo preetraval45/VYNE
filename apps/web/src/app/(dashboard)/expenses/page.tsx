@@ -11,6 +11,7 @@ import {
 import { useExpensesStore } from "@/lib/stores/expenses";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 import { Receipt } from "lucide-react";
+import { MileageTab } from "@/components/expenses/MileageTab";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function statusConfig(s: ExpenseStatus): {
@@ -111,7 +112,7 @@ function TabBtn({
         borderRadius: 8,
         fontSize: 13,
         fontWeight: active ? 600 : 400,
-        background: active ? "var(--vyne-purple)" : "transparent",
+        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         border: "none",
         cursor: "pointer",
@@ -347,7 +348,7 @@ function MyExpensesTab({
           href="/expenses/new"
           style={{
             padding: "8px 16px",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -493,9 +494,9 @@ function MyExpensesTab({
                       onClick={() => onSubmit(e.id)}
                       style={{
                         fontSize: 12,
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         background: "none",
-                        border: "1px solid var(--vyne-purple)",
+                        border: "1px solid var(--vyne-accent, var(--vyne-purple))",
                         borderRadius: 6,
                         padding: "3px 8px",
                         cursor: "pointer",
@@ -701,7 +702,7 @@ function MyExpensesTab({
               style={{
                 padding: "8px 16px",
                 borderRadius: 8,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 border: "none",
                 fontSize: 13,
@@ -833,7 +834,7 @@ function ApprovalsTab({
               checked={selected.has(e.id)}
               onChange={() => toggleSelect(e.id)}
               style={{
-                accentColor: "#06B6D4",
+                accentColor: "var(--vyne-accent, #06B6D4)",
                 width: 15,
                 height: 15,
                 cursor: "pointer",
@@ -845,7 +846,7 @@ function ApprovalsTab({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg,#06B6D4,#9B59B6)",
+                background: "linear-gradient(135deg,var(--vyne-accent, #06B6D4),#9B59B6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1045,7 +1046,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                     style={{
                       height: "100%",
                       width: `${(total / maxTotal) * 100}%`,
-                      background: "var(--vyne-purple)",
+                      background: "var(--vyne-accent, var(--vyne-purple))",
                       borderRadius: 4,
                       transition: "width 0.4s",
                     }}
@@ -1107,9 +1108,9 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
           <button
             style={{
               fontSize: 12,
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               background: "none",
-              border: "1px solid rgba(6, 182, 212,0.3)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 6,
               padding: "3px 10px",
               cursor: "pointer",
@@ -1152,8 +1153,8 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
                   width: "100%",
                   background:
                     month === "Mar"
-                      ? "var(--vyne-purple)"
-                      : "rgba(6, 182, 212,0.2)",
+                      ? "var(--vyne-accent, var(--vyne-purple))"
+                      : "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)",
                   borderRadius: "4px 4px 0 0",
                   height: `${(amount / maxMonthly) * 90}px`,
                   transition: "height 0.4s",
@@ -1265,7 +1266,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
 
 // ── Main Page ─────────────────────────────────────────────────────
 export default function ExpensesPage() {
-  const [tab, setTab] = useState<"mine" | "approvals" | "reports">("mine");
+  const [tab, setTab] = useState<"mine" | "approvals" | "reports" | "mileage">("mine");
   const expenses = useExpensesStore((s) => s.expenses);
   const addExpense = useExpensesStore((s) => s.addExpense);
   const updateExpense = useExpensesStore((s) => s.updateExpense);
@@ -1337,6 +1338,11 @@ export default function ExpensesPage() {
           active={tab === "reports"}
           onClick={() => setTab("reports")}
         />
+        <TabBtn
+          label="Mileage"
+          active={tab === "mileage"}
+          onClick={() => setTab("mileage")}
+        />
       </div>
 
       {/* Content */}
@@ -1356,6 +1362,7 @@ export default function ExpensesPage() {
           />
         )}
         {tab === "reports" && <ReportsTab expenses={expenses} />}
+        {tab === "mileage" && <MileageTab />}
       </div>
     </div>
   );

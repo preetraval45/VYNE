@@ -579,7 +579,7 @@ export const TRACE_SPANS: readonly TraceSpan[] = [
     operation: "POST /api/orders \u2192 route",
     durationMs: 12,
     offsetMs: 0,
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
   },
   {
     id: "ts2",

@@ -73,7 +73,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         <ArrowRight
           size={16}
           className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-1"
-          style={{ color: "var(--vyne-purple)" }}
+          style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
         />
       </div>
 
@@ -165,7 +165,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               ) : (
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                  style={{ background: "var(--vyne-purple)" }}
+                  style={{ background: "var(--vyne-accent, var(--vyne-purple))" }}
                 >
                   {getInitials(project.lead.name)}
                 </div>

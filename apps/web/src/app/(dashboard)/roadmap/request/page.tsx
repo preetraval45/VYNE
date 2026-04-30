@@ -71,8 +71,8 @@ export default function FeatureRequestPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 8,
-                background: "rgba(6, 182, 212,0.12)",
-                color: "var(--vyne-purple)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -92,7 +92,7 @@ export default function FeatureRequestPage() {
               "Flag any deadline / compliance driver",
             ].map((tip) => (
               <li key={tip} style={{ fontSize: 12.5, color: "var(--text-secondary)", display: "flex", gap: 8, letterSpacing: "-0.005em" }}>
-                <span style={{ color: "var(--vyne-purple)", flexShrink: 0 }}>→</span>
+                <span style={{ color: "var(--vyne-accent, var(--vyne-purple))", flexShrink: 0 }}>→</span>
                 {tip}
               </li>
             ))}

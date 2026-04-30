@@ -387,7 +387,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                     onFocus={(e) => {
                       e.target.style.border = "1px solid #06B6D4";
                       e.target.style.boxShadow =
-                        "0 0 0 3px rgba(6, 182, 212,0.08)";
+                        "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                     }}
                     onBlur={(e) => {
                       handleDescriptionBlur();
@@ -491,7 +491,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                             style={{
                               background: comment.author
                                 ? stringToColor(comment.author.name)
-                                : "#06B6D4",
+                                : "var(--vyne-accent, #06B6D4)",
                             }}
                           >
                             {comment.author
@@ -561,7 +561,7 @@ export function IssuePanel({ issue, open, onClose }: IssuePanelProps) {
                     disabled={!commentText.trim() || submittingComment}
                     className="p-2.5 rounded-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                      background: "var(--vyne-purple)",
+                      background: "var(--vyne-accent, var(--vyne-purple))",
                       color: "#FFFFFF",
                     }}
                   >

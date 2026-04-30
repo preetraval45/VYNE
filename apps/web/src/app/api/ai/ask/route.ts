@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { rateLimit } from "@/lib/api/security";
+import { rateLimit, requireAuth } from "@/lib/api/security";
 
 export const runtime = "edge";
 
@@ -217,6 +217,9 @@ function localFallback(
 }
 
 export async function POST(req: Request) {
+  const auth = requireAuth(req);
+  if (!auth.ok) return auth.response!;
+
   const rl = await rateLimit({ key: "ai-ask", limit: 20, windowSec: 60, req });
   if (!rl.ok) return rl.response!;
 

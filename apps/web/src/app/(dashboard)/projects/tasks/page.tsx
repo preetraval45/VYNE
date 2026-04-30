@@ -256,7 +256,7 @@ export default function TasksKanbanPage() {
                     border: `1px solid ${isOver ? "var(--vyne-teal)" : "var(--content-border)"}`,
                     borderRadius: 12,
                     padding: 6,
-                    boxShadow: isOver ? "0 12px 28px rgba(6,182,212,0.25)" : "none",
+                    boxShadow: isOver ? "0 12px 28px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)" : "none",
                     transition: "box-shadow 0.15s, border-color 0.15s",
                   }}
                 >

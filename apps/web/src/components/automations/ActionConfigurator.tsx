@@ -93,7 +93,7 @@ function ActionCard(
               cursor: "pointer",
             }}
           >
-            <option value="">\u2014 Select action \u2014</option>
+            <option value="">— Select action —</option>
             {ACTION_GROUPS.map((group) => (
               <optgroup key={group.group} label={group.group}>
                 {group.options.map((opt) => (
@@ -282,12 +282,12 @@ export default function ActionConfigurator(
           onClick={onAdd}
           style={{
             marginLeft: "auto",
-            background: "rgba(6, 182, 212,0.08)",
-            border: "1px solid rgba(6, 182, 212,0.2)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+            border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)",
             borderRadius: 6,
             padding: "3px 8px",
             fontSize: 11,
-            color: "#06B6D4",
+            color: "var(--vyne-accent, #06B6D4)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -309,7 +309,7 @@ export default function ActionConfigurator(
             fontSize: 11,
           }}
         >
-          No actions yet \u2014 add one above
+          No actions yet — add one above
         </div>
       )}
       {actions.length > 0 && (

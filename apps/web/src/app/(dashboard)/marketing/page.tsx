@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Megaphone } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { SubjectLineGenerator } from "@/components/marketing/SubjectLineGenerator";
+import { UTMBuilder } from "@/components/marketing/UTMBuilder";
 
 // ─── Types ─────────────────────────────────────────────────────────
-type MarketingTab = "campaigns" | "email" | "social" | "landing" | "analytics";
+type MarketingTab = "campaigns" | "email" | "social" | "landing" | "analytics" | "tools";
 type CampaignChannel = "Email" | "Social" | "PPC" | "Content";
 type CampaignStatus = "Draft" | "Active" | "Paused" | "Completed";
 type EmailStatus = "Sent" | "Scheduled" | "Draft";
@@ -404,9 +406,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -590,7 +592,7 @@ function BarChart({
           <div
             style={{
               width: "100%",
-              background: barColor ?? "var(--vyne-purple)",
+              background: barColor ?? "var(--vyne-accent, var(--vyne-purple))",
               borderRadius: "4px 4px 0 0",
               height: `${(Number(d[valueKey]) / maxVal) * (height - 40)}px`,
               opacity: 0.85,
@@ -753,7 +755,7 @@ function CampaignsTab() {
         <KPICard
           title="Active Campaigns"
           value={String(activeCampaigns)}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Total Budget"
@@ -911,7 +913,7 @@ function EmailMarketingTab() {
         <KPICard
           title="Emails Sent"
           value={fmtNum(MOCK_EMAIL_CAMPAIGNS.reduce((s, e) => s + e.sent, 0))}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Avg Open Rate"
@@ -1083,7 +1085,7 @@ function SocialMediaTab() {
         <KPICard
           title="Total Followers"
           value={fmtNum(MOCK_SOCIAL.reduce((s, p) => s + p.followers, 0))}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Total Posts"
@@ -1218,7 +1220,7 @@ function SocialMediaTab() {
                 label={p.platform}
                 value={p.followers}
                 max={Math.max(...MOCK_SOCIAL.map((s) => s.followers))}
-                color={platformColors[p.platform] ?? "#06B6D4"}
+                color={platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)"}
               />
             ))}
           </div>
@@ -1238,7 +1240,7 @@ function SocialMediaTab() {
               segments={MOCK_SOCIAL.map((p) => ({
                 label: p.platform,
                 value: p.impressions,
-                color: platformColors[p.platform] ?? "#06B6D4",
+                color: platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)",
               }))}
               size={100}
             />
@@ -1268,7 +1270,7 @@ function LandingPagesTab() {
           value={String(
             MOCK_LANDING_PAGES.filter((l) => l.status === "Published").length,
           )}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Total Visits"
@@ -1484,7 +1486,7 @@ function AnalyticsTab() {
         <KPICard
           title="Total Leads"
           value={fmtNum(totalLeads)}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Cost per Lead"
@@ -1528,7 +1530,7 @@ function AnalyticsTab() {
             data={monthlyLeads.map((m) => ({ label: m.month, value: m.leads }))}
             labelKey="label"
             valueKey="value"
-            barColor="var(--vyne-purple)"
+            barColor="var(--vyne-accent, var(--vyne-purple))"
             height={160}
           />
         </div>
@@ -1560,7 +1562,7 @@ function AnalyticsTab() {
                 label={cp.channel}
                 value={cp.leads}
                 max={Math.max(...channelPerf.map((x) => x.leads))}
-                color={channelColors[cp.channel] ?? "#06B6D4"}
+                color={channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)"}
               />
             ))}
           </div>
@@ -1580,7 +1582,7 @@ function AnalyticsTab() {
               segments={channelPerf.map((cp) => ({
                 label: cp.channel,
                 value: cp.spent,
-                color: channelColors[cp.channel] ?? "#06B6D4",
+                color: channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)",
               }))}
               size={90}
             />
@@ -1671,6 +1673,7 @@ export default function MarketingPage() {
     { key: "social", label: "Social Media" },
     { key: "landing", label: "Landing Pages" },
     { key: "analytics", label: "Analytics" },
+    { key: "tools", label: "Tools" },
   ];
 
   return (
@@ -1689,9 +1692,9 @@ export default function MarketingPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(6, 182, 212,0.08)" }}
+            style={{ background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" }}
           >
-            <Megaphone size={18} style={{ color: "var(--vyne-purple)" }} />
+            <Megaphone size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           </div>
           <div>
             <h1
@@ -1735,6 +1738,12 @@ export default function MarketingPage() {
         {tab === "social" && <SocialMediaTab />}
         {tab === "landing" && <LandingPagesTab />}
         {tab === "analytics" && <AnalyticsTab />}
+        {tab === "tools" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 760 }}>
+            <SubjectLineGenerator />
+            <UTMBuilder />
+          </div>
+        )}
       </div>
     </div>
   );

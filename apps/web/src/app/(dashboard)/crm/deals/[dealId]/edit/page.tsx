@@ -74,7 +74,7 @@ export default function EditDealPage() {
             display: "inline-block",
             padding: "8px 14px",
             borderRadius: 8,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,

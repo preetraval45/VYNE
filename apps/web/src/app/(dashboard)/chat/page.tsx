@@ -181,13 +181,13 @@ export default function ChatPage() {
               width: 64,
               height: 64,
               borderRadius: 20,
-              background: "rgba(6, 182, 212,0.08)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <MessageSquare size={28} style={{ color: "var(--vyne-purple)" }} />
+            <MessageSquare size={28} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           </div>
           <div style={{ textAlign: "center" }}>
             <h3

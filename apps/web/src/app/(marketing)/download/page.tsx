@@ -29,11 +29,11 @@ const C = {
   text: "#EAFBFD",
   textSub: "#8FB2BA",
   textMuted: "#5A7880",
-  cyan: "#22D3EE",
-  teal: "#06B6D4",
+  cyan: "var(--vyne-accent-light, #22D3EE)",
+  teal: "var(--vyne-accent, #06B6D4)",
   success: "#22C55E",
-  aurora: "linear-gradient(135deg, #22D3EE 0%, #06B6D4 45%, #0E7490 100%)",
-  auroraText: "linear-gradient(135deg, #67E8F9 0%, #22D3EE 50%, #06B6D4 100%)",
+  aurora: "linear-gradient(135deg, var(--vyne-accent-light, #22D3EE) 0%, var(--vyne-accent, #06B6D4) 45%, var(--vyne-accent-deep, #0E7490) 100%)",
+  auroraText: "linear-gradient(135deg, #67E8F9 0%, var(--vyne-accent-light, #22D3EE) 50%, var(--vyne-accent, #06B6D4) 100%)",
 } as const;
 
 type Platform = {
@@ -238,7 +238,7 @@ function PlatformCard({
             right: 12,
             padding: "3px 8px",
             borderRadius: 999,
-            background: "rgba(34,211,238,0.12)",
+            background: "rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.12)",
             color: C.cyan,
             fontSize: 10.5,
             fontWeight: 600,
@@ -257,7 +257,7 @@ function PlatformCard({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "rgba(34,211,238,0.08)",
+          background: "rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.08)",
           border: `1px solid ${C.border}`,
           color: C.cyan,
         }}
@@ -438,7 +438,7 @@ function PWACard() {
             <button
               type="button"
               onClick={onInstall}
-              disabled={busy}
+              disabled={busy} aria-busy={busy}
               style={{
                 padding: "10px 18px",
                 borderRadius: 10,
@@ -570,7 +570,7 @@ export default function DownloadPage() {
               gap: 6,
               padding: "5px 11px",
               borderRadius: 999,
-              background: "rgba(34,211,238,0.08)",
+              background: "rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.08)",
               border: `1px solid ${C.border}`,
               color: C.cyan,
               fontSize: 11.5,

@@ -45,8 +45,8 @@ export function BulkActionsBar({ count, actions, onClear }: Props) {
         style={{
           padding: "3px 10px",
           borderRadius: 999,
-          background: "rgba(6, 182, 212,0.18)",
-          border: "1px solid rgba(6, 182, 212,0.35)",
+          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
+          border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
           fontSize: 12,
           fontWeight: 600,
           color: "#67E8F9",

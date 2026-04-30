@@ -1,9 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { X } from "lucide-react";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useState } from "react";
+import { BottomSheetModal } from "@/components/shared/BottomSheetModal";
 
 interface CreateChannelModalProps {
   readonly onClose: () => void;
@@ -17,8 +15,6 @@ export function CreateChannelModal({
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(dialogRef, true, onClose);
 
   const slug = name
     .toLowerCase()
@@ -26,72 +22,8 @@ export function CreateChannelModal({
     .replaceAll(/^-+|-+$/g, "");
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 100,
-      }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <motion.div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Create a channel"
-        tabIndex={-1}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        style={{
-          background: "var(--content-bg)",
-          borderRadius: 14,
-          width: 440,
-          padding: 24,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          outline: "none",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 20,
-          }}
-        >
-          <span
-            style={{
-              fontSize: 15,
-              fontWeight: 600,
-              color: "var(--text-primary)",
-            }}
-          >
-            Create a channel
-          </span>
-          <button
-            aria-label="Close"
-            onClick={onClose}
-            style={{
-              border: "none",
-              background: "transparent",
-              cursor: "pointer",
-              color: "var(--text-tertiary)",
-              display: "flex",
-              borderRadius: 6,
-              padding: 4,
-            }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-
+    <BottomSheetModal open onClose={onClose} title="Create a channel" maxWidth={440}>
+      <div>
         <p
           style={{
             fontSize: 12,
@@ -226,7 +158,7 @@ export function CreateChannelModal({
                 height: 20,
                 borderRadius: 10,
                 background: isPrivate
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--content-border)",
                 position: "relative",
                 cursor: "pointer",
@@ -268,6 +200,7 @@ export function CreateChannelModal({
 
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <button
+            type="button"
             onClick={onClose}
             style={{
               padding: "8px 16px",
@@ -282,6 +215,7 @@ export function CreateChannelModal({
             Cancel
           </button>
           <button
+            type="button"
             onClick={() => {
               if (slug) {
                 onCreate(slug, desc, isPrivate);
@@ -293,7 +227,7 @@ export function CreateChannelModal({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: slug ? "#06B6D4" : "var(--content-border)",
+              background: slug ? "var(--vyne-accent, #06B6D4)" : "var(--content-border)",
               color: slug ? "#fff" : "var(--text-tertiary)",
               cursor: slug ? "pointer" : "default",
               fontSize: 13,
@@ -303,7 +237,7 @@ export function CreateChannelModal({
             Create Channel
           </button>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </BottomSheetModal>
   );
 }

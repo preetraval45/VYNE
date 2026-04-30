@@ -29,6 +29,8 @@ import {
   type AccountStatus,
   type ContactTag,
 } from "@/lib/stores/contacts";
+import { undoableDelete } from "@/lib/undo";
+import { SearchBar as SharedSearchBar } from "@/components/shared/SearchBar";
 
 // ─── Constants ──────────────────────────────────────────────────
 type ContactsTab = "accounts" | "contacts" | "import";
@@ -158,7 +160,7 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: "8px 20px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+  background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
   color: "#fff",
   cursor: "pointer",
   fontSize: 12,
@@ -208,9 +210,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         display: "flex",
@@ -226,9 +228,9 @@ function TabBtn({
             padding: "1px 6px",
             borderRadius: 10,
             background: active
-              ? "rgba(6, 182, 212,0.12)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
               : "var(--content-secondary)",
-            color: active ? "var(--vyne-purple)" : "var(--text-tertiary)",
+            color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
             fontWeight: 600,
           }}
         >
@@ -288,55 +290,18 @@ function SearchInput({
   onChange: (v: string) => void;
   placeholder: string;
 }>) {
+  // Delegates to the shared SearchBar so the look + accessibility +
+  // ⌘K-all escalation are consistent across module pages.
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        padding: "7px 12px",
-        borderRadius: 8,
-        border: "1px solid var(--content-border)",
-        background: "var(--content-secondary)",
-        width: 240,
-      }}
-    >
-      <Search
-        size={14}
-        style={{ color: "var(--text-tertiary)", flexShrink: 0 }}
-      />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        aria-label={placeholder}
-        style={{
-          flex: 1,
-          border: "none",
-          background: "transparent",
-          fontSize: 12,
-          color: "var(--text-primary)",
-          outline: "none",
-        }}
-      />
-      {value && (
-        <button
-          onClick={() => onChange("")}
-          aria-label="Clear search"
-          style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            padding: 0,
-            display: "flex",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          <X size={12} />
-        </button>
-      )}
-    </div>
+    <SharedSearchBar
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      width={240}
+      onWorkspaceSearch={() =>
+        window.dispatchEvent(new CustomEvent("vyne:open-palette", { detail: { query: value } }))
+      }
+    />
   );
 }
 
@@ -398,23 +363,23 @@ function NewButton({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+        background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 600,
-        boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
+        boxShadow: "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 4px 14px rgba(6, 182, 212,0.45)";
+          "0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.boxShadow =
-          "0 2px 8px rgba(6, 182, 212,0.3)";
+          "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
       }}
     >
@@ -1140,7 +1105,7 @@ function AccountsTab() {
           {
             label: "Total Accounts",
             value: String(accounts.length),
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
           },
           {
             label: "Active",
@@ -1157,7 +1122,7 @@ function AccountsTab() {
           {
             label: "Total Revenue",
             value: fmtRevenue(accounts.reduce((s, a) => s + a.revenue, 0)),
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
           },
         ].map((kpi) => (
           <div
@@ -1206,7 +1171,7 @@ function AccountsTab() {
         }}
       >
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--content-secondary)" }}>
                 <Th>Name</Th>
@@ -1268,13 +1233,13 @@ function AccountsTab() {
                               width: 30,
                               height: 30,
                               borderRadius: 8,
-                              background: "rgba(6, 182, 212,0.08)",
+                              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               fontSize: 11,
                               fontWeight: 700,
-                              color: "var(--vyne-purple)",
+                              color: "var(--vyne-accent, var(--vyne-purple))",
                               flexShrink: 0,
                             }}
                           >
@@ -1288,7 +1253,7 @@ function AccountsTab() {
                       <Td>{account.industry}</Td>
                       <Td>
                         <span
-                          style={{ color: "var(--vyne-purple)", fontSize: 12 }}
+                          style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontSize: 12 }}
                         >
                           {account.website}
                         </span>
@@ -1492,7 +1457,7 @@ function ContactsTabContent() {
         }}
       >
         <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--content-secondary)" }}>
                 <Th>Name</Th>
@@ -1549,13 +1514,13 @@ function ContactsTabContent() {
                             width: 30,
                             height: 30,
                             borderRadius: "50%",
-                            background: "rgba(6, 182, 212,0.10)",
+                            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             fontSize: 11,
                             fontWeight: 700,
-                            color: "var(--vyne-purple)",
+                            color: "var(--vyne-accent, var(--vyne-purple))",
                             flexShrink: 0,
                           }}
                         >
@@ -1572,7 +1537,7 @@ function ContactsTabContent() {
                     </Td>
                     <Td>
                       <span
-                        style={{ color: "var(--vyne-purple)", fontSize: 12 }}
+                        style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontSize: 12 }}
                       >
                         {contact.email}
                       </span>
@@ -1657,9 +1622,20 @@ function ContactsTabContent() {
       <ConfirmDialog
         open={!!deleteId}
         title="Delete Contact"
-        message={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
+        message={`Are you sure you want to delete "${deleteTarget?.name}"? You'll have 5 seconds to undo.`}
         onConfirm={() => {
-          if (deleteId) deleteContact(deleteId);
+          if (deleteId) {
+            const snapshot = useContactsStore.getState().contacts.find((c) => c.id === deleteId);
+            if (snapshot) {
+              undoableDelete({
+                label: `Deleted contact — ${snapshot.name}`,
+                mutate: () => deleteContact(deleteId),
+                restore: () => useContactsStore.getState().addContact(snapshot),
+              });
+            } else {
+              deleteContact(deleteId);
+            }
+          }
           setDeleteId(null);
         }}
         onCancel={() => setDeleteId(null)}
@@ -1733,7 +1709,7 @@ function ImportTab() {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "rgba(6, 182, 212,0.08)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1742,7 +1718,7 @@ function ImportTab() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M3 21h18M3 7V5a2 2 0 012-2h14a2 2 0 012 2v2M3 7h18M3 7v7m18-7v7M3 14h18M3 14v5h18v-5"
-                  stroke="var(--vyne-purple)"
+                  stroke="var(--vyne-accent, var(--vyne-purple))"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1794,13 +1770,13 @@ function ImportTab() {
                   fontSize: 10,
                   fontWeight: 500,
                   background: col.required
-                    ? "rgba(6, 182, 212,0.08)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                     : "var(--content-bg-secondary)",
                   color: col.required
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--text-tertiary)",
                   border: col.required
-                    ? "1px solid rgba(6, 182, 212,0.2)"
+                    ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)"
                     : "1px solid transparent",
                 }}
               >
@@ -1828,7 +1804,7 @@ function ImportTab() {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor =
-                "var(--vyne-purple)";
+                "var(--vyne-accent, var(--vyne-purple))";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor =
@@ -1863,7 +1839,7 @@ function ImportTab() {
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                background: "rgba(6, 182, 212,0.08)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1872,7 +1848,7 @@ function ImportTab() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
-                  stroke="var(--vyne-purple)"
+                  stroke="var(--vyne-accent, var(--vyne-purple))"
                   strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -1924,13 +1900,13 @@ function ImportTab() {
                   fontSize: 10,
                   fontWeight: 500,
                   background: col.required
-                    ? "rgba(6, 182, 212,0.08)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                     : "var(--content-bg-secondary)",
                   color: col.required
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--text-tertiary)",
                   border: col.required
-                    ? "1px solid rgba(6, 182, 212,0.2)"
+                    ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)"
                     : "1px solid transparent",
                 }}
               >
@@ -1958,7 +1934,7 @@ function ImportTab() {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor =
-                "var(--vyne-purple)";
+                "var(--vyne-accent, var(--vyne-purple))";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor =
@@ -2016,13 +1992,13 @@ function ImportTab() {
             }
           }}
           style={{
-            border: `2px dashed ${dragOver ? "var(--vyne-purple)" : "var(--content-border)"}`,
+            border: `2px dashed ${dragOver ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
             borderRadius: 10,
             padding: "48px 20px",
             textAlign: "center",
             cursor: "pointer",
             background: dragOver
-              ? "rgba(6, 182, 212,0.04)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)"
               : "var(--content-secondary)",
             transition: "all 0.15s",
           }}
@@ -2038,11 +2014,11 @@ function ImportTab() {
               width="40"
               height="40"
               rx="10"
-              fill="rgba(6, 182, 212,0.08)"
+              fill="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
             />
             <path
               d="M13 27v2a1 1 0 001 1h12a1 1 0 001-1v-2M20 12v12M16 16l4-4 4 4"
-              stroke={dragOver ? "var(--vyne-purple)" : "var(--text-tertiary)"}
+              stroke={dragOver ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)"}
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -2436,8 +2412,8 @@ function AccountDetailPanel({
                         width: 24,
                         height: 24,
                         borderRadius: "50%",
-                        background: "rgba(6, 182, 212,0.12)",
-                        color: "var(--vyne-purple)",
+                        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -2554,8 +2530,8 @@ function ContactDetailPanel({
                     width: 28,
                     height: 28,
                     borderRadius: 8,
-                    background: "rgba(6, 182, 212,0.08)",
-                    color: "var(--vyne-purple)",
+                    background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",

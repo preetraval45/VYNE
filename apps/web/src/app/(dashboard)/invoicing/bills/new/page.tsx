@@ -92,10 +92,16 @@ export default function NewBillPage() {
       <form id="new-bill-form" onSubmit={handleSubmit}>
         <FormSection title="Vendor">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 180px", gap: 14 }}>
-            <FormField label="Vendor" htmlFor="bill-vendor" required>
+            <FormField
+              label="Vendor"
+              htmlFor={vendors.length > 0 ? "bill-vendor-select" : "bill-vendor-input"}
+              required
+            >
               {vendors.length > 0 ? (
                 <select
-                  id="bill-vendor"
+                  id="bill-vendor-select"
+                  aria-label="Vendor"
+                  title="Vendor"
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
                   className={`${inputClass} cursor-pointer`}
@@ -105,7 +111,8 @@ export default function NewBillPage() {
                 </select>
               ) : (
                 <input
-                  id="bill-vendor"
+                  id="bill-vendor-input"
+                  aria-label="Vendor name"
                   type="text"
                   value={vendor}
                   onChange={(e) => setVendor(e.target.value)}
@@ -190,9 +197,9 @@ export default function NewBillPage() {
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "7px 12px", marginTop: 8,
               fontSize: 12.5, fontWeight: 500,
-              color: "var(--vyne-purple)",
-              background: "rgba(6, 182, 212,0.08)",
-              border: "1px dashed rgba(6, 182, 212,0.3)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+              border: "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 8,
               cursor: "pointer",
               alignSelf: "flex-start",

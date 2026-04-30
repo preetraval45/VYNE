@@ -64,6 +64,15 @@ export function MobileBottomNav() {
     setSheetOpen(false);
   }, [pathname]);
 
+  // Mobile swipe-from-left-edge gesture opens the sheet.
+  useEffect(() => {
+    function onOpen() {
+      setSheetOpen(true);
+    }
+    window.addEventListener("vyne:open-more", onOpen);
+    return () => window.removeEventListener("vyne:open-more", onOpen);
+  }, []);
+
   const mounted = useMounted();
   const rawUnread = useUnreadStore((s) =>
     Object.values(s.counts).reduce((a, b) => a + b, 0),
@@ -120,7 +129,7 @@ export function MobileBottomNav() {
                 gap: 2,
                 textDecoration: "none",
                 color: active
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--text-tertiary)",
                 transition: "color 0.15s",
                 position: "relative",
@@ -137,7 +146,7 @@ export function MobileBottomNav() {
                     width: 28,
                     height: 3,
                     borderRadius: "0 0 3px 3px",
-                    background: "var(--vyne-purple)",
+                    background: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 />
               )}
@@ -197,7 +206,7 @@ export function MobileBottomNav() {
             justifyContent: "center",
             gap: 2,
             color: sheetOpen
-              ? "var(--vyne-purple)"
+              ? "var(--vyne-accent, var(--vyne-purple))"
               : "var(--text-tertiary)",
             transition: "color 0.15s",
           }}

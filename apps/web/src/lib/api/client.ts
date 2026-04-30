@@ -699,6 +699,11 @@ export interface ERPFinance {
   month: number;
   year: number;
 }
+export interface ERPJournalEntryLine {
+  account: string;
+  debit: number;
+  credit: number;
+}
 export interface ERPJournalEntry {
   id: string;
   entryNumber: string;
@@ -706,6 +711,8 @@ export interface ERPJournalEntry {
   postingDate: string;
   status: string;
   totalDebits: number;
+  lines?: ERPJournalEntryLine[];
+  memo?: string;
 }
 export interface ERPCustomer {
   id: string;
@@ -902,20 +909,34 @@ export interface AIInsightsResponse {
 }
 
 // ─── Billing API ─────────────────────────────────────────────────
+// All routes live under /api/stripe/* (real Stripe SDK + Postgres
+// subscription state). The legacy /api/billing/* paths are gone.
 export const billingApi = {
   /** Create a Stripe Checkout session for the given plan tier */
   createCheckout: (tier: string, returnUrl: string) =>
-    apiClient.post<{ url: string; demo?: boolean }>("/api/billing/checkout", {
-      tier,
-      returnUrl,
+    apiClient.post<{ url: string; demo?: boolean }>("/api/stripe/checkout", {
+      plan: tier,
+      successUrl: `${returnUrl}?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${returnUrl}?billing=cancelled`,
     }),
 
   /** Create a Stripe Billing Portal session for plan management */
-  createPortal: (customerId: string | null, returnUrl: string) =>
-    apiClient.post<{ url: string; demo?: boolean }>("/api/billing/portal", {
-      customerId,
-      returnUrl,
-    }),
+  createPortal: (_customerId: string | null, _returnUrl: string) =>
+    apiClient.post<{ url: string; demo?: boolean }>("/api/stripe/portal", {}),
+
+  /** Read current org subscription status (plan, status, period end) */
+  status: () =>
+    apiClient.get<{
+      plan: "free" | "starter" | "business" | "enterprise";
+      planLabel: string;
+      priceUsd: number;
+      status: string;
+      cancelAtPeriodEnd: boolean;
+      currentPeriodEnd: string | null;
+      hasCustomer: boolean;
+      billingConfigured: boolean;
+      plansAvailable: { starter: boolean; business: boolean; enterprise: boolean };
+    }>("/api/stripe/status"),
 };
 
 export default apiClient;

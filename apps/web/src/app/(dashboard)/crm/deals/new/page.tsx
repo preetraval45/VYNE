@@ -12,6 +12,7 @@ import {
 import { useCRMStore } from "@/lib/stores/crm";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import { CustomFieldsForm } from "@/components/shared/CustomFieldsRenderer";
+import { AiFormFill } from "@/components/shared/AiFormFill";
 import {
   STAGES,
   SOURCES,
@@ -63,9 +64,49 @@ function NewDealPageInner() {
   );
   const canSubmit = form.company.trim() && form.contactName.trim();
 
+  // Validate-on-blur state — fields that have been touched and currently
+  // fail validation surface an inline red message. Re-typing clears.
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  function fieldError(key: string): string | null {
+    if (!touched[key]) return null;
+    if (key === "company" && !form.company.trim()) return "Company is required";
+    if (key === "contactName" && !form.contactName.trim()) return "Contact name is required";
+    if (key === "email" && form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
+      return "Email looks invalid";
+    if (key === "value" && form.value && Number.isNaN(Number.parseInt(form.value, 10)))
+      return "Value must be a number";
+    return null;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+
+    // Plan-limit gate: free tier caps deals at 5 (free plan members
+    // limit). Block + nudge to upgrade. Once Stripe is wired the
+    // current plan comes from /api/stripe/status; until then we
+    // assume "free" and only enforce the cap when usage exceeds it.
+    try {
+      const statusRes = await fetch("/api/stripe/status");
+      if (statusRes.ok) {
+        const data = (await statusRes.json()) as { plan?: string };
+        const plan = data.plan ?? "free";
+        if (plan === "free") {
+          const dealCount = useCRMStore.getState().deals.length;
+          if (dealCount >= 5) {
+            toast.error("Free plan limited to 5 deals. Upgrade to add more.", {
+              duration: 6000,
+            });
+            router.push("/settings?tab=billing");
+            return;
+          }
+        }
+      }
+    } catch {
+      // If status fails, allow the create — better UX than blocking
+      // the form on a network hiccup.
+    }
+
     setSubmitting(true);
     const id = `d${Date.now()}`;
     const deal: Deal = {
@@ -107,6 +148,39 @@ function NewDealPageInner() {
       }
     >
       <form id="new-deal-form" onSubmit={handleSubmit}>
+        <AiFormFill
+          title="Describe the deal — AI will fill the form"
+          placeholder="e.g. New deal with Globex for $80k, contact is Marcus Chen, in negotiation, source referral"
+          fields={[
+            { key: "company", label: "Company name" },
+            { key: "contactName", label: "Primary contact" },
+            { key: "email", label: "Contact email" },
+            { key: "value", label: "Deal value", hint: "USD number" },
+            { key: "stage", label: "Stage", hint: "Lead | Qualified | Proposal | Negotiation | Won | Lost" },
+            { key: "source", label: "Source", hint: "website | referral | outbound | inbound" },
+            { key: "nextAction", label: "Next action" },
+            { key: "notes", label: "Notes" },
+          ]}
+          onApply={(values) => {
+            setForm((f) => ({
+              ...f,
+              company: typeof values.company === "string" ? values.company : f.company,
+              contactName:
+                typeof values.contactName === "string" ? values.contactName : f.contactName,
+              email: typeof values.email === "string" ? values.email : f.email,
+              value: typeof values.value === "number"
+                ? String(values.value)
+                : typeof values.value === "string"
+                  ? values.value
+                  : f.value,
+              stage:
+                typeof values.stage === "string" &&
+                ["Lead", "Qualified", "Proposal", "Negotiation", "Won", "Lost"].includes(values.stage)
+                  ? (values.stage as Stage)
+                  : f.stage,
+            }));
+          }}
+        />
         <FormSection title="Company" description="Who is this deal with?">
           <FormField label="Company name" htmlFor="deal-company" required>
             <input
@@ -116,12 +190,19 @@ function NewDealPageInner() {
               onChange={(e) =>
                 setForm((f) => ({ ...f, company: e.target.value }))
               }
+              onBlur={() => setTouched((t) => ({ ...t, company: true }))}
               placeholder="Acme Corp"
               required
               autoFocus
+              aria-invalid={fieldError("company") != null}
               className={inputClass}
               style={inputStyle}
             />
+            {fieldError("company") && (
+              <div style={{ marginTop: 4, fontSize: 11, color: "var(--status-danger)" }}>
+                {fieldError("company")}
+              </div>
+            )}
           </FormField>
 
           <div
@@ -135,11 +216,18 @@ function NewDealPageInner() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, contactName: e.target.value }))
                 }
+                onBlur={() => setTouched((t) => ({ ...t, contactName: true }))}
                 placeholder="Jane Smith"
                 required
+                aria-invalid={fieldError("contactName") != null}
                 className={inputClass}
                 style={inputStyle}
               />
+              {fieldError("contactName") && (
+                <div style={{ marginTop: 4, fontSize: 11, color: "var(--status-danger)" }}>
+                  {fieldError("contactName")}
+                </div>
+              )}
             </FormField>
             <FormField label="Email" htmlFor="deal-email">
               <input
@@ -149,10 +237,17 @@ function NewDealPageInner() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, email: e.target.value }))
                 }
+                onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                 placeholder="jane@company.com"
+                aria-invalid={fieldError("email") != null}
                 className={inputClass}
                 style={inputStyle}
               />
+              {fieldError("email") && (
+                <div style={{ marginTop: 4, fontSize: 11, color: "var(--status-danger)" }}>
+                  {fieldError("email")}
+                </div>
+              )}
             </FormField>
           </div>
         </FormSection>

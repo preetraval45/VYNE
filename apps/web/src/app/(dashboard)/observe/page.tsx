@@ -120,7 +120,7 @@ function getBarColor(pct: number): string {
   if (pct >= 60) {
     return "var(--status-warning)";
   }
-  return "var(--vyne-purple)";
+  return "var(--vyne-accent, var(--vyne-purple))";
 }
 
 function getErrorBarColor(val: number): string {
@@ -246,7 +246,7 @@ function Sparkline({ data }: Readonly<{ data: readonly number[] }>) {
           style={{
             width: 4,
             height: `${Math.round((val / max) * 100)}%`,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             opacity: 0.4 + 0.6 * (idx / (data.length - 1)),
             borderRadius: 1,
             minHeight: 2,
@@ -374,7 +374,7 @@ function RequestRateChart({
             style={{
               flex: 1,
               height: animated ? `${Math.round((val / max) * 100)}%` : "0%",
-              background: "linear-gradient(to top, #06B6D4, #9B7DFF)",
+              background: "linear-gradient(to top, var(--vyne-accent, #06B6D4), #9B7DFF)",
               borderRadius: "2px 2px 0 0",
               minHeight: 2,
               transition: `height 0.6s ease ${(idx * 25).toString()}ms`,
@@ -689,7 +689,7 @@ function OverviewTab({
                     width: 10,
                     height: 10,
                     borderRadius: "50%",
-                    background: "var(--vyne-purple)",
+                    background: "var(--vyne-accent, var(--vyne-purple))",
                     marginTop: 2,
                   }}
                 />
@@ -698,7 +698,7 @@ function OverviewTab({
                     style={{
                       width: 2,
                       flex: 1,
-                      background: "rgba(6, 182, 212,0.15)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
                       minHeight: 14,
                       marginTop: 2,
                     }}
@@ -722,7 +722,7 @@ function OverviewTab({
                       background: "var(--content-secondary)",
                       padding: "1px 6px",
                       borderRadius: 4,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {dep.version}
@@ -1044,7 +1044,7 @@ function LogsTab(_props: Readonly<{ env?: Environment }> = {}) {
                 fontWeight: 500,
                 border: "none",
                 cursor: "pointer",
-                background: filter === f ? "var(--vyne-purple)" : "var(--content-secondary)",
+                background: filter === f ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-secondary)",
                 color: filter === f ? "#fff" : "var(--text-secondary)",
               }}
             >
@@ -1135,7 +1135,7 @@ function LogsTab(_props: Readonly<{ env?: Environment }> = {}) {
             type="checkbox"
             checked={autoRefresh}
             onChange={(e) => setAutoRefresh(e.target.checked)}
-            style={{ accentColor: "#06B6D4", cursor: "pointer" }}
+            style={{ accentColor: "var(--vyne-accent, #06B6D4)", cursor: "pointer" }}
           />
           <span>Auto-refresh</span>
         </label>
@@ -1197,7 +1197,7 @@ function LogsTab(_props: Readonly<{ env?: Environment }> = {}) {
             <span
               style={{
                 fontSize: 10,
-                color: "var(--vyne-purple)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 flexShrink: 0,
                 lineHeight: 1.8,
               }}
@@ -1333,7 +1333,7 @@ function AlertsTab(_props: Readonly<{ env?: Environment }> = {}) {
           </div>
           <button
             style={{
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               border: "none",
               borderRadius: 8,
@@ -1696,7 +1696,7 @@ export default function ObservePage() {
               width: 28,
               height: 28,
               borderRadius: 8,
-              background: "linear-gradient(135deg,#06B6D4,#9B7DFF)",
+              background: "linear-gradient(135deg,var(--vyne-accent, #06B6D4),#9B7DFF)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1774,7 +1774,7 @@ export default function ObservePage() {
                   // where active text inherited --text-primary which is white in dark mode).
                   background:
                     env === e
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "transparent",
                   color:
                     env === e
@@ -1814,7 +1814,7 @@ export default function ObservePage() {
                   border: "none",
                   cursor: "pointer",
                   background:
-                    timeRange === r ? "var(--vyne-purple)" : "transparent",
+                    timeRange === r ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
                   color: timeRange === r ? "#fff" : "var(--text-secondary)",
                   transition: "all 0.15s",
                 }}
@@ -2015,7 +2015,7 @@ export default function ObservePage() {
                       : "2px solid transparent",
                   color:
                     activeTab === tab.id
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "var(--text-secondary)",
                   marginBottom: -1,
                   transition: "color 0.15s",
@@ -2073,7 +2073,7 @@ export default function ObservePage() {
                 padding: "2px 8px",
                 borderRadius: 99,
                 background: "rgba(108, 71, 255, 0.12)",
-                color: "var(--vyne-purple)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 fontWeight: 600,
               }}
             >
@@ -2084,8 +2084,8 @@ export default function ObservePage() {
               style={{
                 padding: "2px 8px",
                 borderRadius: 99,
-                background: "rgba(6, 182, 212, 0.12)",
-                color: "#06B6D4",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                color: "var(--vyne-accent, #06B6D4)",
                 fontWeight: 600,
               }}
             >

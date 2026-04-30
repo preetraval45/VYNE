@@ -1,7 +1,13 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useOpsStore } from "@/lib/stores/ops";
+import { undoableDelete } from "@/lib/undo";
+import { SearchBar as SharedSearchBar } from "@/components/shared/SearchBar";
+import { WorkOrderGantt } from "@/components/ops/WorkOrderGantt";
 import {
   DetailPanel,
   DetailSection,
@@ -44,6 +50,20 @@ import {
   type StatusKey,
 } from "@/lib/fixtures/ops";
 
+// Roll up the unit cost of a BOM by summing each component's costPrice
+// times its quantity. Components are matched against the products list
+// by id; missing components contribute 0 (graceful degradation).
+function computeBomCost(bom: ERPBOM, products: ERPProduct[]): number {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  let total = 0;
+  for (const c of bom.components ?? []) {
+    const p = byId.get(c.componentId);
+    const cost = p?.costPrice ?? 0;
+    total += cost * (c.quantity ?? 0);
+  }
+  return Math.round(total * 100) / 100;
+}
+
 function StatusBadge({ status }: Readonly<{ status: string }>) {
   const s = STATUS_MAP[status as StatusKey] ?? {
     label: status,
@@ -82,7 +102,7 @@ function TabBtn({
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 500,
-        background: active ? "var(--vyne-purple)" : "transparent",
+        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         transition: "all 0.15s",
       }}
@@ -240,11 +260,11 @@ function OverviewTab({
       >
         {[
           {
-            icon: <Package size={18} style={{ color: "var(--vyne-purple)" }} />,
+            icon: <Package size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />,
             label: "Total Products",
             value: products.length.toString(),
             sub: `${inStock} in stock`,
-            bg: "rgba(6, 182, 212,0.08)",
+            bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
           },
           {
             icon: (
@@ -337,6 +357,7 @@ function OverviewTab({
 
       {/* Recent orders + Low stock */}
       <div
+        className="two-pane-layout"
         style={{
           display: "grid",
           gridTemplateColumns: "1fr minmax(0, 280px)",
@@ -362,7 +383,7 @@ function OverviewTab({
           >
             Recent Orders
           </div>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
                 {["Order #", "Customer", "Total", "Status", "Date"].map((h) => (
@@ -394,7 +415,7 @@ function OverviewTab({
                       padding: "10px 16px",
                       fontSize: 12,
                       fontWeight: 600,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {o.orderNumber}
@@ -478,7 +499,7 @@ function OverviewTab({
                       flexShrink: 0,
                     }}
                   />
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, color: "var(--text-primary)" }}>
                       {p.name}
                     </div>
@@ -489,6 +510,21 @@ function OverviewTab({
                     </div>
                   </div>
                   <StatusBadge status={p.status ?? "in_stock"} />
+                  <Link
+                    href={`/ops/orders/new?product=${encodeURIComponent(p.id)}&qty=${Math.max(20, 30 - p.stockQty)}`}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      padding: "4px 10px",
+                      borderRadius: 8,
+                      background: "var(--vyne-accent, #5B5BD6)",
+                      color: "#fff",
+                      textDecoration: "none",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Order more
+                  </Link>
                 </div>
               ))}
           </div>
@@ -594,32 +630,17 @@ function InventoryTab({
           alignItems: "center",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-            background: "var(--content-secondary)",
-            border: "1px solid var(--content-border)",
-            borderRadius: 8,
-            padding: "6px 10px",
-            flex: 1,
-            maxWidth: 320,
-          }}
-        >
-          <Search size={13} style={{ color: "var(--text-tertiary)" }} />
-          <input
+        <div style={{ flex: 1, maxWidth: 320 }}>
+          <SharedSearchBar
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={setSearch}
             placeholder="Search products…"
-            style={{
-              flex: 1,
-              border: "none",
-              background: "transparent",
-              outline: "none",
-              fontSize: 12,
-              color: "var(--text-primary)",
-            }}
+            width={320}
+            onWorkspaceSearch={() =>
+              window.dispatchEvent(
+                new CustomEvent("vyne:open-palette", { detail: { query: search } }),
+              )
+            }
           />
         </div>
         <button
@@ -631,7 +652,7 @@ function InventoryTab({
             padding: "7px 14px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             cursor: "pointer",
             fontSize: 12,
@@ -651,7 +672,7 @@ function InventoryTab({
           overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
               {[
@@ -772,23 +793,52 @@ function InventoryTab({
                   <StatusBadge status={p.status ?? "in_stock"} />
                 </td>
                 <td style={{ padding: "10px 14px" }} onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => setAdjustOpen(p)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      padding: "3px 8px",
-                      borderRadius: 6,
-                      border: "1px solid var(--content-border)",
-                      background: "transparent",
-                      cursor: "pointer",
-                      fontSize: 11,
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    <Edit2 size={11} /> Adjust
-                  </button>
+                  <div style={{ display: "inline-flex", gap: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => setAdjustOpen(p)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 4,
+                        padding: "3px 8px",
+                        borderRadius: 6,
+                        border: "1px solid var(--content-border)",
+                        background: "transparent",
+                        cursor: "pointer",
+                        fontSize: 11,
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      <Edit2 size={11} /> Adjust
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete ${p.name}`}
+                      onClick={() => {
+                        if (!confirm(`Delete ${p.name}? You'll have 5 seconds to undo.`)) return;
+                        const snapshot = { ...p };
+                        undoableDelete({
+                          label: `Deleted product — ${snapshot.name}`,
+                          mutate: () => useOpsStore.getState().deleteProduct(snapshot.id),
+                          restore: () => useOpsStore.getState().addProduct(snapshot),
+                        });
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "3px 6px",
+                        borderRadius: 6,
+                        border: "1px solid rgba(239,68,68,0.25)",
+                        background: "rgba(239,68,68,0.06)",
+                        cursor: "pointer",
+                        fontSize: 11,
+                        color: "var(--status-danger)",
+                      }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -919,7 +969,7 @@ function InventoryTab({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               cursor: "pointer",
               fontSize: 13,
@@ -1006,7 +1056,7 @@ function InventoryTab({
               padding: "8px 16px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               cursor: "pointer",
               fontSize: 13,
@@ -1156,7 +1206,7 @@ function OrdersTab({
                 cursor: "pointer",
                 fontSize: 11,
                 fontWeight: 500,
-                background: filter === s ? "var(--vyne-purple)" : "var(--content-secondary)",
+                background: filter === s ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-secondary)",
                 color: filter === s ? "#fff" : "var(--text-secondary)",
                 textTransform: "capitalize",
               }}
@@ -1201,7 +1251,7 @@ function OrdersTab({
               padding: "7px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               cursor: "pointer",
               fontSize: 12,
@@ -1221,7 +1271,7 @@ function OrdersTab({
           overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
               {[
@@ -1268,7 +1318,7 @@ function OrdersTab({
                     padding: "10px 14px",
                     fontSize: 12,
                     fontWeight: 600,
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 >
                   {o.orderNumber}
@@ -1388,6 +1438,30 @@ function OrdersTab({
                         Cancel
                       </button>
                     )}
+                    <button
+                      type="button"
+                      aria-label={`Delete ${o.orderNumber}`}
+                      onClick={() => {
+                        if (!confirm(`Delete ${o.orderNumber}? You'll have 5 seconds to undo.`)) return;
+                        const snapshot = { ...o };
+                        undoableDelete({
+                          label: `Deleted order — ${snapshot.orderNumber}`,
+                          mutate: () => useOpsStore.getState().deleteOrder(snapshot.id),
+                          restore: () => useOpsStore.getState().addOrder(snapshot),
+                        });
+                      }}
+                      style={{
+                        padding: "3px 6px",
+                        borderRadius: 6,
+                        border: "1px solid rgba(239,68,68,0.25)",
+                        background: "rgba(239,68,68,0.06)",
+                        cursor: "pointer",
+                        fontSize: 11,
+                        color: "var(--status-danger)",
+                      }}
+                    >
+                      <X size={11} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -1467,7 +1541,7 @@ function OrdersTab({
               borderRadius: 8,
               border: "none",
               background: form.customerName
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               color: form.customerName ? "#fff" : "var(--text-tertiary)",
               cursor: form.customerName ? "pointer" : "default",
@@ -1526,7 +1600,7 @@ function SuppliersTab({
             padding: "7px 14px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             cursor: "pointer",
             fontSize: 12,
@@ -1545,12 +1619,12 @@ function SuppliersTab({
           overflow: "hidden",
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
-              {["Supplier", "Contact", "Email", "Phone", "Status"].map((h) => (
+              {["Supplier", "Contact", "Email", "Phone", "Status", ""].map((h, i) => (
                 <th
-                  key={h}
+                  key={h || `act-${i}`}
                   style={{
                     padding: "9px 14px",
                     textAlign: "left",
@@ -1619,6 +1693,32 @@ function SuppliersTab({
                 </td>
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={s.status ?? "active"} />
+                </td>
+                <td style={{ padding: "10px 14px", textAlign: "right" }}>
+                  <button
+                    type="button"
+                    aria-label={`Delete ${s.name}`}
+                    onClick={() => {
+                      if (!confirm(`Delete ${s.name}? You'll have 5 seconds to undo.`)) return;
+                      const snapshot = { ...s };
+                      undoableDelete({
+                        label: `Deleted supplier — ${snapshot.name}`,
+                        mutate: () => useOpsStore.getState().deleteSupplier(snapshot.id),
+                        restore: () => useOpsStore.getState().addSupplier(snapshot),
+                      });
+                    }}
+                    style={{
+                      padding: "3px 6px",
+                      borderRadius: 6,
+                      border: "1px solid rgba(239,68,68,0.25)",
+                      background: "rgba(239,68,68,0.06)",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      color: "var(--status-danger)",
+                    }}
+                  >
+                    <X size={11} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -1699,7 +1799,7 @@ function SuppliersTab({
               borderRadius: 8,
               border: "none",
               background: form.name
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               color: form.name ? "#fff" : "var(--text-tertiary)",
               cursor: form.name ? "pointer" : "default",
@@ -1720,10 +1820,12 @@ function ManufacturingTab({
   boms,
   workOrders,
   setWorkOrders,
+  products,
 }: Readonly<{
   boms: ERPBOM[];
   workOrders: ERPWorkOrder[];
   setWorkOrders: (w: ERPWorkOrder[]) => void;
+  products: ERPProduct[];
 }>) {
   const router = useRouter();
   const [subTab, setSubTab] = useState<"boms" | "work-orders">("boms");
@@ -1769,10 +1871,10 @@ function ManufacturingTab({
             overflow: "hidden",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
-                {["Product", "Version", "Components", "Actions"].map((h) => (
+                {["Product", "Version", "Components", "Unit cost", "Actions"].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -1832,21 +1934,82 @@ function ManufacturingTab({
                   >
                     {b.components?.length ?? 0} components
                   </td>
+                  <td
+                    style={{
+                      padding: "10px 14px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {(() => {
+                      const cost = computeBomCost(b, products);
+                      const product = products.find((p) => p.id === b.productId);
+                      const target = product?.costPrice ?? 0;
+                      const delta = target > 0 ? cost - target : 0;
+                      return (
+                        <>
+                          ${cost.toLocaleString()}
+                          {target > 0 && Math.abs(delta) > 0.01 && (
+                            <span
+                              title={`Stored cost ${`$${target.toLocaleString()}`}; rollup ${delta > 0 ? "+" : ""}${`$${delta.toFixed(2)}`}`}
+                              style={{
+                                marginLeft: 6,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                color: delta > 0 ? "var(--status-danger)" : "var(--status-success)",
+                              }}
+                            >
+                              {delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(0)}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </td>
                   <td style={{ padding: "10px 14px" }}>
-                    <button
-                      onClick={() => setBomDetail(b)}
-                      style={{
-                        padding: "3px 8px",
-                        borderRadius: 6,
-                        border: "1px solid var(--content-border)",
-                        background: "transparent",
-                        cursor: "pointer",
-                        fontSize: 11,
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      View BOM
-                    </button>
+                    <div style={{ display: "inline-flex", gap: 6 }}>
+                      <button
+                        type="button"
+                        onClick={() => setBomDetail(b)}
+                        style={{
+                          padding: "3px 8px",
+                          borderRadius: 6,
+                          border: "1px solid var(--content-border)",
+                          background: "transparent",
+                          cursor: "pointer",
+                          fontSize: 11,
+                          color: "var(--text-secondary)",
+                        }}
+                      >
+                        View BOM
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${b.productName ?? "BOM"}`}
+                        onClick={() => {
+                          if (!confirm(`Delete this BOM? You'll have 5 seconds to undo.`)) return;
+                          const snapshot = { ...b };
+                          undoableDelete({
+                            label: `Deleted BOM — ${snapshot.productName ?? "BOM"}`,
+                            mutate: () => useOpsStore.getState().deleteBom(snapshot.id),
+                            restore: () => useOpsStore.getState().addBom(snapshot),
+                          });
+                        }}
+                        style={{
+                          padding: "3px 6px",
+                          borderRadius: 6,
+                          border: "1px solid rgba(239,68,68,0.25)",
+                          background: "rgba(239,68,68,0.06)",
+                          cursor: "pointer",
+                          fontSize: 11,
+                          color: "var(--status-danger)",
+                        }}
+                      >
+                        <X size={11} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -1873,7 +2036,7 @@ function ManufacturingTab({
                 padding: "7px 14px",
                 borderRadius: 8,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 cursor: "pointer",
                 fontSize: 12,
@@ -1891,7 +2054,7 @@ function ManufacturingTab({
               overflow: "hidden",
             }}
           >
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: "var(--table-header-bg)" }}>
                   {[
@@ -1900,9 +2063,10 @@ function ManufacturingTab({
                     "Status",
                     "Scheduled",
                     "Due Date",
-                  ].map((h) => (
+                    "",
+                  ].map((h, idx) => (
                     <th
-                      key={h}
+                      key={h || `act-${idx}`}
                       style={{
                         padding: "9px 14px",
                         textAlign: "left",
@@ -1979,10 +2143,37 @@ function ManufacturingTab({
                         ? new Date(w.dueDate).toLocaleDateString()
                         : "—"}
                     </td>
+                    <td style={{ padding: "10px 14px", textAlign: "right" }}>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${w.productName ?? "work order"}`}
+                        onClick={() => {
+                          if (!confirm(`Delete this work order? You'll have 5 seconds to undo.`)) return;
+                          const snapshot = { ...w };
+                          undoableDelete({
+                            label: `Deleted work order — ${snapshot.productName ?? "WO"}`,
+                            mutate: () => useOpsStore.getState().deleteWorkOrder(snapshot.id),
+                            restore: () => useOpsStore.getState().addWorkOrder(snapshot),
+                          });
+                        }}
+                        style={{
+                          padding: "3px 6px",
+                          borderRadius: 6,
+                          border: "1px solid rgba(239,68,68,0.25)",
+                          background: "rgba(239,68,68,0.06)",
+                          cursor: "pointer",
+                          fontSize: 11,
+                          color: "var(--status-danger)",
+                        }}
+                      >
+                        <X size={11} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            <WorkOrderGantt workOrders={workOrders} />
           </div>
 
           <Modal
@@ -2042,7 +2233,7 @@ function ManufacturingTab({
                   padding: "8px 16px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   cursor: "pointer",
                   fontSize: 13,
@@ -2079,7 +2270,7 @@ function ManufacturingTab({
             overflow: "hidden",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
                 <th
@@ -2295,7 +2486,7 @@ function OpsPageInner() {
                 fontWeight: 500,
                 background: "transparent",
                 color:
-                  tab === id ? "var(--vyne-purple)" : "var(--text-secondary)",
+                  tab === id ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                 borderBottom:
                   tab === id ? "2px solid #06B6D4" : "2px solid transparent",
                 transition: "all 0.15s",
@@ -2329,6 +2520,7 @@ function OpsPageInner() {
             boms={boms}
             workOrders={workOrders}
             setWorkOrders={setWorkOrders}
+            products={products}
           />
         )}
       </div>

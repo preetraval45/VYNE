@@ -15,9 +15,22 @@ export function SlashCommandMenu({
   onClose,
 }: SlashCommandMenuProps) {
   const [activeIdx, setActiveIdx] = useState(0);
-  const filtered = SLASH_COMMANDS.filter((c) =>
-    c.cmd.startsWith(query.replace(/^\//, "")),
-  );
+  // Improved filter: matches both prefix ("/p" → /poll, /postmortem,
+  // /pr-summary) AND substring elsewhere ("/ask" → matches /ask but
+  // also AI templates that include "ask"). Prefix matches rank first.
+  const q = query.replace(/^\//, "").toLowerCase();
+  const filtered = q
+    ? SLASH_COMMANDS.filter(
+        (c) =>
+          c.cmd.toLowerCase().includes(q) ||
+          c.desc.toLowerCase().includes(q),
+      ).sort((a, b) => {
+        const aPrefix = a.cmd.toLowerCase().startsWith(q);
+        const bPrefix = b.cmd.toLowerCase().startsWith(q);
+        if (aPrefix !== bPrefix) return aPrefix ? -1 : 1;
+        return a.cmd.localeCompare(b.cmd);
+      })
+    : SLASH_COMMANDS;
 
   useEffect(() => {
     function handler(e: KeyboardEvent) {
@@ -88,7 +101,7 @@ export function SlashCommandMenu({
             cursor: "pointer",
             textAlign: "left",
             background:
-              i === activeIdx ? "rgba(6, 182, 212,0.08)" : "transparent",
+              i === activeIdx ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
           }}
         >
           <span style={{ fontSize: 16, lineHeight: 1 }}>{c.icon}</span>
@@ -120,8 +133,8 @@ export function SlashCommandMenu({
                   marginLeft: "auto",
                   fontSize: 9,
                   fontWeight: 700,
-                  color: "#06B6D4",
-                  background: "rgba(6, 182, 212,0.1)",
+                  color: "var(--vyne-accent, #06B6D4)",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
                   padding: "1px 6px",
                   borderRadius: 4,
                 }}

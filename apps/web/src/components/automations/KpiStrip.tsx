@@ -92,11 +92,11 @@ export default function KpiStrip(
       }}
     >
       <KpiCard
-        icon={<Zap size={18} color="#06B6D4" />}
+        icon={<Zap size={18} color="var(--vyne-accent, #06B6D4)" />}
         label="Total Automations"
         value={String(totalAutomations)}
         sub={`${activeCount} active right now`}
-        accent="#06B6D4"
+        accent="var(--vyne-accent, #06B6D4)"
       />
       <KpiCard
         icon={<BarChart2 size={18} color="#22C55E" />}

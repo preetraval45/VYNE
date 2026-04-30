@@ -46,9 +46,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -323,7 +323,7 @@ function BarChart({
             <div
               style={{
                 flex: 1,
-                background: barColor ?? "var(--vyne-purple)",
+                background: barColor ?? "var(--vyne-accent, var(--vyne-purple))",
                 borderRadius: "3px 3px 0 0",
                 height: `${(Number(d[valueKey]) / maxVal) * 100}%`,
                 opacity: 0.85,
@@ -641,19 +641,19 @@ const TOP_CUSTOMERS = [
 ];
 
 const SALES_BY_CATEGORY = [
-  { category: "SaaS Licenses", revenue: 82000, color: "#06B6D4" },
+  { category: "SaaS Licenses", revenue: 82000, color: "var(--vyne-accent, #06B6D4)" },
   { category: "Professional Services", revenue: 45000, color: "#3498DB" },
   { category: "Hardware", revenue: 32000, color: "#2ECC71" },
   { category: "Support Plans", revenue: 18000, color: "#F39C12" },
-  { category: "Training", revenue: 8000, color: "#06B6D4" },
+  { category: "Training", revenue: 8000, color: "var(--vyne-accent, #06B6D4)" },
 ];
 
 const PIPELINE_FUNNEL = [
-  { label: "Leads", value: 1240, color: "rgba(6, 182, 212,0.6)" },
-  { label: "Qualified", value: 680, color: "rgba(6, 182, 212,0.7)" },
-  { label: "Proposal", value: 320, color: "rgba(6, 182, 212,0.8)" },
-  { label: "Negotiation", value: 145, color: "rgba(6, 182, 212,0.9)" },
-  { label: "Won", value: 78, color: "#06B6D4" },
+  { label: "Leads", value: 1240, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)" },
+  { label: "Qualified", value: 680, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.7)" },
+  { label: "Proposal", value: 320, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.8)" },
+  { label: "Negotiation", value: 145, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.9)" },
+  { label: "Won", value: 78, color: "var(--vyne-accent, #06B6D4)" },
 ];
 
 // Financial data
@@ -709,7 +709,7 @@ const AR_AGING = [
 
 // Operations data
 const INVENTORY_CATEGORIES = [
-  { category: "Raw Materials", value: 245000, turnover: 6.2, color: "#06B6D4" },
+  { category: "Raw Materials", value: 245000, turnover: 6.2, color: "var(--vyne-accent, #06B6D4)" },
   {
     category: "Work in Progress",
     value: 128000,
@@ -774,8 +774,8 @@ const MFG_OUTPUT = [
 
 // HR data
 const DEPT_HEADCOUNT = [
-  { dept: "Engineering", count: 42, color: "#06B6D4" },
-  { dept: "Sales", count: 28, color: "#06B6D4" },
+  { dept: "Engineering", count: 42, color: "var(--vyne-accent, #06B6D4)" },
+  { dept: "Sales", count: 28, color: "var(--vyne-accent, #06B6D4)" },
   { dept: "Product", count: 15, color: "#0891B2" },
   { dept: "Operations", count: 18, color: "#F39C12" },
   { dept: "Finance", count: 12, color: "#3498DB" },
@@ -784,8 +784,8 @@ const DEPT_HEADCOUNT = [
 ];
 
 const LEAVE_UTIL = [
-  { type: "Annual Leave", used: 68, total: 100, color: "#06B6D4" },
-  { type: "Sick Leave", used: 22, total: 40, color: "#06B6D4" },
+  { type: "Annual Leave", used: 68, total: 100, color: "var(--vyne-accent, #06B6D4)" },
+  { type: "Sick Leave", used: 22, total: 40, color: "var(--vyne-accent, #06B6D4)" },
   { type: "Personal Days", used: 8, total: 15, color: "#F39C12" },
   { type: "Parental Leave", used: 3, total: 5, color: "#3498DB" },
 ];
@@ -799,11 +799,11 @@ const PAYROLL_SUMMARY = [
 ];
 
 const HIRING_PIPELINE = [
-  { label: "Applications", value: 245, color: "rgba(6, 182, 212,0.5)" },
-  { label: "Screening", value: 120, color: "rgba(6, 182, 212,0.6)" },
-  { label: "Interview", value: 48, color: "rgba(6, 182, 212,0.75)" },
-  { label: "Offer", value: 12, color: "rgba(6, 182, 212,0.9)" },
-  { label: "Hired", value: 8, color: "#06B6D4" },
+  { label: "Applications", value: 245, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.5)" },
+  { label: "Screening", value: 120, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)" },
+  { label: "Interview", value: 48, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.75)" },
+  { label: "Offer", value: 12, color: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.9)" },
+  { label: "Hired", value: 8, color: "var(--vyne-accent, #06B6D4)" },
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -815,7 +815,7 @@ function DashboardTab() {
       title: "Revenue (MTD)",
       value: fmt(185000),
       trend: { value: "12.4%", positive: true },
-      accentColor: "var(--vyne-purple)",
+      accentColor: "var(--vyne-accent, var(--vyne-purple))",
     },
     {
       title: "Orders",
@@ -895,7 +895,7 @@ function DashboardTab() {
             labelKey="label"
             valueKey="revenue"
             secondaryKey="expenses"
-            barColor="var(--vyne-purple)"
+            barColor="var(--vyne-accent, var(--vyne-purple))"
             secondaryColor="var(--status-danger)"
             height={160}
           />
@@ -913,7 +913,7 @@ function DashboardTab() {
                   width: 12,
                   height: 12,
                   borderRadius: 3,
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   opacity: 0.85,
                 }}
               />
@@ -976,7 +976,7 @@ function SalesTab() {
         <KPICard
           title="Total Revenue (6M)"
           value={fmt(totalRevenue)}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Current Month"
@@ -1009,7 +1009,7 @@ function SalesTab() {
             }))}
             labelKey="label"
             valueKey="value"
-            barColor="var(--vyne-purple)"
+            barColor="var(--vyne-accent, var(--vyne-purple))"
             height={160}
           />
         </SectionPanel>
@@ -1131,7 +1131,7 @@ function FinancialTab() {
         <KPICard
           title="Gross Margin"
           value="61.1%"
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Operating Expenses"
@@ -1174,7 +1174,7 @@ function FinancialTab() {
             labelKey="label"
             valueKey="revenue"
             secondaryKey="expenses"
-            barColor="var(--vyne-purple)"
+            barColor="var(--vyne-accent, var(--vyne-purple))"
             secondaryColor="var(--status-danger)"
             height={160}
           />
@@ -1192,7 +1192,7 @@ function FinancialTab() {
                   width: 12,
                   height: 12,
                   borderRadius: 3,
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   opacity: 0.85,
                 }}
               />
@@ -1362,7 +1362,7 @@ function OperationsTab() {
         <KPICard
           title="Inventory Value"
           value={fmt(totalInventory)}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Avg Turnover"
@@ -1565,7 +1565,7 @@ function HRTab() {
         <KPICard
           title="Total Headcount"
           value={String(totalHeadcount)}
-          accentColor="var(--vyne-purple)"
+          accentColor="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           title="Open Positions"
@@ -1861,13 +1861,13 @@ function CustomReportsTab() {
               width: 36,
               height: 36,
               borderRadius: 8,
-              background: "rgba(6, 182, 212,0.08)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <BarChart3 size={18} style={{ color: "var(--vyne-purple)" }} />
+            <BarChart3 size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           </div>
           <div>
             <span
@@ -1970,23 +1970,23 @@ function CustomReportsTab() {
               padding: "10px 24px",
               borderRadius: 8,
               border: "none",
-              background: "linear-gradient(135deg, #06B6D4 0%, #22D3EE 100%)",
+              background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
               color: "#fff",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
-              boxShadow: "0 2px 8px rgba(6, 182, 212,0.3)",
+              boxShadow: "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               transition: "all 0.15s",
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 4px 14px rgba(6, 182, 212,0.45)";
+                "0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)";
               (e.currentTarget as HTMLElement).style.transform =
                 "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 2px 8px rgba(6, 182, 212,0.3)";
+                "0 2px 8px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)";
               (e.currentTarget as HTMLElement).style.transform =
                 "translateY(0)";
             }}
@@ -2015,7 +2015,7 @@ function CustomReportsTab() {
       <div
         style={{
           background: "var(--content-bg)",
-          border: "2px dashed rgba(6, 182, 212,0.2)",
+          border: "2px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)",
           borderRadius: 12,
           padding: "48px 24px",
           display: "flex",
@@ -2030,14 +2030,14 @@ function CustomReportsTab() {
             width: 64,
             height: 64,
             borderRadius: 16,
-            background: "rgba(6, 182, 212,0.08)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 16,
           }}
         >
-          <BarChart3 size={28} style={{ color: "var(--vyne-purple)" }} />
+          <BarChart3 size={28} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         </div>
         <span
           style={{
@@ -2064,8 +2064,8 @@ function CustomReportsTab() {
         </span>
         <Badge
           label="Coming Soon"
-          bg="rgba(6, 182, 212,0.1)"
-          color="var(--vyne-purple)"
+          bg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
+          color="var(--vyne-accent, var(--vyne-purple))"
         />
 
         {/* Preview of selected config */}
@@ -2206,9 +2206,9 @@ export default function ReportingPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(6, 182, 212,0.08)" }}
+            style={{ background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" }}
           >
-            <BarChart3 size={18} style={{ color: "var(--vyne-purple)" }} />
+            <BarChart3 size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           </div>
           <div>
             <h1

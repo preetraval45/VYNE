@@ -193,7 +193,7 @@ export default function StatusPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

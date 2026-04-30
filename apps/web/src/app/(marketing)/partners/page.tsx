@@ -220,7 +220,7 @@ export default function PartnersPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -246,8 +246,8 @@ export default function PartnersPage() {
               gap: 8,
               padding: "5px 12px",
               borderRadius: 999,
-              background: "rgba(6, 182, 212,0.1)",
-              border: "1px solid rgba(6, 182, 212,0.25)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
               color: "#67E8F9",
               fontSize: 12,
               fontWeight: 600,
@@ -315,7 +315,7 @@ export default function PartnersPage() {
                   padding: "9px 14px",
                   borderRadius: "8px 8px 0 0",
                   border: "none",
-                  background: active ? "rgba(6, 182, 212,0.12)" : "transparent",
+                  background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)" : "transparent",
                   color: active ? "#67E8F9" : "rgba(255,255,255,0.55)",
                   fontSize: 13,
                   fontWeight: 600,
@@ -488,7 +488,7 @@ export default function PartnersPage() {
                 >
                   <p.icon
                     size={18}
-                    style={{ color: "#22D3EE", marginBottom: 8 }}
+                    style={{ color: "var(--vyne-accent-light, #22D3EE)", marginBottom: 8 }}
                   />
                   <div
                     style={{
@@ -578,7 +578,7 @@ export default function PartnersPage() {
                   padding: "10px 18px",
                   borderRadius: 8,
                   border: "none",
-                  background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                  background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                   color: "#fff",
                   fontSize: 13,
                   fontWeight: 600,
@@ -732,7 +732,7 @@ export default function PartnersPage() {
                       borderRadius: 4,
                       fontSize: 10,
                       fontWeight: 700,
-                      background: "rgba(6, 182, 212,0.15)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
                       color: "#67E8F9",
                       fontFamily:
                         "var(--font-geist-mono), ui-monospace, monospace",
@@ -767,7 +767,7 @@ export default function PartnersPage() {
                       gap: 5,
                       padding: "6px 12px",
                       borderRadius: 6,
-                      border: "1px solid rgba(6, 182, 212,0.4)",
+                      border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)",
                       background: "transparent",
                       color: "#67E8F9",
                       fontSize: 12,

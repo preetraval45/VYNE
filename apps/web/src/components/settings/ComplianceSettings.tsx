@@ -391,9 +391,9 @@ export default function ComplianceSettings({ onToast }: Props) {
               gap: 6,
               padding: "8px 14px",
               borderRadius: 8,
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               background: "var(--content-bg)",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -545,7 +545,7 @@ export default function ComplianceSettings({ onToast }: Props) {
                 textAlign: "left",
               }}
             >
-              <FileText size={15} style={{ color: "var(--vyne-purple)" }} />
+              <FileText size={15} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <span style={{ fontSize: 13, fontWeight: 700, marginTop: 4 }}>
                 {t.label}
               </span>
@@ -562,7 +562,7 @@ export default function ComplianceSettings({ onToast }: Props) {
                   marginTop: 8,
                   fontSize: 11,
                   fontWeight: 600,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 4,
@@ -619,9 +619,9 @@ export default function ComplianceSettings({ onToast }: Props) {
                   gap: 4,
                   padding: 14,
                   borderRadius: 10,
-                  border: `1.5px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                  border: `1.5px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                   background: active
-                    ? "rgba(6, 182, 212,0.05)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                     : "var(--content-bg)",
                   color: "var(--text-primary)",
                   fontSize: 13,
@@ -710,7 +710,7 @@ export default function ComplianceSettings({ onToast }: Props) {
                 marginBottom: 6,
               }}
             >
-              <Download size={14} style={{ color: "var(--vyne-purple)" }} />
+              <Download size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <span
                 style={{
                   fontSize: 13,
@@ -743,7 +743,7 @@ export default function ComplianceSettings({ onToast }: Props) {
                 padding: "8px 14px",
                 borderRadius: 8,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 12,
                 fontWeight: 600,
@@ -883,9 +883,9 @@ export default function ComplianceSettings({ onToast }: Props) {
               gap: 6,
               padding: "8px 14px",
               borderRadius: 8,
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               background: "var(--content-bg)",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
@@ -952,7 +952,7 @@ export default function ComplianceSettings({ onToast }: Props) {
           }}
         />
         VYNE is SOC 2 Type II audited (ongoing) and GDPR + CCPA compliant. See{" "}
-        <a href="/status" style={{ color: "var(--vyne-purple)" }}>
+        <a href="/status" style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}>
           /status
         </a>{" "}
         for live posture.

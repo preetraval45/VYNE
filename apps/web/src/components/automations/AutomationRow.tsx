@@ -49,9 +49,9 @@ export default function AutomationRow(
           padding: "10px 40px 10px 14px",
           cursor: "pointer",
           borderRadius: 8,
-          background: isSelected ? "rgba(6, 182, 212,0.08)" : "transparent",
+          background: isSelected ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
           border: isSelected
-            ? "1px solid rgba(6, 182, 212,0.2)"
+            ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)"
             : "1px solid transparent",
           transition: "all 0.1s",
         }}

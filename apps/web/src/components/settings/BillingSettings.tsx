@@ -123,8 +123,35 @@ interface BillingSettingsProps {
 
 // ─── Component ───────────────────────────────────────────────────
 export default function BillingSettings({ onToast }: BillingSettingsProps) {
-  const [currentPlan] = useState<PlanTier>("growth");
+  const [currentPlan, setCurrentPlan] = useState<PlanTier>("starter");
   const [upgrading, setUpgrading] = useState<PlanTier | null>(null);
+  const [billingConfigured, setBillingConfigured] = useState<boolean | null>(null);
+  const [hasCustomer, setHasCustomer] = useState(false);
+
+  // Pull current plan + billing-configured flag from /api/stripe/status.
+  // Maps the canonical plan keys (free/starter/business/enterprise) to
+  // the PlanTier display tier this UI uses (starter/growth/enterprise).
+  useEffect(() => {
+    let cancelled = false;
+    void billingApi
+      .status()
+      .then((res) => {
+        if (cancelled || !res.data) return;
+        setBillingConfigured(res.data.billingConfigured);
+        setHasCustomer(res.data.hasCustomer);
+        // Map "business" → "growth" (the existing UI label).
+        if (res.data.plan === "business") setCurrentPlan("growth");
+        else if (res.data.plan === "starter") setCurrentPlan("starter");
+        else if (res.data.plan === "enterprise") setCurrentPlan("enterprise");
+        else setCurrentPlan("starter");
+      })
+      .catch(() => {
+        // Network failure → keep default. Surfaced via toast below.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Show toast on redirect back from Stripe
   useEffect(() => {
@@ -186,7 +213,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
 
   function usageBar(used: number, total: number) {
     const pct = Math.min((used / total) * 100, 100);
-    const color = pct > 85 ? "#EF4444" : pct > 60 ? "#F59E0B" : "#06B6D4";
+    const color = pct > 85 ? "#EF4444" : pct > 60 ? "#F59E0B" : "var(--vyne-accent, #06B6D4)";
     return (
       <div
         style={{
@@ -250,7 +277,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       ? "2px solid #06B6D4"
                       : "1px solid var(--content-border)",
                     background: isCurrent
-                      ? "rgba(6, 182, 212,0.05)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                       : "var(--content-bg)",
                     position: "relative",
                   }}
@@ -263,7 +290,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         right: 12,
                         padding: "2px 10px",
                         borderRadius: "0 0 8px 8px",
-                        background: "#06B6D4",
+                        background: "var(--vyne-accent, #06B6D4)",
                         color: "#fff",
                         fontSize: 10,
                         fontWeight: 600,
@@ -287,7 +314,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                     style={{
                       fontSize: 20,
                       fontWeight: 700,
-                      color: "#06B6D4",
+                      color: "var(--vyne-accent, #06B6D4)",
                       marginBottom: 12,
                     }}
                   >
@@ -357,7 +384,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                         cursor: upgrading === tier ? "not-allowed" : "pointer",
                         fontSize: 12,
                         fontWeight: 500,
-                        color: "#06B6D4",
+                        color: "var(--vyne-accent, #06B6D4)",
                         opacity: upgrading === tier ? 0.6 : 1,
                         display: "flex",
                         alignItems: "center",
@@ -601,7 +628,7 @@ export default function BillingSettings({ onToast }: BillingSettingsProps) {
                       alignItems: "center",
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                      (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.color =
@@ -777,11 +804,11 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                 style={{
                   padding: "8px 14px",
                   borderRadius: 8,
-                  border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                  border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                   background: active
-                    ? "rgba(6, 182, 212,0.08)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                     : "var(--content-bg)",
-                  color: active ? "var(--vyne-purple)" : "var(--text-primary)",
+                  color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: "pointer",
@@ -857,7 +884,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
               borderRadius: 11,
               border: "none",
               background: stripeTax
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               position: "relative",
               cursor: "pointer",
@@ -1181,7 +1208,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                     style={{
                       fontSize: 14,
                       fontWeight: 700,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                       fontFamily:
                         "var(--font-geist-mono), ui-monospace, monospace",
                     }}
@@ -1238,7 +1265,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
               borderRadius: 11,
               border: "none",
               background: anomalyDetection
-                ? "var(--vyne-purple)"
+                ? "var(--vyne-accent, var(--vyne-purple))"
                 : "var(--content-border)",
               position: "relative",
               cursor: "pointer",
@@ -1293,7 +1320,7 @@ function AdvancedBilling({ onToast }: { onToast: (m: string) => void }) {
                   setAnomalyAlertThreshold(Number(e.target.value))
                 }
                 aria-label="Alert threshold"
-                style={{ width: "100%", accentColor: "#06B6D4" }}
+                style={{ width: "100%", accentColor: "var(--vyne-accent, #06B6D4)" }}
               />
             </div>
 

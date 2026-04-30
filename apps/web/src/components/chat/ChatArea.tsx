@@ -36,6 +36,7 @@ import { NotificationPanel } from "./NotificationPanel";
 import { FileUploadZone } from "./FileUploadZone";
 import { SmartReplies } from "./SmartReplies";
 import { PinnedBar } from "./PinnedBar";
+import { SmartCatchupBar } from "./SmartCatchupBar";
 import { ChatSearch } from "./ChatSearch";
 import { cmdOutput } from "./CommandCards";
 import type { UploadedFile } from "@/hooks/useFileUpload";
@@ -292,6 +293,79 @@ export function ChatArea({
       return;
     }
 
+    // /ask <question> — ephemeral inline AI answer (only the asker sees
+    // it as the local cmd-message until they tap "Share"). Uses the
+    // streaming endpoint so the answer appears live in chat.
+    if (cmd === "ask") {
+      const question = args.trim();
+      if (!question) {
+        sendMessage(
+          "_Usage: `/ask <question>` — Vyne AI answers inline, only you see it until you share._",
+        );
+        return;
+      }
+      const placeholderId = `ask-${Date.now()}`;
+      const placeholder: LocalMsg = {
+        id: placeholderId,
+        cmd: "ask",
+        args: question,
+        ts: new Date().toISOString(),
+        loading: true,
+      };
+      setCmdMessages((prev) => [...prev, placeholder]);
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      try {
+        const res = await fetch("/api/ai/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question,
+            history: messages.slice(-6).map((m) => ({
+              role: m.author.id === "me" ? "user" : "assistant",
+              content: m.content,
+            })),
+            context: {},
+          }),
+        });
+        const data = (await res.json()) as {
+          answer?: string;
+          citations?: Array<{ kind: string; id: string; label: string }>;
+        };
+        setCmdMessages((prev) =>
+          prev.map((m) =>
+            m.id === placeholderId
+              ? {
+                  ...m,
+                  loading: false,
+                  apiResult: {
+                    success: true,
+                    data: { answer: data.answer ?? "", citations: data.citations ?? [] },
+                    message: data.answer ?? "Vyne AI didn't reply.",
+                  },
+                }
+              : m,
+          ),
+        );
+      } catch {
+        setCmdMessages((prev) =>
+          prev.map((m) =>
+            m.id === placeholderId
+              ? {
+                  ...m,
+                  loading: false,
+                  apiResult: {
+                    success: false,
+                    data: null,
+                    message: "Couldn't reach Vyne AI.",
+                  },
+                }
+              : m,
+          ),
+        );
+      }
+      return;
+    }
+
     // /workflow <template-id> — spawn a checklist into chat
     if (cmd === "workflow") {
       const trimmed = args.trim();
@@ -440,6 +514,61 @@ export function ChatArea({
     }
   }
 
+  // /ask "Share with channel" — listens for the share event from AskCard
+  // and posts the AI answer as a real message visible to everyone.
+  useEffect(() => {
+    function onShare(e: Event) {
+      const detail = (
+        e as CustomEvent<{ question: string; answer: string }>
+      ).detail;
+      if (!detail) return;
+      sendMessage(
+        `🤖 **Vyne AI** (asked: _${detail.question}_)\n\n${detail.answer}`,
+      );
+    }
+    window.addEventListener("vyne:share-ask", onShare);
+    return () => window.removeEventListener("vyne:share-ask", onShare);
+  }, [sendMessage]);
+
+  // Keyboard nav: j/k for prev/next message, ? for help, esc to clear focus.
+  // Only fires when focus isn't in an input/textarea/contenteditable.
+  useEffect(() => {
+    function isTyping(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false;
+      const tag = target.tagName;
+      return (
+        tag === "INPUT" ||
+        tag === "TEXTAREA" ||
+        target.isContentEditable
+      );
+    }
+    function onKey(e: KeyboardEvent) {
+      if (isTyping(e.target)) return;
+      const rows = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-message-row]"),
+      );
+      if (rows.length === 0) return;
+      const focused = document.activeElement as HTMLElement | null;
+      const idx = focused
+        ? rows.findIndex((r) => r === focused || r.contains(focused))
+        : -1;
+      if (e.key === "j") {
+        e.preventDefault();
+        rows[Math.min(rows.length - 1, idx + 1)]?.focus();
+      } else if (e.key === "k") {
+        e.preventDefault();
+        rows[Math.max(0, idx - 1)]?.focus();
+      } else if (e.key === "?") {
+        e.preventDefault();
+        alert(
+          "Chat shortcuts: j/k = next/prev message · ? = help · type / for slash commands",
+        );
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   function handlePollVote(msgId: string, opt: string) {
     setCmdMessages((prev) =>
       prev.map((m) => {
@@ -560,7 +689,7 @@ export function ChatArea({
                     ? "rgba(108, 71, 255, 0.2)"
                     : "rgba(108, 71, 255, 0.12)",
                   cursor: callStatus === "idle" ? "pointer" : "not-allowed",
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   display: "flex",
                   alignItems: "center",
                   gap: 5,
@@ -645,7 +774,7 @@ export function ChatArea({
                       setCallMenuOpen(false);
                       startCall(channelId, channelName, "video");
                     }}
-                    style={menuItemStyle("var(--vyne-purple)")}
+                    style={menuItemStyle("var(--vyne-accent, var(--vyne-purple))")}
                   >
                     <span
                       style={{
@@ -653,7 +782,7 @@ export function ChatArea({
                         height: 28,
                         borderRadius: 7,
                         background: "rgba(108, 71, 255, 0.15)",
-                        color: "var(--vyne-purple)",
+                        color: "var(--vyne-accent, var(--vyne-purple))",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -695,15 +824,15 @@ export function ChatArea({
                       setCallMenuOpen(false);
                       setScheduleOpen(true);
                     }}
-                    style={menuItemStyle("#06B6D4")}
+                    style={menuItemStyle("var(--vyne-accent, #06B6D4)")}
                   >
                     <span
                       style={{
                         width: 28,
                         height: 28,
                         borderRadius: 7,
-                        background: "rgba(6, 182, 212, 0.15)",
-                        color: "#06B6D4",
+                        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
+                        color: "var(--vyne-accent, #06B6D4)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -742,13 +871,13 @@ export function ChatArea({
                 padding: "5px 9px",
                 borderRadius: 7,
                 border: summaryOpen
-                  ? "1px solid rgba(6, 182, 212,0.4)"
+                  ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)"
                   : "1px solid transparent",
                 background: summaryOpen
-                  ? "rgba(6, 182, 212,0.08)"
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                   : "transparent",
                 cursor: "pointer",
-                color: summaryOpen ? "#06B6D4" : "var(--text-tertiary)",
+                color: summaryOpen ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
@@ -830,6 +959,15 @@ export function ChatArea({
 
         {/* Pinned messages bar */}
         {channelId && <PinnedBar channelId={channelId} />}
+
+        {/* Smart Catch-up bar — AI summary of unread messages */}
+        {channelId && (
+          <SmartCatchupBar
+            channelId={channelId}
+            channelName={channelName}
+            messages={messages}
+          />
+        )}
 
         {/* Messages */}
         <div
@@ -938,14 +1076,14 @@ export function ChatArea({
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      background: "rgba(6, 182, 212,0.12)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                   >
-                    <Zap size={16} style={{ color: "#06B6D4" }} />
+                    <Zap size={16} style={{ color: "var(--vyne-accent, #06B6D4)" }} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
@@ -960,7 +1098,7 @@ export function ChatArea({
                         style={{
                           fontSize: 13,
                           fontWeight: 600,
-                          color: "#06B6D4",
+                          color: "var(--vyne-accent, #06B6D4)",
                         }}
                       >
                         VYNE Bot

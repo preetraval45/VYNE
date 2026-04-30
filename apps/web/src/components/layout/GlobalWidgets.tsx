@@ -89,7 +89,7 @@ function PomodoroWidget() {
   const progress = 1 - remaining / totalSec;
   const strokeColor =
     phase === "focus"
-      ? "var(--vyne-purple)"
+      ? "var(--vyne-accent, var(--vyne-purple))"
       : phase === "shortBreak"
         ? "#22C55E"
         : "#3B82F6";
@@ -372,7 +372,7 @@ function PomodoroWidget() {
                   type="checkbox"
                   checked={settings.soundOn}
                   onChange={(e) => updateSettings({ soundOn: e.target.checked })}
-                  style={{ accentColor: "#06B6D4" }}
+                  style={{ accentColor: "var(--vyne-accent, #06B6D4)" }}
                 />
                 Play chime on phase change
               </label>
@@ -468,7 +468,7 @@ function ctrlBtn(color: string): React.CSSProperties {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 4px 14px rgba(6, 182, 212,0.3)",
+    boxShadow: "0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
   };
 }
 
@@ -629,7 +629,7 @@ function QuickNoteFab() {
                 gap: 8,
               }}
             >
-              <StickyNote size={14} style={{ color: "var(--vyne-purple)" }} />
+              <StickyNote size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <span
                 style={{
                   flex: 1,
@@ -713,7 +713,7 @@ function QuickNoteFab() {
                   borderRadius: 7,
                   border: "none",
                   background: draft.trim()
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--content-border)",
                   color: "#fff",
                   fontSize: 12,
@@ -759,9 +759,9 @@ function QuickNoteFab() {
                   style={{
                     padding: 10,
                     borderRadius: 8,
-                    border: `1px solid ${n.pinned ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                    border: `1px solid ${n.pinned ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                     background: n.pinned
-                      ? "rgba(6, 182, 212,0.05)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                       : "var(--content-secondary)",
                     display: "flex",
                     gap: 8,
@@ -810,7 +810,7 @@ function QuickNoteFab() {
                       border: "none",
                       background: "transparent",
                       color: n.pinned
-                        ? "var(--vyne-purple)"
+                        ? "var(--vyne-accent, var(--vyne-purple))"
                         : "var(--text-tertiary)",
                       cursor: "pointer",
                       fontSize: 13,
@@ -1069,7 +1069,7 @@ function WorkspaceSwitcherTrigger() {
                   padding: "10px 12px",
                   borderRadius: 8,
                   background:
-                    i === activeIdx ? "rgba(6, 182, 212,0.18)" : "transparent",
+                    i === activeIdx ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)" : "transparent",
                   border: "none",
                   color: "#fff",
                   cursor: "pointer",
@@ -1156,7 +1156,7 @@ function WorkspaceSwitcherTrigger() {
 
 function colorFor(id: string): string {
   const colors = [
-    "#06B6D4",
+    "var(--vyne-accent, #06B6D4)",
     "#22C55E",
     "#F59E0B",
     "#EF4444",

@@ -93,7 +93,7 @@ function planColor(plan: Plan): { bg: string; color: string } {
     return { bg: "rgba(59,130,246,0.12)", color: "#60A5FA" };
   if (plan === "Growth")
     return { bg: "rgba(34,197,94,0.12)", color: "#4ADE80" };
-  return { bg: "rgba(6, 182, 212,0.12)", color: "#67E8F9" };
+  return { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)", color: "#67E8F9" };
 }
 
 // ─── KPI Card ─────────────────────────────────────────────────────
@@ -210,7 +210,7 @@ function RevenueChart({ data }: Readonly<{ data: typeof REVENUE_DATA }>) {
           style={{
             fontSize: 22,
             fontWeight: 700,
-            color: "#06B6D4",
+            color: "var(--vyne-accent, #06B6D4)",
             letterSpacing: "-0.03em",
           }}
         >
@@ -231,9 +231,9 @@ function RevenueChart({ data }: Readonly<{ data: typeof REVENUE_DATA }>) {
           const isHovered = hoveredIdx === i;
           const isLast = i === data.length - 1;
 
-          let barBg = "rgba(6, 182, 212,0.25)";
-          if (isLast) barBg = "linear-gradient(180deg, #8B68FF, #06B6D4)";
-          else if (isHovered) barBg = "rgba(6, 182, 212,0.5)";
+          let barBg = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)";
+          if (isLast) barBg = "linear-gradient(180deg, #8B68FF, var(--vyne-accent, #06B6D4))";
+          else if (isHovered) barBg = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.5)";
 
           return (
             <figure
@@ -326,7 +326,7 @@ function RecentSignups({
           onClick={() => router.push("/admin/tenants")}
           style={{
             border: "none",
-            background: "rgba(6, 182, 212,0.12)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
             color: "#67E8F9",
             fontSize: 11,
             fontWeight: 600,
@@ -444,7 +444,7 @@ function SystemHealthSummary({
           onClick={() => router.push("/admin/system")}
           style={{
             border: "none",
-            background: "rgba(6, 182, 212,0.12)",
+            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
             color: "#67E8F9",
             fontSize: 11,
             fontWeight: 600,
@@ -615,7 +615,7 @@ export default function AdminDashboardPage() {
           value="6"
           change="2 new this month"
           changePositive
-          accent="#06B6D4"
+          accent="var(--vyne-accent, #06B6D4)"
         />
         <KPICard
           label="Total Users"

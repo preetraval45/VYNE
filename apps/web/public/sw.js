@@ -15,8 +15,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener("fetch", (event) => {
-  // Pure passthrough. The presence of the fetch listener is enough
-  // for Chrome's installability heuristic.
-  // No-op intentionally.
-});
+// NOTE: previously had a no-op `fetch` listener for the PWA install
+// heuristic. Modern Chrome (>=92) no longer requires it — having an
+// empty handler triggers a console warning ("Fetch event handler is
+// recognized as no-op"), so we omit it. The manifest + start_url alone
+// satisfy installability today.

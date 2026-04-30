@@ -82,7 +82,7 @@ export function SnippetsPicker({ query, onSelect, onClose }: Props) {
           padding: "2px 4px",
         }}
       >
-        <Zap size={10} style={{ color: "var(--vyne-purple)" }} />
+        <Zap size={10} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         Snippets
       </div>
       {filtered.map((s, i) => (
@@ -105,7 +105,7 @@ export function SnippetsPicker({ query, onSelect, onClose }: Props) {
             cursor: "pointer",
             textAlign: "left",
             background:
-              i === activeIdx ? "rgba(6, 182, 212,0.08)" : "transparent",
+              i === activeIdx ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
           }}
         >
           <div
@@ -122,8 +122,8 @@ export function SnippetsPicker({ query, onSelect, onClose }: Props) {
               style={{
                 padding: "1px 6px",
                 borderRadius: 4,
-                background: "rgba(6, 182, 212,0.12)",
-                color: "var(--vyne-purple)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 fontSize: 10,
                 fontFamily:
                   "var(--font-geist-mono), ui-monospace, monospace",

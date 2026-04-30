@@ -32,7 +32,7 @@ function Toggle({
           width: 36,
           height: 20,
           borderRadius: 10,
-          background: checked ? "var(--vyne-purple)" : "var(--content-border)",
+          background: checked ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)",
           position: "relative",
           cursor: "pointer",
           border: "none",
@@ -350,9 +350,9 @@ export default function NotificationsSettings({
                   gap: 5,
                   padding: "7px 14px",
                   borderRadius: 8,
-                  border: "1px solid var(--vyne-purple)",
+                  border: "1px solid var(--vyne-accent, var(--vyne-purple))",
                   background: "transparent",
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: digestLoading ? "default" : "pointer",
@@ -374,7 +374,7 @@ export default function NotificationsSettings({
                   borderRadius: 8,
                   border: "none",
                   background: aiDigest
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--content-border)",
                   color: "#fff",
                   fontSize: 12,
@@ -405,14 +405,14 @@ export default function NotificationsSettings({
                   marginBottom: 8,
                 }}
               >
-                <Sparkles size={13} style={{ color: "var(--vyne-purple)" }} />
+                <Sparkles size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
                 <span
                   style={{
                     fontSize: 11,
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 >
                   Preview
@@ -465,10 +465,10 @@ export default function NotificationsSettings({
                   margin: 0,
                   padding: "8px 12px",
                   borderRadius: 8,
-                  background: "rgba(6, 182, 212,0.1)",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
                   fontSize: 12,
                   fontWeight: 600,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                 }}
               >
                 ⚡ {aiDigest.callToAction}
@@ -580,9 +580,9 @@ export default function NotificationsSettings({
                       width: 34,
                       height: 34,
                       borderRadius: "50%",
-                      border: `1.5px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                      background: active ? "rgba(6, 182, 212,0.1)" : "var(--content-bg)",
-                      color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+                      border: `1.5px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                      background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "var(--content-bg)",
+                      color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                       fontSize: 12,
                       fontWeight: 600,
                       cursor: "pointer",
@@ -659,9 +659,9 @@ export default function NotificationsSettings({
             style={{
               padding: "7px 14px",
               borderRadius: 8,
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               background: "transparent",
-              color: "var(--vyne-purple)",
+              color: "var(--vyne-accent, var(--vyne-purple))",
               fontSize: 12,
               fontWeight: 600,
               cursor: sendingTest || !userEmail ? "default" : "pointer",
@@ -774,7 +774,7 @@ function ChannelSoundsCard({
               background: "var(--content-secondary)",
             }}
           >
-            <Volume2 size={13} style={{ color: "var(--vyne-purple)" }} />
+            <Volume2 size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             <span
               style={{
                 flex: 1,
@@ -904,7 +904,7 @@ function WritingAssistCard({
             >
               <SpellCheck
                 size={13}
-                style={{ color: "var(--vyne-purple)" }}
+                style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
               />
               Spell check in docs + chat
             </div>

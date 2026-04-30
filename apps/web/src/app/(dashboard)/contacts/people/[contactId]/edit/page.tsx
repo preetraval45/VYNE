@@ -47,7 +47,7 @@ export default function EditContactPage() {
     return (
       <div style={{ padding: 40, textAlign: "center" }}>
         <p style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 16 }}>Contact not found.</p>
-        <Link href="/contacts" style={{ display: "inline-block", padding: "8px 14px", borderRadius: 8, background: "var(--vyne-purple)", color: "#fff", fontSize: 13, fontWeight: 600 }}>
+        <Link href="/contacts" style={{ display: "inline-block", padding: "8px 14px", borderRadius: 8, background: "var(--vyne-accent, var(--vyne-purple))", color: "#fff", fontSize: 13, fontWeight: 600 }}>
           Back to contacts
         </Link>
       </div>
@@ -226,9 +226,9 @@ export default function EditContactPage() {
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: "pointer",
-                    border: `1px solid ${active ? "var(--vyne-purple)" : "var(--content-border)"}`,
-                    background: active ? "rgba(6, 182, 212,0.08)" : "transparent",
-                    color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+                    border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+                    background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
+                    color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                     transition: "all 0.15s",
                   }}
                 >

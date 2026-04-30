@@ -19,7 +19,7 @@ export interface CollabState {
 }
 
 const USER_COLORS = [
-  "#06B6D4",
+  "var(--vyne-accent, #06B6D4)",
   "#22C55E",
   "#F59E0B",
   "#EF4444",

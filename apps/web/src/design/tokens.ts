@@ -3,7 +3,7 @@
  *
  * Single source of truth for brand colors used in TypeScript code.
  * For CSS-driven values, prefer CSS custom properties from globals.css
- * (e.g. `var(--vyne-purple)`). Use these constants only when:
+ * (e.g. `var(--vyne-accent, var(--vyne-purple))`). Use these constants only when:
  *   - Passing colors to SVG fill/stroke attributes
  *   - Framer Motion dynamic values
  *   - Inline styles where CSS vars can't be used
@@ -46,8 +46,8 @@ export const marketing = {
   textSub:      '#9490B8',
   textMuted:    '#5E5A7A',
   border:       'rgba(255,255,255,0.06)',
-  purpleDim:    'rgba(6, 182, 212,0.08)',
-  purpleBorder: 'rgba(6, 182, 212,0.3)',
+  purpleDim:    'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)',
+  purpleBorder: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)',
 } as const;
 
 /** Generates a rgba() string from a hex color + alpha (0-1). */
@@ -69,11 +69,11 @@ export const radius = {
 } as const;
 
 export const shadow = {
-  sm:    '0 1px 3px rgba(6, 182, 212,0.07), 0 1px 2px rgba(0,0,0,0.04)',
-  md:    '0 4px 12px rgba(6, 182, 212,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-  lg:    '0 10px 24px rgba(6, 182, 212,0.1), 0 4px 8px rgba(0,0,0,0.04)',
-  xl:    '0 20px 40px rgba(6, 182, 212,0.12), 0 8px 16px rgba(0,0,0,0.06)',
-  panel: '0 0 0 1px rgba(6, 182, 212,0.1), 0 10px 30px rgba(6, 182, 212,0.08)',
+  sm:    '0 1px 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.07), 0 1px 2px rgba(0,0,0,0.04)',
+  md:    '0 4px 12px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08), 0 2px 4px rgba(0,0,0,0.04)',
+  lg:    '0 10px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1), 0 4px 8px rgba(0,0,0,0.04)',
+  xl:    '0 20px 40px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12), 0 8px 16px rgba(0,0,0,0.06)',
+  panel: '0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1), 0 10px 30px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)',
 } as const;
 
 export const z = {

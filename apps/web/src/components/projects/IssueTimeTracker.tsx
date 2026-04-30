@@ -107,7 +107,7 @@ export function IssueTimeTracker({ issueId, issueTitle }: Props) {
           gap: 8,
         }}
       >
-        <Clock size={13} style={{ color: "var(--vyne-purple)" }} />
+        <Clock size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 11,
@@ -144,7 +144,7 @@ export function IssueTimeTracker({ issueId, issueTitle }: Props) {
             border: "none",
             background: isActiveHere
               ? "var(--status-danger)"
-              : "var(--vyne-purple)",
+              : "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 12,
             fontWeight: 600,
@@ -241,7 +241,7 @@ export function IssueTimeTracker({ issueId, issueTitle }: Props) {
                 padding: "6px 14px",
                 borderRadius: 7,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 12,
                 fontWeight: 600,

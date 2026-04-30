@@ -154,8 +154,8 @@ export default function TrainingPage() {
             display: "grid",
             placeItems: "center",
             background:
-              "linear-gradient(135deg, rgba(6, 182, 212,0.18), rgba(139,107,255,0.12))",
-            color: "var(--vyne-purple)",
+              "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), rgba(139,107,255,0.12))",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             flexShrink: 0,
           }}
         >
@@ -214,7 +214,7 @@ export default function TrainingPage() {
               padding: "8px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -241,7 +241,7 @@ export default function TrainingPage() {
             padding: 16,
             borderRadius: 12,
             background:
-              "linear-gradient(135deg, rgba(6, 182, 212,0.08), rgba(139,107,255,0.04))",
+              "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08), rgba(139,107,255,0.04))",
             border: "1px solid var(--content-border)",
             display: "flex",
             gap: 16,
@@ -285,7 +285,7 @@ export default function TrainingPage() {
         >
           <Database
             size={16}
-            style={{ color: "var(--vyne-purple)", marginTop: 2 }}
+            style={{ color: "var(--vyne-accent, var(--vyne-purple))", marginTop: 2 }}
           />
           <div style={{ flex: 1, fontSize: 12.5, color: "var(--text-secondary)", lineHeight: 1.55 }}>
             <strong style={{ color: "var(--text-primary)" }}>
@@ -366,7 +366,7 @@ export default function TrainingPage() {
                     display: "grid",
                     placeItems: "center",
                     background: "var(--content-secondary)",
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     flexShrink: 0,
                   }}
                 >
@@ -490,7 +490,7 @@ function StatTile({
           fontWeight: 700,
         }}
       >
-        <span style={{ color: "var(--vyne-purple)" }}>{icon}</span>
+        <span style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}>{icon}</span>
         {label}
       </div>
       <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text-primary)" }}>

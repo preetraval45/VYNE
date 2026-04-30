@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import { MotionConfig } from "framer-motion";
 import { ThemeApplier } from "@/components/layout/ThemeApplier";
 import { TenantCssInjector } from "@/components/layout/TenantCssInjector";
 import { Analytics } from "@/components/layout/Analytics";
+import { installGlobalErrorHandlers } from "@/lib/errorReporter";
+import { installFetchInterceptor } from "@/lib/fetchInterceptor";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    installGlobalErrorHandlers();
+    installFetchInterceptor();
+  }, []);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -36,7 +42,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
         {children}
       </MotionConfig>
       <Toaster
-        position="bottom-right"
+        position={
+          // Toast sits above MobileBottomNav on phones, top-right on
+          // desktop where the topbar already lives at top.
+          typeof window !== "undefined" && window.matchMedia?.("(max-width: 768px)").matches
+            ? "bottom-center"
+            : "bottom-right"
+        }
+        containerStyle={{
+          // Lift above MobileBottomNav (60px + safe-area) on mobile.
+          bottom: "calc(76px + env(safe-area-inset-bottom, 0px))",
+        }}
         toastOptions={{
           style: {
             background: "var(--content-bg)",
@@ -45,6 +61,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             borderRadius: "8px",
             fontSize: "14px",
             fontFamily: "var(--font-geist-sans)",
+            maxWidth: "92vw",
           },
           success: {
             iconTheme: {

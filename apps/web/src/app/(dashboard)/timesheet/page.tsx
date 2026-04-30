@@ -127,7 +127,7 @@ export default function TimesheetPage() {
               gap: 8,
             }}
           >
-            <Clock size={17} style={{ color: "var(--vyne-purple)" }} />
+            <Clock size={17} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             Timesheet
           </h1>
           <p
@@ -260,10 +260,10 @@ export default function TimesheetPage() {
                   borderRadius: 7,
                   border: "none",
                   background: active
-                    ? "rgba(6, 182, 212,0.1)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                     : "transparent",
                   color: active
-                    ? "var(--vyne-purple)"
+                    ? "var(--vyne-accent, var(--vyne-purple))"
                     : "var(--text-secondary)",
                   fontSize: 12,
                   fontWeight: 600,
@@ -365,7 +365,7 @@ export default function TimesheetPage() {
               <span
                 style={{
                   fontSize: 12,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   fontWeight: 700,
                   fontFamily:
                     "var(--font-geist-mono), ui-monospace, monospace",

@@ -6,6 +6,8 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { ArrowLeft, Tag, X } from "lucide-react";
 import { useProjectsStore, useTeamMembers } from "@/lib/stores/projects";
+import { AiFormFill } from "@/components/shared/AiFormFill";
+import { checkCreateAllowed } from "@/lib/planGate";
 import { generateIdentifier } from "@/lib/utils";
 import { PROJECT_COLORS } from "@/types";
 import type { TaskPriority } from "@/lib/fixtures/projects";
@@ -27,7 +29,7 @@ const PRIORITY_OPTIONS: Array<{
 }> = [
   { value: "urgent", label: "Urgent", color: "#EF4444" },
   { value: "high", label: "High", color: "#F59E0B" },
-  { value: "medium", label: "Medium", color: "#06B6D4" },
+  { value: "medium", label: "Medium", color: "var(--vyne-accent, #06B6D4)" },
   { value: "low", label: "Low", color: "#6B7280" },
 ];
 
@@ -52,6 +54,7 @@ export default function NewProjectPage() {
   });
   const [tagDraft, setTagDraft] = useState("");
   const [identifierEdited, setIdentifierEdited] = useState(false);
+  const [nameTouched, setNameTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const effectiveIdentifier = identifierEdited
@@ -84,6 +87,11 @@ export default function NewProjectPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.name.trim()) return;
+    const allowed = await checkCreateAllowed(
+      "projects",
+      useProjectsStore.getState().projects.length,
+    );
+    if (!allowed) return;
     setSubmitting(true);
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
     addProject({
@@ -194,6 +202,28 @@ export default function NewProjectPage() {
           margin: "0 auto",
         }}
       >
+        <AiFormFill
+          title="Describe the project — AI will fill the form"
+          placeholder="e.g. Q3 mobile launch — kickoff July 1, ship August 15, owned by mobile team"
+          fields={[
+            { key: "name", label: "Project name" },
+            { key: "identifier", label: "Short identifier", hint: "3-6 uppercase letters" },
+            { key: "description", label: "Description", hint: "1-2 sentences" },
+          ]}
+          onApply={(values) => {
+            setForm((f) => ({
+              ...f,
+              name: typeof values.name === "string" ? values.name : f.name,
+              identifier:
+                typeof values.identifier === "string"
+                  ? values.identifier.toUpperCase().slice(0, 6)
+                  : f.identifier,
+              description:
+                typeof values.description === "string" ? values.description : f.description,
+            }));
+            if (typeof values.identifier === "string") setIdentifierEdited(true);
+          }}
+        />
         <div
           style={{
             display: "grid",
@@ -210,11 +240,18 @@ export default function NewProjectPage() {
                   type="text"
                   value={form.name}
                   onChange={(e) => update("name", e.target.value)}
+                  onBlur={() => setNameTouched(true)}
                   placeholder="e.g. Product Redesign"
                   required
                   autoFocus
+                  aria-invalid={nameTouched && !form.name.trim()}
                   style={inputStyle}
                 />
+                {nameTouched && !form.name.trim() && (
+                  <div style={{ marginTop: 4, fontSize: 11, color: "var(--status-danger)" }}>
+                    Project name is required
+                  </div>
+                )}
               </Field>
               <div
                 style={{
@@ -566,10 +603,10 @@ function chipStyle(active: boolean): React.CSSProperties {
     padding: "5px 9px",
     borderRadius: 99,
     border: active
-      ? "1px solid var(--vyne-purple)"
+      ? "1px solid var(--vyne-accent, var(--vyne-purple))"
       : "1px solid var(--content-border)",
     background: active ? "rgba(108, 71, 255, 0.12)" : "transparent",
-    color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+    color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
     fontSize: 11,
     fontWeight: 600,
     cursor: "pointer",
@@ -599,10 +636,10 @@ function memberChip(active: boolean, color: string): React.CSSProperties {
     padding: "3px 8px 3px 3px",
     borderRadius: 99,
     border: active
-      ? "1px solid var(--vyne-purple)"
+      ? "1px solid var(--vyne-accent, var(--vyne-purple))"
       : "1px solid var(--content-border)",
     background: active ? "rgba(108, 71, 255, 0.1)" : "transparent",
-    color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+    color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
     fontSize: 11,
     fontWeight: 500,
     cursor: "pointer",
@@ -646,7 +683,7 @@ const tagPill: React.CSSProperties = {
   padding: "2px 6px 2px 8px",
   borderRadius: 99,
   background: "rgba(108, 71, 255, 0.12)",
-  color: "var(--vyne-purple)",
+  color: "var(--vyne-accent, var(--vyne-purple))",
   fontSize: 10.5,
   fontWeight: 500,
   display: "inline-flex",
@@ -693,7 +730,7 @@ const primaryBtn: React.CSSProperties = {
   padding: "7px 16px",
   borderRadius: 7,
   border: "none",
-  background: "var(--vyne-purple)",
+  background: "var(--vyne-accent, var(--vyne-purple))",
   color: "#fff",
   fontSize: 12,
   fontWeight: 600,

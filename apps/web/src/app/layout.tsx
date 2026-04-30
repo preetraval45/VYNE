@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -9,7 +11,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#06B6D4",
+  // Light mode → match content background; dark mode → match deep
+  // sidebar so iOS/Android browser chrome blends with the app shell.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A1820" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -59,6 +66,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
+        {/* Vercel Analytics + Speed Insights — both auto-disable on
+            non-Vercel hosts and respect Do-Not-Track. Free tier: 2.5K
+            events/mo for Analytics, 10K page-loads/mo for SpeedInsights. */}
+        <VercelAnalytics />
+        <SpeedInsights />
       </body>
     </html>
   );

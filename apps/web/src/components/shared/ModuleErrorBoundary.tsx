@@ -17,14 +17,14 @@ function ModuleErrorFallback({ moduleName, onReset }: Readonly<{ moduleName: str
       {/* Error icon */}
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
-        style={{ background: 'rgba(6, 182, 212, 0.08)' }}
+        style={{ background: 'rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)' }}
       >
         <svg
           width="28"
           height="28"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="var(--vyne-purple)"
+          stroke="var(--vyne-accent, var(--vyne-purple))"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -55,17 +55,17 @@ function ModuleErrorFallback({ moduleName, onReset }: Readonly<{ moduleName: str
           onClick={onReset}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-fast"
           style={{
-            background: 'var(--vyne-purple)',
+            background: 'var(--vyne-accent, var(--vyne-purple))',
             color: '#FFFFFF',
             border: 'none',
             cursor: 'pointer',
             boxShadow: 'var(--shadow-sm)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'var(--vyne-purple-light)'
+            e.currentTarget.style.background = 'var(--vyne-accent-light, var(--vyne-purple-light))'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'var(--vyne-purple)'
+            e.currentTarget.style.background = 'var(--vyne-accent, var(--vyne-purple))'
           }}
         >
           <svg
@@ -94,8 +94,8 @@ function ModuleErrorFallback({ moduleName, onReset }: Readonly<{ moduleName: str
             cursor: 'pointer',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'var(--vyne-purple)'
-            e.currentTarget.style.color = 'var(--vyne-purple)'
+            e.currentTarget.style.borderColor = 'var(--vyne-accent, var(--vyne-purple))'
+            e.currentTarget.style.color = 'var(--vyne-accent, var(--vyne-purple))'
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = 'var(--content-border)'

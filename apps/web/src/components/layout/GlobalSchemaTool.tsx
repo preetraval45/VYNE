@@ -8,6 +8,7 @@ import {
   Download as DownloadIcon,
   MessageSquare,
   StickyNote,
+  Sparkles,
 } from "lucide-react";
 import { FieldSchemaEditor } from "@/components/shared/FieldSchemaEditor";
 import { useUser } from "@/lib/stores/auth";
@@ -92,6 +93,47 @@ export function GlobalSchemaTool() {
         }}
       >
         <Link
+          href="/ai/chat"
+          aria-label="Open Vyne AI"
+          title="Vyne AI — copilot, BRDs, diagrams, sheets, slides"
+          style={{
+            pointerEvents: "auto",
+            height: 32,
+            padding: "0 12px",
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            background:
+              "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.10))",
+            border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)",
+            color: "var(--vyne-teal)",
+            fontSize: 12.5,
+            fontWeight: 600,
+            letterSpacing: "-0.005em",
+            textDecoration: "none",
+            boxShadow: "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), 0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
+            transition:
+              "background 0.18s, color 0.18s, border-color 0.18s, transform 0.12s",
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background = "linear-gradient(135deg, var(--teal-500), var(--teal-700))";
+            el.style.color = "#fff";
+            el.style.borderColor = "var(--teal-500)";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget as HTMLElement;
+            el.style.background =
+              "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.10))";
+            el.style.color = "var(--vyne-teal)";
+            el.style.borderColor = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)";
+          }}
+        >
+          <Sparkles size={13} strokeWidth={2.25} />
+          <span>Vyne AI</span>
+        </Link>
+        <Link
           href="/chat"
           aria-label="Open messages"
           title="Messages (chat & DMs)"
@@ -105,13 +147,13 @@ export function GlobalSchemaTool() {
             justifyContent: "center",
             background: "var(--content-secondary)",
             border: "1px solid var(--content-border)",
-            color: "var(--vyne-purple)",
+            color: "var(--vyne-accent, var(--vyne-purple))",
             transition: "color 0.15s, border-color 0.15s",
             textDecoration: "none",
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor =
-              "var(--vyne-purple)";
+              "var(--vyne-accent, var(--vyne-purple))";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor =
@@ -137,12 +179,12 @@ export function GlobalSchemaTool() {
             justifyContent: "center",
             background: "var(--content-secondary)",
             border: "1px solid var(--content-border)",
-            color: "#06B6D4",
+            color: "var(--vyne-accent, #06B6D4)",
             cursor: "pointer",
             transition: "color 0.15s, border-color 0.15s",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = "#06B6D4";
+            (e.currentTarget as HTMLElement).style.borderColor = "var(--vyne-accent, #06B6D4)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor =

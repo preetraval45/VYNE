@@ -184,7 +184,7 @@ const MOCK_CONFIGS: Record<string, TenantConfig> = {
   },
   t4: {
     companyName: "DataFlow Analytics",
-    primaryColor: "#06B6D4",
+    primaryColor: "var(--vyne-accent, #06B6D4)",
     logoUrl: "",
     customDomain: "",
     modules: {
@@ -252,7 +252,7 @@ function planBadge(plan: Plan): { bg: string; color: string } {
     return { bg: "rgba(59,130,246,0.12)", color: "#60A5FA" };
   if (plan === "Growth")
     return { bg: "rgba(34,197,94,0.12)", color: "#4ADE80" };
-  return { bg: "rgba(6, 182, 212,0.12)", color: "#67E8F9" };
+  return { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)", color: "#67E8F9" };
 }
 
 function statusStyle(status: TenantStatus): {
@@ -355,7 +355,7 @@ function ModuleToggle({
           borderRadius: 11,
           border: "none",
           cursor: "pointer",
-          background: enabled ? "#06B6D4" : "rgba(255,255,255,0.12)",
+          background: enabled ? "var(--vyne-accent, #06B6D4)" : "rgba(255,255,255,0.12)",
           position: "relative",
           transition: "background 0.2s",
           flexShrink: 0,
@@ -586,7 +586,7 @@ function CreateTenantModal({
               padding: "9px 18px",
               borderRadius: 8,
               border: "none",
-              background: "#06B6D4",
+              background: "var(--vyne-accent, #06B6D4)",
               color: "#fff",
               cursor: "pointer",
               fontSize: 13,
@@ -629,7 +629,7 @@ function TenantDetailPanel({
     cursor: "pointer",
     fontSize: 11,
     fontWeight: 600,
-    background: active ? "rgba(6, 182, 212,0.2)" : "transparent",
+    background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)" : "transparent",
     color: active ? "#67E8F9" : "#6060A0",
     transition: "all 0.15s",
   });
@@ -958,7 +958,7 @@ function TenantDetailPanel({
                       width: 30,
                       height: 30,
                       borderRadius: "50%",
-                      background: "linear-gradient(135deg, #06B6D4, #9B59B6)",
+                      background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), #9B59B6)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -997,7 +997,7 @@ function TenantDetailPanel({
                       borderRadius: 4,
                       background:
                         u.role === "Admin"
-                          ? "rgba(6, 182, 212,0.15)"
+                          ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)"
                           : "rgba(255,255,255,0.06)",
                       color: u.role === "Admin" ? "#67E8F9" : "#6060A0",
                     }}
@@ -1157,7 +1157,7 @@ function TenantDetailPanel({
             padding: "10px",
             borderRadius: 8,
             border: "none",
-            background: "#06B6D4",
+            background: "var(--vyne-accent, #06B6D4)",
             color: "#fff",
             fontWeight: 600,
             fontSize: 13,
@@ -1224,7 +1224,7 @@ export default function TenantsPage() {
     };
     const newConfig: TenantConfig = {
       companyName: f.companyName,
-      primaryColor: "#06B6D4",
+      primaryColor: "var(--vyne-accent, #06B6D4)",
       logoUrl: "",
       customDomain: "",
       modules: Object.fromEntries(MODULES.map((m) => [m, true])),
@@ -1291,7 +1291,7 @@ export default function TenantsPage() {
             padding: "9px 18px",
             borderRadius: 10,
             border: "none",
-            background: "#06B6D4",
+            background: "var(--vyne-accent, #06B6D4)",
             color: "#fff",
             cursor: "pointer",
             fontSize: 13,
@@ -1429,7 +1429,7 @@ export default function TenantsPage() {
                     borderTop: "1px solid rgba(255,255,255,0.05)",
                     cursor: "pointer",
                     background: isSelected
-                      ? "rgba(6, 182, 212,0.1)"
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                       : "transparent",
                     transition: "background 0.15s",
                   }}

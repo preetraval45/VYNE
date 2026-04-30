@@ -185,7 +185,7 @@ export function DetailPanel({
                       }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.background = "var(--content-secondary)";
-                        (e.currentTarget as HTMLAnchorElement).style.color = "var(--vyne-purple)";
+                        (e.currentTarget as HTMLAnchorElement).style.color = "var(--vyne-accent, var(--vyne-purple))";
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLAnchorElement).style.background = "var(--content-bg)";

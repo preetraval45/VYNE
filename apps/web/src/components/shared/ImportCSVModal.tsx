@@ -242,7 +242,7 @@ export function ImportCSVModal({
     padding: "8px 18px",
     borderRadius: 8,
     border: "none",
-    background: "#06B6D4",
+    background: "var(--vyne-accent, #06B6D4)",
     color: "#fff",
     cursor: "pointer",
     fontSize: 13,
@@ -336,7 +336,7 @@ export function ImportCSVModal({
                     width: 22,
                     height: 22,
                     borderRadius: "50%",
-                    background: isActive ? "#06B6D4" : "#E0E0EC",
+                    background: isActive ? "var(--vyne-accent, #06B6D4)" : "#E0E0EC",
                     color: isActive ? "#fff" : "var(--text-tertiary)",
                     display: "flex",
                     alignItems: "center",
@@ -385,13 +385,13 @@ export function ImportCSVModal({
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               style={{
-                border: `2px dashed ${dragOver ? "var(--vyne-purple)" : "var(--input-border)"}`,
+                border: `2px dashed ${dragOver ? "var(--vyne-accent, var(--vyne-purple))" : "var(--input-border)"}`,
                 borderRadius: 10,
                 padding: "40px 20px",
                 textAlign: "center",
                 cursor: "pointer",
                 background: dragOver
-                  ? "rgba(6, 182, 212,0.04)"
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)"
                   : "var(--content-secondary)",
                 transition: "all 0.15s",
               }}
@@ -407,7 +407,7 @@ export function ImportCSVModal({
               >
                 <path
                   d="M4 22v4a2 2 0 002 2h20a2 2 0 002-2v-4M16 4v18M10 10l6-6 6 6"
-                  stroke={dragOver ? "#06B6D4" : "var(--text-tertiary)"}
+                  stroke={dragOver ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)"}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -726,7 +726,7 @@ export function ImportCSVModal({
                 style={{
                   width: `${importProgress}%`,
                   height: "100%",
-                  background: "#06B6D4",
+                  background: "var(--vyne-accent, #06B6D4)",
                   borderRadius: 3,
                   transition: "width 0.3s ease",
                 }}

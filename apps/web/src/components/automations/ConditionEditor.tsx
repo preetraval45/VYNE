@@ -121,13 +121,13 @@ function ConditionRow(
           <button
             onClick={onToggleLogic}
             style={{
-              background: "rgba(6, 182, 212,0.1)",
-              border: "1px solid rgba(6, 182, 212,0.2)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)",
               borderRadius: 12,
               padding: "2px 10px",
               fontSize: 10,
               fontWeight: 700,
-              color: "#06B6D4",
+              color: "var(--vyne-accent, #06B6D4)",
               cursor: "pointer",
               letterSpacing: "0.05em",
             }}
@@ -233,7 +233,7 @@ export default function ConditionEditor(
             fontSize: 11,
           }}
         >
-          No conditions \u2014 automation runs on every trigger
+          No conditions — automation runs on every trigger
         </div>
       )}
       {conditions.length > 0 && (

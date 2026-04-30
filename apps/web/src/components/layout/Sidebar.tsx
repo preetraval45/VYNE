@@ -38,8 +38,10 @@ import {
   X as XIcon,
   PanelLeftClose,
   Calendar as CalendarIcon,
+  Sparkles,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useUIStore } from "@/lib/stores/ui";
 import { useUnreadStore } from "@/lib/stores/unread";
@@ -123,12 +125,12 @@ interface NavItemDef {
 }
 
 const NAV_ITEMS: NavItemDef[] = [
-  { icon: Home, label: "Home", href: "/home", color: "#06B6D4" },
+  { icon: Home, label: "Home", href: "/home", color: "var(--vyne-accent, #06B6D4)" },
   {
     icon: BarChart3,
     label: "My Dashboard",
     href: "/dashboard",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
   },
   {
     icon: Contact,
@@ -330,7 +332,7 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: Activity,
     label: "Observe",
     href: "/observe",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
     badge: 1,
     moduleId: "observe",
     subs: [
@@ -345,7 +347,7 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: Brain,
     label: "Vyne AI",
     href: "/ai/chat",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
     moduleId: "ai",
     subs: [
       { label: "Chat", href: "/ai/chat" },
@@ -389,20 +391,20 @@ const NAV_ITEMS: NavItemDef[] = [
     icon: DownloadIcon,
     label: "Download apps",
     href: "/download",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
   },
   { icon: LifeBuoy, label: "Help centre", href: "/help", color: "#2563EB" },
   {
     icon: ListChecks,
     label: "CS playbooks",
     href: "/playbooks",
-    color: "#06B6D4",
+    color: "var(--vyne-accent, #06B6D4)",
   },
   {
     icon: GraduationCap,
     label: "Training",
     href: "/training",
-    color: "#22D3EE",
+    color: "var(--vyne-accent-light, #22D3EE)",
   },
   {
     icon: ShieldAlert,
@@ -428,8 +430,8 @@ const NAV_ITEMS: NavItemDef[] = [
 
 // ── Helper: compute nav row background ────────────────────────────
 function getNavRowBg(active: boolean, hovered: boolean): string {
-  if (active) return "rgba(6, 182, 212,0.08)";
-  if (hovered) return "rgba(6, 182, 212,0.04)";
+  if (active) return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
+  if (hovered) return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04)";
   return "transparent";
 }
 
@@ -497,15 +499,15 @@ function NavRow({
           fontWeight: active ? 600 : 500,
           color: active ? "var(--vyne-teal)" : "var(--text-primary)",
           background: active
-            ? "linear-gradient(90deg, rgba(6,182,212,0.14), rgba(6,182,212,0.04) 70%, transparent)"
+            ? "linear-gradient(90deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04) 70%, transparent)"
             : hovered
-              ? "rgba(6,182,212,0.06)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)"
               : "transparent",
           border: "none",
           borderLeft: active
             ? "2.5px solid var(--vyne-teal)"
             : "2.5px solid transparent",
-          boxShadow: active ? "inset 0 0 0 1px rgba(6,182,212,0.12)" : "none",
+          boxShadow: active ? "inset 0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)" : "none",
           borderRadius: collapsed ? 0 : "0 8px 8px 0",
           marginRight: collapsed ? 0 : 6,
           transition: "all 0.12s ease",
@@ -521,7 +523,7 @@ function NavRow({
             width: 30,
             height: 30,
             borderRadius: 8,
-            background: active ? "rgba(6, 182, 212, 0.14)" : "transparent",
+            background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14)" : "transparent",
             color: active ? "var(--vyne-teal)" : "var(--text-secondary)",
             display: "inline-flex",
             alignItems: "center",
@@ -544,7 +546,7 @@ function NavRow({
                 height: 14,
                 padding: "0 3px",
                 borderRadius: 7,
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 9,
                 fontWeight: 700,
@@ -567,7 +569,7 @@ function NavRow({
               <span
                 aria-label={`${item.badge} notification${item.badge === 1 ? "" : "s"}`}
                 style={{
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   borderRadius: 10,
                   padding: "1px 6px",
@@ -606,7 +608,7 @@ function NavRow({
               onClick={() => onNavigate(sub.href)}
               onMouseEnter={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
-                  "rgba(6, 182, 212,0.05)")
+                  "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)")
               }
               onMouseLeave={(e) =>
                 ((e.currentTarget as HTMLElement).style.background =
@@ -703,7 +705,7 @@ function NavRow({
               <span
                 style={{
                   marginLeft: "auto",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   borderRadius: 10,
                   padding: "1px 6px",
@@ -731,7 +733,7 @@ function NavRow({
                   onClick={() => onNavigate(sub.href)}
                   onMouseEnter={(e) =>
                     ((e.currentTarget as HTMLElement).style.background =
-                      "rgba(6, 182, 212,0.06)")
+                      "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLElement).style.background =
@@ -987,7 +989,7 @@ function EmojiStatusLine() {
                 border: "none",
                 background:
                   status?.text === p.text
-                    ? "rgba(6, 182, 212,0.08)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                     : "transparent",
                 cursor: "pointer",
                 fontSize: 12,
@@ -1114,13 +1116,21 @@ export function Sidebar() {
     }
   }, []);
 
-  // Filter items: keep items with no moduleId (always shown) or enabled module
-  const baseNavItems =
+  // Filter items: keep items with no moduleId (always shown) or enabled
+  // module. Also gate /admin behind Owner/Admin role — Members and
+  // Viewers don't see it in the nav at all.
+  const role = user?.role ?? "member";
+  const isAdminOrOwner = role === "owner" || role === "admin";
+  const baseNavItems = (
     enabledModules === null
       ? NAV_ITEMS
       : NAV_ITEMS.filter(
           (item) => !item.moduleId || enabledModules.has(item.moduleId),
-        );
+        )
+  ).filter((item) => {
+    if (item.href === "/admin" && !isAdminOrOwner) return false;
+    return true;
+  });
 
   // Live unread count from the store powers the Chat badge so it
   // ticks down to 0 the moment a channel is opened.
@@ -1236,7 +1246,7 @@ export function Sidebar() {
           borderBottom: "1px solid var(--content-border)",
           flexShrink: 0,
           background:
-            "linear-gradient(135deg, rgba(6, 182, 212,0.06) 0%, transparent 100%)",
+            "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06) 0%, transparent 100%)",
         }}
       >
         {collapsed ? (
@@ -1284,9 +1294,9 @@ export function Sidebar() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                   (e.currentTarget as HTMLElement).style.borderColor =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
@@ -1316,9 +1326,9 @@ export function Sidebar() {
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                   (e.currentTarget as HTMLElement).style.borderColor =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
@@ -1346,6 +1356,116 @@ export function Sidebar() {
           paddingBottom: 4,
         }}
       >
+        {/* ── Vyne AI featured panel ────────────────────────── */}
+        {!collapsed && (
+          <div style={{ padding: "10px 12px 4px" }}>
+            <Link
+              href="/ai/chat"
+              aria-label="Open Vyne AI"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 12,
+                background:
+                  "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18) 0%, rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.06) 100%)",
+                border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
+                color: "var(--sidebar-active)",
+                textDecoration: "none",
+                boxShadow:
+                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
+                position: "relative",
+                overflow: "hidden",
+                transition:
+                  "border-color 0.18s, transform 0.12s, box-shadow 0.18s",
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)";
+                el.style.transform = "translateY(-1px)";
+                el.style.boxShadow =
+                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 10px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)";
+                el.style.transform = "translateY(0)";
+                el.style.boxShadow =
+                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)";
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 9,
+                  background:
+                    "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
+                  color: "#fff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
+                }}
+              >
+                <Brain size={16} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    letterSpacing: "-0.01em",
+                    color: "#fff",
+                  }}
+                >
+                  Vyne AI
+                </div>
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "rgba(189, 209, 217, 0.75)",
+                    marginTop: 1,
+                  }}
+                >
+                  BRD · Diagrams · Sheets · Slides
+                </div>
+              </div>
+              <Sparkles
+                size={13}
+                style={{ color: "var(--teal-300, #67E8F9)", flexShrink: 0 }}
+              />
+            </Link>
+          </div>
+        )}
+        {collapsed && (
+          <div style={{ padding: "8px 6px 4px", display: "flex", justifyContent: "center" }}>
+            <Link
+              href="/ai/chat"
+              aria-label="Open Vyne AI"
+              title="Vyne AI"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background:
+                  "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
+                color: "#fff",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textDecoration: "none",
+                boxShadow:
+                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)",
+              }}
+            >
+              <Brain size={16} />
+            </Link>
+          </div>
+        )}
+
         {/* ── Pinned ───────────────────────────────────────── */}
         {!collapsed && pinned.length > 0 && (
           <div style={{ padding: "8px 12px 6px" }}>
@@ -1409,11 +1529,11 @@ export function Sidebar() {
                   opacity: pinDragIdx === idx ? 0.4 : 1,
                   borderTop:
                     pinOverIdx === idx && pinDragIdx !== null && pinDragIdx > idx
-                      ? "2px solid var(--vyne-purple)"
+                      ? "2px solid var(--vyne-accent, var(--vyne-purple))"
                       : "2px solid transparent",
                   borderBottom:
                     pinOverIdx === idx && pinDragIdx !== null && pinDragIdx < idx
-                      ? "2px solid var(--vyne-purple)"
+                      ? "2px solid var(--vyne-accent, var(--vyne-purple))"
                       : "2px solid transparent",
                   background: isActive(p.href)
                     ? "rgba(255,255,255,0.06)"
@@ -1622,7 +1742,7 @@ export function Sidebar() {
           flexShrink: 0,
           position: "relative",
           background:
-            "linear-gradient(135deg, rgba(6, 182, 212,0.03) 0%, transparent 100%)",
+            "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.03) 0%, transparent 100%)",
         }}
       >
         {/* Avatar with ring */}
@@ -1636,7 +1756,7 @@ export function Sidebar() {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #7C5CFC, #0891B2)",
+            background: "linear-gradient(135deg, #7C5CFC, var(--vyne-accent-deep, #0891B2))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -1645,18 +1765,18 @@ export function Sidebar() {
             color: "#fff",
             flexShrink: 0,
             cursor: "pointer",
-            border: "2px solid rgba(6, 182, 212,0.25)",
+            border: "2px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
             padding: 0,
-            boxShadow: "0 0 0 3px rgba(6, 182, 212,0.08)",
+            boxShadow: "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
             transition: "box-shadow 0.15s",
           }}
           onMouseEnter={(e) =>
             ((e.currentTarget as HTMLElement).style.boxShadow =
-              "0 0 0 3px rgba(6, 182, 212,0.22)")
+              "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.22)")
           }
           onMouseLeave={(e) =>
             ((e.currentTarget as HTMLElement).style.boxShadow =
-              "0 0 0 3px rgba(6, 182, 212,0.08)")
+              "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)")
           }
         >
           {userInitials}
@@ -1841,7 +1961,7 @@ export function Sidebar() {
                 }}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)")
+                    "var(--vyne-accent, var(--vyne-purple))")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLElement).style.color =
@@ -1863,7 +1983,7 @@ export function Sidebar() {
                     cx="12"
                     cy="12"
                     r="3"
-                    fill="var(--vyne-purple)"
+                    fill="var(--vyne-accent, var(--vyne-purple))"
                     stroke="none"
                   />
                 </svg>
@@ -1961,7 +2081,7 @@ export function Sidebar() {
                 }}
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLElement).style.background =
-                    "rgba(6, 182, 212,0.06)")
+                    "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLElement).style.background =

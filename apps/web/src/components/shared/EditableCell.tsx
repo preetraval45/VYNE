@@ -160,7 +160,7 @@ export function EditableCell<V extends string | number>({
         }}
         onMouseEnter={(e) => {
           if (disabled) return;
-          (e.currentTarget as HTMLElement).style.background = "rgba(6, 182, 212,0.08)";
+          (e.currentTarget as HTMLElement).style.background = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -180,7 +180,7 @@ export function EditableCell<V extends string | number>({
     borderRadius: 4,
     border: error
       ? "1px solid var(--status-danger)"
-      : "1px solid var(--vyne-purple)",
+      : "1px solid var(--vyne-accent, var(--vyne-purple))",
     outline: "none",
     background: "var(--content-bg)",
     color: "var(--text-primary)",
@@ -189,7 +189,7 @@ export function EditableCell<V extends string | number>({
     fontWeight: "inherit",
     boxShadow: error
       ? "0 0 0 3px rgba(239,68,68,0.18)"
-      : "0 0 0 3px rgba(6, 182, 212,0.18)",
+      : "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
     ...inputStyle,
   };
 

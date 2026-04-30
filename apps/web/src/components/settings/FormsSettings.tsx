@@ -141,7 +141,7 @@ export default function FormsSettings({ onToast }: Props) {
               padding: "7px 14px",
               borderRadius: 8,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -183,7 +183,7 @@ export default function FormsSettings({ onToast }: Props) {
                 gap: 12,
               }}
             >
-              <FormInput size={14} style={{ color: "var(--vyne-purple)" }} />
+              <FormInput size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div
                   style={{

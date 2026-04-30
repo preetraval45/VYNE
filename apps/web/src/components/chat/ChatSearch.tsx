@@ -293,12 +293,12 @@ export function ChatSearch({
                 padding: "5px 10px",
                 borderRadius: 99,
                 border: aiMode
-                  ? "1px solid var(--vyne-purple)"
+                  ? "1px solid var(--vyne-accent, var(--vyne-purple))"
                   : "1px solid var(--content-border)",
                 background: aiMode
                   ? "rgba(108, 71, 255, 0.15)"
                   : "transparent",
-                color: aiMode ? "var(--vyne-purple)" : "var(--text-secondary)",
+                color: aiMode ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                 fontSize: 11,
                 fontWeight: 600,
                 cursor: "pointer",
@@ -374,7 +374,7 @@ export function ChatSearch({
                   padding: "30px 20px",
                   textAlign: "center",
                   fontSize: 13,
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   lineHeight: 1.5,
                   display: "flex",
                   flexDirection: "column",
@@ -510,7 +510,7 @@ function highlightMatch(text: string, q: string): React.ReactNode {
       <span
         style={{
           background: "rgba(108, 71, 255, 0.25)",
-          color: "var(--vyne-purple)",
+          color: "var(--vyne-accent, var(--vyne-purple))",
           fontWeight: 600,
           padding: "0 2px",
           borderRadius: 3,

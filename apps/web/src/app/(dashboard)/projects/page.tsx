@@ -48,7 +48,7 @@ import toast from "react-hot-toast";
 
 // Built-in fallback stages when admin hasn't customized statuses.
 const BUILTIN_projectStages = [
-  { id: "active", label: "Active", tone: "info" as Tone, color: "#06B6D4" },
+  { id: "active", label: "Active", tone: "info" as Tone, color: "var(--vyne-accent, #06B6D4)" },
   { id: "paused", label: "On Hold", tone: "warn" as Tone, color: "#F59E0B" },
   { id: "completed", label: "Completed", tone: "success" as Tone, color: "#22C55E" },
 ];
@@ -802,7 +802,7 @@ function ProjectCardLocal({
             style={{ color: "var(--text-tertiary)" }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = "#CFFAFE";
-              (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+              (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callLlamaJson } from "@/lib/ai/claude";
+import { rateLimit } from "@/lib/api/security";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -42,6 +43,8 @@ const SYSTEM_PROMPT = `You distill a meeting transcript into a structured recap.
 Return strict JSON only — no prose, no fences.`;
 
 export async function POST(req: Request) {
+  const rl = await rateLimit({ key: "ai-recap", limit: 10, windowSec: 60, req });
+  if (!rl.ok) return rl.response!;
   let payload: RecapRequest;
   try {
     payload = (await req.json()) as RecapRequest;

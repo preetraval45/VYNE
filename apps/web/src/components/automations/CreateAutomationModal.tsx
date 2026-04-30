@@ -27,14 +27,14 @@ export default function CreateAutomationModal(
               width: 48,
               height: 48,
               borderRadius: 14,
-              background: "rgba(6, 182, 212,0.1)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 12px",
             }}
           >
-            <Zap size={22} color="#06B6D4" />
+            <Zap size={22} color="var(--vyne-accent, #06B6D4)" />
           </div>
           <h2
             style={{
@@ -102,8 +102,8 @@ export default function CreateAutomationModal(
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 3,
-                    background: "rgba(6, 182, 212,0.08)",
-                    color: "#06B6D4",
+                    background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                    color: "var(--vyne-accent, #06B6D4)",
                     borderRadius: 20,
                     padding: "2px 7px",
                     fontSize: 9,

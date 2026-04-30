@@ -15,6 +15,8 @@ export interface Session {
   id: string;
   /** ISO string */
   createdAt: string;
+  /** Owner — every record is filtered by current user before display. */
+  userId?: string;
   /** The user's question / night prompt */
   question: string;
   /** Vyne AI's reply */
@@ -27,6 +29,7 @@ export interface MorningBrief {
   id: string;
   /** ISO string pinned to the LOCAL date, 07:00 */
   createdAt: string;
+  userId?: string;
   summary: string;
   citations?: Array<{ kind: string; id: string; label: string }>;
 }
@@ -37,16 +40,81 @@ export interface Compass {
   intention: string;
 }
 
+export interface MemoryFact {
+  id: string;
+  text: string;
+  /** ISO string */
+  createdAt: string;
+  userId?: string;
+}
+
+export type AiModel = "haiku" | "sonnet" | "opus";
+
+export interface ConversationMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations?: Array<{ kind: string; id: string; label: string }>;
+}
+
+export interface Conversation {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  /** Owner — only this user sees this conversation in the sidebar. */
+  userId?: string;
+  /** First user message — used as the title preview. */
+  title: string;
+  pinned?: boolean;
+  messages: ConversationMessage[];
+  /** Per-conversation context the AI treats as ground truth for THIS
+   *  thread only ("we're testing iOS, not Android"). Merged with the
+   *  global memory facts when the request hits the streaming endpoint. */
+  scopedMemory?: string[];
+}
+
 interface AiMemoryStore {
   sessions: Session[];
   briefs: MorningBrief[];
   compass: Compass | null;
+  /** Persistent user-stated facts that survive conversations
+   *  ("we use Postgres, not MySQL", "Sarah is the design lead"). */
+  facts: MemoryFact[];
+  /** Preferred Vyne AI model. */
+  preferredModel: AiModel;
+  /** Multi-turn conversations — newest first. */
+  conversations: Conversation[];
+  /** Currently-loaded conversation; null = fresh chat. */
+  activeConversationId: string | null;
   /** Day-string (YYYY-MM-DD) of the last chat or brief */
   lastActiveDate: string | null;
+  /** Currently-signed-in user id. Set by /ai/chat from the auth store
+   *  on mount; every write tags the new record so reads can filter. */
+  currentUserId: string | null;
+  setCurrentUserId: (id: string | null) => void;
 
   addSession: (s: Omit<Session, "id" | "createdAt">) => Session;
   addBrief: (b: Omit<MorningBrief, "id" | "createdAt">) => MorningBrief;
   setCompass: (intention: string) => void;
+  addFact: (text: string) => MemoryFact | null;
+  removeFact: (id: string) => void;
+  setPreferredModel: (m: AiModel) => void;
+
+  /** Conversation CRUD */
+  createConversation: (firstUserMessage?: string) => Conversation;
+  setActiveConversation: (id: string | null) => void;
+  appendMessage: (
+    conversationId: string,
+    msg: Omit<ConversationMessage, "id">,
+  ) => ConversationMessage;
+  updateLastAssistantMessage: (
+    conversationId: string,
+    patch: Partial<ConversationMessage>,
+  ) => void;
+  togglePinConversation: (id: string) => void;
+  deleteConversation: (id: string) => void;
+  renameConversation: (id: string, title: string) => void;
+
   clearAll: () => void;
 }
 
@@ -71,17 +139,25 @@ const startOfWeek = (d = new Date()) => {
 
 export const useAiMemoryStore = create<AiMemoryStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       sessions: [],
       briefs: [],
       compass: null,
+      facts: [],
+      preferredModel: "sonnet" as AiModel,
+      conversations: [],
+      activeConversationId: null,
       lastActiveDate: null,
+      currentUserId: null,
+
+      setCurrentUserId: (id) => set(() => ({ currentUserId: id })),
 
       addSession: (s) => {
         const session: Session = {
           ...s,
           id: newId(),
           createdAt: new Date().toISOString(),
+          userId: get().currentUserId ?? undefined,
         };
         set((state) => ({
           // keep newest first, cap at 500 to avoid localStorage bloat
@@ -96,6 +172,7 @@ export const useAiMemoryStore = create<AiMemoryStore>()(
           ...b,
           id: newId(),
           createdAt: new Date().toISOString(),
+          userId: get().currentUserId ?? undefined,
         };
         set((state) => ({
           briefs: [brief, ...state.briefs].slice(0, 90),
@@ -109,10 +186,149 @@ export const useAiMemoryStore = create<AiMemoryStore>()(
           compass: { weekStart: startOfWeek(), intention },
         })),
 
+      addFact: (text) => {
+        const trimmed = text.trim();
+        if (!trimmed) return null;
+        const fact: MemoryFact = {
+          id: newId(),
+          text: trimmed,
+          createdAt: new Date().toISOString(),
+          userId: get().currentUserId ?? undefined,
+        };
+        set((state) => ({
+          // newest first, cap at 50 to keep system prompt size sane
+          facts: [fact, ...state.facts].slice(0, 50),
+        }));
+        return fact;
+      },
+
+      removeFact: (id) =>
+        set((state) => ({
+          facts: state.facts.filter((f) => f.id !== id),
+        })),
+
+      setPreferredModel: (m) => set(() => ({ preferredModel: m })),
+
+      createConversation: (firstUserMessage) => {
+        const now = new Date().toISOString();
+        const conv: Conversation = {
+          id: newId(),
+          createdAt: now,
+          updatedAt: now,
+          userId: get().currentUserId ?? undefined,
+          title: (firstUserMessage ?? "New conversation")
+            .trim()
+            .slice(0, 80),
+          messages: [],
+        };
+        set((state) => ({
+          conversations: [conv, ...state.conversations].slice(0, 200),
+          activeConversationId: conv.id,
+        }));
+        return conv;
+      },
+
+      setActiveConversation: (id) =>
+        set(() => ({ activeConversationId: id })),
+
+      appendMessage: (conversationId, msg) => {
+        const message: ConversationMessage = {
+          ...msg,
+          id: newId(),
+        };
+        set((state) => ({
+          conversations: state.conversations.map((c) =>
+            c.id === conversationId
+              ? {
+                  ...c,
+                  updatedAt: new Date().toISOString(),
+                  // Keep first user message as the title if not yet set
+                  title:
+                    c.title === "New conversation" && msg.role === "user"
+                      ? msg.content.slice(0, 80)
+                      : c.title,
+                  messages: [...c.messages, message],
+                }
+              : c,
+          ),
+        }));
+        return message;
+      },
+
+      updateLastAssistantMessage: (conversationId, patch) =>
+        set((state) => ({
+          conversations: state.conversations.map((c) => {
+            if (c.id !== conversationId) return c;
+            const idx = (() => {
+              for (let i = c.messages.length - 1; i >= 0; i--) {
+                if (c.messages[i].role === "assistant") return i;
+              }
+              return -1;
+            })();
+            if (idx < 0) return c;
+            const next = [...c.messages];
+            next[idx] = { ...next[idx], ...patch };
+            return { ...c, updatedAt: new Date().toISOString(), messages: next };
+          }),
+        })),
+
+      togglePinConversation: (id) =>
+        set((state) => ({
+          conversations: state.conversations.map((c) =>
+            c.id === id ? { ...c, pinned: !c.pinned } : c,
+          ),
+        })),
+
+      deleteConversation: (id) =>
+        set((state) => ({
+          conversations: state.conversations.filter((c) => c.id !== id),
+          activeConversationId:
+            state.activeConversationId === id
+              ? null
+              : state.activeConversationId,
+        })),
+
+      renameConversation: (id, title) =>
+        set((state) => ({
+          conversations: state.conversations.map((c) =>
+            c.id === id
+              ? { ...c, title: title.trim().slice(0, 120) || c.title }
+              : c,
+          ),
+        })),
+
       clearAll: () =>
-        set(() => ({ sessions: [], briefs: [], compass: null, lastActiveDate: null })),
+        set(() => ({
+          sessions: [],
+          briefs: [],
+          compass: null,
+          facts: [],
+          conversations: [],
+          activeConversationId: null,
+          lastActiveDate: null,
+        })),
     }),
-    { name: "vyne-ai-memory", version: 1 },
+    {
+      name: "vyne-ai-memory",
+      version: 4,
+      // Migrate from v3 → v4: drop everything that wasn't tagged with a
+      // userId (it could belong to anyone on this device). Fresh start
+      // per user is the safer default.
+      migrate: (state, fromVersion) => {
+        if (fromVersion < 4) {
+          return {
+            ...(state as object),
+            conversations: [],
+            sessions: [],
+            briefs: [],
+            facts: [],
+            activeConversationId: null,
+            currentUserId: null,
+          } as unknown as AiMemoryStore;
+        }
+        return state as AiMemoryStore;
+      },
+    },
   ),
 );
 

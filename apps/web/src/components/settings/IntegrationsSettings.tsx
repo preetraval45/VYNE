@@ -411,7 +411,7 @@ export default function IntegrationsSettings({ onToast }: Props) {
                           : prev,
                       )
                     }
-                    style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
+                    style={{ accentColor: "var(--vyne-accent, #06B6D4)", width: 16, height: 16 }}
                   />
                   {label}
                 </label>
@@ -454,7 +454,7 @@ export default function IntegrationsSettings({ onToast }: Props) {
                     width: `${importRun.progress ?? 0}%`,
                     height: "100%",
                     background:
-                      "linear-gradient(90deg, #06B6D4, #22D3EE)",
+                      "linear-gradient(90deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                     transition: "width 0.2s",
                   }}
                 />
@@ -576,7 +576,7 @@ export default function IntegrationsSettings({ onToast }: Props) {
                       flex: 1,
                       fontFamily:
                         "var(--font-geist-mono), ui-monospace, monospace",
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {m.vyne}
@@ -628,9 +628,9 @@ export default function IntegrationsSettings({ onToast }: Props) {
                 style={{
                   padding: "0 12px",
                   borderRadius: 8,
-                  border: "1px solid var(--vyne-purple)",
+                  border: "1px solid var(--vyne-accent, var(--vyne-purple))",
                   background: "var(--content-bg)",
-                  color: "var(--vyne-purple)",
+                  color: "var(--vyne-accent, var(--vyne-purple))",
                   fontSize: 12,
                   fontWeight: 600,
                   cursor: "pointer",
@@ -853,7 +853,7 @@ function Row({
             padding: "7px 14px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 12,
             fontWeight: 600,
@@ -998,7 +998,7 @@ function ModalActions({
           padding: "8px 16px",
           borderRadius: 8,
           border: "none",
-          background: "var(--vyne-purple)",
+          background: "var(--vyne-accent, var(--vyne-purple))",
           color: "#fff",
           fontSize: 13,
           fontWeight: 600,
@@ -1083,7 +1083,7 @@ function EmailToIssueSection({
             background: "var(--content-secondary)",
           }}
         >
-          <Mail size={14} style={{ color: "var(--vyne-purple)" }} />
+          <Mail size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
           <code
             style={{
               flex: 1,
@@ -1141,7 +1141,7 @@ function EmailToIssueSection({
             type="checkbox"
             checked={stripSignatures}
             onChange={(e) => setStripSignatures(e.target.checked)}
-            style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
+            style={{ accentColor: "var(--vyne-accent, #06B6D4)", width: 16, height: 16 }}
           />
           <span>
             <strong>Strip email signatures</strong> from the issue body — keeps
@@ -1153,7 +1153,7 @@ function EmailToIssueSection({
             type="checkbox"
             checked={threadReplies}
             onChange={(e) => setThreadReplies(e.target.checked)}
-            style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
+            style={{ accentColor: "var(--vyne-accent, #06B6D4)", width: 16, height: 16 }}
           />
           <span>
             <strong>Thread replies</strong> to the same issue — uses In-Reply-To
@@ -1273,7 +1273,7 @@ function CalendarSyncSection({
                 textAlign: "left",
               }}
             >
-              <CalendarDays size={18} style={{ color: "var(--vyne-purple)" }} />
+              <CalendarDays size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
               <div style={{ flex: 1 }}>
                 <div
                   style={{
@@ -1298,7 +1298,7 @@ function CalendarSyncSection({
                 <Loader2
                   size={14}
                   className="animate-spin"
-                  style={{ color: "var(--vyne-purple)" }}
+                  style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
                 />
               ) : (
                 <Plug size={14} style={{ color: "var(--text-tertiary)" }} />
@@ -1378,10 +1378,10 @@ function CalendarSyncSection({
                     flex: 1,
                     padding: "8px 10px",
                     borderRadius: 8,
-                    border: `1.5px solid ${conn.direction === v ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                    border: `1.5px solid ${conn.direction === v ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                     background:
                       conn.direction === v
-                        ? "rgba(6, 182, 212,0.05)"
+                        ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                         : "var(--content-bg)",
                     color: "var(--text-primary)",
                     fontSize: 12,
@@ -1400,7 +1400,7 @@ function CalendarSyncSection({
               type="checkbox"
               checked={conn.showBusy}
               onChange={(e) => update({ showBusy: e.target.checked })}
-              style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
+              style={{ accentColor: "var(--vyne-accent, #06B6D4)", width: 16, height: 16 }}
             />
             <span>
               <strong>Show busy status</strong> in VYNE based on calendar events
@@ -1412,7 +1412,7 @@ function CalendarSyncSection({
               type="checkbox"
               checked={conn.importInvites}
               onChange={(e) => update({ importInvites: e.target.checked })}
-              style={{ accentColor: "#06B6D4", width: 16, height: 16 }}
+              style={{ accentColor: "var(--vyne-accent, #06B6D4)", width: 16, height: 16 }}
             />
             <span>
               <strong>Import meeting invites</strong> as VYNE events with

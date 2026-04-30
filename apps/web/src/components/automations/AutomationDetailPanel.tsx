@@ -37,14 +37,14 @@ function EmptyState() {
           width: 56,
           height: 56,
           borderRadius: 16,
-          background: "rgba(6, 182, 212,0.08)",
+          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 14,
         }}
       >
-        <Zap size={26} color="#06B6D4" strokeWidth={1.5} />
+        <Zap size={26} color="var(--vyne-accent, #06B6D4)" strokeWidth={1.5} />
       </div>
       <div
         style={{
@@ -450,7 +450,7 @@ export default function AutomationDetailPanel(
                 aria-label="Confirm"
                 onClick={handleNameSave}
                 style={{
-                  background: "#06B6D4",
+                  background: "var(--vyne-accent, #06B6D4)",
                   border: "none",
                   borderRadius: 6,
                   padding: "4px 7px",
@@ -577,7 +577,7 @@ export default function AutomationDetailPanel(
                 padding: "10px 14px",
                 fontSize: 12,
                 fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#06B6D4" : "var(--text-secondary)",
+                color: isActive ? "var(--vyne-accent, #06B6D4)" : "var(--text-secondary)",
                 borderBottom: isActive
                   ? "2px solid #06B6D4"
                   : "2px solid transparent",

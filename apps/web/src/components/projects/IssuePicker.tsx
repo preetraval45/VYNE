@@ -361,7 +361,7 @@ export function AssigneePicker({
                 {!value && (
                   <Check
                     size={12}
-                    style={{ color: "#06B6D4", marginLeft: "auto" }}
+                    style={{ color: "var(--vyne-accent, #06B6D4)", marginLeft: "auto" }}
                   />
                 )}
               </button>
@@ -411,7 +411,7 @@ export function AssigneePicker({
                       {user.name}
                     </span>
                     {isSelected && (
-                      <Check size={12} style={{ color: "#06B6D4" }} />
+                      <Check size={12} style={{ color: "var(--vyne-accent, #06B6D4)" }} />
                     )}
                   </button>
                 </Popover.Close>

@@ -24,7 +24,7 @@ function AdminNavItem({
   else if (hovered) color = "rgba(255,255,255,0.8)";
 
   let bg = "transparent";
-  if (active) bg = "rgba(6, 182, 212,0.22)";
+  if (active) bg = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.22)";
   else if (hovered) bg = "rgba(255,255,255,0.06)";
 
   return (
@@ -58,7 +58,7 @@ function AdminNavItem({
             width: 3,
             height: 20,
             borderRadius: "0 3px 3px 0",
-            background: "#06B6D4",
+            background: "var(--vyne-accent, #06B6D4)",
           }}
         />
       )}
@@ -119,7 +119,7 @@ export default function AdminLayout({
             padding: "20px 18px 16px",
             borderBottom: "1px solid rgba(255,255,255,0.07)",
             background:
-              "linear-gradient(135deg, rgba(6, 182, 212,0.15) 0%, rgba(139,104,255,0.08) 100%)",
+              "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15) 0%, rgba(139,104,255,0.08) 100%)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -154,8 +154,8 @@ export default function AdminLayout({
               marginTop: 10,
               fontSize: 9,
               fontWeight: 700,
-              color: "#06B6D4",
-              background: "rgba(6, 182, 212,0.18)",
+              color: "var(--vyne-accent, #06B6D4)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
               padding: "2px 8px",
               borderRadius: 4,
               letterSpacing: "0.1em",

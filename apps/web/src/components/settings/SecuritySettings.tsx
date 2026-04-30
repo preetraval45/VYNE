@@ -234,7 +234,7 @@ export default function SecuritySettings({ onToast }: Props) {
                 onChange={(e) =>
                   setPolicy((p) => ({ ...p, [key]: e.target.checked }))
                 }
-                style={{ width: 16, height: 16, cursor: "pointer", accentColor: "#06B6D4" }}
+                style={{ width: 16, height: 16, cursor: "pointer", accentColor: "var(--vyne-accent, #06B6D4)" }}
               />
             </label>
           ))}
@@ -291,7 +291,7 @@ export default function SecuritySettings({ onToast }: Props) {
             padding: "8px 16px",
             borderRadius: 8,
             border: "none",
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             color: "#fff",
             fontSize: 13,
             fontWeight: 600,
@@ -374,7 +374,7 @@ export default function SecuritySettings({ onToast }: Props) {
                   padding: "7px 14px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   fontSize: 12,
                   fontWeight: 600,
@@ -466,7 +466,7 @@ export default function SecuritySettings({ onToast }: Props) {
                   padding: "8px 16px",
                   borderRadius: 8,
                   border: "none",
-                  background: "var(--vyne-purple)",
+                  background: "var(--vyne-accent, var(--vyne-purple))",
                   color: "#fff",
                   fontSize: 13,
                   fontWeight: 600,
@@ -502,10 +502,10 @@ export default function SecuritySettings({ onToast }: Props) {
                 flex: "1 1 140px",
                 padding: 14,
                 borderRadius: 10,
-                border: `1.5px solid ${ssoProvider === p ? "var(--vyne-purple)" : "var(--content-border)"}`,
+                border: `1.5px solid ${ssoProvider === p ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
                 background:
                   ssoProvider === p
-                    ? "rgba(6, 182, 212,0.06)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)"
                     : "var(--content-bg)",
                 color: "var(--text-primary)",
                 fontSize: 13,
@@ -557,10 +557,10 @@ export default function SecuritySettings({ onToast }: Props) {
                   padding: "10px 14px",
                   borderRadius: 10,
                   border: s.current
-                    ? "1.5px solid var(--vyne-purple)"
+                    ? "1.5px solid var(--vyne-accent, var(--vyne-purple))"
                     : "1px solid var(--content-border)",
                   background: s.current
-                    ? "rgba(6, 182, 212,0.05)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)"
                     : "var(--content-secondary)",
                 }}
               >
@@ -573,7 +573,7 @@ export default function SecuritySettings({ onToast }: Props) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                   }}
                 >
                   <Icon size={16} />
@@ -873,7 +873,7 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
                 onChange={(e) =>
                   setPolicy((p) => ({ ...p, [key]: e.target.checked }))
                 }
-                style={{ accentColor: "#06B6D4" }}
+                style={{ accentColor: "var(--vyne-accent, #06B6D4)" }}
               />
               {label}
             </label>
@@ -921,7 +921,7 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
                     height: 32,
                     borderRadius: 8,
                     background: "var(--content-bg)",
-                    color: "var(--vyne-purple)",
+                    color: "var(--vyne-accent, var(--vyne-purple))",
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",

@@ -54,7 +54,7 @@ export function CompetitorTable() {
           borderBottom:
             "1px solid var(--content-border, var(--content-border))",
           background:
-            "linear-gradient(135deg, rgba(6, 182, 212,0.04) 0%, rgba(139,92,246,0.04) 100%)",
+            "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04) 0%, rgba(139,92,246,0.04) 100%)",
         }}
       >
         <h2
@@ -105,7 +105,7 @@ export function CompetitorTable() {
                   key={c}
                   style={{
                     ...headerCellStyle,
-                    color: c === "vyne" ? "#06B6D4" : headerCellStyle.color,
+                    color: c === "vyne" ? "var(--vyne-accent, #06B6D4)" : headerCellStyle.color,
                     fontWeight: c === "vyne" ? 700 : 600,
                   }}
                 >
@@ -222,7 +222,7 @@ export function CompetitorTable() {
           }}
         >
           VYNE covers{" "}
-          <span style={{ fontWeight: 700, color: "#06B6D4" }}>
+          <span style={{ fontWeight: 700, color: "var(--vyne-accent, #06B6D4)" }}>
             {COMPETITOR_DATA.filter((r) => r.vyne).length}/
             {COMPETITOR_DATA.length}
           </span>{" "}

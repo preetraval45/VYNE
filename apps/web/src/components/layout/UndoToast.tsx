@@ -108,7 +108,7 @@ export function UndoToast() {
           style={{
             height: "100%",
             width: `${progress * 100}%`,
-            background: "var(--vyne-purple)",
+            background: "var(--vyne-accent, var(--vyne-purple))",
             transition: "width 100ms linear",
           }}
         />

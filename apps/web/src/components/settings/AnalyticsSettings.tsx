@@ -180,7 +180,7 @@ export default function AnalyticsSettings({ onToast }: Props) {
   // Cohort heat-map cell colour
   function cell(value: number) {
     const pct = value / 100;
-    return `rgba(6, 182, 212,${0.1 + pct * 0.55})`;
+    return `rgba(var(--vyne-accent-rgb, 6, 182, 212), ${0.1 + pct * 0.55})`;
   }
 
   // Aggregates for customer health
@@ -245,7 +245,7 @@ export default function AnalyticsSettings({ onToast }: Props) {
                       width: `${pct}%`,
                       height: "100%",
                       background:
-                        "linear-gradient(90deg, var(--vyne-purple), #22D3EE)",
+                        "linear-gradient(90deg, var(--vyne-accent, var(--vyne-purple)), var(--vyne-accent-light, #22D3EE))",
                     }}
                   />
                 </div>
@@ -631,7 +631,7 @@ export default function AnalyticsSettings({ onToast }: Props) {
               padding: "5px 12px",
               borderRadius: 7,
               border: "none",
-              background: "var(--vyne-purple)",
+              background: "var(--vyne-accent, var(--vyne-purple))",
               color: "#fff",
               fontSize: 11,
               fontWeight: 600,
@@ -898,7 +898,7 @@ function Card({
           gap: 10,
         }}
       >
-        <Icon size={14} style={{ color: "var(--vyne-purple)" }} />
+        <Icon size={14} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span
           style={{
             fontSize: 13,

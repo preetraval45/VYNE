@@ -92,7 +92,7 @@ export function ChannelSidebar({
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-              (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+              (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -185,7 +185,7 @@ export function ChannelSidebar({
                 {filteredChannels.map((ch) => {
                   const isActive = selectedId === ch.id && !isDM;
                   let chColor = "var(--text-secondary)";
-                  if (isActive) chColor = "var(--vyne-purple)";
+                  if (isActive) chColor = "var(--vyne-accent, var(--vyne-purple))";
                   else if (ch.unreadCount) chColor = "var(--text-primary)";
                   return (
                     <button
@@ -238,11 +238,31 @@ export function ChannelSidebar({
                       >
                         {ch.name}
                       </span>
+                      {(() => {
+                        const tc = (ch as { threadCount?: number }).threadCount ?? 0;
+                        if (tc <= 0) return null;
+                        return (
+                          <span
+                            title={`${tc} thread${tc === 1 ? "" : "s"}`}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 2,
+                              fontSize: 10,
+                              color: "var(--text-tertiary)",
+                              fontWeight: 500,
+                            }}
+                            aria-label={`${tc} threads`}
+                          >
+                            ↳ {tc}
+                          </span>
+                        );
+                      })()}
                       {(ch.unreadCount ?? 0) > 0 && (
                         <span
                           style={{
                             background: isActive
-                              ? "#06B6D4"
+                              ? "var(--vyne-accent, #06B6D4)"
                               : "var(--content-border)",
                             color: isActive ? "#fff" : "var(--text-secondary)",
                             borderRadius: 10,
@@ -277,7 +297,7 @@ export function ChannelSidebar({
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-secondary)";
-                    (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                    (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
@@ -339,7 +359,7 @@ export function ChannelSidebar({
                 {filteredDMs.map((dm) => {
                   const isActive = selectedId === dm.id && isDM;
                   let dmColor = "var(--text-secondary)";
-                  if (isActive) dmColor = "var(--vyne-purple)";
+                  if (isActive) dmColor = "var(--vyne-accent, var(--vyne-purple))";
                   else if (dm.unreadCount) dmColor = "var(--text-primary)";
                   return (
                     <button
@@ -396,7 +416,7 @@ export function ChannelSidebar({
                       {(dm.unreadCount ?? 0) > 0 && (
                         <span
                           style={{
-                            background: "#06B6D4",
+                            background: "var(--vyne-accent, #06B6D4)",
                             color: "#fff",
                             borderRadius: 10,
                             padding: "0 5px",
@@ -429,7 +449,7 @@ export function ChannelSidebar({
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-secondary)";
-                    (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                    (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background =

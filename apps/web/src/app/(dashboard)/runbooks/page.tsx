@@ -323,7 +323,7 @@ export default function RunbooksPage() {
               marginBottom: 3,
             }}
           >
-            <ShieldAlert size={17} style={{ color: "var(--vyne-purple)" }} />
+            <ShieldAlert size={17} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
             <h1
               style={{
                 margin: 0,
@@ -535,7 +535,7 @@ export default function RunbooksPage() {
                 padding: "8px 16px",
                 borderRadius: 8,
                 border: "none",
-                background: "var(--vyne-purple)",
+                background: "var(--vyne-accent, var(--vyne-purple))",
                 color: "#fff",
                 fontSize: 12,
                 fontWeight: 600,
@@ -697,7 +697,7 @@ function Fact({
           gap: 4,
         }}
       >
-        <span style={{ color: "var(--vyne-purple)" }}>{icon}</span>
+        <span style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}>{icon}</span>
         {label}
       </div>
       <div

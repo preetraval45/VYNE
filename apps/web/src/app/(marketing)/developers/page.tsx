@@ -52,14 +52,14 @@ const RATE_LIMIT_TIERS = [
     rps: "5 req/s",
     daily: "10,000 / day",
     burst: "50",
-    color: "var(--vyne-purple)",
+    color: "var(--vyne-accent, var(--vyne-purple))",
   },
   {
     name: "Business",
     rps: "25 req/s",
     daily: "100,000 / day",
     burst: "200",
-    color: "var(--vyne-purple-light)",
+    color: "var(--vyne-accent-light, var(--vyne-purple-light))",
   },
   {
     name: "Enterprise",
@@ -275,7 +275,7 @@ export default function DevelopersPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -303,8 +303,8 @@ export default function DevelopersPage() {
               gap: 8,
               padding: "5px 12px",
               borderRadius: 999,
-              background: "rgba(6, 182, 212,0.1)",
-              border: "1px solid rgba(6, 182, 212,0.25)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
+              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
               color: "#67E8F9",
               fontSize: 12,
               fontWeight: 600,
@@ -359,7 +359,7 @@ export default function DevelopersPage() {
                 textDecoration: "none",
               }}
             >
-              <Play size={18} style={{ color: "#22D3EE", marginBottom: 8 }} />
+              <Play size={18} style={{ color: "var(--vyne-accent-light, #22D3EE)", marginBottom: 8 }} />
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 3 }}>
                 API playground
               </div>
@@ -502,7 +502,7 @@ export default function DevelopersPage() {
                           padding: "8px 14px",
                           textAlign: "left",
                           background: active
-                            ? "rgba(6, 182, 212,0.15)"
+                            ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)"
                             : "transparent",
                           border: "none",
                           borderLeft: active
@@ -525,7 +525,7 @@ export default function DevelopersPage() {
                               op.method === "GET"
                                 ? "#4ADE80"
                                 : op.method === "POST"
-                                  ? "#22D3EE"
+                                  ? "var(--vyne-accent-light, #22D3EE)"
                                   : op.method === "PATCH"
                                     ? "#FCD34D"
                                     : "#F87171",
@@ -533,7 +533,7 @@ export default function DevelopersPage() {
                               op.method === "GET"
                                 ? "rgba(34,197,94,0.15)"
                                 : op.method === "POST"
-                                  ? "rgba(6, 182, 212,0.18)"
+                                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)"
                                   : op.method === "PATCH"
                                     ? "rgba(245,158,11,0.18)"
                                     : "rgba(239,68,68,0.18)",
@@ -584,7 +584,7 @@ export default function DevelopersPage() {
                           background:
                             selectedOp.method === "GET"
                               ? "rgba(34,197,94,0.18)"
-                              : "rgba(6, 182, 212,0.2)",
+                              : "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.2)",
                           color:
                             selectedOp.method === "GET" ? "#4ADE80" : "#67E8F9",
                           fontFamily:
@@ -702,12 +702,12 @@ export default function DevelopersPage() {
                       padding: "9px 18px",
                       borderRadius: 9,
                       border: "none",
-                      background: "linear-gradient(135deg, #06B6D4, #22D3EE)",
+                      background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                       color: "#fff",
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: running ? "default" : "pointer",
-                      boxShadow: "0 4px 14px rgba(6, 182, 212,0.3)",
+                      boxShadow: "0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
                       opacity: running ? 0.7 : 1,
                     }}
                   >

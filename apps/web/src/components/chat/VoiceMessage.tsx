@@ -105,7 +105,7 @@ export function VoiceMessage({ url, filename, sizeBytes }: VoiceMessageProps) {
         padding: "8px 14px 8px 8px",
         borderRadius: 18,
         background:
-          "linear-gradient(135deg, rgba(108, 71, 255, 0.12), rgba(6, 182, 212, 0.08))",
+          "linear-gradient(135deg, rgba(108, 71, 255, 0.12), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08))",
         border: "1px solid rgba(108, 71, 255, 0.25)",
         maxWidth: 360,
         marginTop: 4,
@@ -122,7 +122,7 @@ export function VoiceMessage({ url, filename, sizeBytes }: VoiceMessageProps) {
           borderRadius: "50%",
           border: "none",
           background:
-            "linear-gradient(135deg, var(--vyne-purple), #06B6D4)",
+            "linear-gradient(135deg, var(--vyne-accent, var(--vyne-purple)), var(--vyne-accent, #06B6D4))",
           color: "#fff",
           cursor: "pointer",
           display: "flex",
@@ -151,7 +151,7 @@ export function VoiceMessage({ url, filename, sizeBytes }: VoiceMessageProps) {
               cursor: "pointer",
               background:
                 i <= playedIdx
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "rgba(255, 255, 255, 0.25)",
               transition: "background 0.1s",
             }}
@@ -170,7 +170,7 @@ export function VoiceMessage({ url, filename, sizeBytes }: VoiceMessageProps) {
           flexShrink: 0,
         }}
       >
-        <Mic size={11} style={{ color: "var(--vyne-purple)" }} />
+        <Mic size={11} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
         <span>
           {duration
             ? fmt(progress * duration) + " / " + fmt(duration)

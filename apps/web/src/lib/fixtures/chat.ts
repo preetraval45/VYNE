@@ -30,6 +30,11 @@ export const SLASH_COMMANDS: SlashCmd[] = [
   { cmd: 'poll',          args: '<question>', icon: '📊', desc: 'Create a quick poll in this channel', category: 'Chat' },
   { cmd: 'remind',        args: '<time> <message>', icon: '⏰', desc: 'Set a reminder for yourself', category: 'Chat' },
   { cmd: 'summarize',     args: '',           icon: '🧠', desc: 'AI-summarize recent messages', category: 'AI' },
+  { cmd: 'ask',           args: '<question>', icon: '💬', desc: 'Ask Vyne AI inline — only you see the answer until you share it', category: 'AI' },
+  { cmd: 'decision',      args: '<what was decided>', icon: '✅', desc: 'Record a decision so the team can find it later', category: 'Chat' },
+  { cmd: 'eta',           args: '<task> <when>', icon: '📆', desc: 'Post an ETA for a piece of work', category: 'Chat' },
+  { cmd: 'huddle',        args: '[topic]',    icon: '🎧', desc: 'Start a quick audio huddle in this channel', category: 'Chat' },
+  { cmd: 'task',          args: '<title>',    icon: '🎯', desc: 'Quick-create a task in the active project', category: 'Projects' },
 ]
 
 // ── AI Summary panel ─────────────────────────────────────────────

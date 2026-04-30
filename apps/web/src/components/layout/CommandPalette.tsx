@@ -60,6 +60,7 @@ type ResultCategory =
   | "Quick Actions"
   | "Create"
   | "Actions"
+  | "AI Tools"
   | "Recent Searches";
 
 interface CommandItem {
@@ -404,6 +405,7 @@ const CATEGORY_ICONS: Record<ResultCategory, React.ReactNode> = {
   "Quick Actions": <Zap size={12} />,
   Create: <Plus size={12} />,
   Actions: <Settings size={12} />,
+  "AI Tools": <Sparkles size={12} />,
   "Recent Searches": <Clock size={12} />,
 };
 
@@ -452,13 +454,13 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
         "w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors text-left",
       )}
       style={{
-        background: isSelected ? "rgba(6, 182, 212,0.15)" : "transparent",
+        background: isSelected ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)" : "transparent",
         color: isSelected ? "#FFFFFF" : "var(--text-tertiary)",
       }}
     >
       <span
         className="flex-shrink-0"
-        style={{ color: isSelected ? "#22D3EE" : "var(--text-secondary)" }}
+        style={{ color: isSelected ? "var(--vyne-accent-light, #22D3EE)" : "var(--text-secondary)" }}
       >
         {item.icon}
       </span>
@@ -476,7 +478,7 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
       {item.badge && (
         <span
           className="flex-shrink-0 text-xs px-1.5 py-0.5 rounded"
-          style={{ background: "rgba(6, 182, 212,0.15)", color: "#22D3EE" }}
+          style={{ background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)", color: "var(--vyne-accent-light, #22D3EE)" }}
         >
           {item.badge}
         </span>
@@ -484,7 +486,7 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
       {isSelected && (
         <ArrowRight
           size={14}
-          style={{ color: "var(--vyne-purple)", flexShrink: 0 }}
+          style={{ color: "var(--vyne-accent, var(--vyne-purple))", flexShrink: 0 }}
         />
       )}
     </button>
@@ -727,6 +729,94 @@ export function CommandPalette() {
         icon: <Settings size={16} />,
         action: () => router.push("/settings"),
         category: "Navigate",
+      },
+    ],
+    [router],
+  );
+
+  // ── AI Tool commands ────────────────────────────────────────────
+  // These don't navigate to a form — they jump into /ai/chat with a
+  // pre-filled prompt so the AI tool-calling layer (toolExecutor.ts)
+  // creates the record. Lets users hit Cmd+K → "create deal" and skip
+  // the multi-field form entirely.
+  const aiToolCommands: CommandItem[] = useMemo(
+    () => [
+      {
+        id: "ai-create-deal",
+        label: "Ask Vyne AI: create a deal",
+        description: "Pre-fills /ai/chat with a deal-create prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push("/ai/chat?prompt=" + encodeURIComponent("Create a deal for ")),
+        category: "AI Tools",
+        keywords: "ai create new deal opportunity crm",
+      },
+      {
+        id: "ai-create-task",
+        label: "Ask Vyne AI: create a task",
+        description: "Pre-fills /ai/chat with a task-create prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push("/ai/chat?prompt=" + encodeURIComponent("Create a task: ")),
+        category: "AI Tools",
+        keywords: "ai create new task issue",
+      },
+      {
+        id: "ai-create-contact",
+        label: "Ask Vyne AI: add a contact",
+        description: "Pre-fills /ai/chat with a contact-create prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push("/ai/chat?prompt=" + encodeURIComponent("Add contact ")),
+        category: "AI Tools",
+        keywords: "ai create new contact person",
+      },
+      {
+        id: "ai-create-invoice",
+        label: "Ask Vyne AI: draft an invoice",
+        description: "Pre-fills /ai/chat with an invoice-create prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push("/ai/chat?prompt=" + encodeURIComponent("Create an invoice for ")),
+        category: "AI Tools",
+        keywords: "ai create new invoice billing",
+      },
+      {
+        id: "ai-create-product",
+        label: "Ask Vyne AI: add a product",
+        description: "Pre-fills /ai/chat with a product-create prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push("/ai/chat?prompt=" + encodeURIComponent("Add product ")),
+        category: "AI Tools",
+        keywords: "ai create new product sku inventory",
+      },
+      {
+        id: "ai-create-work-order",
+        label: "Ask Vyne AI: create a work order",
+        description: "Pre-fills /ai/chat with a work-order prompt",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push(
+            "/ai/chat?prompt=" + encodeURIComponent("Create a work order for "),
+          ),
+        category: "AI Tools",
+        keywords: "ai create work order manufacturing production",
+      },
+      {
+        id: "ai-summarize-week",
+        label: "Ask Vyne AI: summarise the week",
+        description: "What got done, what's at risk, what's next",
+        icon: <Sparkles size={16} />,
+        action: () =>
+          router.push(
+            "/ai/chat?prompt=" +
+              encodeURIComponent(
+                "Summarise this week across all modules — what shipped, what slipped, what needs attention next week.",
+              ),
+          ),
+        category: "AI Tools",
+        keywords: "ai recap weekly summary brief",
       },
     ],
     [router],
@@ -1067,6 +1157,7 @@ export function CommandPalette() {
       return [
         ...recentItems,
         ...navigationCommands,
+        ...aiToolCommands,
         ...createCommands,
         ...actionCommands,
       ];
@@ -1086,6 +1177,13 @@ export function CommandPalette() {
         (cmd.keywords?.toLowerCase().includes(q) ?? false),
     );
 
+    const matchingAiTools = aiToolCommands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(q) ||
+        (cmd.description?.toLowerCase().includes(q) ?? false) ||
+        (cmd.keywords?.toLowerCase().includes(q) ?? false),
+    );
+
     const matchingActionCommands = actionCommands.filter(
       (cmd) =>
         cmd.label.toLowerCase().includes(q) ||
@@ -1096,6 +1194,7 @@ export function CommandPalette() {
     return [
       ...searchResults,
       ...matchingNavCommands,
+      ...matchingAiTools,
       ...matchingCreateCommands,
       ...matchingActionCommands,
     ];
@@ -1104,6 +1203,7 @@ export function CommandPalette() {
     searchResults,
     navigationCommands,
     createCommands,
+    aiToolCommands,
     actionCommands,
     quickActions,
     recentSearches,
@@ -1144,8 +1244,36 @@ export function CommandPalette() {
         close();
       }
     }
+    function handleOpenEvent() {
+      setCommandPaletteOpen(true);
+    }
+    function handleOpenPaletteEvent(e: Event) {
+      // SearchBar's "⌘K all" button dispatches this. Optional detail
+      // carries the in-page query so the palette opens pre-filled.
+      const detail = (e as CustomEvent<{ query?: string }>).detail;
+      if (detail?.query) setQuery(detail.query);
+      setCommandPaletteOpen(true);
+    }
     globalThis.addEventListener("keydown", handleGlobalKeyDown);
-    return () => globalThis.removeEventListener("keydown", handleGlobalKeyDown);
+    globalThis.addEventListener(
+      "vyne:open-command-palette",
+      handleOpenEvent,
+    );
+    globalThis.addEventListener(
+      "vyne:open-palette",
+      handleOpenPaletteEvent as EventListener,
+    );
+    return () => {
+      globalThis.removeEventListener("keydown", handleGlobalKeyDown);
+      globalThis.removeEventListener(
+        "vyne:open-command-palette",
+        handleOpenEvent,
+      );
+      globalThis.removeEventListener(
+        "vyne:open-palette",
+        handleOpenPaletteEvent as EventListener,
+      );
+    };
   }, [commandPaletteOpen, setCommandPaletteOpen, close]);
 
   // ── Keyboard navigation inside the palette ──────────────────────
@@ -1209,7 +1337,7 @@ export function CommandPalette() {
               background: "var(--content-bg, #1C1C2E)",
               border: "1px solid rgba(255,255,255,0.1)",
               boxShadow:
-                "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(6, 182, 212,0.15)",
+                "0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
             }}
           >
             {/* Search input */}
@@ -1262,8 +1390,8 @@ export function CommandPalette() {
               <div
                 className="flex items-center gap-2 px-4 py-2 text-xs"
                 style={{
-                  background: "rgba(6, 182, 212,0.08)",
-                  color: "#22D3EE",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                  color: "var(--vyne-accent-light, #22D3EE)",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}
               >
@@ -1275,7 +1403,7 @@ export function CommandPalette() {
               <div
                 className="flex items-center gap-2 px-4 py-2 text-xs"
                 style={{
-                  background: "rgba(6, 182, 212,0.12)",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                   color: "#67E8F9",
                   borderBottom: "1px solid rgba(255,255,255,0.05)",
                 }}
@@ -1311,7 +1439,7 @@ export function CommandPalette() {
                   <div
                     style={{
                       padding: "12px 16px",
-                      background: "rgba(6, 182, 212,0.06)",
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)",
                       borderBottom: "1px solid rgba(255,255,255,0.05)",
                       color: "var(--content-border)",
                       fontSize: 13,
@@ -1384,7 +1512,7 @@ export function CommandPalette() {
                         style={{
                           padding: "1px 8px",
                           borderRadius: 4,
-                          background: "rgba(6, 182, 212,0.18)",
+                          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
                           color: "#67E8F9",
                           fontSize: 10,
                           fontWeight: 700,

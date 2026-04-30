@@ -184,7 +184,7 @@ export function SummaryPanel({
         background: "var(--content-bg, #fff)",
         border: "1px solid #E0D5FF",
         borderRadius: 12,
-        boxShadow: "0 8px 32px rgba(6, 182, 212,0.15)",
+        boxShadow: "0 8px 32px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
         padding: 16,
         maxHeight: 340,
         overflowY: "auto",
@@ -200,7 +200,7 @@ export function SummaryPanel({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <Sparkles size={15} style={{ color: "#06B6D4" }} />
+          <Sparkles size={15} style={{ color: "var(--vyne-accent, #06B6D4)" }} />
           <span
             style={{
               fontSize: 13,
@@ -213,8 +213,8 @@ export function SummaryPanel({
           <span
             style={{
               fontSize: 10,
-              color: "#06B6D4",
-              background: "rgba(6, 182, 212,0.1)",
+              color: "var(--vyne-accent, #06B6D4)",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
               padding: "1px 6px",
               borderRadius: 4,
               fontWeight: 600,
@@ -276,7 +276,7 @@ export function SummaryPanel({
         >
           <Loader2
             size={16}
-            style={{ color: "#06B6D4", animation: "spin 1s linear infinite" }}
+            style={{ color: "var(--vyne-accent, #06B6D4)", animation: "spin 1s linear infinite" }}
           />
           <span
             style={{

@@ -38,7 +38,7 @@ const TYPE_ICONS: Record<NoteBullet["type"], React.ReactNode> = {
 const TYPE_COLORS: Record<NoteBullet["type"], string> = {
   topic: "#A78BFA",
   decision: "#F59E0B",
-  question: "#06B6D4",
+  question: "var(--vyne-accent, #06B6D4)",
   highlight: "#10B981",
 };
 

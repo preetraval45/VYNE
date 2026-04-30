@@ -239,7 +239,7 @@ export function CalendarView({ events, initialMonth, title }: Props) {
                 display: "flex",
                 flexDirection: "column",
                 gap: 3,
-                background: isToday ? "rgba(6, 182, 212,0.05)" : "transparent",
+                background: isToday ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05)" : "transparent",
                 minHeight: 88,
               }}
             >
@@ -251,7 +251,7 @@ export function CalendarView({ events, initialMonth, title }: Props) {
                   width: isToday ? 22 : "auto",
                   height: isToday ? 22 : "auto",
                   borderRadius: "50%",
-                  background: isToday ? "var(--vyne-purple)" : "transparent",
+                  background: isToday ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
                   color: isToday ? "#fff" : "var(--text-secondary)",
                   fontSize: 11,
                   fontWeight: isToday ? 700 : 500,
@@ -276,15 +276,15 @@ export function CalendarView({ events, initialMonth, title }: Props) {
                     border: "none",
                     background: e.color
                       ? `${e.color}22`
-                      : "rgba(6, 182, 212,0.12)",
-                    color: e.color ?? "var(--vyne-purple)",
+                      : "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                    color: e.color ?? "var(--vyne-accent, var(--vyne-purple))",
                     fontSize: 10,
                     fontWeight: 600,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                     cursor: e.onClick ? "pointer" : "default",
-                    borderLeft: `3px solid ${e.color ?? "var(--vyne-purple)"}`,
+                    borderLeft: `3px solid ${e.color ?? "var(--vyne-accent, var(--vyne-purple))"}`,
                   }}
                 >
                   {e.title}

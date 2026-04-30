@@ -18,7 +18,7 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string; dot: strin
   warning: { bg: "var(--badge-warning-bg)", text: "var(--badge-warning-text)", dot: "var(--status-warning)" },
   danger:  { bg: "var(--badge-danger-bg)",  text: "var(--badge-danger-text)",  dot: "var(--status-danger)"  },
   info:    { bg: "var(--badge-info-bg)",    text: "var(--badge-info-text)",    dot: "var(--status-info)"    },
-  purple:  { bg: "var(--alert-purple-bg)",  text: "var(--alert-purple-text)",  dot: "var(--vyne-purple)"    },
+  purple:  { bg: "var(--alert-purple-bg)",  text: "var(--alert-purple-text)",  dot: "var(--vyne-accent, var(--vyne-purple))"    },
 };
 
 const sizeStyles: Record<BadgeSize, string> = {

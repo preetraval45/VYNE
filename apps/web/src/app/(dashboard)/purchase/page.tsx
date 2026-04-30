@@ -594,9 +594,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
         borderBottom: active
-          ? "2px solid var(--vyne-purple)"
+          ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
         transition: "all 0.15s",
         whiteSpace: "nowrap",
@@ -614,9 +614,9 @@ function TabBtn({
             padding: "1px 5px",
             borderRadius: 10,
             background: active
-              ? "rgba(6, 182, 212,0.12)"
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
               : "var(--content-secondary)",
-            color: active ? "var(--vyne-purple)" : "var(--text-secondary)",
+            color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
           }}
         >
           {count}
@@ -752,7 +752,7 @@ function NewButton({
 }: Readonly<{ label: string; onClick?: () => void; href?: string }>) {
   const sharedStyle: React.CSSProperties = {
     padding: "7px 14px",
-    background: "var(--vyne-purple)",
+    background: "var(--vyne-accent, var(--vyne-purple))",
     color: "#fff",
     border: "none",
     borderRadius: 8,
@@ -872,7 +872,7 @@ function PurchaseOrdersTab() {
         <KPICard
           label="Total POs"
           value={String(totalPOs)}
-          accent="var(--vyne-purple)"
+          accent="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           label="Pending Receipt"
@@ -968,7 +968,7 @@ function PurchaseOrdersTab() {
                     style={{
                       ...tdStyle,
                       fontWeight: 600,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {po.poNumber}
@@ -1108,7 +1108,7 @@ function VendorsTab() {
                   <td
                     style={{
                       ...tdStyle,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                       fontSize: 11,
                     }}
                   >
@@ -1402,7 +1402,7 @@ function ReceiptsTab() {
                     style={{
                       ...tdStyle,
                       fontWeight: 600,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {r.receiptNumber}
@@ -1553,7 +1553,7 @@ function BillsTab() {
                     style={{
                       ...tdStyle,
                       fontWeight: 600,
-                      color: "var(--vyne-purple)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
                     {b.billNumber}
@@ -1654,7 +1654,7 @@ function ReportsTab() {
         <KPICard
           label="Total Spend"
           value={fmt(totalSpend)}
-          accent="var(--vyne-purple)"
+          accent="var(--vyne-accent, var(--vyne-purple))"
         />
         <KPICard
           label="Top Vendor"
@@ -1736,7 +1736,7 @@ function ReportsTab() {
                       height: "100%",
                       width: `${(spend / maxCategorySpend) * 100}%`,
                       background:
-                        "linear-gradient(90deg, var(--vyne-purple), #8B68FF)",
+                        "linear-gradient(90deg, var(--vyne-accent, var(--vyne-purple)), #8B68FF)",
                       borderRadius: 4,
                       transition: "width 0.4s ease",
                     }}

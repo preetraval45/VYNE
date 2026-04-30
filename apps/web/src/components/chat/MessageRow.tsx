@@ -22,6 +22,8 @@ import type { MsgMessage } from "@/lib/api/client";
 import { UserAvatar } from "./UserAvatar";
 import { EmojiPicker } from "./EmojiPicker";
 import { FileAttachment } from "./FileAttachment";
+import { LinkPreviewCard, detectLinks } from "./LinkPreviews";
+import { MentionPreview, extractTaskMentions } from "./MentionPreview";
 import { useSavedStore } from "@/lib/stores/saved";
 import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
 import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
@@ -195,6 +197,26 @@ export function MessageRow({
     new Date(msg.createdAt).getTime() - new Date(prevMsg.createdAt).getTime() <
       300000;
 
+  // Long-press → reveal action toolbar on touch devices. We start a
+  // 450ms timer on touchstart and clear it on touchend/move/cancel. If
+  // the timer fires we set `hovering=true` and emit a small haptic.
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+  const onTouchStart = () => {
+    cancelLongPress();
+    longPressTimer.current = setTimeout(() => {
+      setHovering(true);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.(10);
+      }
+    }, 450);
+  };
+
   return (
     <article
       onMouseEnter={() => setHovering(true)}
@@ -202,6 +224,10 @@ export function MessageRow({
         setHovering(false);
         setEmojiOpen(false);
       }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={cancelLongPress}
+      onTouchMove={cancelLongPress}
+      onTouchCancel={cancelLongPress}
       style={{
         display: "flex",
         gap: 10,
@@ -230,7 +256,7 @@ export function MessageRow({
                 fontSize: 13,
                 fontWeight: 600,
                 color: isCurrentUser
-                  ? "var(--vyne-purple)"
+                  ? "var(--vyne-accent, var(--vyne-purple))"
                   : "var(--text-primary)",
               }}
             >
@@ -242,6 +268,29 @@ export function MessageRow({
           </div>
         )}
 
+        {msg.content && !editing && msg.content.startsWith("[!critical] ") && (
+          <div
+            role="status"
+            aria-label="Critical message"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              marginBottom: 6,
+              padding: "3px 8px",
+              borderRadius: 999,
+              background: "rgba(239, 68, 68, 0.10)",
+              border: "1px solid rgba(239, 68, 68, 0.45)",
+              color: "#EF4444",
+              fontSize: 10.5,
+              fontWeight: 700,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            🚨 Critical · sender requested read receipts
+          </div>
+        )}
         {msg.content && !editing && (
           <p
             style={{
@@ -250,17 +299,26 @@ export function MessageRow({
               lineHeight: 1.6,
               margin: 0,
               wordBreak: "break-word",
-              ...(isUserMentioned(msg.content, ["Preet", "You"])
+              ...(msg.content.startsWith("[!critical] ")
                 ? {
-                    paddingLeft: 8,
-                    borderLeft: "3px solid var(--vyne-purple)",
-                    background: "rgba(108, 71, 255, 0.04)",
+                    paddingLeft: 10,
+                    borderLeft: "3px solid #EF4444",
+                    background: "rgba(239, 68, 68, 0.04)",
                     borderRadius: "0 4px 4px 0",
                   }
-                : {}),
+                : isUserMentioned(msg.content, ["Preet", "You"])
+                  ? {
+                      paddingLeft: 8,
+                      borderLeft: "3px solid var(--vyne-accent, var(--vyne-purple))",
+                      background: "rgba(108, 71, 255, 0.04)",
+                      borderRadius: "0 4px 4px 0",
+                    }
+                  : {}),
             }}
           >
-            {renderMessageContent(msg.content)}
+            {renderMessageContent(
+              msg.content.replace(/^\[!critical\]\s*/, ""),
+            )}
             {msg.updatedAt && (
               <span
                 style={{
@@ -280,7 +338,7 @@ export function MessageRow({
         {editing && (
           <div
             style={{
-              border: "1px solid var(--vyne-purple)",
+              border: "1px solid var(--vyne-accent, var(--vyne-purple))",
               borderRadius: 8,
               padding: 6,
               background: "var(--content-secondary)",
@@ -349,7 +407,7 @@ export function MessageRow({
                   border: "none",
                   background:
                     draft.trim() && draft.trim() !== msg.content
-                      ? "var(--vyne-purple)"
+                      ? "var(--vyne-accent, var(--vyne-purple))"
                       : "var(--content-border)",
                   color: "#fff",
                   fontSize: 11,
@@ -389,7 +447,7 @@ export function MessageRow({
               marginTop: 3,
               fontSize: 10,
               color:
-                seenPeers > 0 ? "var(--vyne-purple)" : "var(--text-tertiary)",
+                seenPeers > 0 ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
               fontWeight: 500,
             }}
             title={
@@ -417,7 +475,7 @@ export function MessageRow({
             style={{
               marginTop: 6,
               padding: "8px 10px",
-              borderLeft: "3px solid var(--vyne-purple)",
+              borderLeft: "3px solid var(--vyne-accent, var(--vyne-purple))",
               background: "rgba(108, 71, 255, 0.06)",
               borderRadius: 6,
               fontSize: 12,
@@ -429,7 +487,7 @@ export function MessageRow({
               style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: "var(--vyne-purple)",
+                color: "var(--vyne-accent, var(--vyne-purple))",
                 textTransform: "uppercase",
                 letterSpacing: 0.5,
                 marginBottom: 6,
@@ -499,7 +557,7 @@ export function MessageRow({
             style={{
               marginTop: 6,
               padding: "6px 10px",
-              borderLeft: "3px solid var(--vyne-purple)",
+              borderLeft: "3px solid var(--vyne-accent, var(--vyne-purple))",
               background: "rgba(108, 71, 255, 0.06)",
               borderRadius: 6,
               fontSize: 11,
@@ -537,6 +595,23 @@ export function MessageRow({
           <FileAttachment attachments={msg.attachments} />
         )}
 
+        {/* @-mention preview cards — inline live status for tasks,
+            deals, contacts, and projects. */}
+        {msg.content &&
+          extractTaskMentions(msg.content).map((m) => (
+            <MentionPreview
+              key={`${m.kind}:${m.id}`}
+              kind={m.kind}
+              id={m.id}
+            />
+          ))}
+
+        {/* Inline link previews (PR / Linear / Figma) */}
+        {msg.content &&
+          detectLinks(msg.content).map((l) => (
+            <LinkPreviewCard key={l.url} link={l} />
+          ))}
+
         {/* Reactions */}
         {msg.reactions && msg.reactions.length > 0 && (
           <div
@@ -556,12 +631,12 @@ export function MessageRow({
                   fontSize: 12,
                   cursor: "pointer",
                   background: r.userReacted
-                    ? "rgba(6, 182, 212,0.1)"
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                     : "var(--content-secondary)",
                   border: r.userReacted
-                    ? "1px solid rgba(6, 182, 212,0.35)"
+                    ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)"
                     : "1px solid var(--content-border)",
-                  color: r.userReacted ? "#06B6D4" : "var(--text-secondary)",
+                  color: r.userReacted ? "var(--vyne-accent, #06B6D4)" : "var(--text-secondary)",
                 }}
               >
                 {r.emoji} <span style={{ fontWeight: 600 }}>{r.count}</span>
@@ -600,13 +675,13 @@ export function MessageRow({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              color: "#06B6D4",
+              color: "var(--vyne-accent, #06B6D4)",
               fontSize: 11,
               fontWeight: 500,
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background =
-                "rgba(6, 182, 212,0.07)";
+                "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.07)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -618,12 +693,13 @@ export function MessageRow({
         )}
       </div>
 
-      {/* Hover actions */}
+      {/* Hover actions — also visible on touch devices and when the
+          row contains focus, since hover doesn't fire on mobile. */}
       <AnimatePresence>
-        {hovering && (
+        {(hovering || isCurrentUser) && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: hovering ? 1 : 0.55, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.1 }}
             style={{
@@ -638,6 +714,9 @@ export function MessageRow({
               padding: "3px 4px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               zIndex: 10,
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.opacity = "1";
             }}
           >
             <div style={{ position: "relative" }}>
@@ -658,7 +737,7 @@ export function MessageRow({
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
                     "var(--content-secondary)";
-                  (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
@@ -693,7 +772,7 @@ export function MessageRow({
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "var(--content-secondary)";
-                (e.currentTarget as HTMLElement).style.color = "#06B6D4";
+                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
@@ -751,7 +830,7 @@ export function MessageRow({
                     ? "rgba(108, 71, 255, 0.12)"
                     : "transparent",
                   cursor: "pointer",
-                  color: translation ? "var(--vyne-purple)" : "var(--text-secondary)",
+                  color: translation ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -760,7 +839,7 @@ export function MessageRow({
                     (e.currentTarget as HTMLElement).style.background =
                       "var(--content-secondary)";
                     (e.currentTarget as HTMLElement).style.color =
-                      "var(--vyne-purple)";
+                      "var(--vyne-accent, var(--vyne-purple))";
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -832,7 +911,7 @@ export function MessageRow({
                   (e.currentTarget as HTMLElement).style.background =
                     "var(--content-secondary)";
                   (e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-purple)";
+                    "var(--vyne-accent, var(--vyne-purple))";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
