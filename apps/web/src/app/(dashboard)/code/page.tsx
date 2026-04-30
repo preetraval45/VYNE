@@ -6,7 +6,16 @@ import { useRouter } from "next/navigation";
 import { ExternalLink, RotateCcw, Undo2, Plus } from "lucide-react";
 import { codeApi } from "@/lib/api/client";
 import type { Deployment, PullRequest, Repository } from "@/types";
-import { MOCK_DEPLOYMENTS, MOCK_PRS, MOCK_REPOS } from "@/lib/fixtures/code";
+import {
+  MOCK_DEPLOYMENTS as _MOCK_DEPLOYMENTS,
+  MOCK_PRS as _MOCK_PRS,
+  MOCK_REPOS as _MOCK_REPOS,
+} from "@/lib/fixtures/code";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+const MOCK_DEPLOYMENTS = seedOrEmpty(_MOCK_DEPLOYMENTS);
+const MOCK_PRS = seedOrEmpty(_MOCK_PRS);
+const MOCK_REPOS = seedOrEmpty(_MOCK_REPOS);
 import {
   InlineCodeReview,
   type DiffFile,

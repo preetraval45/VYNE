@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { MOCK_EXPENSES, type Expense } from "@/lib/fixtures/expenses";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
 
 interface ExpensesState {
   expenses: Expense[];
@@ -16,7 +17,7 @@ interface ExpensesState {
 export const useExpensesStore = create<ExpensesState>()(
   persist(
     (set) => ({
-      expenses: MOCK_EXPENSES,
+      expenses: seedOrEmpty(MOCK_EXPENSES),
 
       setExpenses: (expenses) => set({ expenses }),
       addExpense: (e) => {

@@ -14,10 +14,17 @@ import {
 import { erpApi, type ERPJournalEntry } from "@/lib/api/client";
 import {
   MONTHS,
-  MOCK_MONTHLY,
-  MOCK_JOURNAL,
-  MOCK_ACCOUNTS,
+  MOCK_MONTHLY as _MOCK_MONTHLY,
+  MOCK_JOURNAL as _MOCK_JOURNAL,
+  MOCK_ACCOUNTS as _MOCK_ACCOUNTS,
 } from "@/lib/fixtures/finance";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+// Real signups see no monthly P&L / journal / accounts until they enter
+// their own. Demo session keeps the showcase numbers.
+const MOCK_MONTHLY = seedOrEmpty(_MOCK_MONTHLY);
+const MOCK_JOURNAL = seedOrEmpty(_MOCK_JOURNAL);
+const MOCK_ACCOUNTS = seedOrEmpty(_MOCK_ACCOUNTS);
 import { useFinanceStore } from "@/lib/stores/finance";
 import { ARAgingCard } from "@/components/finance/ARAgingCard";
 import { CashFlowSparkline } from "@/components/finance/CashFlowSparkline";
@@ -130,13 +137,17 @@ function BarChart({
 }
 
 // ─── P&L tab ──────────────────────────────────────────────────────
+const EMPTY_MONTH = { month: "", revenue: 0, expenses: 0 };
 function PLTab() {
-  const current = MOCK_MONTHLY[MOCK_MONTHLY.length - 1];
-  const prev = MOCK_MONTHLY[MOCK_MONTHLY.length - 2];
+  // Real signups have an empty MOCK_MONTHLY (no fixtures). Guard the
+  // last/second-to-last access so the prerender + first paint don't
+  // explode on undefined.
+  const current = MOCK_MONTHLY[MOCK_MONTHLY.length - 1] ?? EMPTY_MONTH;
+  const prev = MOCK_MONTHLY[MOCK_MONTHLY.length - 2] ?? EMPTY_MONTH;
   const profit = current.revenue - current.expenses;
   const prevProfit = prev.revenue - prev.expenses;
-  const profitDelta = ((profit - prevProfit) / prevProfit) * 100;
-  const margin = (profit / current.revenue) * 100;
+  const profitDelta = prevProfit !== 0 ? ((profit - prevProfit) / prevProfit) * 100 : 0;
+  const margin = current.revenue !== 0 ? (profit / current.revenue) * 100 : 0;
 
   const rows = [
     { label: "Revenue", value: current.revenue, bold: true, indent: 0 },
@@ -753,7 +764,7 @@ export default function FinancePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fallback = MOCK_MONTHLY[MOCK_MONTHLY.length - 1];
+  const fallback = MOCK_MONTHLY[MOCK_MONTHLY.length - 1] ?? EMPTY_MONTH;
   const currentMonth = liveSummary ?? fallback;
   const profit = currentMonth.revenue - currentMonth.expenses;
 

@@ -13,6 +13,7 @@ import {
   type TaskPriority,
   type TeamMember,
 } from "@/lib/fixtures/projects";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
 
 // Re-export types the pages need
 export type {
@@ -88,9 +89,9 @@ function now(): string {
 export const useProjectsStore = create<ProjectsState>()(
   persist(
     (set, get) => ({
-      projects: DEMO_PROJECT_DETAILS,
-      tasks: DEMO_TASKS,
-      teamMembers: TEAM_MEMBERS,
+      projects: seedOrEmpty(DEMO_PROJECT_DETAILS),
+      tasks: seedOrEmpty(DEMO_TASKS),
+      teamMembers: seedOrEmpty(TEAM_MEMBERS),
 
       // ── Project CRUD ──────────────────────────────────────────
       addProject: (project) =>

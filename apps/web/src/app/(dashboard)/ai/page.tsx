@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
-  INSIGHTS,
-  AGENT_RUNS,
+  INSIGHTS as _INSIGHTS,
+  AGENT_RUNS as _AGENT_RUNS,
   PRELOADED_RESULT,
   SUGGESTED_QUERIES,
   type InsightSeverity,
@@ -13,6 +13,10 @@ import {
   type QueryResult,
   type TraceStep,
 } from "@/lib/fixtures/ai";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+const INSIGHTS = seedOrEmpty(_INSIGHTS);
+const AGENT_RUNS = seedOrEmpty(_AGENT_RUNS);
 import { aiApi } from "@/lib/api/client";
 
 // ─── Helpers ──────────────────────────────────────────────────────

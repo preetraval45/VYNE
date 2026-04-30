@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ERPJournalEntry } from "@/lib/api/client";
 import { MOCK_JOURNAL } from "@/lib/fixtures/finance";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
 
 interface FinanceState {
   journalEntries: ERPJournalEntry[];
@@ -17,7 +18,7 @@ interface FinanceState {
 export const useFinanceStore = create<FinanceState>()(
   persist(
     (set) => ({
-      journalEntries: MOCK_JOURNAL,
+      journalEntries: seedOrEmpty(MOCK_JOURNAL),
 
       setJournalEntries: (journalEntries) => set({ journalEntries }),
       addJournalEntry: (entry) =>

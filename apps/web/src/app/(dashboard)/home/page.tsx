@@ -15,13 +15,21 @@ import {
   Download as DownloadIcon,
 } from "lucide-react";
 import {
-  STAT_CARDS,
-  RECENT_ACTIVITY,
-  SPRINT_BADGES,
-  FOCUS_TASKS,
-  AI_RECENT_QUERIES,
+  STAT_CARDS as _STAT_CARDS,
+  RECENT_ACTIVITY as _RECENT_ACTIVITY,
+  SPRINT_BADGES as _SPRINT_BADGES,
+  FOCUS_TASKS as _FOCUS_TASKS,
+  AI_RECENT_QUERIES as _AI_RECENT_QUERIES,
   QUICK_ACTIONS,
 } from "@/lib/fixtures/home";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+// Real signups see an empty dashboard; demo session keeps the fixtures.
+const STAT_CARDS = seedOrEmpty(_STAT_CARDS);
+const RECENT_ACTIVITY = seedOrEmpty(_RECENT_ACTIVITY);
+const SPRINT_BADGES = seedOrEmpty(_SPRINT_BADGES);
+const FOCUS_TASKS = seedOrEmpty(_FOCUS_TASKS);
+const AI_RECENT_QUERIES = seedOrEmpty(_AI_RECENT_QUERIES);
 import { VisuallyHidden } from "@/components/shared/VisuallyHidden";
 import { useAuthStore } from "@/lib/stores/auth";
 import { VyneLogo } from "@/components/brand/VyneLogo";

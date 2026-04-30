@@ -16,6 +16,7 @@ import {
   MOCK_BOMS,
   MOCK_WORK_ORDERS,
 } from "@/lib/fixtures/ops";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
 
 interface OpsState {
   products: ERPProduct[];
@@ -53,11 +54,11 @@ interface OpsState {
 export const useOpsStore = create<OpsState>()(
   persist(
     (set) => ({
-      products: MOCK_PRODUCTS,
-      orders: MOCK_ORDERS,
-      suppliers: MOCK_SUPPLIERS,
-      boms: MOCK_BOMS,
-      workOrders: MOCK_WORK_ORDERS,
+      products: seedOrEmpty(MOCK_PRODUCTS),
+      orders: seedOrEmpty(MOCK_ORDERS),
+      suppliers: seedOrEmpty(MOCK_SUPPLIERS),
+      boms: seedOrEmpty(MOCK_BOMS),
+      workOrders: seedOrEmpty(MOCK_WORK_ORDERS),
 
       setProducts: (products) => set({ products }),
       addProduct: (p) => set((s) => ({ products: [p, ...s.products] })),

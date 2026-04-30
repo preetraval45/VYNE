@@ -35,6 +35,7 @@ import {
   PASSWORD_RULES,
   validatePassword,
 } from "@/lib/auth/localAccounts";
+import { clearDemoSession } from "@/lib/stores/seedMode";
 
 interface ModuleOption {
   id: string;
@@ -208,6 +209,18 @@ export default function SignupPage() {
         throw new Error(data.error ?? "Could not create account");
       }
 
+      // Brand-new account → clear any leftover demo seed flag so this
+      // user lands on a clean workspace with no fake inventory.
+      clearDemoSession();
+      // Also wipe stores that may have been hydrated with fixtures
+      // during a prior demo browse on this device.
+      try {
+        ["vyne-crm", "vyne-ops", "vyne-finance", "vyne-expenses", "vyne-invoicing", "vyne-projects"].forEach(
+          (key) => localStorage.removeItem(key),
+        );
+      } catch {
+        /* storage disabled — best-effort */
+      }
       // Wire the new account into the auth store + persistent module list
       // so the sidebar and dashboard render only what was selected. The
       // HttpOnly auth cookie was set by the API itself.

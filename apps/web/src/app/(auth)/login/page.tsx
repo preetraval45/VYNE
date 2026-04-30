@@ -21,6 +21,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { cn } from "@/lib/utils";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 import type { User } from "@/types";
+import { clearDemoSession, markDemoSession } from "@/lib/stores/seedMode";
 
 const PREVIEW_MODULES = [
   { icon: MessageSquare, label: "Messaging", color: "var(--vyne-accent, #06B6D4)" },
@@ -47,6 +48,9 @@ export default function LoginPage() {
   const clearError = () => setError(null);
 
   async function enterDemo() {
+    // Flag this browser as a demo session so Zustand stores + dashboard
+    // pages seed their fixture data instead of starting empty.
+    markDemoSession();
     setUser({
       id: "demo",
       name: "Preet Raval",
@@ -94,6 +98,9 @@ export default function LoginPage() {
         setError(data.error ?? "Login failed. Please try again.");
         return;
       }
+      // Real login → make sure the demo seed flag is OFF so this user
+      // doesn't inherit the showcase fixtures from a prior demo browse.
+      clearDemoSession();
       setUser({
         id: data.user.id,
         email: data.user.email,

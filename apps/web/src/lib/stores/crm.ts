@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { INITIAL_DEALS, type Deal } from "@/lib/fixtures/crm";
 import { subscribe as rtSubscribe, isRealtimeEnabled } from "@/lib/realtime";
+import { seedOrEmpty, shouldSeedFixtures } from "@/lib/stores/seedMode";
 
 // CRM store now mirrors writes to /api/deals (Postgres via Prisma).
 // Pattern: optimistic local update first (fast UX), then server call
@@ -27,7 +28,7 @@ interface CRMState {
 export const useCRMStore = create<CRMState>()(
   persist(
     (set, get) => ({
-      deals: INITIAL_DEALS,
+      deals: seedOrEmpty(INITIAL_DEALS),
       hydrated: false,
 
       setDeals: (deals) => set({ deals, hydrated: true }),
@@ -78,9 +79,14 @@ export const useCRMStore = create<CRMState>()(
           if (Array.isArray(body.deals) && body.deals.length > 0) {
             set({ deals: body.deals as Deal[], hydrated: true });
           } else if (Array.isArray(body.deals)) {
-            // DB is empty — keep INITIAL_DEALS so the demo isn't blank,
-            // but mark hydrated so we don't keep retrying.
-            set({ hydrated: true });
+            // DB is empty. Demo session keeps INITIAL_DEALS so the
+            // showcase isn't blank; real signups stay empty so the
+            // workspace reflects only what they create themselves.
+            if (shouldSeedFixtures()) {
+              set({ deals: INITIAL_DEALS, hydrated: true });
+            } else {
+              set({ deals: [], hydrated: true });
+            }
           }
         } catch {
           // Server unreachable → stay on local cache. We'll retry on

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useFinanceStore } from "@/lib/stores/finance";
 import { MOCK_ACCOUNTS } from "@/lib/fixtures/finance";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
 import type { ERPJournalEntry } from "@/lib/api/client";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -658,13 +659,13 @@ interface InvoicingStore {
 export const useInvoicingStore = create<InvoicingStore>()(
   persist(
     (set) => ({
-      customers: INITIAL_CUSTOMERS,
-      invoices: INITIAL_INVOICES,
-      creditNotes: INITIAL_CREDIT_NOTES,
-      payments: INITIAL_PAYMENTS,
-      vendors: INITIAL_VENDORS,
-      bills: INITIAL_BILLS,
-      refunds: INITIAL_REFUNDS,
+      customers: seedOrEmpty(INITIAL_CUSTOMERS),
+      invoices: seedOrEmpty(INITIAL_INVOICES),
+      creditNotes: seedOrEmpty(INITIAL_CREDIT_NOTES),
+      payments: seedOrEmpty(INITIAL_PAYMENTS),
+      vendors: seedOrEmpty(INITIAL_VENDORS),
+      bills: seedOrEmpty(INITIAL_BILLS),
+      refunds: seedOrEmpty(INITIAL_REFUNDS),
 
       // ── Customers ──────────────────────────────────
       addCustomer: (data) =>

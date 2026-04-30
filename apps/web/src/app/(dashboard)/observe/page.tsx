@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from "react";
 import {
-  SERVICES,
-  REQUEST_BARS,
-  ERROR_BARS,
-  SLOWEST_ENDPOINTS,
-  DEPLOY_EVENTS,
-  CPU_USAGE,
-  MEM_USAGE,
-  DB_POOL,
-  BUSINESS_METRICS,
-  LOG_ENTRIES,
-  ACTIVE_ALERTS,
-  ALERT_HISTORY,
-  TRACE_SPANS,
+  SERVICES as _SERVICES,
+  REQUEST_BARS as _REQUEST_BARS,
+  ERROR_BARS as _ERROR_BARS,
+  SLOWEST_ENDPOINTS as _SLOWEST_ENDPOINTS,
+  DEPLOY_EVENTS as _DEPLOY_EVENTS,
+  CPU_USAGE as _CPU_USAGE,
+  MEM_USAGE as _MEM_USAGE,
+  DB_POOL as _DB_POOL,
+  BUSINESS_METRICS as _BUSINESS_METRICS,
+  LOG_ENTRIES as _LOG_ENTRIES,
+  ACTIVE_ALERTS as _ACTIVE_ALERTS,
+  ALERT_HISTORY as _ALERT_HISTORY,
+  TRACE_SPANS as _TRACE_SPANS,
   TOTAL_TRACE_MS,
   type ServiceStatus,
   type LogLevel,
@@ -23,6 +23,22 @@ import {
   type LogEntry,
   type AlertEntry,
 } from "@/lib/fixtures/observe";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+// Empty for real signups; demo session keeps the showcase metrics.
+const SERVICES = seedOrEmpty(_SERVICES);
+const REQUEST_BARS = seedOrEmpty(_REQUEST_BARS);
+const ERROR_BARS = seedOrEmpty(_ERROR_BARS);
+const SLOWEST_ENDPOINTS = seedOrEmpty(_SLOWEST_ENDPOINTS);
+const DEPLOY_EVENTS = seedOrEmpty(_DEPLOY_EVENTS);
+const CPU_USAGE = seedOrEmpty(_CPU_USAGE);
+const MEM_USAGE = seedOrEmpty(_MEM_USAGE);
+const DB_POOL = seedOrEmpty(_DB_POOL);
+const BUSINESS_METRICS = seedOrEmpty(_BUSINESS_METRICS);
+const LOG_ENTRIES = seedOrEmpty(_LOG_ENTRIES);
+const ACTIVE_ALERTS = seedOrEmpty(_ACTIVE_ALERTS);
+const ALERT_HISTORY = seedOrEmpty(_ALERT_HISTORY);
+const TRACE_SPANS = seedOrEmpty(_TRACE_SPANS);
 
 type TabId = "overview" | "metrics" | "logs" | "alerts" | "traces";
 type Environment = "Production" | "Staging" | "Dev";

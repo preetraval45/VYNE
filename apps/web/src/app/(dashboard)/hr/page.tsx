@@ -5,14 +5,20 @@ import { useRouter } from "next/navigation";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import {
-  EMPLOYEES,
-  INITIAL_LEAVE_REQUESTS,
-  MOCK_DOCS,
+  EMPLOYEES as _EMPLOYEES,
+  INITIAL_LEAVE_REQUESTS as _INITIAL_LEAVE_REQUESTS,
+  MOCK_DOCS as _MOCK_DOCS,
   type Department,
   type Employee,
   type LeaveRequest,
   type LeaveRequestStatus,
 } from "@/lib/fixtures/hr";
+import { seedOrEmpty } from "@/lib/stores/seedMode";
+
+// Real signups see no employees / leave / docs until they add their own.
+const EMPLOYEES = seedOrEmpty(_EMPLOYEES);
+const INITIAL_LEAVE_REQUESTS = seedOrEmpty(_INITIAL_LEAVE_REQUESTS);
+const MOCK_DOCS = seedOrEmpty(_MOCK_DOCS);
 
 type HRTab = "employees" | "leave" | "payroll" | "orgchart";
 
