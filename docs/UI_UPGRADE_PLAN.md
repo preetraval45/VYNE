@@ -660,6 +660,7 @@ Lets every user own the look of their workspace. CSS-variable single-source-of-t
 - [ ] **7.9** Wallpaper / sidebar texture — subtle gradient or pattern behind the sidebar so workspaces feel distinct (Notion-style). Off by default; opt-in from Settings → Appearance.
 - [x] **7.10** Theme presets — 8 curated bundles (VYNE / Linear / Notion / Salesforce / GitHub / Stripe / Solarized / Rose noir) in Settings → Theme presets. Each click sets `theme + accent + customHex + density` in one shot. → [GeneralSettings.tsx](apps/web/src/components/settings/GeneralSettings.tsx)
 - [ ] **7.11** Export / import theme JSON — copy a workspace theme to clipboard or import a teammate's; powers a future "themes gallery" community share.
+- [x] **7.12** Custom workspace background — added `customBgHex` to theme store. ThemeApplier rebinds the surface family (`--bg`, `--content-bg`, `--content-elevated`, `--content-border`, `--sidebar-bg`, `--input-bg`) and derives elevated/border tones by lightening or darkening the chosen hex based on perceived luminance, so light or dark backgrounds both look right. Sidebar accent picker now has Accent / Background tabs with 16 curated presets (8 dark + 8 light) and a hex input + native picker. → [theme.ts](apps/web/src/lib/stores/theme.ts), [ThemeApplier.tsx](apps/web/src/components/layout/ThemeApplier.tsx), [Sidebar.tsx](apps/web/src/components/layout/Sidebar.tsx)
 
 ### Phase 8 — Inline edit, bulk ops, presence (planned)
 

@@ -19,11 +19,53 @@ export function ThemeApplier() {
   const theme = useTheme();
   const accent = useThemeStore((s) => s.accent);
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
+  const customBgHex = useThemeStore((s) => s.customBgHex);
   const density = useThemeStore((s) => s.density);
 
   const applyTheme = useCallback((resolved: "light" | "dark") => {
     document.documentElement.dataset.theme = resolved;
   }, []);
+
+  // Apply custom workspace background. We rebind the surface token
+  // family so app shell, sidebar, cards, and inputs all shift together.
+  // Elevated / border variants are derived by lightening or darkening
+  // the chosen background depending on perceived luminance.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!customBgHex || !/^#?[0-9a-f]{6}$/i.test(customBgHex)) {
+      // Clear overrides so the default :root and [data-theme] tokens win.
+      for (const v of [
+        "--bg",
+        "--content-bg",
+        "--content-elevated",
+        "--content-border",
+        "--sidebar-bg",
+        "--input-bg",
+      ]) {
+        root.style.removeProperty(v);
+      }
+      return;
+    }
+    const bg = customBgHex.startsWith("#") ? customBgHex : `#${customBgHex}`;
+    const rgb = hexToRgb(bg);
+    if (!rgb) return;
+    // Perceived luminance — anything ≥ 140 is "light-ish"; on light bgs
+    // we darken for elevation, on dark bgs we lighten.
+    const lum = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+    const isLight = lum >= 140;
+    const elevated = isLight ? mixHex(bg, "#000000", 0.04) : mixHex(bg, "#FFFFFF", 0.06);
+    const border = isLight ? mixHex(bg, "#000000", 0.10) : mixHex(bg, "#FFFFFF", 0.12);
+    const sidebar = isLight ? mixHex(bg, "#000000", 0.02) : mixHex(bg, "#FFFFFF", 0.03);
+    const input = isLight ? mixHex(bg, "#000000", 0.03) : mixHex(bg, "#FFFFFF", 0.05);
+
+    root.style.setProperty("--bg", bg);
+    root.style.setProperty("--content-bg", bg);
+    root.style.setProperty("--content-elevated", elevated);
+    root.style.setProperty("--content-border", border);
+    root.style.setProperty("--sidebar-bg", sidebar);
+    root.style.setProperty("--input-bg", input);
+    document.body.style.background = bg;
+  }, [customBgHex]);
 
   // Apply density token family. Component CSS reads these so a single
   // toggle scales padding, row heights, and font sizes coherently.

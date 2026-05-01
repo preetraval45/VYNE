@@ -45,12 +45,17 @@ interface ThemeStore {
   /** Optional user-picked hex (#rrggbb). When present overrides the
    *  preset accent so the picker tool can express any colour. */
   customAccentHex: string | null;
+  /** Optional user-picked workspace background hex (#rrggbb). When set
+   *  ThemeApplier rebinds the surface family (--bg / --content-bg /
+   *  --content-elevated / --sidebar-bg) so the entire chrome shifts. */
+  customBgHex: string | null;
   /** Row height + padding scale. ThemeApplier maps this to `data-density`
    *  and a token family on `<html>`. */
   density: Density;
   setTheme: (theme: ThemeMode) => void;
   setAccent: (accent: AccentColor) => void;
   setCustomAccent: (hex: string | null) => void;
+  setCustomBg: (hex: string | null) => void;
   setDensity: (density: Density) => void;
   toggleTheme: () => void;
 }
@@ -61,6 +66,7 @@ export const useThemeStore = create<ThemeStore>()(
       theme: "dark",
       accent: "purple",
       customAccentHex: null,
+      customBgHex: null,
       density: "comfortable",
 
       setTheme: (theme: ThemeMode) => set({ theme }),
@@ -68,6 +74,7 @@ export const useThemeStore = create<ThemeStore>()(
       setAccent: (accent: AccentColor) =>
         set({ accent, customAccentHex: null }),
       setCustomAccent: (hex: string | null) => set({ customAccentHex: hex }),
+      setCustomBg: (hex: string | null) => set({ customBgHex: hex }),
       setDensity: (density: Density) => set({ density }),
 
       toggleTheme: () =>
@@ -80,18 +87,20 @@ export const useThemeStore = create<ThemeStore>()(
     }),
     {
       name: "vyne-theme",
-      version: 4,
+      version: 5,
       migrate: (persistedState) => {
         const prev = (persistedState ?? {}) as Partial<{
           theme: ThemeMode;
           accent: AccentColor;
           customAccentHex: string | null;
+          customBgHex: string | null;
           density: Density;
         }>;
         return {
           theme: prev.theme ?? "dark",
           accent: (prev.accent ?? "purple") as AccentColor,
           customAccentHex: prev.customAccentHex ?? null,
+          customBgHex: prev.customBgHex ?? null,
           density: (prev.density ?? "comfortable") as Density,
         };
       },
@@ -99,6 +108,7 @@ export const useThemeStore = create<ThemeStore>()(
         theme: state.theme,
         accent: state.accent,
         customAccentHex: state.customAccentHex,
+        customBgHex: state.customBgHex,
         density: state.density,
       }),
     },

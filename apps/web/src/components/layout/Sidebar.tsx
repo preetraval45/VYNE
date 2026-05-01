@@ -809,8 +809,12 @@ function AccentPicker({
   const setAccent = useThemeStore((s) => s.setAccent);
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
   const setCustomAccent = useThemeStore((s) => s.setCustomAccent);
+  const customBgHex = useThemeStore((s) => s.customBgHex);
+  const setCustomBg = useThemeStore((s) => s.setCustomBg);
 
+  const [tab, setTab] = useState<"accent" | "bg">("accent");
   const [hexDraft, setHexDraft] = useState(customAccentHex ?? "");
+  const [bgHexDraft, setBgHexDraft] = useState(customBgHex ?? "");
   const popupRef = useRef<HTMLDivElement | null>(null);
 
   // Render at fixed coordinates anchored to the trigger button so the
@@ -878,6 +882,60 @@ function AccentPicker({
         overflowY: "auto",
       }}
     >
+      {/* Tab switcher: accent vs background */}
+      <div
+        role="tablist"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 4,
+          background: "var(--content-elevated, rgba(255,255,255,0.04))",
+          borderRadius: 8,
+          padding: 3,
+          marginBottom: 12,
+        }}
+      >
+        {(["accent", "bg"] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              padding: "5px 8px",
+              borderRadius: 6,
+              border: "none",
+              cursor: "pointer",
+              background:
+                tab === id ? "var(--content-bg)" : "transparent",
+              color:
+                tab === id ? "var(--text-primary)" : "var(--text-tertiary)",
+              boxShadow:
+                tab === id
+                  ? "0 1px 2px rgba(0,0,0,0.06)"
+                  : "none",
+              transition: "all 0.12s",
+            }}
+          >
+            {id === "accent" ? "Accent" : "Background"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "bg" && (
+        <BgPickerPanel
+          customBgHex={customBgHex}
+          setCustomBg={setCustomBg}
+          bgHexDraft={bgHexDraft}
+          setBgHexDraft={setBgHexDraft}
+        />
+      )}
+
+      {tab === "accent" && (
+        <>
       {/* Quick presets row */}
       <div
         style={{
@@ -1105,7 +1163,219 @@ function AccentPicker({
           </button>
         )}
       </div>
+        </>
+      )}
     </div>
+  );
+}
+
+// ─── Background picker panel ──────────────────────────────────────
+const BG_PRESETS: { name: string; hex: string }[] = [
+  // Dark
+  { name: "Onyx", hex: "#0B0F14" },
+  { name: "Slate", hex: "#0F172A" },
+  { name: "Graphite", hex: "#1A1A1A" },
+  { name: "Midnight", hex: "#1E1B2E" },
+  { name: "Forest", hex: "#0E1F1A" },
+  { name: "Ocean", hex: "#0A1929" },
+  { name: "Plum", hex: "#1F1424" },
+  { name: "Espresso", hex: "#1C1410" },
+  // Light
+  { name: "Paper", hex: "#FFFFFF" },
+  { name: "Bone", hex: "#FAFAF7" },
+  { name: "Mist", hex: "#F4F6F8" },
+  { name: "Linen", hex: "#F5F1EA" },
+  { name: "Sky", hex: "#EEF2FF" },
+  { name: "Sage", hex: "#EEF5EE" },
+  { name: "Blush", hex: "#FBF1F2" },
+  { name: "Sand", hex: "#F4EFE6" },
+];
+
+function BgPickerPanel({
+  customBgHex,
+  setCustomBg,
+  bgHexDraft,
+  setBgHexDraft,
+}: Readonly<{
+  customBgHex: string | null;
+  setCustomBg: (hex: string | null) => void;
+  bgHexDraft: string;
+  setBgHexDraft: (v: string) => void;
+}>) {
+  const isActive = (hex: string) =>
+    customBgHex?.toLowerCase() === hex.toLowerCase();
+
+  const commitHex = (raw: string) => {
+    const v = raw.trim();
+    const m = /^#?([0-9a-f]{6})$/i.exec(v);
+    if (m) setCustomBg(`#${m[1].toLowerCase()}`);
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Background presets
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: 6,
+          marginBottom: 12,
+        }}
+      >
+        {BG_PRESETS.map((p) => {
+          const active = isActive(p.hex);
+          return (
+            <button
+              key={p.hex}
+              type="button"
+              title={`${p.name} · ${p.hex}`}
+              aria-label={`Use ${p.name} background`}
+              onClick={() => {
+                setCustomBg(p.hex);
+                setBgHexDraft(p.hex);
+              }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "stretch",
+                gap: 4,
+                padding: 0,
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              <span
+                style={{
+                  width: "100%",
+                  height: 28,
+                  borderRadius: 6,
+                  background: p.hex,
+                  border: active
+                    ? "2px solid var(--text-primary)"
+                    : "1px solid var(--content-border)",
+                  display: "block",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "var(--text-tertiary)",
+                  textAlign: "center",
+                }}
+              >
+                {p.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Custom background
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <label
+          title="Pick any background color"
+          aria-label="Pick custom background color"
+          style={{
+            position: "relative",
+            width: 28,
+            height: 28,
+            borderRadius: 6,
+            cursor: "pointer",
+            background:
+              customBgHex ??
+              "linear-gradient(135deg, #0B0F14, #FFFFFF)",
+            border: "1px solid var(--content-border)",
+            flexShrink: 0,
+          }}
+        >
+          <input
+            type="color"
+            value={customBgHex ?? "#0B0F14"}
+            onChange={(e) => {
+              setCustomBg(e.target.value);
+              setBgHexDraft(e.target.value);
+            }}
+            style={{
+              position: "absolute",
+              inset: 0,
+              opacity: 0,
+              cursor: "pointer",
+              width: "100%",
+              height: "100%",
+              border: 0,
+              padding: 0,
+            }}
+          />
+        </label>
+        <input
+          type="text"
+          value={bgHexDraft}
+          onChange={(e) => setBgHexDraft(e.target.value)}
+          onBlur={(e) => commitHex(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter")
+              commitHex((e.target as HTMLInputElement).value);
+          }}
+          placeholder="#0B0F14"
+          spellCheck={false}
+          style={{
+            flex: 1,
+            fontSize: 12,
+            fontFamily: "ui-monospace, SFMono-Regular, monospace",
+            padding: "5px 8px",
+            background: "var(--content-bg)",
+            border: "1px solid var(--content-border)",
+            borderRadius: 6,
+            color: "var(--text-primary)",
+            outline: "none",
+          }}
+        />
+        {customBgHex && (
+          <button
+            type="button"
+            onClick={() => {
+              setCustomBg(null);
+              setBgHexDraft("");
+            }}
+            title="Reset to theme default"
+            style={{
+              fontSize: 11,
+              padding: "5px 8px",
+              background: "transparent",
+              border: "1px solid var(--content-border)",
+              borderRadius: 6,
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            Reset
+          </button>
+        )}
+      </div>
+    </>
   );
 }
 
