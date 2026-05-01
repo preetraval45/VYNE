@@ -798,13 +798,57 @@ const COLOR_CHART: { name: string; shades: [string, string, string, string, stri
   { name: "Rose",    shades: ["#FDA4AF", "#FB7185", "#F43F5E", "#E11D48", "#BE123C"] },
 ];
 
-function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
+function AccentPicker({
+  anchorRef,
+  onClose,
+}: Readonly<{
+  anchorRef: React.RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+}>) {
   const accent = useThemeStore((s) => s.accent);
   const setAccent = useThemeStore((s) => s.setAccent);
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
   const setCustomAccent = useThemeStore((s) => s.setCustomAccent);
 
   const [hexDraft, setHexDraft] = useState(customAccentHex ?? "");
+  const popupRef = useRef<HTMLDivElement | null>(null);
+
+  // Render at fixed coordinates anchored to the trigger button so the
+  // popup escapes the sidebar's `overflow: hidden` and isn't clipped.
+  const [pos, setPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+
+  useEffect(() => {
+    function place() {
+      const btn = anchorRef.current;
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      const POPUP_W = 300;
+      const margin = 8;
+      // Center over the trigger, clamped to the viewport.
+      let left = r.left + r.width / 2 - POPUP_W / 2;
+      left = Math.max(margin, Math.min(left, window.innerWidth - POPUP_W - margin));
+      const top = r.top - margin; // popup's bottom anchored at this y
+      setPos({ top, left });
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [anchorRef]);
+
+  // Click-outside to dismiss.
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (popupRef.current?.contains(e.target as Node)) return;
+      if (anchorRef.current?.contains(e.target as Node)) return;
+      onClose();
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [anchorRef, onClose]);
 
   const isHexActive = (hex: string) =>
     customAccentHex?.toLowerCase() === hex.toLowerCase();
@@ -817,19 +861,19 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
 
   return (
     <div
+      ref={popupRef}
       style={{
-        position: "absolute",
-        bottom: "100%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        marginBottom: 8,
+        position: "fixed",
+        top: pos.top,
+        left: pos.left,
+        transform: "translateY(-100%)",
         background: "var(--content-bg)",
         border: "1px solid var(--content-border)",
         borderRadius: 12,
         padding: "12px",
         boxShadow: "var(--shadow-lg)",
-        zIndex: 100,
-        width: 280,
+        zIndex: 9999,
+        width: 300,
         maxHeight: "70vh",
         overflowY: "auto",
       }}
@@ -1325,6 +1369,7 @@ export function Sidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorBtnRef = useRef<HTMLButtonElement | null>(null);
 
   // Module visibility — hydrated from onboarding / settings localStorage
   const [enabledModules, setEnabledModules] = useState<Set<string> | null>(
@@ -2169,6 +2214,7 @@ export function Sidebar() {
             {/* Color picker button */}
             <div style={{ position: "relative" }}>
               <button
+                ref={colorBtnRef}
                 type="button"
                 onClick={() => setShowColorPicker(!showColorPicker)}
                 aria-label="Change accent color"
@@ -2215,7 +2261,10 @@ export function Sidebar() {
                 </svg>
               </button>
               {showColorPicker && (
-                <AccentPicker onClose={() => setShowColorPicker(false)} />
+                <AccentPicker
+                  anchorRef={colorBtnRef}
+                  onClose={() => setShowColorPicker(false)}
+                />
               )}
             </div>
 
