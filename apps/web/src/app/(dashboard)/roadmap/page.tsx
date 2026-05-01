@@ -9,6 +9,8 @@ import { KanbanView } from "@/components/roadmap/KanbanView";
 import { ListView } from "@/components/roadmap/ListView";
 import { FeatureRequestModal } from "@/components/roadmap/FeatureRequestModal";
 import { CompetitorTable } from "@/components/roadmap/CompetitorTable";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import {
   FEATURES,
   ALL_MODULES,
@@ -194,6 +196,27 @@ export default function RoadmapPage() {
       return moduleOk && statusOk && searchOk;
     });
   }, [moduleFilter, statusFilter, search]);
+
+  useRegisterCommands("roadmap", [
+    {
+      id: "rm-request",
+      label: "Submit feature request",
+      icon: <Plus size={14} />,
+      action: () => setShowRequestModal(true),
+    },
+    {
+      id: "rm-kanban",
+      label: "Switch to kanban view",
+      icon: <Columns3 size={14} />,
+      action: () => setView("kanban"),
+    },
+    {
+      id: "rm-timeline",
+      label: "Switch to timeline view",
+      icon: <Calendar size={14} />,
+      action: () => setView("timeline"),
+    },
+  ]);
 
   const handleFeatureRequest = () => {
     setShowRequestModal(false);
@@ -454,6 +477,16 @@ export default function RoadmapPage() {
           ))}
         </div>
       </div>
+
+      <PageDashboard
+        storageKey="roadmap"
+        kpis={[
+          { label: "Shipped", value: counts.shipped.toString() },
+          { label: "In progress", value: counts.inProgress.toString() },
+          { label: "Planned", value: counts.planned.toString() },
+          { label: "Under consideration", value: counts.consideration.toString() },
+        ]}
+      />
 
       {/* ── Active filter summary ───────────────────────────── */}
       {(moduleFilter !== "All" ||

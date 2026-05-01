@@ -13,6 +13,8 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 interface PlaybookStep {
   id: string;
@@ -139,6 +141,21 @@ export default function PlaybooksPage() {
 
   const totalActive = playbooks.filter((p) => p.status === "active").length;
   const totalRuns = playbooks.reduce((s, p) => s + p.runsActive, 0);
+  const totalRunsAll = playbooks.reduce((s, p) => s + p.runsTotal, 0);
+  const avgConversion = playbooks.length > 0
+    ? Math.round(
+        playbooks.reduce((s, p) => s + p.conversionRate, 0) / playbooks.length,
+      )
+    : 0;
+
+  useRegisterCommands("playbooks", [
+    {
+      id: "pb-toggle",
+      label: selected.status === "active" ? "Pause selected playbook" : "Activate selected playbook",
+      icon: selected.status === "active" ? <Pause size={14} /> : <Play size={14} />,
+      action: () => toggleStatus(selected.id),
+    },
+  ]);
 
   return (
     <div
@@ -183,6 +200,16 @@ export default function PlaybooksPage() {
           onboarding journeys. {totalActive} active · {totalRuns} in flight.
         </p>
       </header>
+
+      <PageDashboard
+        storageKey="playbooks"
+        kpis={[
+          { label: "Active", value: totalActive.toString(), hint: `${playbooks.length} total` },
+          { label: "In flight", value: totalRuns.toString() },
+          { label: "Total runs", value: totalRunsAll.toLocaleString() },
+          { label: "Avg conversion", value: `${avgConversion}%` },
+        ]}
+      />
 
       <div
         className="two-pane-layout"

@@ -2736,3 +2736,187 @@ button[aria-busy="true"]::before,
     min-height: 100dvh !important;
   }
 }
+
+/* ─── Hover row toolbar ────────────────────────────────────────────
+ * Wrap a list row in `.row-hover-target` (with position: relative) and
+ * drop a <HoverRowToolbar /> inside. The toolbar fades in on row hover
+ * or keyboard focus. Touch devices keep the toolbar visible via
+ * data-always-visible="true" set by the component prop. */
+.row-hover-target {
+  position: relative;
+}
+
+.row-hover-target:hover .hover-row-toolbar,
+.row-hover-target:focus-within .hover-row-toolbar,
+.hover-row-toolbar[data-always-visible="true"] {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+@media (hover: none) {
+  .hover-row-toolbar {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
+/* ─── Phase 6.1 mobile parity overrides ─────────────────────────────
+ * Tighten paddings, allow overflow scroll on dashboards, and stack
+ * grid layouts that PageDashboard / dunning / aging buckets emit when
+ * they hit a phone-width viewport. Targets ≤640px so tablet stays mid-tier. */
+@media (max-width: 640px) {
+  /* PageDashboard: charts stack, KPI tiles compress to 2-col grid */
+  [aria-label="Page dashboard"] {
+    padding: 12px 14px 14px !important;
+  }
+  [aria-label="Page dashboard"] > div:nth-child(2) {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  [aria-label="Page dashboard"] > div:nth-child(3) {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Bulk actions bar — sit flush with bottom on mobile, drop max-width */
+  [role="toolbar"][aria-label="Bulk actions"] {
+    max-width: calc(100vw - 24px) !important;
+    bottom: 12px !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* Hover row toolbar — drop the raised background on mobile so
+   * inline edit/archive don't overlap row content. */
+  .row-hover-target {
+    padding-bottom: 36px;
+  }
+  .hover-row-toolbar {
+    position: static !important;
+    transform: none !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  /* Workflow graph + service map — let SVGs scroll horizontally without
+   * forcing the parent into overflow:auto everywhere */
+  [aria-label="Service map"] svg,
+  [aria-label="Auto-discovered service topology"] {
+    min-width: 540px;
+  }
+
+  /* Aging buckets — tighten the tile padding so ≥4 fit on a phone */
+  [aria-label="Aging buckets"] > div:last-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* Funnel — collapse the fixed 168px label gutter to inline */
+  [aria-label="Conversion funnel"] > div > div {
+    flex-wrap: wrap !important;
+  }
+  [aria-label="Conversion funnel"] > div > div > div:first-child {
+    width: 100% !important;
+    margin-bottom: 4px;
+  }
+
+  /* Gantt swimlane — narrow the left label column on small screens */
+  [aria-label="Timeline gantt"] header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* ─── Phase 6.6: dashboard skeleton shimmer ─────────────────────────
+ * Transform-only sweep — GPU compositor, no paint/layout per frame.
+ * The pseudo-element is sized 240px wide and translated across the
+ * tile, which is faster and smoother than animating background-position. */
+[role="status"][aria-busy="true"] > div {
+  position: relative;
+  overflow: hidden;
+}
+[role="status"][aria-busy="true"] > div::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 240px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: vyne-shimmer 1.4s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes vyne-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(calc(100vw + 240px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [role="status"][aria-busy="true"] > div::after {
+    animation: none;
+  }
+}
+
+/* ─── Phase 6.7: a11y focus rings on Phase 4-5 components ───────────
+ * Inline-styled buttons in the dashboard family don't pick up the
+ * design-system :focus-visible because they bypass tailwind utilities.
+ * Backstop here so keyboard users see a 2px ring on every interactive
+ * surface regardless of how the component was authored. */
+.vyne-kpi-tile:focus-visible,
+[aria-label="Saved views"] button:focus-visible,
+[aria-label="AI deal coach"] a:focus-visible,
+[aria-label="AI deal coach"] button:focus-visible,
+[aria-label="AI close assistant"] a:focus-visible,
+[aria-label="AI close assistant"] button:focus-visible,
+[aria-label="AI sprint planner"] a:focus-visible,
+[aria-label="AI sprint planner"] button:focus-visible,
+[aria-label="AI dunning ladder"] a:focus-visible,
+[aria-label="AI dunning ladder"] button:focus-visible,
+[aria-label="AI incident commander"] a:focus-visible,
+[aria-label="AI incident commander"] button:focus-visible,
+[aria-label="Page dashboard"] button:focus-visible,
+[aria-label="Page dashboard"] select:focus-visible,
+.hover-row-toolbar button:focus-visible,
+[role="toolbar"][aria-label="Bulk actions"] button:focus-visible {
+  outline: 2px solid var(--vyne-accent, var(--vyne-purple)) !important;
+  outline-offset: 2px !important;
+  border-radius: 7px;
+}
+
+/* Honor prefers-reduced-motion across new components */
+@media (prefers-reduced-motion: reduce) {
+  [aria-label="Page dashboard"] *,
+  [aria-label="AI deal coach"] *,
+  [aria-label="AI close assistant"] *,
+  [aria-label="AI sprint planner"] *,
+  [aria-label="AI dunning ladder"] *,
+  [aria-label="AI incident commander"] *,
+  [aria-label="Aging buckets"] *,
+  [aria-label="Conversion funnel"] *,
+  [aria-label="Service map"] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ─── Touch-target fix for icon-only buttons (24/22/26 px shells) ──── */
+@media (pointer: coarse) {
+  button[aria-label][style*="width: 22px"],
+  button[aria-label][style*="width: 24px"],
+  button[aria-label][style*="width: 26px"] {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}

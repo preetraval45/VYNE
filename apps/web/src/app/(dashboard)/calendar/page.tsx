@@ -20,6 +20,8 @@ import {
 } from "@/lib/stores/calendar";
 import { useCallStore } from "@/lib/stores/call";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 type View = "month" | "week" | "day";
 
@@ -75,6 +77,45 @@ export default function CalendarPage() {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [scheduleSeedDate, setScheduleSeedDate] = useState<Date | undefined>();
   const [detailEvent, setDetailEvent] = useState<CalendarEvent | null>(null);
+
+  const today = new Date();
+  const eventsToday = events.filter((e) => isSameDay(new Date(e.startsAt), today));
+  const eventsThisWeek = events.filter((e) => {
+    const t = new Date(e.startsAt).getTime();
+    return Math.abs(t - today.getTime()) < 7 * 86400000;
+  });
+  const meetingsToday = eventsToday.filter((e) => e.type === "meeting").length;
+  const focusBlocksToday = eventsToday.filter((e) => e.type === "focus").length;
+
+  useRegisterCommands("calendar", [
+    {
+      id: "cal-new",
+      label: "Schedule meeting",
+      icon: <Plus size={14} />,
+      action: () => setScheduleOpen(true),
+    },
+    {
+      id: "cal-month",
+      label: "Month view",
+      icon: <CalendarIcon size={14} />,
+      action: () => setView("month"),
+    },
+    {
+      id: "cal-week",
+      label: "Week view",
+      icon: <CalendarIcon size={14} />,
+      action: () => setView("week"),
+    },
+    {
+      id: "cal-today",
+      label: "Jump to today",
+      icon: <Clock size={14} />,
+      action: () => {
+        setCursor(new Date());
+        setSelectedDate(new Date());
+      },
+    },
+  ]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
@@ -302,6 +343,16 @@ export default function CalendarPage() {
             <Plus size={13} /> Schedule
           </button>
         </header>
+
+        <PageDashboard
+          storageKey="calendar"
+          kpis={[
+            { label: "Today", value: eventsToday.length.toString(), hint: `${meetingsToday} meeting${meetingsToday === 1 ? "" : "s"}` },
+            { label: "This week", value: eventsThisWeek.length.toString() },
+            { label: "Focus blocks", value: focusBlocksToday.toString() },
+            { label: "Total events", value: events.length.toString() },
+          ]}
+        />
 
         {/* Calendar body */}
         <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>

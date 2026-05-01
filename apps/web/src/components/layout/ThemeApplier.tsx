@@ -19,10 +19,45 @@ export function ThemeApplier() {
   const theme = useTheme();
   const accent = useThemeStore((s) => s.accent);
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
+  const density = useThemeStore((s) => s.density);
 
   const applyTheme = useCallback((resolved: "light" | "dark") => {
     document.documentElement.dataset.theme = resolved;
   }, []);
+
+  // Apply density token family. Component CSS reads these so a single
+  // toggle scales padding, row heights, and font sizes coherently.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.density = density;
+    const tokens =
+      density === "compact"
+        ? {
+            "--density-row-h": "32px",
+            "--density-pad-card": "10px 12px",
+            "--density-pad-row": "6px 10px",
+            "--density-gap": "6px",
+            "--density-font": "12.5px",
+          }
+        : density === "spacious"
+          ? {
+              "--density-row-h": "52px",
+              "--density-pad-card": "20px 22px",
+              "--density-pad-row": "14px 18px",
+              "--density-gap": "14px",
+              "--density-font": "14.5px",
+            }
+          : {
+              "--density-row-h": "40px",
+              "--density-pad-card": "14px 16px",
+              "--density-pad-row": "10px 14px",
+              "--density-gap": "10px",
+              "--density-font": "13.5px",
+            };
+    for (const [k, v] of Object.entries(tokens)) {
+      root.style.setProperty(k, v);
+    }
+  }, [density]);
 
   // Apply accent color as CSS variables. If the user has set a custom
   // hex via the picker tool we derive light/dark by lightening/darkening

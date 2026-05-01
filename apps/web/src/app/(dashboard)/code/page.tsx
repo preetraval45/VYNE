@@ -26,6 +26,8 @@ import { EnvMatrix } from "@/components/code/EnvMatrix";
 import { computeDora } from "@/lib/dora";
 import { haptics } from "@/lib/haptics";
 import toast from "react-hot-toast";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function timeAgo(iso: string) {
@@ -1672,6 +1674,50 @@ export default function CodePage() {
   }
 
   const openPRs = prs.filter((p) => p.state === "open").length;
+  const successDeploys = deployments.filter((d) => d.status === "success").length;
+  const failedDeploys = deployments.filter((d) => d.status === "failed").length;
+  const inProgressDeploys = deployments.filter((d) => d.status === "in_progress").length;
+  const buildSuccessRate = deployments.length > 0
+    ? Math.round((successDeploys / deployments.length) * 100)
+    : 0;
+  const mergedPRs = prs.filter((p) => p.state === "merged").length;
+  const closedPRs = prs.filter((p) => p.state === "closed").length;
+
+  // 14-day deploy frequency sparkline
+  const deploySparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const d of deployments) {
+      const t = new Date(d.startedAt).getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += 1;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("code", [
+    {
+      id: "code-new-deploy",
+      label: "New deploy",
+      icon: <Plus size={14} />,
+      action: () => router.push("/ai/chat?prompt=" + encodeURIComponent("Trigger a new deploy of ")),
+    },
+    {
+      id: "code-deployments",
+      label: "View deployments",
+      icon: <RotateCcw size={14} />,
+      action: () => setTab("deployments"),
+    },
+    {
+      id: "code-prs",
+      label: "View pull requests",
+      icon: <Undo2 size={14} />,
+      action: () => setTab("prs"),
+      keywords: "merge review",
+    },
+  ]);
 
   return (
     <div
@@ -1795,6 +1841,33 @@ export default function CodePage() {
           </button>
         </div>
       </div>
+
+      {/* Shared <PageDashboard /> */}
+      <PageDashboard
+        storageKey="code"
+        kpis={[
+          {
+            label: "Deploys",
+            value: deployments.length.toString(),
+            sparkline: deploySparkline,
+            hint: `${inProgressDeploys} in flight`,
+          },
+          {
+            label: "Build success",
+            value: `${buildSuccessRate}%`,
+            hint: `${successDeploys} ok · ${failedDeploys} failed`,
+          },
+          {
+            label: "Open PRs",
+            value: openPRs.toString(),
+            hint: `${mergedPRs} merged · ${closedPRs} closed`,
+          },
+          {
+            label: "Repos",
+            value: repos.length.toString(),
+          },
+        ]}
+      />
 
       {/* Tabs */}
       <div

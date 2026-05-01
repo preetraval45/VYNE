@@ -12,6 +12,8 @@ import {
   MessageCircle,
   Mail,
 } from "lucide-react";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 interface HelpArticle {
   slug: string;
@@ -146,6 +148,28 @@ export default function HelpCentrePage() {
     }
     return Array.from(map.entries());
   }, [filtered]);
+
+  const totalCategories = new Set(ARTICLES.map((a) => a.category)).size;
+
+  useRegisterCommands("help", [
+    {
+      id: "help-search",
+      label: "Search help articles",
+      icon: <Search size={14} />,
+      action: () => {
+        const input = document.querySelector<HTMLInputElement>(
+          'input[placeholder*="Search"]',
+        );
+        input?.focus();
+      },
+    },
+    {
+      id: "help-contact",
+      label: "Contact support",
+      icon: <Mail size={14} />,
+      action: () => window.open("mailto:support@vyne.app"),
+    },
+  ]);
 
   if (selected) {
     return (
@@ -296,6 +320,17 @@ export default function HelpCentrePage() {
         >
           Search articles or ask Vyne AI — we&apos;ll point you at the right one.
         </p>
+
+        <div style={{ marginBottom: 22, marginLeft: -32, marginRight: -32 }}>
+          <PageDashboard
+            storageKey="help"
+            kpis={[
+              { label: "Articles", value: ARTICLES.length.toString() },
+              { label: "Categories", value: totalCategories.toString() },
+              { label: "Filtered", value: filtered.length.toString(), hint: query ? `for "${query}"` : "showing all" },
+            ]}
+          />
+        </div>
 
         <div
           style={{

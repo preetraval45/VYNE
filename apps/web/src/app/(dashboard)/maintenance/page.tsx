@@ -17,6 +17,8 @@ import {
   Settings2,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Types
@@ -1794,7 +1796,34 @@ export default function MaintenancePage() {
   const operationalCount = MOCK_EQUIPMENT.filter(
     (eq) => eq.status === "Operational",
   ).length;
-  const uptimePercent = Math.round((operationalCount / totalEquipment) * 100);
+  const uptimePercent = totalEquipment > 0
+    ? Math.round((operationalCount / totalEquipment) * 100)
+    : 0;
+  const openWOs = MOCK_WORK_ORDERS.filter(
+    (wo) => wo.status === "Scheduled" || wo.status === "On Hold",
+  ).length;
+
+  useRegisterCommands("maintenance", [
+    {
+      id: "mtn-equipment",
+      label: "View equipment",
+      icon: <Settings2 size={14} />,
+      action: () => setActiveTab("equipment"),
+    },
+    {
+      id: "mtn-requests",
+      label: "View requests",
+      icon: <ClipboardList size={14} />,
+      action: () => setActiveTab("requests"),
+    },
+    {
+      id: "mtn-overdue",
+      label: "Overdue tasks",
+      icon: <AlertTriangle size={14} />,
+      action: () => setActiveTab("requests"),
+      keywords: "late escalation",
+    },
+  ]);
 
   return (
     <div className="flex flex-col h-full">
@@ -1830,42 +1859,19 @@ export default function MaintenancePage() {
         </div>
       </header>
 
+      <PageDashboard
+        storageKey="maintenance"
+        kpis={[
+          { label: "Equipment", value: totalEquipment.toString(), hint: `${operationalCount} operational` },
+          { label: "Active requests", value: activeRequests.toString() },
+          { label: "Overdue", value: overdueTasks.toString(), goodWhenUp: false },
+          { label: "Open WOs", value: openWOs.toString() },
+          { label: "Uptime", value: `${uptimePercent}%` },
+        ]}
+      />
+
       {/* ─── Content ─────────────────────────────────── */}
       <div className="flex-1 overflow-auto content-scroll px-6 py-6">
-        {/* ── Summary Dashboard ─────────────────────── */}
-        <div
-          style={{
-            display: "flex",
-            gap: 16,
-            marginBottom: 20,
-            flexWrap: "wrap",
-          }}
-        >
-          <KPICard
-            label="Total Equipment"
-            value={totalEquipment}
-            icon={<Settings2 size={20} />}
-            accent="var(--vyne-accent, #06B6D4)"
-          />
-          <KPICard
-            label="Active Requests"
-            value={activeRequests}
-            icon={<ClipboardList size={20} />}
-            accent="#3B82F6"
-          />
-          <KPICard
-            label="Overdue Tasks"
-            value={overdueTasks}
-            icon={<AlertTriangle size={20} />}
-            accent="#EF4444"
-          />
-          <KPICard
-            label="Uptime %"
-            value={`${uptimePercent}%`}
-            icon={<CheckCircle2 size={20} />}
-            accent="#22C55E"
-          />
-        </div>
 
         {/* Recent Activity Feed */}
         <div style={{ marginBottom: 24 }}>

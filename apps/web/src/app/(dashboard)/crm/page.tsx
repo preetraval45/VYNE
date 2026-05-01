@@ -35,6 +35,13 @@ import {
   useDetailParam,
 } from "@/components/shared/DetailPanel";
 import { EditableCell } from "@/components/shared/EditableCell";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Sparkles, Download, BarChart3 } from "lucide-react";
+import { DealCoachCard } from "@/components/crm/DealCoachCard";
+import { SavedViewsBar } from "@/components/shared/SavedViewsBar";
+import { useSavedViews } from "@/hooks/useSavedViews";
 
 // ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
@@ -195,6 +202,19 @@ function PipelineTab({
       {STAGES.map((stage) => {
         const stageDeals = deals.filter((d) => d.stage === stage);
         const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
+        // Weighted total = sum(value × probability/100). Won/Lost short-circuit
+        // to 100/0 so columns at the ends still match raw totals when expected.
+        const stageWeighted = stageDeals.reduce((s, d) => {
+          const prob = stage === "Won" ? 100 : stage === "Lost" ? 0 : d.probability;
+          return s + d.value * (prob / 100);
+        }, 0);
+        // % of overall pipeline (excludes Lost) so users see column importance.
+        const overallPipeline = deals
+          .filter((d) => d.stage !== "Lost")
+          .reduce((s, d) => s + d.value, 0);
+        const sharePct = overallPipeline > 0 && stage !== "Lost"
+          ? Math.round((stageTotal / overallPipeline) * 100)
+          : 0;
 
         return (
           <div
@@ -234,6 +254,49 @@ function PipelineTab({
               >
                 {fmt(stageTotal)}
               </div>
+              {/* Weighted line: value × probability — what actually rolls into forecast */}
+              {stage !== "Lost" && stageDeals.length > 0 && (
+                <div
+                  style={{
+                    fontSize: 10.5,
+                    color: "var(--text-tertiary)",
+                    fontVariantNumeric: "tabular-nums",
+                    marginTop: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <span>≈ {fmt(stageWeighted)} weighted</span>
+                  {sharePct > 0 && (
+                    <>
+                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span>{sharePct}% of pipeline</span>
+                    </>
+                  )}
+                </div>
+              )}
+              {/* Share-of-pipeline bar (omit on Lost) */}
+              {stage !== "Lost" && stageDeals.length > 0 && (
+                <div
+                  style={{
+                    height: 3,
+                    borderRadius: 999,
+                    background: "var(--content-secondary)",
+                    overflow: "hidden",
+                    marginTop: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${Math.min(100, sharePct)}%`,
+                      height: "100%",
+                      background: "var(--vyne-accent, var(--vyne-purple))",
+                      transition: "width 0.4s var(--ease-out-quart, ease-out)",
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Deal cards */}
@@ -917,6 +980,90 @@ function CRMPageInner() {
     (d) => d.stage !== "Won" && d.stage !== "Lost",
   ).length;
 
+  const dash = usePageDashboard("crm", "30d");
+
+  // Saved views — URL-shareable filter presets for the deals table.
+  interface CrmFilters extends Record<string, unknown> {
+    stage?: string;
+    minValue?: number;
+    idleDays?: number;
+  }
+  const views = useSavedViews<CrmFilters>({
+    storageKey: "crm-deals",
+    defaultFilters: {},
+    builtinViews: [
+      { id: "stalling", name: "Stalling 14d+", filters: { idleDays: 14 }, pinned: true },
+      { id: "negotiation", name: "Negotiation", filters: { stage: "Negotiation" } },
+      { id: "high-value", name: "$50k+", filters: { minValue: 50000 } },
+    ],
+  });
+
+  // ─── Real KPIs computed from the deals store ───────────────────
+  const wonDeals = deals.filter((d) => d.stage === "Won");
+  const lostDeals = deals.filter((d) => d.stage === "Lost");
+  const activeDeals = deals.filter((d) => d.stage !== "Won" && d.stage !== "Lost");
+  const weightedForecast = activeDeals.reduce(
+    (s, d) => s + d.value * (d.probability / 100),
+    0,
+  );
+  const wonValueMTD = wonDeals.reduce((s, d) => s + d.value, 0);
+  const winRate = wonDeals.length + lostDeals.length > 0
+    ? Math.round((wonDeals.length / (wonDeals.length + lostDeals.length)) * 100)
+    : 0;
+
+  // 14-day sparkline of weighted forecast based on lastActivity bucketing
+  const forecastSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const d of deals) {
+      if (d.stage === "Won" || d.stage === "Lost") continue;
+      const t = new Date(d.lastActivity).getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += d.value * (d.probability / 100);
+    }
+    // Cumulative so the line trends meaningfully
+    let acc = 0;
+    return buckets.map((v) => (acc += v));
+  })();
+
+  // Page-scoped Cmd+K commands
+  useRegisterCommands("crm", [
+    {
+      id: "crm-new-deal",
+      label: "New deal",
+      icon: <Plus size={16} />,
+      action: () => router.push("/crm/deals/new"),
+      keywords: "create add opportunity",
+    },
+    {
+      id: "crm-ai-coach",
+      label: "AI deal coach for stalled deals",
+      description: "Suggest next moves on idle deals",
+      icon: <Sparkles size={16} />,
+      action: () => router.push("/ai?prompt=Coach%20me%20on%20stalled%20deals"),
+      badge: "AI",
+    },
+    {
+      id: "crm-forecast",
+      label: "Open forecasting view",
+      icon: <BarChart3 size={16} />,
+      action: () => setTab("forecasting"),
+    },
+    {
+      id: "crm-export",
+      label: "Export pipeline as CSV",
+      icon: <Download size={16} />,
+      action: () => {
+        const link = document.querySelector<HTMLButtonElement>(
+          "[data-export-button]",
+        );
+        link?.click();
+      },
+    },
+  ]);
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <DemoDataBanner
@@ -939,6 +1086,11 @@ function CRMPageInner() {
             <ExportButton
               data={deals as unknown as Record<string, unknown>[]}
               filename="vyne-deals"
+              audit={{
+                noun: "crm-deals",
+                viewName: views.activeView?.name ?? null,
+                filters: views.filters,
+              }}
               columns={[
                 { key: "company", header: "Company" },
                 { key: "contactName", header: "Contact" },
@@ -957,6 +1109,40 @@ function CRMPageInner() {
           </>
         }
       />
+
+      <SavedViewsBar store={views} noun="deal" />
+
+      <PageDashboard
+        storageKey="crm"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "Pipeline value",
+            value: fmt(totalPipeline),
+            sparkline: forecastSparkline,
+            hint: `${activeCount} active`,
+          },
+          {
+            label: "Weighted forecast",
+            value: fmt(weightedForecast),
+            sparkline: forecastSparkline,
+            hint: "value × probability",
+          },
+          {
+            label: "Won (revenue)",
+            value: fmt(wonValueMTD),
+            hint: `${wonDeals.length} deal${wonDeals.length === 1 ? "" : "s"}`,
+          },
+          {
+            label: "Win rate",
+            value: `${winRate}%`,
+            hint: `${wonDeals.length} won · ${lostDeals.length} lost`,
+            goodWhenUp: true,
+          },
+        ]}
+      />
+
       <div
         className="shrink-0"
         style={{
@@ -1003,11 +1189,14 @@ function CRMPageInner() {
         ) : (
           <>
             {tab === "pipeline" && (
-              <PipelineTab
-                deals={deals}
-                onDealClick={openDeal}
-                onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
-              />
+              <>
+                <DealCoachCard />
+                <PipelineTab
+                  deals={deals}
+                  onDealClick={openDeal}
+                  onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
+                />
+              </>
             )}
             {tab === "table" && (
               <DealsTableTab

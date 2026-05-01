@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi } from "@/lib/api/client";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus, Truck, FileText } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────
 type PurchaseTab =
@@ -1882,6 +1885,36 @@ export default function PurchasePage() {
       .catch(() => {});
   }, []);
 
+  const openPOs = MOCK_POS.filter(
+    (p) => p.status === "Draft" || p.status === "Sent" || p.status === "Confirmed",
+  ).length;
+  const totalPOValue = MOCK_POS.reduce((s, p) => s + p.amount, 0);
+  const activeVendors = MOCK_VENDORS.filter((v) => v.status === "Active").length;
+  const unpaidBills = MOCK_BILLS.filter(
+    (b) => b.status === "Draft" || b.status === "Overdue",
+  ).length;
+
+  useRegisterCommands("purchase", [
+    {
+      id: "po-new",
+      label: "New purchase order",
+      icon: <Plus size={14} />,
+      action: () => setActiveTab("orders"),
+    },
+    {
+      id: "po-vendors",
+      label: "View vendors",
+      icon: <Truck size={14} />,
+      action: () => setActiveTab("vendors"),
+    },
+    {
+      id: "po-bills",
+      label: "Open bills",
+      icon: <FileText size={14} />,
+      action: () => setActiveTab("bills"),
+    },
+  ]);
+
   function renderTab() {
     switch (activeTab) {
       case "orders":
@@ -1939,6 +1972,18 @@ export default function PurchasePage() {
             Manage purchase orders, vendors, products, receipts and bills
           </p>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 20, marginLeft: -24, marginRight: -24 }}>
+        <PageDashboard
+          storageKey="purchase"
+          kpis={[
+            { label: "Open POs", value: openPOs.toString(), hint: `${MOCK_POS.length} total` },
+            { label: "PO value", value: `$${(totalPOValue / 1000).toFixed(1)}k` },
+            { label: "Active vendors", value: activeVendors.toString() },
+            { label: "Unpaid bills", value: unpaidBills.toString(), goodWhenUp: false },
+          ]}
+        />
       </div>
 
       {/* Tab Bar */}

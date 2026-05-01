@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Clock, Download, Filter, Play, Square } from "lucide-react";
 import { useTimeTrackingStore } from "@/lib/stores/timeTracking";
 import { useAuthStore } from "@/lib/stores/auth";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 type Grouping = "day" | "week" | "issue" | "user";
 
@@ -76,6 +78,31 @@ export default function TimesheetPage() {
   });
 
   const total = filteredEntries.reduce((s, e) => s + e.durationSec, 0);
+
+  const weekTotal = filteredEntries
+    .filter((e) => Date.now() - new Date(e.startedAt).getTime() < 7 * 86400000)
+    .reduce((s, e) => s + e.durationSec, 0);
+  const todayTotal = filteredEntries
+    .filter((e) => startOfDay(e.startedAt) === startOfDay(new Date().toISOString()))
+    .reduce((s, e) => s + e.durationSec, 0);
+  const uniqueProjects = new Set(filteredEntries.map((e) => e.issueId)).size;
+
+  useRegisterCommands("timesheet", [
+    {
+      id: "ts-export",
+      label: "Export timesheet (CSV)",
+      icon: <Download size={14} />,
+      action: () => exportCsv(),
+    },
+    {
+      id: "ts-stop",
+      label: "Stop active timer",
+      icon: <Square size={14} />,
+      action: () => {
+        if (active && user) stopTimer(user.id, user.name);
+      },
+    },
+  ]);
 
   function exportCsv() {
     const rows = [
@@ -162,6 +189,16 @@ export default function TimesheetPage() {
           <Download size={12} /> CSV
         </button>
       </header>
+
+      <PageDashboard
+        storageKey="timesheet"
+        kpis={[
+          { label: "Today", value: fmtDuration(todayTotal) },
+          { label: "This week", value: fmtDuration(weekTotal) },
+          { label: "Total", value: fmtDuration(total), hint: `${filteredEntries.length} entries` },
+          { label: "Issues", value: uniqueProjects.toString() },
+        ]}
+      />
 
       {/* Summary + filters */}
       <section

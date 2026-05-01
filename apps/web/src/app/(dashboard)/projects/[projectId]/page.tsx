@@ -38,6 +38,8 @@ import {
   type ProjectDetail,
 } from "@/lib/stores/projects";
 import { undoableDelete } from "@/lib/undo";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import {
   Pill,
   PrimaryLink,
@@ -137,6 +139,34 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
     const done = tasks.filter((t) => t.status === "done").length;
     return Math.round((done / tasks.length) * 100);
   }, [tasks]);
+
+  const inProgressCount = tasks.filter((t) => t.status === "in_progress").length;
+  const blockedCount = tasks.filter((t) => t.status === "blocked").length;
+  const overdueCount = tasks.filter((t) => {
+    if (!t.dueDate || t.status === "done") return false;
+    return new Date(t.dueDate).getTime() < Date.now();
+  }).length;
+
+  useRegisterCommands(`project-${projectId}`, [
+    {
+      id: `proj-${projectId}-board`,
+      label: "Switch to board view",
+      icon: <Columns3 size={14} />,
+      action: () => setViewMode("board"),
+    },
+    {
+      id: `proj-${projectId}-list`,
+      label: "Switch to list view",
+      icon: <LayoutList size={14} />,
+      action: () => setViewMode("list"),
+    },
+    {
+      id: `proj-${projectId}-back`,
+      label: "Back to all projects",
+      icon: <ArrowLeft size={14} />,
+      action: () => router.push("/projects"),
+    },
+  ]);
 
   if (!project) {
     return (
@@ -367,6 +397,17 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
           </div>
         </div>
       </header>
+
+      <PageDashboard
+        storageKey={`project-${projectId}`}
+        kpis={[
+          { label: "Total tasks", value: tasks.length.toString() },
+          { label: "In progress", value: inProgressCount.toString() },
+          { label: "Blocked", value: blockedCount.toString(), goodWhenUp: false },
+          { label: "Overdue", value: overdueCount.toString(), goodWhenUp: false },
+          { label: "Progress", value: `${progress}%` },
+        ]}
+      />
 
       {/* Project status pipeline — single tight row so the board gets room */}
       <div

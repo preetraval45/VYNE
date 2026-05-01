@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus, Calendar, DollarSign } from "lucide-react";
+import { OrgChartTree } from "@/components/hr/OrgChartTree";
 import {
   EMPLOYEES as _EMPLOYEES,
   INITIAL_LEAVE_REQUESTS as _INITIAL_LEAVE_REQUESTS,
@@ -1723,6 +1727,35 @@ export default function HRPage() {
     { key: "orgchart", label: "Org Chart" },
   ];
 
+  const activeEmps = EMPLOYEES.filter((e) => e.status === "Active").length;
+  const onLeave = EMPLOYEES.filter((e) => e.status === "On Leave").length;
+  const remote = EMPLOYEES.filter((e) => e.status === "Remote").length;
+  const totalPayroll = EMPLOYEES.reduce((s, e) => s + (e.baseSalary ?? 0), 0);
+  const pendingLeave = INITIAL_LEAVE_REQUESTS.filter(
+    (l) => l.status === "Pending",
+  ).length;
+
+  useRegisterCommands("hr", [
+    {
+      id: "hr-new-emp",
+      label: "Add employee",
+      icon: <Plus size={14} />,
+      action: () => setTab("employees"),
+    },
+    {
+      id: "hr-leave",
+      label: "Open leave requests",
+      icon: <Calendar size={14} />,
+      action: () => setTab("leave"),
+    },
+    {
+      id: "hr-payroll",
+      label: "Run payroll",
+      icon: <DollarSign size={14} />,
+      action: () => setTab("payroll"),
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -1838,12 +1871,23 @@ export default function HRPage() {
         </div>
       </div>
 
+      <PageDashboard
+        storageKey="hr"
+        kpis={[
+          { label: "Headcount", value: EMPLOYEES.length.toString(), hint: `${activeEmps} active` },
+          { label: "Remote", value: remote.toString() },
+          { label: "On leave", value: onLeave.toString() },
+          { label: "Pending leave", value: pendingLeave.toString(), goodWhenUp: false },
+          { label: "Payroll", value: `$${(totalPayroll / 1000).toFixed(0)}k` },
+        ]}
+      />
+
       {/* Content */}
       <div className="content-scroll" style={{ flex: 1, overflowY: "auto" }}>
         {tab === "employees" && <EmployeesTab />}
         {tab === "leave" && <LeaveTab />}
         {tab === "payroll" && <PayrollTab />}
-        {tab === "orgchart" && <OrgChartTab />}
+        {tab === "orgchart" && <OrgChartTree employees={EMPLOYEES} />}
       </div>
     </div>
   );

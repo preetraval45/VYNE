@@ -14,6 +14,9 @@ import {
 import { useDebounce } from "@/hooks/useDebounce";
 import { DocTree } from "@/components/docs/DocTree";
 import { formatDistanceToNow } from "date-fns";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus } from "lucide-react";
 
 // Lazy-load the Tiptap + lowlight + yjs stack (≈600KB) so the rest of
 // the dashboard doesn't pay for it. Editor only mounts once a doc is
@@ -227,6 +230,33 @@ export default function DocsPage() {
 
   const isShowingSearch = searchQuery.length >= 2;
 
+  const editedThisWeek = allDocs.filter(
+    (d) => Date.now() - new Date(d.updatedAt).getTime() < 7 * 86400000,
+  ).length;
+  const staleDocs = allDocs.filter(
+    (d) => Date.now() - new Date(d.updatedAt).getTime() > 90 * 86400000,
+  ).length;
+
+  useRegisterCommands("docs", [
+    {
+      id: "docs-new",
+      label: "New document",
+      icon: <Plus size={14} />,
+      action: () => void handleCreateRoot(),
+    },
+    {
+      id: "docs-search",
+      label: "Search docs",
+      icon: <Search size={14} />,
+      action: () => {
+        const input = document.querySelector<HTMLInputElement>(
+          'input[placeholder="Search docs…"]',
+        );
+        input?.focus();
+      },
+    },
+  ]);
+
   return (
     <div
       className="flex h-screen overflow-hidden"
@@ -300,13 +330,39 @@ export default function DocsPage() {
               ) : (
                 <>
                   {/* Welcome header */}
-                  <div className="mb-8">
+                  <div className="mb-6">
                     <h1 className="text-[1.75rem] font-bold text-[var(--text-primary)] mb-1">
                       Docs
                     </h1>
                     <p className="text-[14px] text-[var(--text-tertiary)]">
                       Your team&rsquo;s knowledge base — all in one place.
                     </p>
+                  </div>
+
+                  {/* Top-of-page KPI dashboard (welcome view only) */}
+                  <div className="mb-6 -mx-8">
+                    <PageDashboard
+                      storageKey="docs"
+                      kpis={[
+                        {
+                          label: "Total docs",
+                          value: allDocs.length.toString(),
+                        },
+                        {
+                          label: "Edited this week",
+                          value: editedThisWeek.toString(),
+                        },
+                        {
+                          label: "Stale (90d+)",
+                          value: staleDocs.toString(),
+                          goodWhenUp: false,
+                        },
+                        {
+                          label: "Root pages",
+                          value: rootDocs.length.toString(),
+                        },
+                      ]}
+                    />
                   </div>
 
                   {/* Recent docs */}

@@ -24,6 +24,11 @@ import {
   type AlertEntry,
 } from "@/lib/fixtures/observe";
 import { seedOrEmpty } from "@/lib/stores/seedMode";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Activity, AlertCircle, Search as SearchIcon, Bell } from "lucide-react";
+import { IncidentCommanderCard } from "@/components/observe/IncidentCommanderCard";
+import { ServiceMap } from "@/components/observe/ServiceMap";
 
 // Empty for real signups; demo session keeps the showcase metrics.
 const SERVICES = seedOrEmpty(_SERVICES);
@@ -1683,6 +1688,47 @@ export default function ObservePage() {
     };
   }, []);
 
+  // Real KPIs computed from observability fixtures
+  const healthyServices = SERVICES.filter((s) => s.status === "healthy").length;
+  const degradedServices = SERVICES.filter((s) => s.status === "degraded").length;
+  const errorRate = SERVICES.length > 0
+    ? (SERVICES.reduce((sum, s) => sum + s.errorRate, 0) / SERVICES.length).toFixed(2)
+    : "0.00";
+  const avgP95 = SLOWEST_ENDPOINTS.length > 0
+    ? Math.round(SLOWEST_ENDPOINTS.reduce((s, e) => s + e.p95, 0) / SLOWEST_ENDPOINTS.length)
+    : 0;
+  const criticalAlerts = ACTIVE_ALERTS.filter((a) => a.severity === "critical").length;
+  const requestSparkline = REQUEST_BARS.slice(-14);
+  const errorSparkline = ERROR_BARS.slice(-14);
+
+  useRegisterCommands("observe", [
+    {
+      id: "obs-alerts",
+      label: "View active alerts",
+      icon: <Bell size={14} />,
+      action: () => setActiveTab("alerts"),
+    },
+    {
+      id: "obs-logs",
+      label: "Search logs",
+      icon: <SearchIcon size={14} />,
+      action: () => setActiveTab("logs"),
+    },
+    {
+      id: "obs-traces",
+      label: "Open traces",
+      icon: <Activity size={14} />,
+      action: () => setActiveTab("traces"),
+    },
+    {
+      id: "obs-incidents",
+      label: "Critical incidents only",
+      icon: <AlertCircle size={14} />,
+      action: () => setActiveTab("alerts"),
+      keywords: "p1 sev1",
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -2057,6 +2103,49 @@ export default function ObservePage() {
             ))}
           </div>
 
+          <div style={{ padding: "10px 18px 0" }}>
+            <IncidentCommanderCard
+              alerts={ACTIVE_ALERTS}
+              degradedCount={degradedServices}
+              avgP95Ms={avgP95}
+            />
+          </div>
+
+          {/* Shared <PageDashboard /> — top-of-page KPIs */}
+          <PageDashboard
+            storageKey="observe"
+            kpis={[
+              {
+                label: "Services",
+                value: `${healthyServices}/${SERVICES.length}`,
+                hint: degradedServices > 0 ? `${degradedServices} degraded` : "all healthy",
+                goodWhenUp: false,
+              },
+              {
+                label: "Error rate",
+                value: `${errorRate}%`,
+                sparkline: errorSparkline,
+                goodWhenUp: false,
+              },
+              {
+                label: "p95 latency",
+                value: `${avgP95}ms`,
+                goodWhenUp: false,
+              },
+              {
+                label: "Requests (sample)",
+                value: requestSparkline.reduce((s, v) => s + v, 0).toLocaleString(),
+                sparkline: requestSparkline,
+              },
+              {
+                label: "Active alerts",
+                value: ACTIVE_ALERTS.length.toString(),
+                hint: criticalAlerts > 0 ? `${criticalAlerts} critical` : "no critical",
+                goodWhenUp: false,
+              },
+            ]}
+          />
+
           {/* Active filters banner — confirms env + time range are applied
               so users see the filter responding even when underlying data
               is mock. */}
@@ -2119,7 +2208,12 @@ export default function ObservePage() {
           {/* Tab Content */}
           <div style={{ padding: 18 }}>
             {activeTab === "overview" && (
-              <OverviewTab animated={animated} env={env} timeRange={timeRange} />
+              <>
+                <div style={{ marginBottom: 18 }}>
+                  <ServiceMap services={SERVICES} />
+                </div>
+                <OverviewTab animated={animated} env={env} timeRange={timeRange} />
+              </>
             )}
             {activeTab === "metrics" && <MetricsTab env={env} timeRange={timeRange} />}
             {activeTab === "logs" && <LogsTab env={env} />}

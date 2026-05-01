@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { erpApi } from "@/lib/api/client";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus, Factory, ClipboardCheck } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────
 type MfgTab =
@@ -2294,6 +2297,36 @@ export default function ManufacturingPage() {
       .catch(() => {});
   }, []);
 
+  const inProgressMOs = MOCK_MOS.filter((m) => m.status === "In Progress").length;
+  const doneMOs = MOCK_MOS.filter((m) => m.status === "Done").length;
+  const activeBOMs = MOCK_BOMS.filter((b) => b.status === "Active").length;
+  const activeWCs = MOCK_WORK_CENTERS.filter((w) => w.status === "Active").length;
+  const passedQC = MOCK_QC_CHECKS.filter((q) => q.result === "Pass").length;
+  const qcRate = MOCK_QC_CHECKS.length > 0
+    ? Math.round((passedQC / MOCK_QC_CHECKS.length) * 100)
+    : 0;
+
+  useRegisterCommands("manufacturing", [
+    {
+      id: "mfg-new-mo",
+      label: "New manufacturing order",
+      icon: <Plus size={14} />,
+      action: () => setActiveTab("orders"),
+    },
+    {
+      id: "mfg-new-bom",
+      label: "New BOM",
+      icon: <Factory size={14} />,
+      action: () => setActiveTab("bom"),
+    },
+    {
+      id: "mfg-qc",
+      label: "Quality control",
+      icon: <ClipboardCheck size={14} />,
+      action: () => setActiveTab("qc"),
+    },
+  ]);
+
   function renderTab() {
     switch (activeTab) {
       case "bom":
@@ -2352,6 +2385,19 @@ export default function ManufacturingPage() {
             quality control
           </p>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 20, marginLeft: -24, marginRight: -24 }}>
+        <PageDashboard
+          storageKey="manufacturing"
+          kpis={[
+            { label: "MOs in progress", value: inProgressMOs.toString(), hint: `${MOCK_MOS.length} total` },
+            { label: "Done", value: doneMOs.toString() },
+            { label: "Active BOMs", value: activeBOMs.toString() },
+            { label: "Work centers", value: activeWCs.toString(), hint: `${MOCK_WORK_CENTERS.length} total` },
+            { label: "QC pass rate", value: `${qcRate}%`, hint: `${passedQC} pass · ${MOCK_QC_CHECKS.length - passedQC} other` },
+          ]}
+        />
       </div>
 
       {/* Tab Bar */}

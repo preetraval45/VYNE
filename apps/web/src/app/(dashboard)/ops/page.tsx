@@ -40,6 +40,9 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import {
   MOCK_PRODUCTS,
   MOCK_ORDERS,
@@ -2405,6 +2408,61 @@ function OpsPageInner() {
       },
     ];
 
+  const dash = usePageDashboard("ops", "30d");
+
+  // Real KPIs from current data
+  const lowStockCount = products.filter((p) => p.status === "low_stock").length;
+  const outOfStockCount = products.filter((p) => p.status === "out_of_stock").length;
+  const inventoryValue = products.reduce(
+    (s, p) => s + p.stockQty * (p.price ?? 0),
+    0,
+  );
+  const pendingOrders = orders.filter((o) => o.status === "confirmed" || o.status === "draft").length;
+  const totalOrderValue = orders.reduce((s, o) => s + (o.total ?? 0), 0);
+  const activeWOs = workOrders.filter((w) => w.status === "in_progress" || w.status === "planned").length;
+
+  // 14-day order revenue sparkline
+  const orderSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const o of orders) {
+      const t = new Date(o.createdAt ?? "").getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += o.total ?? 0;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("ops", [
+    {
+      id: "ops-new-product",
+      label: "Add product",
+      icon: <Plus size={14} />,
+      action: () => setTab("inventory"),
+    },
+    {
+      id: "ops-new-order",
+      label: "New order",
+      icon: <ShoppingCart size={14} />,
+      action: () => setTab("orders"),
+    },
+    {
+      id: "ops-low-stock",
+      label: "View low-stock items",
+      icon: <AlertTriangle size={14} />,
+      action: () => setTab("inventory"),
+      keywords: "reorder threshold",
+    },
+    {
+      id: "ops-suppliers",
+      label: "Open suppliers",
+      icon: <Truck size={14} />,
+      action: () => setTab("suppliers"),
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -2461,6 +2519,45 @@ function OpsPageInner() {
           </>
         }
       />
+      <PageDashboard
+        storageKey="ops"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "SKUs",
+            value: products.length.toString(),
+            hint: `${products.filter((p) => p.status === "in_stock").length} in stock`,
+          },
+          {
+            label: "Low stock",
+            value: lowStockCount.toString(),
+            goodWhenUp: false,
+            hint: lowStockCount > 0 ? "needs reorder" : "all healthy",
+          },
+          {
+            label: "Out of stock",
+            value: outOfStockCount.toString(),
+            goodWhenUp: false,
+          },
+          {
+            label: "Inventory value",
+            value: `$${(inventoryValue / 1000).toFixed(1)}k`,
+          },
+          {
+            label: "Pending orders",
+            value: pendingOrders.toString(),
+            sparkline: orderSparkline,
+            hint: `$${(totalOrderValue / 1000).toFixed(1)}k total`,
+          },
+          {
+            label: "Active WOs",
+            value: activeWOs.toString(),
+            hint: `${workOrders.length} total`,
+          },
+        ]}
+      />
+
       <div
         style={{
           padding: "8px 20px 0",

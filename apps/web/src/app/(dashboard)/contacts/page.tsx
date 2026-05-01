@@ -31,6 +31,8 @@ import {
 } from "@/lib/stores/contacts";
 import { undoableDelete } from "@/lib/undo";
 import { SearchBar as SharedSearchBar } from "@/components/shared/SearchBar";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ─── Constants ──────────────────────────────────────────────────
 type ContactsTab = "accounts" | "contacts" | "import";
@@ -2198,12 +2200,72 @@ function ContactsPageInner() {
   const accounts = useContactsStore((s) => s.accounts);
   const contacts = useContactsStore((s) => s.contacts);
 
+  const activeAccounts = accounts.filter((a) => a.status === "Active").length;
+  const totalRevenue = accounts.reduce((s, a) => s + (a.revenue ?? 0), 0);
+  // Stale = no contact in 60+ days
+  const staleContacts = contacts.filter((c) => {
+    if (!c.lastContact) return true;
+    return Date.now() - new Date(c.lastContact).getTime() > 60 * 86400000;
+  }).length;
+  const newThisWeek = contacts.filter((c) => {
+    if (!c.lastContact) return false;
+    return Date.now() - new Date(c.lastContact).getTime() < 7 * 86400000;
+  }).length;
+
+  useRegisterCommands("contacts", [
+    {
+      id: "contacts-new-account",
+      label: "New account",
+      icon: <Plus size={14} />,
+      action: () => setActiveTab("accounts"),
+    },
+    {
+      id: "contacts-new-contact",
+      label: "New contact",
+      icon: <Plus size={14} />,
+      action: () => setActiveTab("contacts"),
+    },
+    {
+      id: "contacts-import",
+      label: "Import CSV",
+      icon: <Upload size={14} />,
+      action: () => setActiveTab("import"),
+      keywords: "csv excel",
+    },
+  ]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <PageHeader
         icon={<Users size={16} />}
         title="Accounts & Contacts"
         subtitle={`${accounts.length} accounts · ${contacts.length} contacts`}
+      />
+
+      <PageDashboard
+        storageKey="contacts"
+        kpis={[
+          {
+            label: "Accounts",
+            value: accounts.length.toString(),
+            hint: `${activeAccounts} active`,
+          },
+          {
+            label: "Contacts",
+            value: contacts.length.toString(),
+            hint: `${newThisWeek} active this week`,
+          },
+          {
+            label: "Stale (60d+)",
+            value: staleContacts.toString(),
+            goodWhenUp: false,
+            hint: staleContacts > 0 ? "needs outreach" : "all engaged",
+          },
+          {
+            label: "Account revenue",
+            value: `$${(totalRevenue / 1000000).toFixed(1)}M`,
+          },
+        ]}
       />
 
       {/* Tabs */}

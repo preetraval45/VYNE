@@ -42,6 +42,10 @@ import { UsageTile } from "@/components/home/UsageTile";
 import { TodayActivityCard } from "@/components/home/TodayActivityCard";
 import { AiOnboardingCards } from "@/components/layout/AiOnboardingCards";
 import { useMounted } from "@/hooks/useMounted";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus, FileText as FileIcon } from "lucide-react";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -49,57 +53,6 @@ function greetingFor(hour: number): string {
   if (hour < 17) return "Good afternoon";
   if (hour < 21) return "Good evening";
   return "Working late";
-}
-
-// ── Stat card ────────────────────────────────────────────────────
-function StatCard({
-  label,
-  value,
-  delta,
-  deltaColor,
-}: Readonly<{
-  label: string;
-  value: string;
-  delta: string;
-  deltaColor: string;
-}>) {
-  return (
-    <section
-      aria-label={`${label}: ${value}`}
-      style={{
-        background: "var(--content-bg-secondary)",
-        borderRadius: 8,
-        padding: "14px 16px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          color: "var(--text-secondary)",
-          marginBottom: 5,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 600,
-          color: "var(--text-primary)",
-          letterSpacing: "-0.03em",
-          lineHeight: 1.1,
-        }}
-      >
-        {value}
-      </div>
-      <div
-        style={{ fontSize: 11, marginTop: 4, color: deltaColor }}
-        aria-label={`Change: ${delta}`}
-      >
-        {delta}
-      </div>
-    </section>
-  );
 }
 
 // ── HTML sanitizer for activity-feed strings ─────────────────────
@@ -398,10 +351,62 @@ function HomeFocusCard() {
   );
 }
 
+// Deterministic seed-based 7-point sparkline so server and client render
+// the same series and the chart doesn't reshuffle on every navigation.
+function synthSparkline(seed: string, length = 14, base = 100, swing = 0.25): number[] {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  const out: number[] = [];
+  let v = base;
+  for (let i = 0; i < length; i++) {
+    h = (h * 1664525 + 1013904223) >>> 0;
+    const r = (h / 0xffffffff) - 0.5; // -0.5..0.5
+    v = Math.max(1, v + base * swing * r * 0.3);
+    out.push(Math.round(v));
+  }
+  return out;
+}
+
+function parseStatValue(s: string): number {
+  // "42", "284", "$12.4k", "4/5" → numeric for sparkline base
+  const cleaned = s.replace(/[^0-9.]/g, "");
+  const n = parseFloat(cleaned);
+  return Number.isFinite(n) && n > 0 ? n : 100;
+}
+
 export default function HomePage() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const mounted = useMounted();
+  const dash = usePageDashboard("home", "7d");
+
+  // Page-scoped Cmd+K commands for /home
+  useRegisterCommands("home", [
+    {
+      id: "home-new-task",
+      label: "Add task",
+      description: "Create a task in any project",
+      icon: <Plus size={16} />,
+      action: () => router.push("/projects"),
+      keywords: "todo new create issue",
+    },
+    {
+      id: "home-ai-brief",
+      label: "Generate morning brief",
+      description: "AI summary of overnight activity",
+      icon: <Sparkles size={16} />,
+      action: () => router.push("/ai"),
+      keywords: "summary digest standup",
+      badge: "AI",
+    },
+    {
+      id: "home-new-doc",
+      label: "New document",
+      icon: <FileIcon size={16} />,
+      action: () => router.push("/docs"),
+      keywords: "wiki notes",
+    },
+  ]);
   // Gate locale/time-dependent content: server renders neutral defaults so
   // the first client render matches, then a re-render after mount fills in
   // the localized greeting + name. Without this React fires error #418.
@@ -790,28 +795,24 @@ export default function HomePage() {
         </section>
         )}
 
-        {/* Stats grid */}
-        <section aria-label="Key metrics">
-          <VisuallyHidden as="h2">Key Metrics</VisuallyHidden>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4,1fr)",
-              gap: 12,
-              marginBottom: 16,
-            }}
-          >
-            {STAT_CARDS.map((s) => (
-              <StatCard
-                key={s.label}
-                label={s.label}
-                value={s.value}
-                delta={s.delta}
-                deltaColor={s.deltaColor}
-              />
-            ))}
+        {/* Stats grid — driven by shared <PageDashboard /> with sparklines */}
+        <VisuallyHidden as="h2">Key Metrics</VisuallyHidden>
+        {STAT_CARDS.length > 0 && (
+          <div style={{ marginBottom: 16, marginLeft: -20, marginRight: -20 }}>
+            <PageDashboard
+              storageKey="home"
+              range={dash.range}
+              onRangeChange={dash.setRange}
+              kpis={STAT_CARDS.map((s) => ({
+                label: s.label,
+                value: s.value,
+                hint: s.delta,
+                sparkline: synthSparkline(s.label, 14, parseStatValue(s.value)),
+                goodWhenUp: !/critical|degraded|urgent|down/i.test(s.delta),
+              }))}
+            />
           </div>
-        </section>
+        )}
 
         {/* Two-column layout */}
         <div

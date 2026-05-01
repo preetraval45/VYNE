@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/lib/stores/settings";
 import { orgsApi } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/auth";
 import { csrfFetch } from "@/lib/api/csrfFetch";
+import { useThemeStore, type Density } from "@/lib/stores/theme";
 
 // ─── Shared styles ───────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
@@ -600,6 +601,9 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </div>
       </SectionCard>
 
+      {/* ── Appearance / Density ─────────────────────────────── */}
+      <DensitySection />
+
       {/* ── Modules ──────────────────────────────────────────── */}
       <SectionCard title="Active Modules">
         {(["Collaboration", "Operations"] as const).map((group) => (
@@ -765,6 +769,85 @@ function DensityToggleRow() {
           })}
         </div>
       </FieldRow>
+    </SectionCard>
+  );
+}
+
+// ─── Appearance / Density ─────────────────────────────────────────
+function DensitySection() {
+  const density = useThemeStore((s) => s.density);
+  const setDensity = useThemeStore((s) => s.setDensity);
+
+  const options: { id: Density; label: string; hint: string }[] = [
+    { id: "compact", label: "Compact", hint: "Tighter rows · more on screen" },
+    { id: "comfortable", label: "Comfortable", hint: "Default · balanced spacing" },
+    { id: "spacious", label: "Spacious", hint: "Roomy · larger touch targets" },
+  ];
+
+  return (
+    <SectionCard title="Appearance">
+      <div
+        style={{
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+          padding: "12px 18px 6px",
+        }}
+      >
+        Density scales row heights, paddings, and font sizes app-wide.
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 8,
+          padding: "8px 18px 18px",
+        }}
+      >
+        {options.map((opt) => {
+          const active = density === opt.id;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setDensity(opt.id)}
+              aria-pressed={active}
+              style={{
+                background: active
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)"
+                  : "var(--content-bg)",
+                border: active
+                  ? "1px solid var(--vyne-accent, #06B6D4)"
+                  : "1px solid var(--content-border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "border-color 0.15s, background 0.15s",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                {opt.label}
+                {active && (
+                  <Check size={13} style={{ color: "var(--vyne-accent, #06B6D4)" }} />
+                )}
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+                {opt.hint}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </SectionCard>
   );
 }

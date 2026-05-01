@@ -15,11 +15,13 @@ import {
   getTriggerLabel,
 } from "@/components/automations/types";
 import {
-  KpiStrip,
   AutomationsList,
   AutomationDetailPanel,
 } from "@/components/automations";
 import { notifyError, notifySuccess } from "@/lib/toast";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ─── AI prose-to-rule types ──────────────────────────────────────────────────
 
@@ -227,6 +229,48 @@ export default function AutomationsPage() {
 
   const totalRuns = automations.reduce((sum, a) => sum + a.runCount, 0);
   const activeCount = automations.filter((a) => a.status === "active").length;
+  const dash = usePageDashboard("automations", "30d");
+
+  const allRuns = automations.flatMap((a) => a.history);
+  const successfulRuns = allRuns.filter((r) => r.status === "success").length;
+  const failedRuns = allRuns.filter((r) => r.status === "failed").length;
+  const successRate = allRuns.length > 0
+    ? Math.round((successfulRuns / allRuns.length) * 100)
+    : 0;
+  const hoursSaved = Math.round(totalRuns * 5 / 60); // 5 min per run estimate
+
+  // 14-day run volume sparkline
+  const runsSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const r of allRuns) {
+      const t = new Date(r.timestamp).getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += 1;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("automations", [
+    {
+      id: "auto-new",
+      label: "New automation",
+      icon: <Plus size={14} />,
+      action: () => {
+        setSelectedId(null);
+        setShowTemplateGallery(true);
+      },
+    },
+    {
+      id: "auto-templates",
+      label: "Browse template gallery",
+      icon: <Sparkles size={14} />,
+      action: () => setShowTemplateGallery(true),
+      keywords: "starter pre-built",
+    },
+  ]);
 
   // ─ List actions ─
 
@@ -585,11 +629,33 @@ export default function AutomationsPage() {
         </div>
       </div>
 
-      {/* KPI strip */}
-      <KpiStrip
-        totalAutomations={automations.length}
-        activeCount={activeCount}
-        totalRuns={totalRuns}
+      {/* KPI strip — shared <PageDashboard /> */}
+      <PageDashboard
+        storageKey="automations"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "Active",
+            value: activeCount.toString(),
+            hint: `${automations.length} total`,
+          },
+          {
+            label: "Runs",
+            value: totalRuns.toLocaleString(),
+            sparkline: runsSparkline,
+          },
+          {
+            label: "Success rate",
+            value: `${successRate}%`,
+            hint: `${successfulRuns} ok · ${failedRuns} failed`,
+          },
+          {
+            label: "Hours saved",
+            value: `${hoursSaved}h`,
+            hint: "5 min / run estimate",
+          },
+        ]}
       />
 
       {/* Split view */}

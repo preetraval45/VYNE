@@ -41,6 +41,9 @@ import { useInvoicingStore } from "@/lib/stores/invoicing";
 import { undoableDelete } from "@/lib/undo";
 import { SearchBar as SharedSearchBar } from "@/components/shared/SearchBar";
 import toast from "react-hot-toast";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ─── Helpers ─────────────────────────────────────────────────────
 function fmt(n: number): string {
@@ -3459,9 +3462,70 @@ export default function SalesPage() {
 }
 
 function SalesPageInner() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<SalesTab>("opportunities");
   const deals = useSalesStore((s) => s.deals);
   const salesOrders = useSalesStore((s) => s.salesOrders);
+  const quotes = useSalesStore((s) => s.quotations);
+  const customers = useSalesStore((s) => s.customers);
+  const dash = usePageDashboard("sales", "30d");
+
+  // Real KPIs
+  const totalPipeline = deals
+    .filter((d) => d.stage !== "Closed Won" && d.stage !== "Closed Lost")
+    .reduce((s, d) => s + d.value, 0);
+  const weightedPipeline = deals
+    .filter((d) => d.stage !== "Closed Won" && d.stage !== "Closed Lost")
+    .reduce((s, d) => s + d.value * (d.probability / 100), 0);
+  const ordersValueMTD = salesOrders.reduce((s, o) => s + o.amount, 0);
+  const acceptedQuotes = quotes.filter((q) => q.status === "Accepted").length;
+  const totalQuotes = quotes.length;
+  const quoteWinRate = totalQuotes > 0
+    ? Math.round((acceptedQuotes / totalQuotes) * 100)
+    : 0;
+
+  // 14-day order revenue sparkline
+  const orderSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const o of salesOrders) {
+      const t = new Date(o.date).getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += o.amount;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("sales", [
+    {
+      id: "sales-new-quote",
+      label: "New quotation",
+      icon: <Plus size={13} />,
+      action: () => setActiveTab("quotations"),
+      keywords: "quote estimate proposal",
+    },
+    {
+      id: "sales-new-order",
+      label: "New sales order",
+      icon: <ShoppingCart size={13} />,
+      action: () => setActiveTab("orders"),
+    },
+    {
+      id: "sales-reports",
+      label: "Open sales reports",
+      icon: <BarChart3 size={13} />,
+      action: () => setActiveTab("reports"),
+    },
+    {
+      id: "sales-leaderboard",
+      label: "View rep leaderboard",
+      icon: <Target size={13} />,
+      action: () => setActiveTab("reports"),
+      keywords: "ranking quota",
+    },
+  ]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -3469,6 +3533,42 @@ function SalesPageInner() {
         icon={<ShoppingCart size={16} />}
         title="Sales"
         subtitle={`${deals.length} opportunities · ${salesOrders.length} orders`}
+      />
+
+      <PageDashboard
+        storageKey="sales"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "Open pipeline",
+            value: fmt(totalPipeline),
+            sparkline: orderSparkline,
+            hint: `${deals.length} opportunities`,
+          },
+          {
+            label: "Weighted forecast",
+            value: fmt(weightedPipeline),
+            sparkline: orderSparkline,
+            hint: "value × probability",
+          },
+          {
+            label: "Order revenue",
+            value: fmt(ordersValueMTD),
+            sparkline: orderSparkline,
+            hint: `${salesOrders.length} orders`,
+          },
+          {
+            label: "Quote win rate",
+            value: `${quoteWinRate}%`,
+            hint: `${acceptedQuotes} of ${totalQuotes}`,
+          },
+          {
+            label: "Customers",
+            value: customers.length.toString(),
+            hint: `${customers.filter((c) => c.status === "Active").length} active`,
+          },
+        ]}
       />
 
       {/* Tabs */}

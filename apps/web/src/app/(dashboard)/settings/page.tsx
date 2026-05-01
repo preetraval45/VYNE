@@ -19,6 +19,7 @@ import {
   BarChart3,
   Smartphone,
 } from "lucide-react";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // Settings page was a 228KB single chunk because it imported all 15 panels
 // eagerly. Each panel is its own tab — the user sees exactly one at a time —
@@ -158,6 +159,16 @@ function Toast({
 export default function SettingsPage() {
   const [tab, setTab] = useState<TabId>("general");
   const [toast, setToast] = useState<string | null>(null);
+
+  useRegisterCommands(
+    "settings",
+    TABS.map((t) => ({
+      id: `settings-${t.id}`,
+      label: `Settings: ${t.label}`,
+      icon: t.icon,
+      action: () => setTab(t.id),
+    })),
+  );
 
   const showToast = useCallback((message: string) => {
     setToast(message);

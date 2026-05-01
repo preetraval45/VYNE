@@ -77,6 +77,26 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ["Ctrl", "⇧", "Z"], action: "Redo" },
     ],
   },
+  {
+    title: "Lists & rows",
+    items: [
+      { keys: ["J"], action: "Move focus to next row" },
+      { keys: ["K"], action: "Move focus to previous row" },
+      { keys: ["Enter"], action: "Open focused row" },
+      { keys: ["E"], action: "Edit focused row" },
+      { keys: ["Backspace"], action: "Delete focused row (with undo)" },
+      { keys: ["⇧", "Click"], action: "Range-select rows for bulk actions" },
+    ],
+  },
+  {
+    title: "Dashboards",
+    items: [
+      { keys: ["Ctrl", "K"], action: "Cmd+K — page-scoped actions surface first" },
+      { keys: ["⌥", "1"], action: "Switch dashboard time range to 24h" },
+      { keys: ["⌥", "7"], action: "Switch dashboard time range to 7d" },
+      { keys: ["⌥", "3"], action: "Switch dashboard time range to 30d" },
+    ],
+  },
 ];
 
 /**

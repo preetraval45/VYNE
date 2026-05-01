@@ -16,6 +16,8 @@ import {
   Users,
   FileText,
 } from "lucide-react";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 type EventModule =
   | "projects"
@@ -207,6 +209,31 @@ export default function ActivityTimelinePage() {
     return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
   }, [filtered]);
 
+  const eventsToday = EVENTS.filter(
+    (e) => Date.now() - new Date(e.at).getTime() < 86400000,
+  ).length;
+  const critical = EVENTS.filter((e) => e.severity === "critical").length;
+  const warnings = EVENTS.filter((e) => e.severity === "warning").length;
+
+  useRegisterCommands("activity", [
+    {
+      id: "act-clear-filters",
+      label: "Clear filters",
+      icon: <Filter size={14} />,
+      action: () => {
+        setQuery("");
+        setModules(new Set());
+        setSeverity("all");
+      },
+    },
+    {
+      id: "act-critical-only",
+      label: "Show critical only",
+      icon: <AlertTriangle size={14} />,
+      action: () => setSeverity("critical"),
+    },
+  ]);
+
   function toggleModule(m: EventModule) {
     setModules((prev) => {
       const next = new Set(prev);
@@ -259,6 +286,16 @@ export default function ActivityTimelinePage() {
           in one searchable stream.
         </p>
       </header>
+
+      <PageDashboard
+        storageKey="activity"
+        kpis={[
+          { label: "Events", value: EVENTS.length.toString() },
+          { label: "Today", value: eventsToday.toString() },
+          { label: "Warnings", value: warnings.toString(), goodWhenUp: false },
+          { label: "Critical", value: critical.toString(), goodWhenUp: false },
+        ]}
+      />
 
       <div
         style={{

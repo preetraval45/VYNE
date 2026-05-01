@@ -10,8 +10,10 @@ import {
 } from "@/lib/fixtures/expenses";
 import { useExpensesStore } from "@/lib/stores/expenses";
 import { PageHeader, Pill } from "@/components/shared/Kit";
-import { Receipt } from "lucide-react";
+import { Receipt, Plus, CheckCircle, FileText } from "lucide-react";
 import { MileageTab } from "@/components/expenses/MileageTab";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ── Helpers ───────────────────────────────────────────────────────
 function statusConfig(s: ExpenseStatus): {
@@ -1272,6 +1274,52 @@ export default function ExpensesPage() {
   const updateExpense = useExpensesStore((s) => s.updateExpense);
 
   const pendingCount = expenses.filter((e) => e.status === "submitted").length;
+  const draftCount = expenses.filter((e) => e.status === "draft").length;
+  const mtdSpend = expenses
+    .filter((e) => {
+      const d = new Date(e.date);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((s, e) => s + e.amount, 0);
+  const reimbursedMTD = expenses
+    .filter((e) => e.status === "paid" || e.status === "approved")
+    .reduce((s, e) => s + e.amount, 0);
+
+  // 14-day spend sparkline
+  const spendSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const exp of expenses) {
+      const t = new Date(exp.date).getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += exp.amount;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("expenses", [
+    {
+      id: "exp-new",
+      label: "New expense",
+      icon: <Plus size={14} />,
+      action: () => setTab("mine"),
+    },
+    {
+      id: "exp-approvals",
+      label: "Open approvals queue",
+      icon: <CheckCircle size={14} />,
+      action: () => setTab("approvals"),
+    },
+    {
+      id: "exp-reports",
+      label: "View expense reports",
+      icon: <FileText size={14} />,
+      action: () => setTab("reports"),
+    },
+  ]);
 
   function handleAdd(e: Omit<Expense, "id">) {
     addExpense(e);
@@ -1310,6 +1358,30 @@ export default function ExpensesPage() {
             </Pill>
           ) : null
         }
+      />
+
+      <PageDashboard
+        storageKey="expenses"
+        kpis={[
+          {
+            label: "MTD spend",
+            value: `$${mtdSpend.toLocaleString()}`,
+            sparkline: spendSparkline,
+          },
+          {
+            label: "Pending approval",
+            value: pendingCount.toString(),
+            goodWhenUp: false,
+          },
+          {
+            label: "Drafts",
+            value: draftCount.toString(),
+          },
+          {
+            label: "Reimbursed",
+            value: `$${reimbursedMTD.toLocaleString()}`,
+          },
+        ]}
       />
 
       {/* Tabs */}

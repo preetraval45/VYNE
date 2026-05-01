@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type ThemeMode = "light" | "dark" | "system";
+export type Density = "compact" | "comfortable" | "spacious";
 export type AccentColor =
   | "purple"
   | "blue"
@@ -44,9 +45,13 @@ interface ThemeStore {
   /** Optional user-picked hex (#rrggbb). When present overrides the
    *  preset accent so the picker tool can express any colour. */
   customAccentHex: string | null;
+  /** Row height + padding scale. ThemeApplier maps this to `data-density`
+   *  and a token family on `<html>`. */
+  density: Density;
   setTheme: (theme: ThemeMode) => void;
   setAccent: (accent: AccentColor) => void;
   setCustomAccent: (hex: string | null) => void;
+  setDensity: (density: Density) => void;
   toggleTheme: () => void;
 }
 
@@ -56,12 +61,14 @@ export const useThemeStore = create<ThemeStore>()(
       theme: "dark",
       accent: "purple",
       customAccentHex: null,
+      density: "comfortable",
 
       setTheme: (theme: ThemeMode) => set({ theme }),
       // Picking a preset clears any custom hex so the preset wins.
       setAccent: (accent: AccentColor) =>
         set({ accent, customAccentHex: null }),
       setCustomAccent: (hex: string | null) => set({ customAccentHex: hex }),
+      setDensity: (density: Density) => set({ density }),
 
       toggleTheme: () =>
         set((state) => {
@@ -73,23 +80,26 @@ export const useThemeStore = create<ThemeStore>()(
     }),
     {
       name: "vyne-theme",
-      version: 3,
+      version: 4,
       migrate: (persistedState) => {
         const prev = (persistedState ?? {}) as Partial<{
           theme: ThemeMode;
           accent: AccentColor;
           customAccentHex: string | null;
+          density: Density;
         }>;
         return {
           theme: prev.theme ?? "dark",
           accent: (prev.accent ?? "purple") as AccentColor,
           customAccentHex: prev.customAccentHex ?? null,
+          density: (prev.density ?? "comfortable") as Density,
         };
       },
       partialize: (state) => ({
         theme: state.theme,
         accent: state.accent,
         customAccentHex: state.customAccentHex,
+        density: state.density,
       }),
     },
   ),

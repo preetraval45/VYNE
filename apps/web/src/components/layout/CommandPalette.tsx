@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -32,6 +32,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useUIStore } from "@/lib/stores/ui";
+import {
+  useCommandRegistry,
+  type RegisteredCommand,
+} from "@/lib/stores/commandRegistry";
 import { useTheme, useThemeStore } from "@/lib/stores/theme";
 import { useAuthStore } from "@/lib/stores/auth";
 import { cn } from "@/lib/utils";
@@ -61,7 +65,8 @@ type ResultCategory =
   | "Create"
   | "Actions"
   | "AI Tools"
-  | "Recent Searches";
+  | "Recent Searches"
+  | "Page actions";
 
 interface CommandItem {
   readonly id: string;
@@ -407,6 +412,7 @@ const CATEGORY_ICONS: Record<ResultCategory, React.ReactNode> = {
   Actions: <Settings size={12} />,
   "AI Tools": <Sparkles size={12} />,
   "Recent Searches": <Clock size={12} />,
+  "Page actions": <Zap size={12} />,
 };
 
 // ── Sub-components ─────────────────────────────────────────────────
@@ -494,8 +500,39 @@ function ResultItem({ item, isSelected, onSelect, onHover }: ResultItemProps) {
 }
 
 // ── Main Component ─────────────────────────────────────────────────
+/** Convert pathname into a stable scope id, e.g. "/projects/p_42" → "projects".
+ * Page-scoped commands match the first path segment so detail routes inherit
+ * the parent module's contributions. */
+function scopeFromPathname(pathname: string | null): string | null {
+  if (!pathname) return null;
+  const seg = pathname.split("/").filter(Boolean)[0];
+  return seg ?? null;
+}
+
 export function CommandPalette() {
   const router = useRouter();
+  const pathname = usePathname();
+  const activeScope = scopeFromPathname(pathname);
+  // Subscribe to the raw commands array (stable ref unless setScopeCommands fired).
+  // Then derive the scope-ordered list via useMemo. Using a derived selector that
+  // returned a fresh `[...scoped, ...global, ...other]` array on every call broke
+  // useSyncExternalStore's snapshot-stability check on React 19 and crashed with
+  // React error #185 (Maximum update depth exceeded).
+  const allCommands = useCommandRegistry((s) => s.commands);
+  const registeredCommands = useMemo<RegisteredCommand[]>(() => {
+    if (!activeScope) {
+      return allCommands.filter((c) => !c.scope || c.scope === "global");
+    }
+    const scoped: RegisteredCommand[] = [];
+    const global: RegisteredCommand[] = [];
+    const other: RegisteredCommand[] = [];
+    for (const c of allCommands) {
+      if (c.scope === activeScope) scoped.push(c);
+      else if (!c.scope) global.push(c);
+      else other.push(c);
+    }
+    return [...scoped, ...global, ...other];
+  }, [allCommands, activeScope]);
   const { commandPaletteOpen, setCommandPaletteOpen } = useUIStore();
   const theme = useTheme();
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
@@ -1128,6 +1165,22 @@ export function CommandPalette() {
     ];
   }, [debouncedQuery, router]);
 
+  // ── Page-registered commands (Cmd+K cross-module hooks) ─────────
+  const pageActionCommands = useMemo<CommandItem[]>(
+    () =>
+      registeredCommands.map((c: RegisteredCommand) => ({
+        id: `page-${c.id}`,
+        label: c.label,
+        description: c.description,
+        icon: c.icon,
+        action: c.action,
+        category: "Page actions" as ResultCategory,
+        keywords: c.keywords,
+        badge: c.badge,
+      })),
+    [registeredCommands],
+  );
+
   // ── Build the final filtered item list ──────────────────────────
   const filteredItems = useMemo((): CommandItem[] => {
     const q = query.toLowerCase().trim();
@@ -1156,6 +1209,7 @@ export function CommandPalette() {
 
       return [
         ...recentItems,
+        ...pageActionCommands,
         ...navigationCommands,
         ...aiToolCommands,
         ...createCommands,
@@ -1190,9 +1244,18 @@ export function CommandPalette() {
         (cmd.description?.toLowerCase().includes(q) ?? false),
     );
 
-    // Search results first, then matching commands
+    const matchingPageActions = pageActionCommands.filter(
+      (cmd) =>
+        cmd.label.toLowerCase().includes(q) ||
+        (cmd.description?.toLowerCase().includes(q) ?? false) ||
+        (cmd.keywords?.toLowerCase().includes(q) ?? false),
+    );
+
+    // Page actions rank just below search hits — they're the user's most
+    // immediate context. Then nav / AI tools / create / generic actions.
     return [
       ...searchResults,
+      ...matchingPageActions,
       ...matchingNavCommands,
       ...matchingAiTools,
       ...matchingCreateCommands,
@@ -1201,6 +1264,7 @@ export function CommandPalette() {
   }, [
     query,
     searchResults,
+    pageActionCommands,
     navigationCommands,
     createCommands,
     aiToolCommands,

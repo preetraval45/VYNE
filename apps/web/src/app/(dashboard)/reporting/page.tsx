@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Plus, Sparkles, Send } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { useRouter } from "next/navigation";
 
 // ─── Types ─────────────────────────────────────────────────────────
 type ReportingTab =
@@ -2180,6 +2182,31 @@ function CustomReportsTab() {
 // ═══════════════════════════════════════════════════════════════════
 export default function ReportingPage() {
   const [tab, setTab] = useState<ReportingTab>("dashboard");
+  const router = useRouter();
+
+  useRegisterCommands("reporting", [
+    {
+      id: "rep-new",
+      label: "New report",
+      icon: <Plus size={14} />,
+      action: () => setTab("custom"),
+    },
+    {
+      id: "rep-ai-query",
+      label: "Ask in natural language",
+      icon: <Sparkles size={14} />,
+      action: () => router.push("/ai?prompt=Show%20me%20a%20report%20of%20"),
+      keywords: "natural language ai",
+      badge: "AI",
+    },
+    {
+      id: "rep-send",
+      label: "Schedule email report",
+      icon: <Send size={14} />,
+      action: () => setTab("custom"),
+      keywords: "email schedule",
+    },
+  ]);
 
   const tabs: { key: ReportingTab; label: string }[] = [
     { key: "dashboard", label: "Dashboard" },

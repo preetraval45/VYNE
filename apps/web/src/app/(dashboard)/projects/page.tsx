@@ -43,6 +43,10 @@ import {
   type Tone,
 } from "@/components/shared/Kit";
 import toast from "react-hot-toast";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { SprintPlannerCard } from "@/components/projects/SprintPlannerCard";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
@@ -122,6 +126,48 @@ function ProjectsPageInner() {
     return map;
   }, [filtered]);
 
+  const dash = usePageDashboard("projects", "30d");
+
+  // Real KPIs computed from tasks across all projects
+  const totalTasks = allTasks.length;
+  const doneTasks = allTasks.filter((t) => t.status === "done").length;
+  const inProgressTasks = allTasks.filter((t) => t.status === "in_progress").length;
+  const overdueTasks = allTasks.filter((t) => {
+    if (!t.dueDate || t.status === "done") return false;
+    return new Date(t.dueDate).getTime() < Date.now();
+  }).length;
+  const activeProjectsCount = projects.filter((p) => p.status !== "completed" && p.status !== "paused").length;
+
+  // 14-day completion sparkline
+  const completionSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const t of allTasks) {
+      if (t.status !== "done") continue;
+      const ts = new Date(t.updatedAt ?? t.createdAt ?? "").getTime();
+      if (Number.isNaN(ts)) continue;
+      const daysAgo = Math.floor((now - ts) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += 1;
+    }
+    return buckets;
+  })();
+
+  useRegisterCommands("projects", [
+    {
+      id: "projects-new",
+      label: "New project",
+      icon: <Plus size={14} />,
+      action: () => router.push("/projects/new"),
+    },
+    {
+      id: "projects-toggle-view",
+      label: view === "board" ? "Switch to list view" : "Switch to board view",
+      icon: view === "board" ? <List size={14} /> : <LayoutGrid size={14} />,
+      action: () => setView(view === "board" ? "list" : "board"),
+    },
+  ]);
+
   return (
     <div className="flex flex-col h-full">
       <PageHeader
@@ -164,10 +210,40 @@ function ProjectsPageInner() {
         }
       />
 
+      <PageDashboard
+        storageKey="projects"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "Active projects",
+            value: activeProjectsCount.toString(),
+            hint: `${projects.length} total`,
+          },
+          {
+            label: "Tasks completed",
+            value: doneTasks.toString(),
+            sparkline: completionSparkline,
+            hint: `${totalTasks} total · ${Math.round((doneTasks / Math.max(totalTasks, 1)) * 100)}%`,
+          },
+          {
+            label: "In progress",
+            value: inProgressTasks.toString(),
+          },
+          {
+            label: "Overdue",
+            value: overdueTasks.toString(),
+            goodWhenUp: false,
+            hint: overdueTasks > 0 ? "needs attention" : "all on track",
+          },
+        ]}
+      />
+
       <div
         className="flex-1 overflow-auto content-scroll"
         style={{ padding: "18px 20px 24px", background: "var(--content-bg-secondary)" }}
       >
+        <SprintPlannerCard />
         {filtered.length === 0 ? (
           <EmptyState
             icon={<LayoutGrid size={24} />}

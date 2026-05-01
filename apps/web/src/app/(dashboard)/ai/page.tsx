@@ -18,6 +18,8 @@ import { seedOrEmpty } from "@/lib/stores/seedMode";
 const INSIGHTS = seedOrEmpty(_INSIGHTS);
 const AGENT_RUNS = seedOrEmpty(_AGENT_RUNS);
 import { aiApi } from "@/lib/api/client";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Sparkles, FileText, Database, Search } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 
@@ -230,6 +232,41 @@ export default function AIPage() {
   const [liveInsights, setLiveInsights] = useState<typeof INSIGHTS | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useRegisterCommands("ai", [
+    {
+      id: "ai-focus-input",
+      label: "New AI query",
+      icon: <Sparkles size={14} />,
+      action: () => inputRef.current?.focus(),
+      keywords: "ask question prompt",
+      badge: "AI",
+    },
+    {
+      id: "ai-toggle-insights",
+      label: sidebarOpen ? "Hide insights sidebar" : "Show insights sidebar",
+      icon: <Database size={14} />,
+      action: () => setSidebarOpen((v) => !v),
+    },
+    {
+      id: "ai-suggested",
+      label: "Show suggested queries",
+      icon: <Search size={14} />,
+      action: () => setQuery(SUGGESTED_QUERIES[0] ?? ""),
+    },
+    {
+      id: "ai-export",
+      label: "Export latest answer as Markdown",
+      icon: <FileText size={14} />,
+      action: () => {
+        const latest = results[0];
+        if (!latest) return;
+        const md = `# ${latest.query}\n\n${latest.answer}\n\n${latest.sources ? `_${latest.sources}_` : ""}`;
+        navigator.clipboard?.writeText(md);
+      },
+      keywords: "copy markdown",
+    },
+  ]);
 
   useEffect(() => {
     inputRef.current?.focus();

@@ -11,6 +11,8 @@ import { ChannelSidebar } from "@/components/chat/ChannelSidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
 import { ThreadPanel } from "@/components/chat/ThreadPanel";
 import { SkeletonList } from "@/components/shared/Skeleton";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { Plus, Sparkles, Hash } from "lucide-react";
 
 function useIsMobile(breakpoint = 768) {
   const [isMobile, setIsMobile] = useState(false);
@@ -55,6 +57,32 @@ export default function ChatPage() {
   // Mobile: show channel list OR chat, never both. Desktop: show both side-by-side.
   const showSidebar = !isMobile || mobileView === "list";
   const showChat = !isMobile || mobileView === "chat";
+
+  useRegisterCommands("chat", [
+    {
+      id: "chat-new-channel",
+      label: "New channel",
+      icon: <Plus size={14} />,
+      action: () => router.push("/chat/new"),
+      keywords: "create room",
+    },
+    {
+      id: "chat-ai-summary",
+      label: "Catch me up on recent activity",
+      icon: <Sparkles size={14} />,
+      action: () => router.push("/ai?prompt=Summarize+chat+activity+from+last+24h"),
+      badge: "AI",
+    },
+    {
+      id: "chat-jump-general",
+      label: "Jump to #general",
+      icon: <Hash size={14} />,
+      action: () => {
+        const general = channels.find((c) => c.name === "general");
+        if (general) selectChannel(general.id, false);
+      },
+    },
+  ]);
 
   return (
     <div

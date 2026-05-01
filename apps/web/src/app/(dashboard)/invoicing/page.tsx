@@ -28,6 +28,11 @@ import {
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { undoableDelete } from "@/lib/undo";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { DunningLadderCard } from "@/components/invoicing/DunningLadderCard";
+import { AgingBucketsCard } from "@/components/invoicing/AgingBucketsCard";
 import { downloadInvoicePdf, type InvoicePayload } from "@/lib/pdf/invoicePdf";
 import {
   useInvoicingStore,
@@ -3408,13 +3413,79 @@ export default function InvoicingPage() {
 
 function InvoicingPageInner() {
   const [tab, setTab] = useState<Tab>("invoices");
-  const { customers, invoices, bills } = useInvoicingStore();
+  const { customers, invoices, bills, payments } = useInvoicingStore();
+  const dash = usePageDashboard("invoicing", "30d");
 
   const totalRevenue = customers.reduce((s, c) => s + c.totalRevenue, 0);
   const totalOutstanding = customers.reduce(
     (s, c) => s + c.outstandingBalance,
     0,
   );
+
+  const overdue = invoices.filter((i) => i.status === "Overdue");
+  const overdueAmount = overdue.reduce((s, i) => s + i.amount, 0);
+  const paidThisMonth = invoices
+    .filter((i) => {
+      if (i.status !== "Paid") return false;
+      const d = new Date(i.date);
+      const now = new Date();
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((s, i) => s + i.amount, 0);
+  const draftCount = invoices.filter((i) => i.status === "Draft").length;
+
+  // 14-day collections sparkline
+  const collectionsSparkline = (() => {
+    const buckets = Array.from({ length: 14 }, () => 0);
+    const now = Date.now();
+    for (const p of payments) {
+      const t = new Date(p.date ?? "").getTime();
+      if (Number.isNaN(t)) continue;
+      const daysAgo = Math.floor((now - t) / 86400000);
+      if (daysAgo < 0 || daysAgo >= 14) continue;
+      buckets[13 - daysAgo] += p.amount;
+    }
+    return buckets;
+  })();
+
+  // DSO approximation: total outstanding / (avg daily revenue last 30d)
+  const last30Revenue = invoices
+    .filter((i) => {
+      const t = new Date(i.date).getTime();
+      return !Number.isNaN(t) && Date.now() - t < 30 * 86400000 && i.status !== "Cancelled";
+    })
+    .reduce((s, i) => s + i.amount, 0);
+  const dso = last30Revenue > 0
+    ? Math.round((totalOutstanding / (last30Revenue / 30)))
+    : 0;
+
+  useRegisterCommands("invoicing", [
+    {
+      id: "inv-new",
+      label: "New invoice",
+      icon: <Plus size={14} />,
+      action: () => setTab("invoices"),
+    },
+    {
+      id: "inv-overdue",
+      label: "View overdue invoices",
+      icon: <AlertTriangle size={14} />,
+      action: () => setTab("invoices"),
+      keywords: "late dunning",
+    },
+    {
+      id: "inv-payments",
+      label: "Record payment",
+      icon: <CheckCircle size={14} />,
+      action: () => setTab("payments"),
+    },
+    {
+      id: "inv-bills",
+      label: "Open bills",
+      icon: <FileText size={14} />,
+      action: () => setTab("bills"),
+    },
+  ]);
 
   return (
     <div
@@ -3440,6 +3511,43 @@ function InvoicingPageInner() {
           </>
         }
       />
+
+      <PageDashboard
+        storageKey="invoicing"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "AR outstanding",
+            value: fmt(totalOutstanding),
+            goodWhenUp: false,
+            hint: `${invoices.filter((i) => i.status === "Sent").length} unpaid`,
+          },
+          {
+            label: "Overdue",
+            value: fmt(overdueAmount),
+            goodWhenUp: false,
+            hint: `${overdue.length} invoice${overdue.length === 1 ? "" : "s"}`,
+          },
+          {
+            label: "Paid (MTD)",
+            value: fmt(paidThisMonth),
+            sparkline: collectionsSparkline,
+          },
+          {
+            label: "DSO",
+            value: dso > 0 ? `${dso}d` : "—",
+            hint: "days sales outstanding",
+            goodWhenUp: false,
+          },
+          {
+            label: "Drafts",
+            value: draftCount.toString(),
+            hint: draftCount > 0 ? "ready to send" : "none pending",
+          },
+        ]}
+      />
+
       <div
         style={{
           padding: "8px 20px 0",
@@ -3499,7 +3607,13 @@ function InvoicingPageInner() {
         style={{ flex: 1, overflowY: "auto", padding: 20 }}
       >
         {tab === "customers" && <CustomersTab />}
-        {tab === "invoices" && <InvoicesTab />}
+        {tab === "invoices" && (
+          <>
+            <AgingBucketsCard />
+            <DunningLadderCard />
+            <InvoicesTab />
+          </>
+        )}
         {tab === "creditNotes" && <CreditNotesTab />}
         {tab === "payments" && <PaymentsTab />}
         {tab === "vendors" && <VendorsTab />}

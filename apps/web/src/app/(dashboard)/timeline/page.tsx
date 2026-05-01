@@ -20,6 +20,9 @@ import {
   type TimelineEvent,
   type TimelineSource,
 } from "@/lib/stores/timeline";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { GanttSwimlanes } from "@/components/timeline/GanttSwimlanes";
 
 const SOURCE_META: Record<
   TimelineSource,
@@ -115,6 +118,29 @@ export default function TimelinePage() {
     return Array.from(groups.entries());
   }, [filtered]);
 
+  const eventsToday = events.filter(
+    (e) => Date.now() - new Date(e.timestamp).getTime() < 86400000,
+  ).length;
+  const incidents = events.filter(
+    (e) => e.kind === "alert" || e.kind === "incident" || e.kind === "error_spike",
+  ).length;
+  const deploys = events.filter((e) => e.kind === "deploy" || e.kind === "release").length;
+
+  useRegisterCommands("timeline", [
+    {
+      id: "tl-sync",
+      label: "Sync now",
+      icon: <RefreshCw size={14} />,
+      action: () => void syncGithub(),
+    },
+    {
+      id: "tl-clear-filter",
+      label: "Show all sources",
+      icon: <Filter size={14} />,
+      action: () => setFilter("all"),
+    },
+  ]);
+
   const sources: Array<TimelineSource | "all"> = [
     "all",
     "github",
@@ -207,6 +233,16 @@ export default function TimelinePage() {
         </button>
       </header>
 
+      <PageDashboard
+        storageKey="timeline"
+        kpis={[
+          { label: "Events", value: events.length.toString() },
+          { label: "Today", value: eventsToday.toString() },
+          { label: "Deploys", value: deploys.toString() },
+          { label: "Incidents", value: incidents.toString(), goodWhenUp: false },
+        ]}
+      />
+
       <div
         style={{
           padding: "10px 20px",
@@ -269,6 +305,9 @@ export default function TimelinePage() {
         className="content-scroll"
         style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}
       >
+        <div style={{ marginBottom: 18 }}>
+          <GanttSwimlanes events={filtered} />
+        </div>
         {byDay.length === 0 && (
           <div
             style={{

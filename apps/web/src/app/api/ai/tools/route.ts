@@ -157,6 +157,71 @@ export const TOOL_CATALOG = [
       dueDate: "ISO date (optional)",
     },
   },
+
+  // ── Cross-module READ tools (Phase 4.1) ─────────────────────────────
+  // The agent uses these to answer questions like
+  // "find every overdue invoice from clients with open support tickets."
+  // The client executor runs them against Zustand stores and returns the
+  // matching rows. The model can then chain a follow-up tool call (e.g.
+  // updateDeal / createTask) using the returned ids.
+  {
+    name: "queryDeals",
+    description: "Search CRM deals. Returns count + matching deals (id, company, stage, value, probability, lastActivity).",
+    args: {
+      stage: "Lead|Qualified|Proposal|Negotiation|Won|Lost (optional)",
+      stageNot: "stage to exclude (optional)",
+      minValue: "number USD (optional)",
+      maxValue: "number USD (optional)",
+      idleDays: "number — only deals untouched for >= this many days (optional)",
+      assignee: "string match (optional)",
+      search: "free text in company/contactName (optional)",
+      limit: "number (default 20, max 100)",
+    },
+  },
+  {
+    name: "queryTasks",
+    description: "Search project tasks. Returns count + tasks (id, title, status, priority, dueDate, projectName).",
+    args: {
+      projectName: "match by name or identifier (optional)",
+      status: "todo|in_progress|in_review|done|blocked (optional)",
+      priority: "low|medium|high|urgent (optional)",
+      overdue: "boolean — only tasks past their due date (optional)",
+      assigneeName: "string (optional)",
+      search: "free text in title/key (optional)",
+      limit: "number (default 20, max 100)",
+    },
+  },
+  {
+    name: "queryInvoices",
+    description: "Search invoices. Returns count + invoices (id, number, customer, amount, status, dueDate).",
+    args: {
+      status: "Draft|Sent|Paid|Overdue|Cancelled (optional)",
+      overdue: "boolean — only invoices past dueDate and not Paid (optional)",
+      customer: "string match (optional)",
+      minAmount: "number USD (optional)",
+      limit: "number (default 20, max 100)",
+    },
+  },
+  {
+    name: "queryContacts",
+    description: "Search contacts. Returns count + contacts (id, name, email, company, lastContact).",
+    args: {
+      company: "string match (optional)",
+      staleDays: "number — only contacts with no contact for >= N days (optional)",
+      search: "free text in name/email (optional)",
+      limit: "number (default 20, max 100)",
+    },
+  },
+  {
+    name: "queryProducts",
+    description: "Search products/inventory. Returns count + products (id, name, sku, stockQty, status, price).",
+    args: {
+      status: "in_stock|low_stock|out_of_stock (optional)",
+      maxStock: "number — only products with stockQty <= this (optional)",
+      search: "free text in name/sku (optional)",
+      limit: "number (default 20, max 100)",
+    },
+  },
 ];
 
 interface ContextBundle {

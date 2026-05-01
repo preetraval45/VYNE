@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { exportToCSV } from "@/lib/utils/csv";
+import { exportToCSV, exportToCSVAudit, type AuditExportContext } from "@/lib/utils/csv";
 
 type ExportButtonProps<T extends Record<string, unknown>> = Readonly<{
   /** Array of objects to export */
@@ -23,6 +23,9 @@ type ExportButtonProps<T extends Record<string, unknown>> = Readonly<{
   columns?: { key: keyof T; header: string }[];
   /** Button label. Default: "Export CSV" */
   label?: string;
+  /** When provided, prepends a SOC2/HIPAA-style manifest header
+   *  (filters, user, timestamp, row count, FNV-1a checksum) to the CSV. */
+  audit?: AuditExportContext;
 }>;
 
 export function ExportButton<T extends Record<string, unknown>>({
@@ -30,9 +33,14 @@ export function ExportButton<T extends Record<string, unknown>>({
   filename,
   columns,
   label = "Export CSV",
+  audit,
 }: ExportButtonProps<T>) {
   function handleExport() {
-    exportToCSV(data, filename, columns);
+    if (audit) {
+      exportToCSVAudit(data, filename, audit, columns);
+    } else {
+      exportToCSV(data, filename, columns);
+    }
   }
 
   return (

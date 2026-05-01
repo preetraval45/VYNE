@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Megaphone } from "lucide-react";
+import { Megaphone, Plus, Mail, BarChart3 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { SubjectLineGenerator } from "@/components/marketing/SubjectLineGenerator";
 import { UTMBuilder } from "@/components/marketing/UTMBuilder";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { FunnelCard } from "@/components/marketing/FunnelCard";
 
 // ─── Types ─────────────────────────────────────────────────────────
 type MarketingTab = "campaigns" | "email" | "social" | "landing" | "analytics" | "tools";
@@ -1505,6 +1508,23 @@ function AnalyticsTab() {
         />
       </div>
 
+      {/* Conversion funnel */}
+      <FunnelCard
+        subtitle="Visitors → MQL → SQL → Opportunity → Closed Won"
+        stages={[
+          { id: "visitors", label: "Site visitors", count: Math.round(totalLeads * 28) },
+          { id: "mql", label: "MQL", count: totalLeads },
+          { id: "sql", label: "SQL", count: Math.round(totalLeads * 0.42) },
+          { id: "opp", label: "Opportunity", count: Math.round(totalLeads * 0.18) },
+          {
+            id: "won",
+            label: "Closed Won",
+            count: Math.round(totalLeads * (overallConvRate / 100)),
+            color: "#0F9D58",
+          },
+        ]}
+      />
+
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         {/* Lead trend chart */}
         <div
@@ -1676,6 +1696,37 @@ export default function MarketingPage() {
     { key: "tools", label: "Tools" },
   ];
 
+  const activeCampaigns = MOCK_CAMPAIGNS.filter((c) => c.status === "Active").length;
+  const totalBudget = MOCK_CAMPAIGNS.reduce((s, c) => s + c.budget, 0);
+  const totalLeads = MOCK_CAMPAIGNS.reduce((s, c) => s + c.leadsGenerated, 0);
+  const avgRoi = MOCK_CAMPAIGNS.length > 0
+    ? Math.round(
+        MOCK_CAMPAIGNS.filter((c) => c.roi > 0).reduce((s, c) => s + c.roi, 0) /
+          Math.max(1, MOCK_CAMPAIGNS.filter((c) => c.roi > 0).length),
+      )
+    : 0;
+
+  useRegisterCommands("marketing", [
+    {
+      id: "mkt-new",
+      label: "New campaign",
+      icon: <Plus size={14} />,
+      action: () => setTab("campaigns"),
+    },
+    {
+      id: "mkt-email",
+      label: "Open email marketing",
+      icon: <Mail size={14} />,
+      action: () => setTab("email"),
+    },
+    {
+      id: "mkt-analytics",
+      label: "View analytics",
+      icon: <BarChart3 size={14} />,
+      action: () => setTab("analytics"),
+    },
+  ]);
+
   return (
     <div className="flex flex-col h-full">
       {/* ─── Header ─────────────────────────────────── */}
@@ -1709,6 +1760,16 @@ export default function MarketingPage() {
           </div>
         </div>
       </header>
+
+      <PageDashboard
+        storageKey="marketing"
+        kpis={[
+          { label: "Active campaigns", value: activeCampaigns.toString(), hint: `${MOCK_CAMPAIGNS.length} total` },
+          { label: "Leads generated", value: totalLeads.toLocaleString() },
+          { label: "Total budget", value: `$${totalBudget.toLocaleString()}` },
+          { label: "Avg ROI", value: `${avgRoi}%` },
+        ]}
+      />
 
       {/* ─── Tabs ───────────────────────────────────── */}
       <div

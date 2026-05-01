@@ -16,6 +16,8 @@ import {
   FileText,
   BarChart3,
 } from "lucide-react";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 interface TrainingStep {
   id: string;
@@ -128,6 +130,21 @@ export default function TrainingPage() {
   );
   const pct = STEPS.length ? Math.round((done.length / STEPS.length) * 100) : 0;
 
+  useRegisterCommands("training", [
+    {
+      id: "tr-reset",
+      label: "Reset training sandbox",
+      icon: <RotateCcw size={14} />,
+      action: () => resetSandbox(),
+    },
+    {
+      id: "tr-exit",
+      label: "Exit training mode",
+      icon: <LogOut size={14} />,
+      action: () => exitTraining(),
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -225,6 +242,15 @@ export default function TrainingPage() {
           </button>
         </div>
       </header>
+
+      <PageDashboard
+        storageKey="training"
+        kpis={[
+          { label: "Progress", value: `${pct}%`, hint: `${done.length}/${STEPS.length} steps` },
+          { label: "Time spent", value: `${doneMinutes}m`, hint: `of ${totalMinutes}m total` },
+          { label: "Status", value: started ? "Active" : "Not started" },
+        ]}
+      />
 
       <div
         style={{

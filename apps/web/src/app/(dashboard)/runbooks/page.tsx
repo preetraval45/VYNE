@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Zap,
 } from "lucide-react";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 type StepStatus = "pending" | "running" | "ok" | "failed" | "skipped";
 
@@ -290,6 +291,27 @@ export default function RunbooksPage() {
   function resetRun() {
     setRuns((prev) => ({ ...prev, [activeId]: {} }));
   }
+
+  useRegisterCommands("runbooks", [
+    {
+      id: "rb-simulate",
+      label: "Simulate runbook drill",
+      icon: <Play size={14} />,
+      action: () => void simulateRun(),
+    },
+    {
+      id: "rb-reset",
+      label: "Reset run state",
+      icon: <RotateCcw size={14} />,
+      action: () => resetRun(),
+    },
+    ...RUNBOOKS.map((r) => ({
+      id: `rb-jump-${r.id}`,
+      label: `Open: ${r.title}`,
+      icon: <ShieldAlert size={14} />,
+      action: () => setActiveId(r.id),
+    })),
+  ]);
 
   return (
     <div

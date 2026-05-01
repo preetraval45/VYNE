@@ -24,6 +24,8 @@ export interface ToolResult {
   detail?: string;
   /** Optional href so the chip can deep-link to the new/updated record. */
   href?: string;
+  /** Query tools return their result rows here so the AI can chain follow-up calls. */
+  data?: { count: number; rows: unknown[] };
 }
 
 function uid(prefix = "x") {
@@ -295,6 +297,218 @@ export async function executeToolCall(call: ToolCall): Promise<ToolResult> {
           dueDate: asString(a.dueDate, new Date(Date.now() + 7 * 86400000).toISOString()),
         });
         return { tool: call.tool, ok: true, label: `Created work order — ${productName}`, detail: `${qtyToProduce} units`, href: "/manufacturing" };
+      }
+
+      // ── Cross-module READ tools (Phase 4.1) ──────────────────────
+      case "queryDeals": {
+        const a = call.args;
+        const limit = Math.min(asNumber(a.limit, 20), 100);
+        const stage = asString(a.stage);
+        const stageNot = asString(a.stageNot);
+        const minValue = a.minValue != null ? asNumber(a.minValue) : null;
+        const maxValue = a.maxValue != null ? asNumber(a.maxValue) : null;
+        const idleDays = a.idleDays != null ? asNumber(a.idleDays) : null;
+        const assignee = asString(a.assignee).toLowerCase();
+        const search = asString(a.search).toLowerCase();
+        const now = Date.now();
+        const matches = useCRMStore.getState().deals.filter((d) => {
+          if (stage && d.stage !== stage) return false;
+          if (stageNot && d.stage === stageNot) return false;
+          if (minValue != null && d.value < minValue) return false;
+          if (maxValue != null && d.value > maxValue) return false;
+          if (assignee && !d.assignee.toLowerCase().includes(assignee)) return false;
+          if (search) {
+            const haystack = `${d.company} ${d.contactName} ${d.email}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          if (idleDays != null) {
+            const daysIdle = (now - new Date(d.lastActivity).getTime()) / 86400000;
+            if (daysIdle < idleDays) return false;
+          }
+          return true;
+        });
+        const rows = matches.slice(0, limit).map((d) => ({
+          id: d.id,
+          company: d.company,
+          stage: d.stage,
+          value: d.value,
+          probability: d.probability,
+          lastActivity: d.lastActivity.slice(0, 10),
+        }));
+        return {
+          tool: call.tool,
+          ok: true,
+          label: `Found ${matches.length} deal${matches.length === 1 ? "" : "s"}`,
+          detail: rows.length > 0 ? rows.map((r) => r.company).slice(0, 3).join(", ") : undefined,
+          href: "/crm",
+          data: { count: matches.length, rows },
+        };
+      }
+
+      case "queryTasks": {
+        const a = call.args;
+        const limit = Math.min(asNumber(a.limit, 20), 100);
+        const projectName = asString(a.projectName).toLowerCase();
+        const status = asString(a.status);
+        const priority = asString(a.priority);
+        const overdue = a.overdue === true || a.overdue === "true";
+        const assigneeName = asString(a.assigneeName).toLowerCase();
+        const search = asString(a.search).toLowerCase();
+        const now = Date.now();
+        const projects = useProjectsStore.getState().projects;
+        const members = useProjectsStore.getState().teamMembers;
+        const projectByName = new Map(
+          projects.map((p) => [p.id, p]),
+        );
+        const tasks = useProjectsStore.getState().tasks.filter((t) => {
+          const proj = projectByName.get(t.projectId);
+          if (projectName) {
+            const m =
+              proj &&
+              (proj.name.toLowerCase().includes(projectName) ||
+                proj.identifier?.toLowerCase().includes(projectName));
+            if (!m) return false;
+          }
+          if (status && t.status !== status) return false;
+          if (priority && t.priority !== priority) return false;
+          if (overdue) {
+            if (!t.dueDate || t.status === "done") return false;
+            if (new Date(t.dueDate).getTime() >= now) return false;
+          }
+          if (assigneeName) {
+            const member = members.find((m) => m.id === t.assigneeId);
+            if (!member || !member.name.toLowerCase().includes(assigneeName)) return false;
+          }
+          if (search) {
+            const haystack = `${t.title} ${t.key ?? ""}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          return true;
+        });
+        const rows = tasks.slice(0, limit).map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          dueDate: t.dueDate,
+          projectName: projectByName.get(t.projectId)?.name ?? t.projectId,
+        }));
+        return {
+          tool: call.tool,
+          ok: true,
+          label: `Found ${tasks.length} task${tasks.length === 1 ? "" : "s"}`,
+          detail: rows.length > 0 ? rows.map((r) => r.title).slice(0, 2).join(" · ") : undefined,
+          href: "/projects",
+          data: { count: tasks.length, rows },
+        };
+      }
+
+      case "queryInvoices": {
+        const a = call.args;
+        const limit = Math.min(asNumber(a.limit, 20), 100);
+        const status = asString(a.status);
+        const overdue = a.overdue === true || a.overdue === "true";
+        const customer = asString(a.customer).toLowerCase();
+        const minAmount = a.minAmount != null ? asNumber(a.minAmount) : null;
+        const now = Date.now();
+        const matches = useInvoicingStore.getState().invoices.filter((inv) => {
+          if (status && inv.status !== status) return false;
+          if (overdue) {
+            if (inv.status === "Paid" || inv.status === "Cancelled") return false;
+            if (new Date(inv.dueDate).getTime() >= now) return false;
+          }
+          if (customer && !inv.customer.toLowerCase().includes(customer)) return false;
+          if (minAmount != null && inv.amount < minAmount) return false;
+          return true;
+        });
+        const rows = matches.slice(0, limit).map((i) => ({
+          id: i.id,
+          number: i.number,
+          customer: i.customer,
+          amount: i.amount,
+          status: i.status,
+          dueDate: i.dueDate,
+        }));
+        return {
+          tool: call.tool,
+          ok: true,
+          label: `Found ${matches.length} invoice${matches.length === 1 ? "" : "s"}`,
+          detail: rows.length > 0
+            ? `$${rows.reduce((s, r) => s + r.amount, 0).toLocaleString()} total`
+            : undefined,
+          href: "/invoicing",
+          data: { count: matches.length, rows },
+        };
+      }
+
+      case "queryContacts": {
+        const a = call.args;
+        const limit = Math.min(asNumber(a.limit, 20), 100);
+        const company = asString(a.company).toLowerCase();
+        const staleDays = a.staleDays != null ? asNumber(a.staleDays) : null;
+        const search = asString(a.search).toLowerCase();
+        const now = Date.now();
+        const matches = useContactsStore.getState().contacts.filter((c) => {
+          if (company && !c.company.toLowerCase().includes(company)) return false;
+          if (staleDays != null) {
+            if (!c.lastContact) return true;
+            const days = (now - new Date(c.lastContact).getTime()) / 86400000;
+            if (days < staleDays) return false;
+          }
+          if (search) {
+            const haystack = `${c.name} ${c.email}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          return true;
+        });
+        const rows = matches.slice(0, limit).map((c) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          company: c.company,
+          lastContact: c.lastContact,
+        }));
+        return {
+          tool: call.tool,
+          ok: true,
+          label: `Found ${matches.length} contact${matches.length === 1 ? "" : "s"}`,
+          detail: rows.length > 0 ? rows.map((r) => r.name).slice(0, 3).join(", ") : undefined,
+          href: "/contacts",
+          data: { count: matches.length, rows },
+        };
+      }
+
+      case "queryProducts": {
+        const a = call.args;
+        const limit = Math.min(asNumber(a.limit, 20), 100);
+        const status = asString(a.status);
+        const maxStock = a.maxStock != null ? asNumber(a.maxStock) : null;
+        const search = asString(a.search).toLowerCase();
+        const matches = useOpsStore.getState().products.filter((p) => {
+          if (status && p.status !== status) return false;
+          if (maxStock != null && p.stockQty > maxStock) return false;
+          if (search) {
+            const haystack = `${p.name} ${p.sku}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+          }
+          return true;
+        });
+        const rows = matches.slice(0, limit).map((p) => ({
+          id: p.id,
+          name: p.name,
+          sku: p.sku,
+          stockQty: p.stockQty,
+          status: p.status,
+          price: p.price,
+        }));
+        return {
+          tool: call.tool,
+          ok: true,
+          label: `Found ${matches.length} product${matches.length === 1 ? "" : "s"}`,
+          detail: rows.length > 0 ? rows.map((r) => r.name).slice(0, 3).join(", ") : undefined,
+          href: "/ops",
+          data: { count: matches.length, rows },
+        };
       }
 
       default:

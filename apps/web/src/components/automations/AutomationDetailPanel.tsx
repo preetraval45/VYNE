@@ -17,6 +17,7 @@ import ConditionEditor from "./ConditionEditor";
 import ActionConfigurator from "./ActionConfigurator";
 import RunHistory from "./RunHistory";
 import CreateAutomationModal from "./CreateAutomationModal";
+import { WorkflowGraph } from "./WorkflowGraph";
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
@@ -561,9 +562,10 @@ export default function AutomationDetailPanel(
           flexShrink: 0,
         }}
       >
-        {(["editor", "history"] as DetailTab[]).map((tab) => {
+        {(["editor", "graph", "history"] as DetailTab[]).map((tab) => {
           const labelMap: Record<DetailTab, string> = {
             editor: "Workflow Editor",
+            graph: "Visual Graph",
             history: "Run History",
           };
           const isActive = detailTab === tab;
@@ -592,7 +594,9 @@ export default function AutomationDetailPanel(
       </div>
 
       {/* Tab Content */}
-      {detailTab === "editor" ? (
+      {detailTab === "graph" ? (
+        <WorkflowGraph automation={automation} />
+      ) : detailTab === "editor" ? (
         <div
           style={{ padding: "20px", overflowY: "auto", flex: 1 }}
           className="content-scroll"

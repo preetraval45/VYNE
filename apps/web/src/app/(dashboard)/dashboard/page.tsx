@@ -16,6 +16,7 @@ import {
   Cpu,
   Layers,
 } from "lucide-react";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 type WidgetType =
   | "stat-revenue"
@@ -222,6 +223,21 @@ export default function DashboardPage() {
     saveDashboard(widgets);
     setDirty(false);
   }
+
+  useRegisterCommands("dashboard", [
+    {
+      id: "dash-save",
+      label: "Save dashboard layout",
+      icon: <Save size={14} />,
+      action: () => persist(),
+    },
+    {
+      id: "dash-reset",
+      label: "Reset to default layout",
+      icon: <RotateCcw size={14} />,
+      action: () => resetDashboard(),
+    },
+  ]);
 
   return (
     <div

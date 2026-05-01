@@ -9,7 +9,7 @@ export type ConditionOperator =
   | "greater_than"
   | "less_than";
 export type LogicOp = "AND" | "OR";
-export type DetailTab = "editor" | "history";
+export type DetailTab = "editor" | "graph" | "history";
 
 export interface RunHistoryEntry {
   id: string;

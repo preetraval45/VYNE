@@ -27,11 +27,15 @@ const MOCK_JOURNAL = seedOrEmpty(_MOCK_JOURNAL);
 const MOCK_ACCOUNTS = seedOrEmpty(_MOCK_ACCOUNTS);
 import { useFinanceStore } from "@/lib/stores/finance";
 import { ARAgingCard } from "@/components/finance/ARAgingCard";
+import { CloseAssistantCard } from "@/components/finance/CloseAssistantCard";
 import { CashFlowSparkline } from "@/components/finance/CashFlowSparkline";
 import { undoableDelete } from "@/lib/undo";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
+import { PageDashboard } from "@/components/shared/PageDashboard";
+import { usePageDashboard } from "@/hooks/usePageDashboard";
+import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const CURRENCY = typeof Intl !== "undefined"
@@ -768,6 +772,42 @@ export default function FinancePage() {
   const currentMonth = liveSummary ?? fallback;
   const profit = currentMonth.revenue - currentMonth.expenses;
 
+  const dash = usePageDashboard("finance", "30d");
+
+  const margin = currentMonth.revenue > 0
+    ? Math.round((profit / currentMonth.revenue) * 100)
+    : 0;
+  const revenueSeries = MOCK_MONTHLY.map((m) => m.revenue);
+  const expensesSeries = MOCK_MONTHLY.map((m) => m.expenses);
+  const profitSeries = MOCK_MONTHLY.map((m) => m.revenue - m.expenses);
+  const prev = MOCK_MONTHLY[MOCK_MONTHLY.length - 2] ?? EMPTY_MONTH;
+  const revenueDelta = prev.revenue > 0
+    ? `${profit >= prev.revenue - prev.expenses ? "+" : ""}${(((currentMonth.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1)}%`
+    : undefined;
+  const draftCount = MOCK_JOURNAL.filter((j) => j.status === "draft").length;
+
+  useRegisterCommands("finance", [
+    {
+      id: "fin-pl",
+      label: "View P&L statement",
+      icon: <DollarSign size={14} />,
+      action: () => setTab("pl"),
+      keywords: "profit loss income",
+    },
+    {
+      id: "fin-journal",
+      label: "Open journal entries",
+      icon: <FileText size={14} />,
+      action: () => setTab("journal"),
+    },
+    {
+      id: "fin-new-entry",
+      label: "New journal entry",
+      icon: <Plus size={14} />,
+      action: () => setTab("journal"),
+    },
+  ]);
+
   return (
     <div
       style={{
@@ -804,6 +844,44 @@ export default function FinancePage() {
           </>
         }
       />
+
+      <PageDashboard
+        storageKey="finance"
+        range={dash.range}
+        onRangeChange={dash.setRange}
+        kpis={[
+          {
+            label: "Revenue (MTD)",
+            value: fmt(currentMonth.revenue),
+            sparkline: revenueSeries,
+            delta: revenueDelta,
+            hint: "vs last month",
+          },
+          {
+            label: "Expenses (MTD)",
+            value: fmt(currentMonth.expenses),
+            sparkline: expensesSeries,
+            goodWhenUp: false,
+          },
+          {
+            label: "Profit",
+            value: fmt(profit),
+            sparkline: profitSeries,
+            hint: `${margin}% margin`,
+          },
+          {
+            label: "Gross margin",
+            value: `${margin}%`,
+          },
+          {
+            label: "Draft entries",
+            value: draftCount.toString(),
+            hint: draftCount > 0 ? "needs review" : "all posted",
+            goodWhenUp: false,
+          },
+        ]}
+      />
+
       <div
         style={{
           padding: "8px 20px 0",
@@ -837,6 +915,7 @@ export default function FinancePage() {
       >
         {tab === "pl" && (
           <>
+            <CloseAssistantCard />
             <div
               style={{
                 display: "grid",
@@ -851,7 +930,12 @@ export default function FinancePage() {
             <PLTab />
           </>
         )}
-        {tab === "journal" && <JournalTab />}
+        {tab === "journal" && (
+          <>
+            <CloseAssistantCard />
+            <JournalTab />
+          </>
+        )}
         {tab === "accounts" && <AccountsTab />}
       </div>
     </div>
