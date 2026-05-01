@@ -601,6 +601,9 @@ export default function GeneralSettings({ onToast }: GeneralSettingsProps) {
         </div>
       </SectionCard>
 
+      {/* ── Theme presets ─────────────────────────────────────── */}
+      <ThemePresetsSection />
+
       {/* ── Appearance / Density ─────────────────────────────── */}
       <DensitySection />
 
@@ -769,6 +772,189 @@ function DensityToggleRow() {
           })}
         </div>
       </FieldRow>
+    </SectionCard>
+  );
+}
+
+// ─── Theme presets ────────────────────────────────────────────────
+// Curated bundles that set theme + accent + density in one click.
+const THEME_PRESETS = [
+  {
+    id: "vyne",
+    name: "VYNE",
+    desc: "Default cyan + dark + comfortable",
+    theme: "dark" as const,
+    accent: "purple" as const,
+    customHex: null,
+    density: "comfortable" as const,
+    swatch: "#06B6D4",
+  },
+  {
+    id: "linear",
+    name: "Linear",
+    desc: "Indigo · dark · compact",
+    theme: "dark" as const,
+    accent: "indigo" as const,
+    customHex: null,
+    density: "compact" as const,
+    swatch: "#6366F1",
+  },
+  {
+    id: "notion",
+    name: "Notion",
+    desc: "Slate · light · comfortable",
+    theme: "light" as const,
+    accent: "purple" as const,
+    customHex: "#3B3B3B",
+    density: "comfortable" as const,
+    swatch: "#3B3B3B",
+  },
+  {
+    id: "salesforce",
+    name: "Salesforce",
+    desc: "Sky blue · light · comfortable",
+    theme: "light" as const,
+    accent: "sky" as const,
+    customHex: null,
+    density: "comfortable" as const,
+    swatch: "#0EA5E9",
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    desc: "Emerald · dark · compact",
+    theme: "dark" as const,
+    accent: "green" as const,
+    customHex: "#2DA44E",
+    density: "compact" as const,
+    swatch: "#2DA44E",
+  },
+  {
+    id: "stripe",
+    name: "Stripe",
+    desc: "Violet · light · spacious",
+    theme: "light" as const,
+    accent: "violet" as const,
+    customHex: "#635BFF",
+    density: "spacious" as const,
+    swatch: "#635BFF",
+  },
+  {
+    id: "solarized",
+    name: "Solarized",
+    desc: "Amber · dark · comfortable",
+    theme: "dark" as const,
+    accent: "amber" as const,
+    customHex: "#B58900",
+    density: "comfortable" as const,
+    swatch: "#B58900",
+  },
+  {
+    id: "rose",
+    name: "Rose noir",
+    desc: "Rose · dark · spacious",
+    theme: "dark" as const,
+    accent: "rose" as const,
+    customHex: null,
+    density: "spacious" as const,
+    swatch: "#F43F5E",
+  },
+];
+
+function ThemePresetsSection() {
+  const setTheme = useThemeStore((s) => s.setTheme);
+  const setAccent = useThemeStore((s) => s.setAccent);
+  const setCustomAccent = useThemeStore((s) => s.setCustomAccent);
+  const setDensity = useThemeStore((s) => s.setDensity);
+
+  function applyPreset(p: (typeof THEME_PRESETS)[number]) {
+    setTheme(p.theme);
+    setAccent(p.accent);
+    setCustomAccent(p.customHex);
+    setDensity(p.density);
+  }
+
+  return (
+    <SectionCard title="Theme presets">
+      <div
+        style={{
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+          padding: "12px 18px 4px",
+        }}
+      >
+        One click sets accent, light/dark mode, and density together.
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+          gap: 10,
+          padding: "8px 18px 18px",
+        }}
+      >
+        {THEME_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => applyPreset(p)}
+            style={{
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              borderRadius: 10,
+              padding: "12px 14px",
+              cursor: "pointer",
+              textAlign: "left",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              transition: "border-color 0.15s, transform 0.08s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--vyne-accent, #06B6D4)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor =
+                "var(--content-border)";
+            }}
+          >
+            <span
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: p.swatch,
+                flexShrink: 0,
+                boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
+              }}
+            />
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: 2,
+                }}
+              >
+                {p.name}
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-tertiary)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {p.desc}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
     </SectionCard>
   );
 }
