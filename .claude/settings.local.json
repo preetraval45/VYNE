@@ -294,7 +294,8 @@
       "PowerShell(npx --yes tsc --noEmit -p apps/web/tsconfig.json 2>&1)",
       "Bash(npx --yes tsc --noEmit -p tsconfig.json)",
       "Bash(grep -n \"ProjectsPageInner\\\\|<PageHeader\\\\|allProjects\\\\|projects\\\\\\\\.length\" \"src/app/\\(dashboard\\)/projects/page.tsx\")",
-      "Bash(curl -s \"https://vyne.vercel.app/\" -I)"
+      "Bash(curl -s \"https://vyne.vercel.app/\" -I)",
+      "Bash(vercel switch *)"
     ]
   }
 }

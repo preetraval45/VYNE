@@ -1191,6 +1191,30 @@ const BG_PRESETS: { name: string; hex: string }[] = [
   { name: "Sand", hex: "#F4EFE6" },
 ];
 
+// Mirror of COLOR_CHART tuned for surface use — same 17 hues but pulled
+// toward the very-light (50/100) and very-dark (800/900/950) ends so
+// they feel like backgrounds, not buttons. 5 shades per row × 17 rows
+// = 85 surface swatches.
+const BG_CHART: { name: string; shades: [string, string, string, string, string] }[] = [
+  { name: "Slate",   shades: ["#F8FAFC", "#F1F5F9", "#E2E8F0", "#1E293B", "#0F172A"] },
+  { name: "Gray",    shades: ["#F9FAFB", "#F3F4F6", "#E5E7EB", "#1F2937", "#111827"] },
+  { name: "Red",     shades: ["#FEF2F2", "#FEE2E2", "#FECACA", "#7F1D1D", "#450A0A"] },
+  { name: "Orange",  shades: ["#FFF7ED", "#FFEDD5", "#FED7AA", "#7C2D12", "#431407"] },
+  { name: "Amber",   shades: ["#FFFBEB", "#FEF3C7", "#FDE68A", "#78350F", "#451A03"] },
+  { name: "Yellow",  shades: ["#FEFCE8", "#FEF9C3", "#FEF08A", "#713F12", "#422006"] },
+  { name: "Lime",    shades: ["#F7FEE7", "#ECFCCB", "#D9F99D", "#365314", "#1A2E05"] },
+  { name: "Green",   shades: ["#F0FDF4", "#DCFCE7", "#BBF7D0", "#14532D", "#052E16"] },
+  { name: "Emerald", shades: ["#ECFDF5", "#D1FAE5", "#A7F3D0", "#064E3B", "#022C22"] },
+  { name: "Teal",    shades: ["#F0FDFA", "#CCFBF1", "#99F6E4", "#134E4A", "#042F2E"] },
+  { name: "Cyan",    shades: ["#ECFEFF", "#CFFAFE", "#A5F3FC", "#164E63", "#083344"] },
+  { name: "Sky",     shades: ["#F0F9FF", "#E0F2FE", "#BAE6FD", "#0C4A6E", "#082F49"] },
+  { name: "Blue",    shades: ["#EFF6FF", "#DBEAFE", "#BFDBFE", "#1E3A8A", "#172554"] },
+  { name: "Indigo",  shades: ["#EEF2FF", "#E0E7FF", "#C7D2FE", "#312E81", "#1E1B4B"] },
+  { name: "Violet",  shades: ["#F5F3FF", "#EDE9FE", "#DDD6FE", "#4C1D95", "#2E1065"] },
+  { name: "Pink",    shades: ["#FDF2F8", "#FCE7F3", "#FBCFE8", "#831843", "#500724"] },
+  { name: "Rose",    shades: ["#FFF1F2", "#FFE4E6", "#FECDD3", "#881337", "#4C0519"] },
+];
+
 function BgPickerPanel({
   customBgHex,
   setCustomBg,
@@ -1280,6 +1304,76 @@ function BgPickerPanel({
             </button>
           );
         })}
+      </div>
+
+      {/* Full surface chart — 17 hues × 5 shades, light/dark biased */}
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Background chart
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "60px repeat(5, 1fr)",
+          gap: 4,
+          alignItems: "center",
+          marginBottom: 12,
+        }}
+      >
+        {BG_CHART.map((row) => (
+          <Fragment key={row.name}>
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--text-tertiary)",
+                fontWeight: 500,
+              }}
+            >
+              {row.name}
+            </span>
+            {row.shades.map((hex) => {
+              const active = isActive(hex);
+              return (
+                <button
+                  type="button"
+                  key={hex}
+                  title={`${row.name} · ${hex}`}
+                  aria-label={`Use ${row.name} ${hex} background`}
+                  onClick={() => {
+                    setCustomBg(hex);
+                    setBgHexDraft(hex);
+                  }}
+                  style={{
+                    width: "100%",
+                    height: 18,
+                    borderRadius: 4,
+                    background: hex,
+                    border: active
+                      ? "2px solid var(--text-primary)"
+                      : "1px solid rgba(0,0,0,0.08)",
+                    cursor: "pointer",
+                    padding: 0,
+                    transition: "transform 0.1s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                  }}
+                />
+              );
+            })}
+          </Fragment>
+        ))}
       </div>
 
       <div

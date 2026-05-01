@@ -32,18 +32,26 @@ export function ThemeApplier() {
   // the chosen background depending on perceived luminance.
   useEffect(() => {
     const root = document.documentElement;
+    const TEXT_OVERRIDES = [
+      "--text-primary",
+      "--text-secondary",
+      "--text-tertiary",
+    ] as const;
+    const SURFACE_OVERRIDES = [
+      "--bg",
+      "--content-bg",
+      "--content-elevated",
+      "--content-border",
+      "--sidebar-bg",
+      "--input-bg",
+    ] as const;
+
     if (!customBgHex || !/^#?[0-9a-f]{6}$/i.test(customBgHex)) {
       // Clear overrides so the default :root and [data-theme] tokens win.
-      for (const v of [
-        "--bg",
-        "--content-bg",
-        "--content-elevated",
-        "--content-border",
-        "--sidebar-bg",
-        "--input-bg",
-      ]) {
+      for (const v of [...SURFACE_OVERRIDES, ...TEXT_OVERRIDES]) {
         root.style.removeProperty(v);
       }
+      document.body.style.background = "";
       return;
     }
     const bg = customBgHex.startsWith("#") ? customBgHex : `#${customBgHex}`;
@@ -64,6 +72,20 @@ export function ThemeApplier() {
     root.style.setProperty("--content-border", border);
     root.style.setProperty("--sidebar-bg", sidebar);
     root.style.setProperty("--input-bg", input);
+
+    // Text contrast — flip text tokens so labels stay readable on the
+    // chosen surface. Without this, picking a light bg in dark mode (or
+    // vice-versa) leaves labels effectively invisible.
+    if (isLight) {
+      root.style.setProperty("--text-primary", "#0F172A");
+      root.style.setProperty("--text-secondary", "#475569");
+      root.style.setProperty("--text-tertiary", "#94A3B8");
+    } else {
+      root.style.setProperty("--text-primary", "#F8FAFC");
+      root.style.setProperty("--text-secondary", "#CBD5E1");
+      root.style.setProperty("--text-tertiary", "#94A3B8");
+    }
+
     document.body.style.background = bg;
   }, [customBgHex]);
 
@@ -180,6 +202,19 @@ export function ThemeApplier() {
       `rgba(${rgbStr}, 0.28)`,
     );
     root.style.setProperty("--alert-purple-text", colors.dark);
+
+    // Foreground that sits on top of the accent (button text, badge
+    // labels, FAB icon). White on dark accents, near-black on bright
+    // accents — derived from perceived luminance so light-yellow /
+    // lime / amber accents don't render unreadable white-on-yellow.
+    const accentRgb = hexToRgb(colors.primary);
+    if (accentRgb) {
+      const accentLum =
+        0.299 * accentRgb.r + 0.587 * accentRgb.g + 0.114 * accentRgb.b;
+      const accentFg = accentLum >= 170 ? "#0B0F14" : "#FFFFFF";
+      root.style.setProperty("--vyne-accent-fg", accentFg);
+      root.style.setProperty("--vyne-accent-on", accentFg);
+    }
   }, [accent, customAccentHex]);
 
   // Apply theme mode
