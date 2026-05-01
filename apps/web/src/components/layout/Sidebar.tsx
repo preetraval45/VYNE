@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Fragment } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Home,
@@ -775,35 +775,86 @@ function NavRow({
 }
 
 // ── Color Picker Component ─────────────────────────────────────────
+// Full Tailwind-style chart: 17 hues × 5 shades (300/400/500/600/700) gives the
+// user 85 ready-made swatches. The center column (500) doubles as the canonical
+// preset; the surrounding columns give light → dark variants for fine taste.
+const COLOR_CHART: { name: string; shades: [string, string, string, string, string] }[] = [
+  { name: "Slate",   shades: ["#94A3B8", "#64748B", "#475569", "#334155", "#1E293B"] },
+  { name: "Gray",    shades: ["#9CA3AF", "#6B7280", "#4B5563", "#374151", "#1F2937"] },
+  { name: "Red",     shades: ["#FCA5A5", "#F87171", "#EF4444", "#DC2626", "#B91C1C"] },
+  { name: "Orange",  shades: ["#FDBA74", "#FB923C", "#F97316", "#EA580C", "#C2410C"] },
+  { name: "Amber",   shades: ["#FCD34D", "#FBBF24", "#F59E0B", "#D97706", "#B45309"] },
+  { name: "Yellow",  shades: ["#FDE047", "#FACC15", "#EAB308", "#CA8A04", "#A16207"] },
+  { name: "Lime",    shades: ["#BEF264", "#A3E635", "#84CC16", "#65A30D", "#4D7C0F"] },
+  { name: "Green",   shades: ["#86EFAC", "#4ADE80", "#22C55E", "#16A34A", "#15803D"] },
+  { name: "Emerald", shades: ["#6EE7B7", "#34D399", "#10B981", "#059669", "#047857"] },
+  { name: "Teal",    shades: ["#5EEAD4", "#2DD4BF", "#14B8A6", "#0D9488", "#0F766E"] },
+  { name: "Cyan",    shades: ["#67E8F9", "#22D3EE", "#06B6D4", "#0891B2", "#0E7490"] },
+  { name: "Sky",     shades: ["#7DD3FC", "#38BDF8", "#0EA5E9", "#0284C7", "#0369A1"] },
+  { name: "Blue",    shades: ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8"] },
+  { name: "Indigo",  shades: ["#A5B4FC", "#818CF8", "#6366F1", "#4F46E5", "#4338CA"] },
+  { name: "Violet",  shades: ["#C4B5FD", "#A78BFA", "#8B5CF6", "#7C3AED", "#6D28D9"] },
+  { name: "Pink",    shades: ["#F9A8D4", "#F472B6", "#EC4899", "#DB2777", "#BE185D"] },
+  { name: "Rose",    shades: ["#FDA4AF", "#FB7185", "#F43F5E", "#E11D48", "#BE123C"] },
+];
+
 function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
   const accent = useThemeStore((s) => s.accent);
   const setAccent = useThemeStore((s) => s.setAccent);
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
   const setCustomAccent = useThemeStore((s) => s.setCustomAccent);
 
+  const [hexDraft, setHexDraft] = useState(customAccentHex ?? "");
+
+  const isHexActive = (hex: string) =>
+    customAccentHex?.toLowerCase() === hex.toLowerCase();
+
+  const commitHex = (raw: string) => {
+    const v = raw.trim();
+    const m = /^#?([0-9a-f]{6})$/i.exec(v);
+    if (m) setCustomAccent(`#${m[1].toLowerCase()}`);
+  };
+
   return (
     <div
       style={{
         position: "absolute",
         bottom: "100%",
-        left: 0,
-        right: 0,
+        left: "50%",
+        transform: "translateX(-50%)",
         marginBottom: 8,
         background: "var(--content-bg)",
         border: "1px solid var(--content-border)",
-        borderRadius: 10,
-        padding: "10px 12px",
+        borderRadius: 12,
+        padding: "12px",
         boxShadow: "var(--shadow-lg)",
         zIndex: 100,
+        width: 280,
+        maxHeight: "70vh",
+        overflowY: "auto",
       }}
     >
+      {/* Quick presets row */}
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Presets
+      </div>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
+          gridTemplateColumns: "repeat(8, 1fr)",
           gap: 6,
           alignItems: "center",
           justifyItems: "center",
+          marginBottom: 12,
         }}
       >
         {(Object.keys(ACCENT_COLORS) as AccentColor[]).map((key) => {
@@ -820,8 +871,8 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
                 onClose();
               }}
               style={{
-                width: 22,
-                height: 22,
+                width: 20,
+                height: 20,
                 borderRadius: "50%",
                 background: c.primary,
                 border: isActive
@@ -836,29 +887,121 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
             />
           );
         })}
-        {/* Native colour picker — gives the user any hex they want.
-            We hide the default chrome and overlay a circular swatch so
-            the row stays visually consistent with the presets. */}
+      </div>
+
+      {/* Full color chart — 17 hues × 5 shades */}
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Color chart
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "60px repeat(5, 1fr)",
+          gap: 4,
+          alignItems: "center",
+          marginBottom: 12,
+        }}
+      >
+        {COLOR_CHART.map((row) => (
+          <Fragment key={row.name}>
+            <span
+              style={{
+                fontSize: 10,
+                color: "var(--text-tertiary)",
+                fontWeight: 500,
+              }}
+            >
+              {row.name}
+            </span>
+            {row.shades.map((hex) => {
+              const active = isHexActive(hex);
+              return (
+                <button
+                  type="button"
+                  key={hex}
+                  title={`${row.name} · ${hex}`}
+                  aria-label={`Use ${row.name} ${hex}`}
+                  onClick={() => {
+                    setCustomAccent(hex);
+                    setHexDraft(hex);
+                  }}
+                  style={{
+                    width: "100%",
+                    height: 18,
+                    borderRadius: 4,
+                    background: hex,
+                    border: active
+                      ? "2px solid var(--text-primary)"
+                      : "1px solid rgba(0,0,0,0.08)",
+                    cursor: "pointer",
+                    padding: 0,
+                    transition: "transform 0.1s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                  }}
+                />
+              );
+            })}
+          </Fragment>
+        ))}
+      </div>
+
+      {/* Custom hex input + native picker */}
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-tertiary)",
+          marginBottom: 6,
+        }}
+      >
+        Custom
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
         <label
           title="Pick any color"
           aria-label="Pick a custom accent color"
           style={{
             position: "relative",
-            width: 22,
-            height: 22,
-            borderRadius: "50%",
+            width: 28,
+            height: 28,
+            borderRadius: 6,
             cursor: "pointer",
-            background: customAccentHex ?? "conic-gradient(#EF4444, #F97316, #EAB308, #22C55E, #06B6D4, #3B82F6, #8B5CF6, #EC4899, #EF4444)",
-            border: customAccentHex
-              ? "2px solid var(--text-primary)"
-              : "2px dashed var(--content-border)",
-            display: "inline-block",
+            background:
+              customAccentHex ??
+              "conic-gradient(#EF4444, #F97316, #EAB308, #22C55E, #06B6D4, #3B82F6, #8B5CF6, #EC4899, #EF4444)",
+            border: "1px solid var(--content-border)",
+            flexShrink: 0,
           }}
         >
           <input
             type="color"
             value={customAccentHex ?? "#06B6D4"}
-            onChange={(e) => setCustomAccent(e.target.value)}
+            onChange={(e) => {
+              setCustomAccent(e.target.value);
+              setHexDraft(e.target.value);
+            }}
             style={{
               position: "absolute",
               inset: 0,
@@ -871,6 +1014,52 @@ function AccentPicker({ onClose }: Readonly<{ onClose: () => void }>) {
             }}
           />
         </label>
+        <input
+          type="text"
+          value={hexDraft}
+          onChange={(e) => setHexDraft(e.target.value)}
+          onBlur={(e) => commitHex(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              commitHex((e.target as HTMLInputElement).value);
+              onClose();
+            }
+          }}
+          placeholder="#06B6D4"
+          spellCheck={false}
+          style={{
+            flex: 1,
+            fontSize: 12,
+            fontFamily: "ui-monospace, SFMono-Regular, monospace",
+            padding: "5px 8px",
+            background: "var(--content-bg)",
+            border: "1px solid var(--content-border)",
+            borderRadius: 6,
+            color: "var(--text-primary)",
+            outline: "none",
+          }}
+        />
+        {customAccentHex && (
+          <button
+            type="button"
+            onClick={() => {
+              setCustomAccent(null);
+              setHexDraft("");
+            }}
+            title="Clear custom color"
+            style={{
+              fontSize: 11,
+              padding: "5px 8px",
+              background: "transparent",
+              border: "1px solid var(--content-border)",
+              borderRadius: 6,
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            Reset
+          </button>
+        )}
       </div>
     </div>
   );
