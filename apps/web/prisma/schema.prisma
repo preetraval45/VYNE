@@ -74,3 +74,83 @@ model Deal {
   @@index([stage])
   @@map("deals")
 }
+
+// CRM contacts (people). Paired with Account in the contacts module.
+model Contact {
+  id          String   @id @default(cuid())
+  orgId       String   @default("demo") @map("org_id")
+  name        String
+  email       String   @default("")
+  phone       String   @default("")
+  company     String   @default("")
+  accountId   String   @default("") @map("account_id")
+  title       String   @default("")
+  department  String   @default("")
+  lastContact String   @default("") @map("last_contact")
+  tags        String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([accountId])
+  @@map("contacts")
+}
+
+// Invoicing.Customer — distinct from CRM contacts. Carries AR rollup.
+model Customer {
+  id                 String   @id @default(cuid())
+  orgId              String   @default("demo") @map("org_id")
+  name               String
+  email              String   @default("")
+  phone              String   @default("")
+  totalRevenue       Int      @default(0) @map("total_revenue")
+  outstandingBalance Int      @default(0) @map("outstanding_balance")
+  lastInvoice        String   @default("") @map("last_invoice")
+  status             String   @default("Active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("customers")
+}
+
+// Invoicing.Invoice — line items live as Json (matches existing UI shape).
+model Invoice {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  number    String
+  customer  String   @default("")
+  date      String   @default("")
+  dueDate   String   @default("") @map("due_date")
+  amount    Int      @default(0)
+  items     Json?
+  notes     String   @default("")
+  status    String   @default("Draft")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("invoices")
+}
+
+// Ops.Product (inventory SKU).
+model Product {
+  id           String   @id @default(cuid())
+  orgId        String   @default("demo") @map("org_id")
+  name         String
+  sku          String
+  price        Int      @default(0)
+  costPrice    Int      @default(0) @map("cost_price")
+  stockQty     Int      @default(0) @map("stock_qty")
+  uom          String   @default("")
+  categoryId   String   @default("") @map("category_id")
+  categoryName String   @default("") @map("category_name")
+  status       String   @default("in_stock")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([sku])
+  @@map("products")
+}

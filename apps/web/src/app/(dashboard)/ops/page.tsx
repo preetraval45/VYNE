@@ -41,8 +41,14 @@ import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 import { PageDashboard } from "@/components/shared/PageDashboard";
+import { BulkActionsBar } from "@/components/shared/BulkActionsBar";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { AskAiButton } from "@/components/shared/AskAiButton";
+import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
+import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
+import { Trash2 } from "lucide-react";
 import {
   MOCK_PRODUCTS,
   MOCK_ORDERS,
@@ -578,6 +584,10 @@ function InventoryTab({
       p.sku.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
+  // Bulk selection (Phase 11.2) — multi-select products for batch
+  // delete with undo. Pattern matches Contacts / Invoicing.
+  const sel = useBulkSelection();
+
   function addProduct() {
     const product: ERPProduct = {
       id: `p${Date.now()}`,
@@ -678,6 +688,28 @@ function InventoryTab({
         <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
+              <th style={{ padding: "9px 12px", width: 32, textAlign: "center" }}>
+                <input
+                  type="checkbox"
+                  aria-label="Select all products"
+                  checked={
+                    filtered.length > 0 &&
+                    sel.isAllSelected(filtered.map((p) => p.id))
+                  }
+                  ref={(el) => {
+                    if (el)
+                      el.indeterminate = sel.isSomeSelected(
+                        filtered.map((p) => p.id),
+                      );
+                  }}
+                  onChange={(e) => {
+                    if (e.target.checked)
+                      sel.selectAll(filtered.map((p) => p.id));
+                    else sel.clear();
+                  }}
+                  style={{ cursor: "pointer" }}
+                />
+              </th>
               {[
                 "SKU",
                 "Product",
@@ -715,16 +747,40 @@ function InventoryTab({
                 style={{
                   borderTop: "1px solid var(--content-border)",
                   cursor: "pointer",
+                  background: sel.isSelected(p.id)
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
+                    : undefined,
                 }}
                 onMouseEnter={(e) => {
+                  if (sel.isSelected(p.id)) return;
                   (e.currentTarget as HTMLTableRowElement).style.background =
                     "var(--content-secondary)";
                 }}
                 onMouseLeave={(e) => {
+                  if (sel.isSelected(p.id)) return;
                   (e.currentTarget as HTMLTableRowElement).style.background =
                     "transparent";
                 }}
               >
+                <td
+                  style={{ padding: "10px 12px", textAlign: "center" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${p.name}`}
+                    checked={sel.isSelected(p.id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      sel.handleRowClick(
+                        filtered.map((x) => x.id),
+                        p.id,
+                        (e.nativeEvent as MouseEvent).shiftKey,
+                      );
+                    }}
+                    style={{ cursor: "pointer" }}
+                  />
+                </td>
                 <td
                   style={{
                     padding: "10px 14px",
@@ -860,6 +916,37 @@ function InventoryTab({
           </div>
         )}
       </div>
+
+      <BulkActionsBar
+        count={sel.selectedCount}
+        onClear={sel.clear}
+        actions={[
+          {
+            id: "delete",
+            label: "Delete",
+            icon: Trash2,
+            destructive: true,
+            onClick: () => {
+              const ids = Array.from(sel.selectedIds);
+              const snapshots = ids
+                .map((id) => products.find((p) => p.id === id))
+                .filter((p): p is ERPProduct => Boolean(p));
+              undoableDelete({
+                label: `Deleted ${ids.length} product${ids.length === 1 ? "" : "s"}`,
+                mutate: () =>
+                  ids.forEach((id) =>
+                    useOpsStore.getState().deleteProduct(id),
+                  ),
+                restore: () => {
+                  for (const p of snapshots)
+                    useOpsStore.getState().addProduct(p);
+                },
+              });
+              sel.clear();
+            },
+          },
+        ]}
+      />
 
       {/* Add Product modal */}
       <Modal
@@ -2409,6 +2496,8 @@ function OpsPageInner() {
     ];
 
   const dash = usePageDashboard("ops", "30d");
+  const aiPrompts = useAiSuggestedPrompts();
+  useRegisterAiCommands("ops");
 
   // Real KPIs from current data
   const lowStockCount = products.filter((p) => p.status === "low_stock").length;
@@ -2489,6 +2578,7 @@ function OpsPageInner() {
             <Pill tone="info" dot>
               {orders.filter((o) => o.status === "confirmed").length} pending
             </Pill>
+            <AskAiButton noun="ops" suggestions={aiPrompts} />
             <ExportButton
               data={
                 tab === "orders"
@@ -2496,6 +2586,11 @@ function OpsPageInner() {
                   : (products as unknown as Record<string, unknown>[])
               }
               filename={tab === "orders" ? "vyne-orders" : "vyne-inventory"}
+              audit={{
+                noun: tab === "orders" ? "ops-orders" : "ops-products",
+                viewName: tab,
+                filters: {},
+              }}
               columns={
                 tab === "orders"
                   ? [

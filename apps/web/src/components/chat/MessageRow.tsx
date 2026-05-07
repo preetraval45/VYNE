@@ -698,6 +698,7 @@ export function MessageRow({
       <AnimatePresence>
         {(hovering || isCurrentUser) && (
           <motion.div
+            data-chat-action-toolbar
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: hovering ? 1 : 0.55, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}

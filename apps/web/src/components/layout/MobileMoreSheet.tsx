@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   X,
   ChevronDown,
+  Search,
   Home,
   BarChart3,
   Contact,
@@ -34,6 +35,7 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
+import { useUIStore } from "@/lib/stores/ui";
 
 interface Sub {
   label: string;
@@ -308,6 +310,7 @@ interface Props {
  */
 export function MobileMoreSheet({ open, onClose }: Props) {
   const router = useRouter();
+  const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -423,6 +426,50 @@ export function MobileMoreSheet({ open, onClose }: Props) {
             <X size={16} />
           </button>
         </div>
+
+        {/* Search shortcut — opens the (mobile-styled) Cmd+K palette
+            so a thumb tap reaches the same action / page jump experience
+            desktop users get on ⌘K. The palette CSS in globals.css
+            re-flows it into a bottom sheet on phones. */}
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            setCommandPaletteOpen(true);
+          }}
+          aria-label="Search and jump"
+          style={{
+            margin: "8px 18px 4px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "10px 14px",
+            borderRadius: 12,
+            border: "1px solid var(--content-border)",
+            background: "var(--content-secondary)",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 500,
+            textAlign: "left",
+          }}
+        >
+          <Search size={15} />
+          <span style={{ flex: 1 }}>Search · jump · run command</span>
+          <kbd
+            style={{
+              padding: "2px 8px",
+              borderRadius: 6,
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              fontSize: 10.5,
+              fontWeight: 700,
+              color: "var(--text-tertiary)",
+            }}
+          >
+            ⌘K
+          </kbd>
+        </button>
 
         {/* Module grid (4 cols × N rows, scrolls). Expanded sub-rows
             span the full grid width via grid-column: 1 / -1. */}

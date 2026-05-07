@@ -27,6 +27,17 @@ import {
   FileDown,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { ShareLinkButton } from "@/components/shared/ShareLinkButton";
+import { PresenceBubbles } from "@/components/shared/PresenceBubbles";
+import { SlaCountdown } from "@/components/shared/SlaCountdown";
+import { BulkActionsBar } from "@/components/shared/BulkActionsBar";
+import { useBulkSelection } from "@/hooks/useBulkSelection";
+import { SavedViewsBar } from "@/components/shared/SavedViewsBar";
+import { useSavedViews } from "@/hooks/useSavedViews";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { AskAiButton } from "@/components/shared/AskAiButton";
+import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
+import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { undoableDelete } from "@/lib/undo";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
@@ -415,10 +426,12 @@ function FilterBtn({
 }>) {
   return (
     <button
+      type="button"
+      aria-pressed={active}
       onClick={onClick}
       style={{
         padding: "5px 12px",
-        borderRadius: 6,
+        borderRadius: 999,
         border: active
           ? "1px solid var(--vyne-accent, var(--vyne-purple))"
           : "1px solid var(--content-border)",
@@ -1635,6 +1648,11 @@ function CustomersTab() {
           <ExportButton
             data={customers as unknown as Record<string, unknown>[]}
             filename="vyne-customers"
+            audit={{
+              noun: "invoicing-customers",
+              viewName: null,
+              filters: { search: search || null },
+            }}
             columns={[
               { key: "name", header: "Name" },
               { key: "email", header: "Email" },
@@ -1830,11 +1848,44 @@ function InvoicesTab() {
   const selectedInvoice = invoiceDetail.id
     ? invoices.find((i) => i.id === invoiceDetail.id)
     : undefined;
-  const [filter, setFilter] = useState<"All" | InvoiceStatus>("All");
+  // Saved views (Phase 11.1) — status filter is the only persisted
+  // dimension for invoices today. Built-ins ship for the common
+  // "Overdue" + "Drafts" filter combinations so the bar feels
+  // populated on first load.
+  type InvoiceFilters = {
+    status: "All" | InvoiceStatus;
+    [key: string]: unknown;
+  };
+  const views = useSavedViews<InvoiceFilters>({
+    storageKey: "invoicing-invoices",
+    defaultFilters: { status: "All" },
+    builtinViews: [
+      { id: "all", name: "All", filters: { status: "All" }, pinned: true },
+      { id: "overdue", name: "Overdue", filters: { status: "Overdue" } },
+      { id: "drafts", name: "Drafts", filters: { status: "Draft" } },
+    ],
+  });
+  const filter = views.filters.status;
+  const setFilter = (v: "All" | InvoiceStatus) =>
+    views.setFilters((f) => ({ ...f, status: v }));
   const [modal, setModal] = useState<
     { type: "create" } | { type: "edit"; invoice: Invoice } | null
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
+  // Bulk-selection (Phase 10.4) — multi-select invoices for batch
+  // mark-paid / mark-sent / delete. Pattern matches the Contacts wiring.
+  const sel = useBulkSelection();
+
+  // Pull-to-refresh (Phase 11.4) — placeholder until invoicing store
+  // grows a server-backed hydrate. Subscribing now still re-runs the
+  // route which re-renders any RSC.
+  usePullToRefresh(() => {
+    // no-op until invoicing store grows hydrateFromServer
+  });
+
+  // Page-aware AI prompts (Phase 13).
+  const aiPrompts = useAiSuggestedPrompts();
+  useRegisterAiCommands("invoicing");
 
   function handleDownloadPdf(inv: Invoice) {
     const payload: InvoicePayload = {
@@ -1900,12 +1951,14 @@ function InvoicesTab() {
 
   return (
     <div>
+      <SavedViewsBar store={views} noun="invoices" />
       {/* KPI Cards */}
       <div
         style={{
           display: "flex",
           gap: 12,
           marginBottom: 16,
+          marginTop: 12,
           flexWrap: "wrap",
         }}
       >
@@ -1976,6 +2029,11 @@ function InvoicesTab() {
           <ExportButton
             data={invoices as unknown as Record<string, unknown>[]}
             filename="vyne-invoices"
+            audit={{
+              noun: "invoices",
+              viewName: views.activeView?.name ?? null,
+              filters: { status: filter || null },
+            }}
             columns={[
               { key: "number", header: "Invoice #" },
               { key: "customer", header: "Customer" },
@@ -1985,6 +2043,7 @@ function InvoicesTab() {
               { key: "status", header: "Status" },
             ]}
           />
+          <AskAiButton noun="invoices" suggestions={aiPrompts} />
           <PrimaryBtn
             icon={<Plus size={13} />}
             label="New Invoice"
@@ -1996,6 +2055,33 @@ function InvoicesTab() {
       <TableContainer>
         <thead>
           <tr style={{ background: "var(--table-header-bg)" }}>
+            <th
+              style={{
+                padding: "9px 12px",
+                textAlign: "center",
+                width: 32,
+              }}
+            >
+              <input
+                type="checkbox"
+                aria-label="Select all invoices"
+                checked={
+                  sorted.length > 0 &&
+                  sel.isAllSelected(sorted.map((i) => i.id))
+                }
+                ref={(el) => {
+                  if (el)
+                    el.indeterminate = sel.isSomeSelected(
+                      sorted.map((i) => i.id),
+                    );
+                }}
+                onChange={(e) => {
+                  if (e.target.checked) sel.selectAll(sorted.map((i) => i.id));
+                  else sel.clear();
+                }}
+                style={{ cursor: "pointer" }}
+              />
+            </th>
             <SortHeader
               label="Invoice #"
               sortKey="number"
@@ -2058,6 +2144,23 @@ function InvoicesTab() {
             const st = invoiceStatusStyle(inv.status);
             return (
               <TableRow key={inv.id} onClick={() => invoiceDetail.open(inv.id)}>
+                <Td align="center">
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${inv.number}`}
+                    checked={sel.isSelected(inv.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      sel.handleRowClick(
+                        sorted.map((i) => i.id),
+                        inv.id,
+                        (e.nativeEvent as MouseEvent).shiftKey,
+                      );
+                    }}
+                    style={{ cursor: "pointer" }}
+                  />
+                </Td>
                 <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {inv.number}
                 </Td>
@@ -2132,7 +2235,7 @@ function InvoicesTab() {
           {sorted.length === 0 && (
             <tr>
               <td
-                colSpan={7}
+                colSpan={8}
                 style={{
                   padding: 40,
                   textAlign: "center",
@@ -2146,6 +2249,61 @@ function InvoicesTab() {
           )}
         </tbody>
       </TableContainer>
+
+      <BulkActionsBar
+        count={sel.selectedCount}
+        onClear={sel.clear}
+        actions={[
+          {
+            id: "mark-paid",
+            label: "Mark paid",
+            icon: CheckCircle,
+            onClick: () => {
+              const ids = Array.from(sel.selectedIds);
+              for (const id of ids) {
+                const inv = invoices.find((i) => i.id === id);
+                if (!inv) continue;
+                if (inv.status === "Sent" || inv.status === "Overdue") {
+                  markAsPaid(id);
+                }
+              }
+              toast.success(`Marked ${ids.length} invoice${ids.length === 1 ? "" : "s"} paid`);
+              sel.clear();
+            },
+          },
+          {
+            id: "send",
+            label: "Send",
+            icon: Send,
+            onClick: () => {
+              const ids = Array.from(sel.selectedIds);
+              for (const id of ids) {
+                const inv = invoices.find((i) => i.id === id);
+                if (!inv) continue;
+                if (inv.status === "Draft" || inv.status === "Sent") {
+                  sendInvoice(id);
+                }
+              }
+              toast.success(`Sent ${ids.length} invoice${ids.length === 1 ? "" : "s"}`);
+              sel.clear();
+            },
+          },
+          {
+            id: "delete",
+            label: "Delete",
+            icon: Trash2,
+            destructive: true,
+            onClick: () => {
+              const ids = Array.from(sel.selectedIds);
+              for (const id of ids) deleteInvoice(id);
+              toast.success(
+                `Deleted ${ids.length} invoice${ids.length === 1 ? "" : "s"}`,
+              );
+              sel.clear();
+            },
+          },
+        ]}
+      />
 
       {modal?.type === "create" && (
         <InvoiceModal onClose={() => setModal(null)} />
@@ -2211,6 +2369,28 @@ function InvoiceDetailPanel({
           >
             {invoice.status}
           </span>
+        )
+      }
+      headerActions={
+        invoice && (
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+            {invoice.dueDate && invoice.status !== "Paid" && (
+              <SlaCountdown
+                targetIso={invoice.dueDate}
+                amberHours={72}
+                redHours={24}
+                label="Due"
+                hideAfterHours={24 * 60}
+              />
+            )}
+            <PresenceBubbles entityKey={`invoice:${invoice.id}`} />
+            <ShareLinkButton
+              entityId={invoice.id}
+              href={`/invoicing?invoice=${invoice.id}`}
+              label="invoice"
+              iconOnly
+            />
+          </div>
         )
       }
     >

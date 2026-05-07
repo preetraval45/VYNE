@@ -108,6 +108,7 @@ export function SmartReplies({
     <AnimatePresence>
       {suggestions.length > 0 && (
         <motion.div
+          data-chat-smart-replies
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 6 }}

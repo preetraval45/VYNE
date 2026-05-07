@@ -1,5 +1,7 @@
 "use client";
 
+import { useThemeStore } from "@/lib/stores/theme";
+
 // v=5 cache-buster — increment whenever the SVG files change
 const V = "?v=5";
 
@@ -18,13 +20,42 @@ export interface VyneLogoProps {
    */
   markSize?: number;
   className?: string;
+  /** Force the default VYNE mark even when a tenant logo is set
+   *  (auth landing pages, marketing). Default false. */
+  ignoreTenant?: boolean;
 }
 
 export function VyneLogo({
   variant = "mark",
   markSize = 32,
   className,
+  ignoreTenant = false,
 }: VyneLogoProps) {
+  const tenantLogo = useThemeStore((s) => s.logoUrl);
+
+  // Tenant logo overrides every variant when set. We render it as a
+  // square mark for mark/horizontal/stacked alike since a single user-
+  // uploaded asset can't be reliably split into horizontal lockups.
+  if (!ignoreTenant && tenantLogo) {
+    const h =
+      variant === "mark"
+        ? markSize
+        : variant === "horizontal"
+          ? Math.round(markSize * 1.5)
+          : Math.round(markSize * 4);
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={tenantLogo}
+        alt="Workspace logo"
+        height={h}
+        className={className}
+        data-no-scale
+        style={{ display: "block", flexShrink: 0, maxHeight: h, width: "auto" }}
+      />
+    );
+  }
+
   if (variant === "mark") {
     return (
       // eslint-disable-next-line @next/next/no-img-element

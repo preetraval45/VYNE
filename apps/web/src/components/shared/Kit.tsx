@@ -122,6 +122,7 @@ export function PageHeader({
 }) {
   return (
     <header
+      data-vyne-page-header
       style={{
         display: "flex",
         alignItems: "center",
@@ -136,7 +137,7 @@ export function PageHeader({
         flexShrink: 0,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+      <div data-vyne-page-header-title style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
         {icon && (
           <div
             style={{
@@ -182,6 +183,7 @@ export function PageHeader({
       </div>
       {actions && (
         <div
+          data-vyne-page-header-actions
           style={{
             display: "flex",
             alignItems: "center",

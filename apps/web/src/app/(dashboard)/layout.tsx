@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { GlobalSchemaTool } from "@/components/layout/GlobalSchemaTool";
 import { UnifiedTopBar } from "@/components/layout/UnifiedTopBar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
+import { GlobalSearchModal } from "@/components/layout/GlobalSearchModal";
 import { KeyboardShortcutsModal } from "@/components/layout/KeyboardShortcutsModal";
 import { FocusModeToast } from "@/components/layout/FocusModeToast";
 import { UndoToast } from "@/components/layout/UndoToast";
@@ -23,11 +24,19 @@ import { EdgeSwipeBack } from "@/components/layout/EdgeSwipeBack";
 import { GlobalDropZone } from "@/components/layout/GlobalDropZone";
 import { ScrollRestoration } from "@/components/layout/ScrollRestoration";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
+import { OfflineBanner } from "@/components/layout/OfflineBanner";
+import { A11yApplier } from "@/components/layout/A11yApplier";
+import { Announcer } from "@/components/layout/Announcer";
+import { AiSidebar } from "@/components/ai/AiSidebar";
+import { FollowTeammateProvider } from "@/hooks/useFollowTeammate";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 import { useCRMStore, bindCrmRealtime } from "@/lib/stores/crm";
+import { useContactsStore, bindContactsRealtime } from "@/lib/stores/contacts";
+import { useInvoicingStore, bindInvoicingRealtime } from "@/lib/stores/invoicing";
+import { useOpsStore, bindOpsRealtime } from "@/lib/stores/ops";
 import { useTabSync } from "@/hooks/useTabSync";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useEffect, useState } from "react";
@@ -48,25 +57,66 @@ export default function DashboardLayout({
   useVisualViewport();
 
   // Wire the global pull-to-refresh event so any page that doesn't have
-  // its own listener still re-syncs by triggering a router refresh +
-  // forcing all Zustand stores to re-emit their persisted state.
+  // its own listener still re-syncs. Broadcasts `vyne:soft-refresh` for
+  // page-local listeners (each list view can refetch its own data) and
+  // hydrates known server-backed stores (CRM today; add others here as
+  // they grow `hydrateFromServer`). Shows a toast so the user gets
+  // visible confirmation that the pull worked.
   useEffect(() => {
-    function onRefresh() {
-      router.refresh();
-      void useCRMStore.getState().hydrateFromServer();
+    let inflight = false;
+    async function onRefresh() {
+      if (inflight) return;
+      inflight = true;
+      const toastModule = await import("react-hot-toast");
+      const toastId = toastModule.default.loading("Refreshing…", {
+        position: "top-center",
+        duration: 1800,
+      });
+      try {
+        router.refresh();
+        await Promise.all([
+          useCRMStore.getState().hydrateFromServer(),
+          useContactsStore.getState().hydrateContactsFromServer(),
+          useInvoicingStore.getState().hydrateCustomersFromServer(),
+          useInvoicingStore.getState().hydrateInvoicesFromServer(),
+          useOpsStore.getState().hydrateProductsFromServer(),
+        ]);
+        window.dispatchEvent(new CustomEvent("vyne:soft-refresh"));
+        toastModule.default.success("Up to date", {
+          id: toastId,
+          position: "top-center",
+          duration: 1200,
+        });
+      } catch {
+        toastModule.default.error("Couldn't refresh", {
+          id: toastId,
+          position: "top-center",
+        });
+      } finally {
+        inflight = false;
+      }
     }
     window.addEventListener("vyne:pull-refresh", onRefresh);
     return () => window.removeEventListener("vyne:pull-refresh", onRefresh);
   }, [router]);
 
-  // Hydrate the CRM cache from Postgres once on mount. Reads /api/deals
-  // and replaces the local Zustand cache with the canonical list. Falls
-  // back silently to localStorage when the API is unreachable.
+  // Hydrate every server-backed Zustand store from Postgres once on
+  // mount. Reads /api/{deals,contacts,customers,invoices,products} and
+  // replaces the local cache with the canonical list. Falls back
+  // silently to localStorage when the API is unreachable.
   useEffect(() => {
     void useCRMStore.getState().hydrateFromServer();
-    // Subscribe to Pusher org-wide deal events. Two-tab CRM edits
-    // become instant once NEXT_PUBLIC_PUSHER_KEY is set.
+    void useContactsStore.getState().hydrateContactsFromServer();
+    void useInvoicingStore.getState().hydrateCustomersFromServer();
+    void useInvoicingStore.getState().hydrateInvoicesFromServer();
+    void useOpsStore.getState().hydrateProductsFromServer();
+    // Subscribe to Pusher org-wide events. Two-tab edits become instant
+    // once NEXT_PUBLIC_PUSHER_KEY is set; the helpers no-op silently
+    // when realtime is not configured.
     bindCrmRealtime("demo");
+    bindContactsRealtime("demo");
+    bindInvoicingRealtime("demo");
+    bindOpsRealtime("demo");
   }, []);
 
   // First-run onboarding: if user hasn't completed the wizard, push them
@@ -87,6 +137,7 @@ export default function DashboardLayout({
   const moduleKey = pathname?.split("/")[1] ?? "root";
 
   return (
+    <FollowTeammateProvider>
     <div
       className="flex h-screen overflow-hidden"
       style={{ background: "var(--content-bg-secondary)" }}
@@ -134,6 +185,9 @@ export default function DashboardLayout({
 
       {/* Global Command Palette */}
       <CommandPalette />
+
+      {/* Phase 14 — Global semantic search modal (Ctrl+/) */}
+      <GlobalSearchModalMount />
 
       {/* Global Keyboard Shortcuts Modal */}
       <KeyboardShortcutsModal />
@@ -191,6 +245,50 @@ export default function DashboardLayout({
       {/* Tenant impersonation banner (visible whenever vyne-impersonating
           is set in localStorage by the /admin impersonation flow) */}
       <ImpersonationBanner />
+
+      {/* Offline-state banner — shows when window.navigator.onLine flips
+          false, plus the count of mutations queued in IndexedDB. Auto-
+          flushes the queue when the network comes back. */}
+      <OfflineBanner />
+
+      {/* Phase 19.1/19.2/19.9 — apply a11y prefs (contrast / text scale / RTL) */}
+      <A11yApplier />
+
+      {/* Phase 19.3 — single global ARIA live region for async actions */}
+      <Announcer />
+
+      {/* Phase 16.10 — embeddable AI sidebar (right rail). Toggle with
+          ⌘+⇧+/ or the floating Sparkles pill. Hidden in focus mode and
+          on the dedicated /ai/chat page so it doesn't overlap. */}
+      {!focusMode && pathname && !pathname.startsWith("/ai") && (
+        <AiSidebar />
+      )}
     </div>
+    </FollowTeammateProvider>
   );
+}
+
+/** Mount + keyboard binding for the Phase 14 global search modal.
+ *  Ctrl+/ (or Cmd+/ on macOS) opens; the modal handles its own Esc.
+ *  Kept in this file so the shortcut wiring lives next to the rest of
+ *  the layout-level shortcuts. */
+function GlobalSearchModalMount() {
+  const open = useUIStore((s) => s.globalSearchOpen);
+  const setOpen = useUIStore((s) => s.setGlobalSearchOpen);
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const isFormField =
+        document.activeElement instanceof HTMLInputElement ||
+        document.activeElement instanceof HTMLTextAreaElement ||
+        (document.activeElement as HTMLElement | null)?.isContentEditable;
+      if (isFormField) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+        e.preventDefault();
+        setOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setOpen]);
+  return <GlobalSearchModal open={open} onClose={() => setOpen(false)} />;
 }

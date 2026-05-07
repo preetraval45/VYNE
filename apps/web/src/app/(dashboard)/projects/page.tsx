@@ -44,6 +44,15 @@ import {
 } from "@/components/shared/Kit";
 import toast from "react-hot-toast";
 import { PageDashboard } from "@/components/shared/PageDashboard";
+import { ShareLinkButton } from "@/components/shared/ShareLinkButton";
+import { PresenceBubbles } from "@/components/shared/PresenceBubbles";
+import { SavedViewsBar } from "@/components/shared/SavedViewsBar";
+import { FilterSearchBar } from "@/components/shared/FilterSearchBar";
+import { AskAiButton } from "@/components/shared/AskAiButton";
+import { useSavedViews } from "@/hooks/useSavedViews";
+import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
+import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { SprintPlannerCard } from "@/components/projects/SprintPlannerCard";
@@ -87,9 +96,42 @@ function ProjectsPageInner() {
   const selectedProject = detail.id
     ? projects.find((p) => p.id === detail.id)
     : undefined;
-  const [search, setSearch] = useState("");
-  const [view, setView] = useState<"board" | "list">("board");
+  // Saved views (Phase 11.1) — search + view toggle live in the saved
+  // bundle so users can pin "My active projects (board)" etc. The
+  // index signature makes ProjectFilters compatible with the
+  // useSavedViews `Record<string, unknown>` constraint.
+  type ProjectFilters = {
+    search: string;
+    view: "board" | "list";
+    [key: string]: unknown;
+  };
+  const views = useSavedViews<ProjectFilters>({
+    storageKey: "projects-list",
+    defaultFilters: { search: "", view: "board" },
+    builtinViews: [
+      { id: "all", name: "All", filters: { search: "", view: "board" }, pinned: true },
+    ],
+  });
+  const search = views.filters.search;
+  const setSearch = (v: string) => views.setFilters((f) => ({ ...f, search: v }));
+  const view = views.filters.view;
+  const setView = (v: "board" | "list") =>
+    views.setFilters((f) => ({ ...f, view: v }));
   const debouncedSearch = useDebounce(search, 300);
+
+  // Pull-to-refresh (Phase 11.4) — replays the projects store hydrate
+  // when the user pulls. The store doesn't have a server-backed hydrate
+  // yet, so for now this is a no-op placeholder; ready for when the
+  // /api/projects route lands.
+  usePullToRefresh(() => {
+    // no-op until projects store grows hydrateFromServer
+  });
+
+  // Page-aware AI suggestions (Phase 13). Renders in the AskAiButton
+  // dropdown so a tap opens /ai/chat with a pre-filled prompt that
+  // already references this module's data shape.
+  const aiPrompts = useAiSuggestedPrompts();
+  useRegisterAiCommands("projects");
 
   // Custom statuses configured by admin via the wrench tool. Fall back
   // to the built-in trio when the workspace hasn't customized them.
@@ -170,6 +212,7 @@ function ProjectsPageInner() {
 
   return (
     <div className="flex flex-col h-full">
+      <SavedViewsBar store={views} noun="projects" />
       <PageHeader
         icon={<LayoutGrid size={16} />}
         title="Projects"
@@ -184,25 +227,77 @@ function ProjectsPageInner() {
                 { value: "list", label: "List", icon: <List size={14} /> },
               ]}
             />
-            <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-              style={{
-                background: "var(--content-secondary)",
-                border: "1px solid var(--content-border)",
-                width: 220,
-              }}
-            >
-              <Search size={14} style={{ color: "var(--text-tertiary)" }} />
-              <input
-                type="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search projects..."
-                aria-label="Search projects"
-                className="flex-1 bg-transparent text-sm focus:outline-none"
-                style={{ color: "var(--text-primary)" }}
-              />
-            </div>
+            <FilterSearchBar
+              query={search}
+              onQueryChange={setSearch}
+              placeholder="Search projects…"
+              width={340}
+              filters={[
+                {
+                  id: "active-only",
+                  label: "Active only",
+                  hint: "Hide done & archived",
+                },
+                { id: "my-projects", label: "My Projects" },
+                { id: "starred", label: "My Favorites" },
+                { id: "unassigned", label: "Unassigned", divider: true },
+                { id: "overdue", label: "Overdue tasks" },
+                { id: "in-progress", label: "Has in-progress tasks" },
+                { id: "blocked", label: "Has blocked tasks", divider: true },
+                { id: "archived", label: "Archived" },
+              ]}
+              activeFilterIds={
+                Array.isArray(views.filters.activeFilterIds)
+                  ? (views.filters.activeFilterIds as string[])
+                  : []
+              }
+              onToggleFilter={(id) =>
+                views.setFilters((f) => {
+                  const cur = Array.isArray(f.activeFilterIds)
+                    ? (f.activeFilterIds as string[])
+                    : [];
+                  return {
+                    ...f,
+                    activeFilterIds: cur.includes(id)
+                      ? cur.filter((x) => x !== id)
+                      : [...cur, id],
+                  };
+                })
+              }
+              groupBy={[
+                { id: "status", label: "Status" },
+                { id: "priority", label: "Priority" },
+                { id: "owner", label: "Owner" },
+                { id: "dueDate", label: "Due date" },
+              ]}
+              activeGroupId={
+                typeof views.filters.groupBy === "string"
+                  ? (views.filters.groupBy as string)
+                  : null
+              }
+              onChangeGroup={(id) =>
+                views.setFilters((f) => ({ ...f, groupBy: id ?? "" }))
+              }
+              favorites={views.views.map((v) => ({
+                id: v.id,
+                label: v.name,
+                pinned: v.pinned,
+              }))}
+              activeFavoriteId={views.activeViewId}
+              onLoadFavorite={(id) => views.selectView(id)}
+              onDeleteFavorite={(id) => views.deleteView(id)}
+              onSaveCurrent={(name) => views.saveView(name)}
+              onPinFavorite={(id, pinned) => views.pinView?.(id, pinned)}
+              onClearAll={() =>
+                views.setFilters({
+                  search: "",
+                  view,
+                  activeFilterIds: [],
+                  groupBy: "",
+                })
+              }
+            />
+            <AskAiButton noun="projects" suggestions={aiPrompts} />
             <PrimaryLink href="/projects/new">
               <Plus size={14} /> New
             </PrimaryLink>
@@ -524,7 +619,14 @@ function ProjectDetailPanel({
       }
       headerActions={
         project && (
-          <>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+            <PresenceBubbles entityKey={`project:${project.id}`} />
+            <ShareLinkButton
+              entityId={project.id}
+              href={`/projects/${project.id}`}
+              label="project"
+              iconOnly
+            />
             <Link
               href={`/projects/${project.id}/edit`}
               title="Edit project"
@@ -545,7 +647,7 @@ function ProjectDetailPanel({
             >
               <Trash2 size={14} />
             </Link>
-          </>
+          </div>
         )
       }
     >

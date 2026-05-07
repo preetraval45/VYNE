@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageCircle, Send, Reply, MoreHorizontal, Check } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
+import {
+  subscribe,
+  publishFromClient,
+  isRealtimeEnabled,
+} from "@/lib/realtime";
+import { useTypingIndicator } from "@/hooks/useTypingIndicator";
+import { TypingIndicator } from "./TypingIndicator";
 
 export interface ThreadMessage {
   id: string;
@@ -13,14 +20,29 @@ export interface ThreadMessage {
   resolved?: boolean;
 }
 
+interface Mention {
+  id: string;
+  name: string;
+}
+
 interface Props {
   /** Entity identifier, e.g. "issue:ENG-43" or "doc:doc-123" */
   subjectId: string;
   label?: string;
   initialMessages?: ThreadMessage[];
+  /** Pool of @-mentionable users; defaults to a small demo set. */
+  mentionPool?: Mention[];
 }
 
 const STORAGE_PREFIX = "vyne-threads-";
+
+const DEMO_MENTIONS: Mention[] = [
+  { id: "u-sarah", name: "Sarah Kim" },
+  { id: "u-tony", name: "Tony Marquez" },
+  { id: "u-maya", name: "Maya Okonkwo" },
+  { id: "u-alex", name: "Alex Rivera" },
+  { id: "u-jamie", name: "Jamie Chen" },
+];
 
 function loadThread(id: string): ThreadMessage[] {
   if (typeof window === "undefined") return [];
@@ -77,13 +99,55 @@ function initials(name: string): string {
     .slice(0, 2);
 }
 
-export function CommentsPanel({ subjectId, label = "Comments", initialMessages }: Props) {
+/** Render @Name chips inline. Cheap split — does not touch surrounding text. */
+function renderBody(body: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  const re = /@([\w-]+(?: [\w-]+)?)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = re.exec(body)) !== null) {
+    if (m.index > last) parts.push(body.slice(last, m.index));
+    parts.push(
+      <span
+        key={`m-${key++}`}
+        style={{
+          color: "var(--vyne-accent, var(--vyne-purple))",
+          background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+          padding: "0 4px",
+          borderRadius: 4,
+          fontWeight: 600,
+        }}
+      >
+        @{m[1]}
+      </span>,
+    );
+    last = m.index + m[0].length;
+  }
+  if (last < body.length) parts.push(body.slice(last));
+  return parts;
+}
+
+export function CommentsPanel({
+  subjectId,
+  label = "Comments",
+  initialMessages,
+  mentionPool = DEMO_MENTIONS,
+}: Props) {
   const user = useAuthStore((s) => s.user);
   const [messages, setMessages] = useState<ThreadMessage[]>(
     initialMessages ?? [],
   );
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionIdx, setMentionIdx] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const meId = user?.id ?? "anonymous";
+
+  const channel = `presence-thread-${subjectId}`;
+  const { typers, onChange: onTypingChange, onSubmit: onTypingSubmit } =
+    useTypingIndicator(subjectId);
 
   useEffect(() => {
     const loaded = loadThread(subjectId);
@@ -97,6 +161,79 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
   useEffect(() => {
     saveThread(subjectId, messages);
   }, [subjectId, messages]);
+
+  // Realtime: receive remote comments & resolve toggles.
+  useEffect(() => {
+    if (!isRealtimeEnabled()) return;
+    const offAdd = subscribe<ThreadMessage>(channel, "comment:add", (msg) => {
+      if (msg.author.id === meId) return;
+      setMessages((prev) =>
+        prev.some((m) => m.id === msg.id) ? prev : [...prev, msg],
+      );
+    });
+    const offResolve = subscribe<{ id: string; resolved: boolean; actorId: string }>(
+      channel,
+      "comment:resolve",
+      ({ id, resolved, actorId }) => {
+        if (actorId === meId) return;
+        setMessages((prev) =>
+          prev.map((m) => (m.id === id ? { ...m, resolved } : m)),
+        );
+      },
+    );
+    return () => {
+      offAdd();
+      offResolve();
+    };
+  }, [channel, meId]);
+
+  const filteredMentions = useMemo(() => {
+    if (mentionQuery === null) return [];
+    const q = mentionQuery.toLowerCase();
+    return mentionPool
+      .filter((m) => m.name.toLowerCase().includes(q))
+      .slice(0, 5);
+  }, [mentionQuery, mentionPool]);
+
+  const insertMention = useCallback(
+    (m: Mention) => {
+      const ta = textareaRef.current;
+      if (!ta) return;
+      const cursor = ta.selectionStart ?? draft.length;
+      // Walk back to the @ trigger
+      const before = draft.slice(0, cursor);
+      const at = before.lastIndexOf("@");
+      if (at < 0) return;
+      const next = `${draft.slice(0, at)}@${m.name} ${draft.slice(cursor)}`;
+      setDraft(next);
+      setMentionQuery(null);
+      requestAnimationFrame(() => {
+        ta.focus();
+        const pos = at + m.name.length + 2;
+        ta.setSelectionRange(pos, pos);
+      });
+    },
+    [draft],
+  );
+
+  const updateDraft = useCallback((value: string, caretPos: number) => {
+    setDraft(value);
+    onTypingChange();
+    // Detect @ trigger: @<query> with no whitespace after @
+    const before = value.slice(0, caretPos);
+    const at = before.lastIndexOf("@");
+    if (at < 0) {
+      setMentionQuery(null);
+      return;
+    }
+    const after = before.slice(at + 1);
+    if (/^[\w-]{0,30}$/.test(after) && (at === 0 || /\s/.test(value[at - 1]))) {
+      setMentionQuery(after);
+      setMentionIdx(0);
+    } else {
+      setMentionQuery(null);
+    }
+  }, [onTypingChange]);
 
   const addMessage = useCallback(() => {
     const text = draft.trim();
@@ -113,13 +250,28 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
     setMessages((prev) => [...prev, msg]);
     setDraft("");
     setReplyTo(null);
-  }, [draft, replyTo, user]);
+    setMentionQuery(null);
+    onTypingSubmit();
+    void publishFromClient(channel, "comment:add", msg);
+  }, [draft, replyTo, user, channel, onTypingSubmit]);
 
-  const toggleResolved = useCallback((id: string) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, resolved: !m.resolved } : m)),
-    );
-  }, []);
+  const toggleResolved = useCallback(
+    (id: string) => {
+      setMessages((prev) => {
+        const target = prev.find((m) => m.id === id);
+        const nextResolved = !(target?.resolved ?? false);
+        void publishFromClient(channel, "comment:resolve", {
+          id,
+          resolved: nextResolved,
+          actorId: meId,
+        });
+        return prev.map((m) =>
+          m.id === id ? { ...m, resolved: nextResolved } : m,
+        );
+      });
+    },
+    [channel, meId],
+  );
 
   // Group by parent → list of replies
   const { rootMessages, repliesByParent } = useMemo(() => {
@@ -249,6 +401,11 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
         })}
       </ol>
 
+      {/* Typing indicator (above the composer) */}
+      <div style={{ minHeight: 16, paddingLeft: 4 }}>
+        <TypingIndicator typers={typers} />
+      </div>
+
       {/* Composer */}
       <form
         onSubmit={(e) => {
@@ -263,6 +420,7 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
           borderRadius: 10,
           background: "var(--content-secondary)",
           border: "1px solid var(--content-border)",
+          position: "relative",
         }}
       >
         {replyTarget && (
@@ -297,15 +455,42 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
           </div>
         )}
         <textarea
+          ref={textareaRef}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) =>
+            updateDraft(e.target.value, e.target.selectionStart ?? e.target.value.length)
+          }
           onKeyDown={(e) => {
+            if (mentionQuery !== null && filteredMentions.length > 0) {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setMentionIdx((i) => (i + 1) % filteredMentions.length);
+                return;
+              }
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setMentionIdx(
+                  (i) => (i - 1 + filteredMentions.length) % filteredMentions.length,
+                );
+                return;
+              }
+              if (e.key === "Enter" || e.key === "Tab") {
+                e.preventDefault();
+                insertMention(filteredMentions[mentionIdx]);
+                return;
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setMentionQuery(null);
+                return;
+              }
+            }
             if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
               e.preventDefault();
               addMessage();
             }
           }}
-          placeholder="Add a comment… (⌘+Enter to send)"
+          placeholder="Add a comment… (@ to mention · ⌘+Enter to send)"
           aria-label="Comment"
           rows={2}
           style={{
@@ -321,6 +506,76 @@ export function CommentsPanel({ subjectId, label = "Comments", initialMessages }
             fontFamily: "inherit",
           }}
         />
+        {mentionQuery !== null && filteredMentions.length > 0 && (
+          <ul
+            role="listbox"
+            aria-label="Mention suggestions"
+            style={{
+              position: "absolute",
+              bottom: "100%",
+              left: 10,
+              right: 10,
+              marginBottom: 6,
+              listStyle: "none",
+              padding: 4,
+              borderRadius: 10,
+              background: "var(--content-bg)",
+              border: "1px solid var(--content-border)",
+              boxShadow: "var(--shadow-lg)",
+              maxHeight: 200,
+              overflow: "auto",
+              zIndex: 30,
+            }}
+          >
+            {filteredMentions.map((m, idx) => (
+              <li key={m.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={idx === mentionIdx}
+                  onMouseEnter={() => setMentionIdx(idx)}
+                  onClick={() => insertMention(m)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    border: "none",
+                    background:
+                      idx === mentionIdx
+                        ? "var(--content-secondary)"
+                        : "transparent",
+                    color: "var(--text-primary)",
+                    fontSize: 12,
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      background: avatarColor(m.id),
+                      color: "#fff",
+                      fontSize: 9,
+                      fontWeight: 700,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {initials(m.name)}
+                  </span>
+                  {m.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         <div
           style={{
             display: "flex",
@@ -440,7 +695,7 @@ function Comment({ msg, isReply, onReply, onToggleResolved }: CommentProps) {
             textDecoration: msg.resolved ? "line-through" : "none",
           }}
         >
-          {msg.body}
+          {renderBody(msg.body)}
         </p>
         <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
           <button

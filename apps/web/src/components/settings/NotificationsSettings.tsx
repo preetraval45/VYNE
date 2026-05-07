@@ -5,6 +5,12 @@ import { Sparkles, Send, Volume2, Play, SpellCheck } from "lucide-react";
 import { useSettingsStore } from "@/lib/stores/settings";
 import { useAuthStore } from "@/lib/stores/auth";
 import type { NotificationSettings as NotifType } from "@/lib/stores/settings";
+import {
+  ensurePushSubscription,
+  disablePushSubscription,
+  isWebPushSupported,
+  getVapidPublicKey,
+} from "@/lib/webPush";
 
 interface DigestPreview {
   headline: string;
@@ -143,6 +149,42 @@ export default function NotificationsSettings({
     }
     onToast(`Daily digest posted to ${postChannel}`);
   }, [aiDigest, postChannel, onToast]);
+
+  // 13.5 — email the AI digest to the signed-in user using the new
+  // /api/notifications/digest pipeline (digest generator → email sender).
+  const emailDigestNow = useCallback(async () => {
+    if (!userEmail) {
+      onToast("No email on file — sign in again to receive the digest");
+      return;
+    }
+    onToast("Generating and sending digest…");
+    try {
+      const res = await fetch("/api/notifications/digest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: userEmail,
+          cadence: notif.emailDigest === "weekly" ? "weekly" : "daily",
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        send?: { queued?: boolean; provider?: string };
+        error?: string;
+      };
+      if (data.ok) {
+        onToast(
+          data.send?.queued
+            ? `Digest sent via ${data.send.provider}`
+            : "Digest generated (email provider not configured)",
+        );
+      } else {
+        onToast(data.error ?? "Could not send digest");
+      }
+    } catch {
+      onToast("Could not reach the digest service");
+    }
+  }, [userEmail, notif.emailDigest, onToast]);
 
   const sendTestEmail = useCallback(async () => {
     if (!userEmail) {
@@ -597,6 +639,189 @@ export default function NotificationsSettings({
         </div>
       </SectionCard>
 
+      <SectionCard title="Web push (this device)">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              Push to this browser even when VYNE is closed
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
+              {isWebPushSupported()
+                ? getVapidPublicKey()
+                  ? "Click enable, accept the browser prompt, and we'll deliver alerts as system notifications."
+                  : "Server is missing NEXT_PUBLIC_VAPID_PUBLIC_KEY — falls back to in-app only."
+                : "This browser does not support web push. Try Chrome / Edge / Firefox on desktop, or Android."}
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              type="button"
+              disabled={!isWebPushSupported() || !getVapidPublicKey()}
+              onClick={async () => {
+                const sub = await ensurePushSubscription();
+                onToast(
+                  sub
+                    ? "Web push enabled on this device"
+                    : "Couldn't enable push (permission, browser, or VAPID key missing)",
+                );
+              }}
+              style={{
+                padding: "7px 14px",
+                borderRadius: 8,
+                border: "none",
+                background:
+                  isWebPushSupported() && getVapidPublicKey()
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--content-border)",
+                color: "#fff",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor:
+                  isWebPushSupported() && getVapidPublicKey() ? "pointer" : "default",
+              }}
+            >
+              Enable
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                const ok = await disablePushSubscription();
+                onToast(ok ? "Web push disabled" : "Nothing to disable");
+              }}
+              style={{
+                padding: "7px 12px",
+                borderRadius: 8,
+                border: "1px solid var(--content-border)",
+                background: "var(--content-bg)",
+                color: "var(--text-primary)",
+                fontSize: 12,
+                fontWeight: 500,
+                cursor: "pointer",
+              }}
+            >
+              Disable
+            </button>
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Mute by module">
+        <p
+          style={{
+            margin: "0 0 12px",
+            fontSize: 12,
+            color: "var(--text-tertiary)",
+          }}
+        >
+          Muted modules drop notifications silently — they never hit the bell,
+          a toast, or web push. Use sparingly; mention alerts still bypass mute.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+            gap: 8,
+          }}
+        >
+          {(
+            [
+              "crm",
+              "sales",
+              "projects",
+              "invoicing",
+              "finance",
+              "expenses",
+              "ops",
+              "contacts",
+              "hr",
+              "marketing",
+              "manufacturing",
+              "observe",
+              "code",
+              "chat",
+              "docs",
+              "roadmap",
+              "automations",
+              "reporting",
+              "maintenance",
+              "purchase",
+              "calendar",
+              "timesheet",
+              "training",
+              "playbooks",
+              "runbooks",
+              "help",
+            ] as const
+          ).map((mod) => {
+            const muted = Boolean(notif.mutedModules?.[mod]);
+            return (
+              <button
+                key={mod}
+                type="button"
+                role="switch"
+                aria-checked={muted ? "true" : "false"}
+                onClick={async () => {
+                  const next = { ...(notif.mutedModules ?? {}) };
+                  if (muted) delete next[mod];
+                  else next[mod] = true;
+                  try {
+                    await update({ mutedModules: next });
+                    onToast(
+                      muted ? `${mod} unmuted` : `${mod} muted`,
+                    );
+                  } catch {
+                    onToast("Failed to update mute setting");
+                  }
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "6px 10px",
+                  borderRadius: 8,
+                  border: "1px solid",
+                  borderColor: muted
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--content-border)",
+                  background: muted
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)"
+                    : "var(--content-bg)",
+                  color: muted
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--text-primary)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  textTransform: "capitalize",
+                  textAlign: "left",
+                }}
+              >
+                <span
+                  aria-hidden="true"
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: muted
+                      ? "var(--vyne-accent, var(--vyne-purple))"
+                      : "var(--content-border)",
+                    flexShrink: 0,
+                  }}
+                />
+                {mod}
+              </button>
+            );
+          })}
+        </div>
+      </SectionCard>
+
       <SectionCard title="Email Digest">
         <div
           style={{
@@ -633,6 +858,45 @@ export default function NotificationsSettings({
             <option value="weekly">Weekly</option>
             <option value="never">Never</option>
           </select>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 16,
+            paddingTop: 16,
+            borderTop: "1px solid var(--content-border)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text-primary)" }}>
+              Send digest now
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 1 }}>
+              AI-summarised email to {userEmail ?? "your email"} ·
+              uses the cadence above for the subject line
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={emailDigestNow}
+            disabled={!userEmail}
+            style={{
+              padding: "7px 14px",
+              borderRadius: 8,
+              border: "none",
+              background: userEmail
+                ? "var(--vyne-accent, var(--vyne-purple))"
+                : "var(--content-border)",
+              color: "#fff",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: userEmail ? "pointer" : "default",
+            }}
+          >
+            Email digest
+          </button>
         </div>
         <div
           style={{

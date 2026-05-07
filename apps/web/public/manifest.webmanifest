@@ -24,9 +24,12 @@
     }
   ],
   "shortcuts": [
-    { "name": "Home",    "url": "/home",    "description": "Dashboard" },
-    { "name": "Chat",    "url": "/chat",    "description": "Channels and DMs" },
-    { "name": "Projects","url": "/projects","description": "Issues and sprints" },
-    { "name": "Docs",    "url": "/docs",    "description": "Knowledge base" }
+    { "name": "Home",        "url": "/home",                 "description": "Dashboard" },
+    { "name": "New issue",   "url": "/projects/new",         "description": "Create an issue from the launcher" },
+    { "name": "Quick search","url": "/?action=cmdk",         "description": "Jump straight into Cmd+K" },
+    { "name": "Ask AI",      "url": "/ai/chat",              "description": "Open Vyne AI" },
+    { "name": "Chat",        "url": "/chat",                 "description": "Channels and DMs" },
+    { "name": "Projects",    "url": "/projects",             "description": "Issues and sprints" },
+    { "name": "Docs",        "url": "/docs",                 "description": "Knowledge base" }
   ]
 }

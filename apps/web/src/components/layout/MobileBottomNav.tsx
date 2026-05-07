@@ -13,6 +13,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useUnreadStore } from "@/lib/stores/unread";
 import { useMounted } from "@/hooks/useMounted";
+import { useUIStore } from "@/lib/stores/ui";
 import { MobileMoreSheet } from "./MobileMoreSheet";
 
 interface NavItem {
@@ -58,6 +59,7 @@ const NAV_ITEMS: NavItem[] = [
 export function MobileBottomNav() {
   const pathname = usePathname() ?? "";
   const [sheetOpen, setSheetOpen] = useState(false);
+  const setCommandPaletteOpen = useUIStore((s) => s.setCommandPaletteOpen);
 
   // Close the sheet whenever the route changes (Link tap navigates).
   useEffect(() => {
@@ -190,10 +192,17 @@ export function MobileBottomNav() {
             </Link>
           );
         })}
+        {/* Long-press the More button to open Cmd+K instead — keeps the
+            tab count at 5 while exposing the palette to thumb input.
+            Quick tap still opens the modules sheet. */}
         <button
           type="button"
           onClick={() => setSheetOpen((v) => !v)}
-          aria-label="Open all modules"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            setCommandPaletteOpen(true);
+          }}
+          aria-label="Open all modules · long-press to search"
           aria-expanded={sheetOpen}
           style={{
             flex: 1,

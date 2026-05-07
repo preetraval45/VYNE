@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
+import {
+  subscribe,
+  publishFromClient,
+  isRealtimeEnabled,
+} from "@/lib/realtime";
 
 interface Reaction {
   emoji: string;
@@ -75,6 +80,23 @@ export function ReactionsBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId]);
 
+  // Realtime: receive remote toggles. Each event carries the full
+  // reactions array so late-joining clients converge on the latest state.
+  useEffect(() => {
+    if (!isRealtimeEnabled()) return;
+    const channel = `presence-reactions-${subjectId}`;
+    const off = subscribe<{ reactions: Reaction[]; actorId: string }>(
+      channel,
+      "reactions:set",
+      ({ reactions: incoming, actorId }) => {
+        if (actorId === userId) return; // ignore our own echo
+        setReactions(incoming);
+        saveReactions(subjectId, incoming);
+      },
+    );
+    return off;
+  }, [subjectId, userId]);
+
   const toggle = (emoji: string) => {
     setReactions((prev) => {
       const existing = prev.find((r) => r.emoji === emoji);
@@ -92,6 +114,10 @@ export function ReactionsBar({
         next = [...prev, { emoji, users: [userId] }];
       }
       saveReactions(subjectId, next);
+      void publishFromClient(`presence-reactions-${subjectId}`, "reactions:set", {
+        reactions: next,
+        actorId: userId,
+      });
       return next;
     });
     setPickerOpen(false);

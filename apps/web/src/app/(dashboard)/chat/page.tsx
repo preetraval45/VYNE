@@ -34,6 +34,18 @@ export default function ChatPage() {
   const [isDM, setIsDM] = useState(false);
   const [threadMsg, setThreadMsg] = useState<MsgMessage | null>(null);
   const isMobile = useIsMobile();
+
+  // Mark <body data-chat-active="true"> while the page is mounted so
+  // CSS rules in globals.css (e.g. hiding the global FAB on /chat,
+  // the message-action toolbar suppression on touch) target only this
+  // route. Cleared on unmount.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.dataset.chatActive = "true";
+    return () => {
+      delete document.body.dataset.chatActive;
+    };
+  }, []);
   // On mobile, default to showing the channel list (no chat selected)
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
 

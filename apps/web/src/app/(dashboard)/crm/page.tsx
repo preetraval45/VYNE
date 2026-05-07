@@ -41,6 +41,11 @@ import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { Sparkles, Download, BarChart3 } from "lucide-react";
 import { DealCoachCard } from "@/components/crm/DealCoachCard";
 import { SavedViewsBar } from "@/components/shared/SavedViewsBar";
+import { ShareLinkButton } from "@/components/shared/ShareLinkButton";
+import { PresenceBubbles } from "@/components/shared/PresenceBubbles";
+import { AskAiButton } from "@/components/shared/AskAiButton";
+import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
+import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { useSavedViews } from "@/hooks/useSavedViews";
 
 // ─── API adapter ─────────────────────────────────────────────────
@@ -471,9 +476,12 @@ function DealsTableTab({
             return (
               <button
                 key={s}
+                type="button"
+                aria-pressed={isActive}
                 onClick={() => setStageFilter(s)}
                 className="px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer transition-all duration-150"
                 style={{
+                  borderRadius: 999,
                   border: isActive
                     ? `1.5px solid ${pillColor}`
                     : "1.5px solid transparent",
@@ -1064,6 +1072,9 @@ function CRMPageInner() {
     },
   ]);
 
+  const aiPrompts = useAiSuggestedPrompts();
+  useRegisterAiCommands("crm");
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <DemoDataBanner
@@ -1083,6 +1094,7 @@ function CRMPageInner() {
             <Pill tone="danger" dot>
               {deals.filter((d) => d.stage === "Lost").length} lost
             </Pill>
+            <AskAiButton noun="deals" suggestions={aiPrompts} />
             <ExportButton
               data={deals as unknown as Record<string, unknown>[]}
               filename="vyne-deals"
@@ -1303,24 +1315,33 @@ function DealDetailPanel({
       }
       headerActions={
         deal && (
-          <Link
-            href={`/crm/deals/${deal.id}/edit`}
-            title="Edit deal"
-            aria-label="Edit deal"
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 7,
-              border: "1px solid var(--content-border)",
-              background: "var(--content-bg)",
-              color: "var(--text-secondary)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Pencil size={14} />
-          </Link>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+            <PresenceBubbles entityKey={`deal:${deal.id}`} />
+            <ShareLinkButton
+              entityId={deal.id}
+              href={`/crm?deal=${deal.id}`}
+              label="deal"
+              iconOnly
+            />
+            <Link
+              href={`/crm/deals/${deal.id}/edit`}
+              title="Edit deal"
+              aria-label="Edit deal"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 7,
+                border: "1px solid var(--content-border)",
+                background: "var(--content-bg)",
+                color: "var(--text-secondary)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Pencil size={14} />
+            </Link>
+          </div>
         )
       }
     >

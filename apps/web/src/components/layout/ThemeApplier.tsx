@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { useTheme, useThemeStore, ACCENT_COLORS } from "@/lib/stores/theme";
+import { usePathname } from "next/navigation";
+import {
+  useTheme,
+  useThemeStore,
+  ACCENT_COLORS,
+  FONT_OPTIONS,
+  type ModuleId,
+} from "@/lib/stores/theme";
 
 /**
  * Reads theme + accent preferences from Zustand and applies:
@@ -21,6 +28,11 @@ export function ThemeApplier() {
   const customAccentHex = useThemeStore((s) => s.customAccentHex);
   const customBgHex = useThemeStore((s) => s.customBgHex);
   const density = useThemeStore((s) => s.density);
+  const font = useThemeStore((s) => s.font);
+  const sidebarPattern = useThemeStore((s) => s.sidebarPattern);
+  const faviconUrl = useThemeStore((s) => s.faviconUrl);
+  const moduleAccents = useThemeStore((s) => s.moduleAccents);
+  const pathname = usePathname() ?? "";
 
   const applyTheme = useCallback((resolved: "light" | "dark") => {
     document.documentElement.dataset.theme = resolved;
@@ -126,14 +138,25 @@ export function ThemeApplier() {
   // Apply accent color as CSS variables. If the user has set a custom
   // hex via the picker tool we derive light/dark by lightening/darkening
   // the primary so every brand surface still recolours coherently.
+  //
+  // Per-module override (Phase 10.6): if the current route's first
+  // segment has a `moduleAccents[id]` entry, the override hex wins over
+  // the global accent. Re-runs whenever pathname or moduleAccents
+  // changes so navigating from CRM (teal) → Finance (amber) instantly
+  // recolours the chrome.
   useEffect(() => {
     const preset = ACCENT_COLORS[accent];
     let primary: string;
     let light: string;
     let dark: string;
 
-    if (customAccentHex && /^#?[0-9a-f]{6}$/i.test(customAccentHex)) {
-      primary = customAccentHex.startsWith("#") ? customAccentHex : `#${customAccentHex}`;
+    // Resolve module override first.
+    const moduleId = pathname.split("/").filter(Boolean)[0] as ModuleId | undefined;
+    const moduleHex = moduleId ? moduleAccents[moduleId] : undefined;
+    const overrideHex = moduleHex ?? customAccentHex;
+
+    if (overrideHex && /^#?[0-9a-f]{6}$/i.test(overrideHex)) {
+      primary = overrideHex.startsWith("#") ? overrideHex : `#${overrideHex}`;
       light = mixHex(primary, "#FFFFFF", 0.25);
       dark = mixHex(primary, "#000000", 0.25);
     } else if (preset) {
@@ -215,7 +238,53 @@ export function ThemeApplier() {
       root.style.setProperty("--vyne-accent-fg", accentFg);
       root.style.setProperty("--vyne-accent-on", accentFg);
     }
-  }, [accent, customAccentHex]);
+  }, [accent, customAccentHex, moduleAccents, pathname]);
+
+  // Apply tenant favicon (Phase 10.5). Replace any existing
+  // <link rel="icon"> entries (Next.js auto-injects from layout
+  // metadata) with a single override so the workspace can be branded
+  // per-tenant. Idempotent — only mutates the DOM when the URL changes.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const ID = "vyne-tenant-favicon";
+    const existing = document.getElementById(ID) as HTMLLinkElement | null;
+    if (!faviconUrl) {
+      if (existing) existing.remove();
+      return;
+    }
+    const link = existing ?? document.createElement("link");
+    link.id = ID;
+    link.rel = "icon";
+    link.href = faviconUrl;
+    if (!existing) document.head.appendChild(link);
+  }, [faviconUrl]);
+
+  // Apply font choice. We write `--font-app` so the body rule in
+  // globals.css picks it up. Google-hosted families inject a one-off
+  // <link> tag (cached per-href) so the family loads on demand.
+  useEffect(() => {
+    const root = document.documentElement;
+    const choice = FONT_OPTIONS[font] ?? FONT_OPTIONS.geist;
+    root.style.setProperty("--font-app", choice.stack);
+
+    if (choice.googleHref) {
+      const id = `vyne-font-${font}`;
+      if (!document.getElementById(id)) {
+        const link = document.createElement("link");
+        link.id = id;
+        link.rel = "stylesheet";
+        link.href = choice.googleHref;
+        document.head.appendChild(link);
+      }
+    }
+  }, [font]);
+
+  // Apply sidebar pattern as a data-attribute so CSS in globals.css can
+  // match `[data-sidebar-pattern="dots"] .sidebar-nav` etc. without any
+  // per-component changes.
+  useEffect(() => {
+    document.documentElement.dataset.sidebarPattern = sidebarPattern;
+  }, [sidebarPattern]);
 
   // Apply theme mode
   useEffect(() => {

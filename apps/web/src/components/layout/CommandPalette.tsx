@@ -38,6 +38,9 @@ import {
 } from "@/lib/stores/commandRegistry";
 import { useTheme, useThemeStore } from "@/lib/stores/theme";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useSearchAnalytics } from "@/lib/stores/searchAnalytics";
+import { useSavedSearches } from "@/lib/stores/savedSearches";
+import { parseQuery, correctQuery } from "@/lib/search/queryChips";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -1182,8 +1185,12 @@ export function CommandPalette() {
   );
 
   // ── Build the final filtered item list ──────────────────────────
+  // 14.7 — chip parser. `from:sarah type:deal foo` → { text: "foo", chips: { from: "sarah", type: "deal" } }
+  // Stripped chips are surfaced as a hint above the results.
+  const parsedQuery = useMemo(() => parseQuery(query), [query]);
+
   const filteredItems = useMemo((): CommandItem[] => {
-    const q = query.toLowerCase().trim();
+    const q = (parsedQuery.text || query).toLowerCase().trim();
 
     // Quick actions mode: ">" prefix
     if (q.startsWith(">")) {
@@ -1196,8 +1203,23 @@ export function CommandPalette() {
       );
     }
 
-    // Empty query: show recent searches then navigation + create
+    // Empty query: show saved searches, recent searches, then navigation + create.
     if (!q) {
+      // 14.2 — saved searches. Pinned first; user-curated workspace queries.
+      const savedSearches = useSavedSearches.getState().items;
+      const savedItems: CommandItem[] = savedSearches
+        .slice()
+        .sort((a, b) => Number(b.pinned ?? false) - Number(a.pinned ?? false))
+        .slice(0, 6)
+        .map((s) => ({
+          id: `saved-${s.id}`,
+          label: s.name,
+          description: s.query,
+          icon: <Hash size={16} />,
+          action: () => setQuery(s.query),
+          category: "Recent Searches" as ResultCategory,
+          badge: s.pinned ? "Pinned" : undefined,
+        }));
       const recentItems: CommandItem[] = recentSearches.map((term, idx) => ({
         id: `recent-${idx}`,
         label: term,
@@ -1208,6 +1230,7 @@ export function CommandPalette() {
       }));
 
       return [
+        ...savedItems,
         ...recentItems,
         ...pageActionCommands,
         ...navigationCommands,
@@ -1253,7 +1276,7 @@ export function CommandPalette() {
 
     // Page actions rank just below search hits — they're the user's most
     // immediate context. Then nav / AI tools / create / generic actions.
-    return [
+    const matches = [
       ...searchResults,
       ...matchingPageActions,
       ...matchingNavCommands,
@@ -1261,6 +1284,29 @@ export function CommandPalette() {
       ...matchingCreateCommands,
       ...matchingActionCommands,
     ];
+
+    // Phase 10.10 — AI fall-through. When the user types a free-form
+    // query that doesn't match any registered command (and isn't already
+    // an explicit AI ("?") or action (">") query), append a synthetic
+    // row that escalates to Vyne AI by re-running the palette in AI
+    // mode. This keeps Cmd+K from looking empty and gives the answer
+    // experience without a second keystroke.
+    if (matches.length === 0 && q.length >= 2) {
+      matches.push({
+        id: "ai-fallthrough",
+        label: `Ask Vyne AI: "${q}"`,
+        description: "No match — escalate to AI search",
+        icon: <Sparkles size={16} />,
+        action: () => {
+          // Convert the current query into AI-mode by prefixing "?".
+          // The existing useEffect above will pick it up and call /api/ai/search.
+          setQuery(`? ${q}`);
+        },
+        category: "AI Tools" as ResultCategory,
+      });
+    }
+
+    return matches;
   }, [
     query,
     searchResults,
@@ -1361,10 +1407,46 @@ export function CommandPalette() {
     // Save search term when selecting a search result
     if (query.trim() && !query.startsWith(">")) {
       addRecentSearch(query);
+      // 14.6 — record click-through against the active query.
+      useSearchAnalytics.getState().record({
+        query,
+        resultCount: filteredItems.length,
+        clicked: true,
+        clickedCategory: cmd.category,
+      });
     }
     cmd.action();
     close();
   }
+
+  // 14.6 — record bare submissions (no click) once the debounced query
+  // settles, so zero-result queries still show up in analytics.
+  useEffect(() => {
+    const q = debouncedQuery.trim();
+    if (!q || q.startsWith(">") || q.startsWith("?")) return;
+    const t = window.setTimeout(() => {
+      useSearchAnalytics.getState().record({
+        query: q,
+        resultCount: filteredItems.length,
+        clicked: false,
+      });
+    }, 1500);
+    return () => window.clearTimeout(t);
+  }, [debouncedQuery, filteredItems.length]);
+
+  // 14.5 — did-you-mean suggestion when 0 results.
+  const didYouMeanText = useMemo(() => {
+    const q = parsedQuery.text.trim();
+    if (!q || q.length < 4) return null;
+    if (filteredItems.length > 0) return null;
+    // Build a tiny vocab from the visible navigation labels + saved searches.
+    const vocab = [
+      ...navigationCommands.map((c) => c.label.replace(/^Go to /i, "")),
+      ...createCommands.map((c) => c.label),
+      ...useSavedSearches.getState().items.map((s) => s.query),
+    ].flatMap((s) => s.split(/\s+/).filter((w) => w.length > 3));
+    return correctQuery(q, vocab);
+  }, [parsedQuery.text, filteredItems.length, navigationCommands, createCommands]);
 
   // ── Detect platform for shortcut hint ───────────────────────────
   const isMac =
@@ -1390,8 +1472,12 @@ export function CommandPalette() {
             onClick={close}
           />
 
-          {/* Palette */}
+          {/* Palette — desktop renders centered; mobile (≤640px) snaps
+              to a bottom sheet via CSS in globals.css ([data-vyne-cmdk]).
+              The data-attribute is the hook the mobile rule targets so
+              we don't have to fork the framer-motion variants. */}
           <motion.div
+            data-vyne-cmdk
             initial={{ opacity: 0, scale: 0.96, y: -8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
@@ -1413,16 +1499,40 @@ export function CommandPalette() {
                 size={16}
                 style={{ color: "var(--text-secondary)", flexShrink: 0 }}
               />
+              {/* Phase 14.7 — render filter chips parsed from the query */}
+              {Object.entries(parseQuery(query).chips)
+                .filter(([, v]) => v)
+                .map(([key, value]) => (
+                  <span
+                    key={key}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
+                      color: "var(--vyne-accent, var(--vyne-purple))",
+                      border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.40)",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {key}:{value}
+                  </span>
+                ))}
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search everything · type > for actions · type ? to ask AI"
+                placeholder="Search · type:deal from:sarah · > for actions · ? for AI"
                 className="flex-1 bg-transparent text-sm text-white placeholder:text-[#4A4A6A] focus:outline-none"
               />
               {query.length > 0 && (
                 <button
+                  type="button"
                   onClick={() => setQuery("")}
                   style={{
                     background: "rgba(255,255,255,0.08)",
@@ -1449,6 +1559,66 @@ export function CommandPalette() {
               </kbd>
             </div>
 
+            {/* 14.7 — chip indicator: shows which chips were parsed out. */}
+            {Object.keys(parsedQuery.chips).length > 0 && (
+              <div
+                className="flex flex-wrap items-center gap-2 px-4 py-2 text-xs"
+                style={{
+                  background: "rgba(139, 92, 246, 0.10)",
+                  color: "#C4B5FD",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <span style={{ opacity: 0.65 }}>Filters:</span>
+                {Object.entries(parsedQuery.chips).map(([k, v]) => (
+                  <span
+                    key={k}
+                    style={{
+                      padding: "1px 8px",
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,0.10)",
+                      fontFamily: "var(--font-mono, monospace)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {k}:{v}
+                  </span>
+                ))}
+              </div>
+            )}
+            {/* 14.5 — did-you-mean banner when no results. */}
+            {didYouMeanText && query.trim().length >= 4 && (
+              <div
+                className="flex items-center gap-2 px-4 py-2 text-xs"
+                style={{
+                  background: "rgba(245, 158, 11, 0.10)",
+                  color: "#FCD34D",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <span>No results.</span>
+                <span>Did you mean</span>
+                <button
+                  type="button"
+                  onClick={() => setQuery(didYouMeanText)}
+                  style={{
+                    padding: "1px 8px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(252, 211, 77, 0.4)",
+                    background: "rgba(252, 211, 77, 0.10)",
+                    color: "#FCD34D",
+                    fontFamily: "var(--font-mono, monospace)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  {didYouMeanText}
+                </button>
+                ?
+              </div>
+            )}
             {/* Query mode indicator */}
             {query.startsWith(">") && (
               <div

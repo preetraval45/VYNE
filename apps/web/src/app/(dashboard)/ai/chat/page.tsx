@@ -37,6 +37,7 @@ import { QuickActions } from "@/components/ai/QuickActions";
 import { ConversationHistory } from "@/components/ai/ConversationHistory";
 import { CitationCard } from "@/components/ai/CitationCard";
 import { VoiceInputButton } from "@/components/ai/VoiceInputButton";
+import { AiCostMeterPill } from "@/components/ai/AiCostMeterPill";
 import {
   ImageGeneratorModal,
   type AspectRatio,
@@ -843,6 +844,7 @@ export default function VyneAIChatPage() {
       <div className="flex flex-col h-full" style={{ flex: 1, minWidth: 0 }}>
       {/* Header */}
       <header
+        data-vyne-page-header
         style={{
           padding: "16px 24px 12px",
           borderBottom: "1px solid var(--content-border)",
@@ -883,6 +885,8 @@ export default function VyneAIChatPage() {
             Grounded in your workspace · {sessions.length} session{sessions.length === 1 ? "" : "s"} remembered
           </p>
         </div>
+        {/* Phase 16.5 — live MTD cost meter */}
+        <AiCostMeterPill />
         <button
           type="button"
           onClick={() => setHistoryOpen((v) => !v)}

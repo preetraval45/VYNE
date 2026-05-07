@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { subscribe as rtSubscribe, isRealtimeEnabled } from "@/lib/realtime";
+import { shouldSeedFixtures } from "@/lib/stores/seedMode";
 
 // ─── Types ───────────────────────────────────────────────────────
 export type AccountStatus = "Active" | "Prospect" | "Inactive";
@@ -340,16 +342,18 @@ const DEFAULT_CONTACTS: Contact[] = [
 interface ContactsStore {
   accounts: Account[];
   contacts: Contact[];
+  contactsHydrated: boolean;
 
   // Account CRUD
   addAccount: (account: Omit<Account, "id">) => void;
   updateAccount: (id: string, data: Partial<Omit<Account, "id">>) => void;
   deleteAccount: (id: string) => void;
 
-  // Contact CRUD
+  // Contact CRUD (mirrors to /api/contacts)
   addContact: (contact: Omit<Contact, "id">) => void;
   updateContact: (id: string, data: Partial<Omit<Contact, "id">>) => void;
   deleteContact: (id: string) => void;
+  hydrateContactsFromServer: () => Promise<void>;
 
   // Tag operations
   addTag: (contactId: string, tag: ContactTag) => void;
@@ -365,11 +369,34 @@ function genId(prefix: string) {
   return `${prefix}${++_nextId}`;
 }
 
+// Fire-and-forget remote mirror. Failures leave the optimistic local
+// state in place; a subsequent hydrateContactsFromServer reconciles.
+function mirrorCreate(c: Contact) {
+  void fetch("/api/contacts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(c),
+  }).catch(() => {});
+}
+function mirrorUpdate(id: string, patch: Partial<Contact>) {
+  void fetch(`/api/contacts/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorDelete(id: string) {
+  void fetch(`/api/contacts/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
+
 export const useContactsStore = create<ContactsStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       accounts: DEFAULT_ACCOUNTS,
       contacts: DEFAULT_CONTACTS,
+      contactsHydrated: false,
 
       addAccount: (account) =>
         set((state) => ({
@@ -388,40 +415,73 @@ export const useContactsStore = create<ContactsStore>()(
           accounts: state.accounts.filter((a) => a.id !== id),
         })),
 
-      addContact: (contact) =>
-        set((state) => ({
-          contacts: [...state.contacts, { ...contact, id: genId("c") }],
-        })),
+      addContact: (contact) => {
+        const row: Contact = { ...contact, id: genId("c") };
+        set((state) => ({ contacts: [...state.contacts, row] }));
+        mirrorCreate(row);
+      },
 
-      updateContact: (id, data) =>
+      updateContact: (id, data) => {
         set((state) => ({
           contacts: state.contacts.map((c) =>
             c.id === id ? { ...c, ...data } : c,
           ),
-        })),
+        }));
+        mirrorUpdate(id, data);
+      },
 
-      deleteContact: (id) =>
+      deleteContact: (id) => {
         set((state) => ({
           contacts: state.contacts.filter((c) => c.id !== id),
-        })),
+        }));
+        mirrorDelete(id);
+      },
 
-      addTag: (contactId, tag) =>
-        set((state) => ({
-          contacts: state.contacts.map((c) =>
-            c.id === contactId && !c.tags.includes(tag)
-              ? { ...c, tags: [...c.tags, tag] }
-              : c,
-          ),
-        })),
+      hydrateContactsFromServer: async () => {
+        try {
+          const res = await fetch("/api/contacts", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { contacts?: Contact[] };
+          if (Array.isArray(body.contacts) && body.contacts.length > 0) {
+            set({ contacts: body.contacts, contactsHydrated: true });
+          } else if (Array.isArray(body.contacts)) {
+            // Empty DB → demo session keeps fixture; real signups stay clean.
+            if (shouldSeedFixtures()) {
+              set({ contacts: DEFAULT_CONTACTS, contactsHydrated: true });
+            } else {
+              set({ contacts: [], contactsHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().contactsHydrated) set({ contactsHydrated: false });
+        }
+      },
 
-      removeTag: (contactId, tag) =>
-        set((state) => ({
-          contacts: state.contacts.map((c) =>
-            c.id === contactId
-              ? { ...c, tags: c.tags.filter((t) => t !== tag) }
-              : c,
-          ),
-        })),
+      addTag: (contactId, tag) => {
+        const next = get().contacts.find((c) => c.id === contactId);
+        if (next && !next.tags.includes(tag)) {
+          const tags = [...next.tags, tag];
+          set((state) => ({
+            contacts: state.contacts.map((c) =>
+              c.id === contactId ? { ...c, tags } : c,
+            ),
+          }));
+          mirrorUpdate(contactId, { tags });
+        }
+      },
+
+      removeTag: (contactId, tag) => {
+        const next = get().contacts.find((c) => c.id === contactId);
+        if (next) {
+          const tags = next.tags.filter((t) => t !== tag);
+          set((state) => ({
+            contacts: state.contacts.map((c) =>
+              c.id === contactId ? { ...c, tags } : c,
+            ),
+          }));
+          mirrorUpdate(contactId, { tags });
+        }
+      },
 
       importAccounts: (rows) =>
         set((state) => {
@@ -468,3 +528,26 @@ export const useContactsStore = create<ContactsStore>()(
     },
   ),
 );
+
+// ── Realtime subscription ──────────────────────────────────────────
+let _contactsRtBound = false;
+export function bindContactsRealtime(orgId = "demo") {
+  if (_contactsRtBound || !isRealtimeEnabled()) return;
+  _contactsRtBound = true;
+  rtSubscribe<Contact>(`org-${orgId}`, "contact:created", (c) => {
+    useContactsStore.setState((s) => {
+      if (s.contacts.some((x) => x.id === c.id)) return s;
+      return { contacts: [c, ...s.contacts] };
+    });
+  });
+  rtSubscribe<Contact>(`org-${orgId}`, "contact:updated", (c) => {
+    useContactsStore.setState((s) => ({
+      contacts: s.contacts.map((x) => (x.id === c.id ? { ...x, ...c } : x)),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "contact:deleted", ({ id }) => {
+    useContactsStore.setState((s) => ({
+      contacts: s.contacts.filter((c) => c.id !== id),
+    }));
+  });
+}

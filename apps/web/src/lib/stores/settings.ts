@@ -27,6 +27,10 @@ export interface NotificationSettings {
   dndEnd: string;
   /** Which days DND applies — 0=Sun … 6=Sat */
   dndDays: number[];
+  /** Per-module mute list. Keys are module ids (`crm`, `ops`, …);
+   *  truthy = muted. Notifications routed through the bell or the
+   *  browser Notification API skip muted modules. */
+  mutedModules?: Record<string, boolean>;
 }
 
 export interface ErpSettings {
@@ -117,6 +121,7 @@ const DEFAULT_NOTIFICATIONS: NotificationSettings = {
   dndStart: "22:00",
   dndEnd: "08:00",
   dndDays: [0, 1, 2, 3, 4, 5, 6],
+  mutedModules: {},
 };
 
 const DEFAULT_ERP: ErpSettings = {

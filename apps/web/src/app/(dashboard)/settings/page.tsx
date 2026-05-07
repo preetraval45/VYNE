@@ -18,6 +18,7 @@ import {
   Sparkles,
   BarChart3,
   Smartphone,
+  Search,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -84,8 +85,26 @@ const GrowthSettings = lazyPanel(
 const AnalyticsSettings = lazyPanel(
   () => import("@/components/settings/AnalyticsSettings"),
 );
+// SearchAnalyticsPanel doesn't need onToast — load it directly with `dynamic`
+// rather than the toast-typed `lazyPanel` helper.
+const SearchAnalyticsPanel = dynamic(
+  () => import("@/components/settings/SearchAnalyticsPanel"),
+  { ssr: false, loading: panelLoading },
+);
 const MobileSettings = lazyPanel(
   () => import("@/components/settings/MobileSettings"),
+);
+const AiPreferencesSettings = lazyPanel(
+  () => import("@/components/settings/AiPreferencesSettings"),
+);
+const DataLifecycleSettings = lazyPanel(
+  () => import("@/components/settings/DataLifecycleSettings"),
+);
+const TrashSettings = lazyPanel(
+  () => import("@/components/settings/TrashSettings"),
+);
+const AccessibilitySettings = lazyPanel(
+  () => import("@/components/settings/AccessibilitySettings"),
 );
 
 // ─── Tab config ──────────────────────────────────────────────────
@@ -100,6 +119,11 @@ const TABS = [
   { id: "integrations", label: "Integrations", icon: <Plug size={14} /> },
   { id: "growth", label: "Growth", icon: <Sparkles size={14} /> },
   { id: "analytics", label: "Analytics", icon: <BarChart3 size={14} /> },
+  { id: "search-analytics", label: "Search analytics", icon: <Search size={14} /> },
+  { id: "ai-preferences", label: "AI preferences", icon: <Sparkles size={14} /> },
+  { id: "data", label: "Data & backups", icon: <Package size={14} /> },
+  { id: "trash", label: "Trash", icon: <Code size={14} /> },
+  { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
   { id: "mobile", label: "Mobile", icon: <Smartphone size={14} /> },
   { id: "security", label: "Security", icon: <Shield size={14} /> },
   { id: "compliance", label: "Compliance", icon: <ScrollText size={14} /> },
@@ -263,6 +287,15 @@ export default function SettingsPage() {
         {tab === "compliance" && <ComplianceSettings onToast={showToast} />}
         {tab === "growth" && <GrowthSettings onToast={showToast} />}
         {tab === "analytics" && <AnalyticsSettings onToast={showToast} />}
+        {tab === "search-analytics" && <SearchAnalyticsPanel />}
+        {tab === "ai-preferences" && (
+          <AiPreferencesSettings onToast={showToast} />
+        )}
+        {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
+        {tab === "trash" && <TrashSettings onToast={showToast} />}
+        {tab === "accessibility" && (
+          <AccessibilitySettings onToast={showToast} />
+        )}
         {tab === "mobile" && <MobileSettings onToast={showToast} />}
       </div>
 

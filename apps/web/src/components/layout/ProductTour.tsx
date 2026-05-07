@@ -57,6 +57,7 @@ const TOUR_STEPS: TourStep[] = [
 ];
 
 const STORAGE_KEY = "vyne-tour-v1";
+const PROGRESS_KEY = "vyne-tour-progress-v1";
 
 function loadSeen(): boolean {
   if (typeof window === "undefined") return true;
@@ -67,22 +68,50 @@ function loadSeen(): boolean {
   }
 }
 
+function loadProgress(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if (!raw) return 0;
+    const n = Number.parseInt(raw, 10);
+    if (!Number.isFinite(n) || n < 0 || n >= TOUR_STEPS.length) return 0;
+    return n;
+  } catch {
+    return 0;
+  }
+}
+
+function persistProgress(n: number) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(PROGRESS_KEY, String(n));
+  } catch {
+    // ignore
+  }
+}
+
 export function ProductTour() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    // Open on first visit or when explicitly requested
+    // Open on first visit or when explicitly requested. Resume from the
+    // last persisted step if the user closed mid-tour previously.
     const seen = loadSeen();
     if (!seen) {
+      const resumeAt = loadProgress();
+      setStep(resumeAt);
       // Show on next tick to avoid layout flash
       const id = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(id);
     }
 
     function openHandler() {
-      setStep(0);
+      const resumeAt = loadProgress();
+      // If the user has already finished the tour at least once, restart.
+      // Otherwise resume from where they left off.
+      setStep(seen ? 0 : resumeAt);
       setOpen(true);
     }
     globalThis.addEventListener("vyne:open-tour", openHandler as EventListener);
@@ -93,10 +122,22 @@ export function ProductTour() {
       );
   }, []);
 
+  // Persist current step so a refresh / accidental close resumes here.
+  useEffect(() => {
+    if (open) persistProgress(step);
+  }, [open, step]);
+
   function close() {
     setOpen(false);
     try {
-      localStorage.setItem(STORAGE_KEY, "done");
+      // Only mark as "done" if the user actually reached the final step.
+      if (step >= TOUR_STEPS.length - 1) {
+        localStorage.setItem(STORAGE_KEY, "done");
+        localStorage.removeItem(PROGRESS_KEY);
+      } else {
+        // Mid-tour close keeps the progress so they resume next time.
+        localStorage.setItem(PROGRESS_KEY, String(step));
+      }
     } catch {
       // ignore
     }
@@ -167,6 +208,23 @@ export function ProductTour() {
         </div>
 
         <div style={{ padding: 24, position: "relative" }}>
+          {/* Phase 15.1 — explicit step counter so users see how far they
+              are. Pairs with the gradient progress bar above. */}
+          <div
+            aria-label={`Step ${step + 1} of ${TOUR_STEPS.length}`}
+            style={{
+              position: "absolute",
+              top: 16,
+              left: 24,
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "var(--text-tertiary)",
+            }}
+          >
+            Step {step + 1} of {TOUR_STEPS.length}
+          </div>
           <button
             type="button"
             aria-label="Close tour"

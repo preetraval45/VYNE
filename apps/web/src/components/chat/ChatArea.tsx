@@ -622,6 +622,7 @@ export function ChatArea({
       >
         {/* Header */}
         <div
+          data-chat-header
           style={{
             display: "flex",
             alignItems: "center",
@@ -670,7 +671,7 @@ export function ChatArea({
               )}
             </div>
           )}
-          <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+          <div data-chat-actions style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
             {/* Call dropdown — Audio / Video options */}
             <div ref={callMenuRef} style={{ position: "relative" }}>
               <button

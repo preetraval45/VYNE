@@ -31,6 +31,7 @@ import {
 import { useAuthStore } from '@/lib/stores/auth'
 import { orgsApi } from '@/lib/api/client'
 import type { OrgFeatures } from '@/lib/api/client'
+import { markSetupStep } from '@/lib/stores/setupScore'
 
 /* ─── Types ──────────────────────────────────────────────────── */
 interface ModuleOption {
@@ -661,6 +662,11 @@ export default function OnboardingPage() {
         // Non-fatal: local state already saved
       }
     }
+
+    // Phase 15 — flip the setup-score steps the wizard naturally completes
+    // so the home checklist already shows progress on the first visit.
+    markSetupStep('create-workspace')
+    if (inviteEmails.filter(Boolean).length > 0) markSetupStep('invite-team')
 
     setIsSaving(false)
     router.push('/home')

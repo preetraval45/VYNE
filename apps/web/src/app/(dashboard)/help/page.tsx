@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { TutorialLibrary } from "@/components/help/TutorialLibrary";
 
 interface HelpArticle {
   slug: string;
@@ -330,6 +331,11 @@ export default function HelpCentrePage() {
               { label: "Filtered", value: filtered.length.toString(), hint: query ? `for "${query}"` : "showing all" },
             ]}
           />
+        </div>
+
+        {/* Phase 15.6 — tutorial library */}
+        <div style={{ marginBottom: 28 }}>
+          <TutorialLibrary />
         </div>
 
         <div

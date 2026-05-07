@@ -17,6 +17,8 @@ import {
   Zap,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import { ShareLinkButton } from "@/components/shared/ShareLinkButton";
+import { PresenceBubbles } from "@/components/shared/PresenceBubbles";
 
 type StepStatus = "pending" | "running" | "ok" | "failed" | "skipped";
 
@@ -524,7 +526,14 @@ export default function RunbooksPage() {
               {active.scenario}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+            <PresenceBubbles entityKey={`runbook:${active.id}`} />
+            <ShareLinkButton
+              entityId={active.id}
+              href={`/runbooks?rb=${active.id}`}
+              label="runbook"
+              iconOnly
+            />
             <button
               type="button"
               onClick={resetRun}

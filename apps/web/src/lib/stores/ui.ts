@@ -7,6 +7,7 @@ interface UIStore {
   sidebarCollapsed: boolean;
   activeModule: Module;
   commandPaletteOpen: boolean;
+  globalSearchOpen: boolean;
   shortcutsOpen: boolean;
   focusMode: boolean;
   activeProjectId: string | null;
@@ -19,6 +20,8 @@ interface UIStore {
   setActiveModule: (module: Module) => void;
   toggleCommandPalette: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  setGlobalSearchOpen: (open: boolean) => void;
+  toggleGlobalSearch: () => void;
   setShortcutsOpen: (open: boolean) => void;
   toggleShortcuts: () => void;
   toggleFocusMode: () => void;
@@ -33,6 +36,7 @@ export const useUIStore = create<UIStore>()(
       sidebarCollapsed: true,
       activeModule: "projects",
       commandPaletteOpen: false,
+      globalSearchOpen: false,
       shortcutsOpen: false,
       focusMode: false,
       activeProjectId: null,
@@ -56,6 +60,11 @@ export const useUIStore = create<UIStore>()(
 
       setCommandPaletteOpen: (open: boolean) =>
         set({ commandPaletteOpen: open }),
+
+      setGlobalSearchOpen: (open: boolean) => set({ globalSearchOpen: open }),
+
+      toggleGlobalSearch: () =>
+        set((state) => ({ globalSearchOpen: !state.globalSearchOpen })),
 
       setShortcutsOpen: (open: boolean) => set({ shortcutsOpen: open }),
 

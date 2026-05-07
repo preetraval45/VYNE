@@ -11,7 +11,9 @@ import {
   Pause,
   Play,
   BarChart3,
+  Search as SearchIcon,
 } from "lucide-react";
+import { useSearchAnalytics } from "@/lib/stores/searchAnalytics";
 
 interface FeatureUsage {
   name: string;
@@ -190,8 +192,119 @@ export default function AnalyticsSettings({ onToast }: Props) {
 
   const maxDau = Math.max(...FEATURE_USAGE.map((f) => f.dau));
 
+  // 14.6 — search analytics summary derived from the local store
+  const searchEvents = useSearchAnalytics((s) => s.events);
+  const topQueries = useSearchAnalytics((s) => s.topQueries);
+  const zeroResultRate = useSearchAnalytics((s) => s.zeroResultRate);
+  const clearSearch = useSearchAnalytics((s) => s.clear);
+  const top = topQueries(8);
+  const zrr = zeroResultRate();
+
   return (
     <div>
+      {/* ── Search analytics ────────────────────────────── */}
+      <Card title="Search analytics" icon={SearchIcon}>
+        <p
+          style={{
+            margin: "0 0 14px",
+            fontSize: 12,
+            color: "var(--text-tertiary)",
+          }}
+        >
+          Tracks every Cmd+K and global search submitted from this device.
+          Top queries help you spot demand the search ranker should bias
+          toward; high zero-result rate means users are looking for things
+          the index does not yet know.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: 10,
+            marginBottom: 14,
+          }}
+        >
+          <Tile label="Total searches" value={String(searchEvents.length)} />
+          <Tile
+            label="Zero-result rate"
+            value={`${Math.round(zrr * 100)}%`}
+            tone={zrr > 0.4 ? "warn" : zrr > 0.2 ? "neutral" : "ok"}
+          />
+          <Tile
+            label="Click-through"
+            value={`${
+              searchEvents.length === 0
+                ? 0
+                : Math.round(
+                    (searchEvents.filter((e) => e.clicked).length /
+                      searchEvents.length) *
+                      100,
+                  )
+            }%`}
+          />
+        </div>
+        {top.length === 0 ? (
+          <p
+            style={{
+              margin: 0,
+              padding: "20px 0",
+              textAlign: "center",
+              fontSize: 12,
+              color: "var(--text-tertiary)",
+            }}
+          >
+            No queries recorded yet. Open Cmd+K and search to populate.
+          </p>
+        ) : (
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              fontSize: 12,
+            }}
+          >
+            <thead>
+              <tr style={{ textAlign: "left" }}>
+                <Th>Query</Th>
+                <Th align="right">Count</Th>
+                <Th align="right">CTR</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {top.map((row) => (
+                <tr key={row.query}>
+                  <Td mono>{row.query}</Td>
+                  <Td align="right">{row.count}</Td>
+                  <Td align="right">{Math.round(row.ctr * 100)}%</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {searchEvents.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              clearSearch();
+              onToast("Search analytics cleared");
+            }}
+            style={{
+              marginTop: 12,
+              padding: "5px 12px",
+              borderRadius: 6,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-bg)",
+              color: "var(--text-secondary)",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            Clear history
+          </button>
+        )}
+      </Card>
+
       {/* ── Per-feature usage analytics ─────────────────────── */}
       <Card title="Feature usage (last 7 days)" icon={BarChart3}>
         <p
@@ -968,5 +1081,96 @@ function RiskTile({
         {sub}
       </div>
     </div>
+  );
+}
+
+// ── Search-analytics helpers ─────────────────────────────────────
+function Tile({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "ok" | "warn" | "neutral";
+}) {
+  const colour =
+    tone === "warn"
+      ? "var(--status-warning, #F59E0B)"
+      : tone === "ok"
+        ? "var(--status-success, #22C55E)"
+        : "var(--text-primary)";
+  return (
+    <div
+      style={{
+        padding: "10px 12px",
+        borderRadius: 8,
+        background: "var(--content-secondary)",
+        border: "1px solid var(--content-border)",
+      }}
+    >
+      <div style={{ fontSize: 18, fontWeight: 700, color: colour }}>{value}</div>
+      <div
+        style={{
+          fontSize: 10,
+          color: "var(--text-tertiary)",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+          marginTop: 2,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function Th({
+  children,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  align?: "left" | "right";
+}) {
+  return (
+    <th
+      style={{
+        textAlign: align,
+        padding: "6px 10px",
+        fontSize: 10,
+        textTransform: "uppercase",
+        letterSpacing: "0.05em",
+        color: "var(--text-tertiary)",
+        fontWeight: 600,
+        borderBottom: "1px solid var(--content-border)",
+      }}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({
+  children,
+  align = "left",
+  mono = false,
+}: {
+  children: React.ReactNode;
+  align?: "left" | "right";
+  mono?: boolean;
+}) {
+  return (
+    <td
+      style={{
+        padding: "6px 10px",
+        textAlign: align,
+        fontSize: 12,
+        color: "var(--text-primary)",
+        borderBottom: "1px solid var(--content-border)",
+        fontFamily: mono ? "var(--font-mono)" : "inherit",
+      }}
+    >
+      {children}
+    </td>
   );
 }

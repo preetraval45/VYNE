@@ -7,11 +7,14 @@ import {
   MessageSquare,
   StickyNote,
   Download as DownloadIcon,
+  Search,
 } from "lucide-react";
+import { useUIStore } from "@/lib/stores/ui";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useMounted } from "@/hooks/useMounted";
 import { QuickCreateIssueModal } from "@/components/layout/QuickCreateIssueModal";
+import { NotificationBell } from "@/components/layout/NotificationBell";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -131,6 +134,7 @@ export function UnifiedTopBar() {
       >
         <VyneLogo variant="mark" markSize={20} />
         <h1
+          className="vyne-unified-greeting"
           style={{
             fontSize: 13,
             fontWeight: 600,
@@ -164,6 +168,7 @@ export function UnifiedTopBar() {
         type="button"
         onClick={() => setIssueModalOpen(true)}
         aria-label="Create new issue"
+        className="vyne-unified-newissue"
         style={{
           background:
             "linear-gradient(135deg, var(--vyne-accent-light, #7c4dff) 0%, var(--vyne-accent, var(--vyne-purple)) 100%)",
@@ -180,12 +185,13 @@ export function UnifiedTopBar() {
             "0 4px 12px rgba(124, 77, 255, 0.32), inset 0 1px 0 rgba(255,255,255,0.18)",
         }}
       >
-        + New Issue
+        <span className="vyne-unified-newissue-label">+ New Issue</span>
       </button>
 
       <div
         aria-label={user?.name ?? "Profile"}
         title={user?.name ?? "Profile"}
+        className="vyne-unified-avatar"
         style={{
           width: 26,
           height: 26,
@@ -206,6 +212,7 @@ export function UnifiedTopBar() {
 
       <div
         aria-hidden="true"
+        className="vyne-unified-divider"
         style={{
           width: 1,
           height: 22,
@@ -218,6 +225,7 @@ export function UnifiedTopBar() {
         href="/ai/chat"
         aria-label="Open Vyne AI"
         title="Vyne AI — copilot, BRDs, diagrams, sheets, slides"
+        className="vyne-unified-vyne-ai"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -245,10 +253,15 @@ export function UnifiedTopBar() {
         href="/chat"
         aria-label="Open messages"
         title="Messages"
+        className="vyne-unified-chat"
         style={iconBtn}
       >
         <MessageSquare size={14} />
       </Link>
+
+      <NotificationBell />
+
+      <SearchTopbarButton />
 
       <button
         type="button"
@@ -257,6 +270,7 @@ export function UnifiedTopBar() {
         }
         aria-label="Open quick notes"
         title="Quick notes"
+        className="vyne-unified-notes"
         style={iconBtn}
       >
         <StickyNote size={14} />
@@ -266,6 +280,7 @@ export function UnifiedTopBar() {
         href="/download"
         aria-label="Download desktop and mobile apps"
         title="Get the desktop & mobile apps"
+        className="vyne-unified-getapp"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -291,5 +306,35 @@ export function UnifiedTopBar() {
       </Link>
     </header>
     </>
+  );
+}
+
+/** Magnifier button in the topbar — opens the Phase 14 global search
+ *  modal. Keyboard shortcut Ctrl+/ does the same; this button surfaces
+ *  the feature to mouse users. */
+function SearchTopbarButton() {
+  const setOpen = useUIStore((s) => s.setGlobalSearchOpen);
+  return (
+    <button
+      type="button"
+      onClick={() => setOpen(true)}
+      aria-label="Search workspace · Ctrl+/"
+      title="Search workspace (Ctrl+/)"
+      className="vyne-unified-search"
+      style={{
+        width: 32,
+        height: 32,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 8,
+        border: "1px solid transparent",
+        background: "transparent",
+        color: "var(--text-secondary)",
+        cursor: "pointer",
+      }}
+    >
+      <Search size={14} />
+    </button>
   );
 }

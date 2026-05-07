@@ -1,12 +1,17 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Clock } from "lucide-react";
 import {
   timeAgo,
   useActivityStore,
   type ActivityRecordType,
+  type ActivityEntry,
 } from "@/lib/stores/activity";
+import {
+  subscribe,
+  isRealtimeEnabled,
+} from "@/lib/realtime";
 
 /**
  * Per-record activity feed. Pass recordType + recordId and the component
@@ -32,6 +37,7 @@ export function ActivityFeed({
   // every render and trips React 19's useSyncExternalStore consistency
   // check (Minified React error #185).
   const allEntries = useActivityStore((s) => s.entries);
+  const log = useActivityStore((s) => s.log);
   const entries = useMemo(
     () =>
       allEntries.filter(
@@ -40,6 +46,45 @@ export function ActivityFeed({
     [allEntries, recordType, recordId],
   );
   const visible = entries.slice(0, limit);
+  const [pulseIds, setPulseIds] = useState<Set<string>>(() => new Set());
+
+  // Realtime: when another tab/user appends an activity for this record,
+  // mirror it into our local store and pulse the row briefly.
+  useEffect(() => {
+    if (!isRealtimeEnabled()) return;
+    const channel = `activity-${recordType}-${recordId}`;
+    const off = subscribe<Omit<ActivityEntry, "id" | "createdAt"> & {
+      id?: string;
+      createdAt?: string;
+    }>(channel, "activity:append", (incoming) => {
+      // Skip our own echo if the payload's id matches one we've already logged.
+      if (incoming.id && allEntries.some((e) => e.id === incoming.id)) return;
+      const row = log({
+        recordType: incoming.recordType,
+        recordId: incoming.recordId,
+        verb: incoming.verb,
+        summary: incoming.summary,
+        field: incoming.field,
+        from: incoming.from,
+        to: incoming.to,
+        actor: incoming.actor,
+      });
+      setPulseIds((prev) => {
+        const next = new Set(prev);
+        next.add(row.id);
+        return next;
+      });
+      window.setTimeout(() => {
+        setPulseIds((prev) => {
+          if (!prev.has(row.id)) return prev;
+          const next = new Set(prev);
+          next.delete(row.id);
+          return next;
+        });
+      }, 4_000);
+    });
+    return off;
+  }, [recordType, recordId, allEntries, log]);
 
   return (
     <section
@@ -99,7 +144,9 @@ export function ActivityFeed({
             gap: 8,
           }}
         >
-          {visible.map((e) => (
+          {visible.map((e) => {
+            const isNew = pulseIds.has(e.id);
+            return (
             <li
               key={e.id}
               style={{
@@ -108,8 +155,14 @@ export function ActivityFeed({
                 gap: 10,
                 padding: "8px 10px",
                 borderRadius: 8,
-                background: "var(--content-secondary)",
-                border: "1px solid var(--content-border)",
+                background: isNew
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)"
+                  : "var(--content-secondary)",
+                border: isNew
+                  ? "1px solid var(--vyne-accent, var(--vyne-purple))"
+                  : "1px solid var(--content-border)",
+                transition: "background 600ms ease, border-color 600ms ease",
+                position: "relative",
               }}
             >
               <span
@@ -185,8 +238,29 @@ export function ActivityFeed({
                   {timeAgo(e.createdAt)}
                 </p>
               </div>
+              {isNew && (
+                <span
+                  aria-label="New"
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 8,
+                    padding: "1px 7px",
+                    borderRadius: 999,
+                    background: "var(--vyne-accent, var(--vyne-purple))",
+                    color: "#fff",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    letterSpacing: 0.4,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  New
+                </span>
+              )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </section>

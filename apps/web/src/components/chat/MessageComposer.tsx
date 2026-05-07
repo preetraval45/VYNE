@@ -303,6 +303,7 @@ export function MessageComposer({
 
   return (
     <div
+      data-chat-composer
       style={{
         padding: "12px 16px",
         borderTop: "1px solid var(--content-border)",
@@ -471,6 +472,7 @@ export function MessageComposer({
         )}
         {/* Toolbar */}
         <div
+          data-chat-format-row
           style={{
             display: "flex",
             gap: 2,
@@ -590,6 +592,7 @@ export function MessageComposer({
 
         {/* Bottom toolbar */}
         <div
+          data-chat-attach-row
           style={{
             display: "flex",
             alignItems: "center",
@@ -849,6 +852,7 @@ export function MessageComposer({
           <button
             onClick={submit}
             disabled={!canSend}
+            data-chat-send
             style={{
               padding: "5px 10px",
               borderRadius: 7,

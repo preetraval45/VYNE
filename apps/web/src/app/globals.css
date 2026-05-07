@@ -485,8 +485,11 @@ body {
   background-color: var(--content-bg);
   background-image: var(--teal-ambient), var(--content-surface-gradient);
   background-attachment: fixed;
-  font-family: var(--font-geist-sans), 'Inter', ui-sans-serif, system-ui,
-    -apple-system, 'Segoe UI', sans-serif;
+  /* `--font-app` is set by ThemeApplier from the theme store. The fallback
+     stack matches the historical default so SSR + first paint still pick up
+     Geist before hydration. */
+  font-family: var(--font-app, var(--font-geist-sans)), 'Inter',
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   font-feature-settings: 'cv11' on, 'ss03' on, 'ss04' on, 'ss05' on;
   font-size: 15px;
   line-height: 1.55;
@@ -2830,12 +2833,17 @@ button[aria-busy="true"]::before,
 /* ─── Phase 6.6: dashboard skeleton shimmer ─────────────────────────
  * Transform-only sweep — GPU compositor, no paint/layout per frame.
  * The pseudo-element is sized 240px wide and translated across the
- * tile, which is faster and smoother than animating background-position. */
-[role="status"][aria-busy="true"] > div {
+ * tile, which is faster and smoother than animating background-position.
+ * The `.vyne-skel` class (Phase 10.9) lets PageSkeleton apply the same
+ * shimmer to grandchildren when the role="status" rule's direct-child
+ * selector won't reach them. */
+[role="status"][aria-busy="true"] > div,
+.vyne-skel {
   position: relative;
   overflow: hidden;
 }
-[role="status"][aria-busy="true"] > div::after {
+[role="status"][aria-busy="true"] > div::after,
+.vyne-skel::after {
   content: "";
   position: absolute;
   top: 0;
@@ -2860,6 +2868,18 @@ button[aria-busy="true"]::before,
   }
   100% {
     transform: translateX(calc(100vw + 240px));
+  }
+}
+
+/* Phase 12.7 — typing indicator dots */
+@keyframes vyne-typing-bounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
   }
 }
 
@@ -2920,3 +2940,1332 @@ button[aria-busy="true"]::before,
     min-height: 36px;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phase 7.9 — Sidebar wallpaper / texture
+ *
+ * `data-sidebar-pattern` is set on <html> by ThemeApplier from the theme
+ * store. Each pattern overlays a subtle texture on the existing sidebar
+ * background so workspaces feel distinct without sacrificing readability.
+ * The texture sits behind the sidebar's own gradient highlight so all
+ * existing accent dots / hover states render unchanged on top.
+ * ════════════════════════════════════════════════════════════════════ */
+html[data-sidebar-pattern="dots"] .sidebar-nav {
+  background-image:
+    radial-gradient(rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18) 1px, transparent 1.4px),
+    var(--content-card-gradient, linear-gradient(180deg, var(--content-bg) 0%, var(--content-bg-secondary) 100%));
+  background-size: 18px 18px, auto;
+  background-position: 0 0, 0 0;
+}
+html[data-sidebar-pattern="lines"] .sidebar-nav {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08) 0 1px,
+      transparent 1px 14px
+    ),
+    var(--content-card-gradient, linear-gradient(180deg, var(--content-bg) 0%, var(--content-bg-secondary) 100%));
+}
+html[data-sidebar-pattern="noise"] .sidebar-nav {
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--content-card-gradient, linear-gradient(180deg, var(--content-bg) 0%, var(--content-bg-secondary) 100%));
+  background-size: 220px 220px, auto;
+}
+html[data-sidebar-pattern="gradient"] .sidebar-nav {
+  background-image:
+    radial-gradient(circle at 20% 0%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), transparent 55%),
+    radial-gradient(circle at 80% 100%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14), transparent 50%),
+    var(--content-card-gradient, linear-gradient(180deg, var(--content-bg) 0%, var(--content-bg-secondary) 100%));
+}
+html[data-sidebar-pattern="none"] .sidebar-nav {
+  /* Explicitly clear so switching back to "none" wipes any prior pattern. */
+  background-image: var(--content-card-gradient, none);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Mobile UnifiedTopBar — clean, single-row layout
+ *
+ * The desktop topbar packs 9 elements into one strip. On phones that
+ * forces a horizontal scroll which looks broken. Hide elements that
+ * are already reachable from the bottom nav (Vyne AI, Chat, Get app)
+ * and shrink the rest so the bar fits a 360-wide viewport without
+ * scrolling. Greeting trims to just "Hi, {name}" with proper ellipsis.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .vyne-unified-topbar {
+    overflow-x: hidden !important;
+    padding: 4px 12px !important;
+    min-height: 44px !important;
+    gap: 6px !important;
+  }
+  /* Hide redundant CTAs that already live in the bottom nav. */
+  .vyne-unified-topbar .vyne-unified-vyne-ai,
+  .vyne-unified-topbar .vyne-unified-chat,
+  .vyne-unified-topbar .vyne-unified-getapp,
+  .vyne-unified-topbar .vyne-unified-divider,
+  .vyne-unified-topbar .vyne-unified-date {
+    display: none !important;
+  }
+  /* Greeting: clip with ellipsis instead of overflowing. */
+  .vyne-unified-topbar .vyne-unified-greeting {
+    font-size: 12.5px !important;
+    max-width: 60vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Compact + New Issue button so it fits at 360px wide. */
+  .vyne-unified-topbar .vyne-unified-newissue {
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+  }
+  .vyne-unified-topbar .vyne-unified-newissue-label {
+    /* Drop "Issue" so the button reads as "+ New" — the icon-style "+" is
+       enough context next to the bottom nav's Create tab. */
+    font-size: 0;
+  }
+  .vyne-unified-topbar .vyne-unified-newissue-label::before {
+    content: "+ New";
+    font-size: 11px;
+  }
+  /* Avatar shrinks slightly on phones. */
+  .vyne-unified-topbar .vyne-unified-avatar {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 9.5px !important;
+  }
+  /* Notes icon stays for quick capture but shrinks. */
+  .vyne-unified-topbar .vyne-unified-notes {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Mobile UI parity sweep — Phase 9 prep
+ *
+ * Targeted tightening across pages: comfortable inline padding for main
+ * content, larger tap surfaces on the sidebar dropdown items the More
+ * sheet renders, and a hard cap on table column widths so wide tables
+ * never overflow the viewport silently.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Page titles often start at 28-32px which fights for vertical room
+     against the topbar + bottom nav. Cap the largest headlines so a
+     phone viewport keeps the title on a single line in most cases. */
+  main h1 {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+  main h2 {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+  }
+  /* Dialogs / drawers / settings panels frequently nest a 2-column
+     `FieldRow` (200px label + flex 1 control). Stack on mobile so the
+     control gets full width instead of clipping the label. */
+  main [style*="width: 200px"][style*="flex-shrink: 0"] {
+    width: auto !important;
+    margin-bottom: 4px;
+  }
+  /* Sticky footer action bars (save/cancel) — keep above the bottom nav
+     so the buttons stay tappable. The bottom nav is 60px + safe-area. */
+  [data-sticky-actions],
+  [data-mobile-sticky-bar] {
+    position: sticky;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0));
+    z-index: 30;
+  }
+  /* MobileFAB sits at bottom-right; keep it above the nav with safe area. */
+  [aria-label="Quick create"],
+  .mobile-fab {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0)) !important;
+  }
+}
+
+/* iOS / Android landscape phones (short height) — drop topbar to two
+ * rows is wasteful. Keep it single-row, smaller. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .vyne-unified-topbar {
+    min-height: 36px !important;
+    padding: 2px 12px !important;
+  }
+  .vyne-unified-topbar .vyne-unified-greeting {
+    font-size: 11.5px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Universal mobile polish — Phase 12 (every dashboard page)
+ *
+ * After scoping fixes module-by-module, the cross-cutting patterns
+ * across 33 pages are: a sticky `<PageHeader />` row that overflows,
+ * inline filter strips that wrap awkwardly, KPI grids that don't
+ * collapse, sticky bottom bars hidden behind the bottom nav, oversized
+ * detail cards, and modals that float centred when a bottom sheet is
+ * better thumb-reach. The data-attribute hooks added to PageHeader
+ * (Phase 12.0) let CSS reach every page that uses it without per-file
+ * touches. Fall-throughs target the inline patterns the rest use.
+ *
+ * All rules scope to ≤640 px so tablets keep their mid-tier layout.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* — Shared PageHeader: stack title above actions, tighter padding,
+       title icon shrinks. Action row scrolls horizontally instead of
+       wrapping into an ugly multi-line block. */
+  [data-vyne-page-header] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+  }
+  [data-vyne-page-header-title] h1 {
+    font-size: 15px !important;
+  }
+  [data-vyne-page-header-title] > div:first-child {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  [data-vyne-page-header-actions] {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    padding-bottom: 2px;
+  }
+  [data-vyne-page-header-actions]::-webkit-scrollbar {
+    display: none;
+  }
+  [data-vyne-page-header-actions] > * {
+    flex-shrink: 0;
+  }
+
+  /* — Inline page headers (pages that hand-rolled instead of using
+       <PageHeader />). Targets the very common
+       `<header style="display:flex; justify-content:space-between">`
+       pattern. Same column-stack treatment. */
+  main [class*="PageHeader"]:not([data-vyne-page-header]),
+  main header[style*="justify-content: space-between"],
+  main header[style*="justify-content:space-between"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  /* — KPI strips: every dashboard tile row that uses `display: flex;
+       gap: 12px; flex-wrap: wrap` becomes a 2-col grid so each KPI
+       gets a usable width even at 360 px. We exclude tile rows nested
+       inside dialogs (already handled by the modal rule). */
+  main > div [style*="display: flex"][style*="gap: 12px"][style*="flex-wrap: wrap"]:not([role="dialog"] *) {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* — Phase 11.7 fix: PageDashboard's KPI grid uses
+       `repeat(auto-fit, minmax(180px, 1fr))` which collapses to 1
+       column at any width below ~388 px. On a typical 360-411 px
+       phone that means the entire dashboard strip eats the viewport
+       before the user reaches the actual content (table / kanban).
+       Force a 2-column layout regardless of width and tighten the
+       tile padding + value font so each row is ~110 px instead of
+       ~180 px. The Overview header + time-range stay at full width
+       above the grid. */
+  [aria-label="Page dashboard"] {
+    padding: 8px 12px 12px !important;
+    gap: 8px !important;
+  }
+  [aria-label="Page dashboard"] > div:nth-child(2) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  /* The skeleton grid (loading state) renders with the same auto-fit
+     so it matches. */
+  [aria-label="Page dashboard"] > div[role="status"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  /* KPI tile shrinks: smaller min-height, tighter padding, smaller
+     value font, hide sparkline (it's noise at 130 px wide), and
+     stack the value+sparkline column so the value isn't cropped. */
+  .vyne-kpi-tile {
+    min-height: 0 !important;
+    padding: 9px 11px !important;
+    gap: 3px !important;
+  }
+  .vyne-kpi-tile [data-kpi-value],
+  .vyne-kpi-tile > div:nth-child(2) > div:first-child {
+    font-size: 18px !important;
+    line-height: 1.1 !important;
+  }
+  .vyne-kpi-tile [data-kpi-label],
+  .vyne-kpi-tile > div:first-child {
+    font-size: 10px !important;
+  }
+  .vyne-kpi-tile svg[width="96"] {
+    display: none !important;
+  }
+
+  /* — Charts row inside PageDashboard stacks (already in Phase 6.1)
+       but reduce padding too so it doesn't add 30 px around each
+       chart. */
+  [aria-label="Page dashboard"] > div:nth-child(3) {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* — Hand-rolled KPI rows with `flex: 1; min-width: 160` (invoicing /
+       observe / sales / automations / KpiCard). Strip the floor so
+       two cards fit per row at 360 px instead of stacking 1-per-row. */
+  [style*="min-width: 160"],
+  [style*="minWidth: 160"],
+  [style*="min-width: 180"],
+  [style*="minWidth: 180"],
+  [style*="min-width: 200"],
+  [style*="minWidth: 200"],
+  [style*="min-width: 220"],
+  [style*="minWidth: 220"],
+  [style*="min-width: 240"],
+  [style*="minWidth: 240"],
+  [style*="min-width: 260"],
+  [style*="minWidth: 260"],
+  [style*="min-width: 280"],
+  [style*="minWidth: 280"],
+  [style*="min-width: 300"],
+  [style*="minWidth: 300"] {
+    min-width: 0 !important;
+  }
+  /* Tighten KpiCard internals on phones — 22 px → 18 px value, 14/16
+     padding → 10/12. */
+  main [style*="border-radius: 10px"][style*="padding: 14px 16px"],
+  main [style*="borderRadius: 10"][style*="padding: 14px"] {
+    padding: 10px 12px !important;
+  }
+  main [style*="font-size: 22px"][style*="font-weight: 700"],
+  main [style*="fontSize: 22"][style*="fontWeight: 700"] {
+    font-size: 18px !important;
+  }
+
+  /* — Tabs / segmented controls (pages use `[role="tablist"]` AND
+       inline div toolbars). Both scroll horizontally instead of
+       wrapping. The `[role="tablist"]` rule from Phase 9.8 already
+       handles roleful tabs; this catches the inline ones common in
+       Settings / Reporting / Roadmap. */
+  main [data-vyne-tabs],
+  main [class*="tabStrip"] {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  main [data-vyne-tabs]::-webkit-scrollbar,
+  main [class*="tabStrip"]::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* — Detail panel sections: common card padding 16-24 → 12 so every
+       section fits more content per scroll. */
+  aside[role="dialog"] section,
+  aside[role="dialog"] [class*="DetailSection"] {
+    padding: 12px !important;
+  }
+
+  /* — Calendar / timeline / Gantt charts: enforce horizontal scroll
+       containers so they don't shred the viewport. Pages use a
+       `[data-vyne-scroll-x]` opt-in marker. */
+  main [data-vyne-scroll-x] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* — Sidebar-style nested layouts (Settings / Runbooks / Docs / AI):
+       the `<aside style="width: 320px">` + content split renders fine
+       as a stacked block on phones. Force-stack any direct flex row
+       child of <main> whose first child is an aside. */
+  main > div > div[style*="display: flex"] > aside,
+  main > div > div[style*="display:flex"] > aside {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--content-border) !important;
+  }
+  main > div > div[style*="display: flex"]:has(> aside),
+  main > div > div[style*="display:flex"]:has(> aside) {
+    flex-direction: column !important;
+  }
+
+  /* — Big page-level CTAs that say "+ New Whatever" with a label →
+       compact label so they don't push other actions off-screen. */
+  [data-vyne-page-header-actions] button > span,
+  [data-vyne-page-header-actions] a > span {
+    /* Keep visible but tighter — don't zero out, the label is useful
+       on the primary action. The horizontal scroll above takes care
+       of overflow. */
+    font-size: 12px !important;
+  }
+
+  /* — Filter pill rows: every page uses the same
+       `<div style="display:flex; gap:6px; flex-wrap:wrap">` pattern
+       for status pills. Make them scroll horizontally instead so the
+       row doesn't grow to 4-5 lines on a phone. */
+  main [data-vyne-pill-row],
+  main [aria-label="Filter" i] {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  main [data-vyne-pill-row]::-webkit-scrollbar,
+  main [aria-label="Filter" i]::-webkit-scrollbar {
+    display: none;
+  }
+  main [data-vyne-pill-row] > *,
+  main [aria-label="Filter" i] > * {
+    flex-shrink: 0;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Chat page mobile polish — Phase 11.5
+ *
+ * The chat page packs the most chrome of any module into a single
+ * fixed-height viewport: channel header (Hash + name + 5 action
+ * buttons), pinned bar, smart catch-up bar, message stream, smart
+ * replies row, formatting toolbar, composer textarea, attachment row,
+ * send button, plus the global bottom nav. On phones that crams way
+ * too much into 360 px wide and the action row scrolls horizontally.
+ *
+ * Fix: shrink padding, drop label text from secondary actions (icon-
+ * only), hide the always-visible message-action toolbar on touch
+ * (long-press still reveals it), suppress the global FAB on /chat
+ * (the composer's own send button is the action), and tighten the
+ * composer's two icon rows.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* — Channel header: tighter padding, smaller name, button row wraps
+       to icon-only. The desktop "Call ▾ / Summarize" labels are noise
+       on a phone where the call dropdown still shows the ▾ chevron. */
+  [data-chat-header] {
+    padding: 8px 12px !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+  [data-chat-actions] {
+    gap: 2px !important;
+    flex-shrink: 0;
+  }
+  /* Drop the "Call" + "Summarize" label text on phones — keep only the
+     icon. The chevron on Call still indicates the dropdown affordance.
+     SVG icons keep their pixel size (lucide-react sets width/height as
+     attributes, not font-size), so collapsing the text is safe. */
+  [data-chat-actions] > button {
+    font-size: 0 !important;
+    padding: 6px !important;
+    gap: 0 !important;
+  }
+  /* Bring back legible text on the dropdown menu items — those render
+     inside a portaled `[role="menu"]` and shouldn't inherit the zero. */
+  [data-chat-actions] [role="menu"],
+  [data-chat-actions] [role="menu"] * {
+    font-size: 12px !important;
+  }
+  [data-chat-actions] [role="menu"] [style*="fontSize: 12.5"],
+  [data-chat-actions] [role="menu"] div[style*="fontSize: 12.5"] {
+    font-size: 12.5px !important;
+  }
+  /* Action buttons get a 36×36 touch target. */
+  [data-chat-actions] > * {
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* — Message action toolbar: hide the always-visible 0.55-opacity
+       state on touch devices. Long-press still triggers `setHovering`
+       which makes the toolbar appear at full opacity, so the action
+       affordance isn't lost — it just stops cluttering every own-message. */
+  [data-chat-action-toolbar] {
+    display: none !important;
+  }
+  /* Reveal once the row is hovered (long-press path) or focused. */
+  article:hover [data-chat-action-toolbar],
+  article:focus-within [data-chat-action-toolbar] {
+    display: flex !important;
+  }
+
+  /* — MobileFAB shouldn't render on /chat — the composer already has a
+       send button and the FAB collides with the composer's right edge.
+       The FAB component renders nothing for unknown routes; the chat
+       route currently maps to "New channel" which is reachable from
+       the channels sidebar instead. */
+  body[data-chat-active="true"] [aria-label="New channel"],
+  body[data-chat-active="true"] .mobile-fab {
+    display: none !important;
+  }
+
+  /* — Composer formatting toolbar: tighten the B / I / <> / ⚡ row. */
+  [data-chat-composer] [data-chat-format-row] {
+    gap: 2px !important;
+    padding: 4px 8px !important;
+  }
+  [data-chat-composer] [data-chat-format-row] button {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+  }
+
+  /* — Composer attachment icon row: equal-width grid so 6+ icons
+       don't bunch on the left and overflow to the right. */
+  [data-chat-composer] [data-chat-attach-row] {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+    gap: 4px !important;
+    padding: 4px 8px !important;
+  }
+  [data-chat-composer] [data-chat-attach-row] button,
+  [data-chat-composer] [data-chat-attach-row] label {
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* — Send button: pin to the right of the attach row (currently
+       breaks to a new line on phones). */
+  [data-chat-composer] [data-chat-send] {
+    align-self: flex-end;
+    min-width: 76px;
+    min-height: 36px;
+  }
+
+  /* — Smart Reply pills row wraps cleanly with consistent spacing. */
+  [data-chat-smart-replies] {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phase 10.8 — Responsive image + media defaults
+ *
+ * Image-heavy modules (docs, training, marketing campaigns, brand
+ * assets, mood boards) used to overflow the viewport on phones because
+ * authors set inline pixel widths or used CSS that didn't reckon with
+ * a 360 px screen. Cap any direct child of `main` (and of every common
+ * content container) so an over-wide asset becomes responsive without
+ * touching the call-site. Avatars and brand marks under 96 px are
+ * preserved by the `width:auto` fallback so we don't deform icons.
+ *
+ * The `[data-no-scale]` opt-out lets specific elements skip the cap
+ * (e.g., the Vyne logo mark in auth pages, image diff viewers).
+ * ════════════════════════════════════════════════════════════════════ */
+main img:not([data-no-scale]),
+main video:not([data-no-scale]),
+main iframe:not([data-no-scale]),
+[role="dialog"] img:not([data-no-scale]),
+[role="dialog"] video:not([data-no-scale]) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* SVG mark / icon family — never let a stretched parent yank the
+ * intrinsic width up. */
+main svg:not([data-no-scale]):not([class*="lucide"]) {
+  max-width: 100%;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phase 9 — Comprehensive mobile polish
+ *
+ * Concrete UX fixes on top of the layout normaliser. Targets the
+ * specific patterns module pages actually use:
+ *   - sticky page headers (h1 + action row) that wrap awkwardly
+ *   - filter bars where the search input needs to stretch full-width
+ *   - cards with fat 16-20px padding that waste viewport real estate
+ *   - kanban columns that lack min-width and shred horizontally
+ *   - modal dialogs that float centred when a bottom-sheet is more
+ *     thumb-reachable
+ *   - detail panels (already handled in 9.5) — keep close button
+ *     bigger + ensure scroll region clears the bottom nav
+ *
+ * All rules scope to ≤640px so tablets stay mid-tier.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* — Page headers: stack title + actions vertically with consistent gap.
+       Pages typically render `<header style={display:flex}>` with a title
+       on the left and one or more CTA pills on the right. On a 360px
+       viewport that flex row breaks ugly; force column layout so each
+       row gets its own line and the title isn't truncated by buttons. */
+  main > div > header[style*="display: flex"],
+  main > div > div > header[style*="display: flex"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+  main > div > header[style*="display: flex"] > *:not(h1):not(h2),
+  main > div > div > header[style*="display: flex"] > *:not(h1):not(h2) {
+    width: 100%;
+  }
+
+  /* — Toolbars and filter rows wrap by default and the search input
+       gets full width so the placeholder is readable. We only target
+       containers that already have multiple flex children so we don't
+       break single-purpose toolbars. */
+  [class*="toolbar"][style*="display: flex"],
+  [aria-label*="Filter" i][style*="display: flex"] {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  [class*="toolbar"] input[type="text"],
+  [class*="toolbar"] input[type="search"],
+  input[type="search"][placeholder*="Search" i] {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* — Cards: tighten the padding that's typically 16-20px so list-of-cards
+       pages don't feel cramped between bottom nav + topbar. */
+  [style*="padding: 16px"],
+  [style*="padding:16px"],
+  [style*="padding: 18px"],
+  [style*="padding:18px"],
+  [style*="padding: 20px"],
+  [style*="padding:20px"] {
+    padding: 12px !important;
+  }
+
+  /* — Kanban columns: every column needs a min-width so the horizontal
+       scroller works smoothly. Tailwind `.flex.gap-3.overflow-x-auto`
+       is the pattern CRM uses; we don't generalise the inline-style
+       case because it false-positives on chip rows that use the same
+       pattern but want auto-sized children. */
+  .flex.gap-3.overflow-x-auto > * {
+    min-width: 240px;
+    flex-shrink: 0;
+  }
+
+  /* — Modal dialogs: snap to bottom sheet for thumb reach. We exclude
+       the role="dialog" aria-modal="false" cases (DetailPanel uses that)
+       since Phase 9.5 handles those separately. */
+  [role="dialog"][aria-modal="true"] {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 92dvh !important;
+    overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45) !important;
+  }
+  /* Modal headers stay sticky inside the bottom sheet so the close
+     button is reachable while scrolling. */
+  [role="dialog"][aria-modal="true"] > header,
+  [role="dialog"][aria-modal="true"] > div:first-child {
+    position: sticky;
+    top: 0;
+    background: var(--content-bg);
+    z-index: 1;
+  }
+
+  /* — Tables: when not opted into m-cards, ensure the first cell stays
+       sticky so the row-identifier (name / id) is always visible while
+       scrolling horizontally. Doesn't fight m-cards because that rule
+       turns the table into block elements first. */
+  table:not(.m-cards) tbody tr td:first-child,
+  table:not(.m-cards) thead tr th:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--content-bg);
+    z-index: 1;
+    box-shadow: 1px 0 0 var(--content-border);
+  }
+
+  /* — Lists: tighten row padding so more rows fit per viewport. The
+       `[data-density]` family already does this when the user picks
+       compact, but this baseline applies even on the default
+       comfortable density on phones. */
+  tbody td,
+  [role="row"] [role="cell"] {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  /* — Action pills + tab strips: scrollable horizontally instead of
+       wrapping ungracefully. We only need this where the strip already
+       has 3+ children. */
+  [role="tablist"] {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  [role="tablist"]::-webkit-scrollbar {
+    display: none;
+  }
+  [role="tab"] {
+    flex-shrink: 0;
+  }
+
+  /* — Forms: any inline two-column form (label | input) collapses to a
+       single column. Many module forms use a 200px label gutter. */
+  form [style*="grid-template-columns:"][style*="200"],
+  form [style*="grid-template-columns:"][style*="240"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* — Card headers with a leading icon + title + trailing chips: allow
+       wrapping so the chip cluster doesn't push the title off-screen. */
+  [class*="cardHeader"],
+  [data-card-header] {
+    flex-wrap: wrap !important;
+  }
+
+  /* — FAB doesn't fight the offline banner. The OfflineBanner pins at
+       72px + safe-area; nudge the FAB up another 12px when the banner
+       is visible (we toggle via body[data-offline]). */
+  body[data-offline="true"] [aria-label="Quick create"],
+  body[data-offline="true"] .mobile-fab {
+    bottom: calc(132px + env(safe-area-inset-bottom, 0)) !important;
+  }
+
+  /* — Compact KPI tile typography on phones so 2-col KPIs aren't truncated. */
+  .vyne-kpi-tile [data-kpi-value] {
+    font-size: 17px !important;
+    line-height: 1.15 !important;
+  }
+  .vyne-kpi-tile [data-kpi-label] {
+    font-size: 10.5px !important;
+  }
+
+  /* — Inputs default font-size already 16px (iOS zoom prevention).
+       Also ensure they always reach a 100% width within their wrappers. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  textarea,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* — Sticky bottom CTA bars: recognise the common `[data-page-actions]`
+       and pin them above the bottom nav so their save / cancel are
+       always reachable. */
+  [data-page-actions] {
+    position: sticky !important;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0)) !important;
+    background: var(--content-bg);
+    border-top: 1px solid var(--content-border);
+    padding: 10px 12px !important;
+    z-index: 25;
+    margin-left: -12px;
+    margin-right: -12px;
+  }
+
+  /* — Tooltip suppression: native title-attr tooltips don't render on
+       touch and our floating tooltips can crowd content. Hide the tip
+       containers on coarse pointers. */
+  .tooltip-popover,
+  [data-tooltip-content] {
+    display: none !important;
+  }
+}
+
+/* Tablet portrait (641-1024) gets the wider polish but doesn't snap
+ * dialogs to the bottom — there's enough room for the centered modal. */
+@media (min-width: 641px) and (max-width: 1024px) and (orientation: portrait) {
+  /* Page headers stack actions on a second line but don't go full
+     vertical column — splits the difference for tablets. */
+  main > div > header[style*="display: flex"] {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+}
+
+/* Sync body[data-offline] on connection state. Reads from the same
+ * `online`/`offline` events the OfflineBanner subscribes to. We don't
+ * need a full listener — the banner mounts once and toggles the body
+ * attribute. */
+@supports selector(body[data-offline="true"]) {
+  /* no-op feature query just to be explicit about the attribute. */
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phase 9.5 — DetailPanel reach on mobile
+ *
+ * The right-side slide-in keeps its desktop motion (we don't re-flow
+ * it to a bottom sheet because that fights framer-motion's x-translate
+ * and would jitter on entry / exit). What we DO fix on phones:
+ *   - leave room for the bottom nav so the panel content scroll never
+ *     ends behind the fixed nav
+ *   - cap the close-button click region at WCAG-AAA 44×44
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  aside[role="dialog"][aria-modal="false"] {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0)) !important;
+  }
+  aside[role="dialog"][aria-modal="false"] button[aria-label="Close"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * Phase 9.4 — Mobile command palette as bottom sheet
+ *
+ * The Cmd+K palette is a great desktop affordance but the centered
+ * `top: 18vh; max-width: 580px` modal floats awkwardly on phones — the
+ * input is far from the thumb and the on-screen keyboard pushes the
+ * results up over the search field. Snap to a full-width bottom sheet
+ * with the input at the top so the thumb-zone stays usable + the
+ * keyboard rises into the open space below the input naturally.
+ * ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  [data-vyne-cmdk] {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
+    max-width: 100vw !important;
+    width: 100vw !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 90dvh;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.45) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  /* Bigger results target so taps feel comfortable. */
+  [data-vyne-cmdk] [role="option"],
+  [data-vyne-cmdk] button[data-cmdk-result] {
+    min-height: 48px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * ✦ Phase 12 — Visual polish layer v2 (every page) ✦
+ *
+ * After 11 phases of structural / mobile work, the next leverage is
+ * coherence: every page shares the same card, table, button, pill,
+ * dropdown, focus, and motion vocabulary. Authors can keep using the
+ * existing inline styles — we only add fall-through rules that elevate
+ * the default look on top, never break overrides. Every selector
+ * scoped to common class names / data-attrs / generic elements so
+ * the polish reaches the whole app without per-page edits.
+ *
+ * Sections:
+ *   12.1  Cards — consistent radius / hover lift / border-glow
+ *   12.2  Tables — zebra rows / sticky thead / sort affordance
+ *   12.3  Buttons — sizes / hover lift / active press
+ *   12.4  Pill chips — filter active state with accent halo
+ *   12.5  Dropdown menus — divider / leading icon / hover bg
+ *   12.6  Form controls — input/select/textarea consistency
+ *   12.7  Links — subtle underline on hover
+ *   12.8  Section labels (uppercase tracked) standardized
+ *   12.9  kbd hint pills + shortcut affordance
+ *   12.10 Loading dots / spinners
+ *   12.11 Empty states scoped to .vyne-empty
+ *   12.12 Page transition micro-interactions
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ─── 12.1 Cards ───────────────────────────────────────────────────── */
+/* Any element matching the common card patterns gets a unified hairline
+   border + soft hover lift. Pages already pass their own bg; we only
+   touch border / shadow / transform. */
+.dk-card,
+[class*="card-shell" i],
+[data-vyne-card] {
+  border: 1px solid var(--content-border);
+  border-radius: 12px;
+  transition: border-color 0.2s var(--ease-out-quart, ease-out),
+    box-shadow 0.2s var(--ease-out-quart, ease-out),
+    transform 0.12s var(--ease-out-quart, ease-out);
+}
+.dk-card:hover,
+[class*="card-shell" i]:hover,
+[data-vyne-card]:hover {
+  border-color: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35);
+  box-shadow: 0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06);
+}
+[data-vyne-card][data-interactive="true"]:hover {
+  transform: translateY(-1px);
+}
+
+/* ─── 12.2 Tables ──────────────────────────────────────────────────── */
+/* Zebra stripes + sticky thead + smooth sort indicator. Skips tables
+   that opt out via .m-cards (mobile card mode) since the cells become
+   blocks there. */
+table:not(.m-cards) tbody tr:nth-child(even) {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.018);
+}
+table:not(.m-cards) thead th {
+  position: sticky;
+  top: 0;
+  background: var(--table-header-bg, var(--content-secondary));
+  z-index: 2;
+}
+/* Sortable headers get a subtle hover hint */
+table:not(.m-cards) thead th[role="columnheader"][aria-sort],
+table:not(.m-cards) thead th[onclick],
+table:not(.m-cards) thead th[style*="cursor: pointer"] {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, color 0.15s;
+}
+table:not(.m-cards) thead th[role="columnheader"][aria-sort]:hover,
+table:not(.m-cards) thead th[style*="cursor: pointer"]:hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08);
+  color: var(--vyne-accent, var(--text-primary));
+}
+
+/* ─── 12.3 Buttons — hover lift + active press, consistent across
+   inline-styled and Tailwind buttons. The site-wide `:active scale(0.97)`
+   from the existing polish layer pairs with this. */
+button:not(:disabled):hover,
+a[role="button"]:not(:disabled):hover,
+.btn-aurora:hover,
+.btn-teal:hover,
+.btn-primary-plus:hover {
+  filter: brightness(1.04);
+}
+/* Outline / ghost button hover: soft tint instead of brightness change */
+button[style*="background: transparent"]:not(:disabled):hover,
+button[style*="background:transparent"]:not(:disabled):hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06) !important;
+}
+/* Primary CTA (aurora/teal/accent gradient): subtle shadow lift on hover */
+button[style*="linear-gradient"]:not(:disabled):hover,
+a[style*="linear-gradient"]:not(:disabled):hover {
+  box-shadow:
+    0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.20),
+    0 8px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20) !important;
+  transform: translateY(-1px);
+}
+
+/* ─── 12.4 Filter pills ───────────────────────────────────────────── */
+/* Pages render filter pills as buttons with `border-radius: 999px` or
+   `rounded-full` Tailwind class. Active state usually has an accent bg
+   inline. Add a subtle glow on the active pill so it pops. */
+button[style*="border-radius: 999"],
+button[style*="border-radius:999"],
+.rounded-full[role="button"] {
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.18s;
+}
+button[aria-pressed="true"][style*="border-radius: 999"],
+button[aria-pressed="true"][style*="border-radius:999"],
+button[aria-current="true"][style*="border-radius: 999"] {
+  box-shadow: 0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18);
+}
+
+/* ─── 12.5 Dropdown menus ──────────────────────────────────────────── */
+[role="menu"] {
+  animation: vyne-menu-pop 0.14s var(--ease-out-quart, ease-out);
+}
+@keyframes vyne-menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+[role="menu"] [role="menuitem"]:hover,
+[role="menu"] button:hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08) !important;
+}
+/* Divider between menu groups when authors add a `<hr>` */
+[role="menu"] hr {
+  margin: 4px 2px;
+  border: none;
+  border-top: 1px solid var(--content-border);
+}
+
+/* ─── 12.6 Form controls — consistent border / focus / hover ──────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):hover,
+select:hover,
+textarea:hover {
+  border-color: var(--content-border-strong, var(--text-tertiary)) !important;
+}
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--content-secondary) !important;
+}
+/* Placeholder text — slightly dimmer for breathing room */
+::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.7;
+}
+
+/* ─── 12.7 Links — ghost underline on hover ──────────────────────────
+ * (Removed — background-image override was hiding link cards that set
+ *  their own background via class instead of inline style. The default
+ *  desktop hover is fine; mobile hovers are no-ops on touch.) */
+
+/* ─── 12.8 Section labels — small caps for uppercase tracking ─────── */
+[data-section-label],
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+/* ─── 12.9 Kbd hints ───────────────────────────────────────────────── */
+kbd:not([class]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 5px;
+  border: 1px solid var(--content-border);
+  background: var(--content-secondary);
+  color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* ─── 12.10 Spinner — `.vyne-spinner` for any loading affordance ─── */
+.vyne-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: vyne-spin 700ms linear infinite;
+}
+
+/* ─── 12.11 Empty states — `.vyne-empty` consistent layout ────────── */
+.vyne-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+.vyne-empty [data-empty-icon] {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--content-secondary);
+  color: var(--vyne-accent, var(--text-secondary));
+  margin-bottom: 4px;
+}
+.vyne-empty [data-empty-title] {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.vyne-empty [data-empty-body] {
+  font-size: 12.5px;
+  max-width: 320px;
+  line-height: 1.55;
+}
+
+/* ─── 12.12 Page transition micro-interactions ──────────────────────
+ * (Removed — `animation-fill-mode: both` was holding `opacity: 0` on
+ *  PageDashboard sections when the animation engine deferred painting
+ *  the keyframe (some desktop browsers / when devtools paused the
+ *  page). The base `<main>` page-fade-in keyframe is enough, and any
+ *  per-component motion uses framer-motion which has its own mount
+ *  trigger.) */
+
+/* ─── 12.13 Scrollbar polish per content region ───────────────────── */
+.content-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.content-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.content-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ─── 12.14 Tables on dark theme: stronger separator + accent on row hover ─ */
+[data-theme="dark"] table:not(.m-cards) tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.012);
+}
+[data-theme="dark"] table:not(.m-cards) tbody tr:hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06);
+}
+
+/* ─── 12.15 Status pills — consistent rounded-full small uppercase ── */
+[role="status"][data-pill],
+.badge-success,
+.badge-warning,
+.badge-danger,
+.badge-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+/* ─── 12.16 Avatar fallbacks — gradient generation via `data-hue` ─── */
+[data-avatar][data-hue] {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--avatar-hue, 200) 70% 55%),
+    hsl(calc(var(--avatar-hue, 200) + 30) 70% 45%)
+  );
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+}
+[data-avatar][data-hue="0"] { --avatar-hue: 0; }
+[data-avatar][data-hue="60"] { --avatar-hue: 60; }
+[data-avatar][data-hue="120"] { --avatar-hue: 120; }
+[data-avatar][data-hue="180"] { --avatar-hue: 180; }
+[data-avatar][data-hue="240"] { --avatar-hue: 240; }
+[data-avatar][data-hue="300"] { --avatar-hue: 300; }
+
+/* ─── 12.17 Smooth detail-panel section hover (sidebars / pickers) ── */
+aside [class*="DetailRow"]:hover,
+[role="dialog"] [class*="DetailRow"]:hover {
+  background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04);
+}
+
+/* ─── 12.18 Active rail micro-glow on sidebar items ────────────────── */
+.sidebar-nav a[aria-current="page"],
+.sidebar-nav button[aria-current="page"] {
+  box-shadow: inset 3px 0 0 var(--vyne-accent, var(--vyne-purple));
+}
+
+/* ─── 12.19 Toast tweaks — subtle accent stripe at the leading edge ─ */
+[data-sonner-toast],
+[data-react-hot-toast] > div,
+.go2072408551 {
+  border-left: 3px solid var(--vyne-accent, var(--vyne-purple)) !important;
+}
+
+/* ─── 12.20 Drag-handle treatment — wherever used ─────────────────── */
+[data-drag-handle] {
+  cursor: grab;
+  color: var(--text-tertiary);
+  opacity: 0.7;
+  transition: opacity 0.15s, color 0.15s;
+}
+[data-drag-handle]:hover {
+  opacity: 1;
+  color: var(--vyne-accent, var(--vyne-purple));
+}
+[data-drag-handle]:active {
+  cursor: grabbing;
+}
+
+/* ─── 12.21 Mobile bottom-nav active pill stronger ─────────────────── */
+@media (max-width: 768px) {
+  .mobile-bottom-nav a[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    inset: 6px 18% auto 18%;
+    height: 28px;
+    border-radius: 14px;
+    background: rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10);
+    z-index: -1;
+  }
+}
+
+/* ─── 12.22 Gradient text utility — apply to brand headings ────────── */
+[data-gradient-text] {
+  background: linear-gradient(
+    135deg,
+    var(--vyne-accent, #06B6D4),
+    var(--vyne-accent-deep, #0E7490)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ────────────────────────────────────────────────────────────────────
+ * 12.23 — Chevron / disclosure-arrow visibility bump
+ *
+ * The lucide chevrons (ChevronRight / Down / Up / Left) render at
+ * stroke-width 2 by default which fades into low-contrast surfaces
+ * (sidebar dark gradient, secondary surfaces). Bump every Lucide
+ * chevron to stroke-width 2.5 + raise its baseline opacity from
+ * 0.4-0.6 to 0.85-1.0 so the affordance is unambiguous.
+ *
+ * The selector targets the SVG class lucide-react ships:
+ * `class="lucide lucide-chevron-*"`. Pages that already pass an inline
+ * `color` win because attribute selectors are more specific than
+ * class selectors of the same name.
+ * ──────────────────────────────────────────────────────────────────── */
+svg.lucide-chevron-right,
+svg.lucide-chevron-down,
+svg.lucide-chevron-up,
+svg.lucide-chevron-left,
+svg.lucide-chevrons-up-down,
+svg.lucide-chevron-down-up,
+svg.lucide-chevrons-right,
+svg.lucide-chevrons-left {
+  stroke-width: 2.5 !important;
+  opacity: var(--chevron-opacity, 0.85);
+}
+/* When the chevron sits inside an interactive element, brighten it
+   on hover/active so the disclosure is unmistakable. */
+button:hover svg.lucide-chevron-right,
+button:hover svg.lucide-chevron-down,
+button:hover svg.lucide-chevron-up,
+button:hover svg.lucide-chevron-left,
+[role="button"]:hover svg.lucide-chevron-right,
+[role="button"]:hover svg.lucide-chevron-down,
+[role="button"]:hover svg.lucide-chevron-up,
+[role="button"]:hover svg.lucide-chevron-left,
+a:hover svg.lucide-chevron-right,
+a:hover svg.lucide-chevron-down,
+a:hover svg.lucide-chevron-up,
+a:hover svg.lucide-chevron-left {
+  opacity: 1;
+  color: var(--vyne-accent, var(--vyne-purple));
+}
+/* aria-current="page" / aria-expanded="true" rows: chevron pops to
+   accent so the active disclosure stands out at a glance. */
+[aria-current="page"] svg.lucide-chevron-right,
+[aria-expanded="true"] svg.lucide-chevron-right,
+[aria-expanded="true"] svg.lucide-chevron-down {
+  opacity: 1;
+  color: var(--vyne-accent, var(--vyne-purple));
+}
+/* Sidebar chevrons specifically: the dark gradient bg makes
+   `--text-tertiary` (#8AA1AB) read at ~3:1 contrast. Use the brighter
+   sidebar text colour at full opacity so the arrows actually look
+   like arrows, not noise. */
+.sidebar-nav svg.lucide-chevron-right,
+.sidebar-nav svg.lucide-chevron-down,
+.sidebar-nav svg.lucide-chevron-up,
+.sidebar-nav svg.lucide-chevron-left {
+  --chevron-opacity: 1;
+  color: var(--sidebar-text);
+}
+.sidebar-nav button:hover svg.lucide-chevron-right,
+.sidebar-nav button:hover svg.lucide-chevron-down,
+.sidebar-nav a:hover svg.lucide-chevron-right,
+.sidebar-nav a:hover svg.lucide-chevron-down,
+.sidebar-nav [aria-current="page"] svg.lucide-chevron-right,
+.sidebar-nav [aria-expanded="true"] svg.lucide-chevron-right,
+.sidebar-nav [aria-expanded="true"] svg.lucide-chevron-down {
+  color: var(--sidebar-active);
+}
+
+/* Smooth rotation of expanded-state chevrons. Pages set the rotation
+   inline via `transform: rotate(90deg)`; this rule provides the
+   transition so the rotation isn't abrupt. */
+svg.lucide-chevron-right,
+svg.lucide-chevron-down,
+svg.lucide-chevron-up,
+svg.lucide-chevron-left {
+  transition: transform 0.2s var(--ease-out-quart, ease-out),
+    color 0.18s var(--ease-out-quart, ease-out),
+    opacity 0.18s var(--ease-out-quart, ease-out);
+}
+
+/* ─── Phase 19 — accessibility & internationalisation ───────────── */
+
+/* 19.2 — text scale. Multiplies every text size by --text-scale.
+ *  ThemeApplier writes 1 / 1.25 / 1.5 to <html>; the inherit chain
+ *  makes the new size cascade everywhere without per-component
+ *  changes. We multiply via a custom property + zoom on the root
+ *  font-size so px-based and em-based UIs both respond. */
+:root {
+  --text-scale: 1;
+}
+html {
+  font-size: calc(16px * var(--text-scale));
+}
+
+/* 19.1 — high-contrast mode. Forces text colour darker, borders
+ *  to 1.5 px solid, removes subtle backgrounds so foreground stays
+ *  WCAG AAA against the canvas. */
+html[data-contrast="high"] {
+  --text-primary: #000000;
+  --text-secondary: #1a1a1a;
+  --text-tertiary: #2a2a2a;
+  --content-border: #6b7280;
+  --input-border: #4b5563;
+}
+html[data-contrast="high"][data-theme="dark"] {
+  --text-primary: #ffffff;
+  --text-secondary: #f0f0f0;
+  --text-tertiary: #d0d0d0;
+  --content-border: #94a3b8;
+  --input-border: #cbd5e1;
+}
+html[data-contrast="high"] button:focus-visible,
+html[data-contrast="high"] a:focus-visible,
+html[data-contrast="high"] [role="button"]:focus-visible {
+  outline: 3px solid currentColor !important;
+  outline-offset: 3px !important;
+}
+
+/* 19.5 — underline links. Off by default; on flips every <a>
+ *  inside main to underline. Helps users who can't rely on colour
+ *  alone to identify links. */
+html[data-link-style="underline"] main a:not(.no-underline) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Reduce motion (manual override). The OS-level
+ *  prefers-reduced-motion media query already handles most of this,
+ *  but the manual toggle exists for users whose OS preference is
+ *  forced by a managed device profile. */
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* 19.9 — RTL. Most components inherit dir from <html>; this rule
+ *  flips the few hand-rolled `marginLeft` / `right: 0` patterns
+ *  that don't use logical properties. */
+html[dir="rtl"] [data-vyne-flip-rtl] {
+  transform: scaleX(-1);
+}
+

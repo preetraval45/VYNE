@@ -2,8 +2,52 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { useFinanceStore } from "@/lib/stores/finance";
 import { MOCK_ACCOUNTS } from "@/lib/fixtures/finance";
-import { seedOrEmpty } from "@/lib/stores/seedMode";
+import { seedOrEmpty, shouldSeedFixtures } from "@/lib/stores/seedMode";
+import { subscribe as rtSubscribe, isRealtimeEnabled } from "@/lib/realtime";
 import type { ERPJournalEntry } from "@/lib/api/client";
+
+// ─── Remote mirror helpers (Postgres via /api routes) ────────────
+// Customer + Invoice are persisted to Postgres. The other invoicing
+// entities (credit notes, payments, vendors, bills, refunds) stay in
+// localStorage for this pass — schema follows in the next batch.
+function mirrorCustomerCreate(c: Customer) {
+  void fetch("/api/customers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(c),
+  }).catch(() => {});
+}
+function mirrorCustomerUpdate(id: string, patch: Partial<Customer>) {
+  void fetch(`/api/customers/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorCustomerDelete(id: string) {
+  void fetch(`/api/customers/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
+function mirrorInvoiceCreate(i: Invoice) {
+  void fetch("/api/invoices", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(i),
+  }).catch(() => {});
+}
+function mirrorInvoiceUpdate(id: string, patch: Partial<Invoice>) {
+  void fetch(`/api/invoices/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorInvoiceDelete(id: string) {
+  void fetch(`/api/invoices/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
 
 // ─── Types ────────────────────────────────────────────────────────
 export type CustomerStatus = "Active" | "Inactive";
@@ -587,8 +631,10 @@ interface InvoicingStore {
   vendors: Vendor[];
   bills: Bill[];
   refunds: Refund[];
+  customersHydrated: boolean;
+  invoicesHydrated: boolean;
 
-  // Customers
+  // Customers (mirrors to /api/customers)
   addCustomer: (
     data: Omit<
       Customer,
@@ -597,6 +643,8 @@ interface InvoicingStore {
   ) => void;
   updateCustomer: (id: string, data: Partial<Customer>) => void;
   deleteCustomer: (id: string) => void;
+  hydrateCustomersFromServer: () => Promise<void>;
+  hydrateInvoicesFromServer: () => Promise<void>;
 
   // Invoices
   addInvoice: (data: {
@@ -658,7 +706,7 @@ interface InvoicingStore {
 
 export const useInvoicingStore = create<InvoicingStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       customers: seedOrEmpty(INITIAL_CUSTOMERS),
       invoices: seedOrEmpty(INITIAL_INVOICES),
       creditNotes: seedOrEmpty(INITIAL_CREDIT_NOTES),
@@ -666,61 +714,97 @@ export const useInvoicingStore = create<InvoicingStore>()(
       vendors: seedOrEmpty(INITIAL_VENDORS),
       bills: seedOrEmpty(INITIAL_BILLS),
       refunds: seedOrEmpty(INITIAL_REFUNDS),
+      customersHydrated: false,
+      invoicesHydrated: false,
 
       // ── Customers ──────────────────────────────────
-      addCustomer: (data) =>
-        set((state) => ({
-          customers: [
-            ...state.customers,
-            {
-              id: genId("c"),
-              name: data.name,
-              email: data.email,
-              phone: data.phone,
-              totalRevenue: 0,
-              outstandingBalance: 0,
-              lastInvoice: new Date().toISOString().slice(0, 10),
-              status: "Active",
-            },
-          ],
-        })),
+      addCustomer: (data) => {
+        const row: Customer = {
+          id: genId("c"),
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          totalRevenue: 0,
+          outstandingBalance: 0,
+          lastInvoice: new Date().toISOString().slice(0, 10),
+          status: "Active",
+        };
+        set((state) => ({ customers: [...state.customers, row] }));
+        mirrorCustomerCreate(row);
+      },
 
-      updateCustomer: (id, data) =>
+      updateCustomer: (id, data) => {
         set((state) => ({
           customers: state.customers.map((c) =>
             c.id === id ? { ...c, ...data } : c,
           ),
-        })),
+        }));
+        mirrorCustomerUpdate(id, data);
+      },
 
-      deleteCustomer: (id) =>
+      deleteCustomer: (id) => {
         set((state) => ({
           customers: state.customers.filter((c) => c.id !== id),
-        })),
+        }));
+        mirrorCustomerDelete(id);
+      },
+
+      hydrateCustomersFromServer: async () => {
+        try {
+          const res = await fetch("/api/customers", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { customers?: Customer[] };
+          if (Array.isArray(body.customers) && body.customers.length > 0) {
+            set({ customers: body.customers, customersHydrated: true });
+          } else if (Array.isArray(body.customers)) {
+            if (shouldSeedFixtures()) {
+              set({ customers: INITIAL_CUSTOMERS, customersHydrated: true });
+            } else {
+              set({ customers: [], customersHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().customersHydrated) set({ customersHydrated: false });
+        }
+      },
+
+      hydrateInvoicesFromServer: async () => {
+        try {
+          const res = await fetch("/api/invoices", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { invoices?: Invoice[] };
+          if (Array.isArray(body.invoices) && body.invoices.length > 0) {
+            set({ invoices: body.invoices, invoicesHydrated: true });
+          } else if (Array.isArray(body.invoices)) {
+            if (shouldSeedFixtures()) {
+              set({ invoices: INITIAL_INVOICES, invoicesHydrated: true });
+            } else {
+              set({ invoices: [], invoicesHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().invoicesHydrated) set({ invoicesHydrated: false });
+        }
+      },
 
       // ── Invoices ───────────────────────────────────
       addInvoice: (data) => {
         const amount = data.items.reduce((s, li) => s + li.qty * li.rate, 0);
         const today = new Date().toISOString().slice(0, 10);
-        let num = "";
-        set((state) => {
-          num = nextNumber(state.invoices, "INV-2026-");
-          return {
-            invoices: [
-              ...state.invoices,
-              {
-                id: genId("i"),
-                number: num,
-                customer: data.customer,
-                date: today,
-                dueDate: data.dueDate,
-                amount,
-                items: data.items,
-                notes: data.notes,
-                status: "Draft",
-              },
-            ],
-          };
-        });
+        const num = nextNumber(get().invoices, "INV-2026-");
+        const row: Invoice = {
+          id: genId("i"),
+          number: num,
+          customer: data.customer,
+          date: today,
+          dueDate: data.dueDate,
+          amount,
+          items: data.items,
+          notes: data.notes,
+          status: "Draft",
+        };
+        set((state) => ({ invoices: [...state.invoices, row] }));
+        mirrorInvoiceCreate(row);
 
         // Wire to general ledger: Dr Accounts Receivable / Cr Sales Revenue
         const finance = useFinanceStore.getState();
@@ -748,7 +832,8 @@ export const useInvoicingStore = create<InvoicingStore>()(
         finance.addJournalEntry(journalEntry);
       },
 
-      updateInvoice: (id, data) =>
+      updateInvoice: (id, data) => {
+        let amountAfter: number | undefined;
         set((state) => ({
           invoices: state.invoices.map((inv) => {
             if (inv.id !== id) return inv;
@@ -758,29 +843,41 @@ export const useInvoicingStore = create<InvoicingStore>()(
                 (s, li) => s + li.qty * li.rate,
                 0,
               );
+              amountAfter = updated.amount;
             }
             return updated;
           }),
-        })),
+        }));
+        // Mirror; recompute amount remotely if items changed.
+        const patch: Partial<Invoice> = { ...data };
+        if (amountAfter !== undefined) patch.amount = amountAfter;
+        mirrorInvoiceUpdate(id, patch);
+      },
 
-      deleteInvoice: (id) =>
+      deleteInvoice: (id) => {
         set((state) => ({
           invoices: state.invoices.filter((inv) => inv.id !== id),
-        })),
+        }));
+        mirrorInvoiceDelete(id);
+      },
 
-      markAsPaid: (id) =>
+      markAsPaid: (id) => {
         set((state) => ({
           invoices: state.invoices.map((inv) =>
             inv.id === id ? { ...inv, status: "Paid" as InvoiceStatus } : inv,
           ),
-        })),
+        }));
+        mirrorInvoiceUpdate(id, { status: "Paid" });
+      },
 
-      sendInvoice: (id) =>
+      sendInvoice: (id) => {
         set((state) => ({
           invoices: state.invoices.map((inv) =>
             inv.id === id ? { ...inv, status: "Sent" as InvoiceStatus } : inv,
           ),
-        })),
+        }));
+        mirrorInvoiceUpdate(id, { status: "Sent" });
+      },
 
       // ── Credit Notes ───────────────────────────────
       addCreditNote: (data) =>
@@ -944,3 +1041,44 @@ export const useInvoicingStore = create<InvoicingStore>()(
     },
   ),
 );
+
+// ── Realtime subscription ──────────────────────────────────────────
+let _invoicingRtBound = false;
+export function bindInvoicingRealtime(orgId = "demo") {
+  if (_invoicingRtBound || !isRealtimeEnabled()) return;
+  _invoicingRtBound = true;
+
+  rtSubscribe<Customer>(`org-${orgId}`, "customer:created", (c) => {
+    useInvoicingStore.setState((s) => {
+      if (s.customers.some((x) => x.id === c.id)) return s;
+      return { customers: [c, ...s.customers] };
+    });
+  });
+  rtSubscribe<Customer>(`org-${orgId}`, "customer:updated", (c) => {
+    useInvoicingStore.setState((s) => ({
+      customers: s.customers.map((x) => (x.id === c.id ? { ...x, ...c } : x)),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "customer:deleted", ({ id }) => {
+    useInvoicingStore.setState((s) => ({
+      customers: s.customers.filter((c) => c.id !== id),
+    }));
+  });
+
+  rtSubscribe<Invoice>(`org-${orgId}`, "invoice:created", (i) => {
+    useInvoicingStore.setState((s) => {
+      if (s.invoices.some((x) => x.id === i.id)) return s;
+      return { invoices: [i, ...s.invoices] };
+    });
+  });
+  rtSubscribe<Invoice>(`org-${orgId}`, "invoice:updated", (i) => {
+    useInvoicingStore.setState((s) => ({
+      invoices: s.invoices.map((x) => (x.id === i.id ? { ...x, ...i } : x)),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "invoice:deleted", ({ id }) => {
+    useInvoicingStore.setState((s) => ({
+      invoices: s.invoices.filter((inv) => inv.id !== id),
+    }));
+  });
+}

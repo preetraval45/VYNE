@@ -1,6 +1,7 @@
 "use client";
 
 import toast from "react-hot-toast";
+import { announce } from "@/components/layout/Announcer";
 
 /**
  * Centralised toast helpers + fetch wrapper that surfaces errors so
@@ -19,7 +20,27 @@ import toast from "react-hot-toast";
  *
  *   undoToast({ message, onUndo })
  *     - 5-second toast with an Undo button
+ *
+ *   notifyCoalesce("invoices", n => `${n} invoices archived`)
+ *     - bumps a counter on the same key for 800 ms instead of stacking
+ *       N separate toasts. The renderer is called once with the final
+ *       count when the window closes.
+ *
+ *   notifyOnce(key, msg)
+ *     - same as notifyInfo but no-ops if the same key fired in the
+ *       last DEDUPE_WINDOW_MS. Use for repeated background events
+ *       (sync error, websocket disconnect) that should announce once
+ *       and then go quiet.
  */
+
+const DEDUPE_WINDOW_MS = 4_000;
+const COALESCE_WINDOW_MS = 800;
+
+const lastFireAt = new Map<string, number>();
+const coalesceState = new Map<
+  string,
+  { count: number; timer: ReturnType<typeof setTimeout>; toastId: string }
+>();
 
 export function notifyError(err: unknown, fallback = "Something went wrong") {
   const msg =
@@ -29,10 +50,80 @@ export function notifyError(err: unknown, fallback = "Something went wrong") {
         ? err.message
         : fallback;
   toast.error(msg, { duration: 5000 });
+  // Phase 19.3 — surface to screen readers (assertive: errors interrupt).
+  announce(msg, "assertive");
 }
 
 export function notifySuccess(message: string) {
   toast.success(message, { duration: 2500 });
+  announce(message, "polite");
+}
+
+export function notifyInfo(message: string) {
+  toast(message, { duration: 2500 });
+  announce(message, "polite");
+}
+
+/** Suppress repeated firings of the same `key` within a 4 s window. */
+export function notifyOnce(
+  key: string,
+  message: string,
+  level: "info" | "success" | "error" = "info",
+) {
+  const now = Date.now();
+  const last = lastFireAt.get(key) ?? 0;
+  if (now - last < DEDUPE_WINDOW_MS) return;
+  lastFireAt.set(key, now);
+  if (level === "success") notifySuccess(message);
+  else if (level === "error") notifyError(message);
+  else notifyInfo(message);
+}
+
+/**
+ * Coalesce N rapid notifications into a single "N things happened"
+ * toast. Each call bumps the count; an 800 ms inactivity window
+ * triggers the render. Use for bulk operations: archive 5 → one toast.
+ *
+ *   notifyCoalesce("archive", n => `${n} invoice${n === 1 ? "" : "s"} archived`)
+ */
+export function notifyCoalesce(
+  key: string,
+  render: (count: number) => string,
+  level: "info" | "success" = "success",
+) {
+  const existing = coalesceState.get(key);
+  if (existing) {
+    existing.count += 1;
+    clearTimeout(existing.timer);
+    existing.timer = setTimeout(() => flushCoalesce(key, render, level), COALESCE_WINDOW_MS);
+    coalesceState.set(key, existing);
+    // Update the in-flight toast text live so users see the count tick up.
+    if (level === "success") {
+      toast.success(render(existing.count), { id: existing.toastId, duration: 2500 });
+    } else {
+      toast(render(existing.count), { id: existing.toastId, duration: 2500 });
+    }
+    return;
+  }
+  // First fire — open the toast immediately with count=1.
+  const id = `coalesce-${key}-${Date.now()}`;
+  if (level === "success") {
+    toast.success(render(1), { id, duration: 2500 });
+  } else {
+    toast(render(1), { id, duration: 2500 });
+  }
+  const timer = setTimeout(() => flushCoalesce(key, render, level), COALESCE_WINDOW_MS);
+  coalesceState.set(key, { count: 1, timer, toastId: id });
+}
+
+function flushCoalesce(
+  key: string,
+  _render: (count: number) => string,
+  _level: "info" | "success",
+) {
+  // The toast is already on screen with the final text; just retire the
+  // counter so the next event starts a new window.
+  coalesceState.delete(key);
 }
 
 export interface UndoToastOptions {

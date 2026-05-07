@@ -584,12 +584,15 @@ function NavRow({
               </span>
             )}
             <ChevronRight
-              size={14}
+              size={15}
+              strokeWidth={2.5}
               style={{
-                color: "var(--text-tertiary)",
+                color: active || hovered
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-secondary)",
                 flexShrink: 0,
-                opacity: hovered || active ? 0.8 : 0.4,
-                transition: "all 0.15s ease",
+                opacity: hovered || active ? 1 : 0.85,
+                transition: "all 0.18s var(--ease-out-quart, ease-out)",
                 transform: expanded ? "rotate(90deg)" : "none",
                 visibility: hasSubs ? "visible" : "hidden",
               }}
@@ -2179,6 +2182,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   onClick={() => go(p.href)}
+                  aria-current={isActive(p.href) ? "page" : undefined}
                   style={{
                     flex: 1,
                     display: "flex",

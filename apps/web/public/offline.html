@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VYNE · Offline</title>
+    <link rel="icon" href="/icon-192.png" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #0f172a;
+        --muted: #64748b;
+        --accent: #06b6d4;
+        --border: #e2e8f0;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --fg: #f1f5f9;
+          --muted: #94a3b8;
+          --border: #1e293b;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        min-height: 100vh;
+      }
+      main {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 80px 24px 40px;
+        text-align: center;
+      }
+      .logo {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 28px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--accent), #0891b2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        box-shadow: 0 12px 28px rgba(6, 182, 212, 0.32);
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 28px;
+        color: var(--muted);
+        line-height: 1.55;
+        font-size: 14px;
+      }
+      button {
+        appearance: none;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(6, 182, 212, 0.32);
+      }
+      .hint {
+        margin-top: 28px;
+        font-size: 12px;
+        color: var(--muted);
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo" aria-hidden="true">V</div>
+      <h1>You're offline</h1>
+      <p>
+        VYNE caches your last visited pages so you can keep referring to them.
+        New data sync resumes automatically once you reconnect.
+      </p>
+      <button onclick="location.reload()" type="button">Try again</button>
+      <p class="hint">
+        Mutations made while offline are queued in your browser and replay when
+        the network comes back.
+      </p>
+    </main>
+  </body>
+</html>
