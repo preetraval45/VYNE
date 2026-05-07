@@ -41,6 +41,44 @@ function mirrorProductDelete(id: string) {
     method: "DELETE",
   }).catch(() => {});
 }
+function mirrorOrderCreate(o: ERPOrder) {
+  void fetch("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(o),
+  }).catch(() => {});
+}
+function mirrorOrderUpdate(id: string, patch: Partial<ERPOrder>) {
+  void fetch(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorOrderDelete(id: string) {
+  void fetch(`/api/orders/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
+function mirrorSupplierCreate(s: ERPSupplier) {
+  void fetch("/api/suppliers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(s),
+  }).catch(() => {});
+}
+function mirrorSupplierUpdate(id: string, patch: Partial<ERPSupplier>) {
+  void fetch(`/api/suppliers/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorSupplierDelete(id: string) {
+  void fetch(`/api/suppliers/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
 
 interface OpsState {
   products: ERPProduct[];
@@ -49,12 +87,16 @@ interface OpsState {
   boms: ERPBOM[];
   workOrders: ERPWorkOrder[];
   productsHydrated: boolean;
+  ordersHydrated: boolean;
+  suppliersHydrated: boolean;
 
   setProducts: (v: ERPProduct[]) => void;
   addProduct: (p: ERPProduct) => void;
   updateProduct: (id: string, patch: Partial<ERPProduct>) => void;
   deleteProduct: (id: string) => void;
   hydrateProductsFromServer: () => Promise<void>;
+  hydrateOrdersFromServer: () => Promise<void>;
+  hydrateSuppliersFromServer: () => Promise<void>;
 
   setOrders: (v: ERPOrder[]) => void;
   addOrder: (o: ERPOrder) => void;
@@ -86,6 +128,8 @@ export const useOpsStore = create<OpsState>()(
       boms: seedOrEmpty(MOCK_BOMS),
       workOrders: seedOrEmpty(MOCK_WORK_ORDERS),
       productsHydrated: false,
+      ordersHydrated: false,
+      suppliersHydrated: false,
 
       setProducts: (products) => set({ products }),
       addProduct: (p) => {
@@ -121,18 +165,70 @@ export const useOpsStore = create<OpsState>()(
       },
 
       setOrders: (orders) => set({ orders }),
-      addOrder: (o) => set((s) => ({ orders: [o, ...s.orders] })),
-      updateOrder: (id, patch) =>
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, ...patch } : o)) })),
-      deleteOrder: (id) =>
-        set((s) => ({ orders: s.orders.filter((o) => o.id !== id) })),
+      addOrder: (o) => {
+        set((s) => ({ orders: [o, ...s.orders] }));
+        mirrorOrderCreate(o);
+      },
+      updateOrder: (id, patch) => {
+        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, ...patch } : o)) }));
+        mirrorOrderUpdate(id, patch);
+      },
+      deleteOrder: (id) => {
+        set((s) => ({ orders: s.orders.filter((o) => o.id !== id) }));
+        mirrorOrderDelete(id);
+      },
+
+      hydrateOrdersFromServer: async () => {
+        try {
+          const res = await fetch("/api/orders", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { orders?: ERPOrder[] };
+          if (Array.isArray(body.orders) && body.orders.length > 0) {
+            set({ orders: body.orders, ordersHydrated: true });
+          } else if (Array.isArray(body.orders)) {
+            if (shouldSeedFixtures()) {
+              set({ orders: MOCK_ORDERS, ordersHydrated: true });
+            } else {
+              set({ orders: [], ordersHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().ordersHydrated) set({ ordersHydrated: false });
+        }
+      },
 
       setSuppliers: (suppliers) => set({ suppliers }),
-      addSupplier: (sup) => set((s) => ({ suppliers: [sup, ...s.suppliers] })),
-      updateSupplier: (id, patch) =>
-        set((s) => ({ suppliers: s.suppliers.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
-      deleteSupplier: (id) =>
-        set((s) => ({ suppliers: s.suppliers.filter((x) => x.id !== id) })),
+      addSupplier: (sup) => {
+        set((s) => ({ suppliers: [sup, ...s.suppliers] }));
+        mirrorSupplierCreate(sup);
+      },
+      updateSupplier: (id, patch) => {
+        set((s) => ({ suppliers: s.suppliers.map((x) => (x.id === id ? { ...x, ...patch } : x)) }));
+        mirrorSupplierUpdate(id, patch);
+      },
+      deleteSupplier: (id) => {
+        set((s) => ({ suppliers: s.suppliers.filter((x) => x.id !== id) }));
+        mirrorSupplierDelete(id);
+      },
+
+      hydrateSuppliersFromServer: async () => {
+        try {
+          const res = await fetch("/api/suppliers", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { suppliers?: ERPSupplier[] };
+          if (Array.isArray(body.suppliers) && body.suppliers.length > 0) {
+            set({ suppliers: body.suppliers, suppliersHydrated: true });
+          } else if (Array.isArray(body.suppliers)) {
+            if (shouldSeedFixtures()) {
+              set({ suppliers: MOCK_SUPPLIERS, suppliersHydrated: true });
+            } else {
+              set({ suppliers: [], suppliersHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().suppliersHydrated) set({ suppliersHydrated: false });
+        }
+      },
 
       setBoms: (boms) => set({ boms }),
       addBom: (b) => set((s) => ({ boms: [b, ...s.boms] })),
@@ -171,6 +267,40 @@ export function bindOpsRealtime(orgId = "demo") {
   rtSubscribe<{ id: string }>(`org-${orgId}`, "product:deleted", ({ id }) => {
     useOpsStore.setState((s) => ({
       products: s.products.filter((p) => p.id !== id),
+    }));
+  });
+  rtSubscribe<ERPOrder>(`org-${orgId}`, "order:created", (o) => {
+    useOpsStore.setState((s) => {
+      if (s.orders.some((x) => x.id === o.id)) return s;
+      return { orders: [o, ...s.orders] };
+    });
+  });
+  rtSubscribe<ERPOrder>(`org-${orgId}`, "order:updated", (o) => {
+    useOpsStore.setState((s) => ({
+      orders: s.orders.map((x) => (x.id === o.id ? { ...x, ...o } : x)),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "order:deleted", ({ id }) => {
+    useOpsStore.setState((s) => ({
+      orders: s.orders.filter((o) => o.id !== id),
+    }));
+  });
+  rtSubscribe<ERPSupplier>(`org-${orgId}`, "supplier:created", (sup) => {
+    useOpsStore.setState((s) => {
+      if (s.suppliers.some((x) => x.id === sup.id)) return s;
+      return { suppliers: [sup, ...s.suppliers] };
+    });
+  });
+  rtSubscribe<ERPSupplier>(`org-${orgId}`, "supplier:updated", (sup) => {
+    useOpsStore.setState((s) => ({
+      suppliers: s.suppliers.map((x) =>
+        x.id === sup.id ? { ...x, ...sup } : x,
+      ),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "supplier:deleted", ({ id }) => {
+    useOpsStore.setState((s) => ({
+      suppliers: s.suppliers.filter((x) => x.id !== id),
     }));
   });
 }

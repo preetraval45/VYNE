@@ -17,7 +17,17 @@ import { publish } from "@/lib/pusher";
 //   export const PATCH = handlers.update;
 //   export const DELETE = handlers.remove;
 
-type PrismaModelKey = "contact" | "customer" | "invoice" | "product";
+type PrismaModelKey =
+  | "contact"
+  | "customer"
+  | "invoice"
+  | "product"
+  | "account"
+  | "project"
+  | "task"
+  | "order"
+  | "supplier"
+  | "journalEntry";
 
 interface CrudConfig {
   /** Prisma delegate name on the singleton (lowercased, matches schema model) */

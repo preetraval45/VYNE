@@ -37,6 +37,8 @@ import { useCRMStore, bindCrmRealtime } from "@/lib/stores/crm";
 import { useContactsStore, bindContactsRealtime } from "@/lib/stores/contacts";
 import { useInvoicingStore, bindInvoicingRealtime } from "@/lib/stores/invoicing";
 import { useOpsStore, bindOpsRealtime } from "@/lib/stores/ops";
+import { useProjectsStore, bindProjectsRealtime } from "@/lib/stores/projects";
+import { useFinanceStore, bindFinanceRealtime } from "@/lib/stores/finance";
 import { useTabSync } from "@/hooks/useTabSync";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useEffect, useState } from "react";
@@ -77,9 +79,15 @@ export default function DashboardLayout({
         await Promise.all([
           useCRMStore.getState().hydrateFromServer(),
           useContactsStore.getState().hydrateContactsFromServer(),
+          useContactsStore.getState().hydrateAccountsFromServer(),
           useInvoicingStore.getState().hydrateCustomersFromServer(),
           useInvoicingStore.getState().hydrateInvoicesFromServer(),
           useOpsStore.getState().hydrateProductsFromServer(),
+          useOpsStore.getState().hydrateOrdersFromServer(),
+          useOpsStore.getState().hydrateSuppliersFromServer(),
+          useProjectsStore.getState().hydrateProjectsFromServer(),
+          useProjectsStore.getState().hydrateTasksFromServer(),
+          useFinanceStore.getState().hydrateJournalFromServer(),
         ]);
         window.dispatchEvent(new CustomEvent("vyne:soft-refresh"));
         toastModule.default.success("Up to date", {
@@ -101,15 +109,22 @@ export default function DashboardLayout({
   }, [router]);
 
   // Hydrate every server-backed Zustand store from Postgres once on
-  // mount. Reads /api/{deals,contacts,customers,invoices,products} and
+  // mount. Reads /api/{deals,contacts,accounts,customers,invoices,
+  // products,orders,suppliers,projects,tasks,journal-entries} and
   // replaces the local cache with the canonical list. Falls back
   // silently to localStorage when the API is unreachable.
   useEffect(() => {
     void useCRMStore.getState().hydrateFromServer();
     void useContactsStore.getState().hydrateContactsFromServer();
+    void useContactsStore.getState().hydrateAccountsFromServer();
     void useInvoicingStore.getState().hydrateCustomersFromServer();
     void useInvoicingStore.getState().hydrateInvoicesFromServer();
     void useOpsStore.getState().hydrateProductsFromServer();
+    void useOpsStore.getState().hydrateOrdersFromServer();
+    void useOpsStore.getState().hydrateSuppliersFromServer();
+    void useProjectsStore.getState().hydrateProjectsFromServer();
+    void useProjectsStore.getState().hydrateTasksFromServer();
+    void useFinanceStore.getState().hydrateJournalFromServer();
     // Subscribe to Pusher org-wide events. Two-tab edits become instant
     // once NEXT_PUBLIC_PUSHER_KEY is set; the helpers no-op silently
     // when realtime is not configured.
@@ -117,6 +132,8 @@ export default function DashboardLayout({
     bindContactsRealtime("demo");
     bindInvoicingRealtime("demo");
     bindOpsRealtime("demo");
+    bindProjectsRealtime("demo");
+    bindFinanceRealtime("demo");
   }, []);
 
   // First-run onboarding: if user hasn't completed the wizard, push them

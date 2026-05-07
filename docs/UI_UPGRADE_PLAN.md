@@ -24,42 +24,54 @@ The gap now is **real backends, real data, real money, real users**. This plan i
 
 Pick the 6 modules that ship as a real product on day one. Everything else stays demo.
 
-- [ ] **1.1** Prisma schema for CRM (`Deal`, `DealStage`, `DealActivity`), Projects (`Project`, `Task`, `Subtask`), Invoicing (`Customer`, `Invoice`, `LineItem`, `Payment`), Ops (`Product`, `Order`, `Supplier`), Finance (`JournalEntry`, `Account`), Contacts (`Contact`, `Account`). Multi-tenant via `workspaceId` on every row + RLS or app-level filter.
-- [ ] **1.2** API routes: `/api/{module}/list`, `/api/{module}/get/[id]`, `/api/{module}/create`, `/api/{module}/update/[id]`, `/api/{module}/delete/[id]`. Cursor pagination via existing `lib/pagination.ts`.
-- [ ] **1.3** Zustand stores grow `hydrateFromServer()` + `mutate*()` that round-trips through the API. Local cache stays for offline; server is source of truth.
-- [ ] **1.4** Wire `usePullToRefresh` on each page so the existing infra triggers a refetch.
-- [ ] **1.5** Migration script: read demo fixtures → seed a "demo" workspace at signup so new users see populated data without losing isolation.
+- [x] **1.1a** Prisma schema for CRM (`Deal`), Invoicing (`Customer`, `Invoice`), Ops (`Product`), Contacts (`Contact`). → [schema.prisma](apps/web/prisma/schema.prisma) + commit `aa4a854`
+- [x] **1.1b** Remaining models: Projects (`Project`, `Task` with subtasks Json), Contacts (`Account` separate from Contact), Ops (`Order`, `Supplier`), Finance (`JournalEntry`), plus `Embedding` for RAG. (`BOM`/`WorkOrder` deferred — fixture-only modules with low write volume.) → [schema.prisma](apps/web/prisma/schema.prisma)
+- [x] **1.2a** API routes for Deal/Contact/Customer/Invoice/Product via shared `lib/api/crud.ts` factory. Each route is ~10 lines (list + create on `/api/{module}`, patch + delete on `/api/{module}/[id]`). → [crud.ts](apps/web/src/lib/api/crud.ts)
+- [x] **1.2b** API routes for Project/Task/Account/Order/Supplier/JournalEntry — same factory, 12 new files (`accounts/`, `projects/`, `tasks/`, `orders/`, `suppliers/`, `journal-entries/` × list + `[id]` pairs).
+- [x] **1.3a** Zustand stores grow `hydrate*FromServer()` + remote mirrors on every mutation for CRM (deals), Contacts (contacts), Invoicing (customers + invoices), Ops (products). Optimistic local update first, fire-and-forget remote, Pusher event subscription via `bind*Realtime()`. → [crm.ts](apps/web/src/lib/stores/crm.ts), [contacts.ts](apps/web/src/lib/stores/contacts.ts), [invoicing.ts](apps/web/src/lib/stores/invoicing.ts), [ops.ts](apps/web/src/lib/stores/ops.ts)
+- [x] **1.3b** Same wiring for projects (projects + tasks), contacts.accounts, ops.orders, ops.suppliers, finance.journalEntries. Each store now exposes `hydrate*FromServer()` + `bind*Realtime("demo")`. Tasks transform their wire shape (`taskKey`/`taskOrder` → local `key`/`order`) on hydrate + realtime arrival. → [projects.ts](apps/web/src/lib/stores/projects.ts), [contacts.ts](apps/web/src/lib/stores/contacts.ts), [ops.ts](apps/web/src/lib/stores/ops.ts), [finance.ts](apps/web/src/lib/stores/finance.ts)
+- [x] **1.4** All eleven server-backed stores hydrate in parallel from the dashboard layout boot path; `vyne:pull-refresh` re-syncs them all. → [(dashboard)/layout.tsx](apps/web/src/app/(dashboard)/layout.tsx)
+- [ ] **1.5** Migration script: read demo fixtures → seed a "demo" workspace at signup so new users see populated data without losing isolation. (Currently `shouldSeedFixtures()` cookie gate handles this client-side.)
 - [ ] **1.6** Flip `vercel.json` `DEMO_MODE: false`. The demo button on `/login` still works via `markDemoSession()`.
 
-Acceptance: Sign up fresh on production → create a deal in CRM → refresh browser → deal still there → log in on phone → same deal visible.
+Acceptance (current): Sign up fresh → create a deal/contact/customer/invoice/product → refresh browser → row still there. Log in on phone → same row visible. **Verified live at [vyne.vercel.app](https://vyne.vercel.app).**
+
+Acceptance (full): Same for projects/tasks/journal/orders/suppliers/accounts.
 
 ---
 
 ## Priority 2 — Real RAG end-to-end (3 days)
 
-Embeddings store + sandbox endpoints already shipped. The pipe is broken in two places.
+End-to-end pipeline now lives at `/api/ai/ingest` (upload + chunk + embed + upsert) → `/api/ai/retrieve` (embed query + cosine + top-K) → callers prepend hits as `<context>` blocks before model dispatch.
 
-- [ ] **2.1** Upload pipeline: when a user drops a PDF/DOCX/MD/TXT into chat, AI sidebar, or docs page, send to `/api/ai/ingest` → extract text (pdf-parse / mammoth / native string) → chunk (700 tokens, 100 overlap) → embed via existing `/api/ai/embed` → upsert into Postgres `pgvector` table or Pinecone.
-- [ ] **2.2** Retrieval: on every AI question, vector-search top 6 chunks, inject into system prompt as `<context>` blocks with source ids, render `<CitationCard>` chips that already exist.
-- [ ] **2.3** Per-page Q&A: AI sidebar on a project page auto-includes that project's docs/comments/tasks as a smaller scoped index.
-- [ ] **2.4** Index management UI: Settings → AI → "Indexed documents" — list, search, re-index, delete. Drives off existing `useEmbeddings` store.
+- [x] **2.1** Upload pipeline at [api/ai/ingest/route.ts](apps/web/src/app/api/ai/ingest/route.ts): POST body `{ ref, source?, text|chunks[], meta?, replace? }`. Calls [chunkText](apps/web/src/lib/rag.ts) (2400 char/240 overlap, snaps to whitespace), POSTs each chunk to existing `/api/ai/embed`, upserts into the `Embedding` Prisma model. GET `?ref=…` lists chunks; DELETE `?ref=…` drops them. Cap 200 chunks/request. Demo mode (no provider key) still works because `/api/ai/embed` falls back to a 384-dim hash vector.
+- [x] **2.2** Retrieval at [api/ai/retrieve/route.ts](apps/web/src/app/api/ai/retrieve/route.ts): POST `{ query, k?, ref? }` — embeds the query, scores up to 1000 rows via [cosineSimilarity](apps/web/src/lib/rag.ts), returns top-K with `{id, ref, source, text, score, meta}`. Caller injects as `<context>` blocks. (Swap to pgvector ANN once the table grows past 1k rows.)
+- [ ] **2.3** Per-page Q&A: AI sidebar on a project page auto-includes that project's docs/comments/tasks as a smaller scoped index. (Endpoint accepts `ref` filter — surface still needs to send the right `ref` per page.)
+- [ ] **2.4** Index management UI: Settings → AI → "Indexed documents" — list (`GET /api/ai/ingest?ref=…`), re-index, delete (`DELETE /api/ai/ingest?ref=…`).
 - [ ] **2.5** Cross-conversation memory: surface `aiMemory.memories[]` as an editable graph view (nodes = facts, edges = "related to"). User can prune what AI remembers.
 
-Acceptance: Drop a 30-page PDF in chat → ask "what does section 4 say about pricing?" → AI cites page 12 + 14 with hover preview.
+Acceptance: Drop a 30-page PDF in chat → ask "what does section 4 say about pricing?" → AI cites page 12 + 14 with hover preview. **Backend done; chat composer file-drop wiring is the remaining UI step.**
 
 ---
 
 ## Priority 3 — Stripe billing (2–3 days)
 
-Plan picker exists; no money flows.
+All four moving parts already shipped in `aa4a854`. **Live mode is just an env-var flip + Stripe dashboard config — no code change.**
 
-- [ ] **3.1** Stripe products: Free / Starter $12 / Business $24 / Enterprise (contact). Match the signup wizard's preset list.
-- [ ] **3.2** Webhook handler at `/api/stripe/webhook`: `customer.subscription.{created,updated,deleted}` → write `Workspace.plan + Workspace.seats`.
-- [ ] **3.3** Settings → Billing tab: portal link, usage meter (seats / API calls / AI spend MTD via existing `aiCostMeter`), plan upgrade/downgrade, invoice history.
-- [ ] **3.4** Metering gates: AI calls hit `aiBudget.guardSpend` (already shipped) → if hard-stop, route returns 402. Lock list-page bulk-export at >1k rows on Free plan.
+- [x] **3.1** Stripe products + price-id map at [stripe.ts](apps/web/src/lib/stripe.ts): Free / Starter $12 / Business $24 / Enterprise. `planFromPriceId()` resolves either way.
+- [x] **3.2** Webhook handler at [api/stripe/webhook/route.ts](apps/web/src/app/api/stripe/webhook/route.ts): `checkout.session.completed`, `customer.subscription.{created,updated,deleted}`, `invoice.payment_failed` → upserts the `Subscription` Prisma model with plan/status/customer/sub-id/period-end/cancel-at-period-end. Verifies `stripe-signature` against `STRIPE_WEBHOOK_SECRET`.
+- [x] **3.3** Checkout session at [api/stripe/checkout/route.ts](apps/web/src/app/api/stripe/checkout/route.ts): creates a subscription Checkout session with seat quantity, success/cancel URLs, promo codes, plan + seats metadata. Edge-runtime, uses Stripe REST directly so no SDK bundle weight. Plus customer portal route + status route. UI: `<BillingSettings />` already mounted in Settings.
+- [ ] **3.4** Metering gates: AI calls hit `aiBudget.guardSpend` (already shipped) → if hard-stop, route returns 402. Lock list-page bulk-export at >1k rows on Free plan. (Helper exists; not yet wired into routes.)
 - [ ] **3.5** Trial: 14 days free, no card. Existing `setupScore` welcome checklist drives activation.
 
-Acceptance: Sign up → 14-day trial visible on settings → upgrade to Starter on Stripe Checkout → subscription reflected in app within 5s.
+**To go live (Vercel env vars):**
+
+- `STRIPE_SECRET_KEY` — `sk_live_…` (or `sk_test_…` to test)
+- `STRIPE_PRICE_ID_STARTER` / `_BUSINESS` / `_ENTERPRISE` — `price_…` from Stripe dashboard
+- `STRIPE_WEBHOOK_SECRET` — `whsec_…` from the webhook endpoint config
+- Stripe dashboard → Webhooks → add endpoint `https://vyne.vercel.app/api/stripe/webhook` with the 5 events above
+
+Acceptance: Sign up → upgrade to Starter on Stripe Checkout → subscription reflected in app within 5s of webhook fire. **Code path verified; env keys are user-side configuration.**
 
 ---
 
@@ -67,7 +79,16 @@ Acceptance: Sign up → 14-day trial visible on settings → upgrade to Starter 
 
 Pusher infrastructure is wired across PresenceBubbles / LiveCursors / Reactions / ActivityFeed / CommentsPanel / TypingIndicator / FollowTeammate / NotificationBell. They no-op without the env var.
 
-- [ ] **4.1** Set `NEXT_PUBLIC_PUSHER_KEY` + `PUSHER_SECRET` in Vercel. Sanity check: open the app in two tabs, edit a CRM deal in tab A, confirm the value updates in tab B.
+- [x] **4.0** **Eleven** server-backed module stores (CRM/Contacts/Customers/Invoices/Products/Accounts/Projects/Tasks/Orders/Suppliers/JournalEntries) now publish + subscribe to `org-${orgId}` Pusher channels via `bind*Realtime()`. Routes via `lib/api/crud.ts` call `publish()` on every create/update/delete; the `/api/deals` route does the same.
+- [ ] **4.1** Set Pusher env vars in Vercel:
+
+  - `NEXT_PUBLIC_PUSHER_KEY` (client-readable)
+  - `PUSHER_APP_ID`
+  - `PUSHER_KEY` (server-side — same value as `NEXT_PUBLIC_PUSHER_KEY`)
+  - `PUSHER_SECRET`
+  - `PUSHER_CLUSTER` (e.g. `mt1`, `us2`, `eu`)
+
+  Sanity check: open the app in two tabs, edit a CRM deal in tab A, confirm the value updates in tab B within ~500 ms. The bind helpers no-op silently when these aren't set, so demo deploys keep working without Pusher.
 - [ ] **4.2** Replace Pusher with Supabase Realtime if Pusher pricing isn't free-tier viable. Same channel API; one-day swap.
 - [ ] **4.3** Cross-device read state on notifications already wired to `presence-notifications-${userId}`. Verify on phone + desktop.
 

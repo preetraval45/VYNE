@@ -343,11 +343,13 @@ interface ContactsStore {
   accounts: Account[];
   contacts: Contact[];
   contactsHydrated: boolean;
+  accountsHydrated: boolean;
 
-  // Account CRUD
+  // Account CRUD (mirrors to /api/accounts)
   addAccount: (account: Omit<Account, "id">) => void;
   updateAccount: (id: string, data: Partial<Omit<Account, "id">>) => void;
   deleteAccount: (id: string) => void;
+  hydrateAccountsFromServer: () => Promise<void>;
 
   // Contact CRUD (mirrors to /api/contacts)
   addContact: (contact: Omit<Contact, "id">) => void;
@@ -370,7 +372,7 @@ function genId(prefix: string) {
 }
 
 // Fire-and-forget remote mirror. Failures leave the optimistic local
-// state in place; a subsequent hydrateContactsFromServer reconciles.
+// state in place; a subsequent hydrate reconciles.
 function mirrorCreate(c: Contact) {
   void fetch("/api/contacts", {
     method: "POST",
@@ -390,6 +392,25 @@ function mirrorDelete(id: string) {
     method: "DELETE",
   }).catch(() => {});
 }
+function mirrorAccountCreate(a: Account) {
+  void fetch("/api/accounts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(a),
+  }).catch(() => {});
+}
+function mirrorAccountUpdate(id: string, patch: Partial<Account>) {
+  void fetch(`/api/accounts/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  }).catch(() => {});
+}
+function mirrorAccountDelete(id: string) {
+  void fetch(`/api/accounts/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
 
 export const useContactsStore = create<ContactsStore>()(
   persist(
@@ -397,23 +418,48 @@ export const useContactsStore = create<ContactsStore>()(
       accounts: DEFAULT_ACCOUNTS,
       contacts: DEFAULT_CONTACTS,
       contactsHydrated: false,
+      accountsHydrated: false,
 
-      addAccount: (account) =>
-        set((state) => ({
-          accounts: [...state.accounts, { ...account, id: genId("acc") }],
-        })),
+      addAccount: (account) => {
+        const row: Account = { ...account, id: genId("acc") };
+        set((state) => ({ accounts: [...state.accounts, row] }));
+        mirrorAccountCreate(row);
+      },
 
-      updateAccount: (id, data) =>
+      updateAccount: (id, data) => {
         set((state) => ({
           accounts: state.accounts.map((a) =>
             a.id === id ? { ...a, ...data } : a,
           ),
-        })),
+        }));
+        mirrorAccountUpdate(id, data);
+      },
 
-      deleteAccount: (id) =>
+      deleteAccount: (id) => {
         set((state) => ({
           accounts: state.accounts.filter((a) => a.id !== id),
-        })),
+        }));
+        mirrorAccountDelete(id);
+      },
+
+      hydrateAccountsFromServer: async () => {
+        try {
+          const res = await fetch("/api/accounts", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { accounts?: Account[] };
+          if (Array.isArray(body.accounts) && body.accounts.length > 0) {
+            set({ accounts: body.accounts, accountsHydrated: true });
+          } else if (Array.isArray(body.accounts)) {
+            if (shouldSeedFixtures()) {
+              set({ accounts: DEFAULT_ACCOUNTS, accountsHydrated: true });
+            } else {
+              set({ accounts: [], accountsHydrated: true });
+            }
+          }
+        } catch {
+          if (!get().accountsHydrated) set({ accountsHydrated: false });
+        }
+      },
 
       addContact: (contact) => {
         const row: Contact = { ...contact, id: genId("c") };
@@ -548,6 +594,22 @@ export function bindContactsRealtime(orgId = "demo") {
   rtSubscribe<{ id: string }>(`org-${orgId}`, "contact:deleted", ({ id }) => {
     useContactsStore.setState((s) => ({
       contacts: s.contacts.filter((c) => c.id !== id),
+    }));
+  });
+  rtSubscribe<Account>(`org-${orgId}`, "account:created", (a) => {
+    useContactsStore.setState((s) => {
+      if (s.accounts.some((x) => x.id === a.id)) return s;
+      return { accounts: [...s.accounts, a] };
+    });
+  });
+  rtSubscribe<Account>(`org-${orgId}`, "account:updated", (a) => {
+    useContactsStore.setState((s) => ({
+      accounts: s.accounts.map((x) => (x.id === a.id ? { ...x, ...a } : x)),
+    }));
+  });
+  rtSubscribe<{ id: string }>(`org-${orgId}`, "account:deleted", ({ id }) => {
+    useContactsStore.setState((s) => ({
+      accounts: s.accounts.filter((a) => a.id !== id),
     }));
   });
 }

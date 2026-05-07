@@ -154,3 +154,153 @@ model Product {
   @@index([sku])
   @@map("products")
 }
+
+// CRM.Account (the company-side of the contacts module). Distinct from
+// invoicing.Customer — accounts carry industry / employees / revenue.
+model Account {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  name      String
+  industry  String   @default("")
+  website   String   @default("")
+  phone     String   @default("")
+  revenue   Int      @default(0)
+  employees Int      @default(0)
+  owner     String   @default("")
+  status    String   @default("Active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("accounts")
+}
+
+// Projects module — Project + Task. Project carries enough metadata
+// for the kanban / list / timeline views. Task references project by
+// id (no FK — matches the Deal pattern, simpler to reason about).
+model Project {
+  id          String   @id @default(cuid())
+  orgId       String   @default("demo") @map("org_id")
+  name        String
+  identifier  String   @default("")
+  description String   @default("")
+  color       String   @default("#6C47FF")
+  icon        String   @default("")
+  status      String   @default("active")
+  memberIds   String[] @default([]) @map("member_ids")
+  leadId      String   @default("") @map("lead_id")
+  startDate   String?  @map("start_date")
+  endDate     String?  @map("end_date")
+  priority    String   @default("medium")
+  tags        String[] @default([])
+  budget      Int?
+  spend       Int?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("projects")
+}
+
+model Task {
+  id             String   @id @default(cuid())
+  orgId          String   @default("demo") @map("org_id")
+  projectId      String   @map("project_id")
+  taskKey        String   @default("") @map("task_key")
+  title          String
+  description    String   @default("")
+  status         String   @default("todo")
+  priority       String   @default("medium")
+  assigneeId     String?  @map("assignee_id")
+  startDate      String?  @map("start_date")
+  dueDate        String?  @map("due_date")
+  estimatedHours Int?     @map("estimated_hours")
+  timeSpent      Int?     @map("time_spent")
+  tags           String[] @default([])
+  taskOrder      Int      @default(0) @map("task_order")
+  subtasks       Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([projectId])
+  @@index([status])
+  @@map("tasks")
+}
+
+// Ops.Order — sales order. Lines stored as Json for now; extract to
+// own table when the inventory engine needs row-level joins.
+model Order {
+  id            String   @id @default(cuid())
+  orgId         String   @default("demo") @map("org_id")
+  orderNumber   String   @map("order_number")
+  customerName  String   @default("") @map("customer_name")
+  customerEmail String   @default("") @map("customer_email")
+  status        String   @default("draft")
+  total         Int      @default(0)
+  lines         Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("orders")
+}
+
+// Ops.Supplier — vendor for the purchase + manufacturing modules.
+model Supplier {
+  id          String   @id @default(cuid())
+  orgId       String   @default("demo") @map("org_id")
+  name        String
+  email       String   @default("")
+  phone       String   @default("")
+  contactName String   @default("") @map("contact_name")
+  category    String   @default("")
+  status      String   @default("Active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("suppliers")
+}
+
+// Finance.JournalEntry — double-entry ledger row. Lines as Json so a
+// single entry can carry N debits + N credits without a side table.
+model JournalEntry {
+  id          String   @id @default(cuid())
+  orgId       String   @default("demo") @map("org_id")
+  entryNumber String   @map("entry_number")
+  description String   @default("")
+  postingDate DateTime @default(now()) @map("posting_date")
+  status      String   @default("draft")
+  totalDebits Int      @default(0) @map("total_debits")
+  memo        String   @default("")
+  lines       Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("journal_entries")
+}
+
+// Embeddings — vector store for RAG. `vector` column gets converted
+// to pgvector via a follow-up migration; storing as bytes for now so
+// Prisma can manage the table without the extension.
+model Embedding {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  ref       String
+  source    String   @default("")
+  text      String
+  // 1536 floats packed as JSON until pgvector migration lands. Read
+  // back as number[] for cosine similarity in the search route.
+  vector    Json
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@index([ref])
+  @@map("embeddings")
+}
