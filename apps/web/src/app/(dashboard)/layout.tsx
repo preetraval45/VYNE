@@ -25,6 +25,7 @@ import { GlobalDropZone } from "@/components/layout/GlobalDropZone";
 import { ScrollRestoration } from "@/components/layout/ScrollRestoration";
 import { ImpersonationBanner } from "@/components/layout/ImpersonationBanner";
 import { OfflineBanner } from "@/components/layout/OfflineBanner";
+import { TrialBanner } from "@/components/layout/TrialBanner";
 import { A11yApplier } from "@/components/layout/A11yApplier";
 import { Announcer } from "@/components/layout/Announcer";
 import { AiSidebar } from "@/components/ai/AiSidebar";
@@ -267,6 +268,11 @@ export default function DashboardLayout({
           false, plus the count of mutations queued in IndexedDB. Auto-
           flushes the queue when the network comes back. */}
       <OfflineBanner />
+
+      {/* 14-day trial banner (UI_UPGRADE_PLAN.md 3.5). Reads /api/stripe/status
+          via the shared subscription hook; renders only while status="trialing".
+          Self-dismissable per-day. */}
+      <TrialBanner />
 
       {/* Phase 19.1/19.2/19.9 — apply a11y prefs (contrast / text scale / RTL) */}
       <A11yApplier />

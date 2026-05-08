@@ -39,6 +39,7 @@ import {
   type ToolResult,
 } from "@/lib/ai/toolExecutor";
 import { PendingApprovalCard } from "@/components/ai/PendingApprovalCard";
+import { guardSpend } from "@/lib/stores/aiBudget";
 import { ArtifactPanel } from "@/components/ai/ArtifactPanel";
 import { QuickActions } from "@/components/ai/QuickActions";
 import { ConversationHistory } from "@/components/ai/ConversationHistory";
@@ -547,6 +548,34 @@ export default function VyneAIChatPage() {
           inputRef.current?.focus();
         }
         return;
+      }
+
+      // Cost guardrail (UI_UPGRADE_PLAN.md 3.4): pre-flight against the
+      // per-workspace + per-user budget. Hard-stop refuses the call;
+      // soft-warn flags a toast but lets it through.
+      const expectedCost =
+        preferredModel === "opus" ? 0.06 : preferredModel === "sonnet" ? 0.02 : 0.005;
+      const guard = guardSpend(undefined, expectedCost);
+      if (!guard.ok) {
+        const limitMsg =
+          "Budget cap reached for this billing period. Bump the cap in Settings → AI preferences or wait until next month.";
+        toast.error(limitMsg);
+        setMessages((m) =>
+          m.map((msg) =>
+            msg.id === assistantId
+              ? { ...msg, content: limitMsg, streaming: false }
+              : msg,
+          ),
+        );
+        setPending(false);
+        abortRef.current = null;
+        return;
+      }
+      if (guard.reason === "soft-warn") {
+        toast(
+          `${Math.round(guard.pct * 100)}% of monthly AI budget used.`,
+          { icon: "⚠️" },
+        );
       }
 
       const ctrl = new AbortController();

@@ -21,6 +21,7 @@ import {
   type ScheduleCadence,
   type ScheduleDelivery,
 } from "@/lib/stores/aiSchedules";
+import { AiMemoryGraph } from "@/components/ai/AiMemoryGraph";
 
 interface Props {
   onToast: (message: string) => void;
@@ -279,6 +280,11 @@ export default function AiPreferencesSettings({ onToast }: Props) {
             ))}
           </ul>
         )}
+      </Card>
+
+      {/* ── Memory graph (UI_UPGRADE_PLAN.md 2.5) ──────────────────── */}
+      <Card title="Cross-conversation memory graph" icon={Brain}>
+        <AiMemoryGraph />
       </Card>
 
       {/* ── Prompt library (16.7) ───────────────────────────────── */}

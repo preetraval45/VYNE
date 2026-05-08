@@ -79,6 +79,27 @@ export async function POST(req: Request) {
         plan,
       },
     });
+    // 14-day trial (UI_UPGRADE_PLAN.md 3.5). New signups get a
+    // Subscription row at status="trialing" so the welcome banner can
+    // show days-left + the existing /api/stripe/status endpoint
+    // surfaces the trial without any code change. Stripe-Checkout
+    // upgrades flip the row via the webhook handler.
+    const trialEnd = new Date(Date.now() + 14 * 86400000);
+    await prisma.subscription.upsert({
+      where: { orgId: user.orgId },
+      create: {
+        orgId: user.orgId,
+        plan: "free",
+        status: "trialing",
+        currentPeriodEnd: trialEnd,
+      },
+      update: {
+        // Don't clobber an existing paying subscription on rare
+        // duplicate-email edge cases.
+        status: "trialing",
+        currentPeriodEnd: trialEnd,
+      },
+    });
   } catch (err) {
     if (
       err instanceof Prisma.PrismaClientKnownRequestError &&

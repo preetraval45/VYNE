@@ -13,6 +13,11 @@
 
 import React from "react";
 import { exportToCSV, exportToCSVAudit, type AuditExportContext } from "@/lib/utils/csv";
+import {
+  useSubscriptionPlan,
+  EXPORT_ROW_LIMIT,
+} from "@/hooks/useSubscriptionPlan";
+import toast from "react-hot-toast";
 
 type ExportButtonProps<T extends Record<string, unknown>> = Readonly<{
   /** Array of objects to export */
@@ -35,7 +40,20 @@ export function ExportButton<T extends Record<string, unknown>>({
   label = "Export CSV",
   audit,
 }: ExportButtonProps<T>) {
+  const plan = useSubscriptionPlan();
+  const rowCap = EXPORT_ROW_LIMIT[plan.plan];
+  const overCap = data.length > rowCap;
+
   function handleExport() {
+    // Plan-based row cap (UI_UPGRADE_PLAN.md 3.4). Free hits 1k; paid
+    // tiers raise it. Exceeding the cap shows an upgrade toast and
+    // refuses the export.
+    if (overCap) {
+      toast.error(
+        `Export capped at ${rowCap.toLocaleString()} rows on ${plan.planLabel}. Upgrade to export ${data.length.toLocaleString()} rows.`,
+      );
+      return;
+    }
     if (audit) {
       exportToCSVAudit(data, filename, audit, columns);
     } else {
