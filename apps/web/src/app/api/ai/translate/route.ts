@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callLlamaJson } from "@/lib/ai/claude";
+import { rateLimit } from "@/lib/api/security";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -47,6 +48,14 @@ const SYSTEM_PROMPT = `You translate short chat messages between languages.
 - Return strict JSON: {"detectedLang":"English","translations":[{"lang":"Spanish","text":"..."},...]}`;
 
 export async function POST(req: Request) {
+  const rl = await rateLimit({
+    key: "ai-translate",
+    limit: 60,
+    windowSec: 60,
+    req,
+  });
+  if (!rl.ok) return rl.response!;
+
   let payload: TranslateRequest;
   try {
     payload = (await req.json()) as TranslateRequest;

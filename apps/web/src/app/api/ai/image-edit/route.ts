@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/api/security";
+import { requireAuth, rateLimit } from "@/lib/api/security";
 export const runtime = "edge";
 
 interface EditPayload {
@@ -23,6 +23,13 @@ interface EditResponse {
  * isn't available on the user's plan.
  */
 export async function POST(req: Request) {
+  const rl = await rateLimit({
+    key: "ai-image-edit",
+    limit: 10,
+    windowSec: 60,
+    req,
+  });
+  if (!rl.ok) return rl.response!;
   const auth = requireAuth(req);
   if (!auth.ok) return auth.response!;
 

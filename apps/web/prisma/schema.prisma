@@ -285,6 +285,60 @@ model JournalEntry {
   @@map("journal_entries")
 }
 
+// Push notification subscription (UI_UPGRADE_PLAN.md 8.5).
+// Stored per (userId, endpoint) so the same user can have multiple
+// devices subscribed; deletion cascades when the user is removed.
+model PushSubscription {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  userId    String?  @map("user_id")
+  endpoint  String   @unique
+  p256dh    String   @default("")
+  auth      String   @default("")
+  userAgent String   @default("") @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([userId])
+  @@map("push_subscriptions")
+}
+
+// Audit events (UI_UPGRADE_PLAN.md 8.7) — server-persisted log of
+// every meaningful state change. Replaces the previous localStorage
+// store; existing client surfaces still mirror to localStorage but
+// also POST here so SOC 2 / HIPAA reviewers see the canonical trail.
+model AuditEvent {
+  id         String   @id @default(cuid())
+  orgId      String   @default("demo") @map("org_id")
+  /** Actor that triggered the event (uid or email). */
+  actorId    String   @default("") @map("actor_id")
+  actorName  String   @default("") @map("actor_name")
+  /** Target entity ref, e.g. "deal:DEAL-123". */
+  entityRef  String   @default("") @map("entity_ref")
+  /** Event verb — created / updated / deleted / read / signed-in / … */
+  action     String
+  /** Optional category — auth / billing / data / security / system. */
+  category   String   @default("data")
+  /** Free-form summary line — appears in the activity feed. */
+  summary    String   @default("")
+  /** Structured before/after diff (audit-grade). */
+  diff       Json?
+  /** Severity hint for filtering / alerting. */
+  severity   String   @default("info")
+  /** Source IP if known. */
+  ip         String   @default("")
+  userAgent  String   @default("") @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([orgId])
+  @@index([actorId])
+  @@index([entityRef])
+  @@index([category])
+  @@index([createdAt])
+  @@map("audit_events")
+}
+
 // Embeddings — vector store for RAG. `vector` column gets converted
 // to pgvector via a follow-up migration; storing as bytes for now so
 // Prisma can manage the table without the extension.

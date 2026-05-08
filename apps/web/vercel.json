@@ -57,6 +57,12 @@
       "destination": "https://vyne-api.vercel.app/$1"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/admin/backup?cron=1",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "env": {
     "NEXT_PUBLIC_APP_ENV": "production",
     "NEXT_PUBLIC_DEMO_MODE": "false",

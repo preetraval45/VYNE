@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callLlamaJson } from "@/lib/ai/claude";
+import { rateLimit } from "@/lib/api/security";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,14 @@ const SYSTEM_PROMPT = `You generate 3 short, useful quick-reply suggestions for 
 Output strict JSON: {"suggestions":[{"emoji":"👍","text":"On it"},...]}. Emoji is optional.`;
 
 export async function POST(req: Request) {
+  const rl = await rateLimit({
+    key: "ai-smart-replies",
+    limit: 60,
+    windowSec: 60,
+    req,
+  });
+  if (!rl.ok) return rl.response!;
+
   let payload: SmartReplyRequest;
   try {
     payload = (await req.json()) as SmartReplyRequest;
