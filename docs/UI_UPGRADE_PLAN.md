@@ -124,9 +124,21 @@ Already huge. The gaps that move the needle:
 
 ## Priority 7 — Inline edit spread + RBAC (2–3 days)
 
-- [ ] **7.1** Spread `<EditableCell>` to every list with a stable id: projects (title/owner/due), invoicing (amount/customer/status), ops (sku/qty/price), contacts (name/email/company), expenses (amount/category). Pattern is already proven in CRM — mostly a copy-paste with the `commit` prop wired to the new API routes from Priority 1.
-- [ ] **7.2** RBAC enforcement: every API route checks `workspaceMember.role` from session. UI: hide Delete + Edit affordances for `member` / `guest` per-entity via existing `fieldPermissions.canWrite`. Settings → Members → Roles surface to flip people up/down.
-- [ ] **7.3** Field-level permissions UI: Settings → Security → "Field permissions" — table of `entity.field × role → mask|read|write|null`. Store + helpers exist (`fieldPermissions.ts`). Build the editor.
+- [x] **7.1** **EditableCell spread across 5 modules.** Every cell uses the existing CRM pattern (`<EditableCell value={...} onSave={(v) => updateX(id, {...})} cellKey={...} />`) — mutations flow through the store's existing `mirror*` helpers (Priority 1) so each save round-trips to the API + broadcasts via Pusher. Per-cell live-collab borders fire automatically thanks to the `cellKey` prop.
+
+  - **Contacts** ([contacts/page.tsx](apps/web/src/app/(dashboard)/contacts/page.tsx)) — name / email (regex-validated) / phone / company / title / department.
+  - **Invoicing** ([invoicing/page.tsx](apps/web/src/app/(dashboard)/invoicing/page.tsx)) — customer (text), amount (number ≥0, currency render), status (select with badge render).
+  - **Ops products** ([ops/page.tsx](apps/web/src/app/(dashboard)/ops/page.tsx)) — sku, name, stockQty (number ≥0), costPrice + price (number ≥0, $ render).
+  - **Projects tasks** ([projects/tasks/page.tsx](apps/web/src/app/(dashboard)/projects/tasks/page.tsx)) — title (required validate). Existing project-name editing stays.
+  - **Expenses** ([expenses/page.tsx](apps/web/src/app/(dashboard)/expenses/page.tsx)) — amount (number ≥0, $ render) + category (select with icon render).
+
+- [x] **7.2** **RBAC enforcement on the server + the UI**:
+
+  - **Server**: new [lib/auth/role.ts](apps/web/src/lib/auth/role.ts) ships `WorkspaceRole` type + `roleAtLeast()` + `resolveSession(req)` (reads session cookie, falls back to a Prisma `User.role` lookup when the token doesn't carry it) + `requireRole(req, allowed[])` (returns 401 for missing auth / 403 for insufficient role / null for green-light). Demo mode (no token + `NEXT_PUBLIC_DEMO_MODE=true`) bypasses the gate. Session payload extended with optional `role` field; signup + login routes now bake the role into every newly minted JWT.
+  - **CRUD factory**: [lib/api/crud.ts](apps/web/src/lib/api/crud.ts) gained `writeRoles?: WorkspaceRole[]` (default: owner/admin/manager/member) + `deleteRoles?: WorkspaceRole[]` (default: owner/admin). All POST/PATCH/DELETE handlers run `requireRole()` before the rate-limit + Prisma round-trip — guests get 403, deletes are admin-only by default. Every list/by-id route under `/api/{contacts,customers,invoices,products,accounts,projects,tasks,orders,suppliers,journal-entries}` inherits the gate automatically.
+  - **Client**: new [hooks/useRole.ts](apps/web/src/hooks/useRole.ts) exposes `useCurrentRole()` / `useCanWrite()` / `useCanDelete()`. EditableCell now reads `useCanWrite()` implicitly — guests + viewers see read-only cells with no double-click affordance, no per-callsite changes needed. Components that mutate self-scoped settings (theme, preferences) opt out via the new `bypassRole` prop.
+
+- [x] **7.3** **Field permissions editor** at Settings → "Field permissions". New [FieldPermissionsEditor.tsx](apps/web/src/components/settings/FieldPermissionsEditor.tsx) lists every rule grouped by entity (contact / deal / employee / invoice / …) with the action chip (mask / read / write — color-coded), affected roles, and a delete button. Inline composer for new rules: entity + field text inputs with a datalist of common entities, action picker with hover hints, multi-select role pills. Drives the existing `useFieldPermissions` store; the existing `canRead` / `canWrite` / `maskField` helpers in `lib/stores/fieldPermissions.ts` read this same store at call time, so rule edits propagate to every detail panel + list cell immediately.
 
 ---
 

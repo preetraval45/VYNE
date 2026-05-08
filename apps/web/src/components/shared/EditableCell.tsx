@@ -14,6 +14,7 @@ import {
   isRealtimeEnabled,
 } from "@/lib/realtime";
 import { useAuthStore } from "@/lib/stores/auth";
+import { useCanWrite } from "@/hooks/useRole";
 
 interface RemoteEditor {
   id: string;
@@ -76,6 +77,11 @@ export interface EditableCellProps<V> {
   label?: string;
   /** Render as disabled-looking; double-click won't enter edit mode. */
   disabled?: boolean;
+  /** UI_UPGRADE_PLAN.md 7.2 — when true, the cell skips the implicit
+   *  role gate (used for self-scoped settings like theme prefs that
+   *  shouldn't depend on workspace role). Default false: cells gate
+   *  by role and become read-only for guests/viewers. */
+  bypassRole?: boolean;
   /** Optional remote commit. When provided, the edit is optimistic: the
    *  local `onSave` runs first, then `commit` runs in the background.
    *  Throwing from `commit` rolls back to the previous value via a
@@ -104,6 +110,7 @@ export function EditableCell<V extends string | number>({
   className,
   label,
   disabled = false,
+  bypassRole = false,
   commit: remoteCommit,
   toastLabel,
   cellKey,
@@ -113,7 +120,11 @@ export function EditableCell<V extends string | number>({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | HTMLSelectElement>(null);
   const me = useAuthStore((s) => s.user);
+  const canWrite = useCanWrite();
   const [remoteEditor, setRemoteEditor] = useState<RemoteEditor | null>(null);
+
+  // Effective disabled state: honors the explicit prop OR the role gate.
+  const effectiveDisabled = disabled || (!bypassRole && !canWrite);
 
   // Realtime: subscribe to edit-start / edit-end on this cell scope.
   useEffect(() => {
@@ -175,7 +186,7 @@ export function EditableCell<V extends string | number>({
   }, [editing]);
 
   function enter() {
-    if (disabled) return;
+    if (effectiveDisabled) return;
     setDraft(String(value ?? ""));
     setError(null);
     setEditing(true);
@@ -236,7 +247,7 @@ export function EditableCell<V extends string | number>({
     borderRadius: 4,
     padding: editing ? 0 : "1px 4px",
     margin: "-1px -4px",
-    cursor: disabled ? "default" : editing ? "text" : "pointer",
+    cursor: effectiveDisabled ? "default" : editing ? "text" : "pointer",
     outline: "none",
     position: "relative",
     ...(remoteEditor
@@ -251,8 +262,8 @@ export function EditableCell<V extends string | number>({
   if (!editing) {
     return (
       <span
-        tabIndex={disabled || remoteEditor ? -1 : 0}
-        role={disabled ? undefined : "button"}
+        tabIndex={effectiveDisabled || remoteEditor ? -1 : 0}
+        role={effectiveDisabled ? undefined : "button"}
         aria-label={
           remoteEditor
             ? `${remoteEditor.name} is editing`
@@ -264,14 +275,14 @@ export function EditableCell<V extends string | number>({
         className={className}
         onDoubleClick={remoteEditor ? undefined : enter}
         onKeyDown={(e) => {
-          if (disabled || remoteEditor) return;
+          if (effectiveDisabled || remoteEditor) return;
           if (e.key === "Enter" || e.key === "F2") {
             e.preventDefault();
             enter();
           }
         }}
         onMouseEnter={(e) => {
-          if (disabled || remoteEditor) return;
+          if (effectiveDisabled || remoteEditor) return;
           (e.currentTarget as HTMLElement).style.background = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
         }}
         onMouseLeave={(e) => {
@@ -280,7 +291,7 @@ export function EditableCell<V extends string | number>({
         }}
         style={{
           ...baseContainer,
-          opacity: disabled ? 0.6 : 1,
+          opacity: effectiveDisabled ? 0.6 : 1,
           cursor: remoteEditor ? "not-allowed" : baseContainer.cursor,
         }}
       >

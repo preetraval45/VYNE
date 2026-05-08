@@ -16,6 +16,7 @@ import {
 import { ExportButton } from "@/components/shared/ExportButton";
 import { PageHeader } from "@/components/shared/Kit";
 import { ImportCSVModal } from "@/components/shared/ImportCSVModal";
+import { EditableCell } from "@/components/shared/EditableCell";
 import {
   DetailPanel,
   DetailSection,
@@ -1650,22 +1651,66 @@ function ContactsTabContent() {
                             .join("")
                             .slice(0, 2)}
                         </div>
-                        <span style={{ fontWeight: 600, fontSize: 12 }}>
-                          {contact.name}
-                        </span>
+                        <EditableCell
+                          value={contact.name}
+                          onSave={(v) => updateContact(contact.id, { name: v })}
+                          label="Contact name"
+                          cellKey={`contact:${contact.id}#name`}
+                          style={{ fontWeight: 600, fontSize: 12 }}
+                        />
                       </div>
                     </Td>
                     <Td>
-                      <span
-                        style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontSize: 12 }}
-                      >
-                        {contact.email}
-                      </span>
+                      <EditableCell
+                        value={contact.email}
+                        onSave={(v) => updateContact(contact.id, { email: v })}
+                        label="Email"
+                        cellKey={`contact:${contact.id}#email`}
+                        validate={(s) =>
+                          s && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)
+                            ? "Invalid email"
+                            : null
+                        }
+                        style={{
+                          color: "var(--vyne-accent, var(--vyne-purple))",
+                          fontSize: 12,
+                        }}
+                      />
                     </Td>
-                    <Td>{contact.phone}</Td>
-                    <Td>{contact.company}</Td>
-                    <Td>{contact.title}</Td>
-                    <Td>{contact.department}</Td>
+                    <Td>
+                      <EditableCell
+                        value={contact.phone}
+                        onSave={(v) => updateContact(contact.id, { phone: v })}
+                        label="Phone"
+                        cellKey={`contact:${contact.id}#phone`}
+                      />
+                    </Td>
+                    <Td>
+                      <EditableCell
+                        value={contact.company}
+                        onSave={(v) => updateContact(contact.id, { company: v })}
+                        label="Company"
+                        cellKey={`contact:${contact.id}#company`}
+                      />
+                    </Td>
+                    <Td>
+                      <EditableCell
+                        value={contact.title}
+                        onSave={(v) => updateContact(contact.id, { title: v })}
+                        label="Title"
+                        cellKey={`contact:${contact.id}#title`}
+                      />
+                    </Td>
+                    <Td>
+                      <EditableCell
+                        value={contact.department}
+                        onSave={(v) =>
+                          updateContact(contact.id, { department: v })
+                        }
+                        label="Department"
+                        cellKey={`contact:${contact.id}#department`}
+                      />
+                    </Td>
                     <Td>
                       <span
                         style={{ color: "var(--text-secondary)", fontSize: 11 }}

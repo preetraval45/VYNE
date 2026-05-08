@@ -8,6 +8,7 @@ import { useProjects, useProjectsStore } from "@/lib/stores/projects";
 import { TASK_STATUS_META, getMember, type Task } from "@/lib/fixtures/projects";
 import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
+import { EditableCell } from "@/components/shared/EditableCell";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type Filter = "open" | "done" | "all";
@@ -585,8 +586,19 @@ function TaskCard({ task }: { task: Task }) {
             flex: 1,
             minWidth: 0,
           }}
+          onClick={(e) => e.stopPropagation()}
         >
-          {task.title}
+          <EditableCell
+            value={task.title}
+            onSave={(v) => {
+              const next = String(v).trim();
+              if (!next) return;
+              useProjectsStore.getState().updateTask(task.id, { title: next });
+            }}
+            label="Task title"
+            cellKey={`task:${task.id}#title`}
+            validate={(s) => (s.trim() ? null : "Title required")}
+          />
         </p>
       </div>
       <div

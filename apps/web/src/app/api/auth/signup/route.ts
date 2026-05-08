@@ -116,7 +116,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const token = signSessionToken({ uid: user.id, email: user.email });
+  const token = signSessionToken({
+    uid: user.id,
+    email: user.email,
+    role: user.role,
+  });
   const csrf = generateCsrfToken();
 
   const res = NextResponse.json({

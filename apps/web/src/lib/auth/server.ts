@@ -67,6 +67,9 @@ export interface SessionPayload {
   uid: string;
   email: string;
   exp: number;
+  /** Workspace role (UI_UPGRADE_PLAN.md 7.2). Optional on legacy
+   *  tokens; resolveSession() falls back to a DB lookup when missing. */
+  role?: string;
 }
 
 export function signSessionToken(payload: Omit<SessionPayload, "exp">) {

@@ -10,6 +10,7 @@ import {
 } from "@/lib/fixtures/expenses";
 import { useExpensesStore } from "@/lib/stores/expenses";
 import { PageHeader, Pill } from "@/components/shared/Kit";
+import { EditableCell } from "@/components/shared/EditableCell";
 import { Receipt, Plus, CheckCircle, FileText } from "lucide-react";
 import { MileageTab } from "@/components/expenses/MileageTab";
 import { PageDashboard } from "@/components/shared/PageDashboard";
@@ -426,7 +427,25 @@ function MyExpensesTab({
                     }}
                   >
                     <span>{categoryIcon(e.category)}</span>
-                    {categoryLabel(e.category)}
+                    <EditableCell
+                      value={e.category}
+                      onSave={(v) =>
+                        updateExpense(e.id, {
+                          category: v as ExpenseCategory,
+                        })
+                      }
+                      type="select"
+                      label="Category"
+                      cellKey={`expense:${e.id}#category`}
+                      options={[
+                        { value: "travel", label: "Travel" },
+                        { value: "meals", label: "Meals" },
+                        { value: "software", label: "Software" },
+                        { value: "office", label: "Office" },
+                        { value: "other", label: "Other" },
+                      ]}
+                      render={(v) => categoryLabel(v as ExpenseCategory)}
+                    />
                   </span>
                 </td>
                 <td
@@ -485,7 +504,17 @@ function MyExpensesTab({
                     color: "var(--text-primary)",
                   }}
                 >
-                  {fmt(e.amount)}
+                  <EditableCell
+                    value={e.amount}
+                    onSave={(v) =>
+                      updateExpense(e.id, { amount: Number(v) || 0 })
+                    }
+                    type="number"
+                    label="Amount"
+                    cellKey={`expense:${e.id}#amount`}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    render={(v) => fmt(Number(v))}
+                  />
                 </td>
                 <td style={{ padding: "11px 16px" }}>
                   <StatusBadge status={e.status} />

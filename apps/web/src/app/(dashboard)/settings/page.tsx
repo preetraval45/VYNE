@@ -142,6 +142,14 @@ const ChatWorkflowsPanel = dynamic(
     ),
   { ssr: false, loading: panelLoading },
 );
+// FieldPermissionsEditor — UI_UPGRADE_PLAN.md 7.3.
+const FieldPermissionsEditor = dynamic(
+  () =>
+    import("@/components/settings/FieldPermissionsEditor").then(
+      (m) => m.FieldPermissionsEditor,
+    ),
+  { ssr: false, loading: panelLoading },
+);
 const DataLifecycleSettings = lazyPanel(
   () => import("@/components/settings/DataLifecycleSettings"),
 );
@@ -171,6 +179,7 @@ const TABS = [
   { id: "computer-use", label: "Computer use", icon: <Cpu size={14} /> },
   { id: "stale-channels", label: "Stale channels", icon: <Inbox size={14} /> },
   { id: "chat-workflows", label: "Chat workflows", icon: <Workflow size={14} /> },
+  { id: "field-permissions", label: "Field permissions", icon: <Shield size={14} /> },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
   { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
@@ -346,6 +355,7 @@ export default function SettingsPage() {
         {tab === "computer-use" && <ComputerUseSidebar />}
         {tab === "stale-channels" && <StaleChannelsPanel />}
         {tab === "chat-workflows" && <ChatWorkflowsPanel />}
+        {tab === "field-permissions" && <FieldPermissionsEditor />}
         {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
         {tab === "trash" && <TrashSettings onToast={showToast} />}
         {tab === "accessibility" && (

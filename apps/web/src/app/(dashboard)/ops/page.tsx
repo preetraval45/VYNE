@@ -39,6 +39,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
+import { EditableCell } from "@/components/shared/EditableCell";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { BulkActionsBar } from "@/components/shared/BulkActionsBar";
@@ -789,7 +790,14 @@ function InventoryTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {p.sku}
+                  <EditableCell
+                    value={p.sku}
+                    onSave={(v) =>
+                      useOpsStore.getState().updateProduct(p.id, { sku: v })
+                    }
+                    label="SKU"
+                    cellKey={`product:${p.id}#sku`}
+                  />
                 </td>
                 <td
                   style={{
@@ -799,7 +807,14 @@ function InventoryTab({
                     color: "var(--text-primary)",
                   }}
                 >
-                  {p.name}
+                  <EditableCell
+                    value={p.name}
+                    onSave={(v) =>
+                      useOpsStore.getState().updateProduct(p.id, { name: v })
+                    }
+                    label="Product name"
+                    cellKey={`product:${p.id}#name`}
+                  />
                 </td>
                 <td
                   style={{
@@ -818,7 +833,20 @@ function InventoryTab({
                     fontWeight: 600,
                   }}
                 >
-                  {p.stockQty}
+                  <EditableCell
+                    value={p.stockQty}
+                    onSave={(v) =>
+                      useOpsStore
+                        .getState()
+                        .updateProduct(p.id, {
+                          stockQty: Math.max(0, Number(v) || 0),
+                        })
+                    }
+                    type="number"
+                    label="Stock qty"
+                    cellKey={`product:${p.id}#stockQty`}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                  />
                 </td>
                 <td
                   style={{
@@ -836,7 +864,19 @@ function InventoryTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  ${p.costPrice.toFixed(2)}
+                  <EditableCell
+                    value={p.costPrice}
+                    onSave={(v) =>
+                      useOpsStore
+                        .getState()
+                        .updateProduct(p.id, { costPrice: Number(v) || 0 })
+                    }
+                    type="number"
+                    label="Cost price"
+                    cellKey={`product:${p.id}#costPrice`}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    render={(v) => `$${Number(v).toFixed(2)}`}
+                  />
                 </td>
                 <td
                   style={{
@@ -846,7 +886,19 @@ function InventoryTab({
                     color: "var(--text-primary)",
                   }}
                 >
-                  ${p.price.toFixed(2)}
+                  <EditableCell
+                    value={p.price}
+                    onSave={(v) =>
+                      useOpsStore
+                        .getState()
+                        .updateProduct(p.id, { price: Number(v) || 0 })
+                    }
+                    type="number"
+                    label="Price"
+                    cellKey={`product:${p.id}#price`}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    render={(v) => `$${Number(v).toFixed(2)}`}
+                  />
                 </td>
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={p.status ?? "in_stock"} />

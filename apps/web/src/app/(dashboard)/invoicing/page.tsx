@@ -27,6 +27,7 @@ import {
   FileDown,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
+import { EditableCell } from "@/components/shared/EditableCell";
 import { ShareLinkButton } from "@/components/shared/ShareLinkButton";
 import { PresenceBubbles } from "@/components/shared/PresenceBubbles";
 import { SlaCountdown } from "@/components/shared/SlaCountdown";
@@ -2164,12 +2165,58 @@ function InvoicesTab() {
                 <Td bold color="var(--vyne-accent, var(--vyne-purple))">
                   {inv.number}
                 </Td>
-                <Td>{inv.customer}</Td>
+                <Td>
+                  <EditableCell
+                    value={inv.customer}
+                    onSave={(v) => updateInvoice(inv.id, { customer: v })}
+                    label="Customer"
+                    cellKey={`invoice:${inv.id}#customer`}
+                  />
+                </Td>
                 <Td color="var(--text-tertiary)">{fmtDate(inv.date)}</Td>
                 <Td color="var(--text-tertiary)">{fmtDate(inv.dueDate)}</Td>
-                <Td bold>{fmtFull(inv.amount)}</Td>
+                <Td bold>
+                  <EditableCell
+                    value={inv.amount}
+                    onSave={(v) =>
+                      updateInvoice(inv.id, { amount: Number(v) || 0 })
+                    }
+                    type="number"
+                    label="Amount"
+                    cellKey={`invoice:${inv.id}#amount`}
+                    validate={(s) =>
+                      Number(s) < 0 ? "Must be ≥ 0" : null
+                    }
+                    render={(v) => fmtFull(Number(v))}
+                    style={{ fontWeight: 700 }}
+                  />
+                </Td>
                 <Td>
-                  <StatusBadge label={inv.status} bg={st.bg} color={st.color} />
+                  <EditableCell
+                    value={inv.status}
+                    onSave={(v) =>
+                      updateInvoice(inv.id, {
+                        status: v as Invoice["status"],
+                      })
+                    }
+                    type="select"
+                    label="Status"
+                    cellKey={`invoice:${inv.id}#status`}
+                    options={[
+                      { value: "Draft", label: "Draft" },
+                      { value: "Sent", label: "Sent" },
+                      { value: "Paid", label: "Paid" },
+                      { value: "Overdue", label: "Overdue" },
+                      { value: "Cancelled", label: "Cancelled" },
+                    ]}
+                    render={(v) => (
+                      <StatusBadge
+                        label={String(v)}
+                        bg={st.bg}
+                        color={st.color}
+                      />
+                    )}
+                  />
                 </Td>
                 <Td align="center">
                   <div

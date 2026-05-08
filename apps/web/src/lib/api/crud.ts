@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/api/security";
 import { publish } from "@/lib/pusher";
+import {
+  requireRole,
+  WRITE_ROLES,
+  ADMIN_ROLES,
+  type WorkspaceRole,
+} from "@/lib/auth/role";
 
 // Generic CRUD route factory. Each module that wants Postgres-backed
 // list/create/update/delete writes ~10 lines instead of duplicating
@@ -40,6 +46,14 @@ interface CrudConfig {
   events: { created: string; updated: string; deleted: string };
   /** Optional default-row patcher for create — sets defaults for required string fields. */
   withDefaults?: (body: Record<string, unknown>) => Record<string, unknown>;
+  /** UI_UPGRADE_PLAN.md 7.2 — RBAC gate on writes. Defaults to all
+   *  write-capable roles (owner/admin/manager/member). Reads are
+   *  always permitted to any authenticated user. Demo mode (no token)
+   *  bypasses the gate so demo workspaces still mutate without auth. */
+  writeRoles?: WorkspaceRole[];
+  /** RBAC gate on deletes. Defaults to ADMIN_ROLES (owner/admin) since
+   *  deletes are irreversible. */
+  deleteRoles?: WorkspaceRole[];
 }
 
 interface CrudHandlers {
@@ -74,6 +88,8 @@ function getDelegate(model: PrismaModelKey) {
 export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
   const delegate = getDelegate(cfg.model);
   const orgIdDefault = cfg.orgId ?? "demo";
+  const writeRoles = cfg.writeRoles ?? WRITE_ROLES;
+  const deleteRoles = cfg.deleteRoles ?? ADMIN_ROLES;
 
   return {
     list: async (req: Request) => {
@@ -110,6 +126,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
         req,
       });
       if (!rl.ok) return rl.response!;
+
+      const roleCheck = await requireRole(req, writeRoles);
+      if (roleCheck) return roleCheck;
 
       let body: Record<string, unknown>;
       try {
@@ -150,6 +169,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
         req,
       });
       if (!rl.ok) return rl.response!;
+
+      const roleCheck = await requireRole(req, writeRoles);
+      if (roleCheck) return roleCheck;
 
       let body: Record<string, unknown>;
       try {
@@ -192,6 +214,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
         req,
       });
       if (!rl.ok) return rl.response!;
+
+      const roleCheck = await requireRole(req, deleteRoles);
+      if (roleCheck) return roleCheck;
 
       try {
         const existing = await delegate.findUnique({
