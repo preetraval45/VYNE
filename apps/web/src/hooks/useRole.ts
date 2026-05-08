@@ -36,15 +36,24 @@ export const ALL_WRITE_ROLES: WorkspaceRole[] = [
 
 export const ADMIN_ONLY: WorkspaceRole[] = ["owner", "admin"];
 
-/** Returns the current user's role. Falls back to "owner" in demo
- *  mode + when the store hasn't hydrated yet so the UI doesn't flash
- *  read-only on first paint. */
+function isDemoSession(): boolean {
+  if (typeof document === "undefined") return false;
+  // Either the demo cookie set by the /login demo button, or the
+  // legacy global bypass via NEXT_PUBLIC_DEMO_MODE.
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") return true;
+  return /(?:^|;\s*)vyne-demo=1\b/.test(document.cookie);
+}
+
+/** Returns the current user's role. Falls back to "owner" for the
+ *  pre-hydration flash + for demo sessions (cookie or legacy env).
+ *  Real signups without a stored role get "guest" so EditableCell
+ *  defaults to read-only until they're elevated. */
 export function useCurrentRole(): WorkspaceRole {
   const user = useAuthStore((s) => s.user);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
   if (!hydrated) return "owner";
-  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true" && !user) return "owner";
+  if (!user && isDemoSession()) return "owner";
   return ((user?.role as WorkspaceRole) ?? "guest") as WorkspaceRole;
 }
 

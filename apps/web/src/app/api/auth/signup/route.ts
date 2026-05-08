@@ -8,6 +8,7 @@ import {
   signSessionToken,
   validatePassword,
 } from "@/lib/auth/server";
+import { seedDemoWorkspace } from "@/lib/seedDemoWorkspace";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,6 +100,15 @@ export async function POST(req: Request) {
         status: "trialing",
         currentPeriodEnd: trialEnd,
       },
+    });
+
+    // 1.5 — Seed a representative dataset scoped to this user's orgId
+    // so the dashboard isn't blank on first paint. Idempotent: re-runs
+    // are no-ops because the seed checks per-entity row counts. Failures
+    // are swallowed so a transient seed error doesn't fail the signup.
+    void seedDemoWorkspace(user.orgId).catch(() => {
+      /* signup succeeds even if the seed hits a transient DB error;
+       * the user can re-trigger via /api/admin/seed-demo later. */
     });
   } catch (err) {
     if (

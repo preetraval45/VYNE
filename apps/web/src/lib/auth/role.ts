@@ -98,23 +98,43 @@ export function roleAtLeast(
 
 /**
  * Gate helper for API routes. Returns a Response when the request should
- * be rejected, or null when the role is sufficient. Demo mode (no token)
- * is treated as the implicit owner so unauthenticated demos still work
- * — flipping `DEMO_MODE: false` in vercel.json closes that hole.
+ * be rejected, or null when the role is sufficient.
+ *
+ * Three accepted paths:
+ *   1. Real session (`vyne-token`) — verify + check role against `allowed`
+ *   2. Demo session (`vyne-demo=1` cookie set by /login demo button) —
+ *      treated as implicit owner so demo workspaces stay editable after
+ *      `NEXT_PUBLIC_DEMO_MODE` is flipped off (UI_UPGRADE_PLAN.md 1.6)
+ *   3. `NEXT_PUBLIC_DEMO_MODE=true` — legacy global bypass (kept so
+ *      preview / staging deploys can opt back in via env)
  */
 export async function requireRole(
   req: Request,
   allowed: WorkspaceRole[],
 ): Promise<Response | null> {
-  // Demo gate: no cookie + DEMO_MODE on → permit.
   const cookieHeader = req.headers.get("cookie") ?? "";
-  if (!cookieHeader.includes("vyne-token=")) {
-    if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") return null;
+  const hasRealToken = /(?:^|;\s*)vyne-token=/.test(cookieHeader);
+  const hasDemoCookie = /(?:^|;\s*)vyne-demo=1\b/.test(cookieHeader);
+
+  // Path 2: demo cookie → permit as implicit owner.
+  if (hasDemoCookie && !hasRealToken) {
+    return null;
+  }
+
+  // Path 3: legacy global bypass.
+  if (!hasRealToken && process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+    return null;
+  }
+
+  // No real token → 401.
+  if (!hasRealToken) {
     return new Response(
       JSON.stringify({ error: "Authentication required" }),
       { status: 401, headers: { "content-type": "application/json" } },
     );
   }
+
+  // Path 1: real session.
   const session = await resolveSession(req);
   if (!session) {
     return new Response(
