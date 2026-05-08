@@ -53,6 +53,19 @@ export interface AiMemory {
   active: boolean;
 }
 
+/** UI_UPGRADE_PLAN.md 5.4 — A SkillStep is one tool invocation in a
+ *  saved Skill (multi-step prompt). Users build skills via Settings →
+ *  AI preferences and run them with `/skill <slug>` in the chat. */
+export interface SkillStep {
+  /** Tool name from the catalog (createDeal, queryTasks, etc.). */
+  tool: string;
+  /** Pre-filled arguments. Templating with `{{var}}` is reserved for
+   *  a follow-up release; today, args are static JSON. */
+  args: Record<string, unknown>;
+  /** Optional one-line note shown in the trace. */
+  note?: string;
+}
+
 export interface SavedPrompt {
   id: string;
   title: string;
@@ -61,6 +74,14 @@ export interface SavedPrompt {
   createdAt: string;
   /** When true, all teammates see the prompt in the library. */
   shared: boolean;
+  /** Stable slug for the slash trigger (`/skill weekly-pipeline`).
+   *  When present, the prompt is treated as a Skill and the slash
+   *  trigger executes the steps sequentially. Falls back to the id
+   *  when not set. */
+  slug?: string;
+  /** When set, this prompt is a Skill — invoking it chains the tool
+   *  calls instead of just sending the body to the AI. */
+  steps?: SkillStep[];
 }
 
 interface AiWorkspaceStore {
@@ -172,6 +193,8 @@ export const useAiWorkspace = create<AiWorkspaceStore>()(
           tags: p.tags ?? [],
           shared: p.shared ?? false,
           createdAt: new Date().toISOString(),
+          slug: p.slug?.trim() || undefined,
+          steps: p.steps && p.steps.length > 0 ? p.steps : undefined,
         };
         set((s) => {
           const existing = s.prompts.findIndex((x) => x.id === id);
@@ -233,6 +256,31 @@ export const useAiWorkspace = create<AiWorkspaceStore>()(
     { name: "vyne-ai-workspace", version: 1 },
   ),
 );
+
+/** Locate a skill (prompt with steps[]) by slug or id. Returns null
+ *  if no match. The chat composer's `/skill <name>` trigger uses this. */
+export function findSkill(slugOrId: string): SavedPrompt | null {
+  const needle = slugOrId.trim().toLowerCase();
+  if (!needle) return null;
+  const all = useAiWorkspace.getState().prompts;
+  return (
+    all.find(
+      (p) =>
+        Array.isArray(p.steps) &&
+        p.steps.length > 0 &&
+        ((p.slug && p.slug.toLowerCase() === needle) ||
+          p.id.toLowerCase() === needle ||
+          p.title.toLowerCase() === needle),
+    ) ?? null
+  );
+}
+
+/** List every prompt that has a steps[] array (i.e. is a Skill). */
+export function listSkills(): SavedPrompt[] {
+  return useAiWorkspace
+    .getState()
+    .prompts.filter((p) => Array.isArray(p.steps) && p.steps.length > 0);
+}
 
 /** Module-level helper so non-React code (route handlers, agent
  *  middleware) can pull the active preface without a hook. */

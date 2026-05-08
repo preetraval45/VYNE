@@ -7,10 +7,18 @@
 // existing <NetworkGraph> primitive — no extra deps.
 
 import { useMemo, useState } from "react";
-import { Trash2, Plus, Sparkles } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  Sparkles,
+  Wand2,
+  Search as SearchIcon,
+} from "lucide-react";
+import toast from "react-hot-toast";
 import {
   useAiMemoryStore,
   type MemoryFact,
+  type Session,
 } from "@/lib/stores/aiMemory";
 import {
   NetworkGraph,
@@ -86,13 +94,87 @@ function shortLabel(text: string): string {
   return `${trimmed.slice(0, 26)}…`;
 }
 
+/** Mine first-person + team-pronoun statements from past sessions for
+ *  candidate memories. The bar is "this looks like a durable preference
+ *  the user stated" — heuristic but quiet enough to be useful. */
+function mineMemoryCandidates(sessions: Session[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const s of sessions) {
+    const text = (s.question ?? "").trim();
+    if (!text || text.length < 12 || text.length > 240) continue;
+    // First-person preference statements only.
+    if (
+      !/\b(i prefer|i (?:always|never|usually) |we use|we don't|our team |our company |we are |we always|we never)/i.test(
+        text,
+      )
+    ) {
+      continue;
+    }
+    // Skip "?" — questions, not statements.
+    if (text.includes("?")) continue;
+    const norm = text.toLowerCase();
+    if (seen.has(norm)) continue;
+    seen.add(norm);
+    out.push(text);
+    if (out.length >= 12) break;
+  }
+  return out;
+}
+
 export function AiMemoryGraph() {
   const facts = useAiMemoryStore((s) => s.facts);
+  const sessions = useAiMemoryStore((s) => s.sessions);
   const addFact = useAiMemoryStore((s) => s.addFact);
   const removeFact = useAiMemoryStore((s) => s.removeFact);
   const clearAll = useAiMemoryStore((s) => s.clearAll);
 
   const [draft, setDraft] = useState("");
+  const [forgetTopic, setForgetTopic] = useState("");
+  const [showImport, setShowImport] = useState(false);
+
+  const candidates = useMemo(
+    () => mineMemoryCandidates(sessions),
+    [sessions],
+  );
+  // Filter out candidates already in facts (case-insensitive).
+  const factsLower = useMemo(
+    () => new Set(facts.map((f) => f.text.toLowerCase().trim())),
+    [facts],
+  );
+  const newCandidates = candidates.filter(
+    (c) => !factsLower.has(c.toLowerCase().trim()),
+  );
+
+  function forgetByTopic() {
+    const topic = forgetTopic.trim().toLowerCase();
+    if (!topic) return;
+    const tokens = topic.split(/\s+/).filter((t) => t.length >= 3);
+    if (tokens.length === 0) {
+      toast.error("Topic too short — try at least one 3+ char word.");
+      return;
+    }
+    const matched = facts.filter((f) => {
+      const txt = f.text.toLowerCase();
+      return tokens.some((t) => txt.includes(t));
+    });
+    if (matched.length === 0) {
+      toast(`No memories match "${forgetTopic.trim()}"`);
+      return;
+    }
+    if (
+      !confirm(
+        `Forget ${matched.length} memor${matched.length === 1 ? "y" : "ies"} about "${forgetTopic.trim()}"?`,
+      )
+    ) {
+      return;
+    }
+    for (const m of matched) removeFact(m.id);
+    toast.success(
+      `Forgot ${matched.length} memor${matched.length === 1 ? "y" : "ies"}`,
+    );
+    setForgetTopic("");
+  }
 
   const { nodes, edges } = useMemo(() => {
     const ns: NetworkNode[] = facts.map((f) => ({
@@ -158,6 +240,152 @@ export function AiMemoryGraph() {
         Persistent facts Vyne AI references on every reply. Edges connect
         facts that share keywords so you can spot related memories.
       </p>
+
+      {/* Forget-by-topic + import-from-conversations (UI_UPGRADE_PLAN.md 5.8) */}
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          alignItems: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            flex: 1,
+            minWidth: 220,
+            border: "1px solid var(--content-border)",
+            borderRadius: 6,
+            padding: "2px 4px 2px 8px",
+            background: "var(--content-bg)",
+            alignItems: "center",
+          }}
+        >
+          <SearchIcon
+            size={12}
+            aria-hidden="true"
+            color="var(--text-tertiary)"
+          />
+          <input
+            value={forgetTopic}
+            onChange={(e) => setForgetTopic(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                forgetByTopic();
+              }
+            }}
+            placeholder="Forget topic (e.g. salary, postgres)"
+            aria-label="Forget memories about a topic"
+            style={{
+              flex: 1,
+              border: "none",
+              background: "transparent",
+              color: "var(--text-primary)",
+              fontSize: 12,
+              padding: "4px 6px",
+              outline: "none",
+            }}
+          />
+          <button
+            type="button"
+            onClick={forgetByTopic}
+            disabled={!forgetTopic.trim() || facts.length === 0}
+            style={{
+              padding: "3px 10px",
+              fontSize: 11,
+              border: "1px solid var(--content-border)",
+              borderRadius: 4,
+              background: "transparent",
+              color: "var(--text-secondary)",
+              cursor:
+                forgetTopic.trim() && facts.length > 0 ? "pointer" : "not-allowed",
+              opacity: forgetTopic.trim() && facts.length > 0 ? 1 : 0.5,
+            }}
+          >
+            Forget
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowImport((v) => !v)}
+          disabled={newCandidates.length === 0}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "6px 10px",
+            fontSize: 12,
+            border: "1px solid var(--content-border)",
+            borderRadius: 6,
+            background: showImport
+              ? "var(--vyne-accent-soft, var(--content-elevated))"
+              : "transparent",
+            color: "var(--text-primary)",
+            cursor: newCandidates.length > 0 ? "pointer" : "not-allowed",
+            opacity: newCandidates.length > 0 ? 1 : 0.5,
+          }}
+        >
+          <Wand2 size={12} />
+          Import {newCandidates.length > 0 ? `(${newCandidates.length})` : ""}
+        </button>
+      </div>
+
+      {showImport && newCandidates.length > 0 && (
+        <div
+          style={{
+            background: "var(--content-elevated)",
+            border: "1px solid var(--content-border)",
+            borderRadius: 6,
+            padding: 8,
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--text-secondary)",
+              padding: "0 4px",
+            }}
+          >
+            Suggestions mined from past conversations. Click any to add.
+          </span>
+          {newCandidates.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => {
+                addFact(c);
+                toast.success("Added memory");
+              }}
+              style={{
+                textAlign: "left",
+                padding: "5px 8px",
+                fontSize: 12,
+                border: "1px solid var(--content-border)",
+                borderRadius: 4,
+                background: "var(--content-bg)",
+                color: "var(--text-primary)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Plus
+                size={11}
+                aria-hidden="true"
+                color="var(--vyne-accent, var(--vyne-purple))"
+              />
+              <span style={{ flex: 1 }}>{c}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Composer */}
       <div

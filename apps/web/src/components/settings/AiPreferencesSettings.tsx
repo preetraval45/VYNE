@@ -9,6 +9,8 @@ import {
   Plus,
   X,
   Pin,
+  Activity,
+  Wrench,
 } from "lucide-react";
 import {
   useAiWorkspace,
@@ -22,6 +24,8 @@ import {
   type ScheduleDelivery,
 } from "@/lib/stores/aiSchedules";
 import { AiMemoryGraph } from "@/components/ai/AiMemoryGraph";
+import { AgentTracePanel } from "@/components/ai/AgentTracePanel";
+import { SkillsLibrary } from "@/components/ai/SkillsLibrary";
 
 interface Props {
   onToast: (message: string) => void;
@@ -285,6 +289,27 @@ export default function AiPreferencesSettings({ onToast }: Props) {
       {/* ── Memory graph (UI_UPGRADE_PLAN.md 2.5) ──────────────────── */}
       <Card title="Cross-conversation memory graph" icon={Brain}>
         <AiMemoryGraph />
+      </Card>
+
+      {/* ── Agent traces (UI_UPGRADE_PLAN.md 5.2) ──────────────────── */}
+      <Card title="Agent traces" icon={Activity}>
+        <p
+          style={{
+            margin: "0 0 12px",
+            fontSize: 12,
+            color: "var(--text-secondary)",
+          }}
+        >
+          Multi-step AI runs are logged here. Each step shows kind / args /
+          output / latency / cost; failed tool calls expose a Replay button
+          that re-runs the original call.
+        </p>
+        <AgentTracePanel />
+      </Card>
+
+      {/* ── Skills (UI_UPGRADE_PLAN.md 5.4) ─────────────────────────── */}
+      <Card title="Skills" icon={Wrench}>
+        <SkillsLibrary />
       </Card>
 
       {/* ── Prompt library (16.7) ───────────────────────────────── */}

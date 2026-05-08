@@ -40,6 +40,9 @@ import {
 } from "@/lib/ai/toolExecutor";
 import { PendingApprovalCard } from "@/components/ai/PendingApprovalCard";
 import { guardSpend } from "@/lib/stores/aiBudget";
+import { useAgentTraces } from "@/lib/stores/agentTraces";
+import { findSkill } from "@/lib/stores/aiWorkspace";
+import { CostPreviewChip } from "@/components/ai/CostPreviewChip";
 import { ArtifactPanel } from "@/components/ai/ArtifactPanel";
 import { QuickActions } from "@/components/ai/QuickActions";
 import { ConversationHistory } from "@/components/ai/ConversationHistory";
@@ -419,6 +422,96 @@ export default function VyneAIChatPage() {
 
       const assistantId = crypto.randomUUID();
 
+      // 5.4 — Skills slash trigger. `/skill <slug>` runs the saved
+      // multi-step chain inline. Each step calls a tool from the
+      // catalog with pre-filled args + writes a step into a fresh
+      // agent trace. Skipped when the slug doesn't resolve so the
+      // user sees a helpful error instead of a silent no-op.
+      const skillMatch =
+        mode === "fresh" ? trimmed.match(/^\/skill\s+(\S+)/i) : null;
+      if (skillMatch) {
+        const slug = skillMatch[1];
+        const skill = findSkill(slug);
+        const userMsg: Msg = {
+          id: crypto.randomUUID(),
+          role: "user",
+          content: trimmed,
+        };
+        setMessages((m) => [
+          ...m,
+          userMsg,
+          {
+            id: assistantId,
+            role: "assistant",
+            content: skill
+              ? `Running skill **${skill.title}** (${skill.steps?.length ?? 0} steps)…`
+              : `No skill matches \`${slug}\`. Visit Settings → AI preferences → Skills to see saved skills.`,
+            streaming: false,
+          },
+        ]);
+        appendMessage(convId, { role: "user", content: trimmed });
+        setInput("");
+        if (!skill || !skill.steps || skill.steps.length === 0) {
+          appendMessage(convId, {
+            role: "assistant",
+            content: `No skill matches \`${slug}\`.`,
+          });
+          return;
+        }
+        setPending(true);
+        const traces = useAgentTraces.getState();
+        const trace = traces.startTrace({
+          conversationId: convId,
+          goal: `Skill: ${skill.title}`,
+        });
+        const results: ToolResult[] = [];
+        let failures = 0;
+        for (const step of skill.steps) {
+          const tracedStep = traces.appendStep(trace.id, {
+            kind: "tool",
+            name: step.tool,
+            argsPreview: step.args,
+            status: "running",
+          });
+          const result = await executeToolCall({
+            tool: step.tool,
+            args: step.args,
+          });
+          if (tracedStep) {
+            traces.completeStep(trace.id, tracedStep.id, {
+              status: result.ok ? "ok" : "failed",
+              outputPreview: result,
+              error: result.ok ? undefined : result.detail,
+            });
+          }
+          results.push(result);
+          if (!result.ok) failures++;
+        }
+        traces.finishTrace(trace.id, {
+          status:
+            failures === 0
+              ? "success"
+              : failures === skill.steps.length
+                ? "failed"
+                : "partial",
+          summary: `${skill.steps.length - failures}/${skill.steps.length} steps OK`,
+        });
+        const summary =
+          failures === 0
+            ? `✅ Skill **${skill.title}** completed: ${results.length} steps OK.`
+            : `⚠️ Skill **${skill.title}**: ${results.length - failures}/${results.length} succeeded.`;
+        setMessages((m) =>
+          m.map((msg) =>
+            msg.id === assistantId
+              ? { ...msg, content: summary, toolResults: results }
+              : msg,
+          ),
+        );
+        appendMessage(convId, { role: "assistant", content: summary });
+        setPending(false);
+        return;
+      }
+
       if (mode === "fresh") {
         const userMsg: Msg = {
           id: crypto.randomUUID(),
@@ -514,9 +607,67 @@ export default function VyneAIChatPage() {
           // Split read/write: read tools (queries) run immediately;
           // write tools (create/update/delete) need user approval.
           const split = splitToolCallsForApproval(toolCalls);
-          const immediate = split.immediate.length
-            ? await executeToolCalls(split.immediate)
-            : [];
+
+          // 5.2 — Open an agent trace for this turn so the user can
+          // inspect what the AI did. Each immediate tool call appends
+          // a step + records its result; pending writes append as
+          // skipped placeholders that flip to ok/failed when the user
+          // approves them via <PendingApprovalCard>.
+          const traces = useAgentTraces.getState();
+          const trace =
+            convId && (split.immediate.length > 0 || split.pending.length > 0)
+              ? traces.startTrace({
+                  conversationId: convId,
+                  goal: prompt.slice(0, 240),
+                })
+              : null;
+
+          const immediate: ToolResult[] = [];
+          if (trace && split.immediate.length > 0) {
+            for (const call of split.immediate) {
+              const step = traces.appendStep(trace.id, {
+                kind: "tool",
+                name: call.tool,
+                argsPreview: call.args,
+                status: "running",
+              });
+              const result = await executeToolCall(call);
+              if (step) {
+                traces.completeStep(trace.id, step.id, {
+                  status: result.ok ? "ok" : "failed",
+                  outputPreview: result,
+                  error: result.ok ? undefined : result.detail,
+                });
+              }
+              immediate.push(result);
+            }
+          } else if (split.immediate.length > 0) {
+            immediate.push(...(await executeToolCalls(split.immediate)));
+          }
+
+          if (trace) {
+            for (const call of split.pending) {
+              traces.appendStep(trace.id, {
+                kind: "tool",
+                name: call.tool,
+                argsPreview: call.args,
+                status: "skipped",
+              });
+            }
+            const failedCount = immediate.filter((r) => !r.ok).length;
+            traces.finishTrace(trace.id, {
+              status:
+                split.pending.length > 0
+                  ? "partial"
+                  : failedCount === 0
+                    ? "success"
+                    : failedCount === immediate.length
+                      ? "failed"
+                      : "partial",
+              summary: data.message ?? undefined,
+            });
+          }
+
           const message =
             data.message ??
             (immediate.length || split.pending.length ? "Done." : "Nothing to do.");
@@ -1487,6 +1638,18 @@ export default function VyneAIChatPage() {
             ))}
           </div>
         )}
+        {input.trim() && (
+          <div
+            style={{
+              maxWidth: 820,
+              margin: "0 auto 6px",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <CostPreviewChip input={input} model={preferredModel} />
+          </div>
+        )}
         <div
           style={{
             maxWidth: 820,
@@ -1510,7 +1673,7 @@ export default function VyneAIChatPage() {
                 void ask(input);
               }
             }}
-            placeholder="Ask Vyne AI about your projects, tasks, deals, inventory…"
+            placeholder="Ask Vyne AI about your projects, tasks, deals, inventory… (or /skill <slug>)"
             rows={1}
             aria-label="Ask Vyne AI"
             style={{
