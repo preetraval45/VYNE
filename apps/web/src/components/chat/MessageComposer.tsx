@@ -22,6 +22,11 @@ import { AttachmentPreview } from "./AttachmentPreview";
 import { MediaCaptureRecorder, type CapturedMedia } from "./MediaCapture";
 import { useFileUpload, ACCEPTED_EXTENSIONS } from "@/hooks/useFileUpload";
 import type { UploadedFile } from "@/hooks/useFileUpload";
+import {
+  expandTemplateTrigger,
+  saveTemplateFromTrigger,
+} from "@/lib/chatTemplates";
+import toast from "react-hot-toast";
 
 interface MessageComposerProps {
   readonly placeholder: string;
@@ -131,6 +136,36 @@ export function MessageComposer({
     if (isUploading) return; // don't send while uploading
 
     const trimmed = text.trim();
+
+    // 6.9 — message template triggers handled inline so the user
+    // sees the expansion as a normal sent message instead of a
+    // slash-command escape hatch.
+    if (/^\/save-template\s+\S+\s+.+/is.test(trimmed)) {
+      const saved = saveTemplateFromTrigger(trimmed);
+      if (saved) {
+        toast.success(
+          `Template saved: /t ${saved.slug ?? saved.id}`,
+        );
+        setText("");
+        if (textareaRef.current) textareaRef.current.style.height = "auto";
+        return;
+      }
+      toast.error("Couldn't save template");
+      return;
+    }
+    const expansion = expandTemplateTrigger(trimmed);
+    if (expansion) {
+      const finalText = critical
+        ? `[!critical] ${expansion.expanded}`
+        : expansion.expanded;
+      onSend(finalText, files.length > 0 ? files : undefined);
+      setText("");
+      setCritical(false);
+      clearFiles();
+      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      return;
+    }
+
     if (trimmed.startsWith("/")) {
       const [rawCmd, ...rest] = trimmed.slice(1).split(" ");
       const cmd = rawCmd.toLowerCase();

@@ -30,6 +30,8 @@ import { usePinnedMessagesStore } from "@/lib/stores/pinnedMessages";
 import { isUserMentioned } from "@/lib/utils/mentions";
 import { renderMessageContent } from "@/lib/utils/messageRender";
 import { LinkPreviews } from "./LinkPreview";
+import { ActionMessageBlock } from "./ActionMessageBlock";
+import { extractActionId, stripActionToken } from "@/lib/stores/chatActions";
 
 interface MessageRowProps {
   readonly msg: MsgMessage;
@@ -41,6 +43,10 @@ interface MessageRowProps {
   readonly channelName?: string;
   readonly onEdit?: (msgId: string, newContent: string) => void;
   readonly onDelete?: (msgId: string) => void;
+  /** UI_UPGRADE_PLAN.md 6.6 — inline thread expansion. When provided,
+   *  the first 3 replies render under the message; "Show N more"
+   *  opens the full thread panel. */
+  readonly inlineReplies?: MsgMessage[];
 }
 
 interface TranslationLine {
@@ -93,6 +99,7 @@ export function MessageRow({
   channelName,
   onEdit,
   onDelete,
+  inlineReplies,
 }: MessageRowProps) {
   const [hovering, setHovering] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
@@ -316,9 +323,17 @@ export function MessageRow({
                   : {}),
             }}
           >
-            {renderMessageContent(
-              msg.content.replace(/^\[!critical\]\s*/, ""),
-            )}
+            {(() => {
+              const stripped = msg.content.replace(/^\[!critical\]\s*/, "");
+              const actionId = extractActionId(stripped);
+              const visibleBody = actionId ? stripActionToken(stripped) : stripped;
+              return (
+                <>
+                  {visibleBody && renderMessageContent(visibleBody)}
+                  {actionId && <ActionMessageBlock blockId={actionId} />}
+                </>
+              );
+            })()}
             {msg.updatedAt && (
               <span
                 style={{
@@ -657,6 +672,74 @@ export function MessageRow({
             >
               +
             </button>
+          </div>
+        )}
+
+        {/* Inline thread preview — UI_UPGRADE_PLAN.md 6.6 */}
+        {inlineReplies && inlineReplies.length > 0 && (
+          <div
+            style={{
+              marginTop: 6,
+              borderLeft: "2px solid var(--content-border)",
+              paddingLeft: 10,
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+            }}
+          >
+            {inlineReplies.slice(0, 3).map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => onReply(msg)}
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 6,
+                  padding: "2px 4px",
+                  background: "transparent",
+                  border: "none",
+                  textAlign: "left",
+                  cursor: "pointer",
+                  color: "var(--text-primary)",
+                  fontSize: 12,
+                  borderRadius: 4,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--content-elevated)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                }}
+              >
+                <UserAvatar name={r.author.name} size={16} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span
+                    style={{
+                      fontWeight: 500,
+                      marginRight: 6,
+                    }}
+                  >
+                    {r.author.name}
+                  </span>
+                  <span
+                    style={{
+                      color: "var(--text-secondary)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "inline-block",
+                      maxWidth: 320,
+                      verticalAlign: "bottom",
+                    }}
+                  >
+                    {r.content || "(attachment)"}
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
         )}
 

@@ -22,6 +22,8 @@ import {
   Database,
   Radio,
   Cpu,
+  Inbox,
+  Workflow,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -124,6 +126,22 @@ const ComputerUseSidebar = dynamic(
     ),
   { ssr: false, loading: panelLoading },
 );
+// StaleChannelsPanel — UI_UPGRADE_PLAN.md 6.5.
+const StaleChannelsPanel = dynamic(
+  () =>
+    import("@/components/settings/StaleChannelsPanel").then(
+      (m) => m.StaleChannelsPanel,
+    ),
+  { ssr: false, loading: panelLoading },
+);
+// ChatWorkflowsPanel — UI_UPGRADE_PLAN.md 6.3.
+const ChatWorkflowsPanel = dynamic(
+  () =>
+    import("@/components/settings/ChatWorkflowsPanel").then(
+      (m) => m.ChatWorkflowsPanel,
+    ),
+  { ssr: false, loading: panelLoading },
+);
 const DataLifecycleSettings = lazyPanel(
   () => import("@/components/settings/DataLifecycleSettings"),
 );
@@ -151,6 +169,8 @@ const TABS = [
   { id: "rag-documents", label: "RAG documents", icon: <Database size={14} /> },
   { id: "realtime", label: "Realtime", icon: <Radio size={14} /> },
   { id: "computer-use", label: "Computer use", icon: <Cpu size={14} /> },
+  { id: "stale-channels", label: "Stale channels", icon: <Inbox size={14} /> },
+  { id: "chat-workflows", label: "Chat workflows", icon: <Workflow size={14} /> },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
   { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
@@ -324,6 +344,8 @@ export default function SettingsPage() {
         {tab === "rag-documents" && <RagDocumentsSettings />}
         {tab === "realtime" && <RealtimeStatusCard />}
         {tab === "computer-use" && <ComputerUseSidebar />}
+        {tab === "stale-channels" && <StaleChannelsPanel />}
+        {tab === "chat-workflows" && <ChatWorkflowsPanel />}
         {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
         {tab === "trash" && <TrashSettings onToast={showToast} />}
         {tab === "accessibility" && (

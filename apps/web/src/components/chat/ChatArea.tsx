@@ -22,6 +22,10 @@ import { useReadReceiptsStore } from "@/lib/stores/readReceipts";
 import { useSlashTemplatesStore } from "@/lib/stores/slashTemplates";
 import { useWorkflowsStore } from "@/lib/stores/workflows";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
+import { HuddleStartButton } from "./HuddleStartButton";
+import { useChatWorkflows } from "@/lib/stores/chatWorkflows";
+import { executeToolCall } from "@/lib/ai/toolExecutor";
+import { pushNotification } from "@/lib/stores/notificationCenter";
 import type { MsgMessage, MsgAttachment } from "@/lib/api/client";
 import { slashCommandApi } from "@/lib/api/client";
 import { useContactsStore } from "@/lib/stores/contacts";
@@ -141,6 +145,46 @@ export function ChatArea({
       prevCount.current = messages.length;
     }
   }, [messages.length]);
+
+  // 6.3 — Chat-workflow matcher. Runs every enabled rule against the
+  // newest message; matched rules dispatch their action (notify / tool)
+  // + bump the fire counter. Tracks last-seen id so re-renders don't
+  // re-fire stale matches.
+  const lastMatchedIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!channelId || messages.length === 0) return;
+    const newest = messages[messages.length - 1];
+    if (!newest || !newest.content) return;
+    if (lastMatchedIdRef.current === newest.id) return;
+    lastMatchedIdRef.current = newest.id;
+
+    const wf = useChatWorkflows.getState();
+    const matched = wf.matchAgainstMessage({
+      channelId,
+      content: newest.content,
+    });
+    for (const rule of matched) {
+      wf.recordFire(rule.id);
+      const action = rule.action;
+      if (action.kind === "notify") {
+        pushNotification({
+          module: "chat",
+          type: "system",
+          title: action.notifyTitle ?? `Chat workflow: ${rule.name}`,
+          body:
+            action.notifyBody ??
+            `Triggered in #${channelName ?? channelId}: "${newest.content.slice(0, 80)}"`,
+          entityKey: `channel:${channelId}`,
+          href: `/chat?channel=${encodeURIComponent(channelId)}`,
+          priority: "normal",
+        });
+      } else if (action.kind === "tool" && action.call) {
+        void executeToolCall(action.call);
+      }
+      // post-action-block runs server-side — needs the chat send path,
+      // wired in a follow-up.
+    }
+  }, [messages, channelId, channelName]);
 
   // ── CRM bridge: read/write Zustand stores synchronously ─────────
   function handleContactLookup(arg: string) {
@@ -671,7 +715,15 @@ export function ChatArea({
               )}
             </div>
           )}
-          <div data-chat-actions style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
+          <div data-chat-actions style={{ marginLeft: "auto", display: "flex", gap: 4, alignItems: "center" }}>
+            {/* 6.1 — One-tap huddle start. Mints a LiveKit token for
+                this channel + spins up the persistent dock. */}
+            {channelId && (
+              <HuddleStartButton
+                channelId={channelId}
+                channelName={channelName}
+              />
+            )}
             {/* Call dropdown — Audio / Video options */}
             <div ref={callMenuRef} style={{ position: "relative" }}>
               <button
@@ -1038,11 +1090,26 @@ export function ChatArea({
                   ...persistedForChannel.filter((m) => !seen.has(m.id)),
                 ];
                 const liveReplyCount: Record<string, number> = {};
+                // 6.6 — collect first 3 replies per parent for the
+                // inline thread preview. Uses chronological order so
+                // the preview matches what the thread panel shows.
+                const repliesByParent: Record<string, MsgMessage[]> = {};
                 for (const m of allMessages) {
                   if (m.parentMessageId) {
                     liveReplyCount[m.parentMessageId] =
                       (liveReplyCount[m.parentMessageId] ?? 0) + 1;
+                    if (!repliesByParent[m.parentMessageId]) {
+                      repliesByParent[m.parentMessageId] = [];
+                    }
+                    repliesByParent[m.parentMessageId].push(m);
                   }
+                }
+                for (const k of Object.keys(repliesByParent)) {
+                  repliesByParent[k].sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  );
                 }
                 const parents = messages.filter((m) => !m.parentMessageId);
                 return parents.map((msg, i, arr) => (
@@ -1053,6 +1120,7 @@ export function ChatArea({
                       // Live count beats the seeded mock value
                       replyCount: liveReplyCount[msg.id] ?? 0,
                     }}
+                    inlineReplies={repliesByParent[msg.id]?.slice(0, 3)}
                     prevMsg={arr[i - 1]}
                     onReaction={addReaction}
                     onReply={onOpenThread}

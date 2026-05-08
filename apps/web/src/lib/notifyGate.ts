@@ -1,6 +1,7 @@
 "use client";
 
 import { useSettingsStore } from "@/lib/stores/settings";
+import { channelDecisionFor } from "@/lib/stores/channelDnd";
 import type { ModuleId } from "@/lib/stores/notificationCenter";
 
 /**
@@ -32,14 +33,31 @@ function inDndWindow(now: Date): boolean {
   return minutes >= start || minutes < end;
 }
 
-export function shouldNotify(module: ModuleId): NotifyDecision {
+export function shouldNotify(
+  module: ModuleId,
+  /** Optional chat channel id — when set, the per-channel rule
+   *  (UI_UPGRADE_PLAN.md 6.8) overrides global gating. `always`
+   *  channels fire even during global DND; `muted` channels drop
+   *  even when the module isn't muted; `schedule` channels enforce
+   *  their own window. */
+  channelId?: string,
+): NotifyDecision {
   const settings = useSettingsStore.getState().notificationSettings;
   if (settings.mutedModules?.[module]) return "drop";
+
+  if (channelId) {
+    const channel = channelDecisionFor(channelId);
+    if (channel === "drop") return "drop";
+    if (channel === "fire") return "fire";
+    if (channel === "quiet") return "quiet";
+    // null → fall through to global rules
+  }
+
   if (inDndWindow(new Date())) return "quiet";
   return "fire";
 }
 
 /** Convenience predicate when callers only care about "show now or not". */
-export function isQuietNow(module: ModuleId): boolean {
-  return shouldNotify(module) !== "fire";
+export function isQuietNow(module: ModuleId, channelId?: string): boolean {
+  return shouldNotify(module, channelId) !== "fire";
 }
