@@ -163,13 +163,19 @@ Already huge. The gaps that move the needle:
 
 ## Priority 9 — Launch readiness (1 week)
 
-- [ ] **9.1** **Landing page** at `/` (apex domain) — currently lands on auth. Add value prop, screenshots/demo video, pricing, waitlist, fair-use signup CTA.
-- [ ] **9.2** **Pricing page** — match Stripe products from Priority 3.
-- [ ] **9.3** **Status page** — `statusPage.ts` already polls; expose `https://status.vyne.app` (statuspage.io free tier or BetterStack).
-- [ ] **9.4** **Public changelog** — `changelog.ts` manifest exists; render at `/changelog` with RSS feed.
-- [ ] **9.5** **Documentation** — `/docs` external site (Mintlify or Docusaurus). At minimum: Getting started, AI features, API reference (the OpenAPI spec at `/api/openapi` already ships).
-- [ ] **9.6** **Onboarding email drip** — Resend templates for day-0 welcome, day-2 "try AI", day-7 "import data", day-14 "trial ending". Pulls from `setupScore` to skip steps the user already completed.
-- [ ] **9.7** **Marketing essentials** — favicon production-ready, og:image per route, robots.txt, sitemap.xml, analytics (Plausible / PostHog).
+- [x] **9.1** **Landing page** at `/` — already shipped at [(marketing)/landing/page.tsx](apps/web/src/app/(marketing)/landing/page.tsx) (~1900 lines, value prop + screenshots + pricing CTA + waitlist + signup). The root `app/page.tsx` re-exports it so `vyne.vercel.app` lands here.
+- [x] **9.2** **Pricing page** at [(marketing)/pricing/page.tsx](apps/web/src/app/(marketing)/pricing/page.tsx). Four tiers (Free / Starter $12 / Business $24 / Enterprise) with monthly/annual toggle (-17% on annual), feature parity matrix, "Most Popular" highlight on Starter. Click → POSTs to `/api/stripe/checkout` and routes to Stripe Checkout when keys configured; falls through to `/signup?plan={tier}` when not. Enterprise opens a `mailto:sales`. Inline FAQ (5 questions) covers card capture, AI cost, switching, data retention, student/non-profit discounts.
+- [x] **9.3** **Status page** at [(marketing)/status/page.tsx](apps/web/src/app/(marketing)/status/page.tsx) — already shipped (~500 lines). Polls the existing `statusPage.ts` helper; renders operational/degraded/outage badge in real time.
+- [x] **9.4** **Public changelog** at [(marketing)/changelog/page.tsx](apps/web/src/app/(marketing)/changelog/page.tsx) — already shipped (~407 lines). Renders the `changelog.ts` manifest with featured / highlights / module chips.
+- [x] **9.5** **Documentation** at [(marketing)/learn/page.tsx](apps/web/src/app/(marketing)/learn/page.tsx) (lives at `/learn` — the in-app `/docs` is the docs editor). Sectioned index (9 cards: Getting started / AI features / REST API / Webhooks / Auth & API keys / Data & backups / Automations / Security / Support) plus inline anchors for `#getting-started`, `#api`, `#webhooks`. Quickstart code snippet + webhook signature-verification example. Live OpenAPI spec linked at `/api/openapi`. Existing [(marketing)/developers](apps/web/src/app/(marketing)/developers/page.tsx) (~1147 lines) covers the deeper API reference.
+- [x] **9.6** **Onboarding email drip** at [api/notifications/drip/route.ts](apps/web/src/app/api/notifications/drip/route.ts). Four steps: day 0 welcome / day 2 "try AI" / day 7 "import data" / day 14 "trial ending". Walks every user younger than 14 days, computes day-since-signup, sends only when account age falls in the step's window. **Idempotency**: each (userId, kind) combo writes an `AuditEvent` so a re-run within the same day is a no-op. Uses existing `/api/notifications/send` (Resend) — without `RESEND_API_KEY` the route still runs the audit trail for telemetry. **Vercel Cron** in `vercel.json`: runs daily at 09:00 UTC; accepts `x-vercel-cron-signature` or `Authorization: Bearer ${CRON_SECRET}`.
+- [x] **9.7** **Marketing essentials** —
+
+  - **OG image**: [opengraph-image.tsx](apps/web/src/app/opengraph-image.tsx) — Next.js auto-generated 1200×630 PNG with gradient background, sparkle mark, headline + subhead + URL. Wired into every route via the root layout's `metadataBase`. Twitter card upgraded from `summary` → `summary_large_image`.
+  - **Favicon**: existing `/brand/logo-mark.svg` already used as `icons.icon` + `apple-touch-icon` in root layout.
+  - **robots.txt**: [robots.ts](apps/web/src/app/robots.ts) — allows `/`, `/pricing`, `/docs`, `/changelog`, `/status`, `/privacy`, `/terms`; disallows every dashboard module + `/admin/*` + `/api/*` + auth routes. Sitemap reference + host directive.
+  - **sitemap.xml**: [sitemap.ts](apps/web/src/app/sitemap.ts) — 10 public marketing routes with priority + changeFrequency.
+  - **Analytics**: existing `@vercel/analytics/next` + `@vercel/speed-insights/next` mounted in root layout (free tier: 2.5K events/mo + 10K page-loads/mo, both auto-disable on non-Vercel hosts and respect Do-Not-Track).
 
 ---
 

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "VYNE — AI-native Company OS",
     description:
       "Replace Slack, Jira, and Notion with one AI-powered workspace.",
