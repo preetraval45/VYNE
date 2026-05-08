@@ -21,6 +21,7 @@ import {
   Search,
   Database,
   Radio,
+  Cpu,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -115,6 +116,14 @@ const RealtimeStatusCard = dynamic(
     ),
   { ssr: false, loading: panelLoading },
 );
+// ComputerUseSidebar — UI_UPGRADE_PLAN.md 5.5.
+const ComputerUseSidebar = dynamic(
+  () =>
+    import("@/components/ai/ComputerUseSidebar").then(
+      (m) => m.ComputerUseSidebar,
+    ),
+  { ssr: false, loading: panelLoading },
+);
 const DataLifecycleSettings = lazyPanel(
   () => import("@/components/settings/DataLifecycleSettings"),
 );
@@ -141,6 +150,7 @@ const TABS = [
   { id: "ai-preferences", label: "AI preferences", icon: <Sparkles size={14} /> },
   { id: "rag-documents", label: "RAG documents", icon: <Database size={14} /> },
   { id: "realtime", label: "Realtime", icon: <Radio size={14} /> },
+  { id: "computer-use", label: "Computer use", icon: <Cpu size={14} /> },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
   { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
@@ -313,6 +323,7 @@ export default function SettingsPage() {
         )}
         {tab === "rag-documents" && <RagDocumentsSettings />}
         {tab === "realtime" && <RealtimeStatusCard />}
+        {tab === "computer-use" && <ComputerUseSidebar />}
         {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
         {tab === "trash" && <TrashSettings onToast={showToast} />}
         {tab === "accessibility" && (

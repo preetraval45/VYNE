@@ -48,6 +48,7 @@ import { QuickActions } from "@/components/ai/QuickActions";
 import { ConversationHistory } from "@/components/ai/ConversationHistory";
 import { CitationCard } from "@/components/ai/CitationCard";
 import { VoiceInputButton } from "@/components/ai/VoiceInputButton";
+import { VoiceConversationButton } from "@/components/ai/VoiceConversationButton";
 import { AiCostMeterPill } from "@/components/ai/AiCostMeterPill";
 import {
   ImageGeneratorModal,
@@ -281,6 +282,34 @@ export default function VyneAIChatPage() {
   // the user can finish the sentence (used by Cmd+K AI Tools entries
   // that want partial prefills like "Create a deal for ").
   const searchParams = useSearchParams();
+  // 5.1 — Watch for assistant messages that finish streaming + dispatch
+  // a `vyne:ai-spoken-text` event so <VoiceConversationButton /> can
+  // speak the reply via SpeechSynthesis. Tracks last-spoken id so we
+  // don't double-fire when other state in the message updates.
+  const lastSpokenIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    const last = messages[messages.length - 1];
+    if (!last) return;
+    if (last.role !== "assistant") return;
+    if (last.streaming) return;
+    if (!last.content || last.content.length < 2) return;
+    if (lastSpokenIdRef.current === last.id) return;
+    lastSpokenIdRef.current = last.id;
+    // Strip markdown that doesn't speak well (links, code fences, headers).
+    const text = last.content
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/^#+\s+/gm, "")
+      .replace(/[*_`]/g, "")
+      .trim()
+      .slice(0, 1200);
+    if (!text) return;
+    window.dispatchEvent(
+      new CustomEvent("vyne:ai-spoken-text", { detail: { text } }),
+    );
+  }, [messages]);
+
   const prefilledQuery = searchParams?.get("q") ?? null;
   const prefilledPrompt = searchParams?.get("prompt") ?? null;
   const prefilledFiredRef = useRef(false);
@@ -1534,21 +1563,80 @@ export default function VyneAIChatPage() {
         onDrop={async (e) => {
           e.preventDefault();
           setDragOver(false);
-          const files = Array.from(e.dataTransfer.files).filter((f) =>
-            f.type.startsWith("image/"),
+          const dropped = Array.from(e.dataTransfer.files);
+
+          // Images: existing path — attach as base64 for vision.
+          const images = dropped.filter((f) => f.type.startsWith("image/"));
+          if (images.length > 0) {
+            const dataUrls = await Promise.all(
+              images.map(
+                (f) =>
+                  new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.readAsDataURL(f);
+                  }),
+              ),
+            );
+            setAttachedImages((prev) => [...prev, ...dataUrls].slice(0, 6));
+          }
+
+          // PDFs + text-y files: ingest into the RAG store via
+          // /api/ai/ingest-file. UI_UPGRADE_PLAN.md 5.6.
+          const documents = dropped.filter(
+            (f) =>
+              f.type === "application/pdf" ||
+              f.name.toLowerCase().endsWith(".pdf") ||
+              f.type.startsWith("text/") ||
+              /\.(md|txt|csv|json|xml|log|yaml|yml)$/i.test(f.name),
           );
-          if (files.length === 0) return;
-          const dataUrls = await Promise.all(
-            files.map(
-              (f) =>
-                new Promise<string>((resolve) => {
-                  const reader = new FileReader();
-                  reader.onload = () => resolve(reader.result as string);
-                  reader.readAsDataURL(f);
-                }),
-            ),
-          );
-          setAttachedImages((prev) => [...prev, ...dataUrls].slice(0, 6));
+          for (const file of documents) {
+            const toastModule = await import("react-hot-toast");
+            const toastId = toastModule.default.loading(
+              `Indexing ${file.name}…`,
+            );
+            try {
+              const form = new FormData();
+              form.append("file", file);
+              const res = await fetch("/api/ai/ingest-file", {
+                method: "POST",
+                body: form,
+              });
+              const data = (await res.json()) as {
+                ok?: boolean;
+                ref?: string;
+                created?: number;
+                chunkCount?: number;
+                error?: string;
+              };
+              if (!res.ok || !data.ok) {
+                toastModule.default.error(
+                  `Indexing failed: ${data.error ?? "unknown error"}`,
+                  { id: toastId },
+                );
+              } else {
+                toastModule.default.success(
+                  `${file.name} indexed — ${data.created}/${data.chunkCount} chunks. Ask Vyne about it.`,
+                  { id: toastId, duration: 5000 },
+                );
+                // Drop a system-style note in the message stream so the
+                // user has visible confirmation + the ref to scope to.
+                setMessages((m) => [
+                  ...m,
+                  {
+                    id: crypto.randomUUID(),
+                    role: "assistant",
+                    content: `📎 Indexed **${file.name}** as \`${data.ref}\` — ${data.created} chunks. Ask follow-up questions and I'll cite them.`,
+                  },
+                ]);
+              }
+            } catch (err) {
+              toastModule.default.error(
+                `Indexing failed: ${err instanceof Error ? err.message : "network error"}`,
+                { id: toastId },
+              );
+            }
+          }
         }}
         style={{
           position: "relative",
@@ -1744,6 +1832,15 @@ export default function VyneAIChatPage() {
           <VoiceInputButton
             disabled={pending} aria-busy={pending}
             onTranscript={(text) => setInput(text)}
+          />
+          {/* 5.1 — Continuous voice conversation: hands-free loop with
+              VAD + barge-in. Falls back to nothing on Firefox. */}
+          <VoiceConversationButton
+            disabled={pending}
+            onUserMessage={(text) => {
+              setInput(text);
+              void ask(text);
+            }}
           />
           <button
             type={pending ? "button" : "submit"}
