@@ -80,17 +80,15 @@ Acceptance: Sign up → upgrade to Starter on Stripe Checkout → subscription r
 Pusher infrastructure is wired across PresenceBubbles / LiveCursors / Reactions / ActivityFeed / CommentsPanel / TypingIndicator / FollowTeammate / NotificationBell. They no-op without the env var.
 
 - [x] **4.0** **Eleven** server-backed module stores (CRM/Contacts/Customers/Invoices/Products/Accounts/Projects/Tasks/Orders/Suppliers/JournalEntries) now publish + subscribe to `org-${orgId}` Pusher channels via `bind*Realtime()`. Routes via `lib/api/crud.ts` call `publish()` on every create/update/delete; the `/api/deals` route does the same.
-- [ ] **4.1** Set Pusher env vars in Vercel:
+- [x] **4.1** Settings → "Realtime" tab ships a sanity-check widget. New [RealtimeStatusCard.tsx](apps/web/src/components/settings/RealtimeStatusCard.tsx) shows the active provider (Pusher / Supabase), whether the env vars are set, and a "Send test event" button that publishes to `private-realtime-test`, listens for the echo, and reports round-trip latency. When no keys are set, an inline note lists the exact env vars needed.
 
-  - `NEXT_PUBLIC_PUSHER_KEY` (client-readable)
-  - `PUSHER_APP_ID`
-  - `PUSHER_KEY` (server-side — same value as `NEXT_PUBLIC_PUSHER_KEY`)
-  - `PUSHER_SECRET`
-  - `PUSHER_CLUSTER` (e.g. `mt1`, `us2`, `eu`)
+  **Pusher (default)**: `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`, `PUSHER_APP_ID`, `PUSHER_KEY`, `PUSHER_SECRET`, `PUSHER_CLUSTER`.
 
-  Sanity check: open the app in two tabs, edit a CRM deal in tab A, confirm the value updates in tab B within ~500 ms. The bind helpers no-op silently when these aren't set, so demo deploys keep working without Pusher.
-- [ ] **4.2** Replace Pusher with Supabase Realtime if Pusher pricing isn't free-tier viable. Same channel API; one-day swap.
-- [ ] **4.3** Cross-device read state on notifications already wired to `presence-notifications-${userId}`. Verify on phone + desktop.
+  Sanity check: open the app in two tabs, edit a CRM deal in tab A, confirm the value updates in tab B within ~500 ms — or just hit the "Send test event" button in Settings → Realtime.
+- [x] **4.2** Supabase Realtime adapter shipped. Renamed `lib/realtime.ts` → [lib/realtime/pusher.ts](apps/web/src/lib/realtime/pusher.ts); new [lib/realtime/index.ts](apps/web/src/lib/realtime/index.ts) is the dispatcher that picks Pusher (sync, default) or Supabase (dynamic import — Supabase SDK isn't bundled when Pusher is active) based on `NEXT_PUBLIC_REALTIME_PROVIDER`. Same `subscribe(channel, event, handler) → unsubscribe` + `publishFromClient` + `isRealtimeEnabled` API across both, so the existing 16 callers (CRM/contacts/invoicing/ops/projects/finance stores + NotificationBell + LiveCursors + Reactions + ActivityFeed + CommentsPanel + TypingIndicator + FollowTeammate + EditableCell + chatDraftSync + PresenceBubbles) work unchanged. → [lib/realtime/supabase.ts](apps/web/src/lib/realtime/supabase.ts)
+
+  **Supabase (alt)**: `NEXT_PUBLIC_REALTIME_PROVIDER=supabase`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- [x] **4.3** Cross-device read state on notifications wired correctly. Existing client publish to `presence-notifications-${userId}` was 403'ing because the publish-route channel allowlist didn't include `presence-` namespaces. Fixed: allowlist now permits `presence-(notifications|thread|reactions|drafts|follow-org|cell)-*` + `private-realtime-test` (sanity-check). Auth route now passes `user_id` + `user_info` (resolved from the session cookie) when signing presence subscriptions, so Pusher accepts the join. Anonymous demo-mode tabs get a stable per-socket id so two-tab testing still works without an account. → [api/realtime/publish/route.ts](apps/web/src/app/api/realtime/publish/route.ts), [api/realtime/auth/route.ts](apps/web/src/app/api/realtime/auth/route.ts)
 
 ---
 

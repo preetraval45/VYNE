@@ -20,6 +20,7 @@ import {
   Smartphone,
   Search,
   Database,
+  Radio,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -106,6 +107,14 @@ const RagDocumentsSettings = dynamic(
     ),
   { ssr: false, loading: panelLoading },
 );
+// RealtimeStatusCard — same pattern, no onToast.
+const RealtimeStatusCard = dynamic(
+  () =>
+    import("@/components/settings/RealtimeStatusCard").then(
+      (m) => m.RealtimeStatusCard,
+    ),
+  { ssr: false, loading: panelLoading },
+);
 const DataLifecycleSettings = lazyPanel(
   () => import("@/components/settings/DataLifecycleSettings"),
 );
@@ -131,6 +140,7 @@ const TABS = [
   { id: "search-analytics", label: "Search analytics", icon: <Search size={14} /> },
   { id: "ai-preferences", label: "AI preferences", icon: <Sparkles size={14} /> },
   { id: "rag-documents", label: "RAG documents", icon: <Database size={14} /> },
+  { id: "realtime", label: "Realtime", icon: <Radio size={14} /> },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
   { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
@@ -302,6 +312,7 @@ export default function SettingsPage() {
           <AiPreferencesSettings onToast={showToast} />
         )}
         {tab === "rag-documents" && <RagDocumentsSettings />}
+        {tab === "realtime" && <RealtimeStatusCard />}
         {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
         {tab === "trash" && <TrashSettings onToast={showToast} />}
         {tab === "accessibility" && (

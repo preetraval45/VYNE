@@ -45,7 +45,23 @@ export async function POST(req: Request) {
   }
   // Channel name allowlist — only let clients publish to namespaces we
   // expect. Stops a rogue tab from spamming arbitrary channels.
-  const allowed = /^(org|channel|deal|task|project)-[A-Za-z0-9_:.-]+$/.test(body.channel);
+  // Includes:
+  //  - `org-{id}` / `channel-{id}` / `deal-{id}` / `task-{id}` / `project-{id}` (public org-wide topics)
+  //  - `presence-notifications-{userId}` (cross-device notification read state, 13.8 / 4.3)
+  //  - `presence-thread-{subjectId}` (record comments, 12.6)
+  //  - `presence-reactions-{subjectId}` (record reactions, 12.4)
+  //  - `presence-drafts-{userId}` (chat draft sync, 28.1.10)
+  //  - `presence-follow-org` (follow-teammate, 12.3)
+  //  - `private-realtime-test` (4.1 sanity-check ping)
+  const allowed =
+    /^(org|channel|deal|task|project|account|customer|invoice|product|supplier|order|contact)-[A-Za-z0-9_:.-]+$/.test(
+      body.channel,
+    ) ||
+    /^presence-(notifications|thread|reactions|drafts|follow-org|cell)-?[A-Za-z0-9_:.-]*$/.test(
+      body.channel,
+    ) ||
+    body.channel === "presence-follow-org" ||
+    body.channel === "private-realtime-test";
   if (!allowed) {
     return NextResponse.json({ error: "channel not allowed" }, { status: 403 });
   }
