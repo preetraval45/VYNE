@@ -31,7 +31,14 @@ import {
 } from "@/lib/stores/aiMemory";
 import { useAuthStore } from "@/lib/stores/auth";
 import { parseArtifacts, streamVyneAI, type Artifact } from "@/lib/ai/streamClient";
-import { executeToolCalls, type ToolCall, type ToolResult } from "@/lib/ai/toolExecutor";
+import {
+  executeToolCalls,
+  executeToolCall,
+  splitToolCallsForApproval,
+  type ToolCall,
+  type ToolResult,
+} from "@/lib/ai/toolExecutor";
+import { PendingApprovalCard } from "@/components/ai/PendingApprovalCard";
 import { ArtifactPanel } from "@/components/ai/ArtifactPanel";
 import { QuickActions } from "@/components/ai/QuickActions";
 import { ConversationHistory } from "@/components/ai/ConversationHistory";
@@ -60,6 +67,8 @@ interface Msg {
   sources?: Array<{ title: string; url: string }>;
   /** Tool execution results (created/updated/deleted records). */
   toolResults?: ToolResult[];
+  /** Write-tool calls awaiting user approval (UI_UPGRADE_PLAN.md 5.3). */
+  pendingApprovals?: ToolCall[];
   /** True while the message is still being streamed. */
   streaming?: boolean;
 }
@@ -501,12 +510,25 @@ export default function VyneAIChatPage() {
           });
           const data = (await res.json()) as { message?: string; toolCalls?: ToolCall[] };
           const toolCalls = Array.isArray(data.toolCalls) ? data.toolCalls : [];
-          const results = toolCalls.length ? await executeToolCalls(toolCalls) : [];
-          const message = data.message ?? (results.length ? "Done." : "Nothing to do.");
+          // Split read/write: read tools (queries) run immediately;
+          // write tools (create/update/delete) need user approval.
+          const split = splitToolCallsForApproval(toolCalls);
+          const immediate = split.immediate.length
+            ? await executeToolCalls(split.immediate)
+            : [];
+          const message =
+            data.message ??
+            (immediate.length || split.pending.length ? "Done." : "Nothing to do.");
           setMessages((m) =>
             m.map((msg) =>
               msg.id === assistantId
-                ? { ...msg, content: message, toolResults: results, streaming: false }
+                ? {
+                    ...msg,
+                    content: message,
+                    toolResults: immediate,
+                    pendingApprovals: split.pending,
+                    streaming: false,
+                  }
                 : msg,
             ),
           );
@@ -2130,6 +2152,50 @@ function MessageBubble({
               {message.toolResults && message.toolResults.length > 0 && (
                 <ToolResultPills results={message.toolResults} />
               )}
+              {message.pendingApprovals &&
+                message.pendingApprovals.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    {message.pendingApprovals.map((call, i) => (
+                      <PendingApprovalCard
+                        key={`${message.id}-pa-${i}`}
+                        call={call}
+                        onApprove={async (approvedCall) => {
+                          const result = await executeToolCall(approvedCall);
+                          setMessages((ms) =>
+                            ms.map((m) =>
+                              m.id === message.id
+                                ? {
+                                    ...m,
+                                    toolResults: [
+                                      ...(m.toolResults ?? []),
+                                      result,
+                                    ],
+                                    pendingApprovals: (
+                                      m.pendingApprovals ?? []
+                                    ).filter((c) => c !== call),
+                                  }
+                                : m,
+                            ),
+                          );
+                        }}
+                        onCancel={() => {
+                          setMessages((ms) =>
+                            ms.map((m) =>
+                              m.id === message.id
+                                ? {
+                                    ...m,
+                                    pendingApprovals: (
+                                      m.pendingApprovals ?? []
+                                    ).filter((c) => c !== call),
+                                  }
+                                : m,
+                            ),
+                          );
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
             </>
           )}
         </div>

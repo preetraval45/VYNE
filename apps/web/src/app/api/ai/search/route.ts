@@ -14,6 +14,31 @@ interface SearchPayload {
     snippet?: string;
     href?: string;
   }>;
+  /** When set, the search route auto-retrieves RAG context and merges it
+   * into the corpus before the model sees it. `ref` filters the
+   * embedding store; `pathname` falls back to a derived ref. */
+  context?: {
+    pathname?: string;
+    entityKey?: string;
+    ref?: string;
+  };
+}
+
+/** Derive a RAG `ref` from the route + entity key the AI sidebar
+ * already passes. e.g. `/projects/abc` + entityKey `project:abc` →
+ * `project:abc`; `/crm` alone → `crm:*`. Returns null when no
+ * meaningful ref can be inferred (which means we skip RAG). */
+function deriveRef(
+  ctx: SearchPayload["context"] | undefined,
+): string | null {
+  if (!ctx) return null;
+  if (ctx.ref && typeof ctx.ref === "string") return ctx.ref;
+  if (ctx.entityKey && typeof ctx.entityKey === "string") return ctx.entityKey;
+  if (ctx.pathname && typeof ctx.pathname === "string") {
+    const seg = ctx.pathname.split("/").filter(Boolean)[0];
+    return seg ? `module:${seg}` : null;
+  }
+  return null;
 }
 
 interface SearchHit {
@@ -159,8 +184,58 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "query required" }, { status: 400 });
   }
 
-  const corpus =
+  // RAG augmentation: if the caller passes context, pull top embedding
+  // hits from /api/ai/retrieve and merge them into the corpus the model
+  // sees. Each RAG hit becomes a `module: "rag"` corpus entry. Failures
+  // fall through silently — search still works without embeddings.
+  const ref = deriveRef(body.context);
+  let ragHits: Array<{
+    id: string;
+    module: string;
+    title: string;
+    snippet: string;
+    href?: string;
+  }> = [];
+  if (ref) {
+    try {
+      const url = new URL(request.url);
+      const origin = `${url.protocol}//${url.host}`;
+      const r = await fetch(`${origin}/api/ai/retrieve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query,
+          k: 4,
+          // Exact-ref filter when given; otherwise rely on the embedded
+          // query alone (cross-document recall).
+          ...(ref.startsWith("module:") ? {} : { ref }),
+        }),
+      });
+      if (r.ok) {
+        const data = (await r.json()) as {
+          hits?: Array<{
+            id: string;
+            ref: string;
+            source: string;
+            text: string;
+            score: number;
+          }>;
+        };
+        ragHits = (data.hits ?? []).map((h) => ({
+          id: h.id,
+          module: "rag",
+          title: `${h.source || h.ref} (${h.score})`,
+          snippet: h.text.slice(0, 280),
+        }));
+      }
+    } catch {
+      /* RAG offline / not configured — skip silently */
+    }
+  }
+
+  const baseCorpus =
     body.corpus && body.corpus.length > 0 ? body.corpus : DEMO_CORPUS;
+  const corpus = [...ragHits, ...baseCorpus];
   const userPrompt = `User asked: "${query}"\n\nCorpus:\n${corpus
     .map(
       (c, i) =>

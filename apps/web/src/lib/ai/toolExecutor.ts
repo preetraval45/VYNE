@@ -531,3 +531,135 @@ export async function executeToolCalls(calls: ToolCall[]): Promise<ToolResult[]>
   }
   return out;
 }
+
+// ─── Approval gate (UI_UPGRADE_PLAN.md 5.3) ────────────────────────
+// Read tools (queryDeals/queryTasks/queryInvoices/queryContacts/queryProducts)
+// run inline because they're idempotent. Every other tool mutates state,
+// so we route it through a "preview → approve" UI step. The chat layer
+// uses splitToolCallsForApproval() to bucket calls, runs read tools
+// immediately, and renders pending-approval cards for the writes.
+
+const READ_TOOLS = new Set([
+  "queryDeals",
+  "queryTasks",
+  "queryInvoices",
+  "queryContacts",
+  "queryProducts",
+]);
+
+export function isReadTool(toolName: string): boolean {
+  return READ_TOOLS.has(toolName);
+}
+
+export function isWriteTool(toolName: string): boolean {
+  return !READ_TOOLS.has(toolName);
+}
+
+export interface ApprovalSplit {
+  /** Read tools — safe to execute immediately. */
+  immediate: ToolCall[];
+  /** Write tools — render approval card; user approves to run. */
+  pending: ToolCall[];
+}
+
+/** Bucket a list of tool calls into immediate-run + needs-approval. */
+export function splitToolCallsForApproval(calls: ToolCall[]): ApprovalSplit {
+  const immediate: ToolCall[] = [];
+  const pending: ToolCall[] = [];
+  for (const c of calls) {
+    if (isReadTool(c.tool)) immediate.push(c);
+    else pending.push(c);
+  }
+  return { immediate, pending };
+}
+
+/** Render-friendly summary of what a write call will do. The chat UI
+ * uses this for the approval card title + description. */
+export function describeWriteCall(call: ToolCall): {
+  title: string;
+  detail: string;
+} {
+  const a = call.args;
+  const t = call.tool;
+  switch (t) {
+    case "createDeal":
+      return {
+        title: `Create deal — ${asString(a.company, "(no company)")}`,
+        detail: `${asString(a.stage, "Lead")} · $${asNumber(a.value).toLocaleString()}`,
+      };
+    case "updateDeal":
+      return {
+        title: `Update deal ${asString(a.id, "?")}`,
+        detail: Object.keys(a)
+          .filter((k) => k !== "id")
+          .map((k) => `${k}=${String(a[k]).slice(0, 40)}`)
+          .join(", "),
+      };
+    case "deleteDeal":
+      return {
+        title: `Delete deal ${asString(a.id, "?")}`,
+        detail: "irreversible",
+      };
+    case "createTask":
+      return {
+        title: `Create task — ${asString(a.title, "(no title)")}`,
+        detail: `${asString(a.status, "todo")} · ${asString(a.priority, "medium")}`,
+      };
+    case "updateTask":
+      return {
+        title: `Update task ${asString(a.id, "?")}`,
+        detail: Object.keys(a)
+          .filter((k) => k !== "id")
+          .slice(0, 4)
+          .map((k) => `${k}=${String(a[k]).slice(0, 40)}`)
+          .join(", "),
+      };
+    case "deleteTask":
+      return {
+        title: `Delete task ${asString(a.id, "?")}`,
+        detail: "irreversible",
+      };
+    case "createContact":
+      return {
+        title: `Create contact — ${asString(a.name, "(no name)")}`,
+        detail: asString(a.email, "—"),
+      };
+    case "updateContact":
+      return {
+        title: `Update contact ${asString(a.id, "?")}`,
+        detail: Object.keys(a)
+          .filter((k) => k !== "id")
+          .slice(0, 4)
+          .map((k) => `${k}=${String(a[k]).slice(0, 40)}`)
+          .join(", "),
+      };
+    case "createProduct":
+      return {
+        title: `Create product — ${asString(a.name, "(no name)")}`,
+        detail: `SKU ${asString(a.sku, "—")} · $${asNumber(a.price).toLocaleString()}`,
+      };
+    case "createInvoice":
+      return {
+        title: `Create invoice — ${asString(a.customer, "(no customer)")}`,
+        detail: `$${asNumber(a.amount).toLocaleString()}`,
+      };
+    case "createSupplier":
+      return {
+        title: `Create supplier — ${asString(a.name, "(no name)")}`,
+        detail: asString(a.category, "—"),
+      };
+    case "createWorkOrder":
+      return {
+        title: `Create work order — ${asString(a.description, "(no description)")}`,
+        detail: `qty ${asNumber(a.quantity).toLocaleString()}`,
+      };
+    default:
+      return {
+        title: t,
+        detail: Object.keys(a)
+          .slice(0, 3)
+          .map((k) => `${k}=${String(a[k]).slice(0, 40)}`)
+          .join(", "),
+      };
+  }
+}

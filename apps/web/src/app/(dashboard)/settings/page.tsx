@@ -19,6 +19,7 @@ import {
   BarChart3,
   Smartphone,
   Search,
+  Database,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -97,6 +98,14 @@ const MobileSettings = lazyPanel(
 const AiPreferencesSettings = lazyPanel(
   () => import("@/components/settings/AiPreferencesSettings"),
 );
+// RagDocumentsSettings doesn't take onToast — use react-hot-toast directly.
+const RagDocumentsSettings = dynamic(
+  () =>
+    import("@/components/settings/RagDocumentsSettings").then(
+      (m) => m.RagDocumentsSettings,
+    ),
+  { ssr: false, loading: panelLoading },
+);
 const DataLifecycleSettings = lazyPanel(
   () => import("@/components/settings/DataLifecycleSettings"),
 );
@@ -121,6 +130,7 @@ const TABS = [
   { id: "analytics", label: "Analytics", icon: <BarChart3 size={14} /> },
   { id: "search-analytics", label: "Search analytics", icon: <Search size={14} /> },
   { id: "ai-preferences", label: "AI preferences", icon: <Sparkles size={14} /> },
+  { id: "rag-documents", label: "RAG documents", icon: <Database size={14} /> },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
   { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
@@ -291,6 +301,7 @@ export default function SettingsPage() {
         {tab === "ai-preferences" && (
           <AiPreferencesSettings onToast={showToast} />
         )}
+        {tab === "rag-documents" && <RagDocumentsSettings />}
         {tab === "data" && <DataLifecycleSettings onToast={showToast} />}
         {tab === "trash" && <TrashSettings onToast={showToast} />}
         {tab === "accessibility" && (
