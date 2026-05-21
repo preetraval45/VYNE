@@ -39,6 +39,7 @@ import {
   PanelLeftClose,
   Calendar as CalendarIcon,
   Sparkles,
+  Truck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
@@ -384,6 +385,17 @@ const NAV_ITEMS: NavItemDef[] = [
   },
   // /maintenance is demo-only and overlaps with /ops work-orders — hidden
   // from nav but route remains live.
+  {
+    icon: Truck,
+    label: "Field Service",
+    href: "/field-service",
+    color: "#0E7490",
+    subs: [
+      { label: "Schedule", href: "/field-service" },
+      { label: "Unassigned", href: "/field-service?view=fs-builtin-unassigned" },
+      { label: "Urgent", href: "/field-service?view=fs-builtin-urgent" },
+    ],
+  },
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
   { icon: Clock, label: "Timesheet", href: "/timesheet", color: "#0E9F6E" },
   { icon: Activity, label: "Activity", href: "/activity", color: "#F59E0B" },

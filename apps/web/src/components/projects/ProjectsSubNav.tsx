@@ -8,10 +8,11 @@ import { usePathname } from "next/navigation";
  * Renders: Projects · Tasks · Sub Tasks · Teams
  */
 const TABS: Array<{ label: string; href: string; match: RegExp }> = [
-  { label: "Projects", href: "/projects", match: /^\/projects(\/|$)(?!tasks|subtasks|teams)/ },
+  { label: "Projects", href: "/projects", match: /^\/projects(\/|$)(?!tasks|subtasks|teams|timeline)/ },
   { label: "Tasks", href: "/projects/tasks", match: /^\/projects\/tasks(\/|$)/ },
   { label: "Sub Tasks", href: "/projects/subtasks", match: /^\/projects\/subtasks(\/|$)/ },
   { label: "Teams", href: "/projects/teams", match: /^\/projects\/teams(\/|$)/ },
+  { label: "Timeline", href: "/projects/timeline", match: /^\/projects\/timeline(\/|$)/ },
 ];
 
 export function ProjectsSubNav() {

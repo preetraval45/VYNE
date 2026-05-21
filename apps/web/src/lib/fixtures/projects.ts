@@ -108,6 +108,17 @@ export interface ProjectDetail {
   updatedAt: string;
 }
 
+/** Predecessor → successor link rendered as arrows in the Gantt view. */
+export type TaskDependencyType = "FS" | "SS" | "FF" | "SF";
+export interface TaskDependency {
+  id: string;
+  fromTaskId: string;
+  toTaskId: string;
+  type: TaskDependencyType;
+  lagDays?: number;
+  createdAt: string;
+}
+
 export interface SubtaskInput {
   title: string;
   done?: boolean;

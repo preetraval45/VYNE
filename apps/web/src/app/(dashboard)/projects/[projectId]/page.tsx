@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, use } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import {
@@ -71,7 +71,8 @@ function toneFromColor(hex: string): Tone {
 }
 import toast from "react-hot-toast";
 import { CalendarView } from "@/components/shared/CalendarView";
-import { GanttChart } from "@/components/shared/GanttChart";
+import { GanttBoard, type GanttRow, type GanttGroupBy, type GanttZoom } from "@/components/shared/gantt";
+import { optimisticAction } from "@/lib/optimistic";
 
 // ─── Constants ──────────────────────────────────────────────────────
 
@@ -755,7 +756,11 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         )}
         {viewMode === "gantt" && (
           <div style={{ padding: 20 }}>
-            <TaskGanttView tasks={filteredTasks} />
+            <TaskGanttView
+              tasks={filteredTasks}
+              projectId={projectId}
+              onTaskClick={openTask}
+            />
           </div>
         )}
       </div>
@@ -1256,37 +1261,161 @@ function TaskCalendarView({
   return <CalendarView events={events} title="Task calendar" />;
 }
 
-function TaskGanttView({ tasks }: { tasks: Task[] }) {
-  const rows = useMemo(
-    () =>
-      tasks
-        .filter((t) => t.createdAt)
-        .map((t) => ({
-          id: t.id,
-          label: t.title,
-          start: t.createdAt,
-          end:
-            t.dueDate ??
-            new Date(
-              new Date(t.createdAt).getTime() + 7 * 86_400_000,
-            ).toISOString(),
-          color:
-            t.priority === "urgent"
-              ? "#EF4444"
-              : t.priority === "high"
-                ? "#F59E0B"
-                : t.status === "done"
-                  ? "#22C55E"
-                  : "var(--vyne-accent, #06B6D4)",
-          progress:
-            t.status === "done"
-              ? 1
-              : t.status === "in_progress" || t.status === "in_review"
-                ? 0.55
-                : 0.1,
-          meta: `${t.status}${t.priority ? ` · ${t.priority}` : ""}`,
-        })),
-    [tasks],
+// ─── Gantt prefs persistence ───────────────────────────────────────
+interface GanttPrefs {
+  zoom: GanttZoom;
+  groupBy: GanttGroupBy;
+  showWeekends: boolean;
+  showCriticalPath: boolean;
+}
+const DEFAULT_GANTT_PREFS: GanttPrefs = {
+  zoom: "week",
+  groupBy: "none",
+  showWeekends: true,
+  showCriticalPath: false,
+};
+function loadGanttPrefs(projectId: string): GanttPrefs {
+  if (typeof window === "undefined") return DEFAULT_GANTT_PREFS;
+  try {
+    const raw = window.localStorage.getItem(`vyne-gantt-pref:project:${projectId}`);
+    if (!raw) return DEFAULT_GANTT_PREFS;
+    const parsed = JSON.parse(raw) as Partial<GanttPrefs>;
+    return { ...DEFAULT_GANTT_PREFS, ...parsed };
+  } catch {
+    return DEFAULT_GANTT_PREFS;
+  }
+}
+function saveGanttPrefs(projectId: string, prefs: GanttPrefs) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      `vyne-gantt-pref:project:${projectId}`,
+      JSON.stringify(prefs),
+    );
+  } catch {
+    // localStorage full / blocked — silently skip.
+  }
+}
+
+function TaskGanttView({
+  tasks,
+  projectId,
+  onTaskClick,
+}: {
+  tasks: Task[];
+  projectId: string;
+  onTaskClick: (id: string) => void;
+}) {
+  const updateTask = useProjectsStore((s) => s.updateTask);
+  const addDependency = useProjectsStore((s) => s.addDependency);
+  const allDependencies = useProjectsStore((s) => s.taskDependencies);
+
+  const [prefs, setPrefs] = useState<GanttPrefs>(() => loadGanttPrefs(projectId));
+  const setPref = useCallback(
+    <K extends keyof GanttPrefs>(key: K, value: GanttPrefs[K]) => {
+      setPrefs((prev) => {
+        const next = { ...prev, [key]: value };
+        saveGanttPrefs(projectId, next);
+        return next;
+      });
+    },
+    [projectId],
+  );
+
+  // Index for fast parent → subtask lookup. Subtasks render as
+  // synthetic child rows under each parent task so the engine's
+  // `parentId` indent + click-through still work.
+  const rows = useMemo<GanttRow[]>(() => {
+    const out: GanttRow[] = [];
+    for (const t of tasks) {
+      const start = t.startDate ?? t.createdAt;
+      const end =
+        t.dueDate ??
+        (start
+          ? new Date(new Date(start).getTime() + 7 * 86_400_000).toISOString()
+          : new Date().toISOString());
+      if (!start) continue;
+      out.push({
+        id: t.id,
+        label: t.title,
+        start,
+        end,
+        status: t.status,
+        priority: t.priority,
+        assigneeIds: t.assigneeId ? [t.assigneeId] : [],
+        groupId: t.assigneeId ?? t.status ?? "default",
+        progress:
+          t.status === "done"
+            ? 1
+            : t.status === "in_progress" || t.status === "in_review"
+              ? 0.55
+              : 0.1,
+        meta: `${t.status}${t.priority ? ` · ${t.priority}` : ""}`,
+      });
+      // Indented subtask children — only those with a real dueDate so we
+      // don't fabricate timeline slots out of thin air.
+      for (const s of t.subtasks) {
+        if (!s.dueDate && !s.startDate) continue;
+        const sStart = s.startDate ?? s.dueDate ?? start;
+        const sEnd = s.dueDate ?? sStart;
+        out.push({
+          id: `${t.id}::${s.id}`,
+          parentId: t.id,
+          label: s.title,
+          start: sStart,
+          end: sEnd,
+          status: s.done ? "done" : "todo",
+          priority: s.priority ?? "low",
+          progress: s.done ? 1 : 0,
+          meta: s.done ? "subtask · done" : "subtask",
+        });
+      }
+    }
+    return out;
+  }, [tasks]);
+
+  // Filter dependencies down to the visible rows (cross-project edges
+  // never render in the per-project view).
+  const dependencies = useMemo(() => {
+    const visible = new Set(rows.map((r) => r.id));
+    return allDependencies.filter(
+      (d) => visible.has(d.fromTaskId) && visible.has(d.toTaskId),
+    );
+  }, [allDependencies, rows]);
+
+  const handleReschedule = useCallback(
+    (id: string, start: string, end: string) => {
+      // Subtask rows use the synthetic "<taskId>::<subtaskId>" key — skip
+      // remote mirror for those until subtask drag wires through the
+      // store's `updateSubtask` action.
+      if (id.includes("::")) return;
+      const original = tasks.find((t) => t.id === id);
+      if (!original) return;
+      const prevStart = original.startDate ?? original.createdAt;
+      const prevEnd = original.dueDate;
+      void optimisticAction({
+        apply: () => updateTask(id, { startDate: start, dueDate: end }),
+        rollback: () =>
+          updateTask(id, { startDate: prevStart, dueDate: prevEnd ?? null }),
+        successMessage: "Task rescheduled",
+        silent: true,
+      });
+    },
+    [tasks, updateTask],
+  );
+
+  const handleResize = handleReschedule;
+
+  const handleLink = useCallback(
+    (fromId: string, toId: string) => {
+      if (fromId.includes("::") || toId.includes("::")) {
+        toast.error("Link subtasks via their parent task.");
+        return;
+      }
+      const created = addDependency(fromId, toId, "FS");
+      if (created) toast.success("Dependency linked");
+    },
+    [addDependency],
   );
 
   if (rows.length === 0) {
@@ -1306,7 +1435,156 @@ function TaskGanttView({ tasks }: { tasks: Task[] }) {
     );
   }
 
-  return <GanttChart rows={rows} title="Sprint timeline" />;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <GanttToolbar prefs={prefs} setPref={setPref} />
+      <GanttBoard
+        rows={rows}
+        dependencies={dependencies.map((d) => ({
+          fromId: d.fromTaskId,
+          toId: d.toTaskId,
+          type: d.type,
+        }))}
+        zoom={prefs.zoom}
+        groupBy={prefs.groupBy}
+        showWeekends={prefs.showWeekends}
+        showCriticalPath={prefs.showCriticalPath}
+        title="Sprint timeline"
+        onRescheduleRow={handleReschedule}
+        onResizeRow={handleResize}
+        onLinkDependency={handleLink}
+        onRowClick={(id) => {
+          // Subtask rows are synthetic; click-through opens the parent.
+          const parentId = id.includes("::") ? id.split("::")[0] : id;
+          onTaskClick(parentId);
+        }}
+      />
+    </div>
+  );
+}
+
+function GanttToolbar({
+  prefs,
+  setPref,
+}: {
+  prefs: GanttPrefs;
+  setPref: <K extends keyof GanttPrefs>(key: K, value: GanttPrefs[K]) => void;
+}) {
+  const select: React.CSSProperties = {
+    padding: "4px 8px",
+    borderRadius: 6,
+    border: "1px solid var(--content-border)",
+    background: "var(--content-bg)",
+    color: "var(--text-primary)",
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: "pointer",
+    outline: "none",
+  };
+  return (
+    <div
+      data-vyne-gantt-toolbar
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 16,
+        padding: "8px 12px",
+        borderRadius: 8,
+        border: "1px solid var(--content-border)",
+        background: "var(--content-secondary)",
+      }}
+    >
+      <ZoomSegmented value={prefs.zoom} onChange={(z) => setPref("zoom", z)} />
+
+      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+        <Layers size={12} aria-hidden="true" />
+        Group by
+        <select
+          aria-label="Group by"
+          value={prefs.groupBy}
+          onChange={(e) => setPref("groupBy", e.target.value as GanttGroupBy)}
+          style={select}
+        >
+          <option value="none">None</option>
+          <option value="assignee">Assignee</option>
+          <option value="status">Status</option>
+          <option value="priority">Priority</option>
+        </select>
+      </label>
+
+      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+        <input
+          type="checkbox"
+          checked={prefs.showWeekends}
+          onChange={(e) => setPref("showWeekends", e.target.checked)}
+        />
+        Show weekends
+      </label>
+
+      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+        <input
+          type="checkbox"
+          checked={prefs.showCriticalPath}
+          onChange={(e) => setPref("showCriticalPath", e.target.checked)}
+        />
+        Critical path
+      </label>
+    </div>
+  );
+}
+
+function ZoomSegmented({
+  value,
+  onChange,
+}: {
+  value: GanttZoom;
+  onChange: (z: GanttZoom) => void;
+}) {
+  const options: { value: GanttZoom; label: string }[] = [
+    { value: "day", label: "Day" },
+    { value: "week", label: "Week" },
+    { value: "month", label: "Month" },
+    { value: "quarter", label: "Quarter" },
+  ];
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Zoom"
+      style={{
+        display: "inline-flex",
+        padding: 2,
+        borderRadius: 6,
+        border: "1px solid var(--content-border)",
+        background: "var(--content-bg)",
+      }}
+    >
+      {options.map((o) => {
+        const selected = o.value === value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(o.value)}
+            style={{
+              padding: "4px 10px",
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 4,
+              border: "none",
+              background: selected ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+              color: selected ? "#fff" : "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 function BoardColumn({

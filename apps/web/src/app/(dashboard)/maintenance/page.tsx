@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Wrench,
@@ -15,10 +15,17 @@ import {
   Calendar,
   ClipboardList,
   Settings2,
+  GanttChart as GanttIcon,
 } from "lucide-react";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
+import {
+  GanttBoard,
+  type GanttRow,
+  type GanttZoom,
+  type GanttGroupBy,
+} from "@/components/shared/gantt";
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Types
@@ -29,7 +36,8 @@ type MaintenanceTab =
   | "requests"
   | "preventive"
   | "workorders"
-  | "parts";
+  | "parts"
+  | "timeline";
 
 type EquipmentCategory =
   | "HVAC"
@@ -1777,6 +1785,305 @@ function PartsTab() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Timeline Tab (Phase 4a — Gantt adapter for Maintenance)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const WO_STATUS_COLOR: Record<WOStatus, string> = {
+  Scheduled: "#3B82F6",
+  "In Progress": "#F59E0B",
+  Completed: "#22C55E",
+  "On Hold": "#A1A1AA",
+};
+
+const REQUEST_PRIORITY_COLOR: Record<RequestPriority, string> = {
+  Low: "#22C55E",
+  Medium: "#F59E0B",
+  High: "#EF4444",
+  Critical: "#991B1B",
+};
+
+const PM_FREQUENCY_COLOR: Record<PMFrequency, string> = {
+  Daily: "#EF4444",
+  Weekly: "#F59E0B",
+  Monthly: "#3B82F6",
+  Quarterly: "#8B5CF6",
+  Yearly: "#22C55E",
+};
+
+type MaintenanceTimelineFilter = "all" | "workorders" | "requests" | "preventive";
+
+function MaintenanceTimelineTab() {
+  const [zoom, setZoom] = useState<GanttZoom>("week");
+  const [groupBy, setGroupBy] = useState<GanttGroupBy>("custom");
+  const [sourceFilter, setSourceFilter] = useState<MaintenanceTimelineFilter>("all");
+  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [showWeekends, setShowWeekends] = useState(true);
+
+  const rows = useMemo<GanttRow[]>(() => {
+    const out: GanttRow[] = [];
+
+    if (sourceFilter === "all" || sourceFilter === "workorders") {
+      for (const wo of MOCK_WORK_ORDERS) {
+        if (!wo.startDate || wo.startDate === "—") continue;
+        const startIso = `${wo.startDate}T00:00:00.000Z`;
+        const endRaw = wo.endDate && wo.endDate !== "—" ? wo.endDate : wo.startDate;
+        const endIso = `${endRaw}T00:00:00.000Z`;
+        out.push({
+          id: wo.id,
+          label: `${wo.woNumber} · ${wo.description.slice(0, 48)}`,
+          start: startIso,
+          end: endIso,
+          groupId: wo.equipment,
+          color: WO_STATUS_COLOR[wo.status],
+          status: wo.status,
+          progress:
+            wo.status === "Completed"
+              ? 1
+              : wo.status === "In Progress"
+                ? 0.55
+                : wo.status === "On Hold"
+                  ? 0.3
+                  : 0.1,
+          meta: `work order · ${wo.status} · ${wo.assignedTo}`,
+        });
+      }
+    }
+
+    if (sourceFilter === "all" || sourceFilter === "requests") {
+      for (const r of MOCK_REQUESTS) {
+        if (!r.created || !r.deadline) continue;
+        out.push({
+          id: r.id,
+          label: `${r.requestNumber} · ${r.equipment}`,
+          start: `${r.created}T00:00:00.000Z`,
+          end: `${r.deadline}T00:00:00.000Z`,
+          groupId: r.equipment,
+          color: REQUEST_PRIORITY_COLOR[r.priority],
+          status: r.status,
+          priority:
+            r.priority === "Critical"
+              ? "urgent"
+              : r.priority === "High"
+                ? "high"
+                : r.priority === "Medium"
+                  ? "medium"
+                  : "low",
+          progress:
+            r.status === "Done"
+              ? 1
+              : r.status === "In Progress"
+                ? 0.55
+                : r.status === "Cancelled"
+                  ? 0
+                  : 0.1,
+          meta: `request · ${r.type} · ${r.priority} · ${r.assignedTo}`,
+        });
+      }
+    }
+
+    if (sourceFilter === "all" || sourceFilter === "preventive") {
+      for (const p of MOCK_PM_PLANS) {
+        if (!p.nextRun) continue;
+        const at = `${p.nextRun}T00:00:00.000Z`;
+        out.push({
+          id: p.id,
+          label: `PM · ${p.planName}`,
+          start: at,
+          end: at,
+          groupId: p.equipment,
+          color: PM_FREQUENCY_COLOR[p.frequency],
+          milestone: true,
+          status: p.status,
+          meta: `preventive · ${p.frequency} · ${p.assignedTeam}`,
+        });
+      }
+    }
+
+    return out;
+  }, [sourceFilter]);
+
+  // ── Asset-keyed dependency placeholder: same-equipment work orders
+  //    chain by start date so the critical-path math has edges to walk.
+  const dependencies = useMemo(() => {
+    const byEquip = new Map<string, GanttRow[]>();
+    for (const r of rows) {
+      if (!r.groupId) continue;
+      if (!byEquip.has(r.groupId)) byEquip.set(r.groupId, []);
+      byEquip.get(r.groupId)!.push(r);
+    }
+    const deps: { fromId: string; toId: string; type?: "FS" }[] = [];
+    for (const groupRows of byEquip.values()) {
+      const sorted = [...groupRows].sort(
+        (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
+      );
+      for (let i = 1; i < sorted.length; i++) {
+        deps.push({ fromId: sorted[i - 1].id, toId: sorted[i].id, type: "FS" });
+      }
+    }
+    return deps;
+  }, [rows]);
+
+  const groupLabel = useCallback(
+    (groupId: string): string => groupId,
+    [],
+  );
+
+  const tabBtn = (id: MaintenanceTimelineFilter, label: string) => (
+    <button
+      key={id}
+      type="button"
+      onClick={() => setSourceFilter(id)}
+      aria-pressed={sourceFilter === id}
+      style={{
+        padding: "5px 11px",
+        borderRadius: 6,
+        border: `1px solid ${sourceFilter === id ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
+        background: sourceFilter === id ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-bg)",
+        color: sourceFilter === id ? "#fff" : "var(--text-secondary)",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer",
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 14,
+          padding: "10px 14px",
+          borderRadius: 10,
+          border: "1px solid var(--content-border)",
+          background: "var(--content-secondary)",
+        }}
+      >
+        <div style={{ display: "inline-flex", gap: 6 }}>
+          {tabBtn("all", "All")}
+          {tabBtn("workorders", "Work orders")}
+          {tabBtn("requests", "Requests")}
+          {tabBtn("preventive", "PM plans")}
+        </div>
+
+        <div
+          role="radiogroup"
+          aria-label="Zoom"
+          style={{
+            display: "inline-flex",
+            padding: 2,
+            borderRadius: 6,
+            border: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+          }}
+        >
+          {(["day", "week", "month", "quarter"] as GanttZoom[]).map((z) => (
+            <button
+              key={z}
+              type="button"
+              role="radio"
+              aria-checked={z === zoom}
+              onClick={() => setZoom(z)}
+              style={{
+                padding: "4px 10px",
+                fontSize: 12,
+                fontWeight: 600,
+                borderRadius: 4,
+                border: "none",
+                background: z === zoom ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+                color: z === zoom ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {z}
+            </button>
+          ))}
+        </div>
+
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+          Group by
+          <select
+            aria-label="Group by"
+            value={groupBy}
+            onChange={(e) => setGroupBy(e.target.value as GanttGroupBy)}
+            style={{
+              padding: "4px 8px",
+              borderRadius: 6,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-bg)",
+              color: "var(--text-primary)",
+              fontSize: 12,
+              fontWeight: 500,
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="custom">Asset</option>
+            <option value="status">Status</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+          <input
+            type="checkbox"
+            checked={showWeekends}
+            onChange={(e) => setShowWeekends(e.target.checked)}
+          />
+          Show weekends
+        </label>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+          <input
+            type="checkbox"
+            checked={showCriticalPath}
+            onChange={(e) => setShowCriticalPath(e.target.checked)}
+          />
+          Critical path
+        </label>
+
+        <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-tertiary)" }}>
+          {rows.length} item{rows.length === 1 ? "" : "s"} · {new Set(rows.map((r) => r.groupId).filter(Boolean)).size} asset
+          {new Set(rows.map((r) => r.groupId).filter(Boolean)).size === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      {rows.length === 0 ? (
+        <div
+          style={{
+            padding: 40,
+            textAlign: "center",
+            color: "var(--text-tertiary)",
+            fontSize: 13,
+            border: "1px dashed var(--content-border)",
+            borderRadius: 12,
+          }}
+        >
+          No maintenance items match this filter yet.
+        </div>
+      ) : (
+        <GanttBoard
+          rows={rows}
+          dependencies={dependencies}
+          groupBy={groupBy}
+          groupLabel={groupLabel}
+          zoom={zoom}
+          showWeekends={showWeekends}
+          showCriticalPath={showCriticalPath}
+          title="Maintenance schedule"
+          readOnly
+        />
+      )}
+    </div>
+  );
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Main page component
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1822,6 +2129,13 @@ export default function MaintenancePage() {
       icon: <AlertTriangle size={14} />,
       action: () => setActiveTab("requests"),
       keywords: "late escalation",
+    },
+    {
+      id: "mtn-timeline",
+      label: "Maintenance timeline",
+      icon: <GanttIcon size={14} />,
+      action: () => setActiveTab("timeline"),
+      keywords: "gantt schedule plan",
     },
   ]);
 
@@ -1922,6 +2236,12 @@ export default function MaintenancePage() {
             onClick={() => setActiveTab("parts")}
             icon={<Package size={13} />}
           />
+          <TabBtn
+            label="Timeline"
+            active={activeTab === "timeline"}
+            onClick={() => setActiveTab("timeline")}
+            icon={<GanttIcon size={13} />}
+          />
         </div>
 
         {/* ── Tab Content ───────────────────────────── */}
@@ -1930,6 +2250,7 @@ export default function MaintenancePage() {
         {activeTab === "preventive" && <PreventiveTab />}
         {activeTab === "workorders" && <WorkOrdersTab />}
         {activeTab === "parts" && <PartsTab />}
+        {activeTab === "timeline" && <MaintenanceTimelineTab />}
       </div>
     </div>
   );

@@ -22,8 +22,13 @@ export function useAiSuggestedPrompts(
   const pathname = usePathname() ?? "";
   return useMemo(() => {
     if (override && override.length > 0) return override;
-    const seg = pathname.split("/").filter(Boolean)[0] ?? "";
-    return MODULE_PROMPTS[seg] ?? GENERIC_PROMPTS;
+    const segs = pathname.split("/").filter(Boolean);
+    // Try the second segment first so nested routes (`/projects/timeline`)
+    // pick up their own entry before falling back to the parent module.
+    if (segs.length >= 2 && MODULE_PROMPTS[segs[1]]) {
+      return MODULE_PROMPTS[segs[1]];
+    }
+    return MODULE_PROMPTS[segs[0] ?? ""] ?? GENERIC_PROMPTS;
   }, [pathname, override]);
 }
 
@@ -56,6 +61,18 @@ const MODULE_PROMPTS: Record<string, AskAiSuggestion[]> = {
     { label: "Sprint plan suggestion", prompt: "Suggest a balanced sprint from my open tasks across all projects, packed to ~30 hours per teammate." },
     { label: "At-risk projects", prompt: "Which projects have the most overdue tasks or stalled progress? Tell me what's blocking each one." },
     { label: "Velocity last 4 sprints", prompt: "Show velocity for the last 4 sprints and call out trends." },
+  ],
+  timeline: [
+    { label: "What's at risk this week?", prompt: "Across all projects, which tasks are at risk of slipping this week? Surface overdue, near-due, and dependencies that block others." },
+    { label: "Who is over-allocated?", prompt: "Which teammates have more than 40 hours of estimated work due in the next 14 days? Suggest who to reassign and to whom." },
+    { label: "Reschedule slipped tasks", prompt: "Find tasks that have slipped past their due date and propose realistic new dates that respect dependencies." },
+    { label: "Summarise critical path", prompt: "Walk me through the current critical-path tasks across all active projects and what's blocking each." },
+  ],
+  "field-service": [
+    { label: "Today's dispatch plan", prompt: "Walk me through today's field-service schedule by technician. Flag any over-booked techs and unassigned urgent jobs." },
+    { label: "Best tech for each unassigned job", prompt: "For every unassigned job in the queue, suggest the best technician based on region, skill, and current load." },
+    { label: "Route-optimize a tech's day", prompt: "Pick the most-booked technician today and propose a route-optimized order of their stops." },
+    { label: "Capacity next 7 days", prompt: "Show booked vs available hours per technician for the next 7 days and call out anyone above 90% capacity." },
   ],
   invoicing: [
     { label: "Overdue invoices", prompt: "List overdue invoices, sorted by days late × amount, and suggest a dunning step for each." },

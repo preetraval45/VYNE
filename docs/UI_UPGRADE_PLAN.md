@@ -219,6 +219,14 @@ These were on prior plans and shipped or aren't worth doing:
 
 ---
 
+## Launch (operator-side, post-code)
+
+Every plan item is on production. The remaining work to actually launch is configuration, DNS, and marketing — all documented:
+
+- [docs/LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) — env vars (Stripe / Pusher / Sentry / Resend / VAPID / LiveKit / OpenAI / Anthropic / Cron / Backup), DNS, pre-launch verification, and the first 48h monitoring runbook.
+- [scripts/setup-env.mjs](../scripts/setup-env.mjs) — interactive Node helper that walks every env var the checklist needs, prints the source URL for each, and pipes the answer to `vercel env add`. Run from repo root with `node scripts/setup-env.mjs`.
+- [docs/marketing/](marketing/) — six launch artifacts: press release, cold-outreach template, X/Twitter thread, Product Hunt listing, Show HN submission, and an hour-by-hour launch-day script. See [marketing/README.md](marketing/README.md) for the sequence.
+
 ## Reference
 
 - Shipped log + file pointers: `~/.claude/projects/.../memory/project_shipped_features.md`

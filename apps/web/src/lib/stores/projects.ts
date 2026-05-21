@@ -9,6 +9,8 @@ import {
   type Task,
   type Subtask,
   type TaskComment,
+  type TaskDependency,
+  type TaskDependencyType,
   type TaskStatus,
   type TaskPriority,
   type TeamMember,
@@ -107,12 +109,27 @@ function mirrorTaskDelete(id: string) {
   }).catch(() => {});
 }
 
+function mirrorDependencyCreate(d: TaskDependency) {
+  void fetch("/api/task-dependencies", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(d),
+  }).catch(() => {});
+}
+function mirrorDependencyDelete(id: string) {
+  void fetch(`/api/task-dependencies/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  }).catch(() => {});
+}
+
 // Re-export types the pages need
 export type {
   ProjectDetail,
   Task,
   Subtask,
   TaskComment,
+  TaskDependency,
+  TaskDependencyType,
   TaskStatus,
   TaskPriority,
   TeamMember,
@@ -124,6 +141,7 @@ interface ProjectsState {
   projects: ProjectDetail[];
   tasks: Task[];
   teamMembers: TeamMember[];
+  taskDependencies: TaskDependency[];
   projectsHydrated: boolean;
   tasksHydrated: boolean;
 
@@ -168,6 +186,15 @@ interface ProjectsState {
     projectId: string,
     updates: { id: string; status: TaskStatus; order: number }[],
   ) => void;
+
+  // ── Dependency ops (Gantt Phase 2) ────────────────────────────
+  addDependency: (
+    fromTaskId: string,
+    toTaskId: string,
+    type?: TaskDependencyType,
+  ) => TaskDependency | null;
+  removeDependency: (id: string) => void;
+  hydrateDependenciesFromServer: () => Promise<void>;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -188,6 +215,7 @@ export const useProjectsStore = create<ProjectsState>()(
       projects: seedOrEmpty(DEMO_PROJECT_DETAILS),
       tasks: seedOrEmpty(DEMO_TASKS),
       teamMembers: seedOrEmpty(TEAM_MEMBERS),
+      taskDependencies: [],
       projectsHydrated: false,
       tasksHydrated: false,
 
@@ -393,6 +421,47 @@ export const useProjectsStore = create<ProjectsState>()(
           ),
         })),
 
+      // ── Dependency ops (Gantt Phase 2) ────────────────────────
+      addDependency: (fromTaskId, toTaskId, type = "FS") => {
+        if (fromTaskId === toTaskId) return null;
+        const exists = get().taskDependencies.some(
+          (d) => d.fromTaskId === fromTaskId && d.toTaskId === toTaskId,
+        );
+        if (exists) return null;
+        const row: TaskDependency = {
+          id: uid(),
+          fromTaskId,
+          toTaskId,
+          type,
+          createdAt: now(),
+        };
+        set((state) => ({
+          taskDependencies: [...state.taskDependencies, row],
+        }));
+        mirrorDependencyCreate(row);
+        return row;
+      },
+
+      removeDependency: (id) => {
+        set((state) => ({
+          taskDependencies: state.taskDependencies.filter((d) => d.id !== id),
+        }));
+        mirrorDependencyDelete(id);
+      },
+
+      hydrateDependenciesFromServer: async () => {
+        try {
+          const res = await fetch("/api/task-dependencies", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { taskDependencies?: TaskDependency[] };
+          if (Array.isArray(body.taskDependencies)) {
+            set({ taskDependencies: body.taskDependencies });
+          }
+        } catch {
+          // Silent — store stays on its persisted copy.
+        }
+      },
+
       // ── Kanban reorder ────────────────────────────────────────
       reorderTasks: (_projectId, updates) => {
         set((state) => ({
@@ -424,6 +493,7 @@ export const useProjectsStore = create<ProjectsState>()(
       partialize: (state) => ({
         projects: state.projects,
         tasks: state.tasks,
+        taskDependencies: state.taskDependencies,
       }),
     },
   ),

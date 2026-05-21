@@ -31,6 +31,7 @@ type PrismaModelKey =
   | "account"
   | "project"
   | "task"
+  | "taskDependency"
   | "order"
   | "supplier"
   | "journalEntry";

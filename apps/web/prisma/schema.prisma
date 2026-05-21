@@ -229,6 +229,23 @@ model Task {
   @@map("tasks")
 }
 
+// Gantt Phase 2 — predecessor → successor links rendered as arrows.
+model TaskDependency {
+  id          String   @id @default(cuid())
+  orgId       String   @default("demo") @map("org_id")
+  fromTaskId  String   @map("from_task_id")
+  toTaskId    String   @map("to_task_id")
+  type        String   @default("FS") // FS | SS | FF | SF
+  lagDays     Int?     @default(0) @map("lag_days")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([fromTaskId, toTaskId])
+  @@index([orgId])
+  @@index([fromTaskId])
+  @@index([toTaskId])
+  @@map("task_dependencies")
+}
+
 // Ops.Order — sales order. Lines stored as Json for now; extract to
 // own table when the inventory engine needs row-level joins.
 model Order {
