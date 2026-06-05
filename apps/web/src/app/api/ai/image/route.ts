@@ -56,8 +56,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const geminiKey =
-    process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
   if (!geminiKey) {
     return Response.json(
       {
@@ -76,7 +75,6 @@ export async function POST(req: Request) {
     "gemini-3.1-flash-image-preview", // Nano Banana 2
     "gemini-3-pro-image-preview", // Nano Banana Pro
     "gemini-2.5-flash-image", // Nano Banana
-    "gemini-2.5-flash-image-preview", // Older preview alias
   ];
   // Aspect-ratio hint baked into the prompt — Flash Image doesn't have
   // a native parameter for this, so we steer the model in plain text.
@@ -121,8 +119,7 @@ export async function POST(req: Request) {
       const imgPart = parts.find(
         (p) => p.inlineData?.data || p.inline_data?.data,
       );
-      const outData =
-        imgPart?.inlineData?.data ?? imgPart?.inline_data?.data;
+      const outData = imgPart?.inlineData?.data ?? imgPart?.inline_data?.data;
       const outMime =
         imgPart?.inlineData?.mimeType ??
         imgPart?.inline_data?.mime_type ??
@@ -138,10 +135,15 @@ export async function POST(req: Request) {
     }
   }
 
-  return Response.json(
-    {
-      imageDataUrl: null,
-      error: `Image generation: every model failed. Tried:\n${allErrors.join("\n")}\n\nVisit /api/ai/list-models to see which models your key has access to.`,
-    } satisfies ImageResponse,
-  );
+  // If every failure was a 429, it's a quota/billing problem, not a bug —
+  // image models (Nano Banana) need a billing-enabled Gemini key; free
+  // keys can chat but have ~no image quota. Surface that plainly instead
+  // of a raw error dump.
+  const allQuota =
+    allErrors.length > 0 && allErrors.every((e) => e.includes("→ 429"));
+  const error = allQuota
+    ? "Image generation quota exceeded (HTTP 429). The Gemini image models (Nano Banana) require a billing-enabled key — free keys can chat but can't generate images. Enable billing on the GEMINI_API_KEY project at https://aistudio.google.com/apikey, or wait for the daily quota to reset."
+    : `Image generation: every model failed. Tried:\n${allErrors.join("\n")}\n\nVisit /api/ai/list-models to see which models your key has access to.`;
+
+  return Response.json({ imageDataUrl: null, error } satisfies ImageResponse);
 }
