@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { SalesDashboardView } from "@/components/sales/SalesDashboardView";
 import {
   DetailPanel,
   DetailSection,
@@ -46,7 +46,7 @@ import { PageDashboard } from "@/components/shared/PageDashboard";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// ─── Helpers ─────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
@@ -165,7 +165,7 @@ function probabilityBadgeStyle(probability: number): {
   };
 }
 
-// ─── Style constants ─────────────────────────────────────────────
+// â”€â”€â”€ Style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
@@ -249,7 +249,7 @@ const dangerBtnStyle: React.CSSProperties = {
   fontWeight: 600,
 };
 
-// ─── Shared UI ───────────────────────────────────────────────────
+// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type SalesTab =
   | "dashboard"
   | "opportunities"
@@ -329,7 +329,7 @@ function SearchInput({
   placeholder: string;
 }>) {
   // Delegates to the shared SearchBar so all module pages get the
-  // same look + ⌘K-all workspace-search escalation.
+  // same look + âŒ˜K-all workspace-search escalation.
   return (
     <SharedSearchBar
       value={value}
@@ -623,7 +623,7 @@ function SmallBtn({
   );
 }
 
-// ─── Confirm Dialog ──────────────────────────────────────────────
+// â”€â”€â”€ Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ConfirmDialog({
   open,
   title,
@@ -691,7 +691,7 @@ function ConfirmDialog({
   );
 }
 
-// ─── Line Items Editor ───────────────────────────────────────────
+// â”€â”€â”€ Line Items Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LineItemsEditor({
   items,
   onChange,
@@ -811,7 +811,7 @@ function LineItemsEditor({
   );
 }
 
-// ─── Deal Modal ──────────────────────────────────────────────────
+// â”€â”€â”€ Deal Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DealModal({
   open,
   onClose,
@@ -1058,7 +1058,7 @@ function DealModal({
   );
 }
 
-// ─── Quotation Modal ─────────────────────────────────────────────
+// â”€â”€â”€ Quotation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function QuotationModal({
   open,
   onClose,
@@ -1181,7 +1181,7 @@ function QuotationModal({
   );
 }
 
-// ─── Sales Order Modal ───────────────────────────────────────────
+// â”€â”€â”€ Sales Order Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SalesOrderModal({
   open,
   onClose,
@@ -1291,7 +1291,7 @@ function SalesOrderModal({
   );
 }
 
-// ─── Product Modal ───────────────────────────────────────────────
+// â”€â”€â”€ Product Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ProductModal({
   open,
   onClose,
@@ -1474,7 +1474,7 @@ function ProductModal({
   );
 }
 
-// ─── Opportunities Tab (Kanban) ──────────────────────────────────
+// â”€â”€â”€ Opportunities Tab (Kanban) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function OpportunitiesTab() {
   const router = useRouter();
   const deals = useSalesStore((s) => s.deals);
@@ -1937,7 +1937,7 @@ function OpportunitiesTab() {
               void _id;
               void _ca;
               undoableDelete({
-                label: `Deleted opportunity — ${snapshot.name}`,
+                label: `Deleted opportunity â€” ${snapshot.name}`,
                 mutate: () => deleteDeal(deleteId),
                 restore: () => useSalesStore.getState().addDeal(rest),
               });
@@ -1972,7 +1972,7 @@ function OpportunityDetailPanel({
       title={deal?.name ?? ""}
       subtitle={
         deal
-          ? `${deal.company}${deal.contact ? ` · ${deal.contact}` : ""}`
+          ? `${deal.company}${deal.contact ? ` Â· ${deal.contact}` : ""}`
           : undefined
       }
       badge={
@@ -2053,11 +2053,11 @@ function OpportunityDetailPanel({
 
           <DetailSection title="Details">
             <DetailRow label="Company" value={deal.company} />
-            <DetailRow label="Contact" value={deal.contact || "—"} />
+            <DetailRow label="Contact" value={deal.contact || "â€”"} />
             <DetailRow label="Assignee" value={deal.assignee} />
             <DetailRow
               label="Expected close"
-              value={deal.expectedClose || "—"}
+              value={deal.expectedClose || "â€”"}
             />
             <DetailRow
               label="Created"
@@ -2070,7 +2070,7 @@ function OpportunityDetailPanel({
   );
 }
 
-// ─── Quotations Tab ──────────────────────────────────────────────
+// â”€â”€â”€ Quotations Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function QuotationsTab() {
   const router = useRouter();
   const quotes = useSalesStore((s) => s.quotations);
@@ -2267,7 +2267,7 @@ function QuotationsTab() {
                           )}
                           {q.status === "Accepted" && (
                             <SmallBtn
-                              label="→ Invoice"
+                              label="â†’ Invoice"
                               color="#fff"
                               bg="var(--vyne-accent, var(--vyne-purple))"
                               onClick={() => {
@@ -2323,7 +2323,7 @@ function QuotationsTab() {
               .quotations.find((q) => q.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted quote — ${snapshot.number}`,
+                label: `Deleted quote â€” ${snapshot.number}`,
                 mutate: () => deleteQuotation(deleteId),
                 restore: () =>
                   useSalesStore.getState().addQuotation({
@@ -2344,7 +2344,7 @@ function QuotationsTab() {
   );
 }
 
-// ─── Sales Orders Tab ────────────────────────────────────────────
+// â”€â”€â”€ Sales Orders Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SalesOrdersTab() {
   const router = useRouter();
   const orders = useSalesStore((s) => s.salesOrders);
@@ -2545,7 +2545,7 @@ function SalesOrdersTab() {
               .salesOrders.find((o) => o.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted sales order — ${snapshot.number}`,
+                label: `Deleted sales order â€” ${snapshot.number}`,
                 mutate: () => deleteSalesOrder(deleteId),
                 restore: () =>
                   useSalesStore.getState().addSalesOrder({
@@ -2565,7 +2565,7 @@ function SalesOrdersTab() {
   );
 }
 
-// ─── Products Tab ────────────────────────────────────────────────
+// â”€â”€â”€ Products Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ProductsTab() {
   const router = useRouter();
   const products = useSalesStore((s) => s.products);
@@ -2816,7 +2816,7 @@ function ProductsTab() {
   );
 }
 
-// ─── Customers Tab ───────────────────────────────────────────────
+// â”€â”€â”€ Customers Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CustomersTab() {
   const customers = useSalesStore((s) => s.customers);
   const deleteCustomer = useSalesStore((s) => s.deleteCustomer);
@@ -3020,7 +3020,7 @@ function CustomersTab() {
   );
 }
 
-// ─── Reports Tab ─────────────────────────────────────────────────
+// â”€â”€â”€ Reports Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MONTHLY_REVENUE = [
   { month: "Oct 2025", revenue: 182000 },
   { month: "Nov 2025", revenue: 215000 },
@@ -3479,7 +3479,7 @@ function ReportsTab() {
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function SalesPage() {
   return (
     <Suspense fallback={null}>
@@ -3575,7 +3575,7 @@ function SalesPageInner() {
       <PageHeader
         icon={<ShoppingCart size={16} />}
         title="Sales"
-        subtitle={`${deals.length} opportunities · ${salesOrders.length} orders`}
+        subtitle={`${deals.length} opportunities Â· ${salesOrders.length} orders`}
       />
 
       <PageDashboard
@@ -3593,7 +3593,7 @@ function SalesPageInner() {
             label: "Weighted forecast",
             value: fmt(weightedPipeline),
             sparkline: orderSparkline,
-            hint: "value × probability",
+            hint: "value Ã— probability",
           },
           {
             label: "Order revenue",
@@ -3695,7 +3695,7 @@ function SalesPageInner() {
           padding: activeTab === "dashboard" ? 0 : 24,
         }}
       >
-        {activeTab === "dashboard" && <ProjectsDashboardView />}
+        {activeTab === "dashboard" && <SalesDashboardView />}
         {activeTab === "opportunities" && <OpportunitiesTab />}
         {activeTab === "quotations" && <QuotationsTab />}
         {activeTab === "orders" && <SalesOrdersTab />}
@@ -3707,7 +3707,7 @@ function SalesPageInner() {
   );
 }
 
-// ── WinLossInsights ────────────────────────────────────────────
+// â”€â”€ WinLossInsights â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Categorizes the notes of Lost deals into themes (Price, Timing,
 // Competitor, Feature gap, Other) via /api/ai/ask, caches in
 // localStorage for the day, renders a horizontal bar chart with
@@ -3854,7 +3854,7 @@ function WinLossInsights({
               color: "var(--text-tertiary)",
             }}
           >
-            {lostDeals.length} lost · {wonCount} won · AI-categorised reasons
+            {lostDeals.length} lost Â· {wonCount} won Â· AI-categorised reasons
           </p>
         </div>
         {lostDeals.length > 0 && (
@@ -3876,7 +3876,7 @@ function WinLossInsights({
             }}
           >
             {loading
-              ? "Categorising…"
+              ? "Categorisingâ€¦"
               : counts
                 ? "Regenerate"
                 : "Categorise with AI"}
@@ -3886,7 +3886,7 @@ function WinLossInsights({
 
       {lostDeals.length === 0 ? (
         <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)" }}>
-          No lost deals yet — nothing to categorise.
+          No lost deals yet â€” nothing to categorise.
         </p>
       ) : counts ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3934,7 +3934,7 @@ function WinLossInsights({
                     color: "var(--text-primary)",
                   }}
                 >
-                  {n} · {pct}%
+                  {n} Â· {pct}%
                 </div>
               </div>
             );

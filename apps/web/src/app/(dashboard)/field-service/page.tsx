@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -12,7 +12,7 @@ import {
   Trash2,
   BarChart3,
 } from "lucide-react";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { FieldServiceDashboardView } from "@/components/fieldservice/FieldServiceDashboardView";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/Kit";
 import { AskAiButton } from "@/components/shared/AskAiButton";
@@ -42,7 +42,7 @@ import {
   type FieldSkill,
 } from "@/lib/stores/fieldService";
 
-// ─── Filter shape ─────────────────────────────────────────────────
+// â”€â”€â”€ Filter shape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface FsFilters extends Record<string, unknown> {
   technicianIds: string[];
@@ -106,7 +106,7 @@ const PRIORITY_COLOR: Record<FieldJobPriority, string> = {
   low: "#22C55E",
 };
 
-// ─── Page ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function FieldServicePage() {
   return (
@@ -162,7 +162,7 @@ function FieldServicePageInner() {
     [setFilters],
   );
 
-  // ─── Visible jobs ────────────────────────────────────────────
+  // â”€â”€â”€ Visible jobs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const visibleJobs = useMemo(() => {
     return jobs.filter((j) => {
       if (filters.onlyUnassigned && j.technicianId) return false;
@@ -194,14 +194,14 @@ function FieldServicePageInner() {
     });
   }, [jobs, filters]);
 
-  // ─── GanttRow mapping ────────────────────────────────────────
+  // â”€â”€â”€ GanttRow mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const rows = useMemo<GanttRow[]>(() => {
     return visibleJobs.map((j) => {
       const tech = technicians.find((t) => t.id === j.technicianId);
       const baseColor = tech?.color ?? PRIORITY_COLOR[j.priority];
       return {
         id: j.id,
-        label: `${j.jobNumber} · ${j.title}`,
+        label: `${j.jobNumber} Â· ${j.title}`,
         start: j.scheduledStart,
         end: j.scheduledEnd,
         groupId: j.technicianId ?? "unassigned",
@@ -216,7 +216,7 @@ function FieldServicePageInner() {
               : j.status === "dispatched"
                 ? 0.25
                 : 0.1,
-        meta: `${j.customerName} · ${j.region} · ${j.skill} · ${j.priority}`,
+        meta: `${j.customerName} Â· ${j.region} Â· ${j.skill} Â· ${j.priority}`,
       };
     });
   }, [visibleJobs, technicians]);
@@ -250,12 +250,12 @@ function FieldServicePageInner() {
       const tech = technicians.find((t) => t.id === groupId);
       if (!tech) return groupId;
       const skills = tech.skills.map((s) => s.toUpperCase()).join(" / ");
-      return `${tech.name} · ${tech.region} · ${skills}`;
+      return `${tech.name} Â· ${tech.region} Â· ${skills}`;
     },
     [filters.groupBy, technicians],
   );
 
-  // ─── Bulk selection + actions ────────────────────────────────
+  // â”€â”€â”€ Bulk selection + actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const selection = useBulkSelection();
   const selected = useMemo(
     () => jobs.filter((j) => selection.isSelected(j.id)),
@@ -266,7 +266,7 @@ function FieldServicePageInner() {
     () => [
       {
         id: "fs-bulk-assign",
-        label: "Assign to…",
+        label: "Assign toâ€¦",
         icon: UserPlus,
         onClick: () => {
           const target = window.prompt(
@@ -330,7 +330,7 @@ function FieldServicePageInner() {
     [selected, selection, technicians, assignJob, updateJob, deleteJob],
   );
 
-  // ─── Drag callbacks ──────────────────────────────────────────
+  // â”€â”€â”€ Drag callbacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleReschedule = useCallback(
     (id: string, start: string, end: string) => {
       const job = jobs.find((j) => j.id === id);
@@ -357,14 +357,14 @@ function FieldServicePageInner() {
       const j = jobs.find((x) => x.id === id);
       if (!j) return;
       toast(
-        `${j.jobNumber} · ${j.customerName}\n${j.address}\n${j.skill} · ${j.priority}`,
+        `${j.jobNumber} Â· ${j.customerName}\n${j.address}\n${j.skill} Â· ${j.priority}`,
         { duration: 4000 },
       );
     },
     [filters.selectionMode, selection, jobs],
   );
 
-  // ─── Cmd+K + AI ──────────────────────────────────────────────
+  // â”€â”€â”€ Cmd+K + AI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const suggestions = useAiSuggestedPrompts();
   useRegisterAiCommands("field-service");
   useRegisterCommands("field-service", [
@@ -406,7 +406,7 @@ function FieldServicePageInner() {
     },
   ]);
 
-  // ─── Export rows ─────────────────────────────────────────────
+  // â”€â”€â”€ Export rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const exportRows = useMemo(
     () =>
       visibleJobs.map((j) => ({
@@ -418,7 +418,7 @@ function FieldServicePageInner() {
         priority: j.priority,
         status: j.status,
         technician:
-          technicians.find((t) => t.id === j.technicianId)?.name ?? "—",
+          technicians.find((t) => t.id === j.technicianId)?.name ?? "â€”",
         start: j.scheduledStart,
         end: j.scheduledEnd,
         estimatedHours: j.estimatedHours,
@@ -426,7 +426,7 @@ function FieldServicePageInner() {
     [visibleJobs, technicians],
   );
 
-  // ─── Capacity warnings (over-allocated tech this week) ───────
+  // â”€â”€â”€ Capacity warnings (over-allocated tech this week) â”€â”€â”€â”€â”€â”€â”€
   const capacityWarnings = useMemo(() => {
     const weekFrom = new Date();
     weekFrom.setUTCHours(0, 0, 0, 0);
@@ -504,7 +504,7 @@ function FieldServicePageInner() {
             <CalendarClock size={13} /> Schedule
           </button>
         </div>
-        <ProjectsDashboardView />
+        <FieldServiceDashboardView />
       </div>
     );
   }
@@ -564,7 +564,7 @@ function FieldServicePageInner() {
       <PageHeader
         icon={<Truck size={16} />}
         title="Field Service"
-        subtitle={`${visibleJobs.length} job${visibleJobs.length === 1 ? "" : "s"} · ${
+        subtitle={`${visibleJobs.length} job${visibleJobs.length === 1 ? "" : "s"} Â· ${
           new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned")).size
         } tech${
           new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned"))
@@ -611,7 +611,7 @@ function FieldServicePageInner() {
         >
           {capacityWarnings
             .map((w) => `${w.name} booked ${w.booked}h vs ${w.cap}h capacity`)
-            .join(" · ")}
+            .join(" Â· ")}
         </div>
       )}
 
@@ -684,7 +684,7 @@ function FieldServicePageInner() {
   );
 }
 
-// ─── Filter rail ──────────────────────────────────────────────────
+// â”€â”€â”€ Filter rail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FieldServiceFilterRail({
   filters,
@@ -780,7 +780,7 @@ function FieldServiceFilterRail({
   );
 }
 
-// ─── Toolbar ──────────────────────────────────────────────────────
+// â”€â”€â”€ Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FieldServiceToolbar({
   filters,
@@ -940,7 +940,7 @@ function ZoomSegmented({
   );
 }
 
-// ─── Local UI helpers ────────────────────────────────────────────
+// â”€â”€â”€ Local UI helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function FilterSection({
   title,
@@ -1056,7 +1056,7 @@ function MultiPick({
   );
 }
 
-// ─── Style constants ─────────────────────────────────────────────
+// â”€â”€â”€ Style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const labelStyle: React.CSSProperties = {
   display: "inline-flex",

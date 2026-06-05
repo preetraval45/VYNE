@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { CRMDashboardView } from "@/components/crm/CRMDashboardView";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import {
@@ -50,7 +50,7 @@ import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
 import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { useSavedViews } from "@/hooks/useSavedViews";
 
-// ─── API adapter ─────────────────────────────────────────────────
+// â”€â”€â”€ API adapter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function statusToStage(status: string): Stage {
   if (status === "active") return "Won";
   if (status === "inactive") return "Lost";
@@ -80,7 +80,7 @@ function customerToDeal(c: ERPCustomer): Deal {
   };
 }
 
-// ─── Helper Functions (no nested ternaries) ───────────────────────
+// â”€â”€â”€ Helper Functions (no nested ternaries) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function stageColor(stage: Stage): string {
   const map: Record<Stage, string> = {
     Lead: "var(--text-secondary)",
@@ -149,7 +149,7 @@ function initials(name: string): string {
     .slice(0, 2);
 }
 
-// ─── Shared UI ────────────────────────────────────────────────────
+// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TabBtn({
   label,
   active,
@@ -171,11 +171,11 @@ function TabBtn({
   );
 }
 
-// Deal-owners used in the assignee filter. Derived from fixture seed data —
+// Deal-owners used in the assignee filter. Derived from fixture seed data â€”
 // keep in sync with whichever names appear on `deal.assignee` below.
 const ASSIGNEES = ["Alex", "Jamie", "Morgan", "Sam", "Taylor"] as const;
 
-// Stage → semantic tone map. Keeps pill colors muted and consistent
+// Stage â†’ semantic tone map. Keeps pill colors muted and consistent
 // instead of each stage shouting its own candy-bright hex.
 const STAGE_TONE: Record<Stage, Tone> = {
   Lead: "neutral",
@@ -194,7 +194,7 @@ function StagePill({ stage }: Readonly<{ stage: Stage }>) {
   );
 }
 
-// ─── Pipeline Tab (Kanban) ────────────────────────────────────────
+// â”€â”€â”€ Pipeline Tab (Kanban) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PipelineTab({
   deals,
   onDealClick,
@@ -209,7 +209,7 @@ function PipelineTab({
       {STAGES.map((stage) => {
         const stageDeals = deals.filter((d) => d.stage === stage);
         const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
-        // Weighted total = sum(value × probability/100). Won/Lost short-circuit
+        // Weighted total = sum(value Ã— probability/100). Won/Lost short-circuit
         // to 100/0 so columns at the ends still match raw totals when expected.
         const stageWeighted = stageDeals.reduce((s, d) => {
           const prob =
@@ -230,7 +230,7 @@ function PipelineTab({
             key={stage}
             className="min-w-[260px] max-w-[260px] shrink-0 flex flex-col gap-2"
           >
-            {/* Column header — muted, uses kit Pill tone */}
+            {/* Column header â€” muted, uses kit Pill tone */}
             <div
               className="rounded-[10px] px-3 py-2.5"
               style={{
@@ -263,7 +263,7 @@ function PipelineTab({
               >
                 {fmt(stageTotal)}
               </div>
-              {/* Weighted line: value × probability — what actually rolls into forecast */}
+              {/* Weighted line: value Ã— probability â€” what actually rolls into forecast */}
               {stage !== "Lost" && stageDeals.length > 0 && (
                 <div
                   style={{
@@ -276,10 +276,10 @@ function PipelineTab({
                     gap: 4,
                   }}
                 >
-                  <span>≈ {fmt(stageWeighted)} weighted</span>
+                  <span>â‰ˆ {fmt(stageWeighted)} weighted</span>
                   {sharePct > 0 && (
                     <>
-                      <span style={{ opacity: 0.4 }}>·</span>
+                      <span style={{ opacity: 0.4 }}>Â·</span>
                       <span>{sharePct}% of pipeline</span>
                     </>
                   )}
@@ -383,7 +383,7 @@ function PipelineTab({
   );
 }
 
-// ─── Deals Table Tab ──────────────────────────────────────────────
+// â”€â”€â”€ Deals Table Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type SortKey = "company" | "value" | "stage" | "lastActivity";
 type SortDir = "asc" | "desc";
 
@@ -414,7 +414,7 @@ function DealsTableTab({
     }
   }
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const searchHits = useSearchIndex(
     deals,
     (d) => [d.company, d.contactName, d.email],
@@ -441,7 +441,7 @@ function DealsTableTab({
 
   function sortArrow(key: SortKey): string {
     if (sortKey !== key) return "";
-    return sortDir === "asc" ? " ↑" : " ↓";
+    return sortDir === "asc" ? " â†‘" : " â†“";
   }
 
   const thClass =
@@ -614,7 +614,7 @@ function DealsTableTab({
                   <td className="px-[14px] py-[10px]">
                     <span
                       className="flex items-center gap-1.5 text-xs font-bold text-vyne-purple"
-                      title="Click to open · Double-click to edit"
+                      title="Click to open Â· Double-click to edit"
                     >
                       <button
                         type="button"
@@ -622,7 +622,7 @@ function DealsTableTab({
                         className="bg-transparent border-0 cursor-pointer p-0 text-left text-vyne-purple"
                         aria-label={`Open ${deal.company}`}
                       >
-                        ↗
+                        â†—
                       </button>
                       <EditableCell
                         value={deal.company}
@@ -660,7 +660,8 @@ function DealsTableTab({
                       label="Deal value"
                       validate={(s) => {
                         const n = Number(s);
-                        if (!Number.isFinite(n) || n < 0) return "Must be ≥ 0";
+                        if (!Number.isFinite(n) || n < 0)
+                          return "Must be â‰¥ 0";
                       }}
                       render={(v) => fmt(Number(v))}
                       style={{ fontWeight: 700 }}
@@ -752,7 +753,7 @@ function DealsTableTab({
   );
 }
 
-// ─── Forecasting Tab ──────────────────────────────────────────────
+// â”€â”€â”€ Forecasting Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   const totalPipeline = deals
     .filter((d) => d.stage !== "Lost")
@@ -931,7 +932,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CRMPageInner() {
   const router = useRouter();
   const deals = useCRMStore((s) => s.deals);
@@ -956,7 +957,7 @@ function CRMPageInner() {
       if (!d) return;
       const snapshot = { ...d };
       undoableDelete({
-        label: `Deleted deal — ${snapshot.company}`,
+        label: `Deleted deal â€” ${snapshot.company}`,
         mutate: () => deleteDealFromStore(snapshot.id),
         restore: () => useCRMStore.getState().addDeal(snapshot),
       });
@@ -1024,7 +1025,7 @@ function CRMPageInner() {
 
   const dash = usePageDashboard("crm", "30d");
 
-  // Saved views — URL-shareable filter presets for the deals table.
+  // Saved views â€” URL-shareable filter presets for the deals table.
   interface CrmFilters extends Record<string, unknown> {
     stage?: string;
     minValue?: number;
@@ -1049,7 +1050,7 @@ function CRMPageInner() {
     ],
   });
 
-  // ─── Real KPIs computed from the deals store ───────────────────
+  // â”€â”€â”€ Real KPIs computed from the deals store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const wonDeals = deals.filter((d) => d.stage === "Won");
   const lostDeals = deals.filter((d) => d.stage === "Lost");
   const activeDeals = deals.filter(
@@ -1133,7 +1134,7 @@ function CRMPageInner() {
       <PageHeader
         icon={<TrendingUp size={16} />}
         title="CRM Pipeline"
-        subtitle={`${activeCount} active · ${fmt(totalPipeline)} pipeline`}
+        subtitle={`${activeCount} active Â· ${fmt(totalPipeline)} pipeline`}
         actions={
           <>
             <Pill tone="success" dot>
@@ -1187,7 +1188,7 @@ function CRMPageInner() {
             label: "Weighted forecast",
             value: fmt(weightedForecast),
             sparkline: forecastSparkline,
-            hint: "value × probability",
+            hint: "value Ã— probability",
           },
           {
             label: "Won (revenue)",
@@ -1197,7 +1198,7 @@ function CRMPageInner() {
           {
             label: "Win rate",
             value: `${winRate}%`,
-            hint: `${wonDeals.length} won · ${lostDeals.length} lost`,
+            hint: `${wonDeals.length} won Â· ${lostDeals.length} lost`,
             goodWhenUp: true,
           },
         ]}
@@ -1244,12 +1245,12 @@ function CRMPageInner() {
         }}
       >
         {tab === "dashboard" ? (
-          <ProjectsDashboardView />
+          <CRMDashboardView />
         ) : deals.length === 0 ? (
           <EmptyState
             icon={<TrendingUp size={20} />}
             title="No deals yet"
-            description="Track your pipeline by creating a first deal — or have Vyne AI draft it for you in seconds."
+            description="Track your pipeline by creating a first deal â€” or have Vyne AI draft it for you in seconds."
             primary={{ label: "New deal", href: "/crm/deals/new" }}
             aiPrompt="Create a deal for "
           />
@@ -1307,7 +1308,7 @@ export default function CRMPage() {
   );
 }
 
-// ─── Slide-in detail panel ────────────────────────────────────────
+// â”€â”€â”€ Slide-in detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function stageBgDetail(stage: string): string {
   const map: Record<string, string> = {
@@ -1348,7 +1349,7 @@ function DealDetailPanel({
       title={deal?.company ?? ""}
       subtitle={
         deal
-          ? `${deal.contactName}${deal.email ? ` · ${deal.email}` : ""}`
+          ? `${deal.contactName}${deal.email ? ` Â· ${deal.email}` : ""}`
           : undefined
       }
       fullPageHref={deal ? `/crm/deals/${deal.id}` : undefined}
@@ -1470,7 +1471,7 @@ function DealDetailPanel({
             <DetailRow label="Contact" value={deal.contactName} />
             <DetailRow
               label="Email"
-              value={deal.email || "—"}
+              value={deal.email || "â€”"}
               mono={!!deal.email}
             />
             <DetailRow label="Source" value={deal.source} />

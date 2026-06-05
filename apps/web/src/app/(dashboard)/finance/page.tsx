@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { FinanceDashboardView } from "@/components/finance/FinanceDashboardView";
 import {
   TrendingUp,
   TrendingDown,
@@ -39,7 +39,7 @@ import { PageDashboard } from "@/components/shared/PageDashboard";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// ─── Helpers ──────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CURRENCY =
   typeof Intl !== "undefined"
     ? new Intl.NumberFormat(undefined, {
@@ -84,7 +84,7 @@ function TabBtn({
   );
 }
 
-// ─── Bar chart (CSS-only) ─────────────────────────────────────────
+// â”€â”€â”€ Bar chart (CSS-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BarChart({
   data,
 }: Readonly<{
@@ -151,7 +151,7 @@ function BarChart({
   );
 }
 
-// ─── P&L tab ──────────────────────────────────────────────────────
+// â”€â”€â”€ P&L tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const EMPTY_MONTH = { month: "", revenue: 0, expenses: 0 };
 function PLTab() {
   // Real signups have an empty MOCK_MONTHLY (no fixtures). Guard the
@@ -225,7 +225,7 @@ function PLTab() {
               color: "var(--text-primary)",
             }}
           >
-            Profit & Loss — March 2026
+            Profit & Loss â€” March 2026
           </span>
           <button
             style={{
@@ -469,7 +469,7 @@ function PLTab() {
   );
 }
 
-// ─── Journal Entries tab ──────────────────────────────────────────
+// â”€â”€â”€ Journal Entries tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function JournalTab() {
   const entries = useFinanceStore((s) => s.journalEntries);
   const setEntries = useFinanceStore((s) => s.setJournalEntries);
@@ -636,7 +636,7 @@ function JournalTab() {
                         return;
                       const snapshot = e;
                       undoableDelete({
-                        label: `Deleted journal — ${snapshot.entryNumber}`,
+                        label: `Deleted journal â€” ${snapshot.entryNumber}`,
                         mutate: () =>
                           useFinanceStore
                             .getState()
@@ -655,7 +655,7 @@ function JournalTab() {
                       color: "var(--status-danger)",
                     }}
                   >
-                    ✕
+                    âœ•
                   </button>
                 </td>
               </tr>
@@ -667,7 +667,7 @@ function JournalTab() {
   );
 }
 
-// ─── Chart of Accounts tab ────────────────────────────────────────
+// â”€â”€â”€ Chart of Accounts tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AccountsTab() {
   const groups = ["Asset", "Liability", "Equity", "Revenue", "Expense"];
   const typeColor: Record<string, string> = {
@@ -781,7 +781,7 @@ function AccountsTab() {
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────
+// â”€â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function FinancePage() {
   return (
     <Suspense fallback={null}>
@@ -889,7 +889,7 @@ function FinancePageInner() {
       <PageHeader
         icon={<DollarSign size={16} />}
         title="Finance"
-        subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} · Profit ${fmt(profit)}`}
+        subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} Â· Profit ${fmt(profit)}`}
         actions={
           <>
             <Pill tone="success" dot>
@@ -990,7 +990,7 @@ function FinancePageInner() {
           padding: tab === "dashboard" ? 0 : 20,
         }}
       >
-        {tab === "dashboard" && <ProjectsDashboardView />}
+        {tab === "dashboard" && <FinanceDashboardView />}
         {tab === "pl" && (
           <>
             <CloseAssistantCard />

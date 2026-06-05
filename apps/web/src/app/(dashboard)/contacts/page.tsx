@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { ContactsDashboardView } from "@/components/contacts/ContactsDashboardView";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import {
   Plus,
@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-// ─── Constants ──────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type ContactsTab = "dashboard" | "accounts" | "contacts" | "import";
 
 const INDUSTRIES = [
@@ -76,7 +76,7 @@ const ALL_TAGS: ContactTag[] = [
 
 const OWNERS = ["Alex Rivera", "Priya Shah", "Sam Chen", "Jordan Lee"];
 
-// ─── Helpers ─────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmtRevenue(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
@@ -113,7 +113,7 @@ function daysSinceStr(isoDate: string): string {
   return `${d} days ago`;
 }
 
-// ─── Shared UI ───────────────────────────────────────────────────
+// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
@@ -316,7 +316,7 @@ function SearchInput({
   placeholder: string;
 }>) {
   // Delegates to the shared SearchBar so the look + accessibility +
-  // ⌘K-all escalation are consistent across module pages.
+  // âŒ˜K-all escalation are consistent across module pages.
   return (
     <SharedSearchBar
       value={value}
@@ -505,7 +505,7 @@ function IconBtn({
   );
 }
 
-// ─── Confirm Dialog ──────────────────────────────────────────────
+// â”€â”€â”€ Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ConfirmDialog({
   open,
   title,
@@ -561,7 +561,7 @@ function ConfirmDialog({
   );
 }
 
-// ─── Account Modal ───────────────────────────────────────────────
+// â”€â”€â”€ Account Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AccountModal({
   open,
   onClose,
@@ -784,7 +784,7 @@ function AccountModal({
   );
 }
 
-// ─── Contact Modal ───────────────────────────────────────────────
+// â”€â”€â”€ Contact Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ContactModal({
   open,
   onClose,
@@ -1022,7 +1022,7 @@ function ContactModal({
   );
 }
 
-// ─── Accounts Tab ────────────────────────────────────────────────
+// â”€â”€â”€ Accounts Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function AccountsTab() {
   const router = useRouter();
   const accounts = useContactsStore((s) => s.accounts);
@@ -1046,8 +1046,8 @@ function AccountsTab() {
     ? accounts.find((a) => a.id === deleteId)
     : null;
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke
-  // instead of O(n × fields × query-len) for the linear toLowerCase().includes()
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke
+  // instead of O(n Ã— fields Ã— query-len) for the linear toLowerCase().includes()
   // pattern. Built once when the accounts array reference changes.
   const searchHits = useSearchIndex(
     accounts,
@@ -1378,7 +1378,7 @@ function AccountsTab() {
   );
 }
 
-// ─── Contacts Tab ────────────────────────────────────────────────
+// â”€â”€â”€ Contacts Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ContactsTabContent() {
   const router = useRouter();
   const contacts = useContactsStore((s) => s.contacts);
@@ -1437,7 +1437,7 @@ function ContactsTabContent() {
   const companies = [...new Set(contacts.map((c) => c.company))].sort();
   const departments = [...new Set(contacts.map((c) => c.department))].sort();
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const searchHits = useSearchIndex(
     contacts,
     (c) => [c.name, c.email, c.title, c.company],
@@ -1612,13 +1612,13 @@ function ContactsTabContent() {
                       sel.handleRowClick(all, contact.id, shiftKey);
                     }}
                     onArchive={() => {
-                      // Archive ⇒ tag and snapshot for undo via existing
+                      // Archive â‡’ tag and snapshot for undo via existing
                       // undoableDelete pattern. Pure UX placeholder so
                       // mobile users get the swipe-to-archive flow now;
                       // when a real `archived` flag lands we just patch
                       // updateContact in place.
                       undoableDelete({
-                        label: `Archived contact — ${contact.name}`,
+                        label: `Archived contact â€” ${contact.name}`,
                         mutate: () => deleteContact(contact.id),
                         restore: () =>
                           useContactsStore.getState().addContact(contact),
@@ -1830,7 +1830,7 @@ function ContactsTabContent() {
               .contacts.find((c) => c.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted contact — ${snapshot.name}`,
+                label: `Deleted contact â€” ${snapshot.name}`,
                 mutate: () => deleteContact(deleteId),
                 restore: () => useContactsStore.getState().addContact(snapshot),
               });
@@ -1906,7 +1906,7 @@ function ContactsTabContent() {
   );
 }
 
-// ─── SwipeableContactRow (Phase 10.3) ─────────────────────────────
+// â”€â”€â”€ SwipeableContactRow (Phase 10.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Drop-in replacement for the contact row that adds left/right swipe
 // gestures on touch devices. Wraps the touch handlers from
 // `useSwipeGesture` and animates a translateX on the row, plus a
@@ -1914,7 +1914,7 @@ function ContactsTabContent() {
 // user can see which action they're about to commit.
 //
 // Children render the table cells exactly as they did before. The
-// swipe is touch-only — desktop click + hover behaviour is unchanged
+// swipe is touch-only â€” desktop click + hover behaviour is unchanged
 // because `useSwipeGesture`'s axis lock requires `touchstart`.
 function SwipeableContactRow({
   contact,
@@ -1968,7 +1968,7 @@ function SwipeableContactRow({
         (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
-      {/* The first <Td> in `children` is the checkbox cell — we don't
+      {/* The first <Td> in `children` is the checkbox cell â€” we don't
           re-render it here. `onSelect` is invoked from the children's
           checkbox onChange (passed in from the parent map), so this
           wrapper only needs to add the swipe behaviour + hint colour
@@ -1989,7 +1989,7 @@ function _swipeableContactRowUnusedRefs(_a: unknown, _b: unknown) {
 }
 void _swipeableContactRowUnusedRefs;
 
-// ─── Import Tab ──────────────────────────────────────────────────
+// â”€â”€â”€ Import Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ImportTab() {
   const importAccounts = useContactsStore((s) => s.importAccounts);
   const importContacts = useContactsStore((s) => s.importContacts);
@@ -2533,7 +2533,7 @@ function ImportTab() {
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ContactsPage() {
   return (
     <Suspense fallback={null}>
@@ -2600,7 +2600,7 @@ function ContactsPageInner() {
       <PageHeader
         icon={<Users size={16} />}
         title="Accounts & Contacts"
-        subtitle={`${accounts.length} accounts · ${contacts.length} contacts`}
+        subtitle={`${accounts.length} accounts Â· ${contacts.length} contacts`}
       />
 
       <PageDashboard
@@ -2672,7 +2672,7 @@ function ContactsPageInner() {
           padding: activeTab === "dashboard" ? 0 : 24,
         }}
       >
-        {activeTab === "dashboard" && <ProjectsDashboardView />}
+        {activeTab === "dashboard" && <ContactsDashboardView />}
         {activeTab === "accounts" && <AccountsTab />}
         {activeTab === "contacts" && <ContactsTabContent />}
         {activeTab === "import" && <ImportTab />}
@@ -2681,7 +2681,7 @@ function ContactsPageInner() {
   );
 }
 
-// ─── Slide-in detail panels ────────────────────────────────────────
+// â”€â”€â”€ Slide-in detail panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const iconBtnStyle: React.CSSProperties = {
   width: 28,
@@ -2714,7 +2714,7 @@ function AccountDetailPanel({
       title={account?.name ?? ""}
       subtitle={
         account
-          ? `${account.industry} · ${account.employees.toLocaleString()} employees`
+          ? `${account.industry} Â· ${account.employees.toLocaleString()} employees`
           : undefined
       }
       badge={
@@ -2809,10 +2809,10 @@ function AccountDetailPanel({
             <DetailRow label="Industry" value={account.industry} />
             <DetailRow
               label="Website"
-              value={account.website || "—"}
+              value={account.website || "â€”"}
               mono={!!account.website}
             />
-            <DetailRow label="Phone" value={account.phone || "—"} />
+            <DetailRow label="Phone" value={account.phone || "â€”"} />
             <DetailRow
               label="Owner"
               value={
@@ -2826,7 +2826,7 @@ function AccountDetailPanel({
           </DetailSection>
 
           {contacts.length > 0 && (
-            <DetailSection title={`People · ${contacts.length}`}>
+            <DetailSection title={`People Â· ${contacts.length}`}>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {contacts.slice(0, 5).map((c) => (
                   <Link
@@ -2915,7 +2915,7 @@ function ContactDetailPanel({
       title={contact?.name ?? ""}
       subtitle={
         contact
-          ? [contact.title, contact.company].filter(Boolean).join(" · ")
+          ? [contact.title, contact.company].filter(Boolean).join(" Â· ")
           : undefined
       }
       headerActions={
@@ -2936,11 +2936,11 @@ function ContactDetailPanel({
           <DetailSection title="Contact">
             <DetailRow
               label="Email"
-              value={contact.email || "—"}
+              value={contact.email || "â€”"}
               mono={!!contact.email}
             />
-            <DetailRow label="Phone" value={contact.phone || "—"} />
-            <DetailRow label="Department" value={contact.department || "—"} />
+            <DetailRow label="Phone" value={contact.phone || "â€”"} />
+            <DetailRow label="Department" value={contact.department || "â€”"} />
             <DetailRow
               label="Last contact"
               value={daysSinceStr(contact.lastContact)}
@@ -2993,7 +2993,7 @@ function ContactDetailPanel({
                     {account.name}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-                    {account.industry} {"·"} {fmtRevenue(account.revenue)}
+                    {account.industry} {"Â·"} {fmtRevenue(account.revenue)}
                   </div>
                 </div>
                 <ArrowRight

@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Megaphone, Plus, Mail, BarChart3 } from "lucide-react";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { MarketingDashboardView } from "@/components/marketing/MarketingDashboardView";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { SubjectLineGenerator } from "@/components/marketing/SubjectLineGenerator";
 import { UTMBuilder } from "@/components/marketing/UTMBuilder";
@@ -11,7 +11,7 @@ import { PageDashboard } from "@/components/shared/PageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { FunnelCard } from "@/components/marketing/FunnelCard";
 
-// ─── Types ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type MarketingTab =
   | "dashboard"
   | "campaigns"
@@ -70,7 +70,7 @@ interface LandingPage {
   status: LandingPageStatus;
 }
 
-// ─── Mock Data ─────────────────────────────────────────────────────
+// â”€â”€â”€ Mock Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const MOCK_CAMPAIGNS: Campaign[] = [
   {
     id: "c1",
@@ -98,7 +98,7 @@ const MOCK_CAMPAIGNS: Campaign[] = [
   },
   {
     id: "c3",
-    name: "Google Ads — Q1 Push",
+    name: "Google Ads â€” Q1 Push",
     channel: "PPC",
     status: "Completed",
     startDate: "2026-01-01",
@@ -146,7 +146,7 @@ const MOCK_CAMPAIGNS: Campaign[] = [
   },
   {
     id: "c7",
-    name: "Retargeting — Cart Abandonment",
+    name: "Retargeting â€” Cart Abandonment",
     channel: "PPC",
     status: "Active",
     startDate: "2026-03-10",
@@ -196,7 +196,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e3",
     campaignName: "Product Demo Invite",
-    subjectLine: "Join our live demo — March 25",
+    subjectLine: "Join our live demo â€” March 25",
     recipients: 3400,
     sent: 3398,
     openRate: 41.3,
@@ -207,7 +207,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e4",
     campaignName: "Customer Onboarding Drip #1",
-    subjectLine: "Welcome to VYNE — Getting Started",
+    subjectLine: "Welcome to VYNE â€” Getting Started",
     recipients: 560,
     sent: 558,
     openRate: 62.1,
@@ -229,7 +229,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e6",
     campaignName: "Re-engagement Series",
-    subjectLine: "We miss you — here's 20% off",
+    subjectLine: "We miss you â€” here's 20% off",
     recipients: 4800,
     sent: 0,
     openRate: 0,
@@ -326,7 +326,7 @@ const MOCK_LANDING_PAGES: LandingPage[] = [
   },
 ];
 
-// ─── Helpers ───────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
@@ -339,7 +339,7 @@ function fmtNum(n: number): string {
   return n.toLocaleString();
 }
 
-// ─── Status / Channel badges ──────────────────────────────────────
+// â”€â”€â”€ Status / Channel badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function campaignStatusStyle(s: CampaignStatus): { bg: string; color: string } {
   const map: Record<CampaignStatus, { bg: string; color: string }> = {
     Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
@@ -402,7 +402,7 @@ function Badge({
   );
 }
 
-// ─── Tab button ────────────────────────────────────────────────────
+// â”€â”€â”€ Tab button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TabBtn({
   label,
   active,
@@ -433,7 +433,7 @@ function TabBtn({
   );
 }
 
-// ─── KPI Card ──────────────────────────────────────────────────────
+// â”€â”€â”€ KPI Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function KPICard({
   title,
   value,
@@ -486,7 +486,7 @@ function KPICard({
   );
 }
 
-// ─── Table wrapper ─────────────────────────────────────────────────
+// â”€â”€â”€ Table wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TableCard({
   title,
   actions,
@@ -530,7 +530,7 @@ function TableCard({
   );
 }
 
-// ─── Shared table styles ───────────────────────────────────────────
+// â”€â”€â”€ Shared table styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const thStyle: React.CSSProperties = {
   padding: "10px 14px",
   fontSize: 11,
@@ -557,7 +557,7 @@ const tdSecondary: React.CSSProperties = {
   color: "var(--text-secondary)",
 };
 
-// ─── Bar Chart (CSS-only) ──────────────────────────────────────────
+// â”€â”€â”€ Bar Chart (CSS-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BarChart({
   data,
   barColor,
@@ -623,7 +623,7 @@ function BarChart({
   );
 }
 
-// ─── Horizontal bar (for channel performance) ─────────────────────
+// â”€â”€â”€ Horizontal bar (for channel performance) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function HorizontalBar({
   label,
   value,
@@ -688,7 +688,7 @@ function HorizontalBar({
   );
 }
 
-// ─── Pie Chart (CSS-only) ──────────────────────────────────────────
+// â”€â”€â”€ Pie Chart (CSS-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PieChart({
   segments,
   size = 120,
@@ -743,9 +743,9 @@ function PieChart({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Tab: Campaigns ────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Tab: Campaigns â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function CampaignsTab() {
   const activeCampaigns = MOCK_CAMPAIGNS.filter(
     (c) => c.status === "Active",
@@ -877,7 +877,7 @@ function CampaignsTab() {
                   <td
                     style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}
                   >
-                    {c.leadsGenerated > 0 ? fmtNum(c.leadsGenerated) : "—"}
+                    {c.leadsGenerated > 0 ? fmtNum(c.leadsGenerated) : "â€”"}
                   </td>
                   <td
                     style={{
@@ -892,7 +892,7 @@ function CampaignsTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {c.roi > 0 ? `${c.roi.toFixed(1)}x` : "—"}
+                    {c.roi > 0 ? `${c.roi.toFixed(1)}x` : "â€”"}
                   </td>
                 </tr>
               );
@@ -904,9 +904,9 @@ function CampaignsTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Tab: Email Marketing ──────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Tab: Email Marketing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function EmailMarketingTab() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1027,7 +1027,7 @@ function EmailMarketingTab() {
                     {fmtNum(e.recipients)}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    {e.sent > 0 ? fmtNum(e.sent) : "—"}
+                    {e.sent > 0 ? fmtNum(e.sent) : "â€”"}
                   </td>
                   <td
                     style={{
@@ -1042,7 +1042,7 @@ function EmailMarketingTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {e.openRate > 0 ? `${e.openRate}%` : "—"}
+                    {e.openRate > 0 ? `${e.openRate}%` : "â€”"}
                   </td>
                   <td
                     style={{
@@ -1057,10 +1057,10 @@ function EmailMarketingTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {e.clickRate > 0 ? `${e.clickRate}%` : "—"}
+                    {e.clickRate > 0 ? `${e.clickRate}%` : "â€”"}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    {e.bounced > 0 ? e.bounced : "—"}
+                    {e.bounced > 0 ? e.bounced : "â€”"}
                   </td>
                   <td style={tdStyle}>
                     <Badge label={e.status} bg={es.bg} color={es.color} />
@@ -1075,9 +1075,9 @@ function EmailMarketingTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Tab: Social Media ─────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Tab: Social Media â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function SocialMediaTab() {
   const platformColors: Record<string, string> = {
     LinkedIn: "#0A66C2",
@@ -1268,9 +1268,9 @@ function SocialMediaTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Tab: Landing Pages ────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Tab: Landing Pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function LandingPagesTab() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -1378,7 +1378,7 @@ function LandingPagesTab() {
                       </code>
                     </td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>
-                      {l.visits > 0 ? fmtNum(l.visits) : "—"}
+                      {l.visits > 0 ? fmtNum(l.visits) : "â€”"}
                     </td>
                     <td
                       style={{
@@ -1387,7 +1387,7 @@ function LandingPagesTab() {
                         fontWeight: 600,
                       }}
                     >
-                      {l.conversions > 0 ? fmtNum(l.conversions) : "—"}
+                      {l.conversions > 0 ? fmtNum(l.conversions) : "â€”"}
                     </td>
                     <td
                       style={{
@@ -1402,7 +1402,7 @@ function LandingPagesTab() {
                               : "var(--text-tertiary)",
                       }}
                     >
-                      {l.conversionRate > 0 ? `${l.conversionRate}%` : "—"}
+                      {l.conversionRate > 0 ? `${l.conversionRate}%` : "â€”"}
                     </td>
                     <td style={tdStyle}>
                       <Badge label={l.status} bg={ls.bg} color={ls.color} />
@@ -1455,9 +1455,9 @@ function LandingPagesTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Tab: Analytics ────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Tab: Analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function AnalyticsTab() {
   const totalLeads = MOCK_CAMPAIGNS.reduce((s, c) => s + c.leadsGenerated, 0);
   const totalSpent = MOCK_CAMPAIGNS.reduce((s, c) => s + c.spent, 0);
@@ -1524,7 +1524,7 @@ function AnalyticsTab() {
 
       {/* Conversion funnel */}
       <FunnelCard
-        subtitle="Visitors → MQL → SQL → Opportunity → Closed Won"
+        subtitle="Visitors â†’ MQL â†’ SQL â†’ Opportunity â†’ Closed Won"
         stages={[
           {
             id: "visitors",
@@ -1689,7 +1689,7 @@ function AnalyticsTab() {
                   <td
                     style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}
                   >
-                    {cp.cpl > 0 ? fmt(Math.round(cp.cpl)) : "—"}
+                    {cp.cpl > 0 ? fmt(Math.round(cp.cpl)) : "â€”"}
                   </td>
                   <td style={tdStyle}>
                     {cp.leads > 0 && (
@@ -1706,9 +1706,9 @@ function AnalyticsTab() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// ─── Main Page ─────────────────────────────────────────────────────
-// ═══════════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function MarketingPage() {
   return (
     <Suspense fallback={null}>
@@ -1785,7 +1785,7 @@ function MarketingPageInner() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* ─── Header ─────────────────────────────────── */}
+      {/* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <header
         className="flex items-center justify-between px-6 py-4 flex-shrink-0"
         style={{
@@ -1836,7 +1836,7 @@ function MarketingPageInner() {
         ]}
       />
 
-      {/* ─── Tabs ───────────────────────────────────── */}
+      {/* â”€â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         style={{
           display: "flex",
@@ -1857,7 +1857,7 @@ function MarketingPageInner() {
         ))}
       </div>
 
-      {/* ─── Content ────────────────────────────────── */}
+      {/* â”€â”€â”€ Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div
         className={
           tab === "dashboard"
@@ -1865,7 +1865,7 @@ function MarketingPageInner() {
             : "flex-1 overflow-auto content-scroll px-6 py-6"
         }
       >
-        {tab === "dashboard" && <ProjectsDashboardView />}
+        {tab === "dashboard" && <MarketingDashboardView />}
         {tab === "campaigns" && <CampaignsTab />}
         {tab === "email" && <EmailMarketingTab />}
         {tab === "social" && <SocialMediaTab />}

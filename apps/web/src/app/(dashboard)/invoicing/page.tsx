@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { InvoicingDashboardView } from "@/components/invoicing/InvoicingDashboardView";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import { PageHeader, Pill } from "@/components/shared/Kit";
@@ -70,7 +70,7 @@ import {
   type RefundType,
 } from "@/lib/stores/invoicing";
 
-// ─── Shared Types ─────────────────────────────────────────────────
+// â”€â”€â”€ Shared Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type Tab =
   | "dashboard"
   | "customers"
@@ -83,7 +83,7 @@ type Tab =
 
 type SortDir = "asc" | "desc";
 
-// ─── Helpers ──────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
@@ -105,7 +105,7 @@ function fmtDate(iso: string): string {
   });
 }
 
-// ─── Status Badge Configs ─────────────────────────────────────────
+// â”€â”€â”€ Status Badge Configs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function invoiceStatusStyle(s: InvoiceStatus): { bg: string; color: string } {
   const map: Record<InvoiceStatus, { bg: string; color: string }> = {
     Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
@@ -173,7 +173,7 @@ function vendorStatusStyle(s: VendorStatus): { bg: string; color: string } {
   return map[s];
 }
 
-// ─── Shared Sub-Components ────────────────────────────────────────
+// â”€â”€â”€ Shared Sub-Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function TabBtn({
   label,
   active,
@@ -604,7 +604,7 @@ function Td({
   );
 }
 
-// ─── Sort Utility ─────────────────────────────────────────────────
+// â”€â”€â”€ Sort Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function useSortableData<T>(
   items: readonly T[],
   defaultKey: string,
@@ -642,7 +642,7 @@ function useSortableData<T>(
   return { sorted, sortKey, sortDir, handleSort };
 }
 
-// ─── Modal / Overlay ──────────────────────────────────────────────
+// â”€â”€â”€ Modal / Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const overlayStyle: React.CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -787,7 +787,7 @@ function FieldGroup({ children }: Readonly<{ children: React.ReactNode }>) {
   return <div style={{ marginBottom: 14 }}>{children}</div>;
 }
 
-// ─── Confirm Delete Dialog ────────────────────────────────────────
+// â”€â”€â”€ Confirm Delete Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ConfirmDeleteDialog({
   name,
   onConfirm,
@@ -849,7 +849,7 @@ function ConfirmDeleteDialog({
   );
 }
 
-// ─── Line Items Editor ────────────────────────────────────────────
+// â”€â”€â”€ Line Items Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LineItemsEditor({
   items,
   onChange,
@@ -1002,7 +1002,7 @@ function LineItemsEditor({
   );
 }
 
-// ─── Customer Modal ───────────────────────────────────────────────
+// â”€â”€â”€ Customer Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CustomerModal({
   existing,
   onClose,
@@ -1087,7 +1087,7 @@ function CustomerModal({
   );
 }
 
-// ─── Invoice Modal ────────────────────────────────────────────────
+// â”€â”€â”€ Invoice Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InvoiceModal({
   existing,
   onClose,
@@ -1175,7 +1175,7 @@ function InvoiceModal({
   );
 }
 
-// ─── Credit Note Modal ────────────────────────────────────────────
+// â”€â”€â”€ Credit Note Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CreditNoteModal({ onClose }: { onClose: () => void }) {
   const { customers, invoices, addCreditNote } = useInvoicingStore();
   const [customer, setCustomer] = useState("");
@@ -1262,7 +1262,7 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Payment Modal ────────────────────────────────────────────────
+// â”€â”€â”€ Payment Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PaymentModal({ onClose }: { onClose: () => void }) {
   const { customers, invoices, addPayment } = useInvoicingStore();
   const [customer, setCustomer] = useState("");
@@ -1372,7 +1372,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Vendor Modal ─────────────────────────────────────────────────
+// â”€â”€â”€ Vendor Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function VendorModal({
   existing,
   onClose,
@@ -1467,7 +1467,7 @@ function VendorModal({
   );
 }
 
-// ─── Bill Modal ───────────────────────────────────────────────────
+// â”€â”€â”€ Bill Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BillModal({
   existing,
   onClose,
@@ -1545,7 +1545,7 @@ function BillModal({
   );
 }
 
-// ─── Refund Modal ─────────────────────────────────────────────────
+// â”€â”€â”€ Refund Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RefundModal({ onClose }: { onClose: () => void }) {
   const { customers, vendors, addRefund } = useInvoicingStore();
   const [type, setType] = useState<RefundType>("Customer Refund");
@@ -1635,7 +1635,7 @@ function RefundModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Tab: Customers ───────────────────────────────────────────────
+// â”€â”€â”€ Tab: Customers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CustomersTab() {
   const router = useRouter();
   const { customers, deleteCustomer } = useInvoicingStore();
@@ -1645,7 +1645,7 @@ function CustomersTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const filtered = useSearchIndex(customers, (c) => [c.name, c.email], search);
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
@@ -1846,7 +1846,7 @@ function CustomersTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted customer — ${snapshot.name}`,
+              label: `Deleted customer â€” ${snapshot.name}`,
               mutate: () => deleteCustomer(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addCustomer({
@@ -1864,7 +1864,7 @@ function CustomersTab() {
   );
 }
 
-// ─── Tab: Invoices ────────────────────────────────────────────────
+// â”€â”€â”€ Tab: Invoices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function InvoicesTab() {
   const router = useRouter();
   const { invoices, markAsPaid, sendInvoice, deleteInvoice, updateInvoice } =
@@ -1873,7 +1873,7 @@ function InvoicesTab() {
   const selectedInvoice = invoiceDetail.id
     ? invoices.find((i) => i.id === invoiceDetail.id)
     : undefined;
-  // Saved views (Phase 11.1) — status filter is the only persisted
+  // Saved views (Phase 11.1) â€” status filter is the only persisted
   // dimension for invoices today. Built-ins ship for the common
   // "Overdue" + "Drafts" filter combinations so the bar feels
   // populated on first load.
@@ -1897,11 +1897,11 @@ function InvoicesTab() {
     { type: "create" } | { type: "edit"; invoice: Invoice } | null
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
-  // Bulk-selection (Phase 10.4) — multi-select invoices for batch
+  // Bulk-selection (Phase 10.4) â€” multi-select invoices for batch
   // mark-paid / mark-sent / delete. Pattern matches the Contacts wiring.
   const sel = useBulkSelection();
 
-  // Pull-to-refresh (Phase 11.4) — placeholder until invoicing store
+  // Pull-to-refresh (Phase 11.4) â€” placeholder until invoicing store
   // grows a server-backed hydrate. Subscribing now still re-runs the
   // route which re-renders any RSC.
   usePullToRefresh(() => {
@@ -1939,7 +1939,7 @@ function InvoicesTab() {
     downloadInvoicePdf(payload, {
       name: "VYNE Demo Org",
       email: "billing@vyne.dev",
-      address: "Charlotte, NC · https://vyne.vercel.app",
+      address: "Charlotte, NC Â· https://vyne.vercel.app",
       accentColor: "var(--vyne-accent, #06B6D4)",
     });
   }
@@ -2213,7 +2213,7 @@ function InvoicesTab() {
                     type="number"
                     label="Amount"
                     cellKey={`invoice:${inv.id}#amount`}
-                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
                     render={(v) => fmtFull(Number(v))}
                     style={{ fontWeight: 700 }}
                   />
@@ -2397,7 +2397,7 @@ function InvoicesTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted invoice — ${snapshot.number}`,
+              label: `Deleted invoice â€” ${snapshot.number}`,
               mutate: () => deleteInvoice(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addInvoice({
@@ -2439,7 +2439,7 @@ function InvoiceDetailPanel({
       title={invoice?.number ?? ""}
       subtitle={
         invoice
-          ? `${invoice.customer} · due ${fmtDate(invoice.dueDate)}`
+          ? `${invoice.customer} Â· due ${fmtDate(invoice.dueDate)}`
           : undefined
       }
       badge={
@@ -2553,7 +2553,7 @@ function InvoiceDetailPanel({
                       <div
                         style={{ color: "var(--text-tertiary)", fontSize: 11 }}
                       >
-                        {li.qty} × {fmtFull(li.rate)}
+                        {li.qty} Ã— {fmtFull(li.rate)}
                       </div>
                     </div>
                     <div
@@ -2592,7 +2592,7 @@ function InvoiceDetailPanel({
   );
 }
 
-// ─── Tab: Credit Notes ────────────────────────────────────────────
+// â”€â”€â”€ Tab: Credit Notes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function CreditNotesTab() {
   const { creditNotes, deleteCreditNote } = useInvoicingStore();
   const [showModal, setShowModal] = useState(false);
@@ -2755,7 +2755,7 @@ function CreditNotesTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted credit note — ${snapshot.number}`,
+              label: `Deleted credit note â€” ${snapshot.number}`,
               mutate: () => deleteCreditNote(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addCreditNote({
@@ -2774,7 +2774,7 @@ function CreditNotesTab() {
   );
 }
 
-// ─── Tab: Payments ────────────────────────────────────────────────
+// â”€â”€â”€ Tab: Payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function PaymentsTab() {
   const { payments, deletePayment } = useInvoicingStore();
   const [methodFilter, setMethodFilter] = useState<"All" | PaymentMethod>(
@@ -2983,7 +2983,7 @@ function PaymentsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted payment — ${snapshot.number}`,
+              label: `Deleted payment â€” ${snapshot.number}`,
               mutate: () => deletePayment(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addPayment({
@@ -3003,7 +3003,7 @@ function PaymentsTab() {
   );
 }
 
-// ─── Tab: Vendors ─────────────────────────────────────────────────
+// â”€â”€â”€ Tab: Vendors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function VendorsTab() {
   const router = useRouter();
   const { vendors, deleteVendor } = useInvoicingStore();
@@ -3013,7 +3013,7 @@ function VendorsTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Vendor | null>(null);
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const filtered = useSearchIndex(
     vendors,
     (v) => [v.name, v.contact, v.email],
@@ -3197,7 +3197,7 @@ function VendorsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted vendor — ${snapshot.name}`,
+              label: `Deleted vendor â€” ${snapshot.name}`,
               mutate: () => deleteVendor(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addVendor({
@@ -3216,7 +3216,7 @@ function VendorsTab() {
   );
 }
 
-// ─── Tab: Bills ───────────────────────────────────────────────────
+// â”€â”€â”€ Tab: Bills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BillsTab() {
   const router = useRouter();
   const { bills, markBillPaid, deleteBill } = useInvoicingStore();
@@ -3486,7 +3486,7 @@ function BillsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted bill — ${snapshot.number}`,
+              label: `Deleted bill â€” ${snapshot.number}`,
               mutate: () => deleteBill(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addBill({
@@ -3504,7 +3504,7 @@ function BillsTab() {
   );
 }
 
-// ─── Tab: Refunds ─────────────────────────────────────────────────
+// â”€â”€â”€ Tab: Refunds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function RefundsTab() {
   const { refunds, deleteRefund } = useInvoicingStore();
   const [showModal, setShowModal] = useState(false);
@@ -3682,7 +3682,7 @@ function RefundsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted refund — ${snapshot.number}`,
+              label: `Deleted refund â€” ${snapshot.number}`,
               mutate: () => deleteRefund(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addRefund({
@@ -3701,7 +3701,7 @@ function RefundsTab() {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function InvoicingPage() {
   return (
     <Suspense fallback={null}>
@@ -3858,7 +3858,7 @@ function InvoicingPageInner() {
           },
           {
             label: "DSO",
-            value: dso > 0 ? `${dso}d` : "—",
+            value: dso > 0 ? `${dso}d` : "â€”",
             hint: "days sales outstanding",
             goodWhenUp: false,
           },
@@ -3937,7 +3937,7 @@ function InvoicingPageInner() {
           padding: tab === "dashboard" ? 0 : 20,
         }}
       >
-        {tab === "dashboard" && <ProjectsDashboardView />}
+        {tab === "dashboard" && <InvoicingDashboardView />}
         {tab === "customers" && <CustomersTab />}
         {tab === "invoices" && (
           <>

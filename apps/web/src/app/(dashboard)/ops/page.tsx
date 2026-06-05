@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { OpsDashboardView } from "@/components/ops/OpsDashboardView";
 import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import { useOpsStore } from "@/lib/stores/ops";
@@ -249,7 +249,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-// ─── Overview tab ─────────────────────────────────────────────────
+// â”€â”€â”€ Overview tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function OverviewTab({
   products,
   orders,
@@ -532,7 +532,7 @@ function OverviewTab({
                     <div
                       style={{ fontSize: 10, color: "var(--text-tertiary)" }}
                     >
-                      {p.sku} · {p.stockQty} left
+                      {p.sku} Â· {p.stockQty} left
                     </div>
                   </div>
                   <StatusBadge status={p.status ?? "in_stock"} />
@@ -560,7 +560,7 @@ function OverviewTab({
   );
 }
 
-// ─── Inventory tab ────────────────────────────────────────────────
+// â”€â”€â”€ Inventory tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function stockQtyColor(qty: number): string {
   if (qty === 0) return "var(--status-danger)";
   if (qty <= 10) return "var(--status-warning)";
@@ -595,14 +595,14 @@ function InventoryTab({
   const [adjustQty, setAdjustQty] = useState("");
   const [adjustReason, setAdjustReason] = useState("received");
 
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const filtered = useSearchIndex(
     products,
     (p) => [p.name, p.sku],
     debouncedSearch,
   );
 
-  // Bulk selection (Phase 11.2) — multi-select products for batch
+  // Bulk selection (Phase 11.2) â€” multi-select products for batch
   // delete with undo. Pattern matches Contacts / Invoicing.
   const sel = useBulkSelection();
 
@@ -665,7 +665,7 @@ function InventoryTab({
           <SharedSearchBar
             value={search}
             onChange={setSearch}
-            placeholder="Search products…"
+            placeholder="Search productsâ€¦"
             width={320}
             onWorkspaceSearch={() =>
               window.dispatchEvent(
@@ -847,7 +847,7 @@ function InventoryTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {p.categoryName ?? "—"}
+                  {p.categoryName ?? "â€”"}
                 </td>
                 <td
                   style={{
@@ -867,7 +867,7 @@ function InventoryTab({
                     type="number"
                     label="Stock qty"
                     cellKey={`product:${p.id}#stockQty`}
-                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
                   />
                 </td>
                 <td
@@ -896,7 +896,7 @@ function InventoryTab({
                     type="number"
                     label="Cost price"
                     cellKey={`product:${p.id}#costPrice`}
-                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
                     render={(v) => `$${Number(v).toFixed(2)}`}
                   />
                 </td>
@@ -918,7 +918,7 @@ function InventoryTab({
                     type="number"
                     label="Price"
                     cellKey={`product:${p.id}#price`}
-                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
                     render={(v) => `$${Number(v).toFixed(2)}`}
                   />
                 </td>
@@ -960,7 +960,7 @@ function InventoryTab({
                           return;
                         const snapshot = { ...p };
                         undoableDelete({
-                          label: `Deleted product — ${snapshot.name}`,
+                          label: `Deleted product â€” ${snapshot.name}`,
                           mutate: () =>
                             useOpsStore.getState().deleteProduct(snapshot.id),
                           restore: () =>
@@ -1158,7 +1158,7 @@ function InventoryTab({
       <Modal
         open={!!adjustOpen}
         onClose={() => setAdjustOpen(null)}
-        title={`Adjust Stock — ${adjustOpen?.name}`}
+        title={`Adjust Stock â€” ${adjustOpen?.name}`}
         width={380}
       >
         <div
@@ -1348,7 +1348,7 @@ function ProductDetailPanel({
   );
 }
 
-// ─── Orders tab ───────────────────────────────────────────────────
+// â”€â”€â”€ Orders tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function OrdersTab({
   orders,
   setOrders,
@@ -1368,7 +1368,7 @@ function OrdersTab({
     "delivered",
     "cancelled",
   ];
-  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
   const searchHits = useSearchIndex(
     orders,
     (o) => [o.customerName, o.orderNumber],
@@ -1454,7 +1454,7 @@ function OrdersTab({
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search orders…"
+              placeholder="Search ordersâ€¦"
               style={{
                 border: "none",
                 background: "transparent",
@@ -1676,7 +1676,7 @@ function OrdersTab({
                           return;
                         const snapshot = { ...o };
                         undoableDelete({
-                          label: `Deleted order — ${snapshot.orderNumber}`,
+                          label: `Deleted order â€” ${snapshot.orderNumber}`,
                           mutate: () =>
                             useOpsStore.getState().deleteOrder(snapshot.id),
                           restore: () =>
@@ -1790,7 +1790,7 @@ function OrdersTab({
   );
 }
 
-// ─── Suppliers tab ────────────────────────────────────────────────
+// â”€â”€â”€ Suppliers tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SuppliersTab({
   suppliers,
   setSuppliers,
@@ -1909,7 +1909,7 @@ function SuppliersTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {s.contactName ?? "—"}
+                  {s.contactName ?? "â€”"}
                 </td>
                 <td
                   style={{
@@ -1918,7 +1918,7 @@ function SuppliersTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {s.email ?? "—"}
+                  {s.email ?? "â€”"}
                 </td>
                 <td
                   style={{
@@ -1927,7 +1927,7 @@ function SuppliersTab({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  {s.phone ?? "—"}
+                  {s.phone ?? "â€”"}
                 </td>
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={s.status ?? "active"} />
@@ -1945,7 +1945,7 @@ function SuppliersTab({
                         return;
                       const snapshot = { ...s };
                       undoableDelete({
-                        label: `Deleted supplier — ${snapshot.name}`,
+                        label: `Deleted supplier â€” ${snapshot.name}`,
                         mutate: () =>
                           useOpsStore.getState().deleteSupplier(snapshot.id),
                         restore: () =>
@@ -2060,7 +2060,7 @@ function SuppliersTab({
   );
 }
 
-// ─── Manufacturing tab ────────────────────────────────────────────
+// â”€â”€â”€ Manufacturing tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ManufacturingTab({
   boms,
   workOrders,
@@ -2157,13 +2157,14 @@ function ManufacturingTab({
                 >
                   {DEMO_BOM_TREES.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} · {t.sku}
+                      {t.name} Â· {t.sku}
                     </option>
                   ))}
                 </select>
                 <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-                  Top-down: final product → direct components → sub-components →
-                  raw materials. Costs roll up to the parent at every level.
+                  Top-down: final product â†’ direct components â†’
+                  sub-components â†’ raw materials. Costs roll up to the parent
+                  at every level.
                 </span>
               </div>
               <BOMFlowchart root={root} />
@@ -2284,7 +2285,7 @@ function ManufacturingTab({
                                     : "var(--status-success)",
                               }}
                             >
-                              {delta > 0 ? "▲" : "▼"}{" "}
+                              {delta > 0 ? "â–²" : "â–¼"}{" "}
                               {Math.abs(delta).toFixed(0)}
                             </span>
                           )}
@@ -2321,7 +2322,7 @@ function ManufacturingTab({
                             return;
                           const snapshot = { ...b };
                           undoableDelete({
-                            label: `Deleted BOM — ${snapshot.productName ?? "BOM"}`,
+                            label: `Deleted BOM â€” ${snapshot.productName ?? "BOM"}`,
                             mutate: () =>
                               useOpsStore.getState().deleteBom(snapshot.id),
                             restore: () =>
@@ -2464,7 +2465,7 @@ function ManufacturingTab({
                     >
                       {w.scheduledDate
                         ? new Date(w.scheduledDate).toLocaleDateString()
-                        : "—"}
+                        : "â€”"}
                     </td>
                     <td
                       style={{
@@ -2475,7 +2476,7 @@ function ManufacturingTab({
                     >
                       {w.dueDate
                         ? new Date(w.dueDate).toLocaleDateString()
-                        : "—"}
+                        : "â€”"}
                     </td>
                     <td style={{ padding: "10px 14px", textAlign: "right" }}>
                       <button
@@ -2490,7 +2491,7 @@ function ManufacturingTab({
                             return;
                           const snapshot = { ...w };
                           undoableDelete({
-                            label: `Deleted work order — ${snapshot.productName ?? "WO"}`,
+                            label: `Deleted work order â€” ${snapshot.productName ?? "WO"}`,
                             mutate: () =>
                               useOpsStore
                                 .getState()
@@ -2594,7 +2595,7 @@ function ManufacturingTab({
       <Modal
         open={!!bomDetail}
         onClose={() => setBomDetail(null)}
-        title={`BOM — ${bomDetail?.productName}`}
+        title={`BOM â€” ${bomDetail?.productName}`}
         width={440}
       >
         <div
@@ -2702,7 +2703,7 @@ function ManufacturingTab({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────
+// â”€â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function OpsPage() {
   return (
     <Suspense fallback={null}>
@@ -2853,7 +2854,7 @@ function OpsPageInner() {
       <PageHeader
         icon={<Package size={16} />}
         title="Operations"
-        subtitle="ERP · Inventory · Manufacturing · Orders"
+        subtitle="ERP Â· Inventory Â· Manufacturing Â· Orders"
         actions={
           <>
             <Pill tone="warn" dot>
@@ -2985,7 +2986,7 @@ function OpsPageInner() {
           padding: tab === "dashboard" ? 0 : 20,
         }}
       >
-        {tab === "dashboard" && <ProjectsDashboardView />}
+        {tab === "dashboard" && <OpsDashboardView />}
         {tab === "overview" && (
           <OverviewTab products={products} orders={orders} />
         )}

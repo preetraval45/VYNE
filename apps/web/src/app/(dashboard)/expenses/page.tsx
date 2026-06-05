@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { ExpensesDashboardView } from "@/components/expenses/ExpensesDashboardView";
 import {
   CATEGORY_LIMITS,
   type Expense,
@@ -18,7 +18,7 @@ import { MileageTab } from "@/components/expenses/MileageTab";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// ── Helpers ───────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function statusConfig(s: ExpenseStatus): {
   label: string;
   bg: string;
@@ -51,11 +51,11 @@ function statusConfig(s: ExpenseStatus): {
 
 function categoryIcon(c: ExpenseCategory): string {
   const map: Record<ExpenseCategory, string> = {
-    travel: "✈",
-    meals: "🍽",
-    software: "💻",
-    office: "🏢",
-    other: "📦",
+    travel: "âœˆ",
+    meals: "ðŸ½",
+    software: "ðŸ’»",
+    office: "ðŸ¢",
+    other: "ðŸ“¦",
   };
   return map[c];
 }
@@ -79,7 +79,7 @@ function isOverLimit(e: Expense): boolean {
   return e.amount > CATEGORY_LIMITS[e.category];
 }
 
-// ── Shared UI ─────────────────────────────────────────────────────
+// â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function StatusBadge({ status }: Readonly<{ status: ExpenseStatus }>) {
   const s = statusConfig(status);
   return (
@@ -208,7 +208,7 @@ function Modal({
               color: "var(--text-secondary)",
             }}
           >
-            ×
+            Ã—
           </button>
         </div>
         {children}
@@ -228,7 +228,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-// ── My Expenses Tab ───────────────────────────────────────────────
+// â”€â”€ My Expenses Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function MyExpensesTab({
   expenses,
   onAdd,
@@ -238,7 +238,7 @@ function MyExpensesTab({
   onAdd: (e: Omit<Expense, "id">) => void;
   onSubmit: (id: string) => void;
 }>) {
-  // PH-F typecheck fix — pull updateExpense from the store so the
+  // PH-F typecheck fix â€” pull updateExpense from the store so the
   // inline EditableCell handlers below can mutate rows server-side.
   const updateExpense = useExpensesStore((s) => s.updateExpense);
   const [showModal, setShowModal] = useState(false);
@@ -519,7 +519,7 @@ function MyExpensesTab({
                     type="number"
                     label="Amount"
                     cellKey={`expense:${e.id}#amount`}
-                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
                     render={(v) => fmt(Number(v))}
                   />
                 </td>
@@ -600,11 +600,11 @@ function MyExpensesTab({
                 }))
               }
             >
-              <option value="travel">✈ Travel</option>
-              <option value="meals">🍽 Meals & Entertainment</option>
-              <option value="software">💻 Software</option>
-              <option value="office">🏢 Office</option>
-              <option value="other">📦 Other</option>
+              <option value="travel">âœˆ Travel</option>
+              <option value="meals">ðŸ½ Meals & Entertainment</option>
+              <option value="software">ðŸ’» Software</option>
+              <option value="office">ðŸ¢ Office</option>
+              <option value="other">ðŸ“¦ Other</option>
             </select>
             <div
               style={{
@@ -715,7 +715,7 @@ function MyExpensesTab({
                   marginBottom: 14,
                 }}
               >
-                ⚠ Amount exceeds policy limit of{" "}
+                âš  Amount exceeds policy limit of{" "}
                 {fmt(CATEGORY_LIMITS[form.category])} for{" "}
                 {categoryLabel(form.category)}. Manager approval required.
               </div>
@@ -759,7 +759,7 @@ function MyExpensesTab({
   );
 }
 
-// ── Approvals Tab ─────────────────────────────────────────────────
+// â”€â”€ Approvals Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ApprovalsTab({
   expenses,
   onApprove,
@@ -792,7 +792,7 @@ function ApprovalsTab({
         }}
       >
         <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-          {pending.length} pending approval · total{" "}
+          {pending.length} pending approval Â· total{" "}
           {fmt(pending.reduce((s, e) => s + e.amount, 0))}
         </span>
         {selected.size > 0 && (
@@ -846,8 +846,8 @@ function ApprovalsTab({
             fontSize: 14,
           }}
         >
-          <div style={{ fontSize: 32, marginBottom: 10 }}>✅</div>
-          All caught up — no pending approvals
+          <div style={{ fontSize: 32, marginBottom: 10 }}>âœ…</div>
+          All caught up â€” no pending approvals
         </div>
       )}
 
@@ -1000,7 +1000,7 @@ function ApprovalsTab({
   );
 }
 
-// ── Reports Tab ───────────────────────────────────────────────────
+// â”€â”€ Reports Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
   const categories: ExpenseCategory[] = [
     "travel",
@@ -1305,7 +1305,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────
+// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function ExpensesPage() {
   return (
     <Suspense fallback={null}>
@@ -1496,7 +1496,7 @@ function ExpensesPageInner() {
           padding: tab === "dashboard" ? 0 : "20px 24px",
         }}
       >
-        {tab === "dashboard" && <ProjectsDashboardView />}
+        {tab === "dashboard" && <ExpensesDashboardView />}
         {tab === "mine" && (
           <MyExpensesTab
             expenses={expenses}
