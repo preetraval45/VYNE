@@ -58,7 +58,7 @@ export default function ChannelsDirectoryPage() {
     void (async () => {
       try {
         const list = await messagingApi.listChannels();
-        if (!cancel) setChannels(list ?? []);
+        if (!cancel) setChannels(list?.data ?? []);
       } catch {
         if (!cancel) setChannels([]);
       } finally {
@@ -169,13 +169,11 @@ export default function ChannelsDirectoryPage() {
             overflow: "hidden",
           }}
         >
-          {(
-            [
-              { id: "active" as const, label: "Active" },
-              { id: "members" as const, label: "Members" },
-              { id: "name" as const, label: "A–Z" },
-            ]
-          ).map((s) => (
+          {[
+            { id: "active" as const, label: "Active" },
+            { id: "members" as const, label: "Members" },
+            { id: "name" as const, label: "A–Z" },
+          ].map((s) => (
             <button
               key={s.id}
               type="button"
@@ -220,7 +218,11 @@ export default function ChannelsDirectoryPage() {
             color: "var(--text-tertiary)",
           }}
         >
-          <FilterIcon size={11} style={{ display: "inline" }} aria-hidden="true" />{" "}
+          <FilterIcon
+            size={11}
+            style={{ display: "inline" }}
+            aria-hidden="true"
+          />{" "}
           {visible.length} of {channels.length}
         </span>
       </div>
@@ -254,7 +256,9 @@ export default function ChannelsDirectoryPage() {
           }}
         >
           {visible.map((ch) => {
-            const pinned = isPinned(`/chat?channel=${encodeURIComponent(ch.id)}`);
+            const pinned = isPinned(
+              `/chat?channel=${encodeURIComponent(ch.id)}`,
+            );
             return (
               <li
                 key={ch.id}
@@ -340,11 +344,24 @@ export default function ChannelsDirectoryPage() {
                     color: "var(--text-tertiary)",
                   }}
                 >
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
                     <Users size={11} aria-hidden="true" /> {ch.memberCount ?? 0}
                   </span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                    <Clock size={11} aria-hidden="true" /> {relTime(ch.lastMessageAt)}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Clock size={11} aria-hidden="true" />{" "}
+                    {relTime(ch.lastMessageAt)}
                   </span>
                 </div>
                 <div
@@ -362,7 +379,8 @@ export default function ChannelsDirectoryPage() {
                       fontSize: 12,
                       fontWeight: 500,
                       textAlign: "center",
-                      border: "1px solid var(--vyne-accent, var(--vyne-purple))",
+                      border:
+                        "1px solid var(--vyne-accent, var(--vyne-purple))",
                       borderRadius: 6,
                       background: "var(--vyne-accent, var(--vyne-purple))",
                       color: "#fff",

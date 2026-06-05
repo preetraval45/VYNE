@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
+import { resolveTenant } from "@/lib/auth/tenantGuard";
 
-export const runtime = "edge";
+// PH-E: tenant-scoped. The orgId is read from the session cookie and
+// baked into the Stripe Checkout Session metadata so the webhook can
+// match the resulting subscription back to the right tenant. Demo
+// sessions can still open Checkout (useful for screenshot/landing-page
+// flows) but Stripe will not bind the subscription to a real org.
+
+// Node runtime so the session lookup + Prisma can run alongside the
+// outbound Stripe REST call.
+export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 interface CheckoutRequest {
@@ -55,6 +64,13 @@ export async function POST(req: Request) {
     );
   }
 
+  // PH-E: identify the tenant so the resulting subscription can be
+  // attributed to the right org via Stripe metadata. Anonymous /
+  // unauthenticated callers still get a Checkout Session — useful for
+  // pre-signup paid funnels — but their subscription will need to be
+  // manually attributed later if no orgId rides through.
+  const ctx = await resolveTenant(req);
+
   let payload: CheckoutRequest;
   try {
     payload = (await req.json()) as CheckoutRequest;
@@ -64,7 +80,9 @@ export async function POST(req: Request) {
   const plan = payload.plan?.toLowerCase();
   if (!plan || !(plan in PLAN_TO_PRICE_ENV)) {
     return NextResponse.json(
-      { error: `unknown plan; choose one of ${Object.keys(PLAN_TO_PRICE_ENV).join(", ")}` },
+      {
+        error: `unknown plan; choose one of ${Object.keys(PLAN_TO_PRICE_ENV).join(", ")}`,
+      },
       { status: 400 },
     );
   }
@@ -101,6 +119,15 @@ export async function POST(req: Request) {
   form.set("metadata[plan]", plan);
   form.set("metadata[seats]", String(seats));
   form.set("subscription_data[metadata][plan]", plan);
+  // PH-E: bind to the caller's tenant. The webhook reads
+  // subscription.metadata.orgId to know which Subscription row to upsert.
+  if (ctx?.orgId) {
+    form.set("metadata[orgId]", ctx.orgId);
+    form.set("subscription_data[metadata][orgId]", ctx.orgId);
+  }
+  if (ctx?.email && !payload.customerEmail) {
+    form.set("customer_email", ctx.email);
+  }
 
   try {
     const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {

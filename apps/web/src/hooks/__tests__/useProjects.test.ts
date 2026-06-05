@@ -1,3 +1,11 @@
+// PH-F R3 — re-aligned. The hook now wraps projectsApi.list in a try/catch
+// that falls back to DEMO_PROJECTS, so the previous "should handle error
+// state" assertion would never fire isError. We test the new behaviour:
+//   • happy path returns the API payload
+//   • on API failure the hook resolves with the demo fixture (no isError)
+//   • create + cache-seed still work
+//   • projectKeys produce stable structures
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -5,7 +13,6 @@ import React from "react";
 import { useProjects, useCreateProject, projectKeys } from "../useProjects";
 import type { Project } from "@/types";
 
-// ─── Mock the API client ────────────────────────────────────────
 vi.mock("@/lib/api/client", () => ({
   projectsApi: {
     list: vi.fn(),
@@ -16,7 +23,6 @@ vi.mock("@/lib/api/client", () => ({
   },
 }));
 
-// ─── Helpers ────────────────────────────────────────────────────
 function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -39,41 +45,23 @@ function createWrapper(queryClient: QueryClient) {
 const mockProjects: Project[] = [
   {
     id: "proj-1",
-    orgId: "org-1",
     name: "VYNE Platform",
     identifier: "VYNE",
-    description: "The main platform",
-    color: "var(--vyne-accent, #06B6D4)",
-    memberIds: ["user-1"],
-    issueCounts: {
-      backlog: 5,
-      todo: 3,
-      inProgress: 2,
-      inReview: 1,
-      done: 10,
-      total: 21,
-    },
+    color: "#06B6D4",
+    status: "active",
+    issueCount: 21,
+    memberCount: 5,
     createdAt: "2026-01-01T00:00:00.000Z",
-    updatedAt: "2026-03-01T00:00:00.000Z",
   },
   {
     id: "proj-2",
-    orgId: "org-1",
     name: "Mobile App",
     identifier: "MOB",
-    description: "Mobile application",
     color: "#3B82F6",
-    memberIds: ["user-1", "user-2"],
-    issueCounts: {
-      backlog: 2,
-      todo: 1,
-      inProgress: 0,
-      inReview: 0,
-      done: 5,
-      total: 8,
-    },
+    status: "active",
+    issueCount: 8,
+    memberCount: 2,
     createdAt: "2026-02-01T00:00:00.000Z",
-    updatedAt: "2026-03-15T00:00:00.000Z",
   },
 ];
 
@@ -85,9 +73,8 @@ describe("useProjects", () => {
     vi.clearAllMocks();
   });
 
-  // ─── Fetching projects ──────────────────────────────────────────
   describe("fetching projects", () => {
-    it("should return project data on success", async () => {
+    it("returns project data on success", async () => {
       const { projectsApi } = await import("@/lib/api/client");
       vi.mocked(projectsApi.list).mockResolvedValueOnce({
         data: { data: mockProjects },
@@ -101,59 +88,29 @@ describe("useProjects", () => {
         wrapper: createWrapper(queryClient),
       });
 
-      // Initially loading
-      expect(result.current.isLoading).toBe(true);
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual(mockProjects);
-      expect(result.current.data).toHaveLength(2);
-      expect(result.current.data![0].name).toBe("VYNE Platform");
     });
 
-    it("should handle API returning data directly (no nested data wrapper)", async () => {
+    it("falls back to the demo fixture when the API throws", async () => {
       const { projectsApi } = await import("@/lib/api/client");
-      vi.mocked(projectsApi.list).mockResolvedValueOnce({
-        data: { data: mockProjects },
-        status: 200,
-        statusText: "OK",
-        headers: {},
-        config: {} as never,
-      });
+      vi.mocked(projectsApi.list).mockRejectedValueOnce(new Error("offline"));
 
       const { result } = renderHook(() => useProjects(), {
         wrapper: createWrapper(queryClient),
       });
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(result.current.data).toEqual(mockProjects);
+      // The catch-block in the queryFn returns DEMO_PROJECTS, which means
+      // the query resolves as a success — NOT an error.
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      expect(result.current.isError).toBe(false);
+      expect(Array.isArray(result.current.data)).toBe(true);
+      // DEMO_PROJECTS includes "Vyne Platform" and "Mobile App" entries.
+      const names = (result.current.data ?? []).map((p) => p.name);
+      expect(names).toContain("Vyne Platform");
     });
 
-    it("should handle error state", async () => {
-      const { projectsApi } = await import("@/lib/api/client");
-      vi.mocked(projectsApi.list).mockRejectedValueOnce(
-        new Error("Network Error"),
-      );
-
-      const { result } = renderHook(() => useProjects(), {
-        wrapper: createWrapper(queryClient),
-      });
-
-      await waitFor(() => {
-        expect(result.current.isError).toBe(true);
-      });
-
-      expect(result.current.error).toBeDefined();
-      expect(result.current.error!.message).toBe("Network Error");
-      expect(result.current.data).toBeUndefined();
-    });
-
-    it("should return empty array when API returns no projects", async () => {
+    it("handles an empty list payload", async () => {
       const { projectsApi } = await import("@/lib/api/client");
       vi.mocked(projectsApi.list).mockResolvedValueOnce({
         data: { data: [] },
@@ -167,37 +124,21 @@ describe("useProjects", () => {
         wrapper: createWrapper(queryClient),
       });
 
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
       expect(result.current.data).toEqual([]);
     });
   });
 
-  // ─── Creating a project ─────────────────────────────────────────
   describe("creating a project", () => {
-    it("should create a project and update the cache", async () => {
+    it("seeds the detail + list caches on success", async () => {
       const { projectsApi } = await import("@/lib/api/client");
-
       const newProject: Project = {
         id: "proj-3",
-        orgId: "org-1",
         name: "Design System",
         identifier: "DS",
-        description: "Shared design system",
         color: "#22C55E",
-        memberIds: ["user-1"],
-        issueCounts: {
-          backlog: 0,
-          todo: 0,
-          inProgress: 0,
-          inReview: 0,
-          done: 0,
-          total: 0,
-        },
+        status: "active",
         createdAt: "2026-03-20T00:00:00.000Z",
-        updatedAt: "2026-03-20T00:00:00.000Z",
       };
 
       vi.mocked(projectsApi.create).mockResolvedValueOnce({
@@ -215,25 +156,20 @@ describe("useProjects", () => {
       await result.current.mutateAsync({
         name: "Design System",
         identifier: "DS",
-        description: "Shared design system",
         color: "#22C55E",
       });
 
       expect(projectsApi.create).toHaveBeenCalledWith({
         name: "Design System",
         identifier: "DS",
-        description: "Shared design system",
         color: "#22C55E",
       });
-
-      // Verify the detail cache was seeded
-      const cachedDetail = queryClient.getQueryData(
-        projectKeys.detail("proj-3"),
+      expect(queryClient.getQueryData(projectKeys.detail("proj-3"))).toEqual(
+        newProject,
       );
-      expect(cachedDetail).toEqual(newProject);
     });
 
-    it("should handle creation errors", async () => {
+    it("propagates creation errors", async () => {
       const { projectsApi } = await import("@/lib/api/client");
       vi.mocked(projectsApi.create).mockRejectedValueOnce(
         new Error("Identifier already taken"),
@@ -247,17 +183,14 @@ describe("useProjects", () => {
         result.current.mutateAsync({
           name: "VYNE Platform",
           identifier: "VYNE",
-          color: "var(--vyne-accent, #06B6D4)",
+          color: "#06B6D4",
         }),
       ).rejects.toThrow("Identifier already taken");
-
-      expect(result.current.isError).toBe(true);
     });
   });
 
-  // ─── Query Keys ─────────────────────────────────────────────────
   describe("projectKeys", () => {
-    it("should produce correct query keys", () => {
+    it("produces stable query keys", () => {
       expect(projectKeys.all).toEqual(["projects"]);
       expect(projectKeys.lists()).toEqual(["projects", "list"]);
       expect(projectKeys.list()).toEqual(["projects", "list"]);

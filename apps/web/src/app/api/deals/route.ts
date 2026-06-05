@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/api/security";
 import { publish } from "@/lib/pusher";
+import { requireTenant } from "@/lib/auth/tenantGuard";
 
 // ─── /api/deals ────────────────────────────────────────────────────
 //
@@ -9,6 +10,9 @@ import { publish } from "@/lib/pusher";
 // store mirrors writes here so changes survive across devices /
 // reloads / cleared localStorage. List is also used at app boot to
 // hydrate the local cache from the canonical source.
+//
+// Tenant scoping: every query filters on `orgId` from the session
+// (real or demo). No cross-tenant reads or writes can leak.
 
 export const dynamic = "force-dynamic";
 
@@ -63,11 +67,20 @@ function shape(d: {
 }
 
 export async function GET(req: Request) {
-  const rl = await rateLimit({ key: "deals-list", limit: 60, windowSec: 60, req });
+  const ctx = await requireTenant(req);
+  if (ctx instanceof Response) return ctx;
+
+  const rl = await rateLimit({
+    key: "deals-list",
+    limit: 60,
+    windowSec: 60,
+    req,
+  });
   if (!rl.ok) return rl.response!;
 
   try {
     const rows = await prisma.deal.findMany({
+      where: { orgId: ctx.orgId },
       orderBy: { createdAt: "desc" },
       take: 200,
     });
@@ -81,7 +94,15 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const rl = await rateLimit({ key: "deals-create", limit: 30, windowSec: 60, req });
+  const ctx = await requireTenant(req);
+  if (ctx instanceof Response) return ctx;
+
+  const rl = await rateLimit({
+    key: "deals-create",
+    limit: 30,
+    windowSec: 60,
+    req,
+  });
   if (!rl.ok) return rl.response!;
 
   let body: DealInput;
@@ -98,6 +119,7 @@ export async function POST(req: Request) {
     const deal = await prisma.deal.create({
       data: {
         id: body.id,
+        orgId: ctx.orgId,
         company: body.company,
         contactName: body.contactName ?? "",
         email: body.email ?? "",
@@ -109,7 +131,9 @@ export async function POST(req: Request) {
         nextAction: body.nextAction ?? "",
         notes: body.notes ?? "",
         customFields: (body.customFields ?? null) as never,
-        lastActivity: body.lastActivity ? new Date(body.lastActivity) : new Date(),
+        lastActivity: body.lastActivity
+          ? new Date(body.lastActivity)
+          : new Date(),
       },
     });
     const shaped = shape(deal);

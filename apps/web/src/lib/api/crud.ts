@@ -8,12 +8,16 @@ import {
   ADMIN_ROLES,
   type WorkspaceRole,
 } from "@/lib/auth/role";
+import { requireTenant } from "@/lib/auth/tenantGuard";
 
 // Generic CRUD route factory. Each module that wants Postgres-backed
 // list/create/update/delete writes ~10 lines instead of duplicating
-// the Deal route pattern. Multi-tenant scoping is by `org_id` field;
-// realtime fan-out goes to `org-${orgId}` Pusher channel under the
-// configured event names.
+// the Deal route pattern. Multi-tenant scoping is enforced at this
+// layer — every list/create/update/delete is gated by `requireTenant`
+// and every Prisma query filters on the caller's `orgId`. The legacy
+// `cfg.orgId` default is retained as a last-resort fallback used only
+// when somehow no session resolves (will not happen in practice now
+// that requireTenant rejects unauthenticated requests with 401).
 //
 // Convention:
 //   const handlers = createCrudHandlers({ model: "contact", orgId: "demo", events: { created: "contact:created", ... } });
@@ -34,7 +38,17 @@ type PrismaModelKey =
   | "taskDependency"
   | "order"
   | "supplier"
-  | "journalEntry";
+  | "journalEntry"
+  | "expense"
+  | "salesOpportunity"
+  | "salesQuote"
+  | "salesOrder"
+  | "salesProduct"
+  | "salesCustomer"
+  | "fieldTechnician"
+  | "fieldJob"
+  | "employee"
+  | "leaveRequest";
 
 interface CrudConfig {
   /** Prisma delegate name on the singleton (lowercased, matches schema model) */
@@ -73,6 +87,10 @@ interface CrudHandlers {
 function getDelegate(model: PrismaModelKey) {
   return prisma[model] as unknown as {
     findMany: (args: object) => Promise<unknown[]>;
+    findFirst: (args: {
+      where: object;
+      select?: object;
+    }) => Promise<{ orgId: string } | null>;
     create: (args: { data: object }) => Promise<{ orgId: string } & object>;
     update: (args: {
       where: object;
@@ -94,6 +112,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
 
   return {
     list: async (req: Request) => {
+      const ctx = await requireTenant(req);
+      if (ctx instanceof Response) return ctx;
+
       const rl = await rateLimit({
         key: `${cfg.resource}-list`,
         limit: 60,
@@ -104,6 +125,7 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
 
       try {
         const rows = await delegate.findMany({
+          where: { orgId: ctx.orgId },
           orderBy: { createdAt: "desc" },
           take: 500,
         });
@@ -120,6 +142,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
     },
 
     create: async (req: Request) => {
+      const ctx = await requireTenant(req);
+      if (ctx instanceof Response) return ctx;
+
       const rl = await rateLimit({
         key: `${cfg.resource}-create`,
         limit: 30,
@@ -145,7 +170,14 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
 
       try {
         const row = await delegate.create({
-          data: { orgId: orgIdDefault, ...(id ? { id } : {}), ...data },
+          // orgId from the session — `orgIdDefault` retained only as a
+          // last-resort fallback (should never trigger because ctx is
+          // guaranteed by requireTenant above).
+          data: {
+            orgId: ctx.orgId || orgIdDefault,
+            ...(id ? { id } : {}),
+            ...data,
+          },
         });
         void publish(
           `org-${(row as { orgId: string }).orgId}`,
@@ -162,6 +194,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
     },
 
     update: async (req, { params }) => {
+      const ctx = await requireTenant(req);
+      if (ctx instanceof Response) return ctx;
+
       const { id } = await params;
       const rl = await rateLimit({
         key: `${cfg.resource}-patch`,
@@ -184,10 +219,22 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
       const data: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(body)) {
         if (v === undefined) continue;
+        // Never let the body override the tenant boundary.
+        if (k === "orgId" || k === "org_id") continue;
         data[k] = v;
       }
 
       try {
+        // Tenant check: confirm the row belongs to the caller's org
+        // BEFORE updating. Cross-tenant PATCH returns 404 (not 403 — we
+        // don't even acknowledge the row exists).
+        const existing = await delegate.findFirst({
+          where: { id, orgId: ctx.orgId },
+          select: { orgId: true },
+        });
+        if (!existing) {
+          return NextResponse.json({ error: "Not found" }, { status: 404 });
+        }
         const row = await delegate.update({
           where: { id },
           data,
@@ -207,6 +254,9 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
     },
 
     remove: async (req, { params }) => {
+      const ctx = await requireTenant(req);
+      if (ctx instanceof Response) return ctx;
+
       const { id } = await params;
       const rl = await rateLimit({
         key: `${cfg.resource}-delete`,
@@ -220,14 +270,15 @@ export function createCrudHandlers(cfg: CrudConfig): CrudHandlers {
       if (roleCheck) return roleCheck;
 
       try {
-        const existing = await delegate.findUnique({
-          where: { id },
+        const existing = await delegate.findFirst({
+          where: { id, orgId: ctx.orgId },
           select: { orgId: true },
         });
-        await delegate.delete({ where: { id } });
-        if (existing) {
-          void publish(`org-${existing.orgId}`, cfg.events.deleted, { id });
+        if (!existing) {
+          return NextResponse.json({ error: "Not found" }, { status: 404 });
         }
+        await delegate.delete({ where: { id } });
+        void publish(`org-${existing.orgId}`, cfg.events.deleted, { id });
         return NextResponse.json({ ok: true });
       } catch (err) {
         return NextResponse.json(

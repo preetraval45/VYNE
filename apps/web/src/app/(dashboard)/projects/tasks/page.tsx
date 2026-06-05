@@ -5,11 +5,16 @@ import Link from "next/link";
 import { Star, Clock, CheckSquare, Search, X, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProjects, useProjectsStore } from "@/lib/stores/projects";
-import { TASK_STATUS_META, getMember, type Task } from "@/lib/fixtures/projects";
+import {
+  TASK_STATUS_META,
+  getMember,
+  type Task,
+} from "@/lib/fixtures/projects";
 import { ProjectsStatsStrip } from "@/components/projects/ProjectsStatsStrip";
 import { PageHeader, EmptyState } from "@/components/shared/Kit";
 import { EditableCell } from "@/components/shared/EditableCell";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 
 type Filter = "open" | "done" | "all";
 
@@ -20,21 +25,27 @@ export default function TasksKanbanPage() {
   const addTask = useProjectsStore((s) => s.addTask);
   const [filter, setFilter] = useState<Filter>("open");
   const [search, setSearch] = useState("");
-  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
-  const [createForProjectId, setCreateForProjectId] = useState<string | null>(null);
+  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(
+    null,
+  );
+  const [createForProjectId, setCreateForProjectId] = useState<string | null>(
+    null,
+  );
   const showCreate = createForProjectId !== null;
 
-  const visibleTasks = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return allTasks.filter((t) => {
-      if (filter === "open" && t.status === "done") return false;
-      if (filter === "done" && t.status !== "done") return false;
-      if (q && !(t.title.toLowerCase().includes(q) || t.key.toLowerCase().includes(q))) {
-        return false;
-      }
-      return true;
-    });
-  }, [allTasks, filter, search]);
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke
+  // instead of O(n × fields × q-len). Index is built once per allTasks
+  // reference and re-used across every filter/search change.
+  const searchHits = useSearchIndex(allTasks, (t) => [t.title, t.key], search);
+  const visibleTasks = useMemo(
+    () =>
+      searchHits.filter((t) => {
+        if (filter === "open" && t.status === "done") return false;
+        if (filter === "done" && t.status !== "done") return false;
+        return true;
+      }),
+    [searchHits, filter],
+  );
 
   const grouped = useMemo(() => {
     const map = new Map<string, Task[]>();
@@ -51,9 +62,12 @@ export default function TasksKanbanPage() {
   const kpis = useMemo(() => {
     const total = allTasks.length;
     const done = allTasks.filter((t) => t.status === "done").length;
-    const inProgress = allTasks.filter((t) => t.status === "in_progress").length;
+    const inProgress = allTasks.filter(
+      (t) => t.status === "in_progress",
+    ).length;
     const overdue = allTasks.filter(
-      (t) => t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
+      (t) =>
+        t.status !== "done" && t.dueDate && new Date(t.dueDate) < new Date(),
     ).length;
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
     return { total, done, inProgress, overdue, pct };
@@ -69,7 +83,8 @@ export default function TasksKanbanPage() {
     if (!task || task.projectId === projectId) return;
     const previousProjectId = task.projectId;
     updateTask(taskId, { projectId });
-    const projectName = projects.find((p) => p.id === projectId)?.name ?? "project";
+    const projectName =
+      projects.find((p) => p.id === projectId)?.name ?? "project";
     toast.success(
       (t) => (
         <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
@@ -105,9 +120,24 @@ export default function TasksKanbanPage() {
       <ProjectsStatsStrip
         items={[
           { label: "Total", value: kpis.total, hint: "All tasks" },
-          { label: "In progress", value: kpis.inProgress, tone: "teal", hint: "Active now" },
-          { label: "Done", value: `${kpis.pct}%`, tone: "success", hint: `${kpis.done} complete` },
-          { label: "Overdue", value: kpis.overdue, tone: kpis.overdue > 0 ? "danger" : "default", hint: "Past due date" },
+          {
+            label: "In progress",
+            value: kpis.inProgress,
+            tone: "teal",
+            hint: "Active now",
+          },
+          {
+            label: "Done",
+            value: `${kpis.pct}%`,
+            tone: "success",
+            hint: `${kpis.done} complete`,
+          },
+          {
+            label: "Overdue",
+            value: kpis.overdue,
+            tone: kpis.overdue > 0 ? "danger" : "default",
+            hint: "Past due date",
+          },
         ]}
       />
       <PageHeader
@@ -140,7 +170,8 @@ export default function TasksKanbanPage() {
                     fontSize: 12.5,
                     fontWeight: 600,
                     color: filter === f ? "#fff" : "var(--text-secondary)",
-                    background: filter === f ? "var(--vyne-teal)" : "transparent",
+                    background:
+                      filter === f ? "var(--vyne-teal)" : "transparent",
                     border: "none",
                     cursor: "pointer",
                     textTransform: "capitalize",
@@ -215,7 +246,10 @@ export default function TasksKanbanPage() {
 
       <div
         className="flex-1 overflow-x-auto content-scroll"
-        style={{ padding: "18px 20px 24px", background: "var(--content-bg-secondary)" }}
+        style={{
+          padding: "18px 20px 24px",
+          background: "var(--content-bg-secondary)",
+        }}
       >
         {projects.length === 0 ? (
           <EmptyState
@@ -245,8 +279,13 @@ export default function TasksKanbanPage() {
                   }}
                   onDragLeave={(e) => {
                     const related = e.relatedTarget as Node | null;
-                    if (!related || !(e.currentTarget as Node).contains(related)) {
-                      setDragOverProjectId((v) => (v === project.id ? null : v));
+                    if (
+                      !related ||
+                      !(e.currentTarget as Node).contains(related)
+                    ) {
+                      setDragOverProjectId((v) =>
+                        v === project.id ? null : v,
+                      );
                     }
                   }}
                   onDrop={(e) => onDropToProject(e, project.id)}
@@ -257,7 +296,9 @@ export default function TasksKanbanPage() {
                     border: `1px solid ${isOver ? "var(--vyne-teal)" : "var(--content-border)"}`,
                     borderRadius: 12,
                     padding: 6,
-                    boxShadow: isOver ? "0 12px 28px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)" : "none",
+                    boxShadow: isOver
+                      ? "0 12px 28px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)"
+                      : "none",
                     transition: "box-shadow 0.15s, border-color 0.15s",
                   }}
                 >
@@ -313,7 +354,15 @@ export default function TasksKanbanPage() {
                       {tasks.length}
                     </span>
                   </header>
-                  <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 8, minHeight: 60 }}>
+                  <div
+                    style={{
+                      padding: 8,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      minHeight: 60,
+                    }}
+                  >
                     {tasks.length === 0 ? (
                       <p
                         style={{
@@ -330,7 +379,9 @@ export default function TasksKanbanPage() {
                         No tasks
                       </p>
                     ) : (
-                      tasks.map((task) => <TaskCard key={task.id} task={task} />)
+                      tasks.map((task) => (
+                        <TaskCard key={task.id} task={task} />
+                      ))
                     )}
                   </div>
                   <Link
@@ -378,7 +429,8 @@ export default function TasksKanbanPage() {
             subtasks: [],
             comments: [],
           });
-          const name = projects.find((p) => p.id === projectId)?.name ?? "project";
+          const name =
+            projects.find((p) => p.id === projectId)?.name ?? "project";
           toast.success(`Task added to ${name}`);
           setCreateForProjectId(null);
         }}
@@ -406,7 +458,8 @@ function NewTaskQuickModal({
   const [title, setTitle] = useState("");
 
   if (!open) return null;
-  const effectiveProjectId = projectId || defaultProjectId || projects[0]?.id || "";
+  const effectiveProjectId =
+    projectId || defaultProjectId || projects[0]?.id || "";
 
   return (
     <div
@@ -442,8 +495,22 @@ function NewTaskQuickModal({
           outline: "none",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 16,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+            }}
+          >
             New task
           </h2>
           <button
@@ -473,7 +540,15 @@ function NewTaskQuickModal({
           style={{ display: "flex", flexDirection: "column", gap: 12 }}
         >
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Project</span>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+              }}
+            >
+              Project
+            </span>
             <select
               value={effectiveProjectId}
               onChange={(e) => setProjectId(e.target.value)}
@@ -488,7 +563,15 @@ function NewTaskQuickModal({
             </select>
           </label>
           <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-secondary)" }}>Title</span>
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "var(--text-secondary)",
+              }}
+            >
+              Title
+            </span>
             <input
               type="text"
               value={title}
@@ -499,7 +582,14 @@ function NewTaskQuickModal({
               required
             />
           </label>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+              marginTop: 6,
+            }}
+          >
             <button type="button" onClick={onClose} style={cancelBtn}>
               Cancel
             </button>
@@ -612,13 +702,17 @@ function TaskCard({ task }: { task: Task }) {
       >
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           {task.dueDate && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <span
+              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            >
               <Clock size={11} />
               {new Date(task.dueDate).toLocaleDateString()}
             </span>
           )}
           {total > 0 && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <span
+              style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            >
               <CheckSquare size={11} /> {done}/{total}
             </span>
           )}

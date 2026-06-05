@@ -24,7 +24,11 @@ import type { User } from "@/types";
 import { clearDemoSession, markDemoSession } from "@/lib/stores/seedMode";
 
 const PREVIEW_MODULES = [
-  { icon: MessageSquare, label: "Messaging", color: "var(--vyne-accent, #06B6D4)" },
+  {
+    icon: MessageSquare,
+    label: "Messaging",
+    color: "var(--vyne-accent, #06B6D4)",
+  },
   { icon: FolderKanban, label: "Projects", color: "#3B82F6" },
   { icon: FileText, label: "Docs", color: "#22C55E" },
   { icon: Package, label: "ERP", color: "#F59E0B" },
@@ -34,11 +38,7 @@ const PREVIEW_MODULES = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const {
-    setUser,
-    setToken,
-    setRefreshToken,
-  } = useAuthStore();
+  const { setUser, setToken, setRefreshToken } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +46,12 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const clearError = () => setError(null);
+
+  // PH-D — MFA second-step. Once /api/auth/login returns step:"mfa", we
+  // swap the password form for a 6-digit (or recovery code) input and
+  // POST to /api/auth/mfa/verify with the short-lived session token.
+  const [mfaStep, setMfaStep] = useState<{ token: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   async function enterDemo() {
     // Flag this browser as a demo session so Zustand stores + dashboard
@@ -77,6 +83,29 @@ export default function LoginPage() {
     router.push("/home");
   }
 
+  // Shared success path — invoked by both the password step (no MFA)
+  // AND the MFA verify step. Sets the auth store + hydrates per-user
+  // module list, then redirects.
+  function applyLoginSuccess(data: {
+    token: string;
+    user: User & { modules: string[]; companyName: string; plan: string };
+  }) {
+    clearDemoSession();
+    setUser({
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.name,
+      orgId: data.user.orgId,
+      role: data.user.role,
+      createdAt: data.user.createdAt,
+    });
+    setToken(data.token);
+    setRefreshToken(data.token);
+    localStorage.setItem("vyne-modules", JSON.stringify(data.user.modules));
+    localStorage.setItem("vyne-onboarded", "true");
+    router.push("/home");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     clearError();
@@ -92,32 +121,62 @@ export default function LoginPage() {
         ok?: boolean;
         error?: string;
         token?: string;
+        step?: "mfa";
+        mfaSessionToken?: string;
         user?: User & { modules: string[]; companyName: string; plan: string };
       };
+
+      // PH-D: MFA gate. Password verified but the account needs a
+      // second factor — switch to the 6-digit input.
+      if (res.ok && data.step === "mfa" && data.mfaSessionToken) {
+        setMfaStep({ token: data.mfaSessionToken });
+        setMfaCode("");
+        return;
+      }
+
       if (!res.ok || !data.user || !data.token) {
         setError(data.error ?? "Login failed. Please try again.");
         return;
       }
-      // Real login → make sure the demo seed flag is OFF so this user
-      // doesn't inherit the showcase fixtures from a prior demo browse.
-      clearDemoSession();
-      setUser({
-        id: data.user.id,
-        email: data.user.email,
-        name: data.user.name,
-        orgId: data.user.orgId,
-        role: data.user.role,
-        createdAt: data.user.createdAt,
-      });
-      setToken(data.token);
-      setRefreshToken(data.token);
-      // Hydrate the per-account module list so the sidebar matches what
-      // the user picked at signup, even on a fresh device.
-      localStorage.setItem("vyne-modules", JSON.stringify(data.user.modules));
-      localStorage.setItem("vyne-onboarded", "true");
-      router.push("/home");
+      applyLoginSuccess({ token: data.token, user: data.user });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // PH-D: handle MFA second-step submission.
+  async function handleMfaSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!mfaStep) return;
+    clearError();
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/mfa/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          mfaSessionToken: mfaStep.token,
+          code: mfaCode.trim(),
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        token?: string;
+        user?: User & { modules: string[]; companyName: string; plan: string };
+      };
+      if (!res.ok || !data.user || !data.token) {
+        setError(data.error ?? "Invalid code. Try again.");
+        return;
+      }
+      applyLoginSuccess({ token: data.token, user: data.user });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't verify code.");
     } finally {
       setIsLoading(false);
     }
@@ -228,65 +287,37 @@ export default function LoginPage() {
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium mb-1.5"
-                  style={{ color: "rgba(255,255,255,0.7)" }}
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  autoComplete="email"
-                  autoFocus
-                  className={cn(
-                    "auth-input w-full px-4 py-3 rounded-lg text-sm text-white",
-                    "placeholder:text-[#4A4A6A]",
-                    "transition-all duration-150",
-                  )}
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    outline: "none",
-                  }}
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
+            {mfaStep ? (
+              // PH-D — MFA second step. Same visual treatment as the
+              // primary form; just one 6-digit (or recovery code) input.
+              <form onSubmit={handleMfaSubmit} className="space-y-4">
+                <div>
                   <label
-                    htmlFor="password"
-                    className="block text-sm font-medium"
+                    htmlFor="mfa-code"
+                    className="block text-sm font-medium mb-1.5"
                     style={{ color: "rgba(255,255,255,0.7)" }}
                   >
-                    Password
+                    Authentication code
                   </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs transition-colors hover:underline"
-                    style={{ color: "var(--vyne-accent-light, #22D3EE)" }}
+                  <p
+                    className="text-xs mb-2"
+                    style={{ color: "rgba(255,255,255,0.55)" }}
                   >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
+                    Enter the 6-digit code from your authenticator app, or a
+                    backup recovery code.
+                  </p>
                   <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    autoComplete="current-password"
+                    id="mfa-code"
+                    name="mfa-code"
+                    type="text"
+                    inputMode="text"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    placeholder="123 456  or  abcd-efgh-ij"
+                    autoComplete="one-time-code"
+                    autoFocus
                     className={cn(
-                      "auth-input w-full px-4 py-3 pr-11 rounded-lg text-sm text-white",
+                      "auth-input w-full px-4 py-3 rounded-lg text-sm text-white tracking-widest font-mono",
                       "placeholder:text-[#4A4A6A]",
                       "transition-all duration-150",
                     )}
@@ -296,45 +327,152 @@ export default function LoginPage() {
                       outline: "none",
                     }}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-white"
-                    style={{ color: "var(--text-secondary)" }}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
                 </div>
-              </div>
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isLoading} aria-busy={isLoading}
-                className={cn(
-                  "btn-aurora w-full mt-2",
-                  "flex items-center justify-center gap-2",
-                  "disabled:opacity-60 disabled:cursor-not-allowed",
-                )}
-                style={{
-                  padding: "12px 20px",
-                  fontSize: 14,
-                }}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Signing in…
-                  </>
-                ) : (
-                  "Sign in"
-                )}
-              </button>
-            </form>
+                <button
+                  type="submit"
+                  disabled={isLoading || mfaCode.length < 6}
+                  aria-busy={isLoading}
+                  className={cn(
+                    "btn-aurora w-full mt-2",
+                    "flex items-center justify-center gap-2",
+                    "disabled:opacity-60 disabled:cursor-not-allowed",
+                  )}
+                  style={{ padding: "12px 20px", fontSize: 14 }}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Verifying…
+                    </>
+                  ) : (
+                    "Verify"
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMfaStep(null);
+                    setMfaCode("");
+                    setError(null);
+                  }}
+                  className="block w-full text-center text-xs hover:underline mt-1"
+                  style={{ color: "rgba(255,255,255,0.55)" }}
+                >
+                  Use a different account
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Email */}
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium mb-1.5"
+                    style={{ color: "rgba(255,255,255,0.7)" }}
+                  >
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    autoComplete="email"
+                    autoFocus
+                    className={cn(
+                      "auth-input w-full px-4 py-3 rounded-lg text-sm text-white",
+                      "placeholder:text-[#4A4A6A]",
+                      "transition-all duration-150",
+                    )}
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      outline: "none",
+                    }}
+                  />
+                </div>
+
+                {/* Password */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium"
+                      style={{ color: "rgba(255,255,255,0.7)" }}
+                    >
+                      Password
+                    </label>
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs transition-colors hover:underline"
+                      style={{ color: "var(--vyne-accent-light, #22D3EE)" }}
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      className={cn(
+                        "auth-input w-full px-4 py-3 pr-11 rounded-lg text-sm text-white",
+                        "placeholder:text-[#4A4A6A]",
+                        "transition-all duration-150",
+                      )}
+                      style={{
+                        background: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        outline: "none",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors hover:text-white"
+                      style={{ color: "var(--text-secondary)" }}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  aria-busy={isLoading}
+                  className={cn(
+                    "btn-aurora w-full mt-2",
+                    "flex items-center justify-center gap-2",
+                    "disabled:opacity-60 disabled:cursor-not-allowed",
+                  )}
+                  style={{
+                    padding: "12px 20px",
+                    fontSize: 14,
+                  }}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Signing in…
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
+                </button>
+              </form>
+            )}
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-5">
@@ -367,9 +505,11 @@ export default function LoginPage() {
               style={{
                 background:
                   "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.04))",
-                border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
+                border:
+                  "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
                 color: "#67E8F9",
-                boxShadow: "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05) inset",
+                boxShadow:
+                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.05) inset",
               }}
             >
               <Sparkles size={15} />
@@ -429,10 +569,14 @@ export default function LoginPage() {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6"
             style={{
               background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)",
-              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
+              border:
+                "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
             }}
           >
-            <Zap size={12} style={{ color: "var(--vyne-accent-light, #22D3EE)" }} />
+            <Zap
+              size={12}
+              style={{ color: "var(--vyne-accent-light, #22D3EE)" }}
+            />
             <span
               className="text-xs font-semibold tracking-wide"
               style={{ color: "#67E8F9" }}

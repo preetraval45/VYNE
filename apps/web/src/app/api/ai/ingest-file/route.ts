@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/api/security";
 import { chunkText } from "@/lib/rag";
+import { requirePlan } from "@/lib/billing/planGuard";
 
 // /api/ai/ingest-file (UI_UPGRADE_PLAN.md 5.6)
+//
+// PH-E: gated to starter+ plans. PDF ingestion + embedding is the
+// most expensive AI path we offer (server-side pdf-parse + multiple
+// embeddings calls). Free tier blocked with 402 + upgrade URL.
 //
 // Multipart variant of /api/ai/ingest that accepts a file blob, extracts
 // text server-side (pdf-parse for PDFs; plain string for text/markdown/
@@ -40,12 +45,20 @@ async function extractText(file: File): Promise<string> {
   // PDF — pdf-parse runs server-side. Lazy-imported so the module
   // doesn't bloat the bundle for non-PDF traffic.
   if (type === "application/pdf" || name.endsWith(".pdf")) {
-    const mod = await import("pdf-parse").catch(() => null);
-    if (!mod?.default) {
+    // PH-F typecheck fix — pdf-parse ESM export shape varies between
+    // versions; cast through unknown to handle both default-only and
+    // namespace-export cases.
+    const mod = (await import("pdf-parse").catch(() => null)) as unknown as {
+      default?: (buf: Buffer) => Promise<{ text?: string }>;
+    } | null;
+    const parser =
+      mod?.default ??
+      (mod as unknown as ((buf: Buffer) => Promise<{ text?: string }>) | null);
+    if (!parser) {
       throw new Error("pdf-parse module not available");
     }
     const buf = Buffer.from(bytes);
-    const result = (await mod.default(buf)) as { text?: string };
+    const result = await parser(buf);
     return (result.text ?? "").trim();
   }
 
@@ -55,6 +68,11 @@ async function extractText(file: File): Promise<string> {
 }
 
 export async function POST(req: Request) {
+  // PH-E — paid-tier gate. Free accounts get a 402 with upgradeUrl;
+  // demo bypasses for the showcase tour.
+  const gate = await requirePlan(req, ["starter", "business", "enterprise"]);
+  if (gate instanceof Response) return gate;
+
   const rl = await rateLimit({
     key: "ai-ingest-file",
     limit: 20,
@@ -80,10 +98,7 @@ export async function POST(req: Request) {
 
   const file = form.get("file");
   if (!(file instanceof File)) {
-    return NextResponse.json(
-      { error: "file field required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "file field required" }, { status: 400 });
   }
   if (file.size > MAX_BYTES) {
     return NextResponse.json(
@@ -118,10 +133,7 @@ export async function POST(req: Request) {
 
   const chunks = chunkText(text).slice(0, 200);
   if (chunks.length === 0) {
-    return NextResponse.json(
-      { error: "no chunks produced" },
-      { status: 422 },
-    );
+    return NextResponse.json({ error: "no chunks produced" }, { status: 422 });
   }
 
   const ref =
@@ -162,7 +174,11 @@ export async function POST(req: Request) {
           source,
           text: chunk,
           vector: j.vector as never,
-          meta: { fileName: file.name, fileType: file.type, fileSize: file.size } as never,
+          meta: {
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+          } as never,
         },
       });
       created++;

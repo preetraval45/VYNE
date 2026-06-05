@@ -1,0 +1,69 @@
+# PH-G — Weekly backup verification.
+#
+# Pulls the most recent JSON dump from /api/admin/backup, then POSTs it
+# back to /api/admin/restore?dryRun=1 to confirm:
+#   1. The dump is parseable JSON in the expected schema.
+#   2. Every row's id + orgId + entity-specific fields satisfy the
+#      restore route's upsert contract (no schema drift would break a
+#      real restore).
+#   3. No prod data is touched — dryRun=1 means the route counts +
+#      validates but never writes.
+#
+# On failure: post a Sentry event tagged `backup-verify-failed` (SEV2).
+# Wiring details in docs/runbooks/db-restore.md.
+
+name: Backup verify (weekly)
+
+on:
+  schedule:
+    # 04:00 UTC every Sunday — runs ~22h after the daily 06:00 backup
+    # so the most recent dump is always recent enough to validate.
+    - cron: "0 4 * * 0"
+  workflow_dispatch: # also allow manual runs from the Actions UI
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify most recent JSON dump round-trips
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq + curl (already on runners, sanity check)
+        run: which jq curl
+
+      - name: Run restore-test.sh against prod (dryRun=1)
+        env:
+          VYNE_BASE_URL: ${{ secrets.VYNE_BASE_URL || 'https://vyne.vercel.app' }}
+          VYNE_ADMIN_TOKEN: ${{ secrets.VYNE_ADMIN_TOKEN }}
+        run: ./scripts/restore-test.sh
+
+      - name: Notify Sentry on failure
+        if: failure()
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # Sentry's "minimal API" payload — no SDK needed. Tags the
+          # event with `backup-verify-failed` so the alert rule in
+          # Sentry routes it to the SEV2 channel.
+          if [[ -z "${SENTRY_DSN:-}" ]]; then
+            echo "::warning::SENTRY_DSN not set — skipping Sentry notify"
+            exit 0
+          fi
+          KEY="${SENTRY_DSN##https://}"; KEY="${KEY%@*}"
+          REST="${SENTRY_DSN##*@}"; HOST="${REST%/*}"; PROJECT="${REST##*/}"
+          ENDPOINT="https://${HOST}/api/${PROJECT}/store/"
+          curl -sSL -X POST "${ENDPOINT}" \
+            -H "Content-Type: application/json" \
+            -H "X-Sentry-Auth: Sentry sentry_version=7, sentry_key=${KEY}, sentry_client=gha-backup-verify/1.0" \
+            -d "$(jq -nc --arg url "${GITHUB_RUN_URL}" '{
+              message: "Backup verification failed",
+              level: "error",
+              tags: { component: "backup-verify-failed", sev: "SEV2" },
+              extra: { run_url: $url }
+            }')"
+          echo "✓ Posted Sentry event"

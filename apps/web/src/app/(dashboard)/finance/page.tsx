@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import {
   TrendingUp,
   TrendingDown,
@@ -38,13 +40,20 @@ import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
 // ─── Helpers ──────────────────────────────────────────────────────
-const CURRENCY = typeof Intl !== "undefined"
-  ? new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 0 })
-  : null;
+const CURRENCY =
+  typeof Intl !== "undefined"
+    ? new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      })
+    : null;
 
 function fmt(n: number) {
-  if (n >= 1_000_000) return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000).toFixed(1)}K`;
+  if (n >= 1_000_000)
+    return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)
+    return `${CURRENCY?.format(0).replace(/[0-9.,\s]/g, "") ?? "$"}${(n / 1_000).toFixed(1)}K`;
   return CURRENCY ? CURRENCY.format(n) : `$${n.toLocaleString()}`;
 }
 
@@ -63,7 +72,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active ? "2px solid #06B6D4" : "2px solid transparent",
         transition: "all 0.15s",
       }}
@@ -150,7 +161,8 @@ function PLTab() {
   const prev = MOCK_MONTHLY[MOCK_MONTHLY.length - 2] ?? EMPTY_MONTH;
   const profit = current.revenue - current.expenses;
   const prevProfit = prev.revenue - prev.expenses;
-  const profitDelta = prevProfit !== 0 ? ((profit - prevProfit) / prevProfit) * 100 : 0;
+  const profitDelta =
+    prevProfit !== 0 ? ((profit - prevProfit) / prevProfit) * 100 : 0;
   const margin = current.revenue !== 0 ? (profit / current.revenue) * 100 : 0;
 
   const rows = [
@@ -232,7 +244,10 @@ function PLTab() {
             <FileText size={12} /> Export
           </button>
         </div>
-        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          className="m-cards"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
           <tbody>
             {rows.map(({ label, value, bold, indent, highlight }) => (
               <tr
@@ -303,7 +318,10 @@ function PLTab() {
             delta: "of revenue",
             up: true,
             icon: (
-              <TrendingUp size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+              <TrendingUp
+                size={16}
+                style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+              />
             ),
             bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
           },
@@ -502,27 +520,35 @@ function JournalTab() {
           overflow: "hidden",
         }}
       >
-        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          className="m-cards"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
-              {["Entry #", "Description", "Date", "Amount (Dr)", "Status", ""].map(
-                (h, idx) => (
-                  <th
-                    key={h || `act-${idx}`}
-                    style={{
-                      padding: "9px 16px",
-                      textAlign: "left",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      color: "var(--text-secondary)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
-                    {h}
-                  </th>
-                ),
-              )}
+              {[
+                "Entry #",
+                "Description",
+                "Date",
+                "Amount (Dr)",
+                "Status",
+                "",
+              ].map((h, idx) => (
+                <th
+                  key={h || `act-${idx}`}
+                  style={{
+                    padding: "9px 16px",
+                    textAlign: "left",
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: "var(--text-secondary)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -584,8 +610,14 @@ function JournalTab() {
                       borderRadius: 20,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: e.status === "posted" ? "var(--badge-success-bg)" : "var(--badge-warning-bg)",
-                      color: e.status === "posted" ? "var(--badge-success-text)" : "var(--badge-warning-text)",
+                      background:
+                        e.status === "posted"
+                          ? "var(--badge-success-bg)"
+                          : "var(--badge-warning-bg)",
+                      color:
+                        e.status === "posted"
+                          ? "var(--badge-success-text)"
+                          : "var(--badge-warning-text)",
                     }}
                   >
                     {e.status === "posted" ? "Posted" : "Draft"}
@@ -596,12 +628,19 @@ function JournalTab() {
                     type="button"
                     aria-label={`Delete ${e.entryNumber}`}
                     onClick={() => {
-                      if (!confirm(`Delete ${e.entryNumber}? You'll have 5 seconds to undo.`)) return;
+                      if (
+                        !confirm(
+                          `Delete ${e.entryNumber}? You'll have 5 seconds to undo.`,
+                        )
+                      )
+                        return;
                       const snapshot = e;
                       undoableDelete({
                         label: `Deleted journal — ${snapshot.entryNumber}`,
                         mutate: () =>
-                          useFinanceStore.getState().deleteJournalEntry(snapshot.id),
+                          useFinanceStore
+                            .getState()
+                            .deleteJournalEntry(snapshot.id),
                         restore: () =>
                           useFinanceStore.getState().addJournalEntry(snapshot),
                       });
@@ -624,7 +663,6 @@ function JournalTab() {
           </tbody>
         </table>
       </div>
-
     </div>
   );
 }
@@ -745,7 +783,31 @@ function AccountsTab() {
 
 // ─── Main page ────────────────────────────────────────────────────
 export default function FinancePage() {
-  const [tab, setTab] = useState<"pl" | "journal" | "accounts">("pl");
+  return (
+    <Suspense fallback={null}>
+      <FinancePageInner />
+    </Suspense>
+  );
+}
+
+function FinancePageInner() {
+  const [tab, setTab] = useState<"dashboard" | "pl" | "journal" | "accounts">(
+    "pl",
+  );
+
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "pl" ||
+      urlView === "journal" ||
+      urlView === "accounts"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
   const [liveSummary, setLiveSummary] = useState<{
     revenue: number;
     expenses: number;
@@ -765,7 +827,7 @@ export default function FinancePage() {
         }
       })
       .catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fallback = MOCK_MONTHLY[MOCK_MONTHLY.length - 1] ?? EMPTY_MONTH;
@@ -774,16 +836,18 @@ export default function FinancePage() {
 
   const dash = usePageDashboard("finance", "30d");
 
-  const margin = currentMonth.revenue > 0
-    ? Math.round((profit / currentMonth.revenue) * 100)
-    : 0;
+  const margin =
+    currentMonth.revenue > 0
+      ? Math.round((profit / currentMonth.revenue) * 100)
+      : 0;
   const revenueSeries = MOCK_MONTHLY.map((m) => m.revenue);
   const expensesSeries = MOCK_MONTHLY.map((m) => m.expenses);
   const profitSeries = MOCK_MONTHLY.map((m) => m.revenue - m.expenses);
   const prev = MOCK_MONTHLY[MOCK_MONTHLY.length - 2] ?? EMPTY_MONTH;
-  const revenueDelta = prev.revenue > 0
-    ? `${profit >= prev.revenue - prev.expenses ? "+" : ""}${(((currentMonth.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1)}%`
-    : undefined;
+  const revenueDelta =
+    prev.revenue > 0
+      ? `${profit >= prev.revenue - prev.expenses ? "+" : ""}${(((currentMonth.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1)}%`
+      : undefined;
   const draftCount = MOCK_JOURNAL.filter((j) => j.status === "draft").length;
 
   useRegisterCommands("finance", [
@@ -828,8 +892,12 @@ export default function FinancePage() {
         subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} · Profit ${fmt(profit)}`}
         actions={
           <>
-            <Pill tone="success" dot>Revenue {fmt(currentMonth.revenue)}</Pill>
-            <Pill tone="danger" dot>Expenses {fmt(currentMonth.expenses)}</Pill>
+            <Pill tone="success" dot>
+              Revenue {fmt(currentMonth.revenue)}
+            </Pill>
+            <Pill tone="danger" dot>
+              Expenses {fmt(currentMonth.expenses)}
+            </Pill>
             <ExportButton
               data={MOCK_JOURNAL as unknown as Record<string, unknown>[]}
               filename="vyne-journal-entries"
@@ -892,6 +960,11 @@ export default function FinancePage() {
       >
         <div style={{ display: "flex", gap: 2 }}>
           <TabBtn
+            label="Dashboard"
+            active={tab === "dashboard"}
+            onClick={() => setTab("dashboard")}
+          />
+          <TabBtn
             label="P&L Statement"
             active={tab === "pl"}
             onClick={() => setTab("pl")}
@@ -911,8 +984,13 @@ export default function FinancePage() {
 
       <div
         className="content-scroll"
-        style={{ flex: 1, overflowY: "auto", padding: 20 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: tab === "dashboard" ? 0 : 20,
+        }}
       >
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "pl" && (
           <>
             <CloseAssistantCard />

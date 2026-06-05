@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageDashboard } from "@/components/shared/PageDashboard";
@@ -24,7 +25,7 @@ const EMPLOYEES = seedOrEmpty(_EMPLOYEES);
 const INITIAL_LEAVE_REQUESTS = seedOrEmpty(_INITIAL_LEAVE_REQUESTS);
 const MOCK_DOCS = seedOrEmpty(_MOCK_DOCS);
 
-type HRTab = "employees" | "leave" | "payroll" | "orgchart";
+type HRTab = "dashboard" | "employees" | "leave" | "payroll" | "orgchart";
 
 // ─── Helpers ──────────────────────────────────────────────────────
 function fmtSalary(n: number): string {
@@ -38,7 +39,10 @@ function fmtNetPay(emp: Employee): number {
 // ─── Department chip ──────────────────────────────────────────────
 function DeptChip({ dept }: Readonly<{ dept: Department }>) {
   const colors: Record<Department, { bg: string; color: string }> = {
-    Engineering: { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)", color: "#8B68FF" },
+    Engineering: {
+      bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+      color: "#8B68FF",
+    },
     Product: { bg: "rgba(155,89,182,0.12)", color: "#A855F7" },
     Sales: { bg: "rgba(239,68,68,0.1)", color: "var(--status-danger)" },
     Finance: { bg: "rgba(59,130,246,0.1)", color: "var(--status-info)" },
@@ -153,7 +157,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active
           ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
@@ -720,7 +726,8 @@ function leaveRequestBackground(status: LeaveRequestStatus): string {
 }
 
 function leaveTypeBadgeBackground(type: string): string {
-  if (type === "Vacation") return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)";
+  if (type === "Vacation")
+    return "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)";
   if (type === "Sick") return "rgba(239,68,68,0.1)";
   return "rgba(245,158,11,0.1)";
 }
@@ -1718,9 +1725,33 @@ function OrgChartTab() {
 
 // ─── Main HR page ─────────────────────────────────────────────────
 export default function HRPage() {
+  return (
+    <Suspense fallback={null}>
+      <HRPageInner />
+    </Suspense>
+  );
+}
+
+function HRPageInner() {
   const [tab, setTab] = useState<HRTab>("employees");
 
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "employees" ||
+      urlView === "leave" ||
+      urlView === "payroll" ||
+      urlView === "orgchart"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
+
   const tabLabels: { key: HRTab; label: string }[] = [
+    { key: "dashboard", label: "Dashboard" },
     { key: "employees", label: "Employees" },
     { key: "leave", label: "Leave" },
     { key: "payroll", label: "Payroll" },
@@ -1874,16 +1905,25 @@ export default function HRPage() {
       <PageDashboard
         storageKey="hr"
         kpis={[
-          { label: "Headcount", value: EMPLOYEES.length.toString(), hint: `${activeEmps} active` },
+          {
+            label: "Headcount",
+            value: EMPLOYEES.length.toString(),
+            hint: `${activeEmps} active`,
+          },
           { label: "Remote", value: remote.toString() },
           { label: "On leave", value: onLeave.toString() },
-          { label: "Pending leave", value: pendingLeave.toString(), goodWhenUp: false },
+          {
+            label: "Pending leave",
+            value: pendingLeave.toString(),
+            goodWhenUp: false,
+          },
           { label: "Payroll", value: `$${(totalPayroll / 1000).toFixed(0)}k` },
         ]}
       />
 
       {/* Content */}
       <div className="content-scroll" style={{ flex: 1, overflowY: "auto" }}>
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "employees" && <EmployeesTab />}
         {tab === "leave" && <LeaveTab />}
         {tab === "payroll" && <PayrollTab />}

@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/api/security";
+import { requirePlan } from "@/lib/billing/planGuard";
 
 // /api/ai/computer-use (UI_UPGRADE_PLAN.md 5.5)
+//
+// PH-E: business+ plan gate. Browserbase + Anthropic computer-use is
+// the most expensive AI offering — capping at the business tier keeps
+// the unit economics sane.
 //
 // Drives a sandboxed browser via Anthropic computer-use + Browserbase
 // (or E2B). Implementation is feature-detected — without the right
@@ -46,7 +51,9 @@ function checkProviders(): ProviderStatus {
   const missing: string[] = [];
   if (!anthropic) missing.push("ANTHROPIC_API_KEY");
   if (!browserbase && !e2b) {
-    missing.push("BROWSERBASE_API_KEY + BROWSERBASE_PROJECT_ID (or E2B_API_KEY)");
+    missing.push(
+      "BROWSERBASE_API_KEY + BROWSERBASE_PROJECT_ID (or E2B_API_KEY)",
+    );
   }
   return {
     ok: anthropic && (browserbase || e2b),
@@ -60,6 +67,10 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  // PH-E — gated to business + enterprise plans.
+  const gate = await requirePlan(req, ["business", "enterprise"]);
+  if (gate instanceof Response) return gate;
+
   const rl = await rateLimit({
     key: "ai-computer-use",
     limit: 10,
@@ -97,7 +108,15 @@ export async function POST(req: Request) {
   // batch of actions; the client polls for more or uses SSE in a
   // follow-up release.
   try {
-    const driver = await import("@/lib/ai/computerUseDriver").catch(() => null);
+    // PH-F typecheck fix — the optional driver module may not be
+    // shipped yet. Cast the dynamic-import result to a thin shape so
+    // TS lets us call it conditionally.
+    type DriverShape = {
+      runTask: (args: { task: string; sessionId?: string }) => Promise<unknown>;
+    };
+    const driver = (await import("@/lib/ai/computerUseDriver" as never).catch(
+      () => null,
+    )) as DriverShape | null;
     if (!driver?.runTask) {
       return NextResponse.json(
         {
@@ -109,10 +128,10 @@ export async function POST(req: Request) {
         { status: 501 },
       );
     }
-    const result = await driver.runTask({
+    const result = (await driver.runTask({
       task,
       sessionId: body.sessionId,
-    });
+    })) as Record<string, unknown>;
     return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     return NextResponse.json(

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { subscribe, publishFromClient, isRealtimeEnabled } from "@/lib/realtime";
+import { subscribe, publishFromClient } from "@/lib/realtime";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useFollow } from "@/hooks/useFollowTeammate";
 
@@ -24,8 +24,8 @@ interface PresenceUser {
  *   - Members idle ≥ 30 s drop off the list.
  *
  * Realtime infra:
- *   - Pusher when configured (NEXT_PUBLIC_PUSHER_KEY set).
- *   - Otherwise renders nothing (same surface, no fallback noise).
+ *   - Auto-selects Pusher → Supabase → SSE fallback via lib/realtime.
+ *   - SSE fallback works without any env vars — presence is always on.
  *
  *   <PresenceBubbles entityKey={`deal:${deal.id}`} />
  */
@@ -56,7 +56,7 @@ export function PresenceBubbles({
 
   // Heartbeat: announce ourselves every HEARTBEAT_MS while mounted.
   useEffect(() => {
-    if (!isRealtimeEnabled() || !me) return;
+    if (!me) return;
     const iam: PresenceUser = {
       id: me.id ?? me.email ?? "anon",
       name: me.name ?? "Teammate",
@@ -85,7 +85,6 @@ export function PresenceBubbles({
 
   // Subscribe + accumulate member list.
   useEffect(() => {
-    if (!isRealtimeEnabled()) return;
     const offHello = subscribe<PresenceUser>(channel, "presence:hello", (u) => {
       setMembers((prev) => {
         const next = new Map(prev);
@@ -93,14 +92,18 @@ export function PresenceBubbles({
         return next;
       });
     });
-    const offBye = subscribe<{ id: string }>(channel, "presence:bye", ({ id }) => {
-      setMembers((prev) => {
-        if (!prev.has(id)) return prev;
-        const next = new Map(prev);
-        next.delete(id);
-        return next;
-      });
-    });
+    const offBye = subscribe<{ id: string }>(
+      channel,
+      "presence:bye",
+      ({ id }) => {
+        setMembers((prev) => {
+          if (!prev.has(id)) return prev;
+          const next = new Map(prev);
+          next.delete(id);
+          return next;
+        });
+      },
+    );
     // Periodic GC of stale members.
     const gc = window.setInterval(() => {
       const cutoff = Date.now() - STALE_AFTER_MS;
@@ -129,7 +132,7 @@ export function PresenceBubbles({
     return list.sort((a, b) => b.lastSeen - a.lastSeen);
   }, [members, me]);
 
-  if (!isRealtimeEnabled() || others.length === 0) return null;
+  if (others.length === 0) return null;
 
   const visible = others.slice(0, max);
   const overflow = others.length - visible.length;
@@ -161,9 +164,7 @@ export function PresenceBubbles({
                 : `${u.name} is viewing — click to follow`
             }
             aria-pressed={amFollowing ? "true" : "false"}
-            onClick={() =>
-              amFollowing ? release() : follow(u.id, u.name)
-            }
+            onClick={() => (amFollowing ? release() : follow(u.id, u.name))}
             style={{
               width: size,
               height: size,

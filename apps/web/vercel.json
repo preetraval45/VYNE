@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "prisma generate && prisma db push --skip-generate && next build",
+  "buildCommand": "prisma generate && node scripts/safe-db-push.js && next build",
   "installCommand": "cd ../.. && npx -y pnpm@9.15.4 install --no-frozen-lockfile",
   "outputDirectory": ".next",
   "regions": ["iad1"],
@@ -65,6 +65,22 @@
     {
       "path": "/api/notifications/drip?cron=1",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/admin/cron/dunning-downgrade",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/admin/cron/account-purge",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/admin/cron/audit-checksum-chain",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/admin/cron/access-review-reminder",
+      "schedule": "0 9 1 1,4,7,10 *"
     }
   ],
   "env": {

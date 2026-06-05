@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Truck,
   Filter,
@@ -9,7 +10,9 @@ import {
   UserPlus,
   CalendarClock,
   Trash2,
+  BarChart3,
 } from "lucide-react";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import toast from "react-hot-toast";
 import { PageHeader } from "@/components/shared/Kit";
 import { AskAiButton } from "@/components/shared/AskAiButton";
@@ -71,7 +74,13 @@ const DEFAULT_FILTERS: FsFilters = {
   selectionMode: false,
 };
 
-const REGION_OPTS: FieldRegion[] = ["north", "south", "east", "west", "central"];
+const REGION_OPTS: FieldRegion[] = [
+  "north",
+  "south",
+  "east",
+  "west",
+  "central",
+];
 const SKILL_OPTS: FieldSkill[] = [
   "hvac",
   "electrical",
@@ -100,6 +109,23 @@ const PRIORITY_COLOR: Record<FieldJobPriority, string> = {
 // ─── Page ─────────────────────────────────────────────────────────
 
 export default function FieldServicePage() {
+  return (
+    <Suspense fallback={null}>
+      <FieldServicePageInner />
+    </Suspense>
+  );
+}
+
+function FieldServicePageInner() {
+  const [view, setView] = useState<"dashboard" | "schedule">("schedule");
+
+  // Honour ?view=dashboard|schedule from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (urlView === "dashboard" || urlView === "schedule") setView(urlView);
+  }, [urlView]);
+
   const jobs = useFieldJobs();
   const technicians = useTechnicians();
   const updateJob = useFieldServiceStore((s) => s.updateJob);
@@ -142,7 +168,10 @@ export default function FieldServicePage() {
       if (filters.onlyUnassigned && j.technicianId) return false;
       if (filters.onlyUrgent && j.priority !== "urgent") return false;
       if (filters.technicianIds.length > 0) {
-        if (!j.technicianId || !filters.technicianIds.includes(j.technicianId)) {
+        if (
+          !j.technicianId ||
+          !filters.technicianIds.includes(j.technicianId)
+        ) {
           return false;
         }
       }
@@ -309,7 +338,8 @@ export default function FieldServicePage() {
       const prevStart = job.scheduledStart;
       const prevEnd = job.scheduledEnd;
       void optimisticAction({
-        apply: () => updateJob(id, { scheduledStart: start, scheduledEnd: end }),
+        apply: () =>
+          updateJob(id, { scheduledStart: start, scheduledEnd: end }),
         rollback: () =>
           updateJob(id, { scheduledStart: prevStart, scheduledEnd: prevEnd }),
         silent: true,
@@ -422,18 +452,125 @@ export default function FieldServicePage() {
     return warnings;
   }, [visibleJobs, technicians]);
 
+  if (view === "dashboard") {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <div
+          style={{
+            padding: "8px 20px 0",
+            borderBottom: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+            flexShrink: 0,
+            display: "flex",
+            gap: 6,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setView("dashboard")}
+            style={{
+              padding: "8px 14px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+              background: "transparent",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              borderBottom: "2px solid var(--vyne-accent, var(--vyne-purple))",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <BarChart3 size={13} /> Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("schedule")}
+            style={{
+              padding: "8px 14px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: 500,
+              background: "transparent",
+              color: "var(--text-secondary)",
+              borderBottom: "2px solid transparent",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <CalendarClock size={13} /> Schedule
+          </button>
+        </div>
+        <ProjectsDashboardView />
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div
+        style={{
+          padding: "8px 20px 0",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+          flexShrink: 0,
+          display: "flex",
+          gap: 6,
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setView("dashboard")}
+          style={{
+            padding: "8px 14px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 500,
+            background: "transparent",
+            color: "var(--text-secondary)",
+            borderBottom: "2px solid transparent",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <BarChart3 size={13} /> Dashboard
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("schedule")}
+          style={{
+            padding: "8px 14px",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 12,
+            fontWeight: 500,
+            background: "transparent",
+            color: "var(--vyne-accent, var(--vyne-purple))",
+            borderBottom: "2px solid var(--vyne-accent, var(--vyne-purple))",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <CalendarClock size={13} /> Schedule
+        </button>
+      </div>
       <SavedViewsBar store={views} noun="field service" />
       <PageHeader
         icon={<Truck size={16} />}
         title="Field Service"
         subtitle={`${visibleJobs.length} job${visibleJobs.length === 1 ? "" : "s"} · ${
-          new Set(
-            visibleJobs.map((j) => j.technicianId ?? "unassigned"),
-          ).size
+          new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned")).size
         } tech${
-          new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned")).size === 1 ? "" : "s"
+          new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned"))
+            .size === 1
+            ? ""
+            : "s"
         }`}
         actions={
           <>
@@ -586,7 +723,11 @@ function FieldServiceFilterRail({
 
       <FilterSection title="Technician">
         <MultiPick
-          options={technicians.map((t) => ({ id: t.id, label: t.name, color: t.color }))}
+          options={technicians.map((t) => ({
+            id: t.id,
+            label: t.name,
+            color: t.color,
+          }))}
           selected={filters.technicianIds}
           onChange={(ids) => setFilter("technicianIds", ids)}
           emptyLabel="Anyone"
@@ -613,7 +754,10 @@ function FieldServiceFilterRail({
 
       <FilterSection title="Status">
         <MultiPick
-          options={STATUS_OPTS.map((s) => ({ id: s, label: s.replace("_", " ") }))}
+          options={STATUS_OPTS.map((s) => ({
+            id: s,
+            label: s.replace("_", " "),
+          }))}
           selected={filters.statuses}
           onChange={(ids) => setFilter("statuses", ids as FieldJobStatus[])}
           emptyLabel="Any status"
@@ -676,7 +820,10 @@ function FieldServiceToolbar({
         background: "var(--content-secondary)",
       }}
     >
-      <ZoomSegmented value={filters.zoom} onChange={(z) => setFilter("zoom", z)} />
+      <ZoomSegmented
+        value={filters.zoom}
+        onChange={(z) => setFilter("zoom", z)}
+      />
 
       <label style={labelStyle}>
         <Layers size={12} aria-hidden="true" />
@@ -767,8 +914,8 @@ function ZoomSegmented({
         const selected = o.value === value;
         return (
           <button
-            key={o.value}
             type="button"
+            key={o.value}
             role="radio"
             aria-checked={selected}
             onClick={() => onChange(o.value)}
@@ -778,7 +925,9 @@ function ZoomSegmented({
               fontWeight: 600,
               borderRadius: 4,
               border: "none",
-              background: selected ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+              background: selected
+                ? "var(--vyne-accent, var(--vyne-purple))"
+                : "transparent",
               color: selected ? "#fff" : "var(--text-secondary)",
               cursor: "pointer",
             }}
@@ -835,7 +984,9 @@ function ToggleRow({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label style={{ ...labelStyle, justifyContent: "space-between", width: "100%" }}>
+    <label
+      style={{ ...labelStyle, justifyContent: "space-between", width: "100%" }}
+    >
       <span>{label}</span>
       <input
         type="checkbox"
@@ -871,10 +1022,12 @@ function MultiPick({
         const on = selected.includes(o.id);
         return (
           <button
-            key={o.id}
             type="button"
+            key={o.id}
             onClick={() =>
-              onChange(on ? selected.filter((x) => x !== o.id) : [...selected, o.id])
+              onChange(
+                on ? selected.filter((x) => x !== o.id) : [...selected, o.id],
+              )
             }
             aria-pressed={on}
             style={{
@@ -918,7 +1071,9 @@ function pillStyle(active: boolean): React.CSSProperties {
     padding: "4px 8px",
     borderRadius: 999,
     border: `1px solid ${active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`,
-    background: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-bg)",
+    background: active
+      ? "var(--vyne-accent, var(--vyne-purple))"
+      : "var(--content-bg)",
     color: active ? "#fff" : "var(--text-secondary)",
     fontSize: 11,
     fontWeight: 600,

@@ -9,6 +9,7 @@ import {
   KeyRound,
   LogOut,
 } from "lucide-react";
+import { MfaPanel } from "./MfaPanel";
 
 // ─── Shared UI ───────────────────────────────────────────────────
 function SectionCard({
@@ -116,13 +117,15 @@ export default function SecuritySettings({ onToast }: Props) {
 
   // 2FA state (client-only demo)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [setupStep, setSetupStep] = useState<"idle" | "scan" | "verify">("idle");
+  const [setupStep, setSetupStep] = useState<"idle" | "scan" | "verify">(
+    "idle",
+  );
   const [verifyCode, setVerifyCode] = useState("");
 
   // SSO state
-  const [ssoProvider, setSsoProvider] = useState<"none" | "google" | "okta" | "azure">(
-    "none",
-  );
+  const [ssoProvider, setSsoProvider] = useState<
+    "none" | "google" | "okta" | "azure"
+  >("none");
 
   // Password policy state
   const [policy, setPolicy] = useState({
@@ -212,11 +215,13 @@ export default function SecuritySettings({ onToast }: Props) {
             />
           </label>
 
-          {([
-            ["requireUppercase", "Require uppercase letter"],
-            ["requireNumber", "Require number"],
-            ["requireSymbol", "Require symbol (e.g. !@#$)"],
-          ] as const).map(([key, label]) => (
+          {(
+            [
+              ["requireUppercase", "Require uppercase letter"],
+              ["requireNumber", "Require number"],
+              ["requireSymbol", "Require symbol (e.g. !@#$)"],
+            ] as const
+          ).map(([key, label]) => (
             <label
               key={key}
               style={{
@@ -234,7 +239,12 @@ export default function SecuritySettings({ onToast }: Props) {
                 onChange={(e) =>
                   setPolicy((p) => ({ ...p, [key]: e.target.checked }))
                 }
-                style={{ width: 16, height: 16, cursor: "pointer", accentColor: "var(--vyne-accent, #06B6D4)" }}
+                style={{
+                  width: 16,
+                  height: 16,
+                  cursor: "pointer",
+                  accentColor: "var(--vyne-accent, #06B6D4)",
+                }}
               />
             </label>
           ))}
@@ -307,177 +317,7 @@ export default function SecuritySettings({ onToast }: Props) {
         title="Two-factor authentication"
         subtitle="Require a 6-digit code from an authenticator app on every sign-in."
       >
-        {setupStep === "idle" && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 14,
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                background: twoFactorEnabled
-                  ? "var(--badge-success-bg)"
-                  : "var(--content-secondary)",
-                color: twoFactorEnabled
-                  ? "var(--badge-success-text)"
-                  : "var(--text-tertiary)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <ShieldCheck size={20} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                }}
-              >
-                {twoFactorEnabled ? "2FA is enabled" : "2FA is disabled"}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
-                {twoFactorEnabled
-                  ? "TOTP authenticator · verified 2 days ago"
-                  : "We strongly recommend enabling 2FA for all admin accounts."}
-              </div>
-            </div>
-            {twoFactorEnabled ? (
-              <button
-                type="button"
-                onClick={disableTwoFactor}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 8,
-                  border: "1px solid var(--status-danger)",
-                  background: "transparent",
-                  color: "var(--status-danger)",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Disable
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={startTwoFactorSetup}
-                style={{
-                  padding: "7px 14px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "var(--vyne-accent, var(--vyne-purple))",
-                  color: "#fff",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Enable 2FA
-              </button>
-            )}
-          </div>
-        )}
-
-        {setupStep === "scan" && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 14,
-              padding: 20,
-            }}
-          >
-            <div
-              aria-hidden="true"
-              style={{
-                width: 160,
-                height: 160,
-                background:
-                  "repeating-linear-gradient(90deg, var(--text-primary) 0 4px, transparent 4px 8px), repeating-linear-gradient(0deg, var(--text-primary) 0 4px, transparent 4px 8px)",
-                border: "6px solid var(--content-bg)",
-                outline: "1px solid var(--content-border)",
-                borderRadius: 8,
-              }}
-            />
-            <div
-              style={{
-                fontSize: 13,
-                color: "var(--text-secondary)",
-                textAlign: "center",
-                maxWidth: 380,
-              }}
-            >
-              Scan the QR code with Google Authenticator, 1Password, or Authy —
-              then enter the 6-digit code to confirm.
-            </div>
-            <input
-              value={verifyCode}
-              onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="000 000"
-              aria-label="Verification code"
-              style={{
-                width: 180,
-                textAlign: "center",
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: "1px solid var(--input-border)",
-                background: "var(--input-bg)",
-                color: "var(--text-primary)",
-                fontSize: 20,
-                fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
-                letterSpacing: "0.2em",
-                outline: "none",
-              }}
-            />
-            <div style={{ display: "flex", gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setSetupStep("idle");
-                  setVerifyCode("");
-                }}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "1px solid var(--content-border)",
-                  background: "var(--content-bg)",
-                  color: "var(--text-secondary)",
-                  fontSize: 13,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmTwoFactor}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "var(--vyne-accent, var(--vyne-purple))",
-                  color: "#fff",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                Confirm & enable
-              </button>
-            </div>
-          </div>
-        )}
+        <MfaPanel onToast={onToast} />
       </SectionCard>
 
       {/* ── SSO/SAML ──────────────────────────────────────── */}
@@ -733,7 +573,7 @@ const SEED_DEVICES: ManagedDevice[] = [
   {
     id: "dev-1",
     user: "Preet Raval",
-    device: "MacBook Pro 16\" (M3 Max)",
+    device: 'MacBook Pro 16" (M3 Max)',
     os: "macOS 15.3",
     status: "trusted",
     encrypted: true,
@@ -792,10 +632,10 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
   });
 
   function setStatus(id: string, status: ManagedDevice["status"]) {
-    setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status } : d)),
+    setDevices((prev) => prev.map((d) => (d.id === id ? { ...d, status } : d)));
+    onToast(
+      `Device ${status === "trusted" ? "approved" : status === "blocked" ? "blocked" : "set to pending"}`,
     );
-    onToast(`Device ${status === "trusted" ? "approved" : status === "blocked" ? "blocked" : "set to pending"}`);
   }
 
   function wipe(id: string) {
@@ -828,7 +668,9 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
         >
           Managed devices
         </div>
-        <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}>
+        <div
+          style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 2 }}
+        >
           Approve devices that connect to your workspace. Optional: enforce
           encryption + screen lock before granting access.
         </div>
@@ -889,7 +731,12 @@ function ManagedDevicesSection({ onToast }: { onToast: (m: string) => void }) {
           }}
         >
           {devices.map((d) => {
-            const Icon = deviceIcon(d.os.toLowerCase().includes("ios") || d.os.toLowerCase().includes("android") ? "mobile" : "desktop");
+            const Icon = deviceIcon(
+              d.os.toLowerCase().includes("ios") ||
+                d.os.toLowerCase().includes("android")
+                ? "mobile"
+                : "desktop",
+            );
             const statusColor =
               d.status === "trusted"
                 ? "var(--badge-success-text)"

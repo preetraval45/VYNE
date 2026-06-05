@@ -1,7 +1,7 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -13,6 +13,7 @@ import {
   Users,
   ArrowRight,
   Clock,
+  BarChart3,
 } from "lucide-react";
 import {
   useProjects,
@@ -56,14 +57,25 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { SprintPlannerCard } from "@/components/projects/SprintPlannerCard";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 
 // ─── Main Page ────────────────────────────────────────────────────
 
 // Built-in fallback stages when admin hasn't customized statuses.
 const BUILTIN_projectStages = [
-  { id: "active", label: "Active", tone: "info" as Tone, color: "var(--vyne-accent, #06B6D4)" },
+  {
+    id: "active",
+    label: "Active",
+    tone: "info" as Tone,
+    color: "var(--vyne-accent, #06B6D4)",
+  },
   { id: "paused", label: "On Hold", tone: "warn" as Tone, color: "#F59E0B" },
-  { id: "completed", label: "Completed", tone: "success" as Tone, color: "#22C55E" },
+  {
+    id: "completed",
+    label: "Completed",
+    tone: "success" as Tone,
+    color: "#22C55E",
+  },
 ];
 
 // Map hex → tone so custom status colors still get a reasonable pill tint.
@@ -88,6 +100,7 @@ function formatShortDate(iso: string | undefined): string {
 
 function ProjectsPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const projects = useProjects();
   const allTasks = useProjectsStore((s) => s.tasks);
   // DetailPanel is kept around for the List view's existing behavior,
@@ -100,23 +113,41 @@ function ProjectsPageInner() {
   // bundle so users can pin "My active projects (board)" etc. The
   // index signature makes ProjectFilters compatible with the
   // useSavedViews `Record<string, unknown>` constraint.
+  type ProjectView = "board" | "list" | "dashboard";
   type ProjectFilters = {
     search: string;
-    view: "board" | "list";
+    view: ProjectView;
     [key: string]: unknown;
   };
   const views = useSavedViews<ProjectFilters>({
     storageKey: "projects-list",
     defaultFilters: { search: "", view: "board" },
     builtinViews: [
-      { id: "all", name: "All", filters: { search: "", view: "board" }, pinned: true },
+      {
+        id: "all",
+        name: "All",
+        filters: { search: "", view: "board" },
+        pinned: true,
+      },
     ],
   });
   const search = views.filters.search;
-  const setSearch = (v: string) => views.setFilters((f) => ({ ...f, search: v }));
+  const setSearch = (v: string) =>
+    views.setFilters((f) => ({ ...f, search: v }));
   const view = views.filters.view;
-  const setView = (v: "board" | "list") =>
+  const setView = (v: ProjectView) =>
     views.setFilters((f) => ({ ...f, view: v }));
+
+  // Honour ?view=dashboard|board|list deep-links (Sidebar's "Dashboard"
+  // sub-item under Projects passes ?view=dashboard). Only react when the
+  // URL flips — manual ViewToggle clicks shouldn't be overridden.
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (urlView === "dashboard" || urlView === "board" || urlView === "list") {
+      if (urlView !== view) setView(urlView);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlView]);
   const debouncedSearch = useDebounce(search, 300);
 
   // Pull-to-refresh (Phase 11.4) — replays the projects store hydrate
@@ -173,12 +204,16 @@ function ProjectsPageInner() {
   // Real KPIs computed from tasks across all projects
   const totalTasks = allTasks.length;
   const doneTasks = allTasks.filter((t) => t.status === "done").length;
-  const inProgressTasks = allTasks.filter((t) => t.status === "in_progress").length;
+  const inProgressTasks = allTasks.filter(
+    (t) => t.status === "in_progress",
+  ).length;
   const overdueTasks = allTasks.filter((t) => {
     if (!t.dueDate || t.status === "done") return false;
     return new Date(t.dueDate).getTime() < Date.now();
   }).length;
-  const activeProjectsCount = projects.filter((p) => p.status !== "completed" && p.status !== "paused").length;
+  const activeProjectsCount = projects.filter(
+    (p) => p.status !== "completed" && p.status !== "paused",
+  ).length;
 
   // 14-day completion sparkline
   const completionSparkline = (() => {
@@ -203,10 +238,22 @@ function ProjectsPageInner() {
       action: () => router.push("/projects/new"),
     },
     {
-      id: "projects-toggle-view",
-      label: view === "board" ? "Switch to list view" : "Switch to board view",
-      icon: view === "board" ? <List size={14} /> : <LayoutGrid size={14} />,
-      action: () => setView(view === "board" ? "list" : "board"),
+      id: "projects-view-board",
+      label: "Switch to board view",
+      icon: <LayoutGrid size={14} />,
+      action: () => setView("board"),
+    },
+    {
+      id: "projects-view-list",
+      label: "Switch to list view",
+      icon: <List size={14} />,
+      action: () => setView("list"),
+    },
+    {
+      id: "projects-view-dashboard",
+      label: "Open portfolio dashboard",
+      icon: <BarChart3 size={14} />,
+      action: () => setView("dashboard"),
     },
   ]);
 
@@ -223,7 +270,16 @@ function ProjectsPageInner() {
               value={view}
               onChange={setView}
               options={[
-                { value: "board", label: "Board", icon: <LayoutGrid size={14} /> },
+                {
+                  value: "dashboard",
+                  label: "Dashboard",
+                  icon: <BarChart3 size={14} />,
+                },
+                {
+                  value: "board",
+                  label: "Board",
+                  icon: <LayoutGrid size={14} />,
+                },
                 { value: "list", label: "List", icon: <List size={14} /> },
               ]}
             />
@@ -305,195 +361,220 @@ function ProjectsPageInner() {
         }
       />
 
-      <PageDashboard
-        storageKey="projects"
-        range={dash.range}
-        onRangeChange={dash.setRange}
-        kpis={[
-          {
-            label: "Active projects",
-            value: activeProjectsCount.toString(),
-            hint: `${projects.length} total`,
-          },
-          {
-            label: "Tasks completed",
-            value: doneTasks.toString(),
-            sparkline: completionSparkline,
-            hint: `${totalTasks} total · ${Math.round((doneTasks / Math.max(totalTasks, 1)) * 100)}%`,
-          },
-          {
-            label: "In progress",
-            value: inProgressTasks.toString(),
-          },
-          {
-            label: "Overdue",
-            value: overdueTasks.toString(),
-            goodWhenUp: false,
-            hint: overdueTasks > 0 ? "needs attention" : "all on track",
-          },
-        ]}
-      />
+      {view !== "dashboard" && (
+        <PageDashboard
+          storageKey="projects"
+          range={dash.range}
+          onRangeChange={dash.setRange}
+          kpis={[
+            {
+              label: "Active projects",
+              value: activeProjectsCount.toString(),
+              hint: `${projects.length} total`,
+            },
+            {
+              label: "Tasks completed",
+              value: doneTasks.toString(),
+              sparkline: completionSparkline,
+              hint: `${totalTasks} total · ${Math.round((doneTasks / Math.max(totalTasks, 1)) * 100)}%`,
+            },
+            {
+              label: "In progress",
+              value: inProgressTasks.toString(),
+            },
+            {
+              label: "Overdue",
+              value: overdueTasks.toString(),
+              goodWhenUp: false,
+              hint: overdueTasks > 0 ? "needs attention" : "all on track",
+            },
+          ]}
+        />
+      )}
 
-      <div
-        className="flex-1 overflow-auto content-scroll"
-        style={{ padding: "18px 20px 24px", background: "var(--content-bg-secondary)" }}
-      >
-        <SprintPlannerCard />
-        {filtered.length === 0 ? (
-          <EmptyState
-            icon={<LayoutGrid size={24} />}
-            title={search ? "No projects found" : "No projects yet"}
-            body={
-              search
-                ? `No projects match "${search}" — try a different keyword.`
-                : "Projects are where your team tracks work. Create one and start assigning tasks."
-            }
-            action={
-              !search && (
-                <PrimaryLink href="/projects/new">
-                  <Plus size={14} /> Create first project
-                </PrimaryLink>
-              )
-            }
-          />
-        ) : view === "board" ? (
-          <Board>
-            {projectStages.map((stage) => {
-              const stageProjects = projectsByStage.get(stage.id) ?? [];
-              return (
-                <BoardColumn
-                  key={stage.id}
-                  title={stage.label}
-                  count={stageProjects.length}
-                  accent={stage.tone}
-                  addHref="/projects/new"
-                  onDropItem={(projectId) => {
-                    const current = projects.find((p) => p.id === projectId);
-                    if (!current || current.status === stage.id) return;
-                    const previousStatus = current.status;
-                    useProjectsStore
-                      .getState()
-                      .updateProject(projectId, { status: stage.id as ProjectDetail["status"] });
-                    useActivityStore.getState().log({
-                      recordType: "project",
-                      recordId: projectId,
-                      verb: "moved",
-                      summary: `moved ${current.name} status`,
-                      field: "status",
-                      from: previousStatus,
-                      to: stage.label,
-                    });
-                    toast.success(
-                      (t) => (
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
-                          Moved to {stage.label}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              useProjectsStore
-                                .getState()
-                                .updateProject(projectId, { status: previousStatus });
-                              toast.dismiss(t.id);
-                              toast.success("Reverted");
-                            }}
+      {view === "dashboard" ? (
+        <ProjectsDashboardView />
+      ) : (
+        <div
+          className="flex-1 overflow-auto content-scroll"
+          style={{
+            padding: "18px 20px 24px",
+            background: "var(--content-bg-secondary)",
+          }}
+        >
+          <SprintPlannerCard />
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={<LayoutGrid size={24} />}
+              title={search ? "No projects found" : "No projects yet"}
+              body={
+                search
+                  ? `No projects match "${search}" — try a different keyword.`
+                  : "Projects are where your team tracks work. Create one and start assigning tasks."
+              }
+              action={
+                !search && (
+                  <PrimaryLink href="/projects/new">
+                    <Plus size={14} /> Create first project
+                  </PrimaryLink>
+                )
+              }
+            />
+          ) : view === "board" ? (
+            <Board>
+              {projectStages.map((stage) => {
+                const stageProjects = projectsByStage.get(stage.id) ?? [];
+                return (
+                  <BoardColumn
+                    key={stage.id}
+                    title={stage.label}
+                    count={stageProjects.length}
+                    accent={stage.tone}
+                    addHref="/projects/new"
+                    onDropItem={(projectId) => {
+                      const current = projects.find((p) => p.id === projectId);
+                      if (!current || current.status === stage.id) return;
+                      const previousStatus = current.status;
+                      useProjectsStore
+                        .getState()
+                        .updateProject(projectId, {
+                          status: stage.id as ProjectDetail["status"],
+                        });
+                      useActivityStore.getState().log({
+                        recordType: "project",
+                        recordId: projectId,
+                        verb: "moved",
+                        summary: `moved ${current.name} status`,
+                        field: "status",
+                        from: previousStatus,
+                        to: stage.label,
+                      });
+                      toast.success(
+                        (t) => (
+                          <span
                             style={{
-                              padding: "3px 10px",
-                              borderRadius: 6,
-                              border: "1px solid var(--vyne-teal)",
-                              background: "transparent",
-                              color: "var(--vyne-teal)",
-                              fontSize: 12,
-                              fontWeight: 600,
-                              cursor: "pointer",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 12,
                             }}
                           >
-                            Undo
-                          </button>
-                        </span>
-                      ),
-                      { duration: 5000 },
-                    );
-                  }}
-                >
-                  {stageProjects.map((project) => {
-                    const pTasks = allTasks.filter((t) => t.projectId === project.id);
-                    const done = pTasks.filter((t) => t.status === "done").length;
-                    const dueDates = pTasks
-                      .map((t) => t.dueDate)
-                      .filter((d): d is string => !!d)
-                      .sort();
-                    const range =
-                      dueDates.length > 0
-                        ? {
-                            from: formatShortDate(project.createdAt),
-                            to: formatShortDate(dueDates[dueDates.length - 1]),
-                          }
-                        : undefined;
-                    return (
-                      <BoardCard
-                        key={project.id}
-                        dragId={project.id}
-                        title={project.name}
-                        href={`/projects/${project.id}`}
-                        dateRange={range}
-                        tag={{
-                          label: project.identifier ?? "Project",
-                          tone: stage.tone,
-                        }}
-                        footer={
-                          <>
-                            <span
+                            Moved to {stage.label}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                useProjectsStore
+                                  .getState()
+                                  .updateProject(projectId, {
+                                    status: previousStatus,
+                                  });
+                                toast.dismiss(t.id);
+                                toast.success("Reverted");
+                              }}
                               style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: 6,
+                                padding: "3px 10px",
+                                borderRadius: 6,
+                                border: "1px solid var(--vyne-teal)",
+                                background: "transparent",
+                                color: "var(--vyne-teal)",
                                 fontSize: 12,
-                                color: "var(--text-tertiary)",
+                                fontWeight: 600,
+                                cursor: "pointer",
                               }}
                             >
-                              <Clock size={12} />
-                              {pTasks.length > 0
-                                ? `${done}/${pTasks.length} tasks`
-                                : "No tasks"}
-                            </span>
-                            <AssigneeDot project={project} />
-                          </>
-                        }
-                      />
-                    );
-                  })}
-                </BoardColumn>
-              );
-            })}
-          </Board>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid gap-4"
-            style={{
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            }}
-          >
-            <AnimatePresence mode="popLayout">
-              {filtered.map((project, i) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ delay: i * 0.04, duration: 0.25 }}
-                >
-                  <ProjectCardLocal
-                    project={project}
-                    onNavigate={() => router.push(`/projects/${project.id}`)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </div>
+                              Undo
+                            </button>
+                          </span>
+                        ),
+                        { duration: 5000 },
+                      );
+                    }}
+                  >
+                    {stageProjects.map((project) => {
+                      const pTasks = allTasks.filter(
+                        (t) => t.projectId === project.id,
+                      );
+                      const done = pTasks.filter(
+                        (t) => t.status === "done",
+                      ).length;
+                      const dueDates = pTasks
+                        .map((t) => t.dueDate)
+                        .filter((d): d is string => !!d)
+                        .sort();
+                      const range =
+                        dueDates.length > 0
+                          ? {
+                              from: formatShortDate(project.createdAt),
+                              to: formatShortDate(
+                                dueDates[dueDates.length - 1],
+                              ),
+                            }
+                          : undefined;
+                      return (
+                        <BoardCard
+                          key={project.id}
+                          dragId={project.id}
+                          title={project.name}
+                          href={`/projects/${project.id}`}
+                          dateRange={range}
+                          tag={{
+                            label: project.identifier ?? "Project",
+                            tone: stage.tone,
+                          }}
+                          footer={
+                            <>
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  fontSize: 12,
+                                  color: "var(--text-tertiary)",
+                                }}
+                              >
+                                <Clock size={12} />
+                                {pTasks.length > 0
+                                  ? `${done}/${pTasks.length} tasks`
+                                  : "No tasks"}
+                              </span>
+                              <AssigneeDot project={project} />
+                            </>
+                          }
+                        />
+                      );
+                    })}
+                  </BoardColumn>
+                );
+              })}
+            </Board>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid gap-4"
+              style={{
+                gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+              }}
+            >
+              <AnimatePresence mode="popLayout">
+                {filtered.map((project, i) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ delay: i * 0.04, duration: 0.25 }}
+                  >
+                    <ProjectCardLocal
+                      project={project}
+                      onNavigate={() => router.push(`/projects/${project.id}`)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Slide-in detail panel */}
       <ProjectDetailPanel project={selectedProject} onClose={detail.close} />
@@ -577,9 +658,12 @@ function ProjectDetailPanel({
   const lead = project && members.find((m) => m.id === project.leadId);
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter((t) => t.status === "done").length;
-  const inProgressTasks = tasks.filter((t) => t.status === "in_progress").length;
+  const inProgressTasks = tasks.filter(
+    (t) => t.status === "in_progress",
+  ).length;
   const blockedTasks = tasks.filter((t) => t.status === "blocked").length;
-  const progress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const progress =
+    totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   const recentTasks = [...tasks]
     .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
@@ -613,13 +697,24 @@ function ProjectDetailPanel({
             }}
           >
             <span style={{ fontSize: 13 }}>{project.icon ?? "📋"}</span>
-            {project.status === "completed" ? "Completed" : project.status === "paused" ? "On Hold" : "Active"}
+            {project.status === "completed"
+              ? "Completed"
+              : project.status === "paused"
+                ? "On Hold"
+                : "Active"}
           </span>
         )
       }
       headerActions={
         project && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              position: "relative",
+            }}
+          >
             <PresenceBubbles entityKey={`project:${project.id}`} />
             <ShareLinkButton
               entityId={project.id}
@@ -710,7 +805,14 @@ function ProjectDetailPanel({
                 }}
               />
             </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                marginTop: 4,
+              }}
+            >
               {inProgressTasks > 0 && (
                 <Pill
                   label={`${inProgressTasks} in progress`}
@@ -729,12 +831,22 @@ function ProjectDetailPanel({
           </DetailSection>
 
           <DetailSection title="Details">
-            <DetailRow label="Identifier" value={project.identifier ?? "—"} mono />
+            <DetailRow
+              label="Identifier"
+              value={project.identifier ?? "—"}
+              mono
+            />
             <DetailRow
               label="Lead"
               value={
                 lead ? (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
                     <span
                       style={{
                         width: 18,
@@ -754,7 +866,9 @@ function ProjectDetailPanel({
                     {lead.name}
                   </span>
                 ) : (
-                  <span style={{ color: "var(--text-tertiary)" }}>Unassigned</span>
+                  <span style={{ color: "var(--text-tertiary)" }}>
+                    Unassigned
+                  </span>
                 )
               }
             />
@@ -768,7 +882,8 @@ function ProjectDetailPanel({
             <DetailSection title={`Recent tasks · ${recentTasks.length}`}>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {recentTasks.map((t) => {
-                  const meta = STATUS_META[t.status as keyof typeof STATUS_META];
+                  const meta =
+                    STATUS_META[t.status as keyof typeof STATUS_META];
                   return (
                     <div
                       key={t.id}
@@ -850,7 +965,15 @@ const iconBtn: React.CSSProperties = {
   transition: "background 0.15s, color 0.15s",
 };
 
-function Pill({ label, color, bg }: { label: string; color: string; bg: string }) {
+function Pill({
+  label,
+  color,
+  bg,
+}: {
+  label: string;
+  color: string;
+  bg: string;
+}) {
   return (
     <span
       style={{
@@ -865,7 +988,9 @@ function Pill({ label, color, bg }: { label: string; color: string; bg: string }
         color,
       }}
     >
-      <span style={{ width: 5, height: 5, borderRadius: "50%", background: color }} />
+      <span
+        style={{ width: 5, height: 5, borderRadius: "50%", background: color }}
+      />
       {label}
     </span>
   );
@@ -980,7 +1105,8 @@ function ProjectCardLocal({
             style={{ color: "var(--text-tertiary)" }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = "#CFFAFE";
-              (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+              (e.currentTarget as HTMLElement).style.color =
+                "var(--vyne-accent, #06B6D4)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -1058,8 +1184,14 @@ function ProjectCardLocal({
       <div className="flex flex-wrap gap-1.5" onClick={onNavigate}>
         {statusEntries.map((entry) => {
           if (entry.count === 0) return null;
-          const color = "meta" in entry && entry.meta ? entry.meta.color : entry.color ?? "var(--text-secondary)";
-          const bgColor = "meta" in entry && entry.meta ? entry.meta.bgColor : entry.bgColor ?? "var(--content-secondary)";
+          const color =
+            "meta" in entry && entry.meta
+              ? entry.meta.color
+              : (entry.color ?? "var(--text-secondary)");
+          const bgColor =
+            "meta" in entry && entry.meta
+              ? entry.meta.bgColor
+              : (entry.bgColor ?? "var(--content-secondary)");
           const { count, label } = entry;
           return (
             <span

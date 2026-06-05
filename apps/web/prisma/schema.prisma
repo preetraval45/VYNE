@@ -33,22 +33,48 @@ model Subscription {
 // Real signup-backed user account. Stores PBKDF2-SHA256 password hash
 // (salt + hash separated) plus the modules the user picked at signup so
 // the dashboard renders only what they enabled.
+//
+// PH-D additions:
+//   - mfaEnabled / mfaSecretEncrypted — TOTP second factor, secret is
+//     AES-256-GCM ciphertext keyed off MFA_ENCRYPTION_KEY env var.
+//   - mfaRecoveryCodes — sha256 hashes of one-time recovery codes,
+//     emptied as each is consumed.
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String
-  companyName   String   @map("company_name")
-  passwordHash  String   @map("password_hash")
-  passwordSalt  String   @map("password_salt")
-  modules       String[] @default([])
-  plan          String   @default("custom")
-  role          String   @default("owner")
-  orgId         String   @default("org-self") @map("org_id")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  name                  String
+  companyName           String   @map("company_name")
+  passwordHash          String   @map("password_hash")
+  passwordSalt          String   @map("password_salt")
+  modules               String[] @default([])
+  plan                  String   @default("custom")
+  role                  String   @default("owner")
+  orgId                 String   @default("org-self") @map("org_id")
+  mfaEnabled            Boolean  @default(false) @map("mfa_enabled")
+  mfaSecretEncrypted    String?  @map("mfa_secret_encrypted")
+  mfaRecoveryCodes      String[] @default([]) @map("mfa_recovery_codes")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@index([orgId])
   @@map("users")
+}
+
+// PH-D — single-use password-reset token. Raw token never persisted;
+// we keep sha256(rawToken) as `tokenHash`. Expires 1 hour after
+// issuance. `usedAt` flips on successful reset so a link cannot be
+// replayed. Index on (tokenHash, usedAt) keeps the lookup point-fast.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
 }
 
 // Single-tenant for now. Multi-tenant scopes to org_id later via RLS.
@@ -282,6 +308,30 @@ model Supplier {
   @@map("suppliers")
 }
 
+// Expenses.Expense (PH-A R3) — submitted reimbursement / OOP entry.
+// Receipt URL is left optional so the store keeps working before the
+// S3 upload path lands.
+model Expense {
+  id          String   @id @default(cuid())
+  orgId       String   @default("org-demo") @map("org_id")
+  date        String   @default("")
+  category    String   @default("other")
+  description String   @default("")
+  amount      Int      @default(0)
+  currency    String   @default("USD")
+  submittedBy String   @default("") @map("submitted_by")
+  status      String   @default("draft")
+  receiptUrl  String   @default("") @map("receipt_url")
+  note        String   @default("")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@index([category])
+  @@map("expenses")
+}
+
 // Finance.JournalEntry — double-entry ledger row. Lines as Json so a
 // single entry can carry N debits + N credits without a side table.
 model JournalEntry {
@@ -300,6 +350,198 @@ model JournalEntry {
   @@index([orgId])
   @@index([status])
   @@map("journal_entries")
+}
+
+// PH-A — Sales module entities. Distinct from Ops.Product / Invoicing.Customer
+// because Sales tracks the deal lifecycle (Opportunity → Quote → Order)
+// whereas Ops tracks inventory state and Invoicing tracks AR. Each entity
+// is org-scoped via the shared CRUD factory in lib/api/crud.ts.
+
+model SalesOpportunity {
+  id            String   @id @default(cuid())
+  orgId         String   @default("demo") @map("org_id")
+  name          String
+  company       String   @default("")
+  contact       String   @default("")
+  value         Int      @default(0)
+  probability   Int      @default(0)
+  stage         String   @default("Prospecting")
+  expectedClose String?  @map("expected_close")
+  assignee      String   @default("")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([stage])
+  @@map("sales_opportunities")
+}
+
+model SalesQuote {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  number    String
+  customer  String   @default("")
+  date      String   @default("")
+  expiry    String   @default("")
+  amount    Int      @default(0)
+  status    String   @default("Draft")
+  items     Int      @default(0)
+  lineItems Json?    @map("line_items")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("sales_quotes")
+}
+
+model SalesOrder {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  number    String
+  customer  String   @default("")
+  date      String   @default("")
+  amount    Int      @default(0)
+  status    String   @default("New")
+  tracking  String   @default("")
+  items     Int      @default(0)
+  lineItems Json?    @map("line_items")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([status])
+  @@map("sales_orders")
+}
+
+model SalesProduct {
+  id        String   @id @default(cuid())
+  orgId     String   @default("demo") @map("org_id")
+  name      String
+  sku       String   @default("")
+  category  String   @default("")
+  price     Int      @default(0)
+  stock     Int      @default(0)
+  status    String   @default("Active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([sku])
+  @@map("sales_products")
+}
+
+model SalesCustomer {
+  id           String   @id @default(cuid())
+  orgId        String   @default("demo") @map("org_id")
+  name         String
+  email        String   @default("")
+  totalOrders  Int      @default(0) @map("total_orders")
+  totalRevenue Int      @default(0) @map("total_revenue")
+  lastOrder    String   @default("") @map("last_order")
+  status       String   @default("Active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("sales_customers")
+}
+
+// PH-A — Field Service module entities. Technicians schedule jobs;
+// each job has a region + skill + priority + status + scheduled
+// start/end. Lightweight enough that the dispatch Gantt + filter rail
+// in field-service/page.tsx can build directly on these tables.
+
+model FieldTechnician {
+  id                  String   @id @default(cuid())
+  orgId               String   @default("demo") @map("org_id")
+  name                String
+  initials            String   @default("")
+  region              String   @default("north")
+  skills              String[] @default([])
+  color               String   @default("#06B6D4")
+  weeklyCapacityHours Int      @default(40) @map("weekly_capacity_hours")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@map("field_technicians")
+}
+
+model FieldJob {
+  id              String   @id @default(cuid())
+  orgId           String   @default("demo") @map("org_id")
+  jobNumber       String   @map("job_number")
+  title           String
+  customerName    String   @default("") @map("customer_name")
+  address         String   @default("")
+  region          String   @default("north")
+  skill           String   @default("hvac")
+  priority        String   @default("medium")
+  status          String   @default("scheduled")
+  technicianId    String?  @map("technician_id")
+  scheduledStart  String   @default("") @map("scheduled_start")
+  scheduledEnd    String   @default("") @map("scheduled_end")
+  estimatedHours  Int      @default(1) @map("estimated_hours")
+  notes           String?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([technicianId])
+  @@index([status])
+  @@map("field_jobs")
+}
+
+// PH-A — HR module entities. Employee directory + leave requests.
+
+model Employee {
+  id              String   @id @default(cuid())
+  orgId           String   @default("demo") @map("org_id")
+  name            String
+  initials        String   @default("")
+  title           String   @default("")
+  department      String   @default("Engineering")
+  status          String   @default("Active")
+  leaveNote       String?  @map("leave_note")
+  joined          String   @default("")
+  email           String   @default("")
+  phone           String   @default("")
+  slack           String   @default("")
+  reportsTo       String   @default("") @map("reports_to")
+  avatarGradient  String   @default("") @map("avatar_gradient")
+  baseSalary      Int      @default(0) @map("base_salary")
+  hoursThisMonth  Int      @default(0) @map("hours_this_month")
+  deductions      Int      @default(0)
+  bonus           Int      @default(0)
+  vacationBalance Int      @default(0) @map("vacation_balance")
+  sickBalance     Int      @default(0) @map("sick_balance")
+  personalBalance Int      @default(0) @map("personal_balance")
+  usedLeaveThisYear Int    @default(0) @map("used_leave_this_year")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([department])
+  @@map("employees")
+}
+
+model LeaveRequest {
+  id           String   @id @default(cuid())
+  orgId        String   @default("demo") @map("org_id")
+  employeeId   String   @map("employee_id")
+  employeeName String   @default("") @map("employee_name")
+  type         String   @default("Vacation")
+  dates        String   @default("")
+  status       String   @default("Pending")
+  reason       String   @default("")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([orgId])
+  @@index([employeeId])
+  @@index([status])
+  @@map("leave_requests")
 }
 
 // Push notification subscription (UI_UPGRADE_PLAN.md 8.5).
@@ -374,4 +616,90 @@ model Embedding {
   @@index([orgId])
   @@index([ref])
   @@map("embeddings")
+}
+
+// PH-H — Cookie / tracking consent record. One row per (userId,
+// category). Consent banner POSTs an updated set of decisions on
+// every change; we keep the rows so we can prove what the user
+// consented to and when. Server-side mirror of the localStorage
+// preference so a cross-device login picks up the same choices.
+model Consent {
+  id        String   @id @default(cuid())
+  userId    String?  @map("user_id")
+  // Anonymous visitors before signup get a hashed visitor id (sha256 of
+  // a long-lived first-party cookie). userId is null for those rows;
+  // we re-stitch them to the User when the visitor signs up by matching
+  // visitor id at signup time.
+  visitorId String?  @map("visitor_id")
+  category  String // strictly_necessary | functional | analytics | marketing
+  granted   Boolean
+  ip        String   @default("")
+  userAgent String   @default("") @map("user_agent")
+  // Source of the decision: "banner" | "settings" | "do-not-track" |
+  // "withdraw" — useful for audit + analytics on banner conversion.
+  source    String   @default("banner")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([visitorId])
+  @@index([category])
+  @@map("consents")
+}
+
+// PH-I — Daily tamper-evident checksum of the audit_events table.
+// The cron at /api/admin/cron/audit-checksum-chain hashes all
+// audit_events created in the past 24h and stores the result keyed by
+// (orgId, date) along with the previous day's checksum. Three
+// properties this gives us for SOC 2 CC6.1 / CC7.2:
+//   1. Each row's `chainHash` = sha256(prev.chainHash || dailyHash)
+//   2. Any tampering with audit_events from a past day produces a
+//      different dailyHash, which cascades — the chain breaks
+//      immediately + visibly.
+//   3. The export endpoint embeds the chain head + manifest, so an
+//      auditor can verify off-line.
+model AuditChecksum {
+  id          String   @id @default(cuid())
+  orgId       String   @map("org_id")
+  // The UTC date this checksum covers (one row per org per day).
+  date        DateTime @map("date")
+  // Number of audit_events rows included.
+  rowCount    Int      @map("row_count")
+  // sha256 of the canonical JSON list of audit_events for this day.
+  dailyHash   String   @map("daily_hash")
+  // sha256(prev.chainHash || dailyHash). Forms the tamper-evident chain.
+  chainHash   String   @map("chain_hash")
+  // The previous day's chainHash (null for the very first row).
+  prevHash    String?  @map("prev_hash")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([orgId, date])
+  @@index([orgId])
+  @@index([date])
+  @@map("audit_checksums")
+}
+
+// PH-H — Pending account-deletion request. /api/account/delete creates
+// one of these with `scheduledFor = now + 30 days`. A daily cron walks
+// rows past their `scheduledFor` and performs the hard delete across
+// every table for the owning orgId. Until then, the row sits as a
+// grace period — undo is a single DELETE on this table.
+model AccountDeletion {
+  id           String    @id @default(cuid())
+  userId       String    @unique @map("user_id")
+  orgId        String    @map("org_id")
+  // Email of the user who requested it (denormalised so the audit
+  // trail survives after the user row is deleted).
+  email        String
+  requestedAt  DateTime  @default(now()) @map("requested_at")
+  // Grace-period end. Cron picks rows where scheduledFor <= now and
+  // hardDeletedAt is null.
+  scheduledFor DateTime  @map("scheduled_for")
+  reason       String    @default("")
+  hardDeletedAt DateTime? @map("hard_deleted_at")
+  // Per-table counts captured at hard-delete time for audit evidence.
+  entityCounts Json?     @map("entity_counts")
+
+  @@index([scheduledFor])
+  @@index([orgId])
+  @@map("account_deletions")
 }

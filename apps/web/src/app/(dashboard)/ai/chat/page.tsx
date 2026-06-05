@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   Brain,
   Compass as CompassIcon,
@@ -30,7 +31,11 @@ import {
   type AiModel,
 } from "@/lib/stores/aiMemory";
 import { useAuthStore } from "@/lib/stores/auth";
-import { parseArtifacts, streamVyneAI, type Artifact } from "@/lib/ai/streamClient";
+import {
+  parseArtifacts,
+  streamVyneAI,
+  type Artifact,
+} from "@/lib/ai/streamClient";
 import {
   executeToolCalls,
   executeToolCall,
@@ -91,17 +96,34 @@ function detectMutationIntent(text: string): boolean {
   // First-word triggers — strongest signal.
   const firstWord = t.split(/\s+/)[0];
   const firstWordTriggers = new Set([
-    "create", "add", "new", "make", "log", "record", "schedule",
-    "update", "edit", "change", "rename", "set", "mark", "move",
-    "delete", "remove", "drop", "cancel",
+    "create",
+    "add",
+    "new",
+    "make",
+    "log",
+    "record",
+    "schedule",
+    "update",
+    "edit",
+    "change",
+    "rename",
+    "set",
+    "mark",
+    "move",
+    "delete",
+    "remove",
+    "drop",
+    "cancel",
   ]);
   if (firstWordTriggers.has(firstWord)) {
     // Must reference an entity noun for it to be a mutation.
-    const entityNouns = /\b(deal|task|issue|contact|product|invoice|supplier|work[- ]?order|opportunity|customer|sku)\b/;
+    const entityNouns =
+      /\b(deal|task|issue|contact|product|invoice|supplier|work[- ]?order|opportunity|customer|sku)\b/;
     return entityNouns.test(t);
   }
   // Imperative shorthand: "/do …" or "/create …"
-  if (t.startsWith("/do ") || t.startsWith("/create ") || t.startsWith("/add ")) return true;
+  if (t.startsWith("/do ") || t.startsWith("/create ") || t.startsWith("/add "))
+    return true;
   return false;
 }
 
@@ -239,9 +261,12 @@ export default function VyneAIChatPage() {
   const [compassDraft, setCompassDraft] = useState("");
   const [editingCompass, setEditingCompass] = useState(false);
   const [archiveQuery, setArchiveQuery] = useState("");
-  const [archiveHits, setArchiveHits] = useState<
-    Array<{ id: string; createdAt: string; snippet: string; reason: string }> | null
-  >(null);
+  const [archiveHits, setArchiveHits] = useState<Array<{
+    id: string;
+    createdAt: string;
+    snippet: string;
+    reason: string;
+  }> | null>(null);
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState<Artifact | null>(null);
   const [memoryOpen, setMemoryOpen] = useState(false);
@@ -336,8 +361,7 @@ export default function VyneAIChatPage() {
   // reply once the edit endpoint returns.
   useEffect(() => {
     function onEdit(e: Event) {
-      const detail = (e as CustomEvent<{ src: string; prompt: string }>)
-        .detail;
+      const detail = (e as CustomEvent<{ src: string; prompt: string }>).detail;
       if (!detail?.src || !detail?.prompt) return;
       void runImageEdit(detail.src, detail.prompt);
     }
@@ -625,13 +649,22 @@ export default function VyneAIChatPage() {
       if (mode === "fresh" && detectMutationIntent(prompt)) {
         try {
           const toolCtx = collectVyneContext();
-          const toolHistory = messages.slice(-4).map((m) => ({ role: m.role, content: m.content }));
+          const toolHistory = messages
+            .slice(-4)
+            .map((m) => ({ role: m.role, content: m.content }));
           const res = await fetch("/api/ai/tools", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: prompt, context: toolCtx, history: toolHistory }),
+            body: JSON.stringify({
+              question: prompt,
+              context: toolCtx,
+              history: toolHistory,
+            }),
           });
-          const data = (await res.json()) as { message?: string; toolCalls?: ToolCall[] };
+          const data = (await res.json()) as {
+            message?: string;
+            toolCalls?: ToolCall[];
+          };
           const toolCalls = Array.isArray(data.toolCalls) ? data.toolCalls : [];
           // Split read/write: read tools (queries) run immediately;
           // write tools (create/update/delete) need user approval.
@@ -699,7 +732,9 @@ export default function VyneAIChatPage() {
 
           const message =
             data.message ??
-            (immediate.length || split.pending.length ? "Done." : "Nothing to do.");
+            (immediate.length || split.pending.length
+              ? "Done."
+              : "Nothing to do.");
           setMessages((m) =>
             m.map((msg) =>
               msg.id === assistantId
@@ -720,7 +755,11 @@ export default function VyneAIChatPage() {
         } catch (err) {
           const failMsg = `Couldn't run tool: ${(err as Error).message ?? "unknown error"}`;
           setMessages((m) =>
-            m.map((msg) => (msg.id === assistantId ? { ...msg, content: failMsg, streaming: false } : msg)),
+            m.map((msg) =>
+              msg.id === assistantId
+                ? { ...msg, content: failMsg, streaming: false }
+                : msg,
+            ),
           );
         } finally {
           setPending(false);
@@ -734,7 +773,11 @@ export default function VyneAIChatPage() {
       // per-workspace + per-user budget. Hard-stop refuses the call;
       // soft-warn flags a toast but lets it through.
       const expectedCost =
-        preferredModel === "opus" ? 0.06 : preferredModel === "sonnet" ? 0.02 : 0.005;
+        preferredModel === "opus"
+          ? 0.06
+          : preferredModel === "sonnet"
+            ? 0.02
+            : 0.005;
       const guard = guardSpend(undefined, expectedCost);
       if (!guard.ok) {
         const limitMsg =
@@ -752,10 +795,9 @@ export default function VyneAIChatPage() {
         return;
       }
       if (guard.reason === "soft-warn") {
-        toast(
-          `${Math.round(guard.pct * 100)}% of monthly AI budget used.`,
-          { icon: "⚠️" },
-        );
+        toast(`${Math.round(guard.pct * 100)}% of monthly AI budget used.`, {
+          icon: "⚠️",
+        });
       }
 
       const ctrl = new AbortController();
@@ -779,9 +821,7 @@ export default function VyneAIChatPage() {
             reply += chunk.text;
             setMessages((m) =>
               m.map((msg) =>
-                msg.id === assistantId
-                  ? { ...msg, content: reply }
-                  : msg,
+                msg.id === assistantId ? { ...msg, content: reply } : msg,
               ),
             );
           } else if (chunk.type === "sources" && chunk.sources) {
@@ -1055,7 +1095,12 @@ export default function VyneAIChatPage() {
         body: JSON.stringify({ query: q, sessions }),
       });
       const data = (await res.json()) as {
-        hits: Array<{ id: string; createdAt: string; snippet: string; reason: string }>;
+        hits: Array<{
+          id: string;
+          createdAt: string;
+          snippet: string;
+          reason: string;
+        }>;
       };
       setArchiveHits(data.hits ?? []);
     } finally {
@@ -1064,7 +1109,10 @@ export default function VyneAIChatPage() {
   }, [archiveQuery, sessions]);
 
   return (
-    <div className="flex h-full" style={{ background: "var(--content-bg-secondary)" }}>
+    <div
+      className="flex h-full"
+      style={{ background: "var(--content-bg-secondary)" }}
+    >
       <ConversationHistory
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}
@@ -1073,184 +1121,320 @@ export default function VyneAIChatPage() {
         }}
       />
       <div className="flex flex-col h-full" style={{ flex: 1, minWidth: 0 }}>
-      {/* Header */}
-      <header
-        data-vyne-page-header
-        style={{
-          padding: "16px 24px 12px",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-        }}
-      >
-        <div
+        {/* Header */}
+        <header
+          data-vyne-page-header
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
-            display: "inline-flex",
+            padding: "16px 24px 12px",
+            borderBottom: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+            display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            boxShadow: "0 8px 22px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
+            gap: 12,
           }}
         >
-          <Brain size={20} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <h1
+          <div
             style={{
-              margin: 0,
-              fontSize: 18,
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
-              color: "var(--text-primary)",
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background:
+                "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#fff",
+              boxShadow:
+                "0 8px 22px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
             }}
           >
-            Vyne AI
-          </h1>
-          <p style={{ margin: "2px 0 0", fontSize: 12.5, color: "var(--text-tertiary)" }}>
-            Grounded in your workspace · {sessions.length} session{sessions.length === 1 ? "" : "s"} remembered
-          </p>
-        </div>
-        {/* Phase 16.5 — live MTD cost meter */}
-        <AiCostMeterPill />
-        <button
-          type="button"
-          onClick={() => setHistoryOpen((v) => !v)}
-          aria-expanded={historyOpen}
-          aria-label="Conversation history"
-          title={`Conversation history (${conversations.length})`}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12.5,
-            color: historyOpen ? "#fff" : "var(--text-secondary)",
-            background: historyOpen
-              ? "var(--vyne-teal)"
-              : "var(--content-secondary)",
-            border: `1px solid ${historyOpen ? "var(--vyne-teal)" : "var(--content-border)"}`,
-            borderRadius: 8,
-            padding: "6px 10px",
-            cursor: "pointer",
-          }}
-        >
-          <History size={12} />
-          History
-          {conversations.length > 0 && (
-            <span
+            <Brain size={20} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h1
               style={{
-                background: historyOpen
-                  ? "rgba(255,255,255,0.22)"
-                  : "var(--vyne-teal-soft)",
-                color: historyOpen ? "#fff" : "var(--vyne-teal)",
-                padding: "1px 6px",
-                borderRadius: 999,
-                fontSize: 10,
-                fontWeight: 600,
+                margin: 0,
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+                color: "var(--text-primary)",
               }}
             >
-              {conversations.length}
-            </span>
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={startNewConversation}
-          aria-label="Start new conversation"
-          title="New conversation"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            fontSize: 12.5,
-            color: "var(--vyne-teal)",
-            background: "var(--vyne-teal-soft)",
-            border: "1px solid var(--vyne-teal)",
-            borderRadius: 8,
-            padding: "6px 10px",
-            cursor: "pointer",
-            fontWeight: 600,
-          }}
-        >
-          <Plus size={12} />
-          New
-        </button>
-        <StreakPill current={streak.current} longest={streak.longest} graceUsed={streak.graceUsed} />
-        <ModelPickerPill
-          value={preferredModel}
-          onChange={setPreferredModel}
-          open={modelMenuOpen}
-          setOpen={setModelMenuOpen}
-        />
-        <button
-          type="button"
-          onClick={() => setMemoryOpen((v) => !v)}
-          aria-expanded={memoryOpen}
-          aria-label="Manage Vyne AI memory"
-          title={`${facts.length} memory fact${facts.length === 1 ? "" : "s"}`}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 12.5,
-            color: memoryOpen ? "#fff" : "var(--text-secondary)",
-            background: memoryOpen
-              ? "var(--vyne-teal)"
-              : "var(--content-secondary)",
-            border: `1px solid ${memoryOpen ? "var(--vyne-teal)" : "var(--content-border)"}`,
-            borderRadius: 8,
-            padding: "6px 10px",
-            cursor: "pointer",
-          }}
-        >
-          <Brain size={12} />
-          Memory
-          {facts.length > 0 && (
-            <span
+              Vyne AI
+            </h1>
+            <p
               style={{
-                background: memoryOpen
-                  ? "rgba(255,255,255,0.22)"
-                  : "var(--vyne-teal-soft)",
-                color: memoryOpen ? "#fff" : "var(--vyne-teal)",
-                padding: "1px 6px",
-                borderRadius: 999,
-                fontSize: 10,
-                fontWeight: 600,
+                margin: "2px 0 0",
+                fontSize: 12.5,
+                color: "var(--text-tertiary)",
               }}
             >
-              {facts.length}
-            </span>
-          )}
-        </button>
-        <Link
-          href="/ai"
-          style={{
-            fontSize: 13,
-            color: "var(--text-secondary)",
-            textDecoration: "none",
-            padding: "6px 12px",
-            borderRadius: 8,
-            background: "var(--content-secondary)",
-            border: "1px solid var(--content-border)",
-          }}
-        >
-          Insights →
-        </Link>
-      </header>
+              Grounded in your workspace · {sessions.length} session
+              {sessions.length === 1 ? "" : "s"} remembered
+            </p>
+          </div>
+          {/* Phase 16.5 — live MTD cost meter */}
+          <AiCostMeterPill />
+          <button
+            type="button"
+            onClick={() => setHistoryOpen((v) => !v)}
+            aria-expanded={historyOpen}
+            aria-label="Conversation history"
+            title={`Conversation history (${conversations.length})`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12.5,
+              color: historyOpen ? "#fff" : "var(--text-secondary)",
+              background: historyOpen
+                ? "var(--vyne-teal)"
+                : "var(--content-secondary)",
+              border: `1px solid ${historyOpen ? "var(--vyne-teal)" : "var(--content-border)"}`,
+              borderRadius: 8,
+              padding: "6px 10px",
+              cursor: "pointer",
+            }}
+          >
+            <History size={12} />
+            History
+            {conversations.length > 0 && (
+              <span
+                style={{
+                  background: historyOpen
+                    ? "rgba(255,255,255,0.22)"
+                    : "var(--vyne-teal-soft)",
+                  color: historyOpen ? "#fff" : "var(--vyne-teal)",
+                  padding: "1px 6px",
+                  borderRadius: 999,
+                  fontSize: 10,
+                  fontWeight: 600,
+                }}
+              >
+                {conversations.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={startNewConversation}
+            aria-label="Start new conversation"
+            title="New conversation"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 12.5,
+              color: "var(--vyne-teal)",
+              background: "var(--vyne-teal-soft)",
+              border: "1px solid var(--vyne-teal)",
+              borderRadius: 8,
+              padding: "6px 10px",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            <Plus size={12} />
+            New
+          </button>
+          <StreakPill
+            current={streak.current}
+            longest={streak.longest}
+            graceUsed={streak.graceUsed}
+          />
+          <ModelPickerPill
+            value={preferredModel}
+            onChange={setPreferredModel}
+            open={modelMenuOpen}
+            setOpen={setModelMenuOpen}
+          />
+          <button
+            type="button"
+            onClick={() => setMemoryOpen((v) => !v)}
+            aria-expanded={memoryOpen}
+            aria-label="Manage Vyne AI memory"
+            title={`${facts.length} memory fact${facts.length === 1 ? "" : "s"}`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12.5,
+              color: memoryOpen ? "#fff" : "var(--text-secondary)",
+              background: memoryOpen
+                ? "var(--vyne-teal)"
+                : "var(--content-secondary)",
+              border: `1px solid ${memoryOpen ? "var(--vyne-teal)" : "var(--content-border)"}`,
+              borderRadius: 8,
+              padding: "6px 10px",
+              cursor: "pointer",
+            }}
+          >
+            <Brain size={12} />
+            Memory
+            {facts.length > 0 && (
+              <span
+                style={{
+                  background: memoryOpen
+                    ? "rgba(255,255,255,0.22)"
+                    : "var(--vyne-teal-soft)",
+                  color: memoryOpen ? "#fff" : "var(--vyne-teal)",
+                  padding: "1px 6px",
+                  borderRadius: 999,
+                  fontSize: 10,
+                  fontWeight: 600,
+                }}
+              >
+                {facts.length}
+              </span>
+            )}
+          </button>
+          <Link
+            href="/ai"
+            style={{
+              fontSize: 13,
+              color: "var(--text-secondary)",
+              textDecoration: "none",
+              padding: "6px 12px",
+              borderRadius: 8,
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+            }}
+          >
+            Insights →
+          </Link>
+        </header>
 
-      {/* Memory drawer */}
-      {memoryOpen && (
+        {/* Memory drawer */}
+        {memoryOpen && (
+          <div
+            style={{
+              padding: "12px 24px",
+              background: "var(--content-bg)",
+              borderBottom: "1px solid var(--content-border)",
+            }}
+          >
+            <div
+              style={{
+                maxWidth: 820,
+                margin: "0 auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  color: "var(--text-tertiary)",
+                }}
+              >
+                Persistent facts Vyne AI remembers across sessions. Add things
+                like "we use Postgres, not MySQL" or "Sarah is the design lead".
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (factDraft.trim()) {
+                    addFact(factDraft);
+                    setFactDraft("");
+                  }
+                }}
+                style={{ display: "flex", gap: 8 }}
+              >
+                <input
+                  value={factDraft}
+                  onChange={(e) => setFactDraft(e.target.value)}
+                  placeholder="Add a fact Vyne AI should always remember…"
+                  aria-label="New memory fact"
+                  style={{
+                    flex: 1,
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--content-border)",
+                    background: "var(--content-bg)",
+                    color: "var(--text-primary)",
+                    fontSize: 13,
+                    outline: "none",
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={!factDraft.trim()}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    border: "none",
+                    background: "var(--vyne-teal)",
+                    color: "#fff",
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    cursor: factDraft.trim() ? "pointer" : "not-allowed",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <Plus size={13} />
+                  Save
+                </button>
+              </form>
+              {facts.length > 0 && (
+                <ul
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 4,
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                  }}
+                >
+                  {facts.map((f) => (
+                    <li
+                      key={f.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        padding: "6px 10px",
+                        background: "var(--content-bg-secondary)",
+                        border: "1px solid var(--content-border)",
+                        borderRadius: 8,
+                      }}
+                    >
+                      <span style={{ flex: 1, fontSize: 12.5 }}>{f.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFact(f.id)}
+                        aria-label={`Remove fact: ${f.text}`}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          border: "none",
+                          background: "transparent",
+                          color: "var(--text-tertiary)",
+                          cursor: "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: 6,
+                        }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+
         <div
-          style={{
-            padding: "12px 24px",
-            background: "var(--content-bg)",
-            borderBottom: "1px solid var(--content-border)",
-          }}
+          ref={scrollerRef}
+          className="flex-1 overflow-auto content-scroll"
+          style={{ padding: "20px 24px 24px" }}
         >
           <div
             style={{
@@ -1258,205 +1442,84 @@ export default function VyneAIChatPage() {
               margin: "0 auto",
               display: "flex",
               flexDirection: "column",
-              gap: 8,
+              gap: 14,
             }}
           >
-            <p
-              style={{
-                margin: 0,
-                fontSize: 12,
-                color: "var(--text-tertiary)",
+            {/* Morning brief */}
+            <BriefCard
+              brief={todaysBrief}
+              loading={briefLoading}
+              onGenerate={generateBrief}
+            />
+
+            {/* Compass */}
+            <CompassCard
+              compass={compass}
+              fresh={compassFresh}
+              editing={editingCompass}
+              draft={compassDraft}
+              onStartEdit={() => {
+                setCompassDraft(compassFresh ? (compass?.intention ?? "") : "");
+                setEditingCompass(true);
               }}
-            >
-              Persistent facts Vyne AI remembers across sessions. Add things
-              like "we use Postgres, not MySQL" or "Sarah is the design lead".
-            </p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (factDraft.trim()) {
-                  addFact(factDraft);
-                  setFactDraft("");
-                }
+              onCancel={() => setEditingCompass(false)}
+              onSave={() => {
+                const v = compassDraft.trim();
+                if (!v) return;
+                setCompass(v);
+                setEditingCompass(false);
               }}
-              style={{ display: "flex", gap: 8 }}
-            >
-              <input
-                value={factDraft}
-                onChange={(e) => setFactDraft(e.target.value)}
-                placeholder="Add a fact Vyne AI should always remember…"
-                aria-label="New memory fact"
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  borderRadius: 8,
-                  border: "1px solid var(--content-border)",
-                  background: "var(--content-bg)",
-                  color: "var(--text-primary)",
-                  fontSize: 13,
-                  outline: "none",
-                }}
-              />
-              <button
-                type="submit"
-                disabled={!factDraft.trim()}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "var(--vyne-teal)",
-                  color: "#fff",
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  cursor: factDraft.trim() ? "pointer" : "not-allowed",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                <Plus size={13} />
-                Save
-              </button>
-            </form>
-            {facts.length > 0 && (
-              <ul
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                  margin: 0,
-                  padding: 0,
-                  listStyle: "none",
-                }}
-              >
-                {facts.map((f) => (
-                  <li
-                    key={f.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "6px 10px",
-                      background: "var(--content-bg-secondary)",
-                      border: "1px solid var(--content-border)",
-                      borderRadius: 8,
-                    }}
-                  >
-                    <span style={{ flex: 1, fontSize: 12.5 }}>{f.text}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFact(f.id)}
-                      aria-label={`Remove fact: ${f.text}`}
-                      style={{
-                        width: 24,
-                        height: 24,
-                        border: "none",
-                        background: "transparent",
-                        color: "var(--text-tertiary)",
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: 6,
-                      }}
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      )}
+              onDraftChange={setCompassDraft}
+            />
 
-      <div
-        ref={scrollerRef}
-        className="flex-1 overflow-auto content-scroll"
-        style={{ padding: "20px 24px 24px" }}
-      >
-        <div
-          style={{
-            maxWidth: 820,
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: "column",
-            gap: 14,
-          }}
-        >
-          {/* Morning brief */}
-          <BriefCard
-            brief={todaysBrief}
-            loading={briefLoading}
-            onGenerate={generateBrief}
-          />
+            {/* Archive search */}
+            <ArchiveCard
+              query={archiveQuery}
+              setQuery={setArchiveQuery}
+              hits={archiveHits}
+              loading={archiveLoading}
+              onSearch={searchArchive}
+              sessions={sessions}
+            />
 
-          {/* Compass */}
-          <CompassCard
-            compass={compass}
-            fresh={compassFresh}
-            editing={editingCompass}
-            draft={compassDraft}
-            onStartEdit={() => {
-              setCompassDraft(compassFresh ? compass?.intention ?? "" : "");
-              setEditingCompass(true);
-            }}
-            onCancel={() => setEditingCompass(false)}
-            onSave={() => {
-              const v = compassDraft.trim();
-              if (!v) return;
-              setCompass(v);
-              setEditingCompass(false);
-            }}
-            onDraftChange={setCompassDraft}
-          />
-
-          {/* Archive search */}
-          <ArchiveCard
-            query={archiveQuery}
-            setQuery={setArchiveQuery}
-            hits={archiveHits}
-            loading={archiveLoading}
-            onSearch={searchArchive}
-            sessions={sessions}
-          />
-
-          {/* Chat messages */}
-          {messages.length > 0 && (
-            <section>
-              <h2
-                style={{
-                  margin: "8px 0 10px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--text-tertiary)",
-                }}
-              >
-                This conversation
-              </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {messages.map((m, idx) => {
-                  const isLastAssistant =
-                    m.role === "assistant" &&
-                    !messages
-                      .slice(idx + 1)
-                      .some((later) => later.role === "assistant");
-                  return (
-                    <MessageBubble
-                      key={m.id}
-                      message={m}
-                      onOpenArtifact={setActiveArtifact}
-                      onRegenerate={regenerate}
-                      onContinue={continueAnswer}
-                      onBranch={branchFromHere}
-                      isLastAssistant={isLastAssistant}
-                    />
-                  );
-                })}
-                {pending &&
-                  !messages[messages.length - 1]?.streaming && (
+            {/* Chat messages */}
+            {messages.length > 0 && (
+              <section>
+                <h2
+                  style={{
+                    margin: "8px 0 10px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--text-tertiary)",
+                  }}
+                >
+                  This conversation
+                </h2>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                >
+                  {messages.map((m, idx) => {
+                    const isLastAssistant =
+                      m.role === "assistant" &&
+                      !messages
+                        .slice(idx + 1)
+                        .some((later) => later.role === "assistant");
+                    return (
+                      <MessageBubble
+                        key={m.id}
+                        message={m}
+                        onOpenArtifact={setActiveArtifact}
+                        onRegenerate={regenerate}
+                        onContinue={continueAnswer}
+                        onBranch={branchFromHere}
+                        isLastAssistant={isLastAssistant}
+                        setMessages={setMessages}
+                      />
+                    );
+                  })}
+                  {pending && !messages[messages.length - 1]?.streaming && (
                     <div
                       style={{
                         display: "inline-flex",
@@ -1472,429 +1535,448 @@ export default function VyneAIChatPage() {
                       Vyne AI is thinking…
                     </div>
                   )}
-              </div>
-            </section>
-          )}
+                </div>
+              </section>
+            )}
 
-          {/* Starter questions when empty */}
-          {messages.length === 0 && (
-            <section style={{ marginTop: 4 }}>
-              <h2
-                style={{
-                  margin: "8px 0 10px",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "var(--text-tertiary)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <Sparkles size={12} /> Try a question
-              </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {STARTER_QUESTIONS.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => void ask(q)}
+            {/* Starter questions when empty */}
+            {messages.length === 0 && (
+              <section style={{ marginTop: 4 }}>
+                <h2
+                  style={{
+                    margin: "8px 0 10px",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--text-tertiary)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                  }}
+                >
+                  <Sparkles size={12} /> Try a question
+                </h2>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
+                >
+                  {STARTER_QUESTIONS.map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      onClick={() => void ask(q)}
+                      style={{
+                        textAlign: "left",
+                        padding: "10px 14px",
+                        borderRadius: 10,
+                        border: "1px solid var(--content-border)",
+                        background: "var(--content-bg)",
+                        color: "var(--text-primary)",
+                        fontSize: 13.5,
+                        cursor: "pointer",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <Sparkles
+                        size={12}
+                        style={{ color: "var(--vyne-teal)" }}
+                      />
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+
+        {/* Composer */}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void ask(input);
+          }}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            // Only show overlay when files are images (mime check on items
+            // when available, since dataTransfer.files is empty until drop).
+            const items = Array.from(e.dataTransfer.items ?? []);
+            const isImage = items.some(
+              (i) => i.kind === "file" && i.type.startsWith("image/"),
+            );
+            if (
+              isImage ||
+              (items.length === 0 && e.dataTransfer.types.includes("Files"))
+            ) {
+              setDragOver(true);
+            }
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            const items = Array.from(e.dataTransfer.items ?? []);
+            const isImage = items.some(
+              (i) => i.kind === "file" && i.type.startsWith("image/"),
+            );
+            if (
+              isImage ||
+              (items.length === 0 && e.dataTransfer.types.includes("Files"))
+            ) {
+              setDragOver(true);
+            }
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            if (
+              e.currentTarget.contains(e.relatedTarget as Node | null) === false
+            ) {
+              setDragOver(false);
+            }
+          }}
+          onDrop={async (e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const dropped = Array.from(e.dataTransfer.files);
+
+            // Images: existing path — attach as base64 for vision.
+            const images = dropped.filter((f) => f.type.startsWith("image/"));
+            if (images.length > 0) {
+              const dataUrls = await Promise.all(
+                images.map(
+                  (f) =>
+                    new Promise<string>((resolve) => {
+                      const reader = new FileReader();
+                      reader.onload = () => resolve(reader.result as string);
+                      reader.readAsDataURL(f);
+                    }),
+                ),
+              );
+              setAttachedImages((prev) => [...prev, ...dataUrls].slice(0, 6));
+            }
+
+            // PDFs + text-y files: ingest into the RAG store via
+            // /api/ai/ingest-file. UI_UPGRADE_PLAN.md 5.6.
+            const documents = dropped.filter(
+              (f) =>
+                f.type === "application/pdf" ||
+                f.name.toLowerCase().endsWith(".pdf") ||
+                f.type.startsWith("text/") ||
+                /\.(md|txt|csv|json|xml|log|yaml|yml)$/i.test(f.name),
+            );
+            for (const file of documents) {
+              const toastModule = await import("react-hot-toast");
+              const toastId = toastModule.default.loading(
+                `Indexing ${file.name}…`,
+              );
+              try {
+                const form = new FormData();
+                form.append("file", file);
+                const res = await fetch("/api/ai/ingest-file", {
+                  method: "POST",
+                  body: form,
+                });
+                const data = (await res.json()) as {
+                  ok?: boolean;
+                  ref?: string;
+                  created?: number;
+                  chunkCount?: number;
+                  error?: string;
+                };
+                if (!res.ok || !data.ok) {
+                  toastModule.default.error(
+                    `Indexing failed: ${data.error ?? "unknown error"}`,
+                    { id: toastId },
+                  );
+                } else {
+                  toastModule.default.success(
+                    `${file.name} indexed — ${data.created}/${data.chunkCount} chunks. Ask Vyne about it.`,
+                    { id: toastId, duration: 5000 },
+                  );
+                  // Drop a system-style note in the message stream so the
+                  // user has visible confirmation + the ref to scope to.
+                  setMessages((m) => [
+                    ...m,
+                    {
+                      id: crypto.randomUUID(),
+                      role: "assistant",
+                      content: `📎 Indexed **${file.name}** as \`${data.ref}\` — ${data.created} chunks. Ask follow-up questions and I'll cite them.`,
+                    },
+                  ]);
+                }
+              } catch (err) {
+                toastModule.default.error(
+                  `Indexing failed: ${err instanceof Error ? err.message : "network error"}`,
+                  { id: toastId },
+                );
+              }
+            }
+          }}
+          style={{
+            position: "relative",
+            borderTop: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+            padding: "12px 24px 14px",
+          }}
+        >
+          {dragOver && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 8,
+                borderRadius: 14,
+                border: "2px dashed var(--vyne-teal)",
+                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--vyne-teal)",
+                pointerEvents: "none",
+                zIndex: 5,
+              }}
+            >
+              Drop images to attach (max 6)
+            </div>
+          )}
+          <div style={{ maxWidth: 820, margin: "0 auto" }}>
+            <QuickActions
+              disabled={pending}
+              aria-busy={pending}
+              onAction={(prompt) => void ask(prompt)}
+            />
+          </div>
+          {attachedImages.length > 0 && (
+            <div
+              style={{
+                maxWidth: 820,
+                margin: "0 auto 8px",
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              {attachedImages.map((src, i) => (
+                <div key={i} style={{ position: "relative" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={src}
+                    alt={`attachment ${i + 1}`}
                     style={{
-                      textAlign: "left",
-                      padding: "10px 14px",
-                      borderRadius: 10,
+                      width: 64,
+                      height: 64,
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      border: "1px solid var(--content-border)",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    aria-label="Remove attachment"
+                    onClick={() =>
+                      setAttachedImages((prev) =>
+                        prev.filter((_, j) => j !== i),
+                      )
+                    }
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -6,
+                      width: 18,
+                      height: 18,
+                      borderRadius: 999,
                       border: "1px solid var(--content-border)",
                       background: "var(--content-bg)",
                       color: "var(--text-primary)",
-                      fontSize: 13.5,
                       cursor: "pointer",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 8,
+                      fontSize: 10,
+                      lineHeight: 1,
                     }}
                   >
-                    <Sparkles size={12} style={{ color: "var(--vyne-teal)" }} />
-                    {q}
+                    ×
                   </button>
-                ))}
-              </div>
-            </section>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* Composer */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void ask(input);
-        }}
-        onDragEnter={(e) => {
-          e.preventDefault();
-          // Only show overlay when files are images (mime check on items
-          // when available, since dataTransfer.files is empty until drop).
-          const items = Array.from(e.dataTransfer.items ?? []);
-          const isImage = items.some(
-            (i) => i.kind === "file" && i.type.startsWith("image/"),
-          );
-          if (isImage || (items.length === 0 && e.dataTransfer.types.includes("Files"))) {
-            setDragOver(true);
-          }
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          const items = Array.from(e.dataTransfer.items ?? []);
-          const isImage = items.some(
-            (i) => i.kind === "file" && i.type.startsWith("image/"),
-          );
-          if (isImage || (items.length === 0 && e.dataTransfer.types.includes("Files"))) {
-            setDragOver(true);
-          }
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          if (
-            e.currentTarget.contains(e.relatedTarget as Node | null) === false
-          ) {
-            setDragOver(false);
-          }
-        }}
-        onDrop={async (e) => {
-          e.preventDefault();
-          setDragOver(false);
-          const dropped = Array.from(e.dataTransfer.files);
-
-          // Images: existing path — attach as base64 for vision.
-          const images = dropped.filter((f) => f.type.startsWith("image/"));
-          if (images.length > 0) {
-            const dataUrls = await Promise.all(
-              images.map(
-                (f) =>
-                  new Promise<string>((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.readAsDataURL(f);
-                  }),
-              ),
-            );
-            setAttachedImages((prev) => [...prev, ...dataUrls].slice(0, 6));
-          }
-
-          // PDFs + text-y files: ingest into the RAG store via
-          // /api/ai/ingest-file. UI_UPGRADE_PLAN.md 5.6.
-          const documents = dropped.filter(
-            (f) =>
-              f.type === "application/pdf" ||
-              f.name.toLowerCase().endsWith(".pdf") ||
-              f.type.startsWith("text/") ||
-              /\.(md|txt|csv|json|xml|log|yaml|yml)$/i.test(f.name),
-          );
-          for (const file of documents) {
-            const toastModule = await import("react-hot-toast");
-            const toastId = toastModule.default.loading(
-              `Indexing ${file.name}…`,
-            );
-            try {
-              const form = new FormData();
-              form.append("file", file);
-              const res = await fetch("/api/ai/ingest-file", {
-                method: "POST",
-                body: form,
-              });
-              const data = (await res.json()) as {
-                ok?: boolean;
-                ref?: string;
-                created?: number;
-                chunkCount?: number;
-                error?: string;
-              };
-              if (!res.ok || !data.ok) {
-                toastModule.default.error(
-                  `Indexing failed: ${data.error ?? "unknown error"}`,
-                  { id: toastId },
-                );
-              } else {
-                toastModule.default.success(
-                  `${file.name} indexed — ${data.created}/${data.chunkCount} chunks. Ask Vyne about it.`,
-                  { id: toastId, duration: 5000 },
-                );
-                // Drop a system-style note in the message stream so the
-                // user has visible confirmation + the ref to scope to.
-                setMessages((m) => [
-                  ...m,
-                  {
-                    id: crypto.randomUUID(),
-                    role: "assistant",
-                    content: `📎 Indexed **${file.name}** as \`${data.ref}\` — ${data.created} chunks. Ask follow-up questions and I'll cite them.`,
-                  },
-                ]);
-              }
-            } catch (err) {
-              toastModule.default.error(
-                `Indexing failed: ${err instanceof Error ? err.message : "network error"}`,
-                { id: toastId },
-              );
-            }
-          }
-        }}
-        style={{
-          position: "relative",
-          borderTop: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          padding: "12px 24px 14px",
-        }}
-      >
-        {dragOver && (
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 8,
-              borderRadius: 14,
-              border: "2px dashed var(--vyne-teal)",
-              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--vyne-teal)",
-              pointerEvents: "none",
-              zIndex: 5,
-            }}
-          >
-            Drop images to attach (max 6)
-          </div>
-        )}
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
-          <QuickActions
-            disabled={pending} aria-busy={pending}
-            onAction={(prompt) => void ask(prompt)}
-          />
-        </div>
-        {attachedImages.length > 0 && (
+          {input.trim() && (
+            <div
+              style={{
+                maxWidth: 820,
+                margin: "0 auto 6px",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <CostPreviewChip input={input} model={preferredModel} />
+            </div>
+          )}
           <div
             style={{
               maxWidth: 820,
-              margin: "0 auto 8px",
+              margin: "0 auto",
               display: "flex",
               gap: 8,
-              flexWrap: "wrap",
+              alignItems: "flex-end",
+              background: "var(--content-secondary)",
+              border: "1px solid var(--content-border)",
+              borderRadius: 14,
+              padding: "8px 8px 8px 14px",
             }}
           >
-            {attachedImages.map((src, i) => (
-              <div key={i} style={{ position: "relative" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={src}
-                  alt={`attachment ${i + 1}`}
-                  style={{
-                    width: 64,
-                    height: 64,
-                    objectFit: "cover",
-                    borderRadius: 8,
-                    border: "1px solid var(--content-border)",
-                  }}
-                />
-                <button
-                  type="button"
-                  aria-label="Remove attachment"
-                  onClick={() =>
-                    setAttachedImages((prev) =>
-                      prev.filter((_, j) => j !== i),
-                    )
-                  }
-                  style={{
-                    position: "absolute",
-                    top: -6,
-                    right: -6,
-                    width: 18,
-                    height: 18,
-                    borderRadius: 999,
-                    border: "1px solid var(--content-border)",
-                    background: "var(--content-bg)",
-                    color: "var(--text-primary)",
-                    cursor: "pointer",
-                    fontSize: 10,
-                    lineHeight: 1,
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  void ask(input);
+                }
+              }}
+              placeholder="Ask Vyne AI about your projects, tasks, deals, inventory… (or /skill <slug>)"
+              rows={1}
+              aria-label="Ask Vyne AI"
+              style={{
+                flex: 1,
+                resize: "none",
+                border: "none",
+                outline: "none",
+                background: "transparent",
+                color: "var(--text-primary)",
+                fontSize: 14,
+                padding: "8px 0",
+                lineHeight: 1.45,
+                maxHeight: 160,
+                fontFamily: "inherit",
+              }}
+            />
+            <label
+              aria-label="Attach images for vision"
+              title="Attach images (Gemini vision)"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                border: "1px solid var(--content-border)",
+                background:
+                  attachedImages.length > 0
+                    ? "var(--vyne-teal-soft)"
+                    : "var(--content-secondary)",
+                color:
+                  attachedImages.length > 0
+                    ? "var(--vyne-teal)"
+                    : "var(--text-secondary)",
+                cursor: pending ? "not-allowed" : "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                opacity: pending ? 0.5 : 1,
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              📎{attachedImages.length > 0 ? attachedImages.length : ""}
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                disabled={pending}
+                aria-busy={pending}
+                onChange={async (e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  const dataUrls = await Promise.all(
+                    files.map(
+                      (f) =>
+                        new Promise<string>((resolve) => {
+                          const reader = new FileReader();
+                          reader.onload = () =>
+                            resolve(reader.result as string);
+                          reader.readAsDataURL(f);
+                        }),
+                    ),
+                  );
+                  setAttachedImages((prev) =>
+                    [...prev, ...dataUrls].slice(0, 6),
+                  );
+                  e.target.value = "";
+                }}
+                style={{ display: "none" }}
+              />
+            </label>
+            <VoiceInputButton
+              disabled={pending}
+              aria-busy={pending}
+              onTranscript={(text) => setInput(text)}
+            />
+            {/* 5.1 — Continuous voice conversation: hands-free loop with
+              VAD + barge-in. Falls back to nothing on Firefox. */}
+            <VoiceConversationButton
+              disabled={pending}
+              onUserMessage={(text) => {
+                setInput(text);
+                void ask(text);
+              }}
+            />
+            <button
+              type={pending ? "button" : "submit"}
+              disabled={!pending && !input.trim()}
+              onClick={pending ? stopStreaming : undefined}
+              aria-label={pending ? "Stop streaming" : "Send message (Enter)"}
+              title={pending ? "Stop  ·  Esc" : "Send  ·  Enter"}
+              className="btn-teal"
+              style={{
+                height: 36,
+                padding: "0 14px",
+                opacity: !pending && !input.trim() ? 0.5 : 1,
+                cursor: pending || input.trim() ? "pointer" : "not-allowed",
+                background: pending
+                  ? "linear-gradient(135deg, #f97316, #ea580c)"
+                  : undefined,
+              }}
+            >
+              {pending ? <StopCircle size={14} /> : <Send size={14} />}
+            </button>
           </div>
-        )}
-        {input.trim() && (
-          <div
+          <p
             style={{
               maxWidth: 820,
-              margin: "0 auto 6px",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <CostPreviewChip input={input} model={preferredModel} />
-          </div>
-        )}
-        <div
-          style={{
-            maxWidth: 820,
-            margin: "0 auto",
-            display: "flex",
-            gap: 8,
-            alignItems: "flex-end",
-            background: "var(--content-secondary)",
-            border: "1px solid var(--content-border)",
-            borderRadius: 14,
-            padding: "8px 8px 8px 14px",
-          }}
-        >
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void ask(input);
-              }
-            }}
-            placeholder="Ask Vyne AI about your projects, tasks, deals, inventory… (or /skill <slug>)"
-            rows={1}
-            aria-label="Ask Vyne AI"
-            style={{
-              flex: 1,
-              resize: "none",
-              border: "none",
-              outline: "none",
-              background: "transparent",
-              color: "var(--text-primary)",
-              fontSize: 14,
-              padding: "8px 0",
-              lineHeight: 1.45,
-              maxHeight: 160,
-              fontFamily: "inherit",
-            }}
-          />
-          <label
-            aria-label="Attach images for vision"
-            title="Attach images (Gemini vision)"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              border: "1px solid var(--content-border)",
-              background:
-                attachedImages.length > 0
-                  ? "var(--vyne-teal-soft)"
-                  : "var(--content-secondary)",
-              color:
-                attachedImages.length > 0
-                  ? "var(--vyne-teal)"
-                  : "var(--text-secondary)",
-              cursor: pending ? "not-allowed" : "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              opacity: pending ? 0.5 : 1,
+              margin: "8px auto 0",
               fontSize: 11,
-              fontWeight: 700,
+              color: "var(--text-tertiary)",
             }}
           >
-            📎{attachedImages.length > 0 ? attachedImages.length : ""}
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              disabled={pending} aria-busy={pending}
-              onChange={async (e) => {
-                const files = Array.from(e.target.files ?? []);
-                const dataUrls = await Promise.all(
-                  files.map(
-                    (f) =>
-                      new Promise<string>((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = () =>
-                          resolve(reader.result as string);
-                        reader.readAsDataURL(f);
-                      }),
-                  ),
-                );
-                setAttachedImages((prev) => [...prev, ...dataUrls].slice(0, 6));
-                e.target.value = "";
-              }}
-              style={{ display: "none" }}
-            />
-          </label>
-          <VoiceInputButton
-            disabled={pending} aria-busy={pending}
-            onTranscript={(text) => setInput(text)}
-          />
-          {/* 5.1 — Continuous voice conversation: hands-free loop with
-              VAD + barge-in. Falls back to nothing on Firefox. */}
-          <VoiceConversationButton
-            disabled={pending}
-            onUserMessage={(text) => {
-              setInput(text);
-              void ask(text);
-            }}
-          />
-          <button
-            type={pending ? "button" : "submit"}
-            disabled={!pending && !input.trim()}
-            onClick={pending ? stopStreaming : undefined}
-            aria-label={pending ? "Stop streaming" : "Send message (Enter)"}
-            title={pending ? "Stop  ·  Esc" : "Send  ·  Enter"}
-            className="btn-teal"
-            style={{
-              height: 36,
-              padding: "0 14px",
-              opacity: !pending && !input.trim() ? 0.5 : 1,
-              cursor:
-                pending || input.trim() ? "pointer" : "not-allowed",
-              background: pending
-                ? "linear-gradient(135deg, #f97316, #ea580c)"
-                : undefined,
-            }}
-          >
-            {pending ? <StopCircle size={14} /> : <Send size={14} />}
-          </button>
-        </div>
-        <p
-          style={{
-            maxWidth: 820,
-            margin: "8px auto 0",
-            fontSize: 11,
-            color: "var(--text-tertiary)",
-          }}
-        >
-          Every conversation is saved to your private Vyne AI memory. Tap a quick action above to generate a BRD, TRD, diagram, spreadsheet, or slide deck on demand.
-        </p>
-      </form>
+            Every conversation is saved to your private Vyne AI memory. Tap a
+            quick action above to generate a BRD, TRD, diagram, spreadsheet, or
+            slide deck on demand.
+          </p>
+        </form>
 
-      <ArtifactPanel
-        artifact={activeArtifact}
-        onClose={() => setActiveArtifact(null)}
-      />
+        <ArtifactPanel
+          artifact={activeArtifact}
+          onClose={() => setActiveArtifact(null)}
+        />
 
-      <ImageGeneratorModal
-        open={imageModalOpen}
-        onClose={() => setImageModalOpen(false)}
-        onSubmit={(p, ar) => void generateImage(p, ar)}
-        initialPrompt={lastImagePrompt?.prompt ?? ""}
-        initialAspectRatio={lastImagePrompt?.aspectRatio ?? "1:1"}
-      />
+        <ImageGeneratorModal
+          open={imageModalOpen}
+          onClose={() => setImageModalOpen(false)}
+          onSubmit={(p, ar) => void generateImage(p, ar)}
+          initialPrompt={lastImagePrompt?.prompt ?? ""}
+          initialAspectRatio={lastImagePrompt?.aspectRatio ?? "1:1"}
+        />
 
-      <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+        <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
 
-      <style jsx global>{`
-        @keyframes blink {
-          50% { opacity: 0; }
-        }
-      `}</style>
+        <style jsx global>{`
+          @keyframes blink {
+            50% {
+              opacity: 0;
+            }
+          }
+        `}</style>
       </div>
     </div>
   );
@@ -2026,7 +2108,15 @@ function ModelPickerPill({
 
 /* ─── Sub-components ───────────────────────────────────────── */
 
-function StreakPill({ current, longest, graceUsed }: { current: number; longest: number; graceUsed: boolean }) {
+function StreakPill({
+  current,
+  longest,
+  graceUsed,
+}: {
+  current: number;
+  longest: number;
+  graceUsed: boolean;
+}) {
   if (current === 0 && longest === 0) return null;
   return (
     <span
@@ -2037,7 +2127,8 @@ function StreakPill({ current, longest, graceUsed }: { current: number; longest:
         gap: 6,
         padding: "6px 10px",
         borderRadius: 999,
-        background: current > 0 ? "rgba(245, 158, 11, 0.14)" : "var(--content-secondary)",
+        background:
+          current > 0 ? "rgba(245, 158, 11, 0.14)" : "var(--content-secondary)",
         border: `1px solid ${current > 0 ? "rgba(245, 158, 11, 0.35)" : "var(--content-border)"}`,
         color: current > 0 ? "#F59E0B" : "var(--text-tertiary)",
         fontSize: 12,
@@ -2056,7 +2147,9 @@ function BriefCard({
   loading,
   onGenerate,
 }: {
-  brief: ReturnType<typeof useAiMemoryStore.getState>["briefs"][number] | undefined;
+  brief:
+    | ReturnType<typeof useAiMemoryStore.getState>["briefs"][number]
+    | undefined;
   loading: boolean;
   onGenerate: () => void;
 }) {
@@ -2070,8 +2163,22 @@ function BriefCard({
         padding: "16px 18px",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "var(--vyne-teal)" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            color: "var(--vyne-teal)",
+          }}
+        >
           <Sunrise size={16} />
           <strong style={{ fontSize: 13, letterSpacing: "-0.005em" }}>
             {brief ? "Your morning brief" : "Generate today's brief"}
@@ -2080,11 +2187,18 @@ function BriefCard({
         <button
           type="button"
           onClick={onGenerate}
-          disabled={loading} aria-busy={loading}
+          disabled={loading}
+          aria-busy={loading}
           className="btn-teal"
           style={{ height: 30, padding: "0 12px", fontSize: 12 }}
         >
-          {loading ? <Loader2 size={12} className="animate-spin" /> : brief ? "Regenerate" : "Generate"}
+          {loading ? (
+            <Loader2 size={12} className="animate-spin" />
+          ) : brief ? (
+            "Regenerate"
+          ) : (
+            "Generate"
+          )}
         </button>
       </div>
       {brief ? (
@@ -2101,9 +2215,16 @@ function BriefCard({
           <AnswerWithCitations text={brief.summary} />
         </p>
       ) : (
-        <p style={{ marginTop: 8, marginBottom: 0, fontSize: 12.5, color: "var(--text-tertiary)" }}>
-          One focused recommendation + the watch-outs from your workspace + a reflection question
-          for tonight. Seeded by your weekly Compass.
+        <p
+          style={{
+            marginTop: 8,
+            marginBottom: 0,
+            fontSize: 12.5,
+            color: "var(--text-tertiary)",
+          }}
+        >
+          One focused recommendation + the watch-outs from your workspace + a
+          reflection question for tonight. Seeded by your weekly Compass.
         </p>
       )}
     </section>
@@ -2138,7 +2259,14 @@ function CompassCard({
         padding: "14px 18px",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
         <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <CompassIcon size={14} style={{ color: "var(--vyne-teal)" }} />
           <strong style={{ fontSize: 12.5, color: "var(--text-primary)" }}>
@@ -2186,7 +2314,14 @@ function CompassCard({
               outline: "none",
             }}
           />
-          <div style={{ display: "flex", gap: 8, marginTop: 8, justifyContent: "flex-end" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              marginTop: 8,
+              justifyContent: "flex-end",
+            }}
+          >
             <button
               type="button"
               onClick={onCancel}
@@ -2215,12 +2350,26 @@ function CompassCard({
           </div>
         </div>
       ) : fresh && compass ? (
-        <p style={{ margin: "8px 0 0", fontSize: 13.5, color: "var(--text-primary)", lineHeight: 1.5 }}>
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontSize: 13.5,
+            color: "var(--text-primary)",
+            lineHeight: 1.5,
+          }}
+        >
           “{compass.intention}”
         </p>
       ) : (
-        <p style={{ margin: "6px 0 0", fontSize: 12.5, color: "var(--text-tertiary)" }}>
-          One measurable intention for the week. Every morning brief holds you against it.
+        <p
+          style={{
+            margin: "6px 0 0",
+            fontSize: 12.5,
+            color: "var(--text-tertiary)",
+          }}
+        >
+          One measurable intention for the week. Every morning brief holds you
+          against it.
         </p>
       )}
     </section>
@@ -2237,7 +2386,12 @@ function ArchiveCard({
 }: {
   query: string;
   setQuery: (v: string) => void;
-  hits: Array<{ id: string; createdAt: string; snippet: string; reason: string }> | null;
+  hits: Array<{
+    id: string;
+    createdAt: string;
+    snippet: string;
+    reason: string;
+  }> | null;
   loading: boolean;
   onSearch: () => void;
   sessions: Session[];
@@ -2339,7 +2493,9 @@ function ArchiveCard({
                 }}
               >
                 <span>{new Date(h.createdAt).toLocaleString()}</span>
-                <span style={{ color: "var(--vyne-teal)", fontWeight: 600 }}>{h.reason}</span>
+                <span style={{ color: "var(--vyne-teal)", fontWeight: 600 }}>
+                  {h.reason}
+                </span>
               </div>
               <p
                 style={{
@@ -2356,7 +2512,13 @@ function ArchiveCard({
         </ul>
       )}
       {hits && hits.length === 0 && (
-        <p style={{ margin: "10px 0 0", fontSize: 12.5, color: "var(--text-tertiary)" }}>
+        <p
+          style={{
+            margin: "10px 0 0",
+            fontSize: 12.5,
+            color: "var(--text-tertiary)",
+          }}
+        >
           Nothing relevant in your archive yet.
         </p>
       )}
@@ -2371,6 +2533,7 @@ function MessageBubble({
   onContinue,
   onBranch,
   isLastAssistant,
+  setMessages,
 }: {
   message: Msg;
   onOpenArtifact?: (a: Artifact) => void;
@@ -2378,6 +2541,7 @@ function MessageBubble({
   onContinue?: () => void;
   onBranch?: () => void;
   isLastAssistant?: boolean;
+  setMessages: React.Dispatch<React.SetStateAction<Msg[]>>;
 }) {
   const isUser = message.role === "user";
   const showActions =
@@ -2412,7 +2576,14 @@ function MessageBubble({
       >
         {isUser ? "You" : <Brain size={14} />}
       </div>
-      <div style={{ maxWidth: "78%", display: "flex", flexDirection: "column", gap: 6 }}>
+      <div
+        style={{
+          maxWidth: "78%",
+          display: "flex",
+          flexDirection: "column",
+          gap: 6,
+        }}
+      >
         <div
           style={{
             background: isUser ? "var(--vyne-teal-soft)" : "var(--content-bg)",
@@ -2512,7 +2683,9 @@ function MessageBubble({
                   .map((s, i) => `[${i + 1}]: ${s.url} "${s.title}"`)
                   .join("\n");
                 navigator.clipboard.writeText(
-                  sources ? `${message.content}\n\n---\n${sources}` : message.content,
+                  sources
+                    ? `${message.content}\n\n---\n${sources}`
+                    : message.content,
                 );
               }}
             />
@@ -2647,7 +2820,9 @@ function ToolResultPills({ results }: { results: ToolResult[] }) {
             <span style={{ fontWeight: 700 }}>{ok ? "✓" : "✗"}</span>
             <span>{r.label}</span>
             {r.detail ? (
-              <span style={{ color: "var(--text-tertiary)" }}>· {r.detail}</span>
+              <span style={{ color: "var(--text-tertiary)" }}>
+                · {r.detail}
+              </span>
             ) : null}
           </>
         );
@@ -2669,7 +2844,12 @@ function ToolResultPills({ results }: { results: ToolResult[] }) {
           whiteSpace: "nowrap",
         };
         return r.href && ok ? (
-          <a key={`${r.tool}-${i}`} role="listitem" href={r.href} style={baseStyle}>
+          <a
+            key={`${r.tool}-${i}`}
+            role="listitem"
+            href={r.href}
+            style={baseStyle}
+          >
             {Inner}
           </a>
         ) : (
@@ -2816,8 +2996,12 @@ function ImageGenSkeleton({ aspectRatio }: { aspectRatio: string }) {
       </span>
       <style jsx>{`
         @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
         }
       `}</style>
     </div>
@@ -2854,12 +3038,7 @@ function ProseWithCitationsAndArtifacts({
             />
           );
         }
-        return (
-          <AnswerWithCitations
-            key={`text-${idx}`}
-            text={part}
-          />
-        );
+        return <AnswerWithCitations key={`text-${idx}`} text={part} />;
       })}
     </>
   );
@@ -2939,7 +3118,8 @@ function AnswerWithCitations({ text }: { text: string }) {
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
-    if (m.index > last) parts.push({ type: "text", value: text.slice(last, m.index) });
+    if (m.index > last)
+      parts.push({ type: "text", value: text.slice(last, m.index) });
     if (m[1]) {
       parts.push({ type: "image", alt: m[2] || "image", src: m[3] });
     } else {

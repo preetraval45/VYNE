@@ -1,6 +1,38 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// PH-A R3 — Sales server-side persistence. Every CRUD method also
+// mirrors to its /api/sales/<resource> route (fire-and-forget, optimistic
+// local update wins on the UI). `hydrateFromServer()` at the bottom
+// replaces local state with the canonical server snapshot on mount.
+
+type SalesResource =
+  | "opportunities"
+  | "quotes"
+  | "orders"
+  | "products"
+  | "customers";
+
+function mirror(
+  method: "POST" | "PATCH" | "DELETE",
+  resource: SalesResource,
+  id?: string,
+  body?: unknown,
+) {
+  const url = id
+    ? `/api/sales/${resource}/${encodeURIComponent(id)}`
+    : `/api/sales/${resource}`;
+  const init: RequestInit = { method };
+  if (body !== undefined) {
+    init.headers = { "Content-Type": "application/json" };
+    init.body = JSON.stringify(body);
+  }
+  void fetch(url, init).catch(() => {
+    // Optimistic local state stays in place; next hydrateFromServer()
+    // call will reconcile if the server rejected the write.
+  });
+}
+
 // ─── Types ───────────────────────────────────────────────────────
 export type OpportunityStage =
   | "Qualification"
@@ -628,6 +660,9 @@ interface SalesStore {
   addCustomer: (c: Omit<Customer, "id">) => void;
   updateCustomer: (id: string, data: Partial<Omit<Customer, "id">>) => void;
   deleteCustomer: (id: string) => void;
+
+  // PH-A R3 — pull canonical state from Postgres on mount.
+  hydrateFromServer: () => Promise<void>;
 }
 
 let _nextId = 200;
@@ -661,27 +696,29 @@ export const useSalesStore = create<SalesStore>()(
       customers: DEFAULT_CUSTOMERS,
 
       // ─── Deal CRUD ──────────────────────────────────
-      addDeal: (deal) =>
-        set((state) => ({
-          deals: [
-            ...state.deals,
-            {
-              ...deal,
-              id: genId("opp"),
-              createdAt: new Date().toISOString().slice(0, 10),
-            },
-          ],
-        })),
+      addDeal: (deal) => {
+        const row: Opportunity = {
+          ...deal,
+          id: genId("opp"),
+          createdAt: new Date().toISOString().slice(0, 10),
+        };
+        set((state) => ({ deals: [...state.deals, row] }));
+        mirror("POST", "opportunities", undefined, row);
+      },
 
-      updateDeal: (id, data) =>
+      updateDeal: (id, data) => {
         set((state) => ({
           deals: state.deals.map((d) => (d.id === id ? { ...d, ...data } : d)),
-        })),
+        }));
+        mirror("PATCH", "opportunities", id, data);
+      },
 
-      deleteDeal: (id) =>
+      deleteDeal: (id) => {
         set((state) => ({
           deals: state.deals.filter((d) => d.id !== id),
-        })),
+        }));
+        mirror("DELETE", "opportunities", id);
+      },
 
       moveDealStage: (id, stage) =>
         set((state) => ({
@@ -724,37 +761,41 @@ export const useSalesStore = create<SalesStore>()(
         })),
 
       // ─── Quotation CRUD ─────────────────────────────
-      addQuotation: ({ customer, expiry, lineItems }) =>
-        set((state) => {
-          const amount = lineItems.reduce(
-            (s, li) => s + li.quantity * li.unitPrice,
-            0,
-          );
-          const newQ: Quote = {
-            id: genId("q"),
-            number: nextQuoteNumber(),
-            customer,
-            date: new Date().toISOString().slice(0, 10),
-            expiry,
-            amount,
-            status: "Draft",
-            items: lineItems.length,
-            lineItems,
-          };
-          return { quotations: [...state.quotations, newQ] };
-        }),
+      addQuotation: ({ customer, expiry, lineItems }) => {
+        const amount = lineItems.reduce(
+          (s, li) => s + li.quantity * li.unitPrice,
+          0,
+        );
+        const newQ: Quote = {
+          id: genId("q"),
+          number: nextQuoteNumber(),
+          customer,
+          date: new Date().toISOString().slice(0, 10),
+          expiry,
+          amount,
+          status: "Draft",
+          items: lineItems.length,
+          lineItems,
+        };
+        set((state) => ({ quotations: [...state.quotations, newQ] }));
+        mirror("POST", "quotes", undefined, newQ);
+      },
 
-      updateQuotation: (id, data) =>
+      updateQuotation: (id, data) => {
         set((state) => ({
           quotations: state.quotations.map((q) =>
             q.id === id ? { ...q, ...data } : q,
           ),
-        })),
+        }));
+        mirror("PATCH", "quotes", id, data);
+      },
 
-      deleteQuotation: (id) =>
+      deleteQuotation: (id) => {
         set((state) => ({
           quotations: state.quotations.filter((q) => q.id !== id),
-        })),
+        }));
+        mirror("DELETE", "quotes", id);
+      },
 
       acceptQuotation: (id) =>
         set((state) => ({
@@ -780,48 +821,54 @@ export const useSalesStore = create<SalesStore>()(
         })),
 
       // ─── Sales Order CRUD ──────────────────────────
-      addSalesOrder: ({ customer, lineItems }) =>
-        set((state) => {
-          const amount = lineItems.reduce(
-            (s, li) => s + li.quantity * li.unitPrice,
-            0,
-          );
-          const newSO: SalesOrder = {
-            id: genId("so"),
-            number: nextSONumber(),
-            customer,
-            date: new Date().toISOString().slice(0, 10),
-            amount,
-            status: "Confirmed",
-            tracking: "--",
-            items: lineItems.length,
-            lineItems,
-          };
-          return { salesOrders: [...state.salesOrders, newSO] };
-        }),
+      addSalesOrder: ({ customer, lineItems }) => {
+        const amount = lineItems.reduce(
+          (s, li) => s + li.quantity * li.unitPrice,
+          0,
+        );
+        const newSO: SalesOrder = {
+          id: genId("so"),
+          number: nextSONumber(),
+          customer,
+          date: new Date().toISOString().slice(0, 10),
+          amount,
+          status: "Confirmed",
+          tracking: "--",
+          items: lineItems.length,
+          lineItems,
+        };
+        set((state) => ({ salesOrders: [...state.salesOrders, newSO] }));
+        mirror("POST", "orders", undefined, newSO);
+      },
 
-      updateSalesOrder: (id, data) =>
+      updateSalesOrder: (id, data) => {
         set((state) => ({
           salesOrders: state.salesOrders.map((o) =>
             o.id === id ? { ...o, ...data } : o,
           ),
-        })),
+        }));
+        mirror("PATCH", "orders", id, data);
+      },
 
-      deleteSalesOrder: (id) =>
+      deleteSalesOrder: (id) => {
         set((state) => ({
           salesOrders: state.salesOrders.filter((o) => o.id !== id),
-        })),
+        }));
+        mirror("DELETE", "orders", id);
+      },
 
       // ─── Product CRUD ──────────────────────────────
-      addProduct: (p) =>
-        set((state) => ({
-          products: [
-            ...state.products,
-            { ...p, id: genId("p"), status: deriveProductStatus(p.stock) },
-          ],
-        })),
+      addProduct: (p) => {
+        const row: Product = {
+          ...p,
+          id: genId("p"),
+          status: deriveProductStatus(p.stock),
+        };
+        set((state) => ({ products: [...state.products, row] }));
+        mirror("POST", "products", undefined, row);
+      },
 
-      updateProduct: (id, data) =>
+      updateProduct: (id, data) => {
         set((state) => ({
           products: state.products.map((p) => {
             if (p.id !== id) return p;
@@ -831,30 +878,80 @@ export const useSalesStore = create<SalesStore>()(
             }
             return updated;
           }),
-        })),
+        }));
+        // Don't strip derived status — server stores it too so the
+        // status pill survives a hydrate.
+        const payload =
+          data.stock !== undefined
+            ? { ...data, status: deriveProductStatus(data.stock) }
+            : data;
+        mirror("PATCH", "products", id, payload);
+      },
 
-      deleteProduct: (id) =>
+      deleteProduct: (id) => {
         set((state) => ({
           products: state.products.filter((p) => p.id !== id),
-        })),
+        }));
+        mirror("DELETE", "products", id);
+      },
 
       // ─── Customer CRUD ─────────────────────────────
-      addCustomer: (c) =>
-        set((state) => ({
-          customers: [...state.customers, { ...c, id: genId("cust") }],
-        })),
+      addCustomer: (c) => {
+        const row: Customer = { ...c, id: genId("cust") };
+        set((state) => ({ customers: [...state.customers, row] }));
+        mirror("POST", "customers", undefined, row);
+      },
 
-      updateCustomer: (id, data) =>
+      updateCustomer: (id, data) => {
         set((state) => ({
           customers: state.customers.map((c) =>
             c.id === id ? { ...c, ...data } : c,
           ),
-        })),
+        }));
+        mirror("PATCH", "customers", id, data);
+      },
 
-      deleteCustomer: (id) =>
+      deleteCustomer: (id) => {
         set((state) => ({
           customers: state.customers.filter((c) => c.id !== id),
-        })),
+        }));
+        mirror("DELETE", "customers", id);
+      },
+
+      // ─── PH-A R3 hydrate ───────────────────────────
+      // Replaces all five local slices with the canonical server
+      // snapshot. Failure on any single resource doesn't block the
+      // rest — each promise is independent.
+      hydrateFromServer: async () => {
+        const tryHydrate = async <T>(
+          resource: SalesResource,
+          key: keyof Pick<
+            SalesStore,
+            "deals" | "quotations" | "salesOrders" | "products" | "customers"
+          >,
+        ): Promise<void> => {
+          try {
+            const res = await fetch(`/api/sales/${resource}`, {
+              cache: "no-store",
+            });
+            if (!res.ok) return;
+            const body = (await res.json()) as Record<string, T[]>;
+            const rows = body[resource];
+            if (Array.isArray(rows) && rows.length > 0) {
+              set({ [key]: rows } as unknown as Partial<SalesStore>);
+            }
+          } catch {
+            // Server unreachable — keep the local cache.
+          }
+        };
+        await Promise.all([
+          tryHydrate<Opportunity>("opportunities", "deals"),
+          tryHydrate<Quote>("quotes", "quotations"),
+          tryHydrate<SalesOrder>("orders", "salesOrders"),
+          tryHydrate<Product>("products", "products"),
+          tryHydrate<Customer>("customers", "customers"),
+        ]);
+      },
     }),
     {
       name: "vyne-sales",

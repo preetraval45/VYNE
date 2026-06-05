@@ -2,7 +2,9 @@
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import {
   Plus,
@@ -210,16 +212,18 @@ function PipelineTab({
         // Weighted total = sum(value × probability/100). Won/Lost short-circuit
         // to 100/0 so columns at the ends still match raw totals when expected.
         const stageWeighted = stageDeals.reduce((s, d) => {
-          const prob = stage === "Won" ? 100 : stage === "Lost" ? 0 : d.probability;
+          const prob =
+            stage === "Won" ? 100 : stage === "Lost" ? 0 : d.probability;
           return s + d.value * (prob / 100);
         }, 0);
         // % of overall pipeline (excludes Lost) so users see column importance.
         const overallPipeline = deals
           .filter((d) => d.stage !== "Lost")
           .reduce((s, d) => s + d.value, 0);
-        const sharePct = overallPipeline > 0 && stage !== "Lost"
-          ? Math.round((stageTotal / overallPipeline) * 100)
-          : 0;
+        const sharePct =
+          overallPipeline > 0 && stage !== "Lost"
+            ? Math.round((stageTotal / overallPipeline) * 100)
+            : 0;
 
         return (
           <div
@@ -410,16 +414,18 @@ function DealsTableTab({
     }
   }
 
-  const filtered = deals
-    .filter((d) => {
-      const matchSearch =
-        d.company.toLowerCase().includes(search.toLowerCase()) ||
-        d.contactName.toLowerCase().includes(search.toLowerCase());
-      const matchStage = stageFilter === "All" || d.stage === stageFilter;
-      const matchAssignee =
-        assigneeFilter === "All" || d.assignee === assigneeFilter;
-      return matchSearch && matchStage && matchAssignee;
-    })
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const searchHits = useSearchIndex(
+    deals,
+    (d) => [d.company, d.contactName, d.email],
+    search,
+  );
+  const filtered = searchHits
+    .filter(
+      (d) =>
+        (stageFilter === "All" || d.stage === stageFilter) &&
+        (assigneeFilter === "All" || d.assignee === assigneeFilter),
+    )
     .sort((a, b) => {
       let cmp = 0;
       if (sortKey === "company") cmp = a.company.localeCompare(b.company);
@@ -472,7 +478,9 @@ function DealsTableTab({
           {(["All", ...STAGES] as Array<Stage | "All">).map((s) => {
             const isActive = stageFilter === s;
             const pillColor =
-              s === "All" ? "var(--vyne-accent, var(--vyne-purple))" : stageColor(s);
+              s === "All"
+                ? "var(--vyne-accent, var(--vyne-purple))"
+                : stageColor(s);
             return (
               <button
                 key={s}
@@ -571,7 +579,10 @@ function DealsTableTab({
                   onTouchStart={(e) => {
                     const tr = e.currentTarget;
                     const timer = window.setTimeout(() => {
-                      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+                      if (
+                        typeof navigator !== "undefined" &&
+                        "vibrate" in navigator
+                      ) {
                         navigator.vibrate?.(10);
                       }
                       onDealClick(deal);
@@ -579,17 +590,23 @@ function DealsTableTab({
                     (tr as unknown as { _vyneLP?: number })._vyneLP = timer;
                   }}
                   onTouchEnd={(e) => {
-                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    const tr = e.currentTarget as unknown as {
+                      _vyneLP?: number;
+                    };
                     if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
                     tr._vyneLP = undefined;
                   }}
                   onTouchMove={(e) => {
-                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    const tr = e.currentTarget as unknown as {
+                      _vyneLP?: number;
+                    };
                     if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
                     tr._vyneLP = undefined;
                   }}
                   onTouchCancel={(e) => {
-                    const tr = e.currentTarget as unknown as { _vyneLP?: number };
+                    const tr = e.currentTarget as unknown as {
+                      _vyneLP?: number;
+                    };
                     if (tr._vyneLP) window.clearTimeout(tr._vyneLP);
                     tr._vyneLP = undefined;
                   }}
@@ -614,7 +631,10 @@ function DealsTableTab({
                           toast.success(`Renamed to "${v}"`);
                         }}
                         label="Company"
-                        style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontWeight: 700 }}
+                        style={{
+                          color: "var(--vyne-accent, var(--vyne-purple))",
+                          fontWeight: 700,
+                        }}
                       />
                     </span>
                   </td>
@@ -943,9 +963,23 @@ function CRMPageInner() {
     },
   });
 
-  const [tab, setTab] = useState<"pipeline" | "table" | "forecasting">(
-    "pipeline",
-  );
+  const [tab, setTab] = useState<
+    "dashboard" | "pipeline" | "table" | "forecasting"
+  >("pipeline");
+
+  // Honour ?view=dashboard from the sidebar Dashboard sub-link.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "pipeline" ||
+      urlView === "table" ||
+      urlView === "forecasting"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
 
   useEffect(() => {
     erpApi
@@ -1000,8 +1034,17 @@ function CRMPageInner() {
     storageKey: "crm-deals",
     defaultFilters: {},
     builtinViews: [
-      { id: "stalling", name: "Stalling 14d+", filters: { idleDays: 14 }, pinned: true },
-      { id: "negotiation", name: "Negotiation", filters: { stage: "Negotiation" } },
+      {
+        id: "stalling",
+        name: "Stalling 14d+",
+        filters: { idleDays: 14 },
+        pinned: true,
+      },
+      {
+        id: "negotiation",
+        name: "Negotiation",
+        filters: { stage: "Negotiation" },
+      },
       { id: "high-value", name: "$50k+", filters: { minValue: 50000 } },
     ],
   });
@@ -1009,15 +1052,20 @@ function CRMPageInner() {
   // ─── Real KPIs computed from the deals store ───────────────────
   const wonDeals = deals.filter((d) => d.stage === "Won");
   const lostDeals = deals.filter((d) => d.stage === "Lost");
-  const activeDeals = deals.filter((d) => d.stage !== "Won" && d.stage !== "Lost");
+  const activeDeals = deals.filter(
+    (d) => d.stage !== "Won" && d.stage !== "Lost",
+  );
   const weightedForecast = activeDeals.reduce(
     (s, d) => s + d.value * (d.probability / 100),
     0,
   );
   const wonValueMTD = wonDeals.reduce((s, d) => s + d.value, 0);
-  const winRate = wonDeals.length + lostDeals.length > 0
-    ? Math.round((wonDeals.length / (wonDeals.length + lostDeals.length)) * 100)
-    : 0;
+  const winRate =
+    wonDeals.length + lostDeals.length > 0
+      ? Math.round(
+          (wonDeals.length / (wonDeals.length + lostDeals.length)) * 100,
+        )
+      : 0;
 
   // 14-day sparkline of weighted forecast based on lastActivity bucketing
   const forecastSparkline = (() => {
@@ -1165,6 +1213,11 @@ function CRMPageInner() {
       >
         <div className="flex gap-0.5">
           <TabBtn
+            label="Dashboard"
+            active={tab === "dashboard"}
+            onClick={() => setTab("dashboard")}
+          />
+          <TabBtn
             label="Pipeline"
             active={tab === "pipeline"}
             onClick={() => setTab("pipeline")}
@@ -1190,7 +1243,9 @@ function CRMPageInner() {
           overflowX: tab === "pipeline" ? "auto" : "hidden",
         }}
       >
-        {deals.length === 0 ? (
+        {tab === "dashboard" ? (
+          <ProjectsDashboardView />
+        ) : deals.length === 0 ? (
           <EmptyState
             icon={<TrendingUp size={20} />}
             title="No deals yet"
@@ -1206,7 +1261,9 @@ function CRMPageInner() {
                 <PipelineTab
                   deals={deals}
                   onDealClick={openDeal}
-                  onAddDeal={(stage) => router.push(`/crm/deals/new?stage=${stage}`)}
+                  onAddDeal={(stage) =>
+                    router.push(`/crm/deals/new?stage=${stage}`)
+                  }
                 />
               </>
             )}
@@ -1315,7 +1372,14 @@ function DealDetailPanel({
       }
       headerActions={
         deal && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              position: "relative",
+            }}
+          >
             <PresenceBubbles entityKey={`deal:${deal.id}`} />
             <ShareLinkButton
               entityId={deal.id}

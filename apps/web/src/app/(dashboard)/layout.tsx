@@ -37,10 +37,18 @@ import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 import { useCRMStore, bindCrmRealtime } from "@/lib/stores/crm";
 import { useContactsStore, bindContactsRealtime } from "@/lib/stores/contacts";
-import { useInvoicingStore, bindInvoicingRealtime } from "@/lib/stores/invoicing";
+import {
+  useInvoicingStore,
+  bindInvoicingRealtime,
+} from "@/lib/stores/invoicing";
 import { useOpsStore, bindOpsRealtime } from "@/lib/stores/ops";
 import { useProjectsStore, bindProjectsRealtime } from "@/lib/stores/projects";
 import { useFinanceStore, bindFinanceRealtime } from "@/lib/stores/finance";
+import { useExpensesStore } from "@/lib/stores/expenses";
+import { useSalesStore } from "@/lib/stores/sales";
+import { useFieldServiceStore } from "@/lib/stores/fieldService";
+import { useHRStore } from "@/lib/stores/hr";
+import { useAuthStore } from "@/lib/stores/auth";
 import { useTabSync } from "@/hooks/useTabSync";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { useEffect, useState } from "react";
@@ -90,6 +98,10 @@ export default function DashboardLayout({
           useProjectsStore.getState().hydrateProjectsFromServer(),
           useProjectsStore.getState().hydrateTasksFromServer(),
           useFinanceStore.getState().hydrateJournalFromServer(),
+          useExpensesStore.getState().hydrateFromServer(),
+          useSalesStore.getState().hydrateFromServer(),
+          useFieldServiceStore.getState().hydrateFromServer(),
+          useHRStore.getState().hydrateFromServer(),
         ]);
         window.dispatchEvent(new CustomEvent("vyne:soft-refresh"));
         toastModule.default.success("Up to date", {
@@ -127,15 +139,25 @@ export default function DashboardLayout({
     void useProjectsStore.getState().hydrateProjectsFromServer();
     void useProjectsStore.getState().hydrateTasksFromServer();
     void useFinanceStore.getState().hydrateJournalFromServer();
+    void useExpensesStore.getState().hydrateFromServer();
+    void useSalesStore.getState().hydrateFromServer();
+    void useFieldServiceStore.getState().hydrateFromServer();
+    void useHRStore.getState().hydrateFromServer();
     // Subscribe to Pusher org-wide events. Two-tab edits become instant
     // once NEXT_PUBLIC_PUSHER_KEY is set; the helpers no-op silently
     // when realtime is not configured.
-    bindCrmRealtime("demo");
-    bindContactsRealtime("demo");
-    bindInvoicingRealtime("demo");
-    bindOpsRealtime("demo");
-    bindProjectsRealtime("demo");
-    bindFinanceRealtime("demo");
+    //
+    // PH-A — Tenant-scope realtime: use the signed-in user's actual
+    // orgId so users only receive events for their own org. Demo
+    // visitors fall back to the shared "org-demo" channel.
+    const authUser = useAuthStore.getState().user;
+    const rtOrg = authUser?.orgId || "org-demo";
+    bindCrmRealtime(rtOrg);
+    bindContactsRealtime(rtOrg);
+    bindInvoicingRealtime(rtOrg);
+    bindOpsRealtime(rtOrg);
+    bindProjectsRealtime(rtOrg);
+    bindFinanceRealtime(rtOrg);
   }, []);
 
   // First-run onboarding: if user hasn't completed the wizard, push them
@@ -157,141 +179,146 @@ export default function DashboardLayout({
 
   return (
     <FollowTeammateProvider>
-    <div
-      className="flex h-screen overflow-hidden"
-      style={{ background: "var(--content-bg-secondary)" }}
-      aria-label="Dashboard"
-      data-focus-mode={focusMode ? "on" : "off"}
-    >
-      {/* Skip to content link — visible on keyboard focus */}
-      <SkipToContent />
+      <div
+        className="flex h-screen overflow-hidden"
+        style={{ background: "var(--content-bg-secondary)" }}
+        aria-label="Dashboard"
+        data-focus-mode={focusMode ? "on" : "off"}
+      >
+        {/* Skip to content link — visible on keyboard focus */}
+        <SkipToContent />
 
-      {/* Fixed Sidebar (hidden in focus mode) */}
-      {!focusMode && <Sidebar />}
+        {/* Fixed Sidebar (hidden in focus mode) */}
+        {!focusMode && <Sidebar />}
 
-      {/* GlobalSchemaTool's floating rail is replaced by <UnifiedTopBar />.
+        {/* GlobalSchemaTool's floating rail is replaced by <UnifiedTopBar />.
           Keeping the component mounted means the FieldSchemaEditor portal
           still works for admins; the rail itself is hidden via CSS. */}
-      {!focusMode && <GlobalSchemaTool />}
+        {!focusMode && <GlobalSchemaTool />}
 
-      {/* Main Content */}
-      <main
-        id="main-content"
-        role="main"
-        className="flex-1 overflow-auto content-scroll"
-        data-vyne-fullshell
-        style={{
-          background: "var(--content-bg)",
-          display: "flex",
-          flexDirection: "column",
-        }}
-        tabIndex={-1}
-      >
-        {/* Global unified top bar — same on every page across all viewports */}
-        {!focusMode && <UnifiedTopBar />}
+        {/* Main Content */}
+        <main
+          id="main-content"
+          role="main"
+          className="flex-1 overflow-auto content-scroll"
+          data-vyne-fullshell
+          style={{
+            background: "var(--content-bg)",
+            display: "flex",
+            flexDirection: "column",
+          }}
+          tabIndex={-1}
+        >
+          {/* Global unified top bar — same on every page across all viewports */}
+          {!focusMode && <UnifiedTopBar />}
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-          <ErrorBoundary>
-            {/* Module-scoped boundary: keyed by the first path segment so a
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+            }}
+          >
+            <ErrorBoundary>
+              {/* Module-scoped boundary: keyed by the first path segment so a
                 crash in one module (e.g. /crm) doesn't blank the whole app
                 and auto-resets when the user navigates to a different one. */}
-            <ModuleErrorBoundary key={moduleKey} moduleName={moduleKey}>
-              {children}
-            </ModuleErrorBoundary>
-          </ErrorBoundary>
-        </div>
-      </main>
+              <ModuleErrorBoundary key={moduleKey} moduleName={moduleKey}>
+                {children}
+              </ModuleErrorBoundary>
+            </ErrorBoundary>
+          </div>
+        </main>
 
-      {/* Global Command Palette */}
-      <CommandPalette />
+        {/* Global Command Palette */}
+        <CommandPalette />
 
-      {/* Phase 14 — Global semantic search modal (Ctrl+/) */}
-      <GlobalSearchModalMount />
+        {/* Phase 14 — Global semantic search modal (Ctrl+/) */}
+        <GlobalSearchModalMount />
 
-      {/* Global Keyboard Shortcuts Modal */}
-      <KeyboardShortcutsModal />
+        {/* Global Keyboard Shortcuts Modal */}
+        <KeyboardShortcutsModal />
 
-      {/* Focus-mode indicator */}
-      <FocusModeToast />
+        {/* Focus-mode indicator */}
+        <FocusModeToast />
 
-      {/* Undo toast */}
-      <UndoToast />
+        {/* Undo toast */}
+        <UndoToast />
 
-      {/* Product tour (first-run + on-demand via settings) */}
-      <ProductTour />
+        {/* Product tour (first-run + on-demand via settings) */}
+        <ProductTour />
 
-      {/* Pomodoro timer + Quick-note FAB + Workspace switcher (⌘⇧O) */}
-      <GlobalWidgets />
+        {/* Pomodoro timer + Quick-note FAB + Workspace switcher (⌘⇧O) */}
+        <GlobalWidgets />
 
-      {/* Global call overlay — survives across page navigation, channel switches */}
-      <GlobalCallPanel />
+        {/* Global call overlay — survives across page navigation, channel switches */}
+        <GlobalCallPanel />
 
-      {/* Mobile bottom navigation (≤768px) */}
-      {!focusMode && <MobileBottomNav />}
+        {/* Mobile bottom navigation (≤768px) */}
+        {!focusMode && <MobileBottomNav />}
 
-      {/* PWA install prompt — shows when browser supports it + user hasn't dismissed */}
-      {!focusMode && <PWAInstallBanner />}
+        {/* PWA install prompt — shows when browser supports it + user hasn't dismissed */}
+        {!focusMode && <PWAInstallBanner />}
 
-      {/* Runtime a11y safety net: labels any unlabeled form element. */}
-      <A11yEnhancer />
+        {/* Runtime a11y safety net: labels any unlabeled form element. */}
+        <A11yEnhancer />
 
-      {/* Runtime mobile layout safety net: collapses multi-col grids,
+        {/* Runtime mobile layout safety net: collapses multi-col grids,
           wraps flex rows, and shrinks oversized fixed widths on phones
           and tablet portrait. Bypasses inline-style specificity. */}
-      <MobileLayoutNormalizer />
+        <MobileLayoutNormalizer />
 
-      {/* Sync document.title to the current route. */}
-      <PageTitleSync />
+        {/* Sync document.title to the current route. */}
+        <PageTitleSync />
 
-      {/* Mobile swipe-from-left edge → dispatch vyne:open-more. */}
-      <MobileSwipeGesture />
+        {/* Mobile swipe-from-left edge → dispatch vyne:open-more. */}
+        <MobileSwipeGesture />
 
-      {/* Mobile pull-to-refresh — dispatches vyne:pull-refresh on release */}
-      <PullToRefresh />
+        {/* Mobile pull-to-refresh — dispatches vyne:pull-refresh on release */}
+        <PullToRefresh />
 
-      {/* Mobile floating "+" FAB — picks the right new-record route per page */}
-      {!focusMode && <MobileFAB />}
+        {/* Mobile floating "+" FAB — picks the right new-record route per page */}
+        {!focusMode && <MobileFAB />}
 
-      {/* iOS-style edge-swipe-back on detail routes */}
-      <EdgeSwipeBack />
+        {/* iOS-style edge-swipe-back on detail routes */}
+        <EdgeSwipeBack />
 
-      {/* Full-window file drag-and-drop overlay */}
-      <GlobalDropZone />
+        {/* Full-window file drag-and-drop overlay */}
+        <GlobalDropZone />
 
-      {/* Per-route scroll restoration on back nav */}
-      <ScrollRestoration />
+        {/* Per-route scroll restoration on back nav */}
+        <ScrollRestoration />
 
-      {/* Tenant impersonation banner (visible whenever vyne-impersonating
+        {/* Tenant impersonation banner (visible whenever vyne-impersonating
           is set in localStorage by the /admin impersonation flow) */}
-      <ImpersonationBanner />
+        <ImpersonationBanner />
 
-      {/* Offline-state banner — shows when window.navigator.onLine flips
+        {/* Offline-state banner — shows when window.navigator.onLine flips
           false, plus the count of mutations queued in IndexedDB. Auto-
           flushes the queue when the network comes back. */}
-      <OfflineBanner />
+        <OfflineBanner />
 
-      {/* 14-day trial banner (UI_UPGRADE_PLAN.md 3.5). Reads /api/stripe/status
+        {/* 14-day trial banner (UI_UPGRADE_PLAN.md 3.5). Reads /api/stripe/status
           via the shared subscription hook; renders only while status="trialing".
           Self-dismissable per-day. */}
-      <TrialBanner />
+        <TrialBanner />
 
-      {/* Persistent huddle dock (UI_UPGRADE_PLAN.md 6.1) — survives page
+        {/* Persistent huddle dock (UI_UPGRADE_PLAN.md 6.1) — survives page
           navigation. Self-hides when no huddle is active. */}
-      <HuddleDock />
+        <HuddleDock />
 
-      {/* Phase 19.1/19.2/19.9 — apply a11y prefs (contrast / text scale / RTL) */}
-      <A11yApplier />
+        {/* Phase 19.1/19.2/19.9 — apply a11y prefs (contrast / text scale / RTL) */}
+        <A11yApplier />
 
-      {/* Phase 19.3 — single global ARIA live region for async actions */}
-      <Announcer />
+        {/* Phase 19.3 — single global ARIA live region for async actions */}
+        <Announcer />
 
-      {/* Phase 16.10 — embeddable AI sidebar (right rail). Toggle with
+        {/* Phase 16.10 — embeddable AI sidebar (right rail). Toggle with
           ⌘+⇧+/ or the floating Sparkles pill. Hidden in focus mode and
           on the dedicated /ai/chat page so it doesn't overlap. */}
-      {!focusMode && pathname && !pathname.startsWith("/ai") && (
-        <AiSidebar />
-      )}
-    </div>
+        {!focusMode && pathname && !pathname.startsWith("/ai") && <AiSidebar />}
+      </div>
     </FollowTeammateProvider>
   );
 }

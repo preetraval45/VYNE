@@ -256,7 +256,8 @@ function VersionHistoryPanel({
               padding: "8px 0",
               borderRadius: 8,
               border: "none",
-              background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
+              background:
+                "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
               color: "#fff",
               fontSize: 12,
               fontWeight: 600,
@@ -389,7 +390,10 @@ function SlashMenu({
           className="w-full flex items-center gap-3 px-3 py-2 text-left text-[13px] transition-colors"
           style={{
             background: i === active ? "#F5F3FF" : "transparent",
-            color: i === active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
+            color:
+              i === active
+                ? "var(--vyne-accent, var(--vyne-purple))"
+                : "var(--text-primary)",
           }}
           onMouseEnter={() => setActive(i)}
         >
@@ -401,7 +405,9 @@ function SlashMenu({
                   ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
                   : "var(--content-bg-secondary)",
               color:
-                i === active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+                i === active
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-secondary)",
             }}
           >
             {item.icon}
@@ -435,8 +441,12 @@ function TB({
       }}
       className="w-7 h-7 flex items-center justify-center rounded transition-colors"
       style={{
-        background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : undefined,
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        background: active
+          ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
+          : undefined,
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
       }}
       onMouseEnter={(e) => {
         if (!active)
@@ -535,6 +545,9 @@ export function DocEditor({ doc }: DocEditorProps) {
   );
 
   // ── TipTap editor ─────────────────────────────────────────────
+  // PH-F typecheck — `extensions` array is mixed Extension / Node /
+  // Mark types; Tiptap v3's overload resolution can't always narrow it.
+  // Cast through unknown to placate `useEditor`'s strict signature.
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -569,7 +582,7 @@ export function DocEditor({ doc }: DocEditorProps) {
             }),
           ]
         : []),
-    ],
+    ] as unknown as never[],
     content: (() => {
       if (!doc.content) return "";
       try {
@@ -796,7 +809,10 @@ export function DocEditor({ doc }: DocEditorProps) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text }),
               });
-              const data = (await res.json()) as { text?: string; error?: string };
+              const data = (await res.json()) as {
+                text?: string;
+                error?: string;
+              };
               if (data.text) {
                 editor
                   .chain()
@@ -1061,7 +1077,8 @@ export function DocEditor({ doc }: DocEditorProps) {
               padding: "12px 16px",
               borderRadius: 12,
               background: "var(--content-bg)",
-              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
+              border:
+                "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
               display: "flex",
               alignItems: "flex-start",
@@ -1168,7 +1185,10 @@ export function DocEditor({ doc }: DocEditorProps) {
                 gap: 6,
               }}
             >
-              <PencilRuler size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+              <PencilRuler
+                size={13}
+                style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+              />
               Whiteboard
             </span>
             <button
@@ -1254,7 +1274,10 @@ export function DocEditor({ doc }: DocEditorProps) {
                 gap: 10,
               }}
             >
-              <GitCompare size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+              <GitCompare
+                size={16}
+                style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+              />
               <span
                 style={{
                   flex: 1,

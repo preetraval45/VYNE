@@ -1,1 +1,30 @@
-npx lint-staged
+#!/usr/bin/env sh
+
+# PH-F R3 — Pre-commit gate: format the staged files via lint-staged,
+# then run a fast typecheck on the web package so a broken commit can't
+# slip past the local boundary into CI. Same tsc --noEmit run that
+# GitHub Actions performs in the `typecheck` job — same source of truth,
+# just earlier (catches errors before they hit the PR queue).
+#
+# Skip with: git commit --no-verify   (use sparingly; CI will catch).
+
+set -e
+
+# Resolve a pnpm runner that works in any shell (git-bash often
+# doesn't have pnpm on PATH; PowerShell does). Try direct, then
+# corepack, then npx as the universal fallback.
+if command -v pnpm >/dev/null 2>&1; then
+  PNPM="pnpm"
+elif command -v corepack >/dev/null 2>&1; then
+  PNPM="corepack pnpm"
+else
+  PNPM="npx --no-install pnpm"
+fi
+
+# 1. Format the staged files only (prettier-write via lint-staged).
+$PNPM exec lint-staged
+
+# 2. Project-wide typecheck on the web package. Hooked here (not inside
+#    lint-staged) because TS needs the full project graph — a per-file
+#    pass would miss cross-file errors.
+$PNPM --filter web typecheck

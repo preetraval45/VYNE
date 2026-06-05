@@ -21,10 +21,13 @@ export const runtime = "edge";
 //   2. We need the same flow on mobile, so keeping intent extraction
 //      on the server means we don't ship a parser to two clients.
 
-export const TOOL_CATALOG = [
+// PH-F typecheck fix — Next 15 routes may only export the
+// HTTP-handler symbols. Keep the catalog module-local.
+const TOOL_CATALOG = [
   {
     name: "createDeal",
-    description: "Create a new CRM deal. Use when the user says 'add', 'create', or 'log' a deal/opportunity.",
+    description:
+      "Create a new CRM deal. Use when the user says 'add', 'create', or 'log' a deal/opportunity.",
     args: {
       company: "string (required)",
       contactName: "string (optional)",
@@ -39,7 +42,8 @@ export const TOOL_CATALOG = [
   },
   {
     name: "updateDeal",
-    description: "Update a deal's stage, value, assignee, next action, or notes. Look up by id from context.",
+    description:
+      "Update a deal's stage, value, assignee, next action, or notes. Look up by id from context.",
     args: { id: "string (required)", patch: "object with any deal fields" },
   },
   {
@@ -49,9 +53,11 @@ export const TOOL_CATALOG = [
   },
   {
     name: "createTask",
-    description: "Create a task/issue in a project. Project is matched by name or identifier.",
+    description:
+      "Create a task/issue in a project. Project is matched by name or identifier.",
     args: {
-      projectName: "string (required) — match against existing project name or identifier",
+      projectName:
+        "string (required) — match against existing project name or identifier",
       title: "string (required)",
       description: "string (optional)",
       status: "todo|in_progress|in_review|done (default todo)",
@@ -62,7 +68,8 @@ export const TOOL_CATALOG = [
   },
   {
     name: "updateTask",
-    description: "Update task title, status, priority, assignee, due date, or description.",
+    description:
+      "Update task title, status, priority, assignee, due date, or description.",
     args: { id: "string (required)", patch: "object with any task fields" },
   },
   {
@@ -116,7 +123,8 @@ export const TOOL_CATALOG = [
   },
   {
     name: "createInvoice",
-    description: "Create an invoice. Customer is matched by name; if unknown, uses the literal string.",
+    description:
+      "Create an invoice. Customer is matched by name; if unknown, uses the literal string.",
     args: {
       customerName: "string (required)",
       total: "number (required)",
@@ -166,13 +174,15 @@ export const TOOL_CATALOG = [
   // updateDeal / createTask) using the returned ids.
   {
     name: "queryDeals",
-    description: "Search CRM deals. Returns count + matching deals (id, company, stage, value, probability, lastActivity).",
+    description:
+      "Search CRM deals. Returns count + matching deals (id, company, stage, value, probability, lastActivity).",
     args: {
       stage: "Lead|Qualified|Proposal|Negotiation|Won|Lost (optional)",
       stageNot: "stage to exclude (optional)",
       minValue: "number USD (optional)",
       maxValue: "number USD (optional)",
-      idleDays: "number — only deals untouched for >= this many days (optional)",
+      idleDays:
+        "number — only deals untouched for >= this many days (optional)",
       assignee: "string match (optional)",
       search: "free text in company/contactName (optional)",
       limit: "number (default 20, max 100)",
@@ -180,7 +190,8 @@ export const TOOL_CATALOG = [
   },
   {
     name: "queryTasks",
-    description: "Search project tasks. Returns count + tasks (id, title, status, priority, dueDate, projectName).",
+    description:
+      "Search project tasks. Returns count + tasks (id, title, status, priority, dueDate, projectName).",
     args: {
       projectName: "match by name or identifier (optional)",
       status: "todo|in_progress|in_review|done|blocked (optional)",
@@ -193,7 +204,8 @@ export const TOOL_CATALOG = [
   },
   {
     name: "queryInvoices",
-    description: "Search invoices. Returns count + invoices (id, number, customer, amount, status, dueDate).",
+    description:
+      "Search invoices. Returns count + invoices (id, number, customer, amount, status, dueDate).",
     args: {
       status: "Draft|Sent|Paid|Overdue|Cancelled (optional)",
       overdue: "boolean — only invoices past dueDate and not Paid (optional)",
@@ -204,17 +216,20 @@ export const TOOL_CATALOG = [
   },
   {
     name: "queryContacts",
-    description: "Search contacts. Returns count + contacts (id, name, email, company, lastContact).",
+    description:
+      "Search contacts. Returns count + contacts (id, name, email, company, lastContact).",
     args: {
       company: "string match (optional)",
-      staleDays: "number — only contacts with no contact for >= N days (optional)",
+      staleDays:
+        "number — only contacts with no contact for >= N days (optional)",
       search: "free text in name/email (optional)",
       limit: "number (default 20, max 100)",
     },
   },
   {
     name: "queryProducts",
-    description: "Search products/inventory. Returns count + products (id, name, sku, stockQty, status, price).",
+    description:
+      "Search products/inventory. Returns count + products (id, name, sku, stockQty, status, price).",
     args: {
       status: "in_stock|low_stock|out_of_stock (optional)",
       maxStock: "number — only products with stockQty <= this (optional)",
@@ -269,12 +284,18 @@ Rules:
 function serializeContext(ctx: ContextBundle | undefined): string {
   if (!ctx) return "(empty)";
   const lines: string[] = [];
-  if (ctx.projects?.length) lines.push(`PROJECTS: ${JSON.stringify(ctx.projects.slice(0, 30))}`);
-  if (ctx.tasks?.length) lines.push(`TASKS: ${JSON.stringify(ctx.tasks.slice(0, 50))}`);
-  if (ctx.deals?.length) lines.push(`DEALS: ${JSON.stringify(ctx.deals.slice(0, 50))}`);
-  if (ctx.contacts?.length) lines.push(`CONTACTS: ${JSON.stringify(ctx.contacts.slice(0, 50))}`);
-  if (ctx.products?.length) lines.push(`PRODUCTS: ${JSON.stringify(ctx.products.slice(0, 50))}`);
-  if (ctx.invoices?.length) lines.push(`INVOICES: ${JSON.stringify(ctx.invoices.slice(0, 30))}`);
+  if (ctx.projects?.length)
+    lines.push(`PROJECTS: ${JSON.stringify(ctx.projects.slice(0, 30))}`);
+  if (ctx.tasks?.length)
+    lines.push(`TASKS: ${JSON.stringify(ctx.tasks.slice(0, 50))}`);
+  if (ctx.deals?.length)
+    lines.push(`DEALS: ${JSON.stringify(ctx.deals.slice(0, 50))}`);
+  if (ctx.contacts?.length)
+    lines.push(`CONTACTS: ${JSON.stringify(ctx.contacts.slice(0, 50))}`);
+  if (ctx.products?.length)
+    lines.push(`PRODUCTS: ${JSON.stringify(ctx.products.slice(0, 50))}`);
+  if (ctx.invoices?.length)
+    lines.push(`INVOICES: ${JSON.stringify(ctx.invoices.slice(0, 30))}`);
   return lines.join("\n");
 }
 
@@ -289,14 +310,23 @@ function tryParse(raw: string): ToolsResponse | null {
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
     if (start === -1 || end === -1) return null;
-    const obj = JSON.parse(cleaned.slice(start, end + 1)) as Partial<ToolsResponse>;
+    const obj = JSON.parse(
+      cleaned.slice(start, end + 1),
+    ) as Partial<ToolsResponse>;
     if (typeof obj.message !== "string") return null;
     if (!Array.isArray(obj.toolCalls)) return null;
     const valid = obj.toolCalls.every(
-      (c) => c && typeof (c as ToolCall).tool === "string" && typeof (c as ToolCall).args === "object",
+      (c) =>
+        c &&
+        typeof (c as ToolCall).tool === "string" &&
+        typeof (c as ToolCall).args === "object",
     );
     if (!valid) return null;
-    return { message: obj.message, toolCalls: obj.toolCalls as ToolCall[], provider: "vyne" };
+    return {
+      message: obj.message,
+      toolCalls: obj.toolCalls as ToolCall[],
+      provider: "vyne",
+    };
   } catch {
     return null;
   }
@@ -306,18 +336,27 @@ function localFallback(question: string): ToolsResponse {
   // Tiny heuristic so demo mode still does *something* useful for the
   // most common verbs: "create deal", "create task", "create contact".
   const q = question.toLowerCase();
-  const dealM = q.match(/(?:create|add|new)\s+deal[^\n]*?(?:for\s+)?([a-z0-9 .&-]+?)(?:\s+(?:worth|at|for)\s+\$?(\d[\d,]*))?$/i);
+  const dealM = q.match(
+    /(?:create|add|new)\s+deal[^\n]*?(?:for\s+)?([a-z0-9 .&-]+?)(?:\s+(?:worth|at|for)\s+\$?(\d[\d,]*))?$/i,
+  );
   if (dealM) {
     const company = dealM[1].trim();
     const value = dealM[2] ? Number(dealM[2].replace(/,/g, "")) : 0;
     return {
       message: `Created a Lead deal for ${company}.`,
-      toolCalls: [{ tool: "createDeal", args: { company, value, stage: "Lead" }, rationale: "matched 'create deal' phrase" }],
+      toolCalls: [
+        {
+          tool: "createDeal",
+          args: { company, value, stage: "Lead" },
+          rationale: "matched 'create deal' phrase",
+        },
+      ],
       provider: "local",
     };
   }
   return {
-    message: "Vyne AI tool-calling needs a model key (GROQ_API_KEY or ANTHROPIC_API_KEY). Without one, only simple 'create deal' phrasing works.",
+    message:
+      "Vyne AI tool-calling needs a model key (GROQ_API_KEY or ANTHROPIC_API_KEY). Without one, only simple 'create deal' phrasing works.",
     toolCalls: [],
     provider: "local",
   };
@@ -327,7 +366,12 @@ export async function POST(req: Request) {
   const auth = requireAuth(req);
   if (!auth.ok) return auth.response!;
 
-  const rl = await rateLimit({ key: "ai-tools", limit: 30, windowSec: 60, req });
+  const rl = await rateLimit({
+    key: "ai-tools",
+    limit: 30,
+    windowSec: 60,
+    req,
+  });
   if (!rl.ok) return rl.response!;
 
   let payload: ToolsPayload;
@@ -349,23 +393,33 @@ export async function POST(req: Request) {
 
   const contextText = serializeContext(payload.context);
   const userPrompt = `CONTEXT\n-------\n${contextText}\n\nUSER REQUEST\n------------\n${question}`;
-  const history = (payload.history ?? []).slice(-4).map((m) => ({ role: m.role, content: m.content }));
+  const history = (payload.history ?? [])
+    .slice(-4)
+    .map((m) => ({ role: m.role, content: m.content }));
   history.push({ role: "user" as const, content: userPrompt });
 
   if (groqKey) {
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          max_tokens: 800,
-          response_format: { type: "json_object" },
-          messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
-        }),
-      });
+      const res = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${groqKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            max_tokens: 800,
+            response_format: { type: "json_object" },
+            messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+          }),
+        },
+      );
       if (res.ok) {
-        const body = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+        const body = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
         const text = body.choices?.[0]?.message?.content?.trim();
         if (text) {
           const parsed = tryParse(text);
@@ -394,7 +448,9 @@ export async function POST(req: Request) {
         }),
       });
       if (res.ok) {
-        const body = (await res.json()) as { content?: Array<{ type: string; text?: string }> };
+        const body = (await res.json()) as {
+          content?: Array<{ type: string; text?: string }>;
+        };
         const text = body.content?.find((c) => c.type === "text")?.text?.trim();
         if (text) {
           const parsed = tryParse(text);

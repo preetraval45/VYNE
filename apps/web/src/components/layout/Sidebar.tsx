@@ -126,7 +126,12 @@ interface NavItemDef {
 }
 
 const NAV_ITEMS: NavItemDef[] = [
-  { icon: Home, label: "Home", href: "/home", color: "var(--vyne-accent, #06B6D4)" },
+  {
+    icon: Home,
+    label: "Home",
+    href: "/home",
+    color: "var(--vyne-accent, #06B6D4)",
+  },
   {
     icon: BarChart3,
     label: "My Dashboard",
@@ -140,9 +145,10 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#2C3E50",
     moduleId: "crm",
     subs: [
-      { label: "Accounts", href: "/contacts" },
-      { label: "Contacts", href: "/contacts" },
-      { label: "Import", href: "/contacts" },
+      { label: "Dashboard", href: "/contacts?view=dashboard" },
+      { label: "Accounts", href: "/contacts?view=accounts" },
+      { label: "Contacts", href: "/contacts?view=contacts" },
+      { label: "Import", href: "/contacts?view=import" },
     ],
   },
   {
@@ -152,12 +158,13 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#27AE60",
     moduleId: "sales",
     subs: [
-      { label: "Opportunities", href: "/sales" },
-      { label: "Quotations", href: "/sales" },
-      { label: "Sales Orders", href: "/sales" },
-      { label: "Products", href: "/sales" },
-      { label: "Customers", href: "/sales" },
-      { label: "Reports", href: "/sales" },
+      { label: "Dashboard", href: "/sales?view=dashboard" },
+      { label: "Opportunities", href: "/sales?view=opportunities" },
+      { label: "Quotations", href: "/sales?view=quotations" },
+      { label: "Sales Orders", href: "/sales?view=orders" },
+      { label: "Products", href: "/sales?view=products" },
+      { label: "Customers", href: "/sales?view=customers" },
+      { label: "Reports", href: "/sales?view=reports" },
     ],
   },
   // /purchase and /manufacturing are demo-only mockups that duplicate
@@ -208,6 +215,7 @@ const NAV_ITEMS: NavItemDef[] = [
     badge: 2,
     moduleId: "projects",
     subs: [
+      { label: "Dashboard", href: "/projects?view=dashboard" },
       { label: "Projects", href: "/projects", badgeKey: "projects" },
       { label: "Tasks", href: "/projects/tasks", badgeKey: "tasks" },
       { label: "Sub Tasks", href: "/projects/subtasks", badgeKey: "subtasks" },
@@ -234,10 +242,10 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#F39C12",
     moduleId: "erp",
     subs: [
-      { label: "Overview", href: "/ops" },
-      { label: "Inventory", href: "/ops" },
-      { label: "Orders", href: "/ops" },
-      { label: "Suppliers", href: "/ops" },
+      { label: "Dashboard", href: "/ops?view=dashboard" },
+      { label: "Inventory", href: "/ops?view=inventory" },
+      { label: "Orders", href: "/ops?view=orders" },
+      { label: "Suppliers", href: "/ops?view=suppliers" },
     ],
   },
   {
@@ -247,9 +255,10 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#1ABC9C",
     moduleId: "finance",
     subs: [
-      { label: "P&L Statement", href: "/finance" },
-      { label: "Journal Entries", href: "/finance" },
-      { label: "Chart of Accounts", href: "/finance" },
+      { label: "Dashboard", href: "/finance?view=dashboard" },
+      { label: "P&L Statement", href: "/finance?view=pl" },
+      { label: "Journal Entries", href: "/finance?view=journal" },
+      { label: "Chart of Accounts", href: "/finance?view=accounts" },
       { label: "Invoices", href: "/finance" },
     ],
   },
@@ -260,7 +269,8 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#E67E22",
     moduleId: "crm",
     subs: [
-      { label: "Pipeline", href: "/crm" },
+      { label: "Dashboard", href: "/crm?view=dashboard" },
+      { label: "Pipeline", href: "/crm?view=pipeline" },
       { label: "Contacts", href: "/crm" },
       { label: "Deals", href: "/crm" },
       { label: "Activities", href: "/crm" },
@@ -273,10 +283,11 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#3498DB",
     moduleId: "hr",
     subs: [
-      { label: "Employees", href: "/hr" },
-      { label: "Leave", href: "/hr" },
-      { label: "Payroll", href: "/hr" },
-      { label: "Org Chart", href: "/hr" },
+      { label: "Dashboard", href: "/hr?view=dashboard" },
+      { label: "Employees", href: "/hr?view=employees" },
+      { label: "Leave", href: "/hr?view=leave" },
+      { label: "Payroll", href: "/hr?view=payroll" },
+      { label: "Org Chart", href: "/hr?view=orgchart" },
     ],
   },
   {
@@ -285,9 +296,10 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/expenses",
     color: "#95A5A6",
     subs: [
-      { label: "My Expenses", href: "/expenses" },
-      { label: "Approvals", href: "/expenses" },
-      { label: "Reports", href: "/expenses" },
+      { label: "Dashboard", href: "/expenses?view=dashboard" },
+      { label: "My Expenses", href: "/expenses?view=mine" },
+      { label: "Approvals", href: "/expenses?view=approvals" },
+      { label: "Reports", href: "/expenses?view=reports" },
     ],
   },
   {
@@ -297,11 +309,12 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#E91E63",
     moduleId: "marketing",
     subs: [
-      { label: "Campaigns", href: "/marketing" },
-      { label: "Email Marketing", href: "/marketing" },
-      { label: "Social Media", href: "/marketing" },
-      { label: "Landing Pages", href: "/marketing" },
-      { label: "Analytics", href: "/marketing" },
+      { label: "Dashboard", href: "/marketing?view=dashboard" },
+      { label: "Campaigns", href: "/marketing?view=campaigns" },
+      { label: "Email Marketing", href: "/marketing?view=email" },
+      { label: "Social Media", href: "/marketing?view=social" },
+      { label: "Landing Pages", href: "/marketing?view=landing" },
+      { label: "Analytics", href: "/marketing?view=analytics" },
     ],
   },
   {
@@ -374,13 +387,14 @@ const NAV_ITEMS: NavItemDef[] = [
     color: "#2ECC71",
     moduleId: "invoicing",
     subs: [
-      { label: "Customers", href: "/invoicing" },
-      { label: "Invoices", href: "/invoicing" },
-      { label: "Credit Notes", href: "/invoicing" },
-      { label: "Payments", href: "/invoicing" },
-      { label: "Vendors", href: "/invoicing" },
-      { label: "Bills", href: "/invoicing" },
-      { label: "Refunds", href: "/invoicing" },
+      { label: "Dashboard", href: "/invoicing?view=dashboard" },
+      { label: "Customers", href: "/invoicing?view=customers" },
+      { label: "Invoices", href: "/invoicing?view=invoices" },
+      { label: "Credit Notes", href: "/invoicing?view=creditNotes" },
+      { label: "Payments", href: "/invoicing?view=payments" },
+      { label: "Vendors", href: "/invoicing?view=vendors" },
+      { label: "Bills", href: "/invoicing?view=bills" },
+      { label: "Refunds", href: "/invoicing?view=refunds" },
     ],
   },
   // /maintenance is demo-only and overlaps with /ops work-orders — hidden
@@ -391,9 +405,16 @@ const NAV_ITEMS: NavItemDef[] = [
     href: "/field-service",
     color: "#0E7490",
     subs: [
-      { label: "Schedule", href: "/field-service" },
-      { label: "Unassigned", href: "/field-service?view=fs-builtin-unassigned" },
-      { label: "Urgent", href: "/field-service?view=fs-builtin-urgent" },
+      { label: "Dashboard", href: "/field-service?view=dashboard" },
+      { label: "Schedule", href: "/field-service?view=schedule" },
+      {
+        label: "Unassigned",
+        href: "/field-service?view=schedule&filter=fs-builtin-unassigned",
+      },
+      {
+        label: "Urgent",
+        href: "/field-service?view=schedule&filter=fs-builtin-urgent",
+      },
     ],
   },
   { icon: Map, label: "Roadmap", href: "/roadmap", color: "#1ABC9C" },
@@ -519,7 +540,9 @@ function NavRow({
           borderLeft: active
             ? "2.5px solid var(--vyne-teal)"
             : "2.5px solid transparent",
-          boxShadow: active ? "inset 0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)" : "none",
+          boxShadow: active
+            ? "inset 0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
+            : "none",
           borderRadius: collapsed ? 0 : "0 8px 8px 0",
           marginRight: collapsed ? 0 : 6,
           transition: "all 0.12s ease",
@@ -535,7 +558,9 @@ function NavRow({
             width: 30,
             height: 30,
             borderRadius: 8,
-            background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14)" : "transparent",
+            background: active
+              ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14)"
+              : "transparent",
             color: active ? "var(--vyne-teal)" : "var(--text-secondary)",
             display: "inline-flex",
             alignItems: "center",
@@ -599,9 +624,10 @@ function NavRow({
               size={15}
               strokeWidth={2.5}
               style={{
-                color: active || hovered
-                  ? "var(--vyne-accent, var(--vyne-purple))"
-                  : "var(--text-secondary)",
+                color:
+                  active || hovered
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--text-secondary)",
                 flexShrink: 0,
                 opacity: hovered || active ? 1 : 0.85,
                 transition: "all 0.18s var(--ease-out-quart, ease-out)",
@@ -793,24 +819,78 @@ function NavRow({
 // Full Tailwind-style chart: 17 hues × 5 shades (300/400/500/600/700) gives the
 // user 85 ready-made swatches. The center column (500) doubles as the canonical
 // preset; the surrounding columns give light → dark variants for fine taste.
-const COLOR_CHART: { name: string; shades: [string, string, string, string, string] }[] = [
-  { name: "Slate",   shades: ["#94A3B8", "#64748B", "#475569", "#334155", "#1E293B"] },
-  { name: "Gray",    shades: ["#9CA3AF", "#6B7280", "#4B5563", "#374151", "#1F2937"] },
-  { name: "Red",     shades: ["#FCA5A5", "#F87171", "#EF4444", "#DC2626", "#B91C1C"] },
-  { name: "Orange",  shades: ["#FDBA74", "#FB923C", "#F97316", "#EA580C", "#C2410C"] },
-  { name: "Amber",   shades: ["#FCD34D", "#FBBF24", "#F59E0B", "#D97706", "#B45309"] },
-  { name: "Yellow",  shades: ["#FDE047", "#FACC15", "#EAB308", "#CA8A04", "#A16207"] },
-  { name: "Lime",    shades: ["#BEF264", "#A3E635", "#84CC16", "#65A30D", "#4D7C0F"] },
-  { name: "Green",   shades: ["#86EFAC", "#4ADE80", "#22C55E", "#16A34A", "#15803D"] },
-  { name: "Emerald", shades: ["#6EE7B7", "#34D399", "#10B981", "#059669", "#047857"] },
-  { name: "Teal",    shades: ["#5EEAD4", "#2DD4BF", "#14B8A6", "#0D9488", "#0F766E"] },
-  { name: "Cyan",    shades: ["#67E8F9", "#22D3EE", "#06B6D4", "#0891B2", "#0E7490"] },
-  { name: "Sky",     shades: ["#7DD3FC", "#38BDF8", "#0EA5E9", "#0284C7", "#0369A1"] },
-  { name: "Blue",    shades: ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8"] },
-  { name: "Indigo",  shades: ["#A5B4FC", "#818CF8", "#6366F1", "#4F46E5", "#4338CA"] },
-  { name: "Violet",  shades: ["#C4B5FD", "#A78BFA", "#8B5CF6", "#7C3AED", "#6D28D9"] },
-  { name: "Pink",    shades: ["#F9A8D4", "#F472B6", "#EC4899", "#DB2777", "#BE185D"] },
-  { name: "Rose",    shades: ["#FDA4AF", "#FB7185", "#F43F5E", "#E11D48", "#BE123C"] },
+const COLOR_CHART: {
+  name: string;
+  shades: [string, string, string, string, string];
+}[] = [
+  {
+    name: "Slate",
+    shades: ["#94A3B8", "#64748B", "#475569", "#334155", "#1E293B"],
+  },
+  {
+    name: "Gray",
+    shades: ["#9CA3AF", "#6B7280", "#4B5563", "#374151", "#1F2937"],
+  },
+  {
+    name: "Red",
+    shades: ["#FCA5A5", "#F87171", "#EF4444", "#DC2626", "#B91C1C"],
+  },
+  {
+    name: "Orange",
+    shades: ["#FDBA74", "#FB923C", "#F97316", "#EA580C", "#C2410C"],
+  },
+  {
+    name: "Amber",
+    shades: ["#FCD34D", "#FBBF24", "#F59E0B", "#D97706", "#B45309"],
+  },
+  {
+    name: "Yellow",
+    shades: ["#FDE047", "#FACC15", "#EAB308", "#CA8A04", "#A16207"],
+  },
+  {
+    name: "Lime",
+    shades: ["#BEF264", "#A3E635", "#84CC16", "#65A30D", "#4D7C0F"],
+  },
+  {
+    name: "Green",
+    shades: ["#86EFAC", "#4ADE80", "#22C55E", "#16A34A", "#15803D"],
+  },
+  {
+    name: "Emerald",
+    shades: ["#6EE7B7", "#34D399", "#10B981", "#059669", "#047857"],
+  },
+  {
+    name: "Teal",
+    shades: ["#5EEAD4", "#2DD4BF", "#14B8A6", "#0D9488", "#0F766E"],
+  },
+  {
+    name: "Cyan",
+    shades: ["#67E8F9", "#22D3EE", "#06B6D4", "#0891B2", "#0E7490"],
+  },
+  {
+    name: "Sky",
+    shades: ["#7DD3FC", "#38BDF8", "#0EA5E9", "#0284C7", "#0369A1"],
+  },
+  {
+    name: "Blue",
+    shades: ["#93C5FD", "#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8"],
+  },
+  {
+    name: "Indigo",
+    shades: ["#A5B4FC", "#818CF8", "#6366F1", "#4F46E5", "#4338CA"],
+  },
+  {
+    name: "Violet",
+    shades: ["#C4B5FD", "#A78BFA", "#8B5CF6", "#7C3AED", "#6D28D9"],
+  },
+  {
+    name: "Pink",
+    shades: ["#F9A8D4", "#F472B6", "#EC4899", "#DB2777", "#BE185D"],
+  },
+  {
+    name: "Rose",
+    shades: ["#FDA4AF", "#FB7185", "#F43F5E", "#E11D48", "#BE123C"],
+  },
 ];
 
 function AccentPicker({
@@ -834,7 +914,10 @@ function AccentPicker({
 
   // Render at fixed coordinates anchored to the trigger button so the
   // popup escapes the sidebar's `overflow: hidden` and isn't clipped.
-  const [pos, setPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+  const [pos, setPos] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
 
   useEffect(() => {
     function place() {
@@ -845,7 +928,10 @@ function AccentPicker({
       const margin = 8;
       // Center over the trigger, clamped to the viewport.
       let left = r.left + r.width / 2 - POPUP_W / 2;
-      left = Math.max(margin, Math.min(left, window.innerWidth - POPUP_W - margin));
+      left = Math.max(
+        margin,
+        Math.min(left, window.innerWidth - POPUP_W - margin),
+      );
       const top = r.top - margin; // popup's bottom anchored at this y
       setPos({ top, left });
     }
@@ -924,14 +1010,10 @@ function AccentPicker({
               borderRadius: 6,
               border: "none",
               cursor: "pointer",
-              background:
-                tab === id ? "var(--content-bg)" : "transparent",
+              background: tab === id ? "var(--content-bg)" : "transparent",
               color:
                 tab === id ? "var(--text-primary)" : "var(--text-tertiary)",
-              boxShadow:
-                tab === id
-                  ? "0 1px 2px rgba(0,0,0,0.06)"
-                  : "none",
+              boxShadow: tab === id ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
               transition: "all 0.12s",
             }}
           >
@@ -951,233 +1033,235 @@ function AccentPicker({
 
       {tab === "accent" && (
         <>
-      {/* Quick presets row */}
-      <div
-        style={{
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "var(--text-tertiary)",
-          marginBottom: 6,
-        }}
-      >
-        Presets
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(8, 1fr)",
-          gap: 6,
-          alignItems: "center",
-          justifyItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        {(Object.keys(ACCENT_COLORS) as AccentColor[]).map((key) => {
-          const c = ACCENT_COLORS[key];
-          const isActive = !customAccentHex && accent === key;
-          return (
-            <button
-              type="button"
-              key={key}
-              title={c.label}
-              aria-label={`Use ${c.label} accent`}
-              onClick={() => {
-                setAccent(key);
-                onClose();
-              }}
-              style={{
-                width: 20,
-                height: 20,
-                borderRadius: "50%",
-                background: c.primary,
-                border: isActive
-                  ? "2px solid var(--text-primary)"
-                  : "2px solid transparent",
-                cursor: "pointer",
-                outline: isActive ? `2px solid ${c.primary}` : "none",
-                outlineOffset: 2,
-                padding: 0,
-                transition: "all 0.15s",
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* Full color chart — 17 hues × 5 shades */}
-      <div
-        style={{
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "var(--text-tertiary)",
-          marginBottom: 6,
-        }}
-      >
-        Color chart
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "60px repeat(5, 1fr)",
-          gap: 4,
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        {COLOR_CHART.map((row) => (
-          <Fragment key={row.name}>
-            <span
-              style={{
-                fontSize: 10,
-                color: "var(--text-tertiary)",
-                fontWeight: 500,
-              }}
-            >
-              {row.name}
-            </span>
-            {row.shades.map((hex) => {
-              const active = isHexActive(hex);
+          {/* Quick presets row */}
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--text-tertiary)",
+              marginBottom: 6,
+            }}
+          >
+            Presets
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(8, 1fr)",
+              gap: 6,
+              alignItems: "center",
+              justifyItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            {(Object.keys(ACCENT_COLORS) as AccentColor[]).map((key) => {
+              const c = ACCENT_COLORS[key];
+              const isActive = !customAccentHex && accent === key;
               return (
                 <button
                   type="button"
-                  key={hex}
-                  title={`${row.name} · ${hex}`}
-                  aria-label={`Use ${row.name} ${hex}`}
+                  key={key}
+                  title={c.label}
+                  aria-label={`Use ${c.label} accent`}
                   onClick={() => {
-                    setCustomAccent(hex);
-                    setHexDraft(hex);
+                    setAccent(key);
+                    onClose();
                   }}
                   style={{
-                    width: "100%",
-                    height: 18,
-                    borderRadius: 4,
-                    background: hex,
-                    border: active
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: c.primary,
+                    border: isActive
                       ? "2px solid var(--text-primary)"
-                      : "1px solid rgba(0,0,0,0.08)",
+                      : "2px solid transparent",
                     cursor: "pointer",
+                    outline: isActive ? `2px solid ${c.primary}` : "none",
+                    outlineOffset: 2,
                     padding: 0,
-                    transition: "transform 0.1s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "scale(1.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                    transition: "all 0.15s",
                   }}
                 />
               );
             })}
-          </Fragment>
-        ))}
-      </div>
+          </div>
 
-      {/* Custom hex input + native picker */}
-      <div
-        style={{
-          fontSize: 10,
-          fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "var(--text-tertiary)",
-          marginBottom: 6,
-        }}
-      >
-        Custom
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-        }}
-      >
-        <label
-          title="Pick any color"
-          aria-label="Pick a custom accent color"
-          style={{
-            position: "relative",
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            cursor: "pointer",
-            background:
-              customAccentHex ??
-              "conic-gradient(#EF4444, #F97316, #EAB308, #22C55E, #06B6D4, #3B82F6, #8B5CF6, #EC4899, #EF4444)",
-            border: "1px solid var(--content-border)",
-            flexShrink: 0,
-          }}
-        >
-          <input
-            type="color"
-            value={customAccentHex ?? "#06B6D4"}
-            onChange={(e) => {
-              setCustomAccent(e.target.value);
-              setHexDraft(e.target.value);
-            }}
+          {/* Full color chart — 17 hues × 5 shades */}
+          <div
             style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0,
-              cursor: "pointer",
-              width: "100%",
-              height: "100%",
-              border: 0,
-              padding: 0,
-            }}
-          />
-        </label>
-        <input
-          type="text"
-          value={hexDraft}
-          onChange={(e) => setHexDraft(e.target.value)}
-          onBlur={(e) => commitHex(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              commitHex((e.target as HTMLInputElement).value);
-              onClose();
-            }
-          }}
-          placeholder="#06B6D4"
-          spellCheck={false}
-          style={{
-            flex: 1,
-            fontSize: 12,
-            fontFamily: "ui-monospace, SFMono-Regular, monospace",
-            padding: "5px 8px",
-            background: "var(--content-bg)",
-            border: "1px solid var(--content-border)",
-            borderRadius: 6,
-            color: "var(--text-primary)",
-            outline: "none",
-          }}
-        />
-        {customAccentHex && (
-          <button
-            type="button"
-            onClick={() => {
-              setCustomAccent(null);
-              setHexDraft("");
-            }}
-            title="Clear custom color"
-            style={{
-              fontSize: 11,
-              padding: "5px 8px",
-              background: "transparent",
-              border: "1px solid var(--content-border)",
-              borderRadius: 6,
-              color: "var(--text-secondary)",
-              cursor: "pointer",
+              fontSize: 10,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--text-tertiary)",
+              marginBottom: 6,
             }}
           >
-            Reset
-          </button>
-        )}
-      </div>
+            Color chart
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "60px repeat(5, 1fr)",
+              gap: 4,
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            {COLOR_CHART.map((row) => (
+              <Fragment key={row.name}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: "var(--text-tertiary)",
+                    fontWeight: 500,
+                  }}
+                >
+                  {row.name}
+                </span>
+                {row.shades.map((hex) => {
+                  const active = isHexActive(hex);
+                  return (
+                    <button
+                      type="button"
+                      key={hex}
+                      title={`${row.name} · ${hex}`}
+                      aria-label={`Use ${row.name} ${hex}`}
+                      onClick={() => {
+                        setCustomAccent(hex);
+                        setHexDraft(hex);
+                      }}
+                      style={{
+                        width: "100%",
+                        height: 18,
+                        borderRadius: 4,
+                        background: hex,
+                        border: active
+                          ? "2px solid var(--text-primary)"
+                          : "1px solid rgba(0,0,0,0.08)",
+                        cursor: "pointer",
+                        padding: 0,
+                        transition: "transform 0.1s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.transform =
+                          "scale(1.08)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.transform =
+                          "scale(1)";
+                      }}
+                    />
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
+
+          {/* Custom hex input + native picker */}
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              color: "var(--text-tertiary)",
+              marginBottom: 6,
+            }}
+          >
+            Custom
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <label
+              title="Pick any color"
+              aria-label="Pick a custom accent color"
+              style={{
+                position: "relative",
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                cursor: "pointer",
+                background:
+                  customAccentHex ??
+                  "conic-gradient(#EF4444, #F97316, #EAB308, #22C55E, #06B6D4, #3B82F6, #8B5CF6, #EC4899, #EF4444)",
+                border: "1px solid var(--content-border)",
+                flexShrink: 0,
+              }}
+            >
+              <input
+                type="color"
+                value={customAccentHex ?? "#06B6D4"}
+                onChange={(e) => {
+                  setCustomAccent(e.target.value);
+                  setHexDraft(e.target.value);
+                }}
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  opacity: 0,
+                  cursor: "pointer",
+                  width: "100%",
+                  height: "100%",
+                  border: 0,
+                  padding: 0,
+                }}
+              />
+            </label>
+            <input
+              type="text"
+              value={hexDraft}
+              onChange={(e) => setHexDraft(e.target.value)}
+              onBlur={(e) => commitHex(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  commitHex((e.target as HTMLInputElement).value);
+                  onClose();
+                }
+              }}
+              placeholder="#06B6D4"
+              spellCheck={false}
+              style={{
+                flex: 1,
+                fontSize: 12,
+                fontFamily: "ui-monospace, SFMono-Regular, monospace",
+                padding: "5px 8px",
+                background: "var(--content-bg)",
+                border: "1px solid var(--content-border)",
+                borderRadius: 6,
+                color: "var(--text-primary)",
+                outline: "none",
+              }}
+            />
+            {customAccentHex && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomAccent(null);
+                  setHexDraft("");
+                }}
+                title="Clear custom color"
+                style={{
+                  fontSize: 11,
+                  padding: "5px 8px",
+                  background: "transparent",
+                  border: "1px solid var(--content-border)",
+                  borderRadius: 6,
+                  color: "var(--text-secondary)",
+                  cursor: "pointer",
+                }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </>
       )}
     </div>
@@ -1210,24 +1294,78 @@ const BG_PRESETS: { name: string; hex: string }[] = [
 // toward the very-light (50/100) and very-dark (800/900/950) ends so
 // they feel like backgrounds, not buttons. 5 shades per row × 17 rows
 // = 85 surface swatches.
-const BG_CHART: { name: string; shades: [string, string, string, string, string] }[] = [
-  { name: "Slate",   shades: ["#F8FAFC", "#F1F5F9", "#E2E8F0", "#1E293B", "#0F172A"] },
-  { name: "Gray",    shades: ["#F9FAFB", "#F3F4F6", "#E5E7EB", "#1F2937", "#111827"] },
-  { name: "Red",     shades: ["#FEF2F2", "#FEE2E2", "#FECACA", "#7F1D1D", "#450A0A"] },
-  { name: "Orange",  shades: ["#FFF7ED", "#FFEDD5", "#FED7AA", "#7C2D12", "#431407"] },
-  { name: "Amber",   shades: ["#FFFBEB", "#FEF3C7", "#FDE68A", "#78350F", "#451A03"] },
-  { name: "Yellow",  shades: ["#FEFCE8", "#FEF9C3", "#FEF08A", "#713F12", "#422006"] },
-  { name: "Lime",    shades: ["#F7FEE7", "#ECFCCB", "#D9F99D", "#365314", "#1A2E05"] },
-  { name: "Green",   shades: ["#F0FDF4", "#DCFCE7", "#BBF7D0", "#14532D", "#052E16"] },
-  { name: "Emerald", shades: ["#ECFDF5", "#D1FAE5", "#A7F3D0", "#064E3B", "#022C22"] },
-  { name: "Teal",    shades: ["#F0FDFA", "#CCFBF1", "#99F6E4", "#134E4A", "#042F2E"] },
-  { name: "Cyan",    shades: ["#ECFEFF", "#CFFAFE", "#A5F3FC", "#164E63", "#083344"] },
-  { name: "Sky",     shades: ["#F0F9FF", "#E0F2FE", "#BAE6FD", "#0C4A6E", "#082F49"] },
-  { name: "Blue",    shades: ["#EFF6FF", "#DBEAFE", "#BFDBFE", "#1E3A8A", "#172554"] },
-  { name: "Indigo",  shades: ["#EEF2FF", "#E0E7FF", "#C7D2FE", "#312E81", "#1E1B4B"] },
-  { name: "Violet",  shades: ["#F5F3FF", "#EDE9FE", "#DDD6FE", "#4C1D95", "#2E1065"] },
-  { name: "Pink",    shades: ["#FDF2F8", "#FCE7F3", "#FBCFE8", "#831843", "#500724"] },
-  { name: "Rose",    shades: ["#FFF1F2", "#FFE4E6", "#FECDD3", "#881337", "#4C0519"] },
+const BG_CHART: {
+  name: string;
+  shades: [string, string, string, string, string];
+}[] = [
+  {
+    name: "Slate",
+    shades: ["#F8FAFC", "#F1F5F9", "#E2E8F0", "#1E293B", "#0F172A"],
+  },
+  {
+    name: "Gray",
+    shades: ["#F9FAFB", "#F3F4F6", "#E5E7EB", "#1F2937", "#111827"],
+  },
+  {
+    name: "Red",
+    shades: ["#FEF2F2", "#FEE2E2", "#FECACA", "#7F1D1D", "#450A0A"],
+  },
+  {
+    name: "Orange",
+    shades: ["#FFF7ED", "#FFEDD5", "#FED7AA", "#7C2D12", "#431407"],
+  },
+  {
+    name: "Amber",
+    shades: ["#FFFBEB", "#FEF3C7", "#FDE68A", "#78350F", "#451A03"],
+  },
+  {
+    name: "Yellow",
+    shades: ["#FEFCE8", "#FEF9C3", "#FEF08A", "#713F12", "#422006"],
+  },
+  {
+    name: "Lime",
+    shades: ["#F7FEE7", "#ECFCCB", "#D9F99D", "#365314", "#1A2E05"],
+  },
+  {
+    name: "Green",
+    shades: ["#F0FDF4", "#DCFCE7", "#BBF7D0", "#14532D", "#052E16"],
+  },
+  {
+    name: "Emerald",
+    shades: ["#ECFDF5", "#D1FAE5", "#A7F3D0", "#064E3B", "#022C22"],
+  },
+  {
+    name: "Teal",
+    shades: ["#F0FDFA", "#CCFBF1", "#99F6E4", "#134E4A", "#042F2E"],
+  },
+  {
+    name: "Cyan",
+    shades: ["#ECFEFF", "#CFFAFE", "#A5F3FC", "#164E63", "#083344"],
+  },
+  {
+    name: "Sky",
+    shades: ["#F0F9FF", "#E0F2FE", "#BAE6FD", "#0C4A6E", "#082F49"],
+  },
+  {
+    name: "Blue",
+    shades: ["#EFF6FF", "#DBEAFE", "#BFDBFE", "#1E3A8A", "#172554"],
+  },
+  {
+    name: "Indigo",
+    shades: ["#EEF2FF", "#E0E7FF", "#C7D2FE", "#312E81", "#1E1B4B"],
+  },
+  {
+    name: "Violet",
+    shades: ["#F5F3FF", "#EDE9FE", "#DDD6FE", "#4C1D95", "#2E1065"],
+  },
+  {
+    name: "Pink",
+    shades: ["#FDF2F8", "#FCE7F3", "#FBCFE8", "#831843", "#500724"],
+  },
+  {
+    name: "Rose",
+    shades: ["#FFF1F2", "#FFE4E6", "#FECDD3", "#881337", "#4C0519"],
+  },
 ];
 
 function BgPickerPanel({
@@ -1379,10 +1517,12 @@ function BgPickerPanel({
                     transition: "transform 0.1s",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "scale(1.08)";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "scale(1.08)";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = "scale(1)";
+                    (e.currentTarget as HTMLElement).style.transform =
+                      "scale(1)";
                   }}
                 />
               );
@@ -1414,8 +1554,7 @@ function BgPickerPanel({
             borderRadius: 6,
             cursor: "pointer",
             background:
-              customBgHex ??
-              "linear-gradient(135deg, #0B0F14, #FFFFFF)",
+              customBgHex ?? "linear-gradient(135deg, #0B0F14, #FFFFFF)",
             border: "1px solid var(--content-border)",
             flexShrink: 0,
           }}
@@ -2020,7 +2159,8 @@ export function Sidebar() {
                 borderRadius: 12,
                 background:
                   "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18) 0%, rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.06) 100%)",
-                border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
+                border:
+                  "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
                 color: "var(--sidebar-active)",
                 textDecoration: "none",
                 boxShadow:
@@ -2032,14 +2172,16 @@ export function Sidebar() {
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)";
+                el.style.borderColor =
+                  "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)";
                 el.style.transform = "translateY(-1px)";
                 el.style.boxShadow =
                   "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 10px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)";
               }}
               onMouseLeave={(e) => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)";
+                el.style.borderColor =
+                  "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)";
                 el.style.transform = "translateY(0)";
                 el.style.boxShadow =
                   "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)";
@@ -2091,7 +2233,13 @@ export function Sidebar() {
           </div>
         )}
         {collapsed && (
-          <div style={{ padding: "8px 6px 4px", display: "flex", justifyContent: "center" }}>
+          <div
+            style={{
+              padding: "8px 6px 4px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Link
               href="/ai/chat"
               aria-label="Open Vyne AI"
@@ -2178,11 +2326,15 @@ export function Sidebar() {
                   cursor: pinDragIdx === idx ? "grabbing" : "grab",
                   opacity: pinDragIdx === idx ? 0.4 : 1,
                   borderTop:
-                    pinOverIdx === idx && pinDragIdx !== null && pinDragIdx > idx
+                    pinOverIdx === idx &&
+                    pinDragIdx !== null &&
+                    pinDragIdx > idx
                       ? "2px solid var(--vyne-accent, var(--vyne-purple))"
                       : "2px solid transparent",
                   borderBottom:
-                    pinOverIdx === idx && pinDragIdx !== null && pinDragIdx < idx
+                    pinOverIdx === idx &&
+                    pinDragIdx !== null &&
+                    pinDragIdx < idx
                       ? "2px solid var(--vyne-accent, var(--vyne-purple))"
                       : "2px solid transparent",
                   background: isActive(p.href)
@@ -2407,7 +2559,8 @@ export function Sidebar() {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "linear-gradient(135deg, #7C5CFC, var(--vyne-accent-deep, #0891B2))",
+            background:
+              "linear-gradient(135deg, #7C5CFC, var(--vyne-accent-deep, #0891B2))",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -2418,7 +2571,8 @@ export function Sidebar() {
             cursor: "pointer",
             border: "2px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.25)",
             padding: 0,
-            boxShadow: "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+            boxShadow:
+              "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
             transition: "box-shadow 0.15s",
           }}
           onMouseEnter={(e) =>

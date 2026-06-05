@@ -1,0 +1,7 @@
+# PH-F R3 — CODEOWNERS. Required for "Require review from Code Owners"
+# in branch protection. For the solo-dev phase, the repo owner owns
+# everything; the line below is a placeholder pattern that GitHub
+# accepts as valid and that's easy to expand later when contributors
+# are added (e.g. `apps/web/src/components/billing/ @vyne/billing`).
+
+*       @preetraval

@@ -38,7 +38,7 @@ export function isRealtimeEnabled(): boolean {
   if (typeof window === "undefined") return false;
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 }
 
@@ -74,7 +74,18 @@ export function subscribe<T = unknown>(
       // the channel for everyone else.
     }
   };
-  ch.on("broadcast", { event }, cb);
+  // PH-J: cast through unknown to escape the SDK's overload picker
+  // which mis-resolves `"broadcast"` against the `"system"` overload.
+  // Runtime behaviour is unchanged — Supabase accepts these args.
+  (
+    ch as unknown as {
+      on: (
+        type: "broadcast",
+        filter: { event: string },
+        callback: (msg: { payload: T }) => void,
+      ) => RealtimeChannel;
+    }
+  ).on("broadcast", { event }, cb);
 
   return () => {
     try {

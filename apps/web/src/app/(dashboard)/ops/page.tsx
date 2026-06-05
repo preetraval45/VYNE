@@ -2,9 +2,13 @@
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import { useOpsStore } from "@/lib/stores/ops";
+import { BOMFlowchart } from "@/components/ops/BOMFlowchart";
+import { DEMO_BOM_TREES } from "@/lib/fixtures/bomTree";
 import { undoableDelete } from "@/lib/undo";
 import { SearchBar as SharedSearchBar } from "@/components/shared/SearchBar";
 import { WorkOrderGantt } from "@/components/ops/WorkOrderGantt";
@@ -112,13 +116,16 @@ function TabBtn({
         cursor: "pointer",
         fontSize: 12,
         fontWeight: 500,
-        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+        background: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         transition: "all 0.15s",
       }}
       onMouseEnter={(e) => {
         if (!active)
-          (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+          (e.currentTarget as HTMLElement).style.background =
+            "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         if (!active)
@@ -185,7 +192,8 @@ function Modal({
           >
             {title}
           </span>
-          <button aria-label="Close"
+          <button
+            aria-label="Close"
             onClick={onClose}
             style={{
               border: "none",
@@ -270,7 +278,12 @@ function OverviewTab({
       >
         {[
           {
-            icon: <Package size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />,
+            icon: (
+              <Package
+                size={18}
+                style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+              />
+            ),
             label: "Total Products",
             value: products.length.toString(),
             sub: `${inStock} in stock`,
@@ -393,7 +406,10 @@ function OverviewTab({
           >
             Recent Orders
           </div>
-          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table
+            className="m-cards"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
                 {["Order #", "Customer", "Total", "Status", "Date"].map((h) => (
@@ -579,10 +595,11 @@ function InventoryTab({
   const [adjustQty, setAdjustQty] = useState("");
   const [adjustReason, setAdjustReason] = useState("received");
 
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      p.sku.toLowerCase().includes(debouncedSearch.toLowerCase()),
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const filtered = useSearchIndex(
+    products,
+    (p) => [p.name, p.sku],
+    debouncedSearch,
   );
 
   // Bulk selection (Phase 11.2) — multi-select products for batch
@@ -652,7 +669,9 @@ function InventoryTab({
             width={320}
             onWorkspaceSearch={() =>
               window.dispatchEvent(
-                new CustomEvent("vyne:open-palette", { detail: { query: search } }),
+                new CustomEvent("vyne:open-palette", {
+                  detail: { query: search },
+                }),
               )
             }
           />
@@ -686,10 +705,15 @@ function InventoryTab({
           overflow: "hidden",
         }}
       >
-        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          className="m-cards"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
-              <th style={{ padding: "9px 12px", width: 32, textAlign: "center" }}>
+              <th
+                style={{ padding: "9px 12px", width: 32, textAlign: "center" }}
+              >
                 <input
                   type="checkbox"
                   aria-label="Select all products"
@@ -836,11 +860,9 @@ function InventoryTab({
                   <EditableCell
                     value={p.stockQty}
                     onSave={(v) =>
-                      useOpsStore
-                        .getState()
-                        .updateProduct(p.id, {
-                          stockQty: Math.max(0, Number(v) || 0),
-                        })
+                      useOpsStore.getState().updateProduct(p.id, {
+                        stockQty: Math.max(0, Number(v) || 0),
+                      })
                     }
                     type="number"
                     label="Stock qty"
@@ -903,7 +925,10 @@ function InventoryTab({
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={p.status ?? "in_stock"} />
                 </td>
-                <td style={{ padding: "10px 14px" }} onClick={(e) => e.stopPropagation()}>
+                <td
+                  style={{ padding: "10px 14px" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div style={{ display: "inline-flex", gap: 6 }}>
                     <button
                       type="button"
@@ -927,12 +952,19 @@ function InventoryTab({
                       type="button"
                       aria-label={`Delete ${p.name}`}
                       onClick={() => {
-                        if (!confirm(`Delete ${p.name}? You'll have 5 seconds to undo.`)) return;
+                        if (
+                          !confirm(
+                            `Delete ${p.name}? You'll have 5 seconds to undo.`,
+                          )
+                        )
+                          return;
                         const snapshot = { ...p };
                         undoableDelete({
                           label: `Deleted product — ${snapshot.name}`,
-                          mutate: () => useOpsStore.getState().deleteProduct(snapshot.id),
-                          restore: () => useOpsStore.getState().addProduct(snapshot),
+                          mutate: () =>
+                            useOpsStore.getState().deleteProduct(snapshot.id),
+                          restore: () =>
+                            useOpsStore.getState().addProduct(snapshot),
                         });
                       }}
                       style={{
@@ -986,9 +1018,7 @@ function InventoryTab({
               undoableDelete({
                 label: `Deleted ${ids.length} product${ids.length === 1 ? "" : "s"}`,
                 mutate: () =>
-                  ids.forEach((id) =>
-                    useOpsStore.getState().deleteProduct(id),
-                  ),
+                  ids.forEach((id) => useOpsStore.getState().deleteProduct(id)),
                 restore: () => {
                   for (const p of snapshots)
                     useOpsStore.getState().addProduct(p);
@@ -1058,7 +1088,8 @@ function InventoryTab({
             />
           </FormField>
           <FormField label="Unit of Measure">
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               id="prod-uom"
               value={form.uom}
               onChange={(e) => setForm({ ...form, uom: e.target.value })}
@@ -1162,7 +1193,8 @@ function InventoryTab({
           />
         </FormField>
         <FormField label="Reason">
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             id="adj-reason"
             value={adjustReason}
             onChange={(e) => setAdjustReason(e.target.value)}
@@ -1211,7 +1243,10 @@ function InventoryTab({
       </Modal>
 
       {/* Slide-in product detail panel */}
-      <ProductDetailPanel product={selectedProduct} onClose={productDetail.close} />
+      <ProductDetailPanel
+        product={selectedProduct}
+        onClose={productDetail.close}
+      />
     </div>
   );
 }
@@ -1224,7 +1259,11 @@ function ProductDetailPanel({
   onClose: () => void;
 }) {
   if (!product) {
-    return <DetailPanel open={false} onClose={onClose} title=""><></></DetailPanel>;
+    return (
+      <DetailPanel open={false} onClose={onClose} title="">
+        <></>
+      </DetailPanel>
+    );
   }
   const margin =
     product.price > 0 && product.costPrice > 0
@@ -1239,20 +1278,54 @@ function ProductDetailPanel({
       badge={<StatusBadge status={product.status ?? "in_stock"} />}
     >
       <DetailSection title="Margin">
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
           <div>
-            <div className="text-aurora" style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1 }}>
+            <div
+              className="text-aurora"
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: "-0.025em",
+                lineHeight: 1,
+              }}
+            >
               {margin}%
             </div>
-            <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
+            <div
+              style={{
+                fontSize: 11.5,
+                color: "var(--text-tertiary)",
+                marginTop: 4,
+              }}
+            >
               Gross margin
             </div>
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+            <div
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.02em",
+              }}
+            >
               ${(product.price - product.costPrice).toFixed(2)}
             </div>
-            <div style={{ fontSize: 10.5, color: "var(--text-tertiary)", marginTop: 2 }}>
+            <div
+              style={{
+                fontSize: 10.5,
+                color: "var(--text-tertiary)",
+                marginTop: 2,
+              }}
+            >
               Per unit
             </div>
           </div>
@@ -1262,7 +1335,10 @@ function ProductDetailPanel({
       <DetailSection title="Pricing & stock">
         <DetailRow label="SKU" value={product.sku} mono />
         <DetailRow label="Sell price" value={`$${product.price.toFixed(2)}`} />
-        <DetailRow label="Cost price" value={`$${product.costPrice.toFixed(2)}`} />
+        <DetailRow
+          label="Cost price"
+          value={`$${product.costPrice.toFixed(2)}`}
+        />
         <DetailRow
           label="Stock"
           value={`${product.stockQty.toLocaleString()} ${product.uom ?? "each"}`}
@@ -1292,13 +1368,15 @@ function OrdersTab({
     "delivered",
     "cancelled",
   ];
-  const filtered = orders.filter((o) => {
-    const matchStatus = filter === "all" || o.status === filter;
-    const matchSearch =
-      o.customerName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-      o.orderNumber.toLowerCase().includes(debouncedSearch.toLowerCase());
-    return matchStatus && matchSearch;
-  });
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const searchHits = useSearchIndex(
+    orders,
+    (o) => [o.customerName, o.orderNumber],
+    debouncedSearch,
+  );
+  const filtered = searchHits.filter(
+    (o) => filter === "all" || o.status === filter,
+  );
 
   function updateOrderStatus(id: string, status: ERPOrder["status"]) {
     setOrders(orders.map((o) => (o.id === id ? { ...o, status } : o)));
@@ -1348,7 +1426,10 @@ function OrdersTab({
                 cursor: "pointer",
                 fontSize: 11,
                 fontWeight: 500,
-                background: filter === s ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-secondary)",
+                background:
+                  filter === s
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--content-secondary)",
                 color: filter === s ? "#fff" : "var(--text-secondary)",
                 textTransform: "capitalize",
               }}
@@ -1413,7 +1494,10 @@ function OrdersTab({
           overflow: "hidden",
         }}
       >
-        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          className="m-cards"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
               {[
@@ -1584,12 +1668,19 @@ function OrdersTab({
                       type="button"
                       aria-label={`Delete ${o.orderNumber}`}
                       onClick={() => {
-                        if (!confirm(`Delete ${o.orderNumber}? You'll have 5 seconds to undo.`)) return;
+                        if (
+                          !confirm(
+                            `Delete ${o.orderNumber}? You'll have 5 seconds to undo.`,
+                          )
+                        )
+                          return;
                         const snapshot = { ...o };
                         undoableDelete({
                           label: `Deleted order — ${snapshot.orderNumber}`,
-                          mutate: () => useOpsStore.getState().deleteOrder(snapshot.id),
-                          restore: () => useOpsStore.getState().addOrder(snapshot),
+                          mutate: () =>
+                            useOpsStore.getState().deleteOrder(snapshot.id),
+                          restore: () =>
+                            useOpsStore.getState().addOrder(snapshot),
                         });
                       }}
                       style={{
@@ -1761,25 +1852,30 @@ function SuppliersTab({
           overflow: "hidden",
         }}
       >
-        <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          className="m-cards"
+          style={{ width: "100%", borderCollapse: "collapse" }}
+        >
           <thead>
             <tr style={{ background: "var(--table-header-bg)" }}>
-              {["Supplier", "Contact", "Email", "Phone", "Status", ""].map((h, i) => (
-                <th
-                  key={h || `act-${i}`}
-                  style={{
-                    padding: "9px 14px",
-                    textAlign: "left",
-                    fontSize: 10,
-                    fontWeight: 600,
-                    color: "var(--text-secondary)",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.06em",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
+              {["Supplier", "Contact", "Email", "Phone", "Status", ""].map(
+                (h, i) => (
+                  <th
+                    key={h || `act-${i}`}
+                    style={{
+                      padding: "9px 14px",
+                      textAlign: "left",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: "var(--text-secondary)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody>
@@ -1841,12 +1937,19 @@ function SuppliersTab({
                     type="button"
                     aria-label={`Delete ${s.name}`}
                     onClick={() => {
-                      if (!confirm(`Delete ${s.name}? You'll have 5 seconds to undo.`)) return;
+                      if (
+                        !confirm(
+                          `Delete ${s.name}? You'll have 5 seconds to undo.`,
+                        )
+                      )
+                        return;
                       const snapshot = { ...s };
                       undoableDelete({
                         label: `Deleted supplier — ${snapshot.name}`,
-                        mutate: () => useOpsStore.getState().deleteSupplier(snapshot.id),
-                        restore: () => useOpsStore.getState().addSupplier(snapshot),
+                        mutate: () =>
+                          useOpsStore.getState().deleteSupplier(snapshot.id),
+                        restore: () =>
+                          useOpsStore.getState().addSupplier(snapshot),
                       });
                     }}
                     style={{
@@ -1970,7 +2073,11 @@ function ManufacturingTab({
   products: ERPProduct[];
 }>) {
   const router = useRouter();
-  const [subTab, setSubTab] = useState<"boms" | "work-orders">("boms");
+  const [subTab, setSubTab] = useState<"boms" | "work-orders" | "flowchart">(
+    "boms",
+  );
+  const [flowchartProductId, setFlowchartProductId] =
+    useState<string>("p-macbook");
   const [bomDetail, setBomDetail] = useState<ERPBOM | null>(null);
   const [newWOOpen, setNewWOOpen] = useState(false);
   const [woForm, setWoForm] = useState({ productName: "", qtyToProduce: "" });
@@ -1998,11 +2105,71 @@ function ManufacturingTab({
           onClick={() => setSubTab("boms")}
         />
         <TabBtn
+          label="BOM Flowchart"
+          active={subTab === "flowchart"}
+          onClick={() => setSubTab("flowchart")}
+        />
+        <TabBtn
           label="Work Orders"
           active={subTab === "work-orders"}
           onClick={() => setSubTab("work-orders")}
         />
       </div>
+
+      {subTab === "flowchart" &&
+        (() => {
+          const root =
+            DEMO_BOM_TREES.find((t) => t.id === flowchartProductId) ??
+            DEMO_BOM_TREES[0];
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                <label
+                  htmlFor="bom-product-select"
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-secondary)",
+                    fontWeight: 600,
+                  }}
+                >
+                  Show BOM tree for:
+                </label>
+                <select
+                  id="bom-product-select"
+                  value={flowchartProductId}
+                  onChange={(e) => setFlowchartProductId(e.target.value)}
+                  style={{
+                    fontSize: 12,
+                    padding: "5px 9px",
+                    borderRadius: 8,
+                    border: "1px solid var(--content-border)",
+                    background: "var(--content-bg)",
+                    color: "var(--text-primary)",
+                    minWidth: 220,
+                  }}
+                >
+                  {DEMO_BOM_TREES.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} · {t.sku}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
+                  Top-down: final product → direct components → sub-components →
+                  raw materials. Costs roll up to the parent at every level.
+                </span>
+              </div>
+              <BOMFlowchart root={root} />
+            </div>
+          );
+        })()}
 
       {subTab === "boms" && (
         <div
@@ -2013,10 +2180,19 @@ function ManufacturingTab({
             overflow: "hidden",
           }}
         >
-          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table
+            className="m-cards"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
-                {["Product", "Version", "Components", "Unit cost", "Actions"].map((h) => (
+                {[
+                  "Product",
+                  "Version",
+                  "Components",
+                  "Unit cost",
+                  "Actions",
+                ].map((h) => (
                   <th
                     key={h}
                     style={{
@@ -2087,7 +2263,9 @@ function ManufacturingTab({
                   >
                     {(() => {
                       const cost = computeBomCost(b, products);
-                      const product = products.find((p) => p.id === b.productId);
+                      const product = products.find(
+                        (p) => p.id === b.productId,
+                      );
                       const target = product?.costPrice ?? 0;
                       const delta = target > 0 ? cost - target : 0;
                       return (
@@ -2100,10 +2278,14 @@ function ManufacturingTab({
                                 marginLeft: 6,
                                 fontSize: 10,
                                 fontWeight: 700,
-                                color: delta > 0 ? "var(--status-danger)" : "var(--status-success)",
+                                color:
+                                  delta > 0
+                                    ? "var(--status-danger)"
+                                    : "var(--status-success)",
                               }}
                             >
-                              {delta > 0 ? "▲" : "▼"} {Math.abs(delta).toFixed(0)}
+                              {delta > 0 ? "▲" : "▼"}{" "}
+                              {Math.abs(delta).toFixed(0)}
                             </span>
                           )}
                         </>
@@ -2131,12 +2313,19 @@ function ManufacturingTab({
                         type="button"
                         aria-label={`Delete ${b.productName ?? "BOM"}`}
                         onClick={() => {
-                          if (!confirm(`Delete this BOM? You'll have 5 seconds to undo.`)) return;
+                          if (
+                            !confirm(
+                              `Delete this BOM? You'll have 5 seconds to undo.`,
+                            )
+                          )
+                            return;
                           const snapshot = { ...b };
                           undoableDelete({
                             label: `Deleted BOM — ${snapshot.productName ?? "BOM"}`,
-                            mutate: () => useOpsStore.getState().deleteBom(snapshot.id),
-                            restore: () => useOpsStore.getState().addBom(snapshot),
+                            mutate: () =>
+                              useOpsStore.getState().deleteBom(snapshot.id),
+                            restore: () =>
+                              useOpsStore.getState().addBom(snapshot),
                           });
                         }}
                         style={{
@@ -2196,7 +2385,10 @@ function ManufacturingTab({
               overflow: "hidden",
             }}
           >
-            <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+            <table
+              className="m-cards"
+              style={{ width: "100%", borderCollapse: "collapse" }}
+            >
               <thead>
                 <tr style={{ background: "var(--table-header-bg)" }}>
                   {[
@@ -2290,12 +2482,21 @@ function ManufacturingTab({
                         type="button"
                         aria-label={`Delete ${w.productName ?? "work order"}`}
                         onClick={() => {
-                          if (!confirm(`Delete this work order? You'll have 5 seconds to undo.`)) return;
+                          if (
+                            !confirm(
+                              `Delete this work order? You'll have 5 seconds to undo.`,
+                            )
+                          )
+                            return;
                           const snapshot = { ...w };
                           undoableDelete({
                             label: `Deleted work order — ${snapshot.productName ?? "WO"}`,
-                            mutate: () => useOpsStore.getState().deleteWorkOrder(snapshot.id),
-                            restore: () => useOpsStore.getState().addWorkOrder(snapshot),
+                            mutate: () =>
+                              useOpsStore
+                                .getState()
+                                .deleteWorkOrder(snapshot.id),
+                            restore: () =>
+                              useOpsStore.getState().addWorkOrder(snapshot),
                           });
                         }}
                         style={{
@@ -2412,7 +2613,10 @@ function ManufacturingTab({
             overflow: "hidden",
           }}
         >
-          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table
+            className="m-cards"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
             <thead>
               <tr style={{ background: "var(--table-header-bg)" }}>
                 <th
@@ -2509,8 +2713,29 @@ export default function OpsPage() {
 
 function OpsPageInner() {
   const [tab, setTab] = useState<
-    "overview" | "inventory" | "orders" | "suppliers" | "manufacturing"
+    | "dashboard"
+    | "overview"
+    | "inventory"
+    | "orders"
+    | "suppliers"
+    | "manufacturing"
   >("overview");
+
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "overview" ||
+      urlView === "inventory" ||
+      urlView === "orders" ||
+      urlView === "suppliers" ||
+      urlView === "manufacturing"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
   const [products, setProducts] = useState<ERPProduct[]>(MOCK_PRODUCTS);
   const [orders, setOrders] = useState<ERPOrder[]>(MOCK_ORDERS);
   const [suppliers, setSuppliers] = useState<ERPSupplier[]>(MOCK_SUPPLIERS);
@@ -2536,6 +2761,7 @@ function OpsPageInner() {
 
   const tabs: Array<{ id: typeof tab; label: string; icon: React.ReactNode }> =
     [
+      { id: "dashboard", label: "Dashboard", icon: <TrendingUp size={13} /> },
       { id: "overview", label: "Overview", icon: <TrendingUp size={13} /> },
       { id: "inventory", label: "Inventory", icon: <Package size={13} /> },
       { id: "orders", label: "Orders", icon: <ShoppingCart size={13} /> },
@@ -2553,14 +2779,20 @@ function OpsPageInner() {
 
   // Real KPIs from current data
   const lowStockCount = products.filter((p) => p.status === "low_stock").length;
-  const outOfStockCount = products.filter((p) => p.status === "out_of_stock").length;
+  const outOfStockCount = products.filter(
+    (p) => p.status === "out_of_stock",
+  ).length;
   const inventoryValue = products.reduce(
     (s, p) => s + p.stockQty * (p.price ?? 0),
     0,
   );
-  const pendingOrders = orders.filter((o) => o.status === "confirmed" || o.status === "draft").length;
+  const pendingOrders = orders.filter(
+    (o) => o.status === "confirmed" || o.status === "draft",
+  ).length;
   const totalOrderValue = orders.reduce((s, o) => s + (o.total ?? 0), 0);
-  const activeWOs = workOrders.filter((w) => w.status === "in_progress" || w.status === "planned").length;
+  const activeWOs = workOrders.filter(
+    (w) => w.status === "in_progress" || w.status === "planned",
+  ).length;
 
   // 14-day order revenue sparkline
   const orderSparkline = (() => {
@@ -2730,7 +2962,9 @@ function OpsPageInner() {
                 fontWeight: 500,
                 background: "transparent",
                 color:
-                  tab === id ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+                  tab === id
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--text-secondary)",
                 borderBottom:
                   tab === id ? "2px solid #06B6D4" : "2px solid transparent",
                 transition: "all 0.15s",
@@ -2745,8 +2979,13 @@ function OpsPageInner() {
       {/* Content */}
       <div
         className="content-scroll"
-        style={{ flex: 1, overflowY: "auto", padding: 20 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: tab === "dashboard" ? 0 : 20,
+        }}
       >
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "overview" && (
           <OverviewTab products={products} orders={orders} />
         )}

@@ -1,4 +1,9 @@
-import { randomBytes, pbkdf2Sync, createHmac, timingSafeEqual } from "node:crypto";
+import {
+  randomBytes,
+  pbkdf2Sync,
+  createHmac,
+  timingSafeEqual,
+} from "node:crypto";
 
 // Server-side auth helpers — used by /api/auth/signup and /api/auth/login.
 // We deliberately use Node's crypto rather than pulling bcrypt: PBKDF2-SHA256
@@ -8,11 +13,27 @@ const PBKDF2_ITERATIONS = 120_000;
 const KEY_LEN = 32;
 
 export const PASSWORD_RULES = [
-  { id: "len", label: "At least 10 characters", test: (p: string) => p.length >= 10 },
-  { id: "upper", label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
-  { id: "lower", label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+  {
+    id: "len",
+    label: "At least 10 characters",
+    test: (p: string) => p.length >= 10,
+  },
+  {
+    id: "upper",
+    label: "One uppercase letter",
+    test: (p: string) => /[A-Z]/.test(p),
+  },
+  {
+    id: "lower",
+    label: "One lowercase letter",
+    test: (p: string) => /[a-z]/.test(p),
+  },
   { id: "num", label: "One number", test: (p: string) => /[0-9]/.test(p) },
-  { id: "special", label: "One special character", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+  {
+    id: "special",
+    label: "One special character",
+    test: (p: string) => /[^A-Za-z0-9]/.test(p),
+  },
 ] as const;
 
 export function validatePassword(password: string) {
@@ -22,11 +43,21 @@ export function validatePassword(password: string) {
 
 export function hashPassword(password: string, salt?: string) {
   const saltHex = salt ?? randomBytes(16).toString("hex");
-  const hash = pbkdf2Sync(password, Buffer.from(saltHex, "hex"), PBKDF2_ITERATIONS, KEY_LEN, "sha256").toString("hex");
+  const hash = pbkdf2Sync(
+    password,
+    Buffer.from(saltHex, "hex"),
+    PBKDF2_ITERATIONS,
+    KEY_LEN,
+    "sha256",
+  ).toString("hex");
   return { saltHex, hash };
 }
 
-export function verifyPassword(password: string, saltHex: string, expectedHash: string) {
+export function verifyPassword(
+  password: string,
+  saltHex: string,
+  expectedHash: string,
+) {
   const { hash } = hashPassword(password, saltHex);
   const a = Buffer.from(hash, "hex");
   const b = Buffer.from(expectedHash, "hex");
@@ -70,6 +101,10 @@ export interface SessionPayload {
   /** Workspace role (UI_UPGRADE_PLAN.md 7.2). Optional on legacy
    *  tokens; resolveSession() falls back to a DB lookup when missing. */
   role?: string;
+  /** Tenant id baked into the token at login/signup so /api/* routes
+   *  can scope queries without a DB round-trip (PH-A). Optional on
+   *  legacy tokens; tenantGuard() falls back to a DB lookup when missing. */
+  orgId?: string;
 }
 
 export function signSessionToken(payload: Omit<SessionPayload, "exp">) {
@@ -88,7 +123,10 @@ export function verifySessionToken(token: string): SessionPayload | null {
   const [body, sig] = parts;
   const expected = createHmac("sha256", authSecret()).update(body).digest();
   const provided = b64urlDecode(sig);
-  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+  if (
+    expected.length !== provided.length ||
+    !timingSafeEqual(expected, provided)
+  ) {
     return null;
   }
   try {

@@ -142,6 +142,63 @@ export interface RateLimitResult {
 
 const memoryStore = new Map<string, { count: number; expiresAt: number }>();
 
+// Throttle the Redis-outage warning so a sustained Redis outage doesn't
+// spam Sentry / logs. We log once per minute per process.
+let lastRedisOutageWarnAt = 0;
+function warnRedisOutage(err: unknown) {
+  const now = Date.now();
+  if (now - lastRedisOutageWarnAt < 60_000) return;
+  lastRedisOutageWarnAt = now;
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[rateLimit] Redis unreachable — falling back to in-memory limiter (PH-C):",
+    err instanceof Error ? err.message : err,
+  );
+  // Best-effort Sentry breadcrumb. Lazy-import to avoid pulling Sentry
+  // into the security module's static dependency graph.
+  try {
+    void import("@sentry/nextjs")
+      .then((Sentry) => {
+        Sentry.captureMessage(
+          "rateLimit: Redis outage — failing open to in-memory",
+          {
+            level: "warning",
+            tags: { subsystem: "rate-limit" },
+          },
+        );
+      })
+      .catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
+async function memoryBranch(
+  bucketKey: string,
+  windowSec: number,
+  now: number,
+): Promise<{ count: number; ttl: number }> {
+  const existing = memoryStore.get(bucketKey);
+  let count: number;
+  let ttl: number;
+  if (!existing || existing.expiresAt <= now) {
+    memoryStore.set(bucketKey, { count: 1, expiresAt: now + windowSec });
+    count = 1;
+    ttl = windowSec;
+  } else {
+    existing.count += 1;
+    count = existing.count;
+    ttl = existing.expiresAt - now;
+  }
+  // Crude memory cleanup so the Map doesn't grow unbounded across cold starts.
+  if (memoryStore.size > 1000) {
+    for (const [k, v] of memoryStore) {
+      if (v.expiresAt <= now) memoryStore.delete(k);
+    }
+  }
+  return { count, ttl };
+}
+
 export async function rateLimit(
   opts: RateLimitOptions,
 ): Promise<RateLimitResult> {
@@ -154,35 +211,30 @@ export async function rateLimit(
   let ttl: number;
 
   if (redis) {
-    count = (await redis.incr(bucketKey)) ?? 1;
-    if (count === 1) {
-      await redis.expire(bucketKey, opts.windowSec);
-      ttl = opts.windowSec;
-    } else {
-      // @upstash/redis exposes `ttl` at runtime but the bundled types in some
-      // versions omit it — cast through the runtime shape to keep accurate
-      // reset-in-sec without bumping the package.
-      const ttlFn = (redis as unknown as { ttl: (k: string) => Promise<number> }).ttl;
-      const t = ttlFn ? await ttlFn.call(redis, bucketKey) : -1;
-      ttl = typeof t === "number" && t > 0 ? t : opts.windowSec;
+    try {
+      count = (await redis.incr(bucketKey)) ?? 1;
+      if (count === 1) {
+        await redis.expire(bucketKey, opts.windowSec);
+        ttl = opts.windowSec;
+      } else {
+        // @upstash/redis exposes `ttl` at runtime but the bundled types in some
+        // versions omit it — cast through the runtime shape to keep accurate
+        // reset-in-sec without bumping the package.
+        const ttlFn = (
+          redis as unknown as { ttl: (k: string) => Promise<number> }
+        ).ttl;
+        const t = ttlFn ? await ttlFn.call(redis, bucketKey) : -1;
+        ttl = typeof t === "number" && t > 0 ? t : opts.windowSec;
+      }
+    } catch (err) {
+      // PH-C — fail open on Redis outage. Never let an upstream Redis
+      // incident DoS the whole site. We still apply the in-memory
+      // per-instance limit and surface the outage to Sentry.
+      warnRedisOutage(err);
+      ({ count, ttl } = await memoryBranch(bucketKey, opts.windowSec, now));
     }
   } else {
-    const existing = memoryStore.get(bucketKey);
-    if (!existing || existing.expiresAt <= now) {
-      memoryStore.set(bucketKey, { count: 1, expiresAt: now + opts.windowSec });
-      count = 1;
-      ttl = opts.windowSec;
-    } else {
-      existing.count += 1;
-      count = existing.count;
-      ttl = existing.expiresAt - now;
-    }
-    // Crude memory cleanup so the Map doesn't grow unbounded across cold starts.
-    if (memoryStore.size > 1000) {
-      for (const [k, v] of memoryStore) {
-        if (v.expiresAt <= now) memoryStore.delete(k);
-      }
-    }
+    ({ count, ttl } = await memoryBranch(bucketKey, opts.windowSec, now));
   }
 
   const remaining = Math.max(0, opts.limit - count);

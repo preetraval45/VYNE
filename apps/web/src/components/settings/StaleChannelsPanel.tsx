@@ -37,7 +37,7 @@ export function StaleChannelsPanel() {
     setLoading(true);
     try {
       const list = await messagingApi.listChannels();
-      setChannels(list ?? []);
+      setChannels(list?.data ?? []);
     } catch {
       setChannels([]);
     } finally {
@@ -96,10 +96,7 @@ export function StaleChannelsPanel() {
     >
       <header style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Inbox size={16} aria-hidden="true" />
-        <h2
-          id="stale-channels-heading"
-          style={{ margin: 0, fontSize: 16 }}
-        >
+        <h2 id="stale-channels-heading" style={{ margin: 0, fontSize: 16 }}>
           Stale channels
         </h2>
         <button
@@ -233,9 +230,7 @@ export function StaleChannelsPanel() {
                     height: 28,
                     border: "1px solid var(--content-border)",
                     borderRadius: 5,
-                    background: muted
-                      ? "var(--content-bg)"
-                      : "transparent",
+                    background: muted ? "var(--content-bg)" : "transparent",
                     color: muted
                       ? "var(--text-tertiary)"
                       : "var(--text-secondary)",
@@ -261,9 +256,7 @@ export function StaleChannelsPanel() {
                     fontSize: 12,
                     border: "1px solid var(--content-border)",
                     borderRadius: 5,
-                    background: archived
-                      ? "var(--content-bg)"
-                      : "transparent",
+                    background: archived ? "var(--content-bg)" : "transparent",
                     color: archived
                       ? "var(--text-tertiary)"
                       : "var(--text-primary)",

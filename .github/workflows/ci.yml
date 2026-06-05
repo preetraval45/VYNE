@@ -1,0 +1,132 @@
+# PH-F — CI gating for vyne.vercel.app.
+#
+# Runs on every PR + push to main. Three required jobs:
+#   1. typecheck — `pnpm --filter web typecheck` (was failing on main
+#      until PH-F R1; we now keep it green).
+#   2. unit-tests — `pnpm --filter web test` (vitest, jsdom env). Pure-
+#      data layers (lib/dsa/*, lib/dashboard/aggregations, lib/auth/totp)
+#      have full coverage; component tests live alongside their files.
+#   3. build — full Next.js build with Prisma generate (safe-db-push
+#      retries 4× then no-ops so a Neon hiccup doesn't fail the job).
+#
+# Lint is gated to a soft "report-only" — the repo has ~hundreds of
+# accessibility/style hints in non-touched code that would block every
+# PR. Flipping to required will follow a one-time cleanup pass.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  # Stub values so prisma generate + tsc don't bail out reading env
+  # vars at import time. Real values live in Vercel's Production env.
+  POSTGRES_PRISMA_URL: "postgresql://stub:stub@localhost:5432/stub?schema=public"
+  POSTGRES_URL_NON_POOLING: "postgresql://stub:stub@localhost:5432/stub?schema=public"
+  AUTH_TOKEN_SECRET: "ci-stub-secret-not-used-in-runtime"
+  MFA_ENCRYPTION_KEY: "0000000000000000000000000000000000000000000000000000000000000000"
+
+jobs:
+  typecheck:
+    name: Typecheck (tsc --noEmit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Prisma generate
+        run: pnpm --filter web exec prisma generate
+      - name: Typecheck
+        run: pnpm --filter web typecheck
+
+  unit-tests:
+    name: Unit tests (vitest + coverage)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Prisma generate
+        run: pnpm --filter web exec prisma generate
+      - name: Run unit tests with coverage
+        # Vitest is configured with branch-protection-ready coverage
+        # thresholds in apps/web/vitest.config.ts. Failing those
+        # thresholds fails this job, which is what branch protection
+        # would gate on.
+        run: pnpm --filter web test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: apps/web/coverage/
+          retention-days: 7
+
+  lint:
+    name: Lint (report-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    # Soft-gate: lint runs but doesn't fail the workflow until the
+    # backlog of accessibility / style warnings is cleaned up.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Lint
+        run: pnpm --filter web lint
+
+  build:
+    name: Build (next build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [typecheck, unit-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --no-frozen-lockfile
+      - name: Build
+        env:
+          # Skip the prisma db push step in CI — it would need a live
+          # Postgres. The wrapper's graceful-degrade path covers this:
+          # we set POSTGRES_PRISMA_URL to an unreachable host and the
+          # script logs a warning + exits 0, letting `next build` run.
+          POSTGRES_PRISMA_URL: "postgresql://stub:stub@localhost:5432/stub?schema=public"
+          POSTGRES_URL_NON_POOLING: "postgresql://stub:stub@localhost:5432/stub?schema=public"
+        run: pnpm --filter web build

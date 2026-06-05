@@ -5,6 +5,7 @@ import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { CookieBanner } from "@/components/legal/CookieBanner";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -66,6 +67,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>{children}</Providers>
+        {/* PH-H — Cookie banner. Renders only on first visit (or when
+            re-opened from the footer "Cookie preferences" link). Server-
+            side render returns null; client decides whether to show. */}
+        <CookieBanner />
         {/* Vercel Analytics + Speed Insights — both auto-disable on
             non-Vercel hosts and respect Do-Not-Track. Free tier: 2.5K
             events/mo for Analytics, 10K page-loads/mo for SpeedInsights. */}

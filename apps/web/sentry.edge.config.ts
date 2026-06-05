@@ -9,7 +9,15 @@ if (DSN) {
   Sentry.init({
     dsn: DSN,
     tracesSampleRate: 0.1,
-    environment: process.env.SENTRY_ENV ?? process.env.NEXT_PUBLIC_SENTRY_ENV ?? "production",
+    environment:
+      process.env.SENTRY_ENV ??
+      process.env.NEXT_PUBLIC_SENTRY_ENV ??
+      "production",
     enabled: process.env.NODE_ENV === "production",
+    release:
+      process.env.SENTRY_RELEASE ??
+      process.env.VERCEL_GIT_COMMIT_SHA ??
+      undefined,
+    denyUrls: [/\/api\/auth\/login/, /\/api\/auth\/signup/],
   });
 }

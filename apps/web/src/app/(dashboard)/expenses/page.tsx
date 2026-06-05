@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import {
   CATEGORY_LIMITS,
   type Expense,
@@ -115,7 +117,9 @@ function TabBtn({
         borderRadius: 8,
         fontSize: 13,
         fontWeight: active ? 600 : 400,
-        background: active ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+        background: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "transparent",
         color: active ? "#fff" : "var(--text-secondary)",
         border: "none",
         cursor: "pointer",
@@ -234,6 +238,9 @@ function MyExpensesTab({
   onAdd: (e: Omit<Expense, "id">) => void;
   onSubmit: (id: string) => void;
 }>) {
+  // PH-F typecheck fix — pull updateExpense from the store so the
+  // inline EditableCell handlers below can mutate rows server-side.
+  const updateExpense = useExpensesStore((s) => s.updateExpense);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     date: new Date().toISOString().split("T")[0],
@@ -527,7 +534,8 @@ function MyExpensesTab({
                         fontSize: 12,
                         color: "var(--vyne-accent, var(--vyne-purple))",
                         background: "none",
-                        border: "1px solid var(--vyne-accent, var(--vyne-purple))",
+                        border:
+                          "1px solid var(--vyne-accent, var(--vyne-purple))",
                         borderRadius: 6,
                         padding: "3px 8px",
                         cursor: "pointer",
@@ -877,7 +885,8 @@ function ApprovalsTab({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "linear-gradient(135deg,var(--vyne-accent, #06B6D4),#9B59B6)",
+                background:
+                  "linear-gradient(135deg,var(--vyne-accent, #06B6D4),#9B59B6)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1141,7 +1150,8 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
               fontSize: 12,
               color: "var(--vyne-accent, var(--vyne-purple))",
               background: "none",
-              border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
+              border:
+                "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
               borderRadius: 6,
               padding: "3px 10px",
               cursor: "pointer",
@@ -1297,7 +1307,32 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
 
 // ── Main Page ─────────────────────────────────────────────────────
 export default function ExpensesPage() {
-  const [tab, setTab] = useState<"mine" | "approvals" | "reports" | "mileage">("mine");
+  return (
+    <Suspense fallback={null}>
+      <ExpensesPageInner />
+    </Suspense>
+  );
+}
+
+function ExpensesPageInner() {
+  const [tab, setTab] = useState<
+    "dashboard" | "mine" | "approvals" | "reports" | "mileage"
+  >("mine");
+
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "mine" ||
+      urlView === "approvals" ||
+      urlView === "reports" ||
+      urlView === "mileage"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
   const expenses = useExpensesStore((s) => s.expenses);
   const addExpense = useExpensesStore((s) => s.addExpense);
   const updateExpense = useExpensesStore((s) => s.updateExpense);
@@ -1308,7 +1343,9 @@ export default function ExpensesPage() {
     .filter((e) => {
       const d = new Date(e.date);
       const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return (
+        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      );
     })
     .reduce((s, e) => s + e.amount, 0);
   const reimbursedMTD = expenses
@@ -1424,6 +1461,11 @@ export default function ExpensesPage() {
         }}
       >
         <TabBtn
+          label="Dashboard"
+          active={tab === "dashboard"}
+          onClick={() => setTab("dashboard")}
+        />
+        <TabBtn
           label="My Expenses"
           active={tab === "mine"}
           onClick={() => setTab("mine")}
@@ -1447,7 +1489,14 @@ export default function ExpensesPage() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: tab === "dashboard" ? 0 : "20px 24px",
+        }}
+      >
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "mine" && (
           <MyExpensesTab
             expenses={expenses}

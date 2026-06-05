@@ -50,7 +50,7 @@ export interface FieldJob {
   status: FieldJobStatus;
   technicianId: string | null;
   scheduledStart: string; // ISO
-  scheduledEnd: string;   // ISO
+  scheduledEnd: string; // ISO
   estimatedHours: number;
   notes?: string;
   createdAt: string;
@@ -298,10 +298,29 @@ interface FieldServiceState {
   updateJob: (id: string, patch: Partial<FieldJob>) => void;
   deleteJob: (id: string) => void;
   assignJob: (id: string, technicianId: string | null) => void;
+  /** PH-A R4 — pull canonical jobs + technicians from Postgres. */
+  hydrateFromServer: () => Promise<void>;
 }
 
 function now(): string {
   return new Date().toISOString();
+}
+
+// PH-A R4 — mirror writes to /api/field-service/{jobs,technicians}.
+function mirrorJob(
+  method: "POST" | "PATCH" | "DELETE",
+  id?: string,
+  body?: unknown,
+) {
+  const url = id
+    ? `/api/field-service/jobs/${encodeURIComponent(id)}`
+    : `/api/field-service/jobs`;
+  const init: RequestInit = { method };
+  if (body !== undefined) {
+    init.headers = { "Content-Type": "application/json" };
+    init.body = JSON.stringify(body);
+  }
+  void fetch(url, init).catch(() => {});
 }
 
 export const useFieldServiceStore = create<FieldServiceState>()(
@@ -310,26 +329,63 @@ export const useFieldServiceStore = create<FieldServiceState>()(
       jobs: seedOrEmpty(DEMO_FIELD_JOBS),
       technicians: seedOrEmpty(DEMO_TECHNICIANS),
 
-      updateJob: (id, patch) =>
+      updateJob: (id, patch) => {
         set((state) => ({
           jobs: state.jobs.map((j) =>
             j.id === id ? { ...j, ...patch, updatedAt: now() } : j,
           ),
-        })),
+        }));
+        mirrorJob("PATCH", id, patch);
+      },
 
-      deleteJob: (id) =>
-        set((state) => ({ jobs: state.jobs.filter((j) => j.id !== id) })),
+      deleteJob: (id) => {
+        set((state) => ({ jobs: state.jobs.filter((j) => j.id !== id) }));
+        mirrorJob("DELETE", id);
+      },
 
-      assignJob: (id, technicianId) =>
+      assignJob: (id, technicianId) => {
         set((state) => ({
           jobs: state.jobs.map((j) =>
             j.id === id ? { ...j, technicianId, updatedAt: now() } : j,
           ),
-        })),
+        }));
+        mirrorJob("PATCH", id, { technicianId });
+      },
+
+      hydrateFromServer: async () => {
+        try {
+          const [jobsRes, techsRes] = await Promise.all([
+            fetch("/api/field-service/jobs", { cache: "no-store" }),
+            fetch("/api/field-service/technicians", { cache: "no-store" }),
+          ]);
+          if (jobsRes.ok) {
+            const body = (await jobsRes.json()) as { jobs?: FieldJob[] };
+            if (Array.isArray(body.jobs) && body.jobs.length > 0) {
+              set({ jobs: body.jobs });
+            }
+          }
+          if (techsRes.ok) {
+            const body = (await techsRes.json()) as {
+              technicians?: Technician[];
+            };
+            if (
+              Array.isArray(body.technicians) &&
+              body.technicians.length > 0
+            ) {
+              set({ technicians: body.technicians });
+            }
+          }
+        } catch {
+          // Stay on local cache.
+        }
+      },
     }),
     {
       name: "vyne-field-service",
-      partialize: (state) => ({ jobs: state.jobs, technicians: state.technicians }),
+      partialize: (state) => ({
+        jobs: state.jobs,
+        technicians: state.technicians,
+      }),
     },
   ),
 );

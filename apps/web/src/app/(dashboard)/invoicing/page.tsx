@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense, useState, useMemo } from "react";
+import { Suspense, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import toast from "react-hot-toast";
 import { PageHeader, Pill } from "@/components/shared/Kit";
 import {
@@ -70,6 +72,7 @@ import {
 
 // ─── Shared Types ─────────────────────────────────────────────────
 type Tab =
+  | "dashboard"
   | "customers"
   | "invoices"
   | "creditNotes"
@@ -186,7 +189,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active
           ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
@@ -320,7 +325,9 @@ function SortHeader({
         textAlign: "left",
         fontSize: 10,
         fontWeight: 600,
-        color: isActive ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: isActive
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         textTransform: "uppercase",
         letterSpacing: "0.06em",
         cursor: "pointer",
@@ -370,7 +377,8 @@ function ActionBtn({
         transition: "all 0.15s",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "var(--content-secondary)";
+        (e.currentTarget as HTMLElement).style.background =
+          "var(--content-secondary)";
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = "transparent";
@@ -436,8 +444,12 @@ function FilterBtn({
         border: active
           ? "1px solid var(--vyne-accent, var(--vyne-purple))"
           : "1px solid var(--content-border)",
-        background: active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        background: active
+          ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
+          : "transparent",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         fontSize: 11,
         fontWeight: 500,
         cursor: "pointer",
@@ -454,7 +466,9 @@ function FilterBtn({
             fontSize: 10,
             padding: "0 5px",
             borderRadius: 10,
-            background: active ? "var(--vyne-accent, var(--vyne-purple))" : "rgba(0,0,0,0.06)",
+            background: active
+              ? "var(--vyne-accent, var(--vyne-purple))"
+              : "rgba(0,0,0,0.06)",
             color: active ? "#fff" : "var(--text-tertiary)",
             fontWeight: 600,
           }}
@@ -547,7 +561,8 @@ function TableRow({
         cursor: onClick ? "pointer" : undefined,
       }}
       onMouseEnter={(ev) => {
-        (ev.currentTarget as HTMLTableRowElement).style.background = "var(--content-secondary)";
+        (ev.currentTarget as HTMLTableRowElement).style.background =
+          "var(--content-secondary)";
       }}
       onMouseLeave={(ev) => {
         (ev.currentTarget as HTMLTableRowElement).style.background =
@@ -591,7 +606,7 @@ function Td({
 
 // ─── Sort Utility ─────────────────────────────────────────────────
 function useSortableData<T>(
-  items: T[],
+  items: readonly T[],
   defaultKey: string,
   defaultDir: SortDir = "asc",
 ) {
@@ -699,7 +714,8 @@ function ModalHeader({
       >
         {title}
       </h3>
-      <button aria-label="Close"
+      <button
+        aria-label="Close"
         onClick={onClose}
         style={{
           border: "none",
@@ -1050,7 +1066,8 @@ function CustomerModal({
         {existing && (
           <FieldGroup>
             <label style={fieldLabelStyle}>Status</label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={selectStyle}
               value={status}
               onChange={(e) => setStatus(e.target.value as CustomerStatus)}
@@ -1110,7 +1127,8 @@ function InvoiceModal({
         />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
@@ -1179,7 +1197,8 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="New Credit Note" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => {
@@ -1197,7 +1216,8 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Original Invoice</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={originalInvoice}
             onChange={(e) => setOriginalInvoice(e.target.value)}
@@ -1269,7 +1289,8 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="Record Payment" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Customer</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={customer}
             onChange={(e) => {
@@ -1287,7 +1308,8 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Invoice</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={invoice}
             onChange={(e) => {
@@ -1319,7 +1341,8 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
         </FieldGroup>
         <FieldGroup>
           <label style={fieldLabelStyle}>Method</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={method}
             onChange={(e) => setMethod(e.target.value as PaymentMethod)}
@@ -1423,7 +1446,8 @@ function VendorModal({
         {existing && (
           <FieldGroup>
             <label style={fieldLabelStyle}>Status</label>
-            <select aria-label="Select option"
+            <select
+              aria-label="Select option"
               style={selectStyle}
               value={status}
               onChange={(e) => setStatus(e.target.value as VendorStatus)}
@@ -1482,7 +1506,8 @@ function BillModal({
         />
         <FieldGroup>
           <label style={fieldLabelStyle}>Vendor</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={vendor}
             onChange={(e) => setVendor(e.target.value)}
@@ -1545,7 +1570,8 @@ function RefundModal({ onClose }: { onClose: () => void }) {
         <ModalHeader title="New Refund" onClose={onClose} />
         <FieldGroup>
           <label style={fieldLabelStyle}>Refund Type</label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={type}
             onChange={(e) => {
@@ -1561,7 +1587,8 @@ function RefundModal({ onClose }: { onClose: () => void }) {
           <label style={fieldLabelStyle}>
             {type === "Customer Refund" ? "Customer" : "Vendor"}
           </label>
-          <select aria-label="Select option"
+          <select
+            aria-label="Select option"
             style={selectStyle}
             value={customerOrVendor}
             onChange={(e) => setCustomerOrVendor(e.target.value)}
@@ -1618,11 +1645,8 @@ function CustomersTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
-  const filtered = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()),
-  );
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const filtered = useSearchIndex(customers, (c) => [c.name, c.email], search);
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
     "name",
@@ -1843,7 +1867,7 @@ function CustomersTab() {
 // ─── Tab: Invoices ────────────────────────────────────────────────
 function InvoicesTab() {
   const router = useRouter();
-  const { invoices, markAsPaid, sendInvoice, deleteInvoice } =
+  const { invoices, markAsPaid, sendInvoice, deleteInvoice, updateInvoice } =
     useInvoicingStore();
   const invoiceDetail = useDetailParam("invoice");
   const selectedInvoice = invoiceDetail.id
@@ -1966,7 +1990,12 @@ function InvoicesTab() {
         <KpiCard
           label="Total Invoiced"
           value={fmt(totalInvoiced)}
-          icon={<FileText size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />}
+          icon={
+            <FileText
+              size={16}
+              style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+            />
+          }
           iconBg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
           delta={`${counts.Paid + counts.Sent + counts.Draft + (counts.Overdue ?? 0)} invoices total`}
           deltaUp
@@ -2184,9 +2213,7 @@ function InvoicesTab() {
                     type="number"
                     label="Amount"
                     cellKey={`invoice:${inv.id}#amount`}
-                    validate={(s) =>
-                      Number(s) < 0 ? "Must be ≥ 0" : null
-                    }
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                     render={(v) => fmtFull(Number(v))}
                     style={{ fontWeight: 700 }}
                   />
@@ -2241,7 +2268,9 @@ function InvoicesTab() {
                         label="Resend"
                         onClick={() => {
                           sendInvoice(inv.id);
-                          toast.success(`Resent ${inv.number} to ${inv.customer}`);
+                          toast.success(
+                            `Resent ${inv.number} to ${inv.customer}`,
+                          );
                         }}
                         color="#1E40AF"
                       />
@@ -2314,7 +2343,9 @@ function InvoicesTab() {
                   markAsPaid(id);
                 }
               }
-              toast.success(`Marked ${ids.length} invoice${ids.length === 1 ? "" : "s"} paid`);
+              toast.success(
+                `Marked ${ids.length} invoice${ids.length === 1 ? "" : "s"} paid`,
+              );
               sel.clear();
             },
           },
@@ -2331,7 +2362,9 @@ function InvoicesTab() {
                   sendInvoice(id);
                 }
               }
-              toast.success(`Sent ${ids.length} invoice${ids.length === 1 ? "" : "s"}`);
+              toast.success(
+                `Sent ${ids.length} invoice${ids.length === 1 ? "" : "s"}`,
+              );
               sel.clear();
             },
           },
@@ -2381,7 +2414,10 @@ function InvoicesTab() {
       )}
 
       {/* Slide-in invoice detail panel */}
-      <InvoiceDetailPanel invoice={selectedInvoice} onClose={invoiceDetail.close} />
+      <InvoiceDetailPanel
+        invoice={selectedInvoice}
+        onClose={invoiceDetail.close}
+      />
     </div>
   );
 }
@@ -2393,13 +2429,19 @@ function InvoiceDetailPanel({
   invoice: Invoice | undefined;
   onClose: () => void;
 }) {
-  const st = invoice ? invoiceStatusStyle(invoice.status) : { bg: "", color: "" };
+  const st = invoice
+    ? invoiceStatusStyle(invoice.status)
+    : { bg: "", color: "" };
   return (
     <DetailPanel
       open={!!invoice}
       onClose={onClose}
       title={invoice?.number ?? ""}
-      subtitle={invoice ? `${invoice.customer} · due ${fmtDate(invoice.dueDate)}` : undefined}
+      subtitle={
+        invoice
+          ? `${invoice.customer} · due ${fmtDate(invoice.dueDate)}`
+          : undefined
+      }
       badge={
         invoice && (
           <span
@@ -2420,7 +2462,14 @@ function InvoiceDetailPanel({
       }
       headerActions={
         invoice && (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, position: "relative" }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              position: "relative",
+            }}
+          >
             {invoice.dueDate && invoice.status !== "Paid" && (
               <SlaCountdown
                 targetIso={invoice.dueDate}
@@ -2444,11 +2493,26 @@ function InvoiceDetailPanel({
       {!invoice ? null : (
         <>
           <DetailSection title="Amount">
-            <div style={{ fontSize: 28, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.025em", lineHeight: 1 }}>
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                letterSpacing: "-0.025em",
+                lineHeight: 1,
+              }}
+            >
               {fmtFull(invoice.amount)}
             </div>
-            <div style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginTop: 4 }}>
-              {invoice.items.length} line item{invoice.items.length === 1 ? "" : "s"}
+            <div
+              style={{
+                fontSize: 11.5,
+                color: "var(--text-tertiary)",
+                marginTop: 4,
+              }}
+            >
+              {invoice.items.length} line item
+              {invoice.items.length === 1 ? "" : "s"}
             </div>
           </DetailSection>
 
@@ -2486,7 +2550,9 @@ function InvoiceDetailPanel({
                       >
                         {li.description}
                       </div>
-                      <div style={{ color: "var(--text-tertiary)", fontSize: 11 }}>
+                      <div
+                        style={{ color: "var(--text-tertiary)", fontSize: 11 }}
+                      >
                         {li.qty} × {fmtFull(li.rate)}
                       </div>
                     </div>
@@ -2861,7 +2927,8 @@ function PaymentsTab() {
                       borderRadius: 6,
                       fontSize: 11,
                       fontWeight: 500,
-                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)",
+                      background:
+                        "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)",
                       color: "var(--vyne-accent, var(--vyne-purple))",
                     }}
                   >
@@ -2946,11 +3013,11 @@ function VendorsTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Vendor | null>(null);
 
-  const filtered = vendors.filter(
-    (v) =>
-      v.name.toLowerCase().includes(search.toLowerCase()) ||
-      v.contact.toLowerCase().includes(search.toLowerCase()) ||
-      v.email.toLowerCase().includes(search.toLowerCase()),
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const filtered = useSearchIndex(
+    vendors,
+    (v) => [v.name, v.contact, v.email],
+    search,
   );
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
@@ -3201,7 +3268,12 @@ function BillsTab() {
         <KpiCard
           label="Total Billed"
           value={fmt(totalBilled)}
-          icon={<FileText size={16} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />}
+          icon={
+            <FileText
+              size={16}
+              style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+            />
+          }
           iconBg="rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
         />
         <KpiCard
@@ -3640,6 +3712,24 @@ export default function InvoicingPage() {
 
 function InvoicingPageInner() {
   const [tab, setTab] = useState<Tab>("invoices");
+
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "customers" ||
+      urlView === "invoices" ||
+      urlView === "creditNotes" ||
+      urlView === "payments" ||
+      urlView === "vendors" ||
+      urlView === "bills" ||
+      urlView === "refunds"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
   const { customers, invoices, bills, payments } = useInvoicingStore();
   const dash = usePageDashboard("invoicing", "30d");
 
@@ -3656,7 +3746,9 @@ function InvoicingPageInner() {
       if (i.status !== "Paid") return false;
       const d = new Date(i.date);
       const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      return (
+        d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+      );
     })
     .reduce((s, i) => s + i.amount, 0);
   const draftCount = invoices.filter((i) => i.status === "Draft").length;
@@ -3679,12 +3771,15 @@ function InvoicingPageInner() {
   const last30Revenue = invoices
     .filter((i) => {
       const t = new Date(i.date).getTime();
-      return !Number.isNaN(t) && Date.now() - t < 30 * 86400000 && i.status !== "Cancelled";
+      return (
+        !Number.isNaN(t) &&
+        Date.now() - t < 30 * 86400000 &&
+        i.status !== "Cancelled"
+      );
     })
     .reduce((s, i) => s + i.amount, 0);
-  const dso = last30Revenue > 0
-    ? Math.round((totalOutstanding / (last30Revenue / 30)))
-    : 0;
+  const dso =
+    last30Revenue > 0 ? Math.round(totalOutstanding / (last30Revenue / 30)) : 0;
 
   useRegisterCommands("invoicing", [
     {
@@ -3791,6 +3886,11 @@ function InvoicingPageInner() {
           }}
         >
           <TabBtn
+            label="Dashboard"
+            active={tab === "dashboard"}
+            onClick={() => setTab("dashboard")}
+          />
+          <TabBtn
             label="Customers"
             active={tab === "customers"}
             onClick={() => setTab("customers")}
@@ -3831,8 +3931,13 @@ function InvoicingPageInner() {
       {/* Content */}
       <div
         className="content-scroll"
-        style={{ flex: 1, overflowY: "auto", padding: 20 }}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: tab === "dashboard" ? 0 : 20,
+        }}
       >
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "customers" && <CustomersTab />}
         {tab === "invoices" && (
           <>

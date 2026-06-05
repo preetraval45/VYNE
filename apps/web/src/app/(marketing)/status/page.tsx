@@ -62,10 +62,18 @@ const SERVICES: Service[] = [
   { name: "Web app (vyne.vercel.app)", status: "operational", uptime: 99.98 },
   { name: "API gateway", status: "operational", uptime: 99.95 },
   { name: "Core service (auth, orgs)", status: "operational", uptime: 99.97 },
-  { name: "Messaging service (WebSocket)", status: "operational", uptime: 99.92 },
+  {
+    name: "Messaging service (WebSocket)",
+    status: "operational",
+    uptime: 99.92,
+  },
   { name: "Projects service", status: "operational", uptime: 99.96 },
   { name: "ERP service", status: "operational", uptime: 99.9 },
-  { name: "AI service (LangGraph agents)", status: "operational", uptime: 99.85 },
+  {
+    name: "AI service (LangGraph agents)",
+    status: "operational",
+    uptime: 99.85,
+  },
   { name: "Notification service (SES)", status: "operational", uptime: 99.99 },
   { name: "Stripe billing webhook", status: "operational", uptime: 99.99 },
   { name: "S3 document storage", status: "operational", uptime: 100 },
@@ -193,7 +201,8 @@ export default function StatusPage() {
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
+                background:
+                  "linear-gradient(135deg, var(--vyne-accent, #06B6D4), var(--vyne-accent-light, #22D3EE))",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -328,7 +337,8 @@ export default function StatusPage() {
                     style={{
                       fontSize: 12,
                       color: "rgba(255,255,255,0.5)",
-                      fontFamily: "var(--font-geist-mono), ui-monospace, monospace",
+                      fontFamily:
+                        "var(--font-geist-mono), ui-monospace, monospace",
                     }}
                   >
                     {s.uptime.toFixed(2)}% uptime
@@ -348,6 +358,100 @@ export default function StatusPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Disaster recovery readiness — PH-G */}
+      <section style={{ padding: "20px 24px 0" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: "#fff",
+              marginBottom: 14,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Disaster recovery readiness
+          </h2>
+          <div
+            style={{
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(255,255,255,0.02)",
+              padding: "18px 22px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+              gap: 16,
+            }}
+          >
+            {[
+              {
+                label: "Backup cadence",
+                value: "Daily 06:00 UTC",
+                sub: "JSON dump → Vercel Blob",
+              },
+              {
+                label: "Verification cadence",
+                value: "Weekly (Sunday 04:00 UTC)",
+                sub: "Dry-run restore",
+              },
+              {
+                label: "Last verified restore",
+                value: "—",
+                sub: "Drill pending before paid launch",
+              },
+              {
+                label: "RPO (point objective)",
+                value: "5 min",
+                sub: "Neon PITR replay",
+              },
+              {
+                label: "RTO (time objective)",
+                value: "30 min",
+                sub: "Branch swap + redeploy",
+              },
+              {
+                label: "Point-in-time recovery",
+                value: "7-day window",
+                sub: "Neon WAL",
+              },
+            ].map((item) => (
+              <div key={item.label}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "rgba(255,255,255,0.5)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: 4,
+                  }}
+                >
+                  {item.label}
+                </div>
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#fff",
+                    marginBottom: 2,
+                  }}
+                >
+                  {item.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "rgba(255,255,255,0.4)",
+                  }}
+                >
+                  {item.sub}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense, useState, useRef } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
+import { useSearchIndex } from "@/hooks/useSearchIndex";
 import {
   Plus,
   Search,
@@ -42,11 +44,16 @@ import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { AskAiButton } from "@/components/shared/AskAiButton";
 import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
 import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
-import { Tag as TagIcon, Mail as MailIcon, Star as StarIcon, Archive } from "lucide-react";
+import {
+  Tag as TagIcon,
+  Mail as MailIcon,
+  Star as StarIcon,
+  Archive,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 // ─── Constants ──────────────────────────────────────────────────
-type ContactsTab = "accounts" | "contacts" | "import";
+type ContactsTab = "dashboard" | "accounts" | "contacts" | "import";
 
 const INDUSTRIES = [
   "Technology",
@@ -173,7 +180,8 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: "8px 20px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+  background:
+    "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
   color: "#fff",
   cursor: "pointer",
   fontSize: 12,
@@ -223,7 +231,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active
           ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
@@ -243,7 +253,9 @@ function TabBtn({
             background: active
               ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
               : "var(--content-secondary)",
-            color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
+            color: active
+              ? "var(--vyne-accent, var(--vyne-purple))"
+              : "var(--text-tertiary)",
             fontWeight: 600,
           }}
         >
@@ -312,7 +324,9 @@ function SearchInput({
       placeholder={placeholder}
       width={240}
       onWorkspaceSearch={() =>
-        window.dispatchEvent(new CustomEvent("vyne:open-palette", { detail: { query: value } }))
+        window.dispatchEvent(
+          new CustomEvent("vyne:open-palette", { detail: { query: value } }),
+        )
       }
     />
   );
@@ -376,7 +390,8 @@ function NewButton({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+        background:
+          "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
@@ -1031,14 +1046,19 @@ function AccountsTab() {
     ? accounts.find((a) => a.id === deleteId)
     : null;
 
-  const filtered = accounts.filter((a) => {
-    const matchSearch =
-      a.name.toLowerCase().includes(search.toLowerCase()) ||
-      a.owner.toLowerCase().includes(search.toLowerCase());
-    const matchIndustry = !industryFilter || a.industry === industryFilter;
-    const matchStatus = !statusFilter || a.status === statusFilter;
-    return matchSearch && matchIndustry && matchStatus;
-  });
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke
+  // instead of O(n × fields × query-len) for the linear toLowerCase().includes()
+  // pattern. Built once when the accounts array reference changes.
+  const searchHits = useSearchIndex(
+    accounts,
+    (a) => [a.name, a.owner, a.industry],
+    search,
+  );
+  const filtered = searchHits.filter(
+    (a) =>
+      (!industryFilter || a.industry === industryFilter) &&
+      (!statusFilter || a.status === statusFilter),
+  );
 
   const exportData = filtered.map((a) => ({
     name: a.name,
@@ -1184,7 +1204,10 @@ function AccountsTab() {
         }}
       >
         <div style={{ overflowX: "auto" }}>
-          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table
+            className="m-cards"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
             <thead>
               <tr style={{ background: "var(--content-secondary)" }}>
                 <Th>Name</Th>
@@ -1246,7 +1269,8 @@ function AccountsTab() {
                               width: 30,
                               height: 30,
                               borderRadius: 8,
-                              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                              background:
+                                "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -1266,7 +1290,10 @@ function AccountsTab() {
                       <Td>{account.industry}</Td>
                       <Td>
                         <span
-                          style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontSize: 12 }}
+                          style={{
+                            color: "var(--vyne-accent, var(--vyne-purple))",
+                            fontSize: 12,
+                          }}
                         >
                           {account.website}
                         </span>
@@ -1410,15 +1437,17 @@ function ContactsTabContent() {
   const companies = [...new Set(contacts.map((c) => c.company))].sort();
   const departments = [...new Set(contacts.map((c) => c.department))].sort();
 
-  const filtered = contacts.filter((c) => {
-    const matchSearch =
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.email.toLowerCase().includes(search.toLowerCase()) ||
-      c.title.toLowerCase().includes(search.toLowerCase());
-    const matchCompany = !companyFilter || c.company === companyFilter;
-    const matchDept = !departmentFilter || c.department === departmentFilter;
-    return matchSearch && matchCompany && matchDept;
-  });
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
+  const searchHits = useSearchIndex(
+    contacts,
+    (c) => [c.name, c.email, c.title, c.company],
+    search,
+  );
+  const filtered = searchHits.filter(
+    (c) =>
+      (!companyFilter || c.company === companyFilter) &&
+      (!departmentFilter || c.department === departmentFilter),
+  );
 
   const exportData = filtered.map((c) => ({
     name: c.name,
@@ -1516,7 +1545,10 @@ function ContactsTabContent() {
         }}
       >
         <div style={{ overflowX: "auto" }}>
-          <table className="m-cards" style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table
+            className="m-cards"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
             <thead>
               <tr style={{ background: "var(--content-secondary)" }}>
                 <Th width={32}>
@@ -1635,7 +1667,8 @@ function ContactsTabContent() {
                             width: 30,
                             height: 30,
                             borderRadius: "50%",
-                            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+                            background:
+                              "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -1688,7 +1721,9 @@ function ContactsTabContent() {
                     <Td>
                       <EditableCell
                         value={contact.company}
-                        onSave={(v) => updateContact(contact.id, { company: v })}
+                        onSave={(v) =>
+                          updateContact(contact.id, { company: v })
+                        }
                         label="Company"
                         cellKey={`contact:${contact.id}#company`}
                       />
@@ -1790,7 +1825,9 @@ function ContactsTabContent() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"? You'll have 5 seconds to undo.`}
         onConfirm={() => {
           if (deleteId) {
-            const snapshot = useContactsStore.getState().contacts.find((c) => c.id === deleteId);
+            const snapshot = useContactsStore
+              .getState()
+              .contacts.find((c) => c.id === deleteId);
             if (snapshot) {
               undoableDelete({
                 label: `Deleted contact — ${snapshot.name}`,
@@ -1836,7 +1873,9 @@ function ContactsTabContent() {
                 if (c.tags.includes("VIP")) continue;
                 updateContact(id, { tags: [...c.tags, "VIP"] });
               }
-              toast.success(`Tagged ${ids.length} contact${ids.length === 1 ? "" : "s"} as VIP`);
+              toast.success(
+                `Tagged ${ids.length} contact${ids.length === 1 ? "" : "s"} as VIP`,
+              );
               sel.clear();
             },
           },
@@ -1906,7 +1945,8 @@ function SwipeableContactRow({
       data-vyne-swipeable
       onClick={onOpen}
       style={{
-        transition: dx === 0 ? "background 0.1s, transform 0.2s" : "background 0.1s",
+        transition:
+          dx === 0 ? "background 0.1s, transform 0.2s" : "background 0.1s",
         cursor: "pointer",
         background: selected
           ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
@@ -2323,7 +2363,11 @@ function ImportTab() {
             />
             <path
               d="M13 27v2a1 1 0 001 1h12a1 1 0 001-1v-2M20 12v12M16 16l4-4 4 4"
-              stroke={dragOver ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)"}
+              stroke={
+                dragOver
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-tertiary)"
+              }
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -2500,6 +2544,20 @@ export default function ContactsPage() {
 
 function ContactsPageInner() {
   const [activeTab, setActiveTab] = useState<ContactsTab>("accounts");
+
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "accounts" ||
+      urlView === "contacts" ||
+      urlView === "import"
+    ) {
+      setActiveTab(urlView);
+    }
+  }, [urlView]);
   const accounts = useContactsStore((s) => s.accounts);
   const contacts = useContactsStore((s) => s.contacts);
 
@@ -2583,6 +2641,11 @@ function ContactsPageInner() {
         }}
       >
         <TabBtn
+          label="Dashboard"
+          active={activeTab === "dashboard"}
+          onClick={() => setActiveTab("dashboard")}
+        />
+        <TabBtn
           label="Accounts"
           active={activeTab === "accounts"}
           onClick={() => setActiveTab("accounts")}
@@ -2602,7 +2665,14 @@ function ContactsPageInner() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: activeTab === "dashboard" ? 0 : 24,
+        }}
+      >
+        {activeTab === "dashboard" && <ProjectsDashboardView />}
         {activeTab === "accounts" && <AccountsTab />}
         {activeTab === "contacts" && <ContactsTabContent />}
         {activeTab === "import" && <ImportTab />}
@@ -2777,7 +2847,8 @@ function AccountDetailPanel({
                         width: 24,
                         height: 24,
                         borderRadius: "50%",
-                        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                        background:
+                          "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                         color: "var(--vyne-accent, var(--vyne-purple))",
                         display: "inline-flex",
                         alignItems: "center",
@@ -2895,7 +2966,8 @@ function ContactDetailPanel({
                     width: 28,
                     height: 28,
                     borderRadius: 8,
-                    background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                    background:
+                      "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                     color: "var(--vyne-accent, var(--vyne-purple))",
                     display: "inline-flex",
                     alignItems: "center",

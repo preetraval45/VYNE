@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import {
   DetailPanel,
   DetailSection,
@@ -218,7 +219,8 @@ const primaryBtnStyle: React.CSSProperties = {
   padding: "8px 20px",
   borderRadius: 8,
   border: "none",
-  background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+  background:
+    "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
   color: "#fff",
   cursor: "pointer",
   fontSize: 12,
@@ -249,6 +251,7 @@ const dangerBtnStyle: React.CSSProperties = {
 
 // ─── Shared UI ───────────────────────────────────────────────────
 type SalesTab =
+  | "dashboard"
   | "opportunities"
   | "quotations"
   | "orders"
@@ -277,7 +280,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active
           ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
@@ -332,7 +337,9 @@ function SearchInput({
       placeholder={placeholder}
       width={240}
       onWorkspaceSearch={() =>
-        window.dispatchEvent(new CustomEvent("vyne:open-palette", { detail: { query: value } }))
+        window.dispatchEvent(
+          new CustomEvent("vyne:open-palette", { detail: { query: value } }),
+        )
       }
     />
   );
@@ -394,7 +401,8 @@ function NewButton({
         padding: "7px 14px",
         borderRadius: 8,
         border: "none",
-        background: "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
+        background:
+          "linear-gradient(135deg, var(--vyne-accent, #06B6D4) 0%, var(--vyne-accent-light, #22D3EE) 100%)",
         color: "#fff",
         cursor: "pointer",
         fontSize: 12,
@@ -1826,7 +1834,8 @@ function OpportunitiesTab() {
                               width: 20,
                               height: 20,
                               borderRadius: "50%",
-                              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+                              background:
+                                "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -1920,10 +1929,13 @@ function OpportunitiesTab() {
         message={`Are you sure you want to delete "${deleteTarget?.name}"? You'll have 5 seconds to undo.`}
         onConfirm={() => {
           if (deleteId) {
-            const snapshot = useSalesStore.getState().deals.find((d) => d.id === deleteId);
+            const snapshot = useSalesStore
+              .getState()
+              .deals.find((d) => d.id === deleteId);
             if (snapshot) {
               const { id: _id, createdAt: _ca, ...rest } = snapshot;
-              void _id; void _ca;
+              void _id;
+              void _ca;
               undoableDelete({
                 label: `Deleted opportunity — ${snapshot.name}`,
                 mutate: () => deleteDeal(deleteId),
@@ -2266,10 +2278,14 @@ function QuotationsTab() {
                                     qty: li.quantity,
                                     rate: li.unitPrice,
                                   })),
-                                  dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+                                  dueDate: new Date(Date.now() + 30 * 86400000)
+                                    .toISOString()
+                                    .slice(0, 10),
                                   notes: `From quote ${q.number}`,
                                 });
-                                toast.success(`Invoice drafted from ${q.number}`);
+                                toast.success(
+                                  `Invoice drafted from ${q.number}`,
+                                );
                               }}
                             />
                           )}
@@ -2302,7 +2318,9 @@ function QuotationsTab() {
         message={`Are you sure you want to delete "${deleteTarget?.number}"? You'll have 5 seconds to undo.`}
         onConfirm={() => {
           if (deleteId) {
-            const snapshot = useSalesStore.getState().quotations.find((q) => q.id === deleteId);
+            const snapshot = useSalesStore
+              .getState()
+              .quotations.find((q) => q.id === deleteId);
             if (snapshot) {
               undoableDelete({
                 label: `Deleted quote — ${snapshot.number}`,
@@ -2522,7 +2540,9 @@ function SalesOrdersTab() {
         message={`Are you sure you want to delete "${deleteTarget?.number}"? You'll have 5 seconds to undo.`}
         onConfirm={() => {
           if (deleteId) {
-            const snapshot = useSalesStore.getState().salesOrders.find((o) => o.id === deleteId);
+            const snapshot = useSalesStore
+              .getState()
+              .salesOrders.find((o) => o.id === deleteId);
             if (snapshot) {
               undoableDelete({
                 label: `Deleted sales order — ${snapshot.number}`,
@@ -2695,7 +2715,8 @@ function ProductsTab() {
                               width: 30,
                               height: 30,
                               borderRadius: 8,
-                              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+                              background:
+                                "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2703,7 +2724,9 @@ function ProductsTab() {
                           >
                             <Package
                               size={14}
-                              style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+                              style={{
+                                color: "var(--vyne-accent, var(--vyne-purple))",
+                              }}
                             />
                           </div>
                           <span style={{ fontWeight: 600, fontSize: 12 }}>
@@ -2932,7 +2955,8 @@ function CustomersTab() {
                               width: 30,
                               height: 30,
                               borderRadius: "50%",
-                              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+                              background:
+                                "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2951,7 +2975,10 @@ function CustomersTab() {
                       </Td>
                       <Td>
                         <span
-                          style={{ color: "var(--vyne-accent, var(--vyne-purple))", fontSize: 12 }}
+                          style={{
+                            color: "var(--vyne-accent, var(--vyne-purple))",
+                            fontSize: 12,
+                          }}
                         >
                           {cust.email}
                         </span>
@@ -3065,7 +3092,6 @@ function ReportsTab() {
       </div>
 
       <WinLossInsights lostDeals={lostDeals} wonCount={wonDeals.length} />
-
 
       {/* Monthly Revenue Bar Chart */}
       <div
@@ -3419,7 +3445,8 @@ function ReportsTab() {
                             width: 28,
                             height: 28,
                             borderRadius: "50%",
-                            background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+                            background:
+                              "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -3462,8 +3489,25 @@ export default function SalesPage() {
 }
 
 function SalesPageInner() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<SalesTab>("opportunities");
+
+  // Honour ?view=dashboard from sidebar.
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "opportunities" ||
+      urlView === "quotations" ||
+      urlView === "orders" ||
+      urlView === "products" ||
+      urlView === "customers" ||
+      urlView === "reports"
+    ) {
+      setActiveTab(urlView);
+    }
+  }, [urlView]);
   const deals = useSalesStore((s) => s.deals);
   const salesOrders = useSalesStore((s) => s.salesOrders);
   const quotes = useSalesStore((s) => s.quotations);
@@ -3480,9 +3524,8 @@ function SalesPageInner() {
   const ordersValueMTD = salesOrders.reduce((s, o) => s + o.amount, 0);
   const acceptedQuotes = quotes.filter((q) => q.status === "Accepted").length;
   const totalQuotes = quotes.length;
-  const quoteWinRate = totalQuotes > 0
-    ? Math.round((acceptedQuotes / totalQuotes) * 100)
-    : 0;
+  const quoteWinRate =
+    totalQuotes > 0 ? Math.round((acceptedQuotes / totalQuotes) * 100) : 0;
 
   // 14-day order revenue sparkline
   const orderSparkline = (() => {
@@ -3584,6 +3627,12 @@ function SalesPageInner() {
         }}
       >
         <TabBtn
+          label="Dashboard"
+          icon={<BarChart3 size={13} />}
+          active={activeTab === "dashboard"}
+          onClick={() => setActiveTab("dashboard")}
+        />
+        <TabBtn
           label="Opportunities"
           icon={<Target size={13} />}
           active={activeTab === "opportunities"}
@@ -3639,7 +3688,14 @@ function SalesPageInner() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: activeTab === "dashboard" ? 0 : 24,
+        }}
+      >
+        {activeTab === "dashboard" && <ProjectsDashboardView />}
         {activeTab === "opportunities" && <OpportunitiesTab />}
         {activeTab === "quotations" && <QuotationsTab />}
         {activeTab === "orders" && <SalesOrdersTab />}
@@ -3662,9 +3718,21 @@ interface DealLite {
   notes?: string;
 }
 type Category = "Price" | "Timing" | "Competitor" | "Feature gap" | "Other";
-const CATEGORIES: Category[] = ["Price", "Timing", "Competitor", "Feature gap", "Other"];
+const CATEGORIES: Category[] = [
+  "Price",
+  "Timing",
+  "Competitor",
+  "Feature gap",
+  "Other",
+];
 
-function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCount: number }) {
+function WinLossInsights({
+  lostDeals,
+  wonCount,
+}: {
+  lostDeals: DealLite[];
+  wonCount: number;
+}) {
   const [counts, setCounts] = useState<Record<Category, number> | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -3701,7 +3769,10 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
       const start = raw.indexOf("[");
       const end = raw.lastIndexOf("]");
       if (start === -1 || end === -1) throw new Error("no JSON array");
-      const arr = JSON.parse(raw.slice(start, end + 1)) as Array<{ id: string; category: Category }>;
+      const arr = JSON.parse(raw.slice(start, end + 1)) as Array<{
+        id: string;
+        category: Category;
+      }>;
       const tally: Record<Category, number> = {
         Price: 0,
         Timing: 0,
@@ -3731,9 +3802,12 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
       for (const d of lostDeals) {
         const n = (d.notes ?? "").toLowerCase();
         if (/(price|cost|expensive|budget)/.test(n)) tally.Price += 1;
-        else if (/(timing|too early|too late|next year|not now)/.test(n)) tally.Timing += 1;
-        else if (/(competitor|chose|went with|other vendor)/.test(n)) tally.Competitor += 1;
-        else if (/(feature|missing|lacked|need)/.test(n)) tally["Feature gap"] += 1;
+        else if (/(timing|too early|too late|next year|not now)/.test(n))
+          tally.Timing += 1;
+        else if (/(competitor|chose|went with|other vendor)/.test(n))
+          tally.Competitor += 1;
+        else if (/(feature|missing|lacked|need)/.test(n))
+          tally["Feature gap"] += 1;
         else tally.Other += 1;
       }
       setCounts(tally);
@@ -3754,12 +3828,32 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
         marginBottom: 20,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 12,
+        }}
+      >
         <div>
-          <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 14,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+            }}
+          >
             Win / loss insights
           </h3>
-          <p style={{ margin: "2px 0 0", fontSize: 11, color: "var(--text-tertiary)" }}>
+          <p
+            style={{
+              margin: "2px 0 0",
+              fontSize: 11,
+              color: "var(--text-tertiary)",
+            }}
+          >
             {lostDeals.length} lost · {wonCount} won · AI-categorised reasons
           </p>
         </div>
@@ -3774,13 +3868,18 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
               fontSize: 12,
               fontWeight: 600,
               borderRadius: 8,
-              border: "1px solid var(--vyne-accent-ring, var(--content-border))",
+              border:
+                "1px solid var(--vyne-accent-ring, var(--content-border))",
               background: "var(--vyne-accent-soft, var(--content-secondary))",
               color: "var(--vyne-accent-deep, var(--text-primary))",
               cursor: loading ? "wait" : "pointer",
             }}
           >
-            {loading ? "Categorising…" : counts ? "Regenerate" : "Categorise with AI"}
+            {loading
+              ? "Categorising…"
+              : counts
+                ? "Regenerate"
+                : "Categorise with AI"}
           </button>
         )}
       </div>
@@ -3795,8 +3894,19 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
             const n = counts[c];
             const pct = total > 0 ? Math.round((n / total) * 100) : 0;
             return (
-              <div key={c} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 100, fontSize: 12, color: "var(--text-secondary)" }}>{c}</div>
+              <div
+                key={c}
+                style={{ display: "flex", alignItems: "center", gap: 10 }}
+              >
+                <div
+                  style={{
+                    width: 100,
+                    fontSize: 12,
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {c}
+                </div>
                 <div
                   style={{
                     flex: 1,
@@ -3832,7 +3942,8 @@ function WinLossInsights({ lostDeals, wonCount }: { lostDeals: DealLite[]; wonCo
         </div>
       ) : (
         <p style={{ margin: 0, fontSize: 13, color: "var(--text-tertiary)" }}>
-          Tap "Categorise with AI" to group reasons across {lostDeals.length} lost deal
+          Tap "Categorise with AI" to group reasons across {lostDeals.length}{" "}
+          lost deal
           {lostDeals.length === 1 ? "" : "s"}.
         </p>
       )}

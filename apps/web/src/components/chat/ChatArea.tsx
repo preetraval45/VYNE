@@ -96,9 +96,7 @@ export function ChatArea({
   // NOTE: must NOT create a new array in the selector (`?? []`), that
   // breaks Zustand's referential equality and triggers infinite renders.
   // Select the underlying value, default to a stable EMPTY_PERSISTED below.
-  const persistedRaw = useSentMessagesStore(
-    (s) => s.byChannel[channelId],
-  );
+  const persistedRaw = useSentMessagesStore((s) => s.byChannel[channelId]);
   const persistedForChannel = persistedRaw ?? EMPTY_PERSISTED;
 
   // Close call menu on outside click
@@ -169,7 +167,9 @@ export function ChatArea({
       if (action.kind === "notify") {
         pushNotification({
           module: "chat",
-          type: "system",
+          // PH-F typecheck fix — "system" isn't in NotificationType.
+          // Chat workflow alerts surface as "alert"-class notifications.
+          type: "alert",
           title: action.notifyTitle ?? `Chat workflow: ${rule.name}`,
           body:
             action.notifyBody ??
@@ -225,7 +225,9 @@ export function ChatArea({
           .join(" ");
     addContact({
       name: guessName,
-      email: isEmail ? arg : `${guessName.toLowerCase().replace(/\s+/g, ".")}@unknown.com`,
+      email: isEmail
+        ? arg
+        : `${guessName.toLowerCase().replace(/\s+/g, ".")}@unknown.com`,
       phone: "",
       company: "Unknown",
       accountId: "",
@@ -383,7 +385,10 @@ export function ChatArea({
                   loading: false,
                   apiResult: {
                     success: true,
-                    data: { answer: data.answer ?? "", citations: data.citations ?? [] },
+                    data: {
+                      answer: data.answer ?? "",
+                      citations: data.citations ?? [],
+                    },
                     message: data.answer ?? "Vyne AI didn't reply.",
                   },
                 }
@@ -446,7 +451,10 @@ export function ChatArea({
         return;
       }
       const stepLines = inst.steps
-        .map((s, i) => `${i + 1}. [ ] ${s.title}${s.detail ? ` _(${s.detail})_` : ""}`)
+        .map(
+          (s, i) =>
+            `${i + 1}. [ ] ${s.title}${s.detail ? ` _(${s.detail})_` : ""}`,
+        )
         .join("\n");
       sendMessage(
         `${tpl.emoji} **${tpl.name}** — workflow started\n${tpl.description}\n\n${stepLines}\n\n_View + check off steps in the workflow drawer (coming soon — for now, edit this message to update)._`,
@@ -562,9 +570,8 @@ export function ChatArea({
   // and posts the AI answer as a real message visible to everyone.
   useEffect(() => {
     function onShare(e: Event) {
-      const detail = (
-        e as CustomEvent<{ question: string; answer: string }>
-      ).detail;
+      const detail = (e as CustomEvent<{ question: string; answer: string }>)
+        .detail;
       if (!detail) return;
       sendMessage(
         `🤖 **Vyne AI** (asked: _${detail.question}_)\n\n${detail.answer}`,
@@ -580,11 +587,7 @@ export function ChatArea({
     function isTyping(target: EventTarget | null): boolean {
       if (!(target instanceof HTMLElement)) return false;
       const tag = target.tagName;
-      return (
-        tag === "INPUT" ||
-        tag === "TEXTAREA" ||
-        target.isContentEditable
-      );
+      return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
     }
     function onKey(e: KeyboardEvent) {
       if (isTyping(e.target)) return;
@@ -715,7 +718,15 @@ export function ChatArea({
               )}
             </div>
           )}
-          <div data-chat-actions style={{ marginLeft: "auto", display: "flex", gap: 4, alignItems: "center" }}>
+          <div
+            data-chat-actions
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+            }}
+          >
             {/* 6.1 — One-tap huddle start. Mints a LiveKit token for
                 this channel + spins up the persistent dock. */}
             {channelId && (
@@ -827,7 +838,9 @@ export function ChatArea({
                       setCallMenuOpen(false);
                       startCall(channelId, channelName, "video");
                     }}
-                    style={menuItemStyle("var(--vyne-accent, var(--vyne-purple))")}
+                    style={menuItemStyle(
+                      "var(--vyne-accent, var(--vyne-purple))",
+                    )}
                   >
                     <span
                       style={{
@@ -884,7 +897,8 @@ export function ChatArea({
                         width: 28,
                         height: 28,
                         borderRadius: 7,
-                        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
+                        background:
+                          "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
                         color: "var(--vyne-accent, #06B6D4)",
                         display: "flex",
                         alignItems: "center",
@@ -930,7 +944,9 @@ export function ChatArea({
                   ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
                   : "transparent",
                 cursor: "pointer",
-                color: summaryOpen ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
+                color: summaryOpen
+                  ? "var(--vyne-accent, #06B6D4)"
+                  : "var(--text-tertiary)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
@@ -1145,14 +1161,18 @@ export function ChatArea({
                       width: 36,
                       height: 36,
                       borderRadius: "50%",
-                      background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                      background:
+                        "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
                     }}
                   >
-                    <Zap size={16} style={{ color: "var(--vyne-accent, #06B6D4)" }} />
+                    <Zap
+                      size={16}
+                      style={{ color: "var(--vyne-accent, #06B6D4)" }}
+                    />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div

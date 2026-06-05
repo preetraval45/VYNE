@@ -1493,3 +1493,592 @@ Give me the improved version of every file that needs changes.
 Save this file. Use one prompt per Claude conversation for best results.
 Each prompt is designed to produce complete, production-quality code.
 Version 1.0 — March 2026
+
+---
+
+## PHASE 12 — PRODUCTION HARDENING (PAID-LAUNCH READINESS)
+
+> **Purpose.** These ten prompts close the gap between "live demo at vyne.vercel.app" and "B2B SaaS that can charge a credit card." Run them in the order at the bottom of this section — the earlier prompts unblock the later ones (e.g. real Postgres persistence must land before integration tests are meaningful).
+>
+> **Read first.** [VYNE MASTER PLAN.md → 🛡️ PAID-LAUNCH READINESS section](./VYNE%20MASTER%20PLAN.md) holds the matching task breakdown with acceptance criteria, time estimates, and dependencies. Keep the two documents in sync when scope changes.
+
+---
+
+### Prompt PH-A — Postgres-back every Zustand store (P0 — biggest blocker)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Make user data follow the user across devices. Today only `User` + a handful of mirror routes hit Postgres; CRM deals, Ops products/orders/suppliers/BOMs/work-orders, Finance journal entries, Expenses, Invoicing (customers/invoices/credit-notes/payments/vendors/bills/refunds), Contacts (accounts/contacts), Projects/Tasks, Field-service jobs/technicians all live in localStorage via `persist()`. A user who signs in on a second device sees an empty workspace.
+
+TARGET FILES:
+- apps/web/prisma/schema.prisma — add tables for every entity (see list below)
+- apps/web/src/app/api/<resource>/route.ts — REST CRUD for each resource (use the existing /api/projects + /api/tasks routes as the reference)
+- apps/web/src/app/api/<resource>/[id]/route.ts — single-resource GET/PATCH/DELETE
+- apps/web/src/lib/stores/<store>.ts — add `hydrateFromServer()` to every store that doesn't have one yet; keep the localStorage `persist()` for offline cache only
+- apps/web/src/middleware.ts — make sure /api/* is authenticated (tenant scoping)
+
+ENTITIES TO MIGRATE (in priority order):
+1. CRM: Deal, DealActivity
+2. Ops: ERPProduct, ERPOrder, ERPSupplier, ERPBOM, ERPWorkOrder, ERPCategory, ERPWarehouse
+3. Finance: ERPJournalEntry, ERPJournalLine, ERPAccount
+4. Invoicing: Customer, Invoice, InvoiceLineItem, CreditNote, Payment, Vendor, Bill, BillLineItem, Refund
+5. Expenses: Expense (+ category limits via ERPSettings)
+6. Contacts: Account, Contact, ContactActivity
+7. Projects: ProjectDetail, Task, Subtask, TaskComment, TaskActivity, TaskAttachment, TeamMember (already partially done — finish the migration of subtasks/comments/activity/attachments)
+8. Field service: FieldJob, Technician
+9. HR: Employee, LeaveRequest (currently fixtures-only — promote to Postgres)
+10. Activity log: ActivityEntry (centralised cross-record feed)
+
+PATTERN PER STORE (reference: apps/web/src/lib/stores/projects.ts):
+1. Define wire-shape (matches Prisma row) — `XxxWire`
+2. `mirrorXxxCreate / Update / Delete` that POST/PATCH/DELETE `/api/xxx/:id` (fire-and-forget on success path; do NOT block the optimistic UI update)
+3. `hydrateXxxFromServer()` action — GET `/api/xxx`, set state, mark `xxxHydrated = true`. Idempotent.
+4. Replace `seedOrEmpty(MOCK_XXX)` with empty array — demo users still see fixtures because `useEffect(() => { if (shouldSeedFixtures()) setXxx(MOCK_XXX); }, [])` runs on first mount.
+5. Add `seedOrServer()` helper in seedMode.ts that picks between demo fixtures and live hydration.
+
+TENANT SCOPING:
+- Every Prisma model gets `orgId String` + `@@index([orgId])`
+- Every API route filters `where: { orgId: session.orgId }` for SELECT and includes `orgId` on INSERT
+- Add a thin `tenantGuard()` helper at apps/web/src/lib/auth/tenantGuard.ts that returns `{ userId, orgId }` from the session cookie — every /api/* route imports it
+- 401 if no session; 403 if the resource's orgId doesn't match
+
+OFFLINE QUEUE:
+- The existing apps/web/src/lib/offlineQueue.ts (IndexedDB) is good. Make sure every mirror function goes through `csrfFetch` so the interceptor catches offline cases and enqueues automatically.
+
+ACCEPTANCE CRITERIA:
+- [ ] Sign up Account A on browser X, add 5 deals, sign out
+- [ ] Open browser Y (different machine / incognito), sign in as Account A — the 5 deals appear
+- [ ] Add a 6th deal on browser Y, close it offline, come back online — deal syncs
+- [ ] Across all 10 entity domains, the test above passes
+- [ ] Demo-mode (cookie `vyne-demo=1`) still loads fixtures and never hits /api/*
+- [ ] `prisma db push --skip-generate` runs clean in the Vercel build step
+- [ ] No request goes out without a session cookie
+
+TIME ESTIMATE: 3-4 days for a solo dev. Split as: schema + migrations (4h) → CRM (3h) → Ops (6h) → Invoicing (6h) → Finance (3h) → Expenses (2h) → Contacts (3h) → Projects finish (3h) → Field service (3h) → HR (3h) → end-to-end QA across all 10 (4h).
+
+ROLLBACK: each store keeps its old `persist()` localStorage path. If a server hydrate fails, the store stays on the cached snapshot — log the error to errorReporter, show a soft "Working offline" badge, don't crash.
+
+DEPENDENCIES: none. This is the blocker every other paid-launch prompt depends on. Ship this FIRST.
+```
+
+---
+
+### Prompt PH-B — Real Sentry / observability instrumentation (P0)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: See production errors and slow requests within 60s of them happening. Today apps/web/src/lib/errorReporter.ts is Sentry-shaped but writes only to console — a paying customer hitting a 500 produces nothing actionable.
+
+TARGET FILES:
+- apps/web/package.json — add `@sentry/nextjs` (latest)
+- apps/web/sentry.client.config.ts (NEW)
+- apps/web/sentry.server.config.ts (NEW)
+- apps/web/sentry.edge.config.ts (NEW)
+- apps/web/next.config.ts — wrap with `withSentryConfig`
+- apps/web/src/lib/errorReporter.ts — replace stub with real `Sentry.captureException`, keep the same exported API so nothing else needs to change
+- apps/web/src/app/providers.tsx — wire `Sentry.init` browser side
+- apps/web/src/app/global-error.tsx (NEW) — Sentry.captureUnderscoreError pattern
+- apps/web/src/middleware.ts — add `Sentry.setTag('orgId', session.orgId)` per request
+
+ENV VARS (set in Vercel project settings):
+- SENTRY_DSN — server-side
+- NEXT_PUBLIC_SENTRY_DSN — client-side (same value, public-safe)
+- SENTRY_ORG, SENTRY_PROJECT, SENTRY_AUTH_TOKEN — for sourcemap upload at build time
+- SENTRY_RELEASE — set to `${VERCEL_GIT_COMMIT_SHA}` so each deploy gets a release
+
+WHAT TO INSTRUMENT:
+1. Uncaught exceptions on client + server (the `@sentry/nextjs` defaults cover this)
+2. Every API route — wrap handlers with `withSentry()` and tag with `route.name`
+3. Slow queries — `Sentry.startSpan({ op: 'db.prisma', name: model })` around prisma calls
+4. AI streaming — `Sentry.startSpan({ op: 'ai.chat', name: provider })` around Groq/Gemini/Claude calls; capture `usage.total_tokens` as a measurement
+5. Auth failures — `Sentry.captureMessage('auth.failure', { extra: { ip, email_hash } })` with `level: 'warning'` (never log the email itself)
+
+PERFORMANCE & SAMPLING:
+- tracesSampleRate: 0.1 (10% of requests get a full transaction)
+- replaysSessionSampleRate: 0.05, replaysOnErrorSampleRate: 1.0
+- profilesSampleRate: 0.1 (server only — Node profiler)
+- Use Sentry's `beforeSend` to scrub: cookies, authorization headers, password fields, anything matching /token|key|secret|password/i
+
+PII REDACTION:
+- Strip `req.body.password`, `req.body.token`, `Authorization` header, `vyne-token` cookie before sending
+- `denyUrls: [/\/api\/auth\/login/, /\/api\/auth\/signup/]` — these are noisy and contain secrets
+
+DASHBOARDS:
+- Create 3 Sentry dashboards: (a) Errors by route, (b) p95 latency by route, (c) AI provider costs by user
+- Alert rules: >5 errors/min on auth, >2s p95 on /api/projects, any AI 5xx
+
+ACCEPTANCE CRITERIA:
+- [ ] Force a 500 in /api/projects → Sentry shows the stack trace within 60s, tagged with orgId
+- [ ] Source-mapped stack traces show original TypeScript, not minified JS
+- [ ] No secret leaks into the Sentry event payload (verify in the Sentry "raw event" view)
+- [ ] Vercel deploy produces a Sentry release matching the commit SHA
+- [ ] Session replay captures the user click flow for the most recent error
+
+TIME ESTIMATE: 1 day. Install + wrap + scrub + dashboard configuration.
+
+DEPENDENCIES: none — can run in parallel with PH-A. Ideally land before PH-A so the migration errors show up in Sentry.
+```
+
+---
+
+### Prompt PH-C — Rate limiting on auth endpoints (P0)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Make credential-stuffing not work. Today /api/auth/login, /api/auth/signup, /api/auth/forgot-password have ZERO rate limit. Anyone can try 10k passwords per second from a single IP.
+
+TARGET FILES:
+- apps/web/src/lib/rateLimit.ts (NEW) — Upstash Redis Rest API client; sliding-window algorithm
+- apps/web/src/app/api/auth/login/route.ts — wrap with rateLimit('auth:login', 5/min, 50/hour)
+- apps/web/src/app/api/auth/signup/route.ts — wrap with rateLimit('auth:signup', 3/min, 10/day)
+- apps/web/src/app/api/auth/forgot-password/route.ts — wrap with rateLimit('auth:forgot', 3/15min)
+- apps/web/src/app/api/auth/reset-password/route.ts — wrap with rateLimit('auth:reset', 5/hour)
+- apps/web/src/middleware.ts — generic /api/* rate limit at 100 req/min/IP as backstop
+- apps/web/.env.example — document UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
+
+WHY UPSTASH:
+- Vercel functions are stateless; in-memory rate limit doesn't survive cold starts
+- Upstash Redis REST API has a free tier (10k commands/day) — enough for early traffic
+- Latency: ~10ms from Vercel edge to Upstash — acceptable for auth paths
+
+ALGORITHM (sliding window):
+- Key: `rl:${bucket}:${ip}` (sha256 of IP if you want PII-clean keys)
+- Use ZADD with score = now, ZREMRANGEBYSCORE to drop entries older than the window, ZCARD for the count
+- If count >= limit, return 429 with `Retry-After` header
+
+PER-LIMIT CONFIG:
+- login: 5/min per IP, 5/min per email_hash, 50/hour per IP
+- signup: 3/min per IP, 10/day per IP
+- forgot-password: 3/15min per email_hash (also dedup: same email within 15min returns the existing token)
+- generic /api/*: 100/min per session (or per IP if anonymous)
+
+LOCKOUT vs THROTTLE:
+- After 10 failed logins on a single email in 1 hour: temporarily lock that account for 15 min (separate Redis key `lock:${email_hash}`)
+- Surface to UI as a soft message: "Too many attempts — try again in 12 min"
+
+ACCEPTANCE CRITERIA:
+- [ ] 6 rapid login attempts from one IP → the 6th returns 429
+- [ ] 4 rapid signups from one IP → the 4th returns 429
+- [ ] Different IPs are not rate-limited together
+- [ ] On Redis outage, the limiter fails OPEN (lets traffic through) but logs a Sentry warning — never DoS yourself
+- [ ] Per-route limit overrides the generic backstop
+- [ ] 429 responses include `Retry-After: <seconds>` and a human-readable JSON body
+
+TIME ESTIMATE: 4 hours. Redis setup (30min) → rateLimit.ts (1h) → wrap 4 routes + middleware (1h) → tests + manual abuse-attempt verification (1.5h).
+
+DEPENDENCIES: PH-B (Sentry) — so Redis outages are observable. Otherwise standalone.
+```
+
+---
+
+### Prompt PH-D — MFA + real password-reset email flow (P1)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Two pieces — (1) password reset emails actually leave the building, (2) accounts can enable TOTP MFA.
+
+TARGET FILES — PASSWORD RESET:
+- apps/web/src/lib/email/index.ts (NEW) — Resend SDK wrapper (Resend has a generous free tier; SES later if you want vendor independence)
+- apps/web/src/lib/email/templates/passwordReset.tsx (NEW) — React Email template
+- apps/web/src/app/api/auth/forgot-password/route.ts — generate reset token (PostgreSQL `PasswordResetToken` table: id, userId, tokenHash (sha256), expiresAt (now + 1h), usedAt), send email with link `${BASE_URL}/reset-password?token=${raw}`
+- apps/web/src/app/api/auth/reset-password/route.ts — accept `{ token, newPassword }`, verify by hashing + checking expiresAt + usedAt is null + validatePassword, update password_hash + password_salt, mark token used, log audit entry
+- apps/web/prisma/schema.prisma — add `PasswordResetToken` model
+
+TARGET FILES — MFA (TOTP):
+- apps/web/src/lib/auth/totp.ts (NEW) — use `otpauth` package for HOTP/TOTP generation + verification
+- apps/web/src/app/api/auth/mfa/setup/route.ts — POST: generate secret, return `{ secret, otpauthUrl, qrPngBase64 }` (use `qrcode` package to render); user scans, then POSTs the first code to confirm
+- apps/web/src/app/api/auth/mfa/confirm/route.ts — verify code, persist secret to User row (encrypted at rest with `AES-256-GCM` keyed off `MFA_ENCRYPTION_KEY` env var)
+- apps/web/src/app/api/auth/mfa/disable/route.ts — requires password re-entry + valid TOTP
+- apps/web/src/app/api/auth/login/route.ts — after password verify, if `user.mfaEnabled` then return `{ mfaRequired: true, mfaSessionToken }` instead of full session; client posts the 6-digit code to /api/auth/mfa/verify with that token
+- apps/web/src/components/settings/MfaSettings.tsx (NEW) — UI to enable / disable / regenerate recovery codes
+- apps/web/src/app/(auth)/login/page.tsx — second step: show 6-digit input when `mfaRequired`
+
+ACCEPTANCE CRITERIA:
+- [ ] Forgot-password sends a real email via Resend with a working link
+- [ ] Reset token is single-use (second click on the same link returns "expired")
+- [ ] Reset token expires after 1 hour
+- [ ] Password reset path is rate-limited (3/15min, see PH-C)
+- [ ] User can enable MFA from Settings → Security
+- [ ] On login with MFA enabled, password alone returns `{ step: "mfa" }` — no full session issued
+- [ ] Recovery codes work once and only once
+- [ ] Disabling MFA requires both password AND valid TOTP
+- [ ] Stored TOTP secret is AES-256-GCM encrypted, key from env, not stored in plain text
+
+TIME ESTIMATE: 1.5 days. Password reset (4h) + TOTP MFA (6h) + UI (3h) + tests (3h).
+
+DEPENDENCIES: PH-A (need Postgres for PasswordResetToken + User.totpSecret), PH-C (rate-limit the reset endpoints).
+```
+
+---
+
+### Prompt PH-E — Stripe webhook + subscription lifecycle (P1)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Take money. Today /pricing exists but nothing happens on click. Need: real Stripe Checkout, webhook → DB sync, customer portal, dunning emails, plan-aware feature gating.
+
+TARGET FILES:
+- apps/web/package.json — add `stripe` (server SDK) and `@stripe/stripe-js` (client)
+- apps/web/src/lib/stripe/server.ts (NEW) — Stripe SDK init, `getOrCreateCustomer(userId)`
+- apps/web/src/lib/stripe/products.ts (NEW) — map plan codes → Stripe price IDs (env-driven)
+- apps/web/src/app/api/billing/checkout/route.ts — create Stripe Checkout Session for the picked plan, return URL
+- apps/web/src/app/api/billing/portal/route.ts — create Stripe Billing Portal Session (so users can update card, cancel)
+- apps/web/src/app/api/billing/webhook/route.ts — receive Stripe webhooks, verify signature, dispatch by event type (use raw body — Next.js needs `runtime = 'nodejs'` + `dynamic = 'force-dynamic'`)
+- apps/web/src/components/admin/BillingSettings.tsx — show current plan, next billing date, "Manage subscription" → portal
+- apps/web/prisma/schema.prisma — add Subscription model (orgId, stripeCustomerId, stripeSubscriptionId, plan, status, currentPeriodEnd, cancelAtPeriodEnd)
+- apps/web/src/lib/billing/planGuard.ts (NEW) — `requirePlan(['pro', 'enterprise'])` middleware for feature flags
+
+WEBHOOK EVENTS TO HANDLE:
+- `customer.subscription.created` → create Subscription row
+- `customer.subscription.updated` → patch status, plan, currentPeriodEnd
+- `customer.subscription.deleted` → mark canceled, schedule downgrade at currentPeriodEnd
+- `invoice.paid` → reset any `delinquent` flag
+- `invoice.payment_failed` → mark `delinquent: true`, fire dunning email (uses PH-D email infra)
+- `invoice.payment_action_required` → email user "action required" link to /admin/billing
+- Verify signature with `stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)`. Reject 400 on bad signature.
+
+DUNNING LADDER:
+- Day 0: first payment fail → "We couldn't charge your card" email
+- Day 3: retry — "Card still failing"
+- Day 7: final notice — "Account will downgrade in 3 days"
+- Day 10: downgrade to free tier (set Subscription.plan = 'free')
+
+PLAN GATING:
+- `planGuard.ts` exports `requirePlan(['pro', 'enterprise'])` — wraps an API route
+- Free plan: 1 user, 3 projects, 100 tasks, no AI
+- Pro: 10 users, unlimited projects, AI included
+- Enterprise: SSO, audit log export, custom retention
+
+ACCEPTANCE CRITERIA:
+- [ ] /pricing → click Upgrade → Stripe Checkout opens → use Stripe test card 4242 → redirected back to /admin/billing with Pro plan active
+- [ ] Webhook events fire and DB reflects Stripe state within 5s
+- [ ] Failed payment (4000 0000 0000 0341) triggers dunning email immediately
+- [ ] After 10 days of failed payments, plan downgrades automatically (cron-tested)
+- [ ] Webhook endpoint rejects requests with invalid signature
+- [ ] AI chat returns 402 Payment Required for free-plan accounts after 50 messages/month
+- [ ] Customer Portal works end-to-end (update card → next webhook → DB updated)
+
+TIME ESTIMATE: 2 days. Setup + price IDs (3h) + checkout (3h) + webhook (6h, including idempotency + signature verify) + dunning ladder (3h) + plan gates (3h) + tests with Stripe CLI replay (4h).
+
+DEPENDENCIES: PH-A (need Subscription table in Postgres), PH-D (email infra for dunning), PH-B (Sentry for webhook failures).
+```
+
+---
+
+### Prompt PH-F — Tests + CI gating (P1)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Stop shipping broken code. Today `pnpm typecheck` has pre-existing failures; there are zero integration tests; CI doesn't block merges on anything.
+
+TARGET FILES:
+- apps/web/package.json — add vitest, @vitest/ui, @testing-library/react, @testing-library/jest-dom, msw (for API mocking), playwright (already maybe?)
+- apps/web/vitest.config.ts (NEW)
+- apps/web/playwright.config.ts (NEW or update existing)
+- apps/web/src/**/__tests__/*.test.ts(x) — unit tests
+- apps/web/tests/integration/*.spec.ts — API integration tests against a test Postgres
+- apps/web/tests/e2e/*.spec.ts — Playwright flows
+- .github/workflows/ci.yml — gate PRs on typecheck + unit + integration + e2e
+- .github/workflows/required-checks.yml — GitHub Actions ruleset blocking merge until all green
+
+WHAT TO BUILD:
+1. Fix existing typecheck errors (from the deploy logs there are real ones in ai/chat, channels, invoicing, computer-use, pdf-parse). Wire `tsc --noEmit` into CI as a required check. No new typecheck errors may land.
+
+2. Unit tests (vitest) — coverage targets:
+   - apps/web/src/lib/dsa/* — 100% (pure data)
+   - apps/web/src/lib/dashboard/aggregations.ts — 100% (pure data)
+   - apps/web/src/lib/auth/* — 90% (security-critical)
+   - apps/web/src/lib/optimistic.ts — 100% (concurrency-critical)
+   - apps/web/src/lib/offlineQueue.ts — 100% (data-loss risk)
+   - Component snapshot/interaction tests for: GradientKpiTile, BOMFlowchart, ProjectsDashboardView
+   - Overall target: >70% line coverage, enforced in CI
+
+3. Integration tests (vitest + msw + supertest-style API harness):
+   - Spin up `pg_tmp` or testcontainers Postgres in CI
+   - Run prisma migrate, seed two orgs
+   - For each /api/* route: GET/POST/PATCH/DELETE happy path + auth-required test + tenant-isolation test (org A cannot see org B's rows)
+   - Auth flows: signup → login → forgot → reset → MFA enable → MFA verify
+
+4. E2E tests (Playwright):
+   - Critical flows only: signup → onboard → create deal → log out → log back in → deal still there
+   - Demo mode toggle on /login
+   - Stripe checkout flow (use stripe-mock or Stripe test mode)
+   - Mobile viewport regression for dashboard tab
+
+5. CI workflow:
+   - On every PR: lint → typecheck → unit tests → integration tests → e2e tests → build
+   - Block merge until all required checks pass (GitHub branch protection rules)
+   - Parallelise where possible (typecheck + unit can run in parallel)
+   - Cache pnpm store + Playwright browsers + Prisma client between runs
+   - Fail CI if test coverage drops below threshold
+
+6. Pre-commit hook (husky + lint-staged):
+   - Format changed files
+   - Run typecheck on changed files only (faster than full tsc)
+   - No bypass without `--no-verify` (which is itself discouraged)
+
+ACCEPTANCE CRITERIA:
+- [ ] `pnpm typecheck` exits 0 on main (clear the backlog)
+- [ ] Pushing a PR that breaks a test blocks merge
+- [ ] Coverage report posted to PR conversation
+- [ ] CI runs in <5 minutes on a clean cache
+- [ ] Tenant isolation test catches a deliberate `where: {}` regression
+
+TIME ESTIMATE: 1.5 days. Fix existing TS errors (3h) → vitest setup + 15 unit tests (4h) → integration harness + 30 route tests (5h) → 6 Playwright flows (3h) → CI workflow + branch protection (3h).
+
+DEPENDENCIES: PH-A (integration tests need real Postgres + tenant guard), PH-B (e2e tests instrument Sentry to verify error reporting).
+```
+
+---
+
+### Prompt PH-G — Backup / restore tested + documented (P2)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Prove that a corrupted prod DB can be restored from backup in <30 minutes with <5 min of data loss.
+
+TARGET FILES:
+- docs/runbooks/db-restore.md (NEW) — step-by-step playbook
+- apps/web/src/app/api/admin/backup/route.ts (already exists from Phase 8 — verify it actually runs)
+- apps/web/src/app/api/admin/restore/route.ts (NEW) — admin-only endpoint to load a backup file
+- .github/workflows/backup-verify.yml (NEW) — weekly job that pulls the latest backup, restores to a throwaway Neon branch, runs smoke tests
+- scripts/restore-test.sh (NEW) — local script to validate a backup snapshot
+
+WHAT TO BUILD:
+1. Inventory the current backup cron — confirm it runs, where it writes (Neon point-in-time? S3? local?), retention policy, encryption at rest
+2. If Neon: enable Point-in-Time-Restore (PITR) — 7-day window minimum, 30-day for paid
+3. Document the restore procedure step by step:
+   a. Stop new writes (set a maintenance flag in env or feature gate)
+   b. Take a final snapshot of the corrupted DB (for forensics)
+   c. Restore from the chosen point-in-time to a new database
+   d. Update DATABASE_URL in Vercel + redeploy
+   e. Verify smoke tests (login works, recent deal visible, AI chat responds)
+   f. Re-enable writes
+4. Weekly verification job (GitHub Actions on cron):
+   - Pull last week's backup
+   - Restore to ephemeral Neon branch
+   - Run `prisma migrate status` (must be clean)
+   - Run a curl-based smoke test against the restored DB
+   - Post the result to #incidents Slack channel
+   - Alert in Sentry if verification fails
+5. RPO/RTO commitments:
+   - RPO (max data loss): 5 minutes (Neon WAL + PITR)
+   - RTO (max downtime): 30 minutes (worst case: full restore from snapshot)
+   - Document these numbers in the runbook so support knows what to tell users
+6. Customer-facing trust signal: add /status page metric "Last verified restore: <date>"
+
+ACCEPTANCE CRITERIA:
+- [ ] docs/runbooks/db-restore.md exists and a non-author engineer can follow it end-to-end
+- [ ] Weekly verification job has run successfully at least 4 times
+- [ ] Smoke test catches a deliberately-broken backup (mutate a row, restore, fail the test)
+- [ ] /status page reflects last-verified-restore timestamp
+- [ ] Sentry alert fires when verification fails
+
+TIME ESTIMATE: 1 day. Mostly documentation + GitHub Actions wiring + actually running a restore manually once.
+
+DEPENDENCIES: PH-A (need a real Postgres with real data to back up).
+```
+
+---
+
+### Prompt PH-H — Legal review (privacy + terms + DPA + cookie policy) (P2)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Make the legal pages defensible. Today /privacy and /terms are templates copied from a generic SaaS — they reference data we don't collect (cookies we don't set) and don't reference data we DO collect (AI prompts, audit logs).
+
+TARGET FILES:
+- apps/web/src/app/(marketing)/privacy/page.tsx — rewrite
+- apps/web/src/app/(marketing)/terms/page.tsx — rewrite
+- apps/web/src/app/(marketing)/dpa/page.tsx (NEW) — Data Processing Addendum for B2B
+- apps/web/src/app/(marketing)/cookie-policy/page.tsx (NEW)
+- apps/web/src/app/(marketing)/security/page.tsx (NEW) — security posture page
+- apps/web/src/components/marketing/CookieBanner.tsx (NEW) — GDPR-compliant consent
+
+WHAT TO BUILD (engineering side; legal side requires a lawyer):
+1. Audit what data is actually collected:
+   - Auth: email, password hash, IP (for rate-limit), user-agent
+   - App: every CRUD action via the audit log → ActivityEntry table
+   - AI: every prompt + response + tokens (current implementation logs to errorReporter only)
+   - Analytics: none currently (consider adding privacy-respecting analytics like Plausible)
+2. Generate a data-collection inventory and link from /privacy — must list:
+   - Field name
+   - Purpose
+   - Retention period
+   - Lawful basis (GDPR Art. 6) — consent / contract / legitimate interest
+   - Third-party processors (Vercel, Neon, Resend, Stripe, Sentry, AI providers)
+3. Rewrite /privacy with these sections:
+   - What we collect
+   - Why we collect it (with lawful basis)
+   - Who we share it with (subprocessors)
+   - Retention periods
+   - User rights (access, deletion, portability, rectification)
+   - Contact for DSAR (data subject access request)
+   - International transfers (US ↔ EU — SCCs in DPA)
+4. Rewrite /terms:
+   - Acceptable use (no spam, no malware, etc.)
+   - SLA — be honest (no five-9s claim)
+   - Limitation of liability
+   - Termination (their end + ours)
+   - Data export on termination
+5. DPA template (Standard Contractual Clauses) — required for EU customers; have a lawyer review before publishing
+6. Cookie banner:
+   - Strictly necessary (vyne-token, csrf, vyne-theme) — no consent needed
+   - Functional (vyne-modules, vyne-saved-views) — opt-in
+   - Analytics — opt-in
+   - Marketing — opt-in
+   - Store consent in `localStorage['vyne-consent']` + a `Consent` Postgres row keyed by userId
+7. /security page:
+   - Encryption: TLS in transit, AES-256 at rest (Neon default), envelope-encrypted secrets (Vercel)
+   - Backups: PH-G policy
+   - Vulnerability reporting: email security@vyne.com (set up the inbox)
+   - Bug bounty: link or "not yet"
+
+ACCEPTANCE CRITERIA:
+- [ ] Privacy page lists every actual data field collected, with retention + lawful basis
+- [ ] DPA page exists, lawyer-reviewed (track who + when in a comment at the top of the file)
+- [ ] Cookie banner appears for new visitors, persists consent for 12 months, easily reopenable from footer
+- [ ] User can request deletion → /api/account/delete kicks off a 30-day grace then hard-deletes everything (PII first, audit logs anonymised at 90d)
+- [ ] /security page reflects reality, not aspirations
+
+TIME ESTIMATE: 4 hours of engineering + 1-2 weeks of legal review (out of scope for engineering). Budget $500-2000 for a lawyer to review the DPA + terms.
+
+DEPENDENCIES: PH-A (account-deletion endpoint needs to walk Postgres tables).
+```
+
+---
+
+### Prompt PH-I — SOC2 / security review preparation (P2 — only if selling to enterprise)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Get to "SOC2 Type 1 ready" — auditors can certify the controls are designed correctly. Type 2 (operating effectively for 6+ months) comes later.
+
+TARGET FILES:
+- docs/soc2/control-matrix.md (NEW) — list every SOC2 Trust Service Criterion + which Vyne control satisfies it
+- docs/soc2/access-control.md (NEW) — who has prod access, MFA enforcement, review cadence
+- docs/soc2/incident-response.md (NEW) — playbook
+- docs/soc2/vendor-management.md (NEW) — subprocessor list + SOC2 reports on file
+- docs/soc2/change-management.md (NEW) — PR review + CI gate process (links to PH-F)
+- apps/web/src/app/api/admin/audit-export/route.ts — let admins export an audit log range as CSV
+- apps/web/src/lib/auth/permissions.ts — formalise RBAC (already started in Phase 7 — finish)
+
+WHAT TO BUILD:
+1. Access control:
+   - Vercel: only owner + 1 ops engineer have prod access; both have MFA on Vercel + GitHub
+   - Neon: only owner + ops engineer have prod-DB access; SSH-key + IP allowlist
+   - All prod access reviewed quarterly (document the review process)
+2. Encryption:
+   - In transit: TLS 1.2+ everywhere (Vercel + Neon + Resend + Stripe — verify with sslyze)
+   - At rest: Neon default (AES-256), Vercel Build outputs not stored long-term
+   - Application-level: TOTP secrets encrypted (PH-D), audit log signed-and-stored
+3. Logging:
+   - Audit log: every privileged action (admin login, user invite, plan change, data export, account delete) → ActivityEntry with `actor`, `verb`, `subject`, `ip`, `userAgent`
+   - Retention: 7 years (financial-grade)
+   - Tamper-evidence: write a daily checksum chain (hash of today's entries + yesterday's checksum) → tamper-detectable
+   - Export: /api/admin/audit-export → CSV with the manifest + checksum
+4. Incident response:
+   - Defined severities: SEV1 (data breach / total outage), SEV2 (partial outage), SEV3 (degradation)
+   - On-call rotation (even for solo: pager via SMS/PagerDuty free tier)
+   - Playbook: detect → triage → contain → eradicate → recover → post-mortem
+   - 72-hour breach notification process (GDPR Art. 33)
+5. Vendor management:
+   - Inventory all subprocessors: Vercel, Neon, Resend, Stripe, Sentry, Upstash, AI providers (Groq, Anthropic, Google AI)
+   - Get a SOC2 Type 2 report from each
+   - Document Vyne's reliance + risk per vendor
+6. Change management:
+   - All code changes via PR with one approver (even solo — review your own PR after a 1h cooling-off period)
+   - PR template requires: risk assessment, rollback plan, testing notes
+   - Production changes via CI/CD only (no manual `vercel deploy` from a laptop — though we do this now, change it)
+7. Vulnerability management:
+   - Weekly `pnpm audit` in CI; fail on high/critical
+   - Snyk or Dependabot on dependency updates
+   - Annual penetration test (budget $5-15k for an external pen-test)
+
+ACCEPTANCE CRITERIA:
+- [ ] All 5 SOC2 Trust Service Criteria (Security, Availability, Confidentiality, Processing Integrity, Privacy) have a matching control documented
+- [ ] Auditor sample test: pull 5 random PRs from the last 30 days → all have an approver, a passing CI, a deploy log entry — none missing
+- [ ] Audit log export produces a CSV with valid checksum chain (verify with the included verification script)
+- [ ] Incident response playbook ran through a tabletop exercise (document the dry-run)
+
+TIME ESTIMATE: 1 week (engineering) + 3-6 months (auditor engagement). Budget $20-40k for the Type 1 audit, $30-60k for Type 2.
+
+DEPENDENCIES: PH-A (audit log needs Postgres), PH-B (incidents need to surface in Sentry), PH-F (change management needs CI gates).
+```
+
+---
+
+### Prompt PH-J — Realtime always-on (P1)
+
+```text
+[PASTE MASTER CONTEXT BLOCK HERE]
+
+GOAL: Collaboration features (presence, share links, live cursors) work in prod without a manual env-var dance. Today PresenceBubbles + ShareLinkButton silently no-op when NEXT_PUBLIC_PUSHER_KEY is unset.
+
+TARGET FILES:
+- apps/web/src/lib/realtime/index.ts — refactor: pick the right provider at runtime, expose a single `subscribe(channel, handler)` and `publish(channel, event)` API
+- apps/web/src/lib/realtime/pusher.ts — keep existing
+- apps/web/src/lib/realtime/supabase.ts — already exists from Phase 8 (with a TS error — fix)
+- apps/web/src/lib/realtime/sse.ts (NEW) — pure-Vercel fallback using Server-Sent Events from a /api/realtime/[channel] route
+- apps/web/src/components/shared/PresenceBubbles.tsx — drop the "if no key, render nothing" guard; use the always-on API
+- apps/web/src/components/shared/ShareLinkButton.tsx — same
+- apps/web/.env.example — document all three options (pusher / supabase / sse-only)
+
+WHAT TO BUILD:
+1. Provider abstraction (RealtimeProvider interface with subscribe / publish / presence methods)
+2. SSE fallback (pure Vercel):
+   - GET /api/realtime/[channel] → returns `Content-Type: text/event-stream`
+   - Connection held open via Vercel Edge runtime (limit: 30s; reconnect on close with last-event-id)
+   - In-memory pub/sub on the server (acceptable for low traffic; replace with Upstash Redis pub/sub when scaling)
+   - Auth: validate session cookie before opening the stream; tag connections with `userId + orgId`
+   - Presence: heartbeat every 15s via separate POST /api/realtime/[channel]/presence; server tracks `Set<userId>` per channel, broadcasts join/leave
+3. Provider auto-select at boot:
+   - If `NEXT_PUBLIC_PUSHER_KEY` set → Pusher
+   - Else if `NEXT_PUBLIC_SUPABASE_URL` set → Supabase Realtime
+   - Else → SSE fallback (always works on Vercel)
+4. Drop the no-op guards in PresenceBubbles + ShareLinkButton + anywhere else that does `if (!NEXT_PUBLIC_PUSHER_KEY) return null` — instead let the abstraction handle it
+5. Fix the existing `apps/web/src/lib/realtime/supabase.ts` TS error (`"broadcast" not assignable to "system"` — wrong channel-type cast)
+6. Reconnection handling: on visibility change (`document.visibilityState === 'visible'`), if the connection has been idle >30s, reconnect from the last seen event id
+
+ACCEPTANCE CRITERIA:
+- [ ] With NO env vars set, presence bubbles still update across two tabs in <500ms
+- [ ] With Pusher key set, traffic routes through Pusher
+- [ ] With Supabase URL set, traffic routes through Supabase
+- [ ] Killing the Vercel function (cold start) drops the SSE connection; client reconnects within 2s with no event loss (last-event-id replay)
+- [ ] Reverted typecheck error in supabase.ts (PH-F now passes typecheck on this file)
+- [ ] No silent no-ops anywhere in the codebase
+
+TIME ESTIMATE: 1.5 days. Abstraction (3h) + SSE fallback (5h) + auto-select logic (1h) + presence + ShareLink rewrite (3h) + Supabase TS fix (30min) + tests (3h).
+
+DEPENDENCIES: PH-F (need typecheck-clean), PH-B (realtime connection failures show in Sentry).
+```
+
+---
+
+### Final ordering
+
+Run the prompts in this order — each unblocks the next:
+
+| #   | Prompt                             | Severity             | Days                  | Week                   |
+| --- | ---------------------------------- | -------------------- | --------------------- | ---------------------- |
+| 1   | **PH-A** Postgres-back every store | P0                   | 3-4                   | 1                      |
+| 2   | **PH-B** Sentry observability      | P0                   | 1                     | 1 (parallel with PH-A) |
+| 3   | **PH-C** Auth rate limiting        | P0                   | 0.5                   | 2                      |
+| 4   | **PH-D** MFA + password reset      | P1                   | 1.5                   | 2                      |
+| 5   | **PH-F** Tests + CI gating         | P1                   | 1.5                   | 2                      |
+| 6   | **PH-E** Stripe + dunning          | P1                   | 2                     | 3                      |
+| 7   | **PH-G** Backup verification       | P2                   | 1                     | 3                      |
+| 8   | **PH-J** Realtime always-on        | P1                   | 1.5                   | 3 (parallel)           |
+| 9   | **PH-H** Legal review              | P2                   | 0.5 + 2 wks legal     | 4                      |
+| 10  | **PH-I** SOC2 prep                 | P2 (enterprise only) | 1 wk + auditor 3-6 mo | post-launch            |
+
+After PH-A → PH-G are live and verified for two weeks of clean prod traffic, the app is **paid-launch ready** for early SMB customers. Enterprise tier needs PH-I + a signed BAA/DPA per customer.

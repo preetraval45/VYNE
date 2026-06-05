@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { rateLimit, generateCsrfToken, csrfCookieAttrs } from "@/lib/api/security";
+import {
+  rateLimit,
+  generateCsrfToken,
+  csrfCookieAttrs,
+} from "@/lib/api/security";
 import {
   COOKIE_MAX_AGE_SEC,
   hashPassword,
@@ -9,9 +13,18 @@ import {
   validatePassword,
 } from "@/lib/auth/server";
 import { seedDemoWorkspace } from "@/lib/seedDemoWorkspace";
+import { randomBytes } from "node:crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// 14-byte URL-safe id, collision-resistant enough for the user table
+// without dragging in a `cuid` dependency. Output is ~19 chars base64url.
+function cryptoCuid() {
+  return randomBytes(14)
+    .toString("base64")
+    .replace(/[+/=]/g, (c) => (c === "+" ? "-" : c === "/" ? "_" : ""));
+}
 
 interface SignupBody {
   name?: string;
@@ -23,12 +36,33 @@ interface SignupBody {
 }
 
 function cookieAttrs(maxAge: number) {
-  return ["Path=/", `Max-Age=${maxAge}`, "HttpOnly", "Secure", "SameSite=Strict"].join("; ");
+  return [
+    "Path=/",
+    `Max-Age=${maxAge}`,
+    "HttpOnly",
+    "Secure",
+    "SameSite=Strict",
+  ].join("; ");
 }
 
 export async function POST(req: Request) {
-  const rl = await rateLimit({ key: "auth-signup", limit: 5, windowSec: 60, req });
+  // PH-C: 3/min per IP (master plan) and 10/day per IP via separate keys.
+  // The second key uses a long window so we don't pay a Redis lookup
+  // for the daily backstop on every minute-grained hit.
+  const rl = await rateLimit({
+    key: "auth-signup-min",
+    limit: 3,
+    windowSec: 60,
+    req,
+  });
   if (!rl.ok) return rl.response!;
+  const rlDay = await rateLimit({
+    key: "auth-signup-day",
+    limit: 10,
+    windowSec: 86400,
+    req,
+  });
+  if (!rlDay.ok) return rlDay.response!;
 
   let body: SignupBody;
   try {
@@ -49,13 +83,23 @@ export async function POST(req: Request) {
     .filter(Boolean)
     .slice(0, 30);
 
-  if (name.length < 2) return NextResponse.json({ error: "Name is required" }, { status: 400 });
+  if (name.length < 2)
+    return NextResponse.json({ error: "Name is required" }, { status: 400 });
   if (companyName.length < 2)
-    return NextResponse.json({ error: "Company name is required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Company name is required" },
+      { status: 400 },
+    );
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return NextResponse.json({ error: "Valid email required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Valid email required" },
+      { status: 400 },
+    );
   if (modules.length === 0)
-    return NextResponse.json({ error: "Pick at least one module" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Pick at least one module" },
+      { status: 400 },
+    );
 
   const pw = validatePassword(password);
   if (!pw.valid) {
@@ -67,10 +111,18 @@ export async function POST(req: Request) {
 
   const { saltHex, hash } = hashPassword(password);
 
+  // Each signup gets its own tenant. Using a fresh cuid (Prisma generates
+  // one on create) for the user id, then mirroring it into orgId so the
+  // tenant is unique-per-account by default. Multi-user orgs come later
+  // via /api/orgs/invite — invitees inherit the inviter's orgId.
+  const newUserId = `usr_${cryptoCuid()}`;
+  const newOrgId = `org_${newUserId.slice(4)}`;
   let user;
   try {
     user = await prisma.user.create({
       data: {
+        id: newUserId,
+        orgId: newOrgId,
         email,
         name,
         companyName,
@@ -126,10 +178,13 @@ export async function POST(req: Request) {
     );
   }
 
+  // Bake orgId into the token so /api/* routes can resolve tenant
+  // without a DB round-trip on every request (see tenantGuard.ts).
   const token = signSessionToken({
     uid: user.id,
     email: user.email,
     role: user.role,
+    orgId: user.orgId,
   });
   const csrf = generateCsrfToken();
 

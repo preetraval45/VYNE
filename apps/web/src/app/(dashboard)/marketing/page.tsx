@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Megaphone, Plus, Mail, BarChart3 } from "lucide-react";
+import { ProjectsDashboardView } from "@/components/projects/ProjectsDashboardView";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { SubjectLineGenerator } from "@/components/marketing/SubjectLineGenerator";
 import { UTMBuilder } from "@/components/marketing/UTMBuilder";
@@ -10,7 +12,14 @@ import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { FunnelCard } from "@/components/marketing/FunnelCard";
 
 // ─── Types ─────────────────────────────────────────────────────────
-type MarketingTab = "campaigns" | "email" | "social" | "landing" | "analytics" | "tools";
+type MarketingTab =
+  | "dashboard"
+  | "campaigns"
+  | "email"
+  | "social"
+  | "landing"
+  | "analytics"
+  | "tools";
 type CampaignChannel = "Email" | "Social" | "PPC" | "Content";
 type CampaignStatus = "Draft" | "Active" | "Paused" | "Completed";
 type EmailStatus = "Sent" | "Scheduled" | "Draft";
@@ -409,7 +418,9 @@ function TabBtn({
         fontSize: 12,
         fontWeight: 500,
         background: "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-secondary)",
         borderBottom: active
           ? "2px solid var(--vyne-accent, var(--vyne-purple))"
           : "2px solid transparent",
@@ -1223,7 +1234,9 @@ function SocialMediaTab() {
                 label={p.platform}
                 value={p.followers}
                 max={Math.max(...MOCK_SOCIAL.map((s) => s.followers))}
-                color={platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)"}
+                color={
+                  platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)"
+                }
               />
             ))}
           </div>
@@ -1243,7 +1256,8 @@ function SocialMediaTab() {
               segments={MOCK_SOCIAL.map((p) => ({
                 label: p.platform,
                 value: p.impressions,
-                color: platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)",
+                color:
+                  platformColors[p.platform] ?? "var(--vyne-accent, #06B6D4)",
               }))}
               size={100}
             />
@@ -1512,10 +1526,18 @@ function AnalyticsTab() {
       <FunnelCard
         subtitle="Visitors → MQL → SQL → Opportunity → Closed Won"
         stages={[
-          { id: "visitors", label: "Site visitors", count: Math.round(totalLeads * 28) },
+          {
+            id: "visitors",
+            label: "Site visitors",
+            count: Math.round(totalLeads * 28),
+          },
           { id: "mql", label: "MQL", count: totalLeads },
           { id: "sql", label: "SQL", count: Math.round(totalLeads * 0.42) },
-          { id: "opp", label: "Opportunity", count: Math.round(totalLeads * 0.18) },
+          {
+            id: "opp",
+            label: "Opportunity",
+            count: Math.round(totalLeads * 0.18),
+          },
           {
             id: "won",
             label: "Closed Won",
@@ -1582,7 +1604,9 @@ function AnalyticsTab() {
                 label={cp.channel}
                 value={cp.leads}
                 max={Math.max(...channelPerf.map((x) => x.leads))}
-                color={channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)"}
+                color={
+                  channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)"
+                }
               />
             ))}
           </div>
@@ -1602,7 +1626,8 @@ function AnalyticsTab() {
               segments={channelPerf.map((cp) => ({
                 label: cp.channel,
                 value: cp.spent,
-                color: channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)",
+                color:
+                  channelColors[cp.channel] ?? "var(--vyne-accent, #06B6D4)",
               }))}
               size={90}
             />
@@ -1685,9 +1710,35 @@ function AnalyticsTab() {
 // ─── Main Page ─────────────────────────────────────────────────────
 // ═══════════════════════════════════════════════════════════════════
 export default function MarketingPage() {
+  return (
+    <Suspense fallback={null}>
+      <MarketingPageInner />
+    </Suspense>
+  );
+}
+
+function MarketingPageInner() {
   const [tab, setTab] = useState<MarketingTab>("campaigns");
 
+  // Honour ?view=dashboard from sidebar.
+  const searchParams = useSearchParams();
+  const urlView = searchParams.get("view");
+  useEffect(() => {
+    if (
+      urlView === "dashboard" ||
+      urlView === "campaigns" ||
+      urlView === "email" ||
+      urlView === "social" ||
+      urlView === "landing" ||
+      urlView === "analytics" ||
+      urlView === "tools"
+    ) {
+      setTab(urlView);
+    }
+  }, [urlView]);
+
   const tabs: { key: MarketingTab; label: string }[] = [
+    { key: "dashboard", label: "Dashboard" },
     { key: "campaigns", label: "Campaigns" },
     { key: "email", label: "Email Marketing" },
     { key: "social", label: "Social Media" },
@@ -1696,15 +1747,20 @@ export default function MarketingPage() {
     { key: "tools", label: "Tools" },
   ];
 
-  const activeCampaigns = MOCK_CAMPAIGNS.filter((c) => c.status === "Active").length;
+  const activeCampaigns = MOCK_CAMPAIGNS.filter(
+    (c) => c.status === "Active",
+  ).length;
   const totalBudget = MOCK_CAMPAIGNS.reduce((s, c) => s + c.budget, 0);
   const totalLeads = MOCK_CAMPAIGNS.reduce((s, c) => s + c.leadsGenerated, 0);
-  const avgRoi = MOCK_CAMPAIGNS.length > 0
-    ? Math.round(
-        MOCK_CAMPAIGNS.filter((c) => c.roi > 0).reduce((s, c) => s + c.roi, 0) /
-          Math.max(1, MOCK_CAMPAIGNS.filter((c) => c.roi > 0).length),
-      )
-    : 0;
+  const avgRoi =
+    MOCK_CAMPAIGNS.length > 0
+      ? Math.round(
+          MOCK_CAMPAIGNS.filter((c) => c.roi > 0).reduce(
+            (s, c) => s + c.roi,
+            0,
+          ) / Math.max(1, MOCK_CAMPAIGNS.filter((c) => c.roi > 0).length),
+        )
+      : 0;
 
   useRegisterCommands("marketing", [
     {
@@ -1743,9 +1799,14 @@ export default function MarketingPage() {
         <div className="flex items-center gap-3">
           <div
             className="p-1.5 rounded-lg"
-            style={{ background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" }}
+            style={{
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)",
+            }}
           >
-            <Megaphone size={18} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+            <Megaphone
+              size={18}
+              style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+            />
           </div>
           <div>
             <h1
@@ -1764,7 +1825,11 @@ export default function MarketingPage() {
       <PageDashboard
         storageKey="marketing"
         kpis={[
-          { label: "Active campaigns", value: activeCampaigns.toString(), hint: `${MOCK_CAMPAIGNS.length} total` },
+          {
+            label: "Active campaigns",
+            value: activeCampaigns.toString(),
+            hint: `${MOCK_CAMPAIGNS.length} total`,
+          },
           { label: "Leads generated", value: totalLeads.toLocaleString() },
           { label: "Total budget", value: `$${totalBudget.toLocaleString()}` },
           { label: "Avg ROI", value: `${avgRoi}%` },
@@ -1793,14 +1858,28 @@ export default function MarketingPage() {
       </div>
 
       {/* ─── Content ────────────────────────────────── */}
-      <div className="flex-1 overflow-auto content-scroll px-6 py-6">
+      <div
+        className={
+          tab === "dashboard"
+            ? "flex-1 overflow-auto content-scroll"
+            : "flex-1 overflow-auto content-scroll px-6 py-6"
+        }
+      >
+        {tab === "dashboard" && <ProjectsDashboardView />}
         {tab === "campaigns" && <CampaignsTab />}
         {tab === "email" && <EmailMarketingTab />}
         {tab === "social" && <SocialMediaTab />}
         {tab === "landing" && <LandingPagesTab />}
         {tab === "analytics" && <AnalyticsTab />}
         {tab === "tools" && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 760 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 16,
+              maxWidth: 760,
+            }}
+          >
             <SubjectLineGenerator />
             <UTMBuilder />
           </div>
