@@ -97,12 +97,12 @@ export function memoize<A, R>(
  * Memoize a multi-arg pure function. Args are joined with a `|`
  * separator into a single string key, so primitive args only.
  */
-export function memoizeMany<R>(
-  fn: (...args: (string | number | boolean)[]) => R,
+export function memoizeMany<A extends (string | number | boolean)[], R>(
+  fn: (...args: A) => R,
   maxEntries = 100,
-): (...args: (string | number | boolean)[]) => R {
+): (...args: A) => R {
   const cache = new LRU<string, R>(maxEntries);
-  return (...args: (string | number | boolean)[]): R => {
+  return (...args: A): R => {
     const key = args.join("|");
     const cached = cache.get(key);
     if (cached !== undefined) return cached;

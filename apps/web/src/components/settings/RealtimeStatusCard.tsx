@@ -26,7 +26,9 @@ import {
 type Status = "idle" | "sending" | "received" | "timeout" | "failed";
 
 export function RealtimeStatusCard() {
-  const [provider, setProvider] = useState<"pusher" | "supabase">("pusher");
+  const [provider, setProvider] = useState<"pusher" | "supabase" | "sse">(
+    "pusher",
+  );
   const [enabled, setEnabled] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [latency, setLatency] = useState<number | null>(null);
@@ -221,8 +223,8 @@ export function RealtimeStatusCard() {
                 Set <code>NEXT_PUBLIC_PUSHER_KEY</code>,{" "}
                 <code>PUSHER_APP_ID</code>, <code>PUSHER_KEY</code>,{" "}
                 <code>PUSHER_SECRET</code>, and <code>PUSHER_CLUSTER</code> in
-                Vercel project settings, then redeploy. The bind helpers
-                no-op silently without these so demo workspaces keep working.
+                Vercel project settings, then redeploy. The bind helpers no-op
+                silently without these so demo workspaces keep working.
               </span>
             ) : (
               <span>

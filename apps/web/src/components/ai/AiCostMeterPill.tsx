@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Coins, ChevronDown, X } from "lucide-react";
 import { useAiCostMeter } from "@/lib/stores/aiCostMeter";
 
@@ -25,10 +25,42 @@ function fmtTokens(n: number): string {
 }
 
 export function AiCostMeterPill() {
+  // Select the raw events array only. Deriving today/month totals must
+  // happen in useMemo, NOT inside the selector — totalsToday()/
+  // totalsThisMonth() allocate a fresh {tokens,usd} object each call,
+  // which makes Zustand's snapshot always "change" and triggers an
+  // infinite render loop (React error #185). See feedback_zustand_selectors.
   const events = useAiCostMeter((s) => s.events);
-  const today = useAiCostMeter((s) => s.totalsToday());
-  const month = useAiCostMeter((s) => s.totalsThisMonth());
   const clear = useAiCostMeter((s) => s.clear);
+  const { today, month } = useMemo(() => {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const dayStart = todayStart.getTime();
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monStart = monthStart.getTime();
+    let dayTokens = 0,
+      dayUsd = 0,
+      monTokens = 0,
+      monUsd = 0;
+    for (const e of events) {
+      const t = new Date(e.ts).getTime();
+      const tok = e.inputTokens + e.outputTokens;
+      if (t >= dayStart) {
+        dayTokens += tok;
+        dayUsd += e.costUsd;
+      }
+      if (t >= monStart) {
+        monTokens += tok;
+        monUsd += e.costUsd;
+      }
+    }
+    return {
+      today: { tokens: dayTokens, usd: dayUsd },
+      month: { tokens: monTokens, usd: monUsd },
+    };
+  }, [events]);
   const [open, setOpen] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +84,10 @@ export function AiCostMeterPill() {
   if (events.length === 0) return null;
 
   // Per-model breakdown for the popover.
-  const byModel = new Map<string, { tokens: number; usd: number; calls: number }>();
+  const byModel = new Map<
+    string,
+    { tokens: number; usd: number; calls: number }
+  >();
   for (const e of events) {
     const cur = byModel.get(e.model) ?? { tokens: 0, usd: 0, calls: 0 };
     cur.tokens += e.inputTokens + e.outputTokens;
@@ -85,7 +120,10 @@ export function AiCostMeterPill() {
           cursor: "pointer",
         }}
       >
-        <Coins size={11} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+        <Coins
+          size={11}
+          style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+        />
         {fmtUsd(today.usd)} today
         <span style={{ color: "var(--text-tertiary)", fontWeight: 500 }}>
           · {fmtUsd(month.usd)} MTD
@@ -234,7 +272,15 @@ export function AiCostMeterPill() {
   );
 }
 
-function Tile({ label, tokens, usd }: { label: string; tokens: number; usd: number }) {
+function Tile({
+  label,
+  tokens,
+  usd,
+}: {
+  label: string;
+  tokens: number;
+  usd: number;
+}) {
   return (
     <div
       style={{

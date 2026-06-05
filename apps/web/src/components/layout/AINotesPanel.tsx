@@ -55,7 +55,16 @@ export function AINotesPanel({ onClose }: AINotesPanelProps) {
   const isTranscribing = useCallStore((s) => s.isTranscribing);
   const toggleTranscription = useCallStore((s) => s.toggleTranscription);
   const toggleActionItem = useCallStore((s) => s.toggleActionItem);
-  const callStartTime = useCallStore((s) => Date.now() - s.durationSec * 1000);
+  // Derive the absolute call-start timestamp from durationSec. Must NOT
+  // be computed inside the selector — Date.now() makes the snapshot
+  // differ on every read, so Zustand/useSyncExternalStore never caches
+  // it and React throws "Maximum update depth exceeded" (#185). Select
+  // durationSec raw and recompute only when it ticks.
+  const durationSec = useCallStore((s) => s.durationSec);
+  const callStartTime = useMemo(
+    () => Date.now() - durationSec * 1000,
+    [durationSec],
+  );
 
   const [tab, setTab] = useState<Tab>("notes");
   const transcriptScrollRef = useRef<HTMLDivElement | null>(null);
@@ -241,7 +250,7 @@ export function AINotesPanel({ onClose }: AINotesPanelProps) {
               }}
             >
               {isTranscribing
-                ? "Listening for action items… speak phrases like \"I'll send\", \"we need to\", or \"let's schedule\"."
+                ? 'Listening for action items… speak phrases like "I\'ll send", "we need to", or "let\'s schedule".'
                 : "Action items will appear here once you start AI Notes."}
             </div>
           ) : (
@@ -356,7 +365,10 @@ function NoteBulletRow({
   readonly note: NoteBullet;
   readonly callStartTime: number;
 }) {
-  const elapsed = Math.max(0, Math.floor((note.timestamp - callStartTime) / 1000));
+  const elapsed = Math.max(
+    0,
+    Math.floor((note.timestamp - callStartTime) / 1000),
+  );
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
   return (
@@ -702,15 +714,29 @@ function buildNotes(transcript: TranscriptEntry[]): NoteBullet[] {
 function classify(sentence: string): NoteBullet["type"] | null {
   const s = sentence.toLowerCase();
   // Question
-  if (/\?$/.test(sentence) || /^(what|when|where|why|how|who|can|could|should|would|will|do|does|are|is)\b/.test(s)) {
+  if (
+    /\?$/.test(sentence) ||
+    /^(what|when|where|why|how|who|can|could|should|would|will|do|does|are|is)\b/.test(
+      s,
+    )
+  ) {
     return "question";
   }
   // Decision
-  if (/\b(decided|we will|we'll|let's go with|going with|approved|agreed|consensus|chose|picked)\b/.test(s)) {
+  if (
+    /\b(decided|we will|we'll|let's go with|going with|approved|agreed|consensus|chose|picked)\b/.test(
+      s,
+    )
+  ) {
     return "decision";
   }
   // Topic / key statement
-  if (s.length > 25 && /\b(important|critical|key|main|focus|priority|because|since|so that|the goal)\b/.test(s)) {
+  if (
+    s.length > 25 &&
+    /\b(important|critical|key|main|focus|priority|because|since|so that|the goal)\b/.test(
+      s,
+    )
+  ) {
     return "topic";
   }
   // Highlight: first sentences of speech tend to be context-setters
