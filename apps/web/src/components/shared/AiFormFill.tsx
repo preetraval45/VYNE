@@ -4,10 +4,15 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 
 // Drop-in card that lets a user describe what they want in plain
-// English, posts it to /api/ai/ask with a "fill these fields" prompt,
-// and calls back with parsed key→value pairs the host form can apply
-// via setState. Caller passes the field shape so the AI knows what to
-// extract.
+// English, posts it to /api/ai/extract (a purpose-built structured
+// extraction endpoint), and calls back with parsed key→value pairs the
+// host form can apply via setState. Caller passes the field shape so the
+// AI knows what to extract.
+//
+// NOTE: this used to POST to /api/ai/ask with the description tucked into
+// `context.userText` — but that route's serializer dropped unknown context
+// keys (so the model never saw the text) and it didn't support the app's
+// GEMINI_API_KEY, so auto-fill silently did nothing (BUG #4).
 
 interface FieldSpec {
   /** Form-state key the parsed value will be written to. */
@@ -27,7 +32,12 @@ interface Props {
   title?: string;
 }
 
-export function AiFormFill({ fields, placeholder, onApply, title = "Describe + auto-fill" }: Props) {
+export function AiFormFill({
+  fields,
+  placeholder,
+  onApply,
+  title = "Describe + auto-fill",
+}: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,33 +47,36 @@ export function AiFormFill({ fields, placeholder, onApply, title = "Describe + a
     setBusy(true);
     setError(null);
     try {
-      const fieldList = fields
-        .map((f) => `- ${f.key} (${f.label}${f.hint ? `, ${f.hint}` : ""})`)
-        .join("\n");
-      const res = await fetch("/api/ai/ask", {
+      const res = await fetch("/api/ai/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: `Extract values for these form fields from the user's text. Output ONLY a JSON object whose keys are the field names below and whose values are strings or numbers. Skip fields you can't determine.\n\nFields:\n${fieldList}`,
-          context: { userText: text },
-        }),
+        body: JSON.stringify({ text, fields }),
       });
-      const body = (await res.json()) as { answer?: string };
-      const raw = (body.answer ?? "").trim();
-      const start = raw.indexOf("{");
-      const end = raw.lastIndexOf("}");
-      if (start === -1 || end === -1) throw new Error("AI didn't return JSON");
-      const parsed = JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
-      const allowed = new Set(fields.map((f) => f.key));
-      const out: Record<string, string | number> = {};
-      for (const [k, v] of Object.entries(parsed)) {
-        if (!allowed.has(k)) continue;
-        if (typeof v === "string" || typeof v === "number") out[k] = v;
+      const body = (await res.json()) as {
+        values?: Record<string, string | number>;
+        note?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(body.error || `Auto-fill failed (HTTP ${res.status})`);
       }
-      onApply(out);
+      const values = body.values ?? {};
+      if (Object.keys(values).length === 0) {
+        // Nothing extracted — surface the reason and keep the text so the
+        // user can refine it rather than re-typing.
+        setError(
+          body.note || "Couldn't pull any field values from that description.",
+        );
+        return;
+      }
+      onApply(values);
       setText("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't parse response");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Couldn't reach the auto-fill service",
+      );
     } finally {
       setBusy(false);
     }
@@ -79,7 +92,14 @@ export function AiFormFill({ fields, placeholder, onApply, title = "Describe + a
         marginBottom: 16,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
         <span
           aria-hidden="true"
           style={{
@@ -95,7 +115,14 @@ export function AiFormFill({ fields, placeholder, onApply, title = "Describe + a
         >
           <Sparkles size={11} />
         </span>
-        <h3 style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "var(--text-primary)" }}>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 12.5,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+          }}
+        >
           {title}
         </h3>
       </div>
@@ -117,9 +144,18 @@ export function AiFormFill({ fields, placeholder, onApply, title = "Describe + a
           boxSizing: "border-box",
         }}
       />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 8,
+        }}
+      >
         {error ? (
-          <span style={{ fontSize: 11, color: "var(--status-danger)" }}>{error}</span>
+          <span style={{ fontSize: 11, color: "var(--status-danger)" }}>
+            {error}
+          </span>
         ) : (
           <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
             Fills: {fields.map((f) => f.key).join(", ")}
