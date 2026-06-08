@@ -32,6 +32,7 @@ export function DailyDigestCard() {
   const sent = useSentMessagesStore((s) => s.byChannel);
   const [data, setData] = useState<DigestResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const mounted = useMounted();
 
   function todayKey(): string {
@@ -103,15 +104,14 @@ export function DailyDigestCard() {
       );
     }
     if (out.length === 0) {
-      out.push(
-        "Quiet day — no scheduled events, light message volume",
-      );
+      out.push("Quiet day — no scheduled events, light message volume");
     }
     return out;
   }
 
   async function generateDigest(force = false) {
     setLoading(true);
+    setError(null);
     try {
       const today = todayKey();
       if (!force) {
@@ -128,11 +128,29 @@ export function DailyDigestCard() {
         body: JSON.stringify({ audience: "you", highlights }),
       });
       if (!res.ok) {
+        setError(
+          res.status === 429
+            ? "Too many requests — try again in a minute."
+            : `Couldn't generate the digest (HTTP ${res.status}).`,
+        );
         return;
       }
-      const json = (await res.json()) as DigestResponse;
-      setData(json);
-      writeCache({ date: today, data: json });
+      // The endpoint wraps the digest as { digest, provider, generatedAt }.
+      // Older shape returned the fields at the top level — accept both so a
+      // shape mismatch can never leave the card stuck on "Generating…".
+      const json = (await res.json()) as {
+        digest?: DigestResponse;
+      } & Partial<DigestResponse>;
+      const digest: DigestResponse | null =
+        json.digest ?? (json.headline ? (json as DigestResponse) : null);
+      if (!digest) {
+        setError("The digest response was empty. Try refreshing.");
+        return;
+      }
+      setData(digest);
+      writeCache({ date: today, data: digest });
+    } catch {
+      setError("Couldn't reach the digest service. Check your connection.");
     } finally {
       setLoading(false);
     }
@@ -204,13 +222,14 @@ export function DailyDigestCard() {
             {data?.headline ??
               (loading
                 ? "Generating digest…"
-                : "Click refresh to brief me on today")}
+                : (error ?? "Click refresh to brief me on today"))}
           </div>
         </div>
         <button
           type="button"
           onClick={() => generateDigest(true)}
-          disabled={loading} aria-busy={loading}
+          disabled={loading}
+          aria-busy={loading}
           aria-label="Refresh digest"
           title="Refresh"
           style={{
