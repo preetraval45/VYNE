@@ -134,20 +134,34 @@ function ProjectsPageInner() {
   const search = views.filters.search;
   const setSearch = (v: string) =>
     views.setFilters((f) => ({ ...f, search: v }));
-  const view = views.filters.view;
-  const setView = (v: ProjectView) =>
-    views.setFilters((f) => ({ ...f, view: v }));
 
-  // Honour ?view=dashboard|board|list deep-links (Sidebar's "Dashboard"
-  // sub-item under Projects passes ?view=dashboard). Only react when the
-  // URL flips — manual ViewToggle clicks shouldn't be overridden.
+  // Layout mode (board/list/dashboard) is deliberately kept OUT of the
+  // saved-views `?view=` param: useSavedViews reads `?view=` as a saved-view
+  // *ID*, so `?view=dashboard` would otherwise be mistaken for a missing view
+  // and silently fall back to the default board. We own a separate local
+  // state for the layout mode, seeded from the URL deep-link (Sidebar's
+  // "Dashboard" sub-item links `?view=dashboard`) and persisted into the
+  // saved filters only so saving a view still captures the chosen layout.
   const urlView = searchParams.get("view");
+  const validUrlView: ProjectView | null =
+    urlView === "dashboard" || urlView === "board" || urlView === "list"
+      ? urlView
+      : null;
+  const [view, setViewState] = useState<ProjectView>(
+    validUrlView ?? (views.filters.view as ProjectView) ?? "board",
+  );
+  const setView = (v: ProjectView) => {
+    setViewState(v);
+    views.setFilters((f) => ({ ...f, view: v }));
+  };
+
+  // Re-sync when the URL deep-link flips client-side (e.g. clicking the
+  // Sidebar "Dashboard" sub-item while already on /projects). Manual
+  // ViewToggle clicks update local state directly, so they aren't affected.
   useEffect(() => {
-    if (urlView === "dashboard" || urlView === "board" || urlView === "list") {
-      if (urlView !== view) setView(urlView);
-    }
+    if (validUrlView && validUrlView !== view) setViewState(validUrlView);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlView]);
+  }, [validUrlView]);
   const debouncedSearch = useDebounce(search, 300);
 
   // Pull-to-refresh (Phase 11.4) — replays the projects store hydrate
@@ -435,11 +449,9 @@ function ProjectsPageInner() {
                       const current = projects.find((p) => p.id === projectId);
                       if (!current || current.status === stage.id) return;
                       const previousStatus = current.status;
-                      useProjectsStore
-                        .getState()
-                        .updateProject(projectId, {
-                          status: stage.id as ProjectDetail["status"],
-                        });
+                      useProjectsStore.getState().updateProject(projectId, {
+                        status: stage.id as ProjectDetail["status"],
+                      });
                       useActivityStore.getState().log({
                         recordType: "project",
                         recordId: projectId,
