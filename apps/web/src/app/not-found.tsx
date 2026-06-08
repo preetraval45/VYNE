@@ -51,14 +51,18 @@ export default function NotFound() {
           lineHeight: 1.55,
         }}
       >
-        The page you&apos;re looking for doesn&apos;t exist, has been moved, or is still under construction.
+        The page you&apos;re looking for doesn&apos;t exist, has been moved, or
+        is still under construction.
       </p>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-        <Link
-          href="/"
-          className="btn-teal"
-          style={{ textDecoration: "none" }}
-        >
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <Link href="/" className="btn-teal" style={{ textDecoration: "none" }}>
           Back to home
         </Link>
         <Link
@@ -79,6 +83,71 @@ export default function NotFound() {
         >
           Open dashboard
         </Link>
+      </div>
+
+      {/* Quick links — so a 404 still offers a way into the app even though the
+          global not-found renders outside the dashboard sidebar shell. */}
+      <div
+        style={{
+          marginTop: 40,
+          width: "100%",
+          maxWidth: 520,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "var(--text-tertiary)",
+          }}
+        >
+          Jump to
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+            gap: 8,
+            width: "100%",
+          }}
+        >
+          {[
+            { label: "🏠 Home", href: "/home" },
+            { label: "📊 My Dashboard", href: "/dashboard" },
+            { label: "📈 Sales", href: "/sales" },
+            { label: "🎯 CRM", href: "/crm" },
+            { label: "💬 Chat", href: "/chat" },
+            { label: "📋 Projects", href: "/projects" },
+            { label: "🧠 Vyne AI", href: "/ai/chat" },
+            { label: "⚙️ Settings", href: "/settings" },
+          ].map((m) => (
+            <Link
+              key={m.href}
+              href={m.href}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "9px 12px",
+                borderRadius: 8,
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-secondary)",
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
+                textDecoration: "none",
+              }}
+            >
+              {m.label}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

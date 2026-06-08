@@ -59,7 +59,10 @@ function RecentDocsGrid({
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <div className="w-14 h-14 rounded-2xl bg-[#CFFAFE] flex items-center justify-center">
-          <FileText size={24} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+          <FileText
+            size={24}
+            style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+          />
         </div>
         <p className="text-[15px] font-semibold text-[var(--text-primary)]">
           No documents yet
@@ -77,10 +80,10 @@ function RecentDocsGrid({
         <button
           key={doc.id}
           onClick={() => onSelect(doc.id)}
-          className="group flex flex-col gap-2 p-4 rounded-xl border border-[var(--content-border)] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
+          className="group flex flex-col gap-2 p-4 rounded-xl border border-[var(--content-border)] bg-[var(--content-bg)] hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
         >
           <span className="text-2xl leading-none">{doc.icon ?? "📄"}</span>
-          <span className="text-[13px] font-medium text-[var(--text-primary)] line-clamp-2 group-hover:text-[#06B6D4] transition-colors">
+          <span className="text-[13px] font-semibold text-[var(--text-primary)] line-clamp-2 group-hover:text-[#06B6D4] transition-colors">
             {doc.title}
           </span>
           <span className="text-[11px] text-[var(--text-tertiary)] mt-auto">
@@ -137,7 +140,7 @@ function SearchResults({
               onSelect(doc.id);
               onClear();
             }}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[var(--content-border)] bg-white hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg border border-[var(--content-border)] bg-[var(--content-bg)] hover:border-[#06B6D4] hover:shadow-vyne-sm transition-all text-left"
           >
             <span className="text-lg">{doc.icon ?? "📄"}</span>
             <div>
@@ -269,7 +272,10 @@ export default function DocsPage() {
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-3 border-b border-[var(--content-border)]">
-          <FileText size={15} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+          <FileText
+            size={15}
+            style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+          />
           <span className="text-[13px] font-semibold text-[var(--text-primary)]">
             Docs
           </span>
@@ -283,7 +289,7 @@ export default function DocsPage() {
               className="absolute left-2.5 text-[var(--text-tertiary)]"
             />
             <input
-              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-white border border-[var(--content-border)] rounded-md outline-none focus:border-[#06B6D4] transition-colors"
+              className="w-full pl-7 pr-2 py-1.5 text-[12px] bg-[var(--content-secondary)] text-[var(--text-primary)] border border-[var(--content-border)] rounded-md outline-none focus:border-[#06B6D4] transition-colors"
               placeholder="Search docs…"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
