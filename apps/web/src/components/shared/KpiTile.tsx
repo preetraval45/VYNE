@@ -35,7 +35,11 @@ function inferTrend(sparkline?: number[], explicit?: KpiTrend): KpiTrend {
   return "flat";
 }
 
-function trendColor(trend: KpiTrend, goodWhenUp: boolean, accent: string): string {
+function trendColor(
+  trend: KpiTrend,
+  goodWhenUp: boolean,
+  accent: string,
+): string {
   if (trend === "flat") return "var(--text-tertiary)";
   const isPositive = goodWhenUp ? trend === "up" : trend === "down";
   if (isPositive) return "#0F9D58";
@@ -88,7 +92,14 @@ function Sparkline({
         </linearGradient>
       </defs>
       <path d={areaPath} fill={`url(#${gradId})`} />
-      <path d={path} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
+      <path
+        d={path}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
       <circle
         cx={points[points.length - 1][0]}
         cy={points[points.length - 1][1]}
@@ -112,7 +123,8 @@ export function KpiTile({
 }: KpiTileProps) {
   const trend = inferTrend(sparkline, trendProp);
   const color = trendColor(trend, goodWhenUp, accentColor);
-  const TrendIcon = trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
+  const TrendIcon =
+    trend === "up" ? TrendingUp : trend === "down" ? TrendingDown : Minus;
 
   const Tag = onClick ? "button" : "div";
 
@@ -136,8 +148,12 @@ export function KpiTile({
   // into "Revenue", "$120k", "+12%". Keeps role="group" on non-button tiles.
   const ariaLabel = [
     label,
-    typeof value === "string" || typeof value === "number" ? String(value) : null,
-    delta ? `${delta} ${trend === "up" ? "up" : trend === "down" ? "down" : "flat"}` : null,
+    typeof value === "string" || typeof value === "number"
+      ? String(value)
+      : null,
+    delta
+      ? `${delta} ${trend === "up" ? "up" : trend === "down" ? "down" : "flat"}`
+      : null,
     hint,
   ]
     .filter(Boolean)
@@ -152,25 +168,36 @@ export function KpiTile({
       className="vyne-kpi-tile"
       style={baseStyle}
       onMouseEnter={(e) => {
-        if (onClick) (e.currentTarget as HTMLElement).style.borderColor = "var(--text-tertiary)";
+        if (onClick)
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "var(--text-tertiary)";
       }}
       onMouseLeave={(e) => {
-        if (onClick) (e.currentTarget as HTMLElement).style.borderColor = "var(--content-border)";
+        if (onClick)
+          (e.currentTarget as HTMLElement).style.borderColor =
+            "var(--content-border)";
       }}
     >
       <div
         style={{
-          fontSize: 11,
-          fontWeight: 500,
-          color: "var(--text-tertiary)",
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
+          fontSize: 12.5,
+          fontWeight: 600,
+          color: "var(--text-secondary)",
+          textTransform: "none",
+          letterSpacing: "0.005em",
         }}
       >
         {label}
       </div>
 
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 8,
+        }}
+      >
         <div
           style={{
             fontSize: 22,
@@ -206,7 +233,15 @@ export function KpiTile({
           }}
         >
           {delta && (
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 3, color, fontWeight: 600 }}>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+                color,
+                fontWeight: 600,
+              }}
+            >
               <TrendIcon size={11} />
               {delta}
             </span>

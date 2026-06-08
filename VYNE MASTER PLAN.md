@@ -63,15 +63,15 @@ Strong, polished dark-mode aesthetic and a clear product identity — modern and
 
 ### Issues & What Can Be Improved ⚠️
 
-- [ ] **1. Redundant Navigation (biggest UX issue)** — left sidebar and home module grid show the same destinations, creating cognitive duplication. Repurpose the home grid to show personalized/recent modules only, or remove it.
-- [ ] **2. Sidebar cut off at the bottom** — on the default viewport the sidebar cuts off (Finance is last visible; HR/CRM missing) with no indicator there's more below. Add a fade-out gradient or scroll indicator.
-- [ ] **3. Unclear iconography in the top bar** — top-right icons (chat, bell, search, document, "Get app") have no labels; tooltips exist but labels or persistent tooltips would be more accessible.
-- [ ] **4. "Vyne AI Daily Digest" card is passive** — says "Click refresh to brief me on today" but the whole card is clickable with no obvious button. Add a visible "Generate Brief" CTA inside the card. _(Ties to BUG #5.)_
-- [ ] **5. "Get Started" checklist is buried** — onboarding checklist (0%) sits below the fold under the grid; new users need it most. Make it collapsible and pin it near the top, or surface via a welcome modal.
-- [ ] **6. Dashboard widget labels are very small** — all-caps tiny titles ("MRR — TOTAL", "OPEN ORDERS") are hard to scan. Use slightly larger, sentence-case labels.
-- [ ] **7. "+ New Issue" button uses jargon** — for an all-in-one OS tool, "Issue" is confusing. Rename to "+ New Task" or make it context-aware per module.
-- [ ] **8. No visual section grouping in the module grid** — 24 modules in a flat 6-column grid with no categories. Add subtle section headers (e.g. "People", "Operations", "Finance") for scannability.
-- [ ] **9. Bottom status bar is ambiguous** — user avatar + "Set status" and four tiny unlabeled icons (settings, theme, presence, logout). Enlarge/label them; give "Set status" more prominence for a team-collaboration tool.
+- [~] **1. Redundant Navigation (biggest UX issue)** — left sidebar and home module grid show the same destinations, creating cognitive duplication. _Mitigated: home grid is now grouped into named sections (#8) and already has a Customize/hide-tile feature so users can curate it into a personal launcher rather than a duplicate. Full "recent modules" auto-personalization still deferred._
+- [x] **2. Sidebar cut off at the bottom** — _Done: added a fade-out gradient at the bottom of the nav scroll area signaling more items below the fold (`Sidebar.tsx`)._
+- [x] **3. Unclear iconography in the top bar** — _Done (via tooltips): every top-bar icon (chat, bell, notes, Get app) has `title` + `aria-label`; Vyne AI and Get app also carry persistent text labels (`UnifiedTopBar.tsx`)._
+- [x] **4. "Vyne AI Daily Digest" card is passive** — _Done: added a prominent gradient "Generate brief" CTA button inside the card when no digest is loaded (`DailyDigestCard.tsx`)._
+- [x] **5. "Get Started" checklist is buried** — _Done: `WelcomeChecklist` is now pinned near the top of the home page (above the module grid), and remains collapsible (`home/page.tsx`)._
+- [x] **6. Dashboard widget labels are very small** — _Done: `KpiTile` labels bumped to 12.5px / weight 600, dropped the all-caps transform and wide tracking → sentence-case, more scannable across every page (`KpiTile.tsx`)._
+- [x] **7. "+ New Issue" button uses jargon** — _Done: renamed to "+ New Task" in the topbar, the quick-create modal heading + toast, and the home quick-actions fixture (`UnifiedTopBar.tsx`, `QuickCreateIssueModal.tsx`, `fixtures/home.ts`)._
+- [x] **8. No visual section grouping in the module grid** — _Done: module grid split into 5 labelled sections (People & Relationships, Sales & Revenue, Operations, Dev & Intelligence, Admin) with subtle headers (`home/page.tsx`)._
+- [x] **9. Bottom status bar is ambiguous** — _Done: the four footer icons (settings, theme, accent, logout) unified to consistent boxed 32×32 buttons with hover states + tooltips; "Set status" is now accent-coloured + non-italic for prominence (`Sidebar.tsx`)._
 
 ### Quick Win Priority List
 

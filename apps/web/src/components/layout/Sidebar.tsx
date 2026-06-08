@@ -2680,26 +2680,32 @@ export function Sidebar() {
               type="button"
               onClick={() => go("/settings")}
               aria-label="Open settings"
+              title="Settings"
               style={{
-                background: "transparent",
-                border: "none",
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
                 cursor: "pointer",
-                color: "var(--text-tertiary)",
-                padding: 4,
-                borderRadius: 6,
+                color: "var(--text-secondary)",
+                width: 32,
+                height: 32,
+                borderRadius: 8,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "color 0.15s",
+                transition: "color 0.15s, border-color 0.15s",
               }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--text-primary)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--text-tertiary)")
-              }
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-primary)";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--vyne-teal)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-secondary)";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--content-border)";
+              }}
             >
               <Settings size={16} />
             </button>
@@ -2820,25 +2826,30 @@ export function Sidebar() {
                 aria-label="Change accent color"
                 title="Accent color"
                 style={{
-                  background: "transparent",
-                  border: "none",
+                  background: "var(--content-secondary)",
+                  border: "1px solid var(--content-border)",
                   cursor: "pointer",
-                  color: "var(--text-tertiary)",
-                  padding: 4,
-                  borderRadius: 6,
+                  color: "var(--text-secondary)",
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  transition: "color 0.15s",
+                  transition: "color 0.15s, border-color 0.15s",
                 }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.color =
-                    "var(--vyne-accent, var(--vyne-purple))")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.color =
-                    "var(--text-tertiary)")
-                }
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-accent, var(--vyne-purple))";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--vyne-accent, var(--vyne-purple))";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-secondary)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--content-border)";
+                }}
               >
                 <svg
                   width="16"
@@ -2875,25 +2886,30 @@ export function Sidebar() {
               aria-label="Sign out"
               title="Sign out"
               style={{
-                background: "transparent",
-                border: "none",
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
                 cursor: "pointer",
-                color: "var(--text-tertiary)",
-                padding: 4,
-                borderRadius: 6,
+                color: "var(--text-secondary)",
+                width: 32,
+                height: 32,
+                borderRadius: 8,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                transition: "color 0.15s",
+                transition: "color 0.15s, border-color 0.15s",
               }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--status-danger)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.color =
-                  "var(--text-tertiary)")
-              }
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--status-danger)";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--status-danger)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-secondary)";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--content-border)";
+              }}
             >
               <LogOut size={16} />
             </button>

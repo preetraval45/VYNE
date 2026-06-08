@@ -515,6 +515,13 @@ export default function HomePage() {
           <DailyDigestCard />
         </div>
 
+        {/* Phase 15.3 / 15.7 — Welcome checklist + setup score gauge.
+            Pinned near the top (above the module grid) so new users see
+            onboarding first. Hides itself at 100% once dismissed. */}
+        <div style={{ maxWidth: 800, margin: "0 auto 16px" }}>
+          <WelcomeChecklist />
+        </div>
+
         {/* ── Module Grid (App Drawer) ────────────────── */}
         <section
           aria-label="Modules"
@@ -981,12 +988,6 @@ export default function HomePage() {
             </div>
           </section>
         )}
-
-        {/* Phase 15.3 / 15.7 — Welcome checklist + setup score gauge.
-            Hides itself once the user reaches 100% and dismisses. */}
-        <div style={{ marginBottom: 16 }}>
-          <WelcomeChecklist />
-        </div>
 
         {/* Stats grid — driven by shared <PageDashboard /> with sparklines */}
         <VisuallyHidden as="h2">Key Metrics</VisuallyHidden>
