@@ -48,6 +48,10 @@ const TYPE_LABELS: Record<EntityType, string> = {
 export function GlobalSearchInput() {
   const router = useRouter();
   const openAdvanced = useUIStore((s) => s.setGlobalSearchOpen);
+  const openCommandPalette = useUIStore((s) => s.setCommandPaletteOpen);
+  const isMac =
+    typeof navigator !== "undefined" &&
+    /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
   const [query, setQuery] = useState("");
   const debounced = useDebounce(query, 180);
   const [open, setOpen] = useState(false);
@@ -188,6 +192,28 @@ export function GlobalSearchInput() {
             fontSize: 13,
           }}
         />
+        <button
+          type="button"
+          onClick={() => openCommandPalette(true)}
+          aria-label="Open command palette"
+          title="Command palette — search everything"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            border: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+            color: "var(--text-tertiary)",
+            borderRadius: 5,
+            padding: "1px 5px",
+            fontSize: 10,
+            fontWeight: 600,
+            fontFamily: "var(--font-geist-mono, ui-monospace, monospace)",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          {isMac ? "⌘K" : "Ctrl K"}
+        </button>
         <button
           type="button"
           onClick={() => openAdvanced(true)}

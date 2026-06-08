@@ -36,13 +36,14 @@ interface ScheduleMeetingModalProps {
   readonly onScheduled?: (event: CalendarEvent) => void;
 }
 
-const TYPE_CHOICES: Array<{ value: EventType; label: string; emoji: string }> = [
-  { value: "meeting", label: "Meeting", emoji: "👥" },
-  { value: "call", label: "Call", emoji: "📞" },
-  { value: "focus", label: "Focus", emoji: "🎯" },
-  { value: "deadline", label: "Deadline", emoji: "📌" },
-  { value: "other", label: "Other", emoji: "📅" },
-];
+const TYPE_CHOICES: Array<{ value: EventType; label: string; emoji: string }> =
+  [
+    { value: "meeting", label: "Meeting", emoji: "👥" },
+    { value: "call", label: "Call", emoji: "📞" },
+    { value: "focus", label: "Focus", emoji: "🎯" },
+    { value: "deadline", label: "Deadline", emoji: "📌" },
+    { value: "other", label: "Other", emoji: "📅" },
+  ];
 
 const DURATION_PRESETS = [15, 30, 45, 60, 90];
 
@@ -54,6 +55,20 @@ function isoDate(d: Date): string {
 }
 function isoTime(d: Date): string {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+/** "Today" / "Tomorrow" / "Mon" so a suggested slot reads "Tomorrow, 08:00"
+ *  instead of a bare time with no day context. */
+function slotDayLabel(d: Date): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(d);
+  target.setHours(0, 0, 0, 0);
+  const diffDays = Math.round(
+    (target.getTime() - today.getTime()) / 86_400_000,
+  );
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+  return target.toLocaleDateString("en-US", { weekday: "short" });
 }
 function fromInputs(date: string, time: string): Date {
   const [y, m, d] = date.split("-").map(Number);
@@ -325,7 +340,10 @@ export function ScheduleMeetingModal({
           </div>
 
           {/* Attendees */}
-          <Field label={`Attendees${attendees.length ? ` (${attendees.length})` : ""}`} icon={<Users size={11} />}>
+          <Field
+            label={`Attendees${attendees.length ? ` (${attendees.length})` : ""}`}
+            icon={<Users size={11} />}
+          >
             <div
               style={{
                 display: "flex",
@@ -456,7 +474,12 @@ export function ScheduleMeetingModal({
                           </div>
                         )}
                       </span>
-                      <Plus size={11} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+                      <Plus
+                        size={11}
+                        style={{
+                          color: "var(--vyne-accent, var(--vyne-purple))",
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -507,9 +530,9 @@ export function ScheduleMeetingModal({
                       alignItems: "center",
                       gap: 5,
                     }}
-                    title={s.reason}
+                    title={`${slotDayLabel(s.start)}, ${isoTime(s.start)} — ${s.reason}`}
                   >
-                    {isoTime(s.start)}
+                    {slotDayLabel(s.start)}, {isoTime(s.start)}
                   </button>
                 ))}
               </div>
@@ -614,7 +637,11 @@ export function ScheduleMeetingModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="Agenda, links, prep work…"
-              style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+              style={{
+                ...inputStyle,
+                resize: "vertical",
+                fontFamily: "inherit",
+              }}
             />
           </Field>
         </div>
