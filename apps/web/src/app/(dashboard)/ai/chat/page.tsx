@@ -1539,6 +1539,9 @@ export default function VyneAIChatPage() {
               </section>
             )}
 
+            {/* First-run: ask the user's role to calibrate answers */}
+            {messages.length === 0 && <AiRolePrompt />}
+
             {/* Starter questions when empty */}
             {messages.length === 0 && (
               <section style={{ marginTop: 4 }}>
@@ -3288,5 +3291,119 @@ function EditableImage({ src, alt }: { src: string; alt: string }) {
         </span>
       )}
     </span>
+  );
+}
+
+// ── First-run role onboarding ──────────────────────────────────────
+// Shown once on an empty AI chat. Captures the user's role and stores it
+// as a persistent memory fact so Vyne AI calibrates examples + priorities
+// (the stream endpoint already injects `facts` into context). Self-dismisses
+// once a role fact exists.
+const AI_ROLE_OPTIONS = [
+  "Founder / CEO",
+  "Sales",
+  "Engineering",
+  "Operations",
+  "Finance",
+  "Marketing",
+  "HR",
+  "Other",
+];
+
+function AiRolePrompt() {
+  const facts = useAiMemoryStore((s) => s.facts);
+  const addFact = useAiMemoryStore((s) => s.addFact);
+  const [dismissed, setDismissed] = useState(false);
+
+  const hasRole = facts.some((f) => /^my role is/i.test(f.text.trim()));
+  if (dismissed || hasRole) return null;
+
+  const pick = (role: string) => {
+    addFact(
+      `My role is ${role}. Calibrate answers, examples, and priorities for this role.`,
+    );
+    setDismissed(true);
+  };
+
+  return (
+    <section
+      style={{
+        marginBottom: 16,
+        padding: 16,
+        borderRadius: 12,
+        border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
+        background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          marginBottom: 4,
+        }}
+      >
+        <h2
+          style={{
+            margin: 0,
+            fontSize: 14,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <Sparkles size={14} /> What&apos;s your role?
+        </h2>
+        <button
+          type="button"
+          onClick={() => setDismissed(true)}
+          aria-label="Skip"
+          style={{
+            border: "none",
+            background: "transparent",
+            color: "var(--text-tertiary)",
+            cursor: "pointer",
+            fontSize: 12,
+          }}
+        >
+          Skip
+        </button>
+      </div>
+      <p
+        style={{
+          margin: "0 0 12px",
+          fontSize: 12.5,
+          color: "var(--text-secondary)",
+          lineHeight: 1.5,
+        }}
+      >
+        I&apos;ll tailor answers, examples, and priorities to you. You can
+        change this anytime in AI memory.
+      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {AI_ROLE_OPTIONS.map((role) => (
+          <button
+            key={role}
+            type="button"
+            onClick={() => pick(role)}
+            style={{
+              padding: "7px 14px",
+              borderRadius: 999,
+              border: "1px solid var(--content-border)",
+              background: "var(--content-bg)",
+              color: "var(--text-primary)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            {role}
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

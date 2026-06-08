@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -68,10 +68,7 @@ function sanitizeActivityHtml(input: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
-  return escaped.replace(
-    /&lt;(\/?(?:strong|em|b|i))&gt;/g,
-    "<$1>",
-  );
+  return escaped.replace(/&lt;(\/?(?:strong|em|b|i))&gt;/g, "<$1>");
 }
 
 // ── Activity item ─────────────────────────────────────────────────
@@ -354,14 +351,19 @@ function HomeFocusCard() {
 
 // Deterministic seed-based 7-point sparkline so server and client render
 // the same series and the chart doesn't reshuffle on every navigation.
-function synthSparkline(seed: string, length = 14, base = 100, swing = 0.25): number[] {
+function synthSparkline(
+  seed: string,
+  length = 14,
+  base = 100,
+  swing = 0.25,
+): number[] {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   const out: number[] = [];
   let v = base;
   for (let i = 0; i < length; i++) {
     h = (h * 1664525 + 1013904223) >>> 0;
-    const r = (h / 0xffffffff) - 0.5; // -0.5..0.5
+    const r = h / 0xffffffff - 0.5; // -0.5..0.5
     v = Math.max(1, v + base * swing * r * 0.3);
     out.push(Math.round(v));
   }
@@ -437,6 +439,34 @@ export default function HomePage() {
     flexShrink: 0,
   };
 
+  // ── App-launcher customisation: hide/show tiles, persisted locally ──
+  const [customizingApps, setCustomizingApps] = useState(false);
+  const [hiddenTiles, setHiddenTiles] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      return new Set(
+        JSON.parse(
+          localStorage.getItem("vyne-home-hidden-tiles") ?? "[]",
+        ) as string[],
+      );
+    } catch {
+      return new Set();
+    }
+  });
+  const toggleTileHidden = (href: string) =>
+    setHiddenTiles((prev) => {
+      const next = new Set(prev);
+      if (next.has(href)) next.delete(href);
+      else next.add(href);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "vyne-home-hidden-tiles",
+          JSON.stringify([...next]),
+        );
+      }
+      return next;
+    });
+
   return (
     <div
       data-page="home"
@@ -494,6 +524,51 @@ export default function HomePage() {
           }}
         >
           <div
+            style={{
+              maxWidth: 800,
+              margin: "0 auto 12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--text-tertiary)",
+              }}
+            >
+              Apps
+              {hiddenTiles.size > 0 && !customizingApps && (
+                <span style={{ fontWeight: 500, textTransform: "none" }}>
+                  {" "}
+                  · {hiddenTiles.size} hidden
+                </span>
+              )}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCustomizingApps((v) => !v)}
+              style={{
+                fontSize: 11.5,
+                fontWeight: 600,
+                padding: "4px 10px",
+                borderRadius: 7,
+                border: "1px solid var(--content-border)",
+                background: customizingApps
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--content-secondary)",
+                color: customizingApps ? "#fff" : "var(--text-secondary)",
+                cursor: "pointer",
+              }}
+            >
+              {customizingApps ? "Done" : "Customize"}
+            </button>
+          </div>
+          <div
             className="home-module-grid"
             style={{
               display: "grid",
@@ -505,7 +580,12 @@ export default function HomePage() {
             }}
           >
             {[
-              { label: "Home", icon: "🏠", color: "var(--vyne-accent, #06B6D4)", href: "/home" },
+              {
+                label: "Home",
+                icon: "🏠",
+                color: "var(--vyne-accent, #06B6D4)",
+                href: "/home",
+              },
               {
                 label: "Contacts",
                 icon: "📇",
@@ -560,7 +640,12 @@ export default function HomePage() {
                 color: "var(--vyne-accent, #06B6D4)",
                 href: "/observe",
               },
-              { label: "AI", icon: "🧠", color: "var(--vyne-accent, #06B6D4)", href: "/ai" },
+              {
+                label: "AI",
+                icon: "🧠",
+                color: "var(--vyne-accent, #06B6D4)",
+                href: "/ai",
+              },
               {
                 label: "Automations",
                 icon: "⚡",
@@ -604,66 +689,107 @@ export default function HomePage() {
                 href: "/settings",
               },
               { label: "Admin", icon: "🛡️", color: "#2C3E50", href: "/admin" },
-            ].map((mod) => (
-              <button
-            type="button"
-                key={mod.href}
-                onClick={() => router.push(mod.href)}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "16px 8px",
-                  borderRadius: 12,
-                  border: "1px solid var(--content-border)",
-                  background: "var(--content-bg)",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background =
-                    `rgba(${mod.color === "var(--vyne-accent, #06B6D4)" ? "108,71,255" : "0,0,0"}, 0.04)`;
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    mod.color;
-                  (e.currentTarget as HTMLElement).style.transform =
-                    "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background =
-                    "var(--content-bg)";
-                  (e.currentTarget as HTMLElement).style.borderColor =
-                    "var(--content-border)";
-                  (e.currentTarget as HTMLElement).style.transform = "none";
-                }}
-              >
-                <div
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 10,
-                    background: `${mod.color}18`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 22,
-                  }}
-                >
-                  {mod.icon}
-                </div>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: "var(--text-primary)",
-                    textAlign: "center",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {mod.label}
-                </span>
-              </button>
-            ))}
+            ]
+              .filter((mod) => customizingApps || !hiddenTiles.has(mod.href))
+              .map((mod) => {
+                const isHidden = hiddenTiles.has(mod.href);
+                return (
+                  <button
+                    type="button"
+                    key={mod.href}
+                    onClick={() =>
+                      customizingApps
+                        ? toggleTileHidden(mod.href)
+                        : router.push(mod.href)
+                    }
+                    aria-label={
+                      customizingApps
+                        ? `${isHidden ? "Show" : "Hide"} ${mod.label}`
+                        : mod.label
+                    }
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "16px 8px",
+                      borderRadius: 12,
+                      border: "1px solid var(--content-border)",
+                      background: "var(--content-bg)",
+                      cursor: "pointer",
+                      transition: "all 0.15s",
+                      opacity: customizingApps && isHidden ? 0.4 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background =
+                        `rgba(${mod.color === "var(--vyne-accent, #06B6D4)" ? "108,71,255" : "0,0,0"}, 0.04)`;
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        mod.color;
+                      (e.currentTarget as HTMLElement).style.transform =
+                        "translateY(-2px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background =
+                        "var(--content-bg)";
+                      (e.currentTarget as HTMLElement).style.borderColor =
+                        "var(--content-border)";
+                      (e.currentTarget as HTMLElement).style.transform = "none";
+                    }}
+                  >
+                    {customizingApps && (
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          lineHeight: 1,
+                          background: isHidden
+                            ? "var(--vyne-accent, var(--vyne-purple))"
+                            : "var(--status-danger, #EF4444)",
+                          color: "#fff",
+                        }}
+                      >
+                        {isHidden ? "+" : "×"}
+                      </span>
+                    )}
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 10,
+                        background: `${mod.color}18`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 22,
+                      }}
+                    >
+                      {mod.icon}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: "var(--text-primary)",
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {mod.label}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
         </section>
 
@@ -671,129 +797,134 @@ export default function HomePage() {
         <HomeFocusCard />
 
         {false && (
-        <section
-          aria-label="Active incident alert"
-          style={{
-            background: "var(--alert-purple-bg)",
-            border: "1px solid var(--alert-purple-border)",
-            borderRadius: 12,
-            padding: "14px 16px",
-            marginBottom: 16,
-          }}
-        >
-          <div
+          <section
+            aria-label="Active incident alert"
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              marginBottom: 10,
+              background: "var(--alert-purple-bg)",
+              border: "1px solid var(--alert-purple-border)",
+              borderRadius: 12,
+              padding: "14px 16px",
+              marginBottom: 16,
             }}
           >
-            <VyneLogo variant="mark" markSize={20} />
-            <h2
+            <div
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--alert-purple-text)",
-                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 10,
               }}
             >
-              Vyne AI — Active Incident
-            </h2>
-            <span
-              aria-label="Live incident"
+              <VyneLogo variant="mark" markSize={20} />
+              <h2
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "var(--alert-purple-text)",
+                  margin: 0,
+                }}
+              >
+                Vyne AI — Active Incident
+              </h2>
+              <span
+                aria-label="Live incident"
+                style={{
+                  fontSize: 9,
+                  fontWeight: 600,
+                  color: "var(--vyne-accent, var(--vyne-purple))",
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                  padding: "2px 6px",
+                  borderRadius: 4,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                LIVE
+              </span>
+              <span
+                style={{
+                  marginLeft: "auto",
+                  fontSize: 10,
+                  color: "var(--text-tertiary)",
+                }}
+              >
+                2:14 PM · 7 min ago
+              </span>
+            </div>
+            <p
               style={{
-                fontSize: 9,
-                fontWeight: 600,
-                color: "var(--vyne-accent, var(--vyne-purple))",
-                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
-                padding: "2px 6px",
-                borderRadius: 4,
-                letterSpacing: "0.05em",
+                fontSize: 13,
+                color: "var(--text-primary)",
+                lineHeight: 1.65,
+                marginBottom: 12,
               }}
             >
-              LIVE
-            </span>
-            <span
-              style={{ marginLeft: "auto", fontSize: 10, color: "var(--text-tertiary)" }}
-            >
-              2:14 PM · 7 min ago
-            </span>
-          </div>
-          <p
-            style={{
-              fontSize: 13,
-              color: "var(--text-primary)",
-              lineHeight: 1.65,
-              marginBottom: 12,
-            }}
-          >
-            <code
-              style={{
-                background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
-                padding: "1px 5px",
-                borderRadius: 4,
-                fontSize: 12,
-              }}
-            >
-              api-service v2.4.1
-            </code>{" "}
-            deployment failed at 2:14 PM due to a missing IAM permission.{" "}
-            <strong>47 orders</strong> are currently stuck in
-            &quot;processing&quot; — estimated revenue at risk:{" "}
-            <strong style={{ color: "var(--status-danger)" }}>$12,400</strong>.
-          </p>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button
-            type="button"
-              style={{
-                background: "var(--vyne-accent, var(--vyne-purple))",
-                color: "#fff",
-                border: "none",
-                borderRadius: 8,
-                padding: "4px 10px",
-                fontSize: 11,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-              onClick={() => router.push("/observe")}
-            >
-              🔄 Execute Rollback
-            </button>
-            <button
-            type="button"
-              style={{
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--content-border)",
-                borderRadius: 8,
-                padding: "4px 10px",
-                fontSize: 11,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-              onClick={() => router.push("/observe")}
-            >
-              View Metrics
-            </button>
-            <button
-            type="button"
-              style={{
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--content-border)",
-                borderRadius: 8,
-                padding: "4px 10px",
-                fontSize: 11,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-              onClick={() => router.push("/chat")}
-            >
-              Open #alerts
-            </button>
-          </div>
-        </section>
+              <code
+                style={{
+                  background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  fontSize: 12,
+                }}
+              >
+                api-service v2.4.1
+              </code>{" "}
+              deployment failed at 2:14 PM due to a missing IAM permission.{" "}
+              <strong>47 orders</strong> are currently stuck in
+              &quot;processing&quot; — estimated revenue at risk:{" "}
+              <strong style={{ color: "var(--status-danger)" }}>$12,400</strong>
+              .
+            </p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                type="button"
+                style={{
+                  background: "var(--vyne-accent, var(--vyne-purple))",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => router.push("/observe")}
+              >
+                🔄 Execute Rollback
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--content-border)",
+                  borderRadius: 8,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => router.push("/observe")}
+              >
+                View Metrics
+              </button>
+              <button
+                type="button"
+                style={{
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--content-border)",
+                  borderRadius: 8,
+                  padding: "4px 10px",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+                onClick={() => router.push("/chat")}
+              >
+                Open #alerts
+              </button>
+            </div>
+          </section>
         )}
 
         {/* Phase 15.3 / 15.7 — Welcome checklist + setup score gauge.
@@ -1163,7 +1294,7 @@ export default function HomePage() {
               >
                 {QUICK_ACTIONS.map(({ label, route }) => (
                   <button
-            type="button"
+                    type="button"
                     key={label}
                     onClick={() => router.push(route)}
                     style={{

@@ -40,8 +40,8 @@ Findings from a paying-user walkthrough of prod. The report praised Chat, Video 
 - [x] **Cmd+K / Ctrl+K to open global search** — already bound (CommandPalette). Added a discoverable `⌘K`/`Ctrl K` badge to the inline [GlobalSearchInput](apps/web/src/components/layout/GlobalSearchInput.tsx) that opens the palette on click.
 - [x] **Screen-share gives no feedback** — already correct in code: [call store](apps/web/src/lib/stores/call.ts) `toggleScreenShare` calls the real `getDisplayMedia` and sets `error` on failure; [GlobalCallPanel](apps/web/src/components/layout/GlobalCallPanel.tsx) surfaces it via an `ErrorToast`. No change needed (the report's "no prompt" was likely a denied/blocked permission, which now shows the toast).
 - [x] **"Find a Time" should show day context** — [ScheduleMeetingModal](apps/web/src/components/calendar/ScheduleMeetingModal.tsx) slot chips now read "Today/Tomorrow/Mon, 08:00" instead of a bare time.
-- [ ] **Home app-launcher grid customisation** — pin/hide tiles (e.g. Manufacturing, Maintenance).
-- [ ] **AI first-run onboarding prompt** — ask the user's role to calibrate responses instead of a blank slate.
+- [x] **Home app-launcher grid customisation** — added a "Customize" toggle on the [home](<apps/web/src/app/(dashboard)/home/page.tsx>) app grid; in edit mode each tile shows a hide (×) / restore (+) badge, hidden tiles are dropped from the normal view and the count shows as "Apps · N hidden". Persisted to localStorage.
+- [x] **AI first-run onboarding prompt** — new `AiRolePrompt` on an empty [AI chat](<apps/web/src/app/(dashboard)/ai/chat/page.tsx>) asks "What's your role?" with quick options; the pick is saved as a persistent memory fact (`addFact`) so the stream endpoint calibrates answers. Self-dismisses once a role fact exists; "Skip" available.
 
 ---
 
