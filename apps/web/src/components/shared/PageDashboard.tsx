@@ -23,7 +23,10 @@ export interface PageDashboardProps {
   onRangeChange?: (next: TimeRange) => void;
   /** Extra controls in the top-right (e.g. filter chips) */
   toolbar?: ReactNode;
-  /** Default-collapsed state of the entire dashboard */
+  /** Default-collapsed state of the entire dashboard. Defaults to collapsed so
+   *  the Overview KPIs stay compact and the page's primary content is the most
+   *  visible thing on first load — users expand it on demand (choice persists
+   *  per storageKey). */
   defaultCollapsed?: boolean;
   /** When true, hides the dashboard entirely (e.g., empty state) */
   hidden?: boolean;
@@ -86,7 +89,7 @@ export function PageDashboard({
   range,
   onRangeChange,
   toolbar,
-  defaultCollapsed = false,
+  defaultCollapsed = true,
   hidden = false,
   loading = false,
   style,
