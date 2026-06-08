@@ -25,6 +25,19 @@ AI story front-and-center.
 **Parity bar (per module):** the "Done when" criteria in each Phase-B epic.
 **Moat bar:** cross-module AI answers grounded in live data (Phase C).
 
+**Product principles (non-negotiable):**
+
+- **Real, not mock** — every module persists to Postgres and runs _real_ workflows
+  the way Odoo/NetSuite/Salesforce/Rithmiq do: order-to-cash, procure-to-pay,
+  double-entry GL, MRP runs, leave accruals. No static demo UI in production; demo
+  seed data is clearly flagged and replaceable. State survives reload, multi-user,
+  and server round-trips (not just local Zustand).
+- **Fully customizable (the "Studio")** — every org configures its own fields,
+  objects, layouts, views, pipelines/statuses, workflows, roles/permissions,
+  reports, dashboards, number sequences, templates, and which modules show —
+  all no-code. This is a first-class pillar (§3.5), not an afterthought.
+- **AI-native** — the AI reads and can act on all of the above.
+
 ---
 
 ## 1. Baseline already shipped (context only — do not re-do)
@@ -128,6 +141,7 @@ depth, SKU detail, POs, real WOs, warehousing, supplier mgmt, barcode, multi-cur
 - [ ] **Inventory / SKU detail page** — `/ops/inventory/[sku]`: stock by location, movements ledger, reorder point, lead time, valuation (FIFO/avg), supplier links.
 - [ ] **Purchase orders** — create PO from low-stock or manually; receive against PO (full/partial); 3-way match (PO ↔ receipt ↔ bill).
 - [ ] **Manufacturing / work orders** — BOM → WO → consume components → produce finished goods; routing/operations; WIP. (Today is surface-only.)
+- [ ] **MRP (material requirements planning)** — demand (sales orders + forecasts) vs supply (on-hand + POs + WOs) → auto reorder/production suggestions using BOM explosion + lead times; master production schedule; basic capacity/load planning. This is the "MRP" the nav promises.
 - [ ] **Warehousing / locations** — multi-location stock, transfers, bin/zone; per-location reorder.
 - [ ] **Supplier management** — supplier records, price lists, lead times, performance, linked POs/bills.
 - [ ] **Barcode** — scan-to-find / scan-to-adjust (web camera + manual entry); printable SKU labels.
@@ -212,6 +226,67 @@ depth, SKU detail, POs, real WOs, warehousing, supplier mgmt, barcode, multi-cur
 
 ---
 
+## 3.5 Phase B★ — Customization & extensibility: the VYNE Studio (cross-cutting)
+
+> What makes Odoo, NetSuite, and Salesforce sticky is that every customer molds
+> the system to their business **without code**. VYNE must match this. The Studio
+> is one admin surface (`/settings?panel=studio`) backed by a metadata engine, so
+> customization applies uniformly to every module. Build the engine once; every
+> module reads it.
+
+**The metadata engine (foundation — build first):**
+
+- [ ] **Entity/field registry** — a DB-backed schema describing every object and
+      its fields (built-in + custom), so UI, validation, search, and the API are
+      all metadata-driven instead of hard-coded.
+  - Data: `EntityDef`, `FieldDef` (type, required, default, options, formula,
+    visibility, help), `RecordValue` (EAV or JSONB column) per org.
+- [ ] **Org-scoped config store** — all customization keyed by `orgId`; safe
+      defaults so a fresh org still works out of the box.
+
+**Customization surfaces (each reads the engine):**
+
+- [ ] **Custom fields** on any entity (Deals, Contacts, Products, Employees,
+      Invoices, Tasks…): text/number/date/select/multiselect/currency/boolean/
+      relation/formula; required + default + help; per-field permissions.
+- [ ] **Custom objects/modules** — admins define brand-new entities (e.g.
+      "Assets", "Contracts", "Tickets") with their own fields, list/detail pages,
+      and a sidebar entry — no code.
+- [ ] **Layout / form builder** — drag fields into sections/columns on each
+      entity's detail + create form; show/hide, reorder, conditional visibility.
+- [ ] **View builder** — per-entity saved views (list / kanban / calendar /
+      gantt / chart), column pick, filters, sort, group-by, sharing; set a
+      default view per role. (Extend the existing `useSavedViews`.)
+- [ ] **Custom pipelines & statuses** — define stages/statuses per entity
+      (deal pipelines, order states, task workflows, ticket states) with colors,
+      probabilities, and allowed transitions.
+- [ ] **No-code automation builder** — visual trigger → conditions → actions
+      (create/update record, send email/Slack, assign, webhook, AI step); the
+      single engine that also powers CRM/Ops/HR/Chat/Projects (shared with §5 D3).
+- [ ] **Report & dashboard builder** — pick entity + fields + group/aggregate +
+      chart type; save, share, schedule-email; pin to My Dashboard.
+- [ ] **Roles & permissions (RBAC)** — custom roles; per-module + per-field +
+      per-record (ownership/team) read/write/delete; record-level sharing rules.
+- [ ] **Number sequences & templates** — configurable doc numbering (INV-, SO-,
+      PO-…), branded PDF/email templates per doc type, fiscal-year reset.
+- [ ] **Org/localization config** — base currency + multi-currency, languages,
+      timezones, fiscal calendar, units of measure, tax rules.
+- [ ] **Branding / white-label** — logo, accent + full theming (accent picker
+      already exists), custom domain, login branding.
+- [ ] **Navigation config** — show/hide/reorder modules per org; rename modules;
+      per-role default landing page.
+- [ ] **Import/export & API** — CSV import with field mapping per entity (AI
+      column-map already prototyped), bulk export, and a public REST/webhook API
+      generated from the entity registry so customers extend programmatically.
+- [ ] **AI-assisted customization** — "add a 'Renewal date' field to Contracts and
+      remind me 30 days before" → the AI proposes the field + automation; admin
+      confirms. Turns the Studio into a conversation.
+- [ ] **Done when:** an admin can model their own business — new objects, fields,
+      layouts, views, pipelines, automations, roles, reports, branding — entirely
+      no-code, and every module + the AI respect it immediately.
+
+---
+
 ## 4. Phase C — The AI moat (the differentiator)
 
 > This is the only thing no incumbent can copy quickly. Invest here continuously,
@@ -243,8 +318,12 @@ depth, SKU detail, POs, real WOs, warehousing, supplier mgmt, barcode, multi-cur
 ## 6. Sequencing / milestones
 
 - [ ] **M0 — Launchable (Phase A):** no dead nav, Sales Orders + Finance Invoices real, critical UI fixed, AI front-and-center.
-- [ ] **M1 — "Real CRM + Finance" (B1, B3, B8):** order-to-cash works end to end.
-- [ ] **M2 — "Real Ops + HR" (B2, B4):** procure→make→sell→fulfill; hire→manage→offboard.
-- [ ] **M3 — "Team OS" (B5, B6, B7):** Projects/Chat/Docs are daily drivers.
-- [ ] **M4 — "AI moat" (Phase C):** proactive cross-module intelligence + agentic actions.
-- [ ] **M5 — "Platform" (Phase D):** mobile, integrations, automation, multi-tenant, billing, security.
+- [ ] **M1 — "Real persistence + Studio foundation":** move modules off local-only
+      state to Postgres; ship the metadata engine (entity/field registry, org config) + custom fields/views so B-work is built customization-ready from day one (§3.5).
+- [ ] **M2 — "Real CRM + Finance" (B1, B3, B8):** order-to-cash works end to end.
+- [ ] **M3 — "Real Ops/ERP + MRP + HR" (B2, B4):** procure→make→sell→fulfill with MRP; hire→manage→offboard.
+- [ ] **M4 — "Team OS" (B5, B6, B7):** Projects/Chat/Docs are daily drivers.
+- [ ] **M5 — "Full Studio" (rest of §3.5):** custom objects, layout/automation/report
+      builders, RBAC, branding, nav config, public API — no-code customization complete.
+- [ ] **M6 — "AI moat" (Phase C):** proactive cross-module intelligence + agentic actions.
+- [ ] **M7 — "Platform" (Phase D):** mobile, integrations marketplace, billing, security/SSO.
