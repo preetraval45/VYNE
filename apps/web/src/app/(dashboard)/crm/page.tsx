@@ -50,7 +50,7 @@ import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
 import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { useSavedViews } from "@/hooks/useSavedViews";
 
-// â”€â”€â”€ API adapter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
   if (status === "active") return "Won";
   if (status === "inactive") return "Lost";
@@ -80,7 +80,7 @@ function customerToDeal(c: ERPCustomer): Deal {
   };
 }
 
-// â”€â”€â”€ Helper Functions (no nested ternaries) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helper Functions (no nested ternaries) ───────────────────────
 function stageColor(stage: Stage): string {
   const map: Record<Stage, string> = {
     Lead: "var(--text-secondary)",
@@ -149,7 +149,7 @@ function initials(name: string): string {
     .slice(0, 2);
 }
 
-// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared UI ────────────────────────────────────────────────────
 function TabBtn({
   label,
   active,
@@ -175,7 +175,7 @@ function TabBtn({
 // keep in sync with whichever names appear on `deal.assignee` below.
 const ASSIGNEES = ["Alex", "Jamie", "Morgan", "Sam", "Taylor"] as const;
 
-// Stage â†’ semantic tone map. Keeps pill colors muted and consistent
+// Stage → semantic tone map. Keeps pill colors muted and consistent
 // instead of each stage shouting its own candy-bright hex.
 const STAGE_TONE: Record<Stage, Tone> = {
   Lead: "neutral",
@@ -194,7 +194,7 @@ function StagePill({ stage }: Readonly<{ stage: Stage }>) {
   );
 }
 
-// â”€â”€â”€ Pipeline Tab (Kanban) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Pipeline Tab (Kanban) ────────────────────────────────────────
 function PipelineTab({
   deals,
   onDealClick,
@@ -276,7 +276,7 @@ function PipelineTab({
                     gap: 4,
                   }}
                 >
-                  <span>â‰ˆ {fmt(stageWeighted)} weighted</span>
+                  <span>≈ {fmt(stageWeighted)} weighted</span>
                   {sharePct > 0 && (
                     <>
                       <span style={{ opacity: 0.4 }}>·</span>
@@ -383,7 +383,7 @@ function PipelineTab({
   );
 }
 
-// â”€â”€â”€ Deals Table Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Deals Table Tab ──────────────────────────────────────────────
 type SortKey = "company" | "value" | "stage" | "lastActivity";
 type SortDir = "asc" | "desc";
 
@@ -441,7 +441,7 @@ function DealsTableTab({
 
   function sortArrow(key: SortKey): string {
     if (sortKey !== key) return "";
-    return sortDir === "asc" ? " â†‘" : " â†“";
+    return sortDir === "asc" ? " ↑" : " ↓";
   }
 
   const thClass =
@@ -622,7 +622,7 @@ function DealsTableTab({
                         className="bg-transparent border-0 cursor-pointer p-0 text-left text-vyne-purple"
                         aria-label={`Open ${deal.company}`}
                       >
-                        â†—
+                        ↗
                       </button>
                       <EditableCell
                         value={deal.company}
@@ -660,8 +660,7 @@ function DealsTableTab({
                       label="Deal value"
                       validate={(s) => {
                         const n = Number(s);
-                        if (!Number.isFinite(n) || n < 0)
-                          return "Must be â‰¥ 0";
+                        if (!Number.isFinite(n) || n < 0) return "Must be ≥ 0";
                       }}
                       render={(v) => fmt(Number(v))}
                       style={{ fontWeight: 700 }}
@@ -753,7 +752,7 @@ function DealsTableTab({
   );
 }
 
-// â”€â”€â”€ Forecasting Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Forecasting Tab ──────────────────────────────────────────────
 function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   const totalPipeline = deals
     .filter((d) => d.stage !== "Lost")
@@ -932,7 +931,7 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   );
 }
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Page ────────────────────────────────────────────────────
 function CRMPageInner() {
   const router = useRouter();
   const deals = useCRMStore((s) => s.deals);
@@ -1050,7 +1049,7 @@ function CRMPageInner() {
     ],
   });
 
-  // â”€â”€â”€ Real KPIs computed from the deals store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Real KPIs computed from the deals store ───────────────────
   const wonDeals = deals.filter((d) => d.stage === "Won");
   const lostDeals = deals.filter((d) => d.stage === "Lost");
   const activeDeals = deals.filter(
@@ -1308,7 +1307,7 @@ export default function CRMPage() {
   );
 }
 
-// â”€â”€â”€ Slide-in detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Slide-in detail panel ────────────────────────────────────────
 
 function stageBgDetail(stage: string): string {
   const map: Record<string, string> = {

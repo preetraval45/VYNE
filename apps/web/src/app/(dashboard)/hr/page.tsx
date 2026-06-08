@@ -27,7 +27,7 @@ const MOCK_DOCS = seedOrEmpty(_MOCK_DOCS);
 
 type HRTab = "dashboard" | "employees" | "leave" | "payroll" | "orgchart";
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────
 function fmtSalary(n: number): string {
   return `$${n.toLocaleString()}`;
 }
@@ -36,7 +36,7 @@ function fmtNetPay(emp: Employee): number {
   return Math.round(emp.baseSalary / 12 - emp.deductions + emp.bonus);
 }
 
-// â”€â”€â”€ Department chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Department chip ──────────────────────────────────────────────
 function DeptChip({ dept }: Readonly<{ dept: Department }>) {
   const colors: Record<Department, { bg: string; color: string }> = {
     Engineering: {
@@ -65,7 +65,7 @@ function DeptChip({ dept }: Readonly<{ dept: Department }>) {
   );
 }
 
-// â”€â”€â”€ Status badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Status badge ─────────────────────────────────────────────────
 function StatusBadge({ emp }: Readonly<{ emp: Employee }>) {
   if (emp.status === "Active") {
     return (
@@ -115,7 +115,7 @@ function StatusBadge({ emp }: Readonly<{ emp: Employee }>) {
   );
 }
 
-// â”€â”€â”€ Avatar circle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Avatar circle ────────────────────────────────────────────────
 function Avatar({
   emp,
   size = 40,
@@ -141,7 +141,7 @@ function Avatar({
   );
 }
 
-// â”€â”€â”€ Tab button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab button ───────────────────────────────────────────────────
 function TabBtn({
   label,
   active,
@@ -172,7 +172,7 @@ function TabBtn({
   );
 }
 
-// â”€â”€â”€ Employee modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Employee modal ───────────────────────────────────────────────
 function EmployeeModal({
   emp,
   onClose,
@@ -518,7 +518,7 @@ function LeaveBalanceBar({
   );
 }
 
-// â”€â”€â”€ Employees tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Employees tab ────────────────────────────────────────────────
 function EmployeesTab() {
   const router = useRouter();
 
@@ -599,7 +599,7 @@ function EmployeesTab() {
   );
 }
 
-// â”€â”€â”€ Calendar strip helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Calendar strip helpers ───────────────────────────────────────
 function calendarCellBackground(
   day: number | null,
   hasAbsences: boolean,
@@ -614,7 +614,7 @@ function calendarCellBorder(day: number | null): string {
   return "1px solid var(--content-border)";
 }
 
-// â”€â”€â”€ Calendar strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Calendar strip ───────────────────────────────────────────────
 function CalendarStrip() {
   // May 2026: 31 days, starts on Friday (day index 5)
   const daysInMonth = 31;
@@ -718,7 +718,7 @@ function CalendarStrip() {
   );
 }
 
-// â”€â”€â”€ Leave tab helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Leave tab helpers ────────────────────────────────────────────
 function leaveRequestBackground(status: LeaveRequestStatus): string {
   if (status === "Pending") return "var(--content-secondary)";
   if (status === "Approved") return "#F0FDF4";
@@ -743,7 +743,7 @@ function resolvedStatusColor(status: LeaveRequestStatus): string {
   return "#991B1B";
 }
 
-// â”€â”€â”€ Leave tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Leave tab ────────────────────────────────────────────────────
 function LeaveTab() {
   const [requests, setRequests] = useState<LeaveRequest[]>(
     INITIAL_LEAVE_REQUESTS,
@@ -1114,7 +1114,7 @@ function LeaveTab() {
   );
 }
 
-// â”€â”€â”€ Payroll tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Payroll tab ──────────────────────────────────────────────────
 function PayrollTab() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [payrollRun, setPayrollRun] = useState(false);
@@ -1208,7 +1208,7 @@ function PayrollTab() {
               cursor: "pointer",
             }}
           >
-            {payrollRun ? "Payroll Run âœ“" : "Run Payroll — May 2026"}
+            {payrollRun ? "Payroll Run ✓" : "Run Payroll — May 2026"}
           </button>
         </div>
       </div>
@@ -1567,7 +1567,7 @@ function PayrollTab() {
   );
 }
 
-// â”€â”€â”€ Org chart node â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Org chart node ───────────────────────────────────────────────
 function OrgNode({ emp }: Readonly<{ emp: Employee }>) {
   return (
     <div
@@ -1605,7 +1605,7 @@ function OrgNode({ emp }: Readonly<{ emp: Employee }>) {
   );
 }
 
-// â”€â”€â”€ Org chart tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Org chart tab ────────────────────────────────────────────────
 function OrgChartTab() {
   const ceo = EMPLOYEES.find((e) => e.id === "e1") ?? EMPLOYEES[0];
   const reports = EMPLOYEES.filter((e) => e.reportsTo === "Preet Raval");
@@ -1723,7 +1723,7 @@ function OrgChartTab() {
   );
 }
 
-// â”€â”€â”€ Main HR page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main HR page ─────────────────────────────────────────────────
 export default function HRPage() {
   return (
     <Suspense fallback={null}>

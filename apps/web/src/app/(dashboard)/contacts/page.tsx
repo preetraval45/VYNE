@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ──────────────────────────────────────────────────
 type ContactsTab = "dashboard" | "accounts" | "contacts" | "import";
 
 const INDUSTRIES = [
@@ -76,7 +76,7 @@ const ALL_TAGS: ContactTag[] = [
 
 const OWNERS = ["Alex Rivera", "Priya Shah", "Sam Chen", "Jordan Lee"];
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ─────────────────────────────────────────────────────
 function fmtRevenue(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
@@ -113,7 +113,7 @@ function daysSinceStr(isoDate: string): string {
   return `${d} days ago`;
 }
 
-// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared UI ───────────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
@@ -316,7 +316,7 @@ function SearchInput({
   placeholder: string;
 }>) {
   // Delegates to the shared SearchBar so the look + accessibility +
-  // âŒ˜K-all escalation are consistent across module pages.
+  // ⌘K-all escalation are consistent across module pages.
   return (
     <SharedSearchBar
       value={value}
@@ -505,7 +505,7 @@ function IconBtn({
   );
 }
 
-// â”€â”€â”€ Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Confirm Dialog ──────────────────────────────────────────────
 function ConfirmDialog({
   open,
   title,
@@ -561,7 +561,7 @@ function ConfirmDialog({
   );
 }
 
-// â”€â”€â”€ Account Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Account Modal ───────────────────────────────────────────────
 function AccountModal({
   open,
   onClose,
@@ -784,7 +784,7 @@ function AccountModal({
   );
 }
 
-// â”€â”€â”€ Contact Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Contact Modal ───────────────────────────────────────────────
 function ContactModal({
   open,
   onClose,
@@ -1022,7 +1022,7 @@ function ContactModal({
   );
 }
 
-// â”€â”€â”€ Accounts Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Accounts Tab ────────────────────────────────────────────────
 function AccountsTab() {
   const router = useRouter();
   const accounts = useContactsStore((s) => s.accounts);
@@ -1378,7 +1378,7 @@ function AccountsTab() {
   );
 }
 
-// â”€â”€â”€ Contacts Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Contacts Tab ────────────────────────────────────────────────
 function ContactsTabContent() {
   const router = useRouter();
   const contacts = useContactsStore((s) => s.contacts);
@@ -1612,7 +1612,7 @@ function ContactsTabContent() {
                       sel.handleRowClick(all, contact.id, shiftKey);
                     }}
                     onArchive={() => {
-                      // Archive â‡’ tag and snapshot for undo via existing
+                      // Archive ⇒ tag and snapshot for undo via existing
                       // undoableDelete pattern. Pure UX placeholder so
                       // mobile users get the swipe-to-archive flow now;
                       // when a real `archived` flag lands we just patch
@@ -1906,7 +1906,7 @@ function ContactsTabContent() {
   );
 }
 
-// â”€â”€â”€ SwipeableContactRow (Phase 10.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── SwipeableContactRow (Phase 10.3) ─────────────────────────────
 // Drop-in replacement for the contact row that adds left/right swipe
 // gestures on touch devices. Wraps the touch handlers from
 // `useSwipeGesture` and animates a translateX on the row, plus a
@@ -1989,7 +1989,7 @@ function _swipeableContactRowUnusedRefs(_a: unknown, _b: unknown) {
 }
 void _swipeableContactRowUnusedRefs;
 
-// â”€â”€â”€ Import Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Import Tab ──────────────────────────────────────────────────
 function ImportTab() {
   const importAccounts = useContactsStore((s) => s.importAccounts);
   const importContacts = useContactsStore((s) => s.importContacts);
@@ -2533,7 +2533,7 @@ function ImportTab() {
   );
 }
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Page ───────────────────────────────────────────────────
 export default function ContactsPage() {
   return (
     <Suspense fallback={null}>
@@ -2681,7 +2681,7 @@ function ContactsPageInner() {
   );
 }
 
-// â”€â”€â”€ Slide-in detail panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Slide-in detail panels ────────────────────────────────────────
 
 const iconBtnStyle: React.CSSProperties = {
   width: 28,

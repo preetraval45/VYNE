@@ -39,7 +39,7 @@ import { PageDashboard } from "@/components/shared/PageDashboard";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────
 const CURRENCY =
   typeof Intl !== "undefined"
     ? new Intl.NumberFormat(undefined, {
@@ -84,7 +84,7 @@ function TabBtn({
   );
 }
 
-// â”€â”€â”€ Bar chart (CSS-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Bar chart (CSS-only) ─────────────────────────────────────────
 function BarChart({
   data,
 }: Readonly<{
@@ -151,7 +151,7 @@ function BarChart({
   );
 }
 
-// â”€â”€â”€ P&L tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── P&L tab ──────────────────────────────────────────────────────
 const EMPTY_MONTH = { month: "", revenue: 0, expenses: 0 };
 function PLTab() {
   // Real signups have an empty MOCK_MONTHLY (no fixtures). Guard the
@@ -469,7 +469,7 @@ function PLTab() {
   );
 }
 
-// â”€â”€â”€ Journal Entries tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Journal Entries tab ──────────────────────────────────────────
 function JournalTab() {
   const entries = useFinanceStore((s) => s.journalEntries);
   const setEntries = useFinanceStore((s) => s.setJournalEntries);
@@ -655,7 +655,7 @@ function JournalTab() {
                       color: "var(--status-danger)",
                     }}
                   >
-                    âœ•
+                    ✕
                   </button>
                 </td>
               </tr>
@@ -667,7 +667,7 @@ function JournalTab() {
   );
 }
 
-// â”€â”€â”€ Chart of Accounts tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Chart of Accounts tab ────────────────────────────────────────
 function AccountsTab() {
   const groups = ["Asset", "Liability", "Equity", "Revenue", "Expense"];
   const typeColor: Record<string, string> = {
@@ -781,7 +781,7 @@ function AccountsTab() {
   );
 }
 
-// â”€â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main page ────────────────────────────────────────────────────
 export default function FinancePage() {
   return (
     <Suspense fallback={null}>

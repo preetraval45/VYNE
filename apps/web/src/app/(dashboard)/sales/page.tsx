@@ -46,7 +46,7 @@ import { PageDashboard } from "@/components/shared/PageDashboard";
 import { usePageDashboard } from "@/hooks/usePageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ─────────────────────────────────────────────────────
 function fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
@@ -165,7 +165,7 @@ function probabilityBadgeStyle(probability: number): {
   };
 }
 
-// â”€â”€â”€ Style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Style constants ─────────────────────────────────────────────
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "8px 12px",
@@ -249,7 +249,7 @@ const dangerBtnStyle: React.CSSProperties = {
   fontWeight: 600,
 };
 
-// â”€â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared UI ───────────────────────────────────────────────────
 type SalesTab =
   | "dashboard"
   | "opportunities"
@@ -329,7 +329,7 @@ function SearchInput({
   placeholder: string;
 }>) {
   // Delegates to the shared SearchBar so all module pages get the
-  // same look + âŒ˜K-all workspace-search escalation.
+  // same look + ⌘K-all workspace-search escalation.
   return (
     <SharedSearchBar
       value={value}
@@ -623,7 +623,7 @@ function SmallBtn({
   );
 }
 
-// â”€â”€â”€ Confirm Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Confirm Dialog ──────────────────────────────────────────────
 function ConfirmDialog({
   open,
   title,
@@ -691,7 +691,7 @@ function ConfirmDialog({
   );
 }
 
-// â”€â”€â”€ Line Items Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Line Items Editor ───────────────────────────────────────────
 function LineItemsEditor({
   items,
   onChange,
@@ -811,7 +811,7 @@ function LineItemsEditor({
   );
 }
 
-// â”€â”€â”€ Deal Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Deal Modal ──────────────────────────────────────────────────
 function DealModal({
   open,
   onClose,
@@ -1058,7 +1058,7 @@ function DealModal({
   );
 }
 
-// â”€â”€â”€ Quotation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Quotation Modal ─────────────────────────────────────────────
 function QuotationModal({
   open,
   onClose,
@@ -1181,7 +1181,7 @@ function QuotationModal({
   );
 }
 
-// â”€â”€â”€ Sales Order Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sales Order Modal ───────────────────────────────────────────
 function SalesOrderModal({
   open,
   onClose,
@@ -1291,7 +1291,7 @@ function SalesOrderModal({
   );
 }
 
-// â”€â”€â”€ Product Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Product Modal ───────────────────────────────────────────────
 function ProductModal({
   open,
   onClose,
@@ -1474,7 +1474,7 @@ function ProductModal({
   );
 }
 
-// â”€â”€â”€ Opportunities Tab (Kanban) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Opportunities Tab (Kanban) ──────────────────────────────────
 function OpportunitiesTab() {
   const router = useRouter();
   const deals = useSalesStore((s) => s.deals);
@@ -2097,7 +2097,7 @@ function OpportunityDetailPanel({
   );
 }
 
-// â”€â”€â”€ Quotations Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Quotations Tab ──────────────────────────────────────────────
 function QuotationsTab() {
   const router = useRouter();
   const quotes = useSalesStore((s) => s.quotations);
@@ -2294,7 +2294,7 @@ function QuotationsTab() {
                           )}
                           {q.status === "Accepted" && (
                             <SmallBtn
-                              label="â†’ Invoice"
+                              label="→ Invoice"
                               color="#fff"
                               bg="var(--vyne-accent, var(--vyne-purple))"
                               onClick={() => {
@@ -2371,7 +2371,7 @@ function QuotationsTab() {
   );
 }
 
-// â”€â”€â”€ Sales Orders Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sales Orders Tab ────────────────────────────────────────────
 function SalesOrdersTab() {
   const router = useRouter();
   const orders = useSalesStore((s) => s.salesOrders);
@@ -2592,7 +2592,7 @@ function SalesOrdersTab() {
   );
 }
 
-// â”€â”€â”€ Products Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Products Tab ────────────────────────────────────────────────
 function ProductsTab() {
   const router = useRouter();
   const products = useSalesStore((s) => s.products);
@@ -2843,7 +2843,7 @@ function ProductsTab() {
   );
 }
 
-// â”€â”€â”€ Customers Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Customers Tab ───────────────────────────────────────────────
 function CustomersTab() {
   const customers = useSalesStore((s) => s.customers);
   const deleteCustomer = useSalesStore((s) => s.deleteCustomer);
@@ -3047,7 +3047,7 @@ function CustomersTab() {
   );
 }
 
-// â”€â”€â”€ Reports Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Reports Tab ─────────────────────────────────────────────────
 const MONTHLY_REVENUE = [
   { month: "Oct 2025", revenue: 182000 },
   { month: "Nov 2025", revenue: 215000 },
@@ -3506,7 +3506,7 @@ function ReportsTab() {
   );
 }
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Page ───────────────────────────────────────────────────
 export default function SalesPage() {
   return (
     <Suspense fallback={null}>
@@ -3734,7 +3734,7 @@ function SalesPageInner() {
   );
 }
 
-// â”€â”€ WinLossInsights â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── WinLossInsights ────────────────────────────────────────────
 // Categorizes the notes of Lost deals into themes (Price, Timing,
 // Competitor, Feature gap, Other) via /api/ai/ask, caches in
 // localStorage for the day, renders a horizontal bar chart with

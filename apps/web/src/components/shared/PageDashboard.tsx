@@ -47,9 +47,31 @@ function KpiTileSkeleton() {
         minHeight: 96,
       }}
     >
-      <div style={{ width: 60, height: 8, borderRadius: 3, background: "var(--content-secondary)" }} />
-      <div style={{ width: "70%", height: 22, borderRadius: 4, background: "var(--content-secondary)", marginTop: 4 }} />
-      <div style={{ width: 100, height: 6, borderRadius: 3, background: "var(--content-secondary)" }} />
+      <div
+        style={{
+          width: 60,
+          height: 8,
+          borderRadius: 3,
+          background: "var(--content-secondary)",
+        }}
+      />
+      <div
+        style={{
+          width: "70%",
+          height: 22,
+          borderRadius: 4,
+          background: "var(--content-secondary)",
+          marginTop: 4,
+        }}
+      />
+      <div
+        style={{
+          width: 100,
+          height: 6,
+          borderRadius: 3,
+          background: "var(--content-secondary)",
+        }}
+      />
     </div>
   );
 }
@@ -72,7 +94,9 @@ export function PageDashboard({
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return defaultCollapsed;
     try {
-      const saved = window.localStorage.getItem(`${COLLAPSE_KEY_PREFIX}${storageKey}`);
+      const saved = window.localStorage.getItem(
+        `${COLLAPSE_KEY_PREFIX}${storageKey}`,
+      );
       if (saved === "1") return true;
       if (saved === "0") return false;
     } catch {
@@ -85,7 +109,10 @@ export function PageDashboard({
     setCollapsed((prev) => {
       const next = !prev;
       try {
-        window.localStorage.setItem(`${COLLAPSE_KEY_PREFIX}${storageKey}`, next ? "1" : "0");
+        window.localStorage.setItem(
+          `${COLLAPSE_KEY_PREFIX}${storageKey}`,
+          next ? "1" : "0",
+        );
       } catch {
         // ignore
       }
@@ -146,10 +173,23 @@ export function PageDashboard({
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-          {toolbar}
-          {range && onRangeChange && <TimeRangeSelect value={range} onChange={onRangeChange} />}
-        </div>
+        {/* Right cluster (filters + range) controls the KPI body — hide it
+            when collapsed so it doesn't float orphaned with no context. */}
+        {!collapsed && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              flexWrap: "wrap",
+            }}
+          >
+            {toolbar}
+            {range && onRangeChange && (
+              <TimeRangeSelect value={range} onChange={onRangeChange} />
+            )}
+          </div>
+        )}
       </div>
 
       {!collapsed && (
@@ -189,12 +229,18 @@ export function PageDashboard({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: secondaryChart ? "minmax(0, 3fr) minmax(0, 2fr)" : "1fr",
+                gridTemplateColumns: secondaryChart
+                  ? "minmax(0, 3fr) minmax(0, 2fr)"
+                  : "1fr",
                 gap: 10,
               }}
             >
-              {primaryChart && <div style={{ minWidth: 0 }}>{primaryChart}</div>}
-              {secondaryChart && <div style={{ minWidth: 0 }}>{secondaryChart}</div>}
+              {primaryChart && (
+                <div style={{ minWidth: 0 }}>{primaryChart}</div>
+              )}
+              {secondaryChart && (
+                <div style={{ minWidth: 0 }}>{secondaryChart}</div>
+              )}
             </div>
           )}
         </>

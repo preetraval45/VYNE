@@ -18,7 +18,7 @@ import { MileageTab } from "@/components/expenses/MileageTab";
 import { PageDashboard } from "@/components/shared/PageDashboard";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ───────────────────────────────────────────────────────
 function statusConfig(s: ExpenseStatus): {
   label: string;
   bg: string;
@@ -51,11 +51,11 @@ function statusConfig(s: ExpenseStatus): {
 
 function categoryIcon(c: ExpenseCategory): string {
   const map: Record<ExpenseCategory, string> = {
-    travel: "âœˆ",
-    meals: "ðŸ½",
-    software: "ðŸ’»",
-    office: "ðŸ¢",
-    other: "ðŸ“¦",
+    travel: "✈",
+    meals: "🍽",
+    software: "💻",
+    office: "🏢",
+    other: "📦",
   };
   return map[c];
 }
@@ -79,7 +79,7 @@ function isOverLimit(e: Expense): boolean {
   return e.amount > CATEGORY_LIMITS[e.category];
 }
 
-// â”€â”€ Shared UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared UI ─────────────────────────────────────────────────────
 function StatusBadge({ status }: Readonly<{ status: ExpenseStatus }>) {
   const s = statusConfig(status);
   return (
@@ -228,7 +228,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-// â”€â”€ My Expenses Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── My Expenses Tab ───────────────────────────────────────────────
 function MyExpensesTab({
   expenses,
   onAdd,
@@ -519,7 +519,7 @@ function MyExpensesTab({
                     type="number"
                     label="Amount"
                     cellKey={`expense:${e.id}#amount`}
-                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                     render={(v) => fmt(Number(v))}
                   />
                 </td>
@@ -600,11 +600,11 @@ function MyExpensesTab({
                 }))
               }
             >
-              <option value="travel">âœˆ Travel</option>
-              <option value="meals">ðŸ½ Meals & Entertainment</option>
-              <option value="software">ðŸ’» Software</option>
-              <option value="office">ðŸ¢ Office</option>
-              <option value="other">ðŸ“¦ Other</option>
+              <option value="travel">✈ Travel</option>
+              <option value="meals">🍽 Meals & Entertainment</option>
+              <option value="software">💻 Software</option>
+              <option value="office">🏢 Office</option>
+              <option value="other">📦 Other</option>
             </select>
             <div
               style={{
@@ -715,7 +715,7 @@ function MyExpensesTab({
                   marginBottom: 14,
                 }}
               >
-                âš  Amount exceeds policy limit of{" "}
+                ⚠ Amount exceeds policy limit of{" "}
                 {fmt(CATEGORY_LIMITS[form.category])} for{" "}
                 {categoryLabel(form.category)}. Manager approval required.
               </div>
@@ -759,7 +759,7 @@ function MyExpensesTab({
   );
 }
 
-// â”€â”€ Approvals Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Approvals Tab ─────────────────────────────────────────────────
 function ApprovalsTab({
   expenses,
   onApprove,
@@ -846,7 +846,7 @@ function ApprovalsTab({
             fontSize: 14,
           }}
         >
-          <div style={{ fontSize: 32, marginBottom: 10 }}>âœ…</div>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>✅</div>
           All caught up — no pending approvals
         </div>
       )}
@@ -1000,7 +1000,7 @@ function ApprovalsTab({
   );
 }
 
-// â”€â”€ Reports Tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Reports Tab ───────────────────────────────────────────────────
 function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
   const categories: ExpenseCategory[] = [
     "travel",
@@ -1305,7 +1305,7 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
   );
 }
 
-// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main Page ─────────────────────────────────────────────────────
 export default function ExpensesPage() {
   return (
     <Suspense fallback={null}>

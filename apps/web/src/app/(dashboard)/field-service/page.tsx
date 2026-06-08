@@ -42,7 +42,7 @@ import {
   type FieldSkill,
 } from "@/lib/stores/fieldService";
 
-// â”€â”€â”€ Filter shape â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Filter shape ─────────────────────────────────────────────────
 
 interface FsFilters extends Record<string, unknown> {
   technicianIds: string[];
@@ -106,7 +106,7 @@ const PRIORITY_COLOR: Record<FieldJobPriority, string> = {
   low: "#22C55E",
 };
 
-// â”€â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Page ─────────────────────────────────────────────────────────
 
 export default function FieldServicePage() {
   return (
@@ -162,7 +162,7 @@ function FieldServicePageInner() {
     [setFilters],
   );
 
-  // â”€â”€â”€ Visible jobs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Visible jobs ────────────────────────────────────────────
   const visibleJobs = useMemo(() => {
     return jobs.filter((j) => {
       if (filters.onlyUnassigned && j.technicianId) return false;
@@ -194,7 +194,7 @@ function FieldServicePageInner() {
     });
   }, [jobs, filters]);
 
-  // â”€â”€â”€ GanttRow mapping â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── GanttRow mapping ────────────────────────────────────────
   const rows = useMemo<GanttRow[]>(() => {
     return visibleJobs.map((j) => {
       const tech = technicians.find((t) => t.id === j.technicianId);
@@ -255,7 +255,7 @@ function FieldServicePageInner() {
     [filters.groupBy, technicians],
   );
 
-  // â”€â”€â”€ Bulk selection + actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Bulk selection + actions ────────────────────────────────
   const selection = useBulkSelection();
   const selected = useMemo(
     () => jobs.filter((j) => selection.isSelected(j.id)),
@@ -330,7 +330,7 @@ function FieldServicePageInner() {
     [selected, selection, technicians, assignJob, updateJob, deleteJob],
   );
 
-  // â”€â”€â”€ Drag callbacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Drag callbacks ──────────────────────────────────────────
   const handleReschedule = useCallback(
     (id: string, start: string, end: string) => {
       const job = jobs.find((j) => j.id === id);
@@ -364,7 +364,7 @@ function FieldServicePageInner() {
     [filters.selectionMode, selection, jobs],
   );
 
-  // â”€â”€â”€ Cmd+K + AI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Cmd+K + AI ──────────────────────────────────────────────
   const suggestions = useAiSuggestedPrompts();
   useRegisterAiCommands("field-service");
   useRegisterCommands("field-service", [
@@ -406,7 +406,7 @@ function FieldServicePageInner() {
     },
   ]);
 
-  // â”€â”€â”€ Export rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Export rows ─────────────────────────────────────────────
   const exportRows = useMemo(
     () =>
       visibleJobs.map((j) => ({
@@ -426,7 +426,7 @@ function FieldServicePageInner() {
     [visibleJobs, technicians],
   );
 
-  // â”€â”€â”€ Capacity warnings (over-allocated tech this week) â”€â”€â”€â”€â”€â”€â”€
+  // ─── Capacity warnings (over-allocated tech this week) ───────
   const capacityWarnings = useMemo(() => {
     const weekFrom = new Date();
     weekFrom.setUTCHours(0, 0, 0, 0);
@@ -684,7 +684,7 @@ function FieldServicePageInner() {
   );
 }
 
-// â”€â”€â”€ Filter rail â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Filter rail ──────────────────────────────────────────────────
 
 function FieldServiceFilterRail({
   filters,
@@ -780,7 +780,7 @@ function FieldServiceFilterRail({
   );
 }
 
-// â”€â”€â”€ Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Toolbar ──────────────────────────────────────────────────────
 
 function FieldServiceToolbar({
   filters,
@@ -940,7 +940,7 @@ function ZoomSegmented({
   );
 }
 
-// â”€â”€â”€ Local UI helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Local UI helpers ────────────────────────────────────────────
 
 function FilterSection({
   title,
@@ -1056,7 +1056,7 @@ function MultiPick({
   );
 }
 
-// â”€â”€â”€ Style constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Style constants ─────────────────────────────────────────────
 
 const labelStyle: React.CSSProperties = {
   display: "inline-flex",

@@ -70,7 +70,7 @@ import {
   type RefundType,
 } from "@/lib/stores/invoicing";
 
-// â”€â”€â”€ Shared Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared Types ─────────────────────────────────────────────────
 type Tab =
   | "dashboard"
   | "customers"
@@ -83,7 +83,7 @@ type Tab =
 
 type SortDir = "asc" | "desc";
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────
 function fmt(n: number): string {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
@@ -105,7 +105,7 @@ function fmtDate(iso: string): string {
   });
 }
 
-// â”€â”€â”€ Status Badge Configs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Status Badge Configs ─────────────────────────────────────────
 function invoiceStatusStyle(s: InvoiceStatus): { bg: string; color: string } {
   const map: Record<InvoiceStatus, { bg: string; color: string }> = {
     Draft: { bg: "var(--content-secondary)", color: "var(--text-secondary)" },
@@ -173,7 +173,7 @@ function vendorStatusStyle(s: VendorStatus): { bg: string; color: string } {
   return map[s];
 }
 
-// â”€â”€â”€ Shared Sub-Components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Shared Sub-Components ────────────────────────────────────────
 function TabBtn({
   label,
   active,
@@ -604,7 +604,7 @@ function Td({
   );
 }
 
-// â”€â”€â”€ Sort Utility â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sort Utility ─────────────────────────────────────────────────
 function useSortableData<T>(
   items: readonly T[],
   defaultKey: string,
@@ -642,7 +642,7 @@ function useSortableData<T>(
   return { sorted, sortKey, sortDir, handleSort };
 }
 
-// â”€â”€â”€ Modal / Overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Modal / Overlay ──────────────────────────────────────────────
 const overlayStyle: React.CSSProperties = {
   position: "fixed",
   inset: 0,
@@ -787,7 +787,7 @@ function FieldGroup({ children }: Readonly<{ children: React.ReactNode }>) {
   return <div style={{ marginBottom: 14 }}>{children}</div>;
 }
 
-// â”€â”€â”€ Confirm Delete Dialog â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Confirm Delete Dialog ────────────────────────────────────────
 function ConfirmDeleteDialog({
   name,
   onConfirm,
@@ -849,7 +849,7 @@ function ConfirmDeleteDialog({
   );
 }
 
-// â”€â”€â”€ Line Items Editor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Line Items Editor ────────────────────────────────────────────
 function LineItemsEditor({
   items,
   onChange,
@@ -1002,7 +1002,7 @@ function LineItemsEditor({
   );
 }
 
-// â”€â”€â”€ Customer Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Customer Modal ───────────────────────────────────────────────
 function CustomerModal({
   existing,
   onClose,
@@ -1087,7 +1087,7 @@ function CustomerModal({
   );
 }
 
-// â”€â”€â”€ Invoice Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Invoice Modal ────────────────────────────────────────────────
 function InvoiceModal({
   existing,
   onClose,
@@ -1175,7 +1175,7 @@ function InvoiceModal({
   );
 }
 
-// â”€â”€â”€ Credit Note Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Credit Note Modal ────────────────────────────────────────────
 function CreditNoteModal({ onClose }: { onClose: () => void }) {
   const { customers, invoices, addCreditNote } = useInvoicingStore();
   const [customer, setCustomer] = useState("");
@@ -1262,7 +1262,7 @@ function CreditNoteModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// â”€â”€â”€ Payment Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Payment Modal ────────────────────────────────────────────────
 function PaymentModal({ onClose }: { onClose: () => void }) {
   const { customers, invoices, addPayment } = useInvoicingStore();
   const [customer, setCustomer] = useState("");
@@ -1372,7 +1372,7 @@ function PaymentModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// â”€â”€â”€ Vendor Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Vendor Modal ─────────────────────────────────────────────────
 function VendorModal({
   existing,
   onClose,
@@ -1467,7 +1467,7 @@ function VendorModal({
   );
 }
 
-// â”€â”€â”€ Bill Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Bill Modal ───────────────────────────────────────────────────
 function BillModal({
   existing,
   onClose,
@@ -1545,7 +1545,7 @@ function BillModal({
   );
 }
 
-// â”€â”€â”€ Refund Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Refund Modal ─────────────────────────────────────────────────
 function RefundModal({ onClose }: { onClose: () => void }) {
   const { customers, vendors, addRefund } = useInvoicingStore();
   const [type, setType] = useState<RefundType>("Customer Refund");
@@ -1635,7 +1635,7 @@ function RefundModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// â”€â”€â”€ Tab: Customers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Customers ───────────────────────────────────────────────
 function CustomersTab() {
   const router = useRouter();
   const { customers, deleteCustomer } = useInvoicingStore();
@@ -1864,7 +1864,7 @@ function CustomersTab() {
   );
 }
 
-// â”€â”€â”€ Tab: Invoices â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Invoices ────────────────────────────────────────────────
 function InvoicesTab() {
   const router = useRouter();
   const { invoices, markAsPaid, sendInvoice, deleteInvoice, updateInvoice } =
@@ -2213,7 +2213,7 @@ function InvoicesTab() {
                     type="number"
                     label="Amount"
                     cellKey={`invoice:${inv.id}#amount`}
-                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                     render={(v) => fmtFull(Number(v))}
                     style={{ fontWeight: 700 }}
                   />
@@ -2592,7 +2592,7 @@ function InvoiceDetailPanel({
   );
 }
 
-// â”€â”€â”€ Tab: Credit Notes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Credit Notes ────────────────────────────────────────────
 function CreditNotesTab() {
   const { creditNotes, deleteCreditNote } = useInvoicingStore();
   const [showModal, setShowModal] = useState(false);
@@ -2774,7 +2774,7 @@ function CreditNotesTab() {
   );
 }
 
-// â”€â”€â”€ Tab: Payments â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Payments ────────────────────────────────────────────────
 function PaymentsTab() {
   const { payments, deletePayment } = useInvoicingStore();
   const [methodFilter, setMethodFilter] = useState<"All" | PaymentMethod>(
@@ -3003,7 +3003,7 @@ function PaymentsTab() {
   );
 }
 
-// â”€â”€â”€ Tab: Vendors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Vendors ─────────────────────────────────────────────────
 function VendorsTab() {
   const router = useRouter();
   const { vendors, deleteVendor } = useInvoicingStore();
@@ -3216,7 +3216,7 @@ function VendorsTab() {
   );
 }
 
-// â”€â”€â”€ Tab: Bills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Bills ───────────────────────────────────────────────────
 function BillsTab() {
   const router = useRouter();
   const { bills, markBillPaid, deleteBill } = useInvoicingStore();
@@ -3504,7 +3504,7 @@ function BillsTab() {
   );
 }
 
-// â”€â”€â”€ Tab: Refunds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Tab: Refunds ─────────────────────────────────────────────────
 function RefundsTab() {
   const { refunds, deleteRefund } = useInvoicingStore();
   const [showModal, setShowModal] = useState(false);
@@ -3701,7 +3701,7 @@ function RefundsTab() {
   );
 }
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main Page ────────────────────────────────────────────────────
 export default function InvoicingPage() {
   return (
     <Suspense fallback={null}>

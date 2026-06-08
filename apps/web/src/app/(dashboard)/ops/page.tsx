@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { OpsDashboardView } from "@/components/ops/OpsDashboardView";
@@ -249,7 +249,7 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-// â”€â”€â”€ Overview tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Overview tab ─────────────────────────────────────────────────
 function OverviewTab({
   products,
   orders,
@@ -560,7 +560,7 @@ function OverviewTab({
   );
 }
 
-// â”€â”€â”€ Inventory tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Inventory tab ────────────────────────────────────────────────
 function stockQtyColor(qty: number): string {
   if (qty === 0) return "var(--status-danger)";
   if (qty <= 10) return "var(--status-warning)";
@@ -867,7 +867,7 @@ function InventoryTab({
                     type="number"
                     label="Stock qty"
                     cellKey={`product:${p.id}#stockQty`}
-                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                   />
                 </td>
                 <td
@@ -896,7 +896,7 @@ function InventoryTab({
                     type="number"
                     label="Cost price"
                     cellKey={`product:${p.id}#costPrice`}
-                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                     render={(v) => `$${Number(v).toFixed(2)}`}
                   />
                 </td>
@@ -918,7 +918,7 @@ function InventoryTab({
                     type="number"
                     label="Price"
                     cellKey={`product:${p.id}#price`}
-                    validate={(s) => (Number(s) < 0 ? "Must be â‰¥ 0" : null)}
+                    validate={(s) => (Number(s) < 0 ? "Must be ≥ 0" : null)}
                     render={(v) => `$${Number(v).toFixed(2)}`}
                   />
                 </td>
@@ -1348,7 +1348,7 @@ function ProductDetailPanel({
   );
 }
 
-// â”€â”€â”€ Orders tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Orders tab ───────────────────────────────────────────────────
 function OrdersTab({
   orders,
   setOrders,
@@ -1790,7 +1790,7 @@ function OrdersTab({
   );
 }
 
-// â”€â”€â”€ Suppliers tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Suppliers tab ────────────────────────────────────────────────
 function SuppliersTab({
   suppliers,
   setSuppliers,
@@ -1800,12 +1800,23 @@ function SuppliersTab({
 }>) {
   const router = useRouter();
   const [addOpen, setAddOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     name: "",
     contactName: "",
     email: "",
     phone: "",
   });
+
+  const filteredSuppliers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return suppliers;
+    return suppliers.filter((s) =>
+      [s.name, s.contactName, s.email, s.phone]
+        .filter(Boolean)
+        .some((field) => field!.toLowerCase().includes(q)),
+    );
+  }, [suppliers, search]);
 
   function addSupplier() {
     const s: ERPSupplier = { id: `s${Date.now()}`, ...form, status: "active" };
@@ -1820,10 +1831,27 @@ function SuppliersTab({
       <div
         style={{
           display: "flex",
-          justifyContent: "flex-end",
+          gap: 10,
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: 14,
         }}
       >
+        <div style={{ flex: 1, maxWidth: 320 }}>
+          <SharedSearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Search suppliers…"
+            width={320}
+            onWorkspaceSearch={() =>
+              window.dispatchEvent(
+                new CustomEvent("vyne:open-palette", {
+                  detail: { query: search },
+                }),
+              )
+            }
+          />
+        </div>
         <button
           onClick={() => router.push("/ops/suppliers/new")}
           style={{
@@ -1838,6 +1866,7 @@ function SuppliersTab({
             cursor: "pointer",
             fontSize: 12,
             fontWeight: 500,
+            flexShrink: 0,
           }}
         >
           <Plus size={13} /> Add Supplier
@@ -1879,7 +1908,22 @@ function SuppliersTab({
             </tr>
           </thead>
           <tbody>
-            {suppliers.map((s) => (
+            {filteredSuppliers.length === 0 && (
+              <tr>
+                <td
+                  colSpan={6}
+                  style={{
+                    padding: "28px 14px",
+                    textAlign: "center",
+                    fontSize: 12.5,
+                    color: "var(--text-tertiary)",
+                  }}
+                >
+                  No suppliers match &quot;{search.trim()}&quot;.
+                </td>
+              </tr>
+            )}
+            {filteredSuppliers.map((s) => (
               <tr
                 key={s.id}
                 style={{ borderTop: "1px solid var(--content-border)" }}
@@ -2060,7 +2104,7 @@ function SuppliersTab({
   );
 }
 
-// â”€â”€â”€ Manufacturing tab â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Manufacturing tab ────────────────────────────────────────────
 function ManufacturingTab({
   boms,
   workOrders,
@@ -2162,9 +2206,8 @@ function ManufacturingTab({
                   ))}
                 </select>
                 <span style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-                  Top-down: final product â†’ direct components â†’
-                  sub-components â†’ raw materials. Costs roll up to the parent
-                  at every level.
+                  Top-down: final product → direct components → sub-components →
+                  raw materials. Costs roll up to the parent at every level.
                 </span>
               </div>
               <BOMFlowchart root={root} />
@@ -2285,7 +2328,7 @@ function ManufacturingTab({
                                     : "var(--status-success)",
                               }}
                             >
-                              {delta > 0 ? "â–²" : "â–¼"}{" "}
+                              {delta > 0 ? "▲" : "▼"}{" "}
                               {Math.abs(delta).toFixed(0)}
                             </span>
                           )}
@@ -2703,7 +2746,7 @@ function ManufacturingTab({
   );
 }
 
-// â”€â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main page ────────────────────────────────────────────────────
 export default function OpsPage() {
   return (
     <Suspense fallback={null}>
@@ -2899,114 +2942,127 @@ function OpsPageInner() {
           </>
         }
       />
-      <PageDashboard
-        storageKey="ops"
-        range={dash.range}
-        onRangeChange={dash.setRange}
-        kpis={[
-          {
-            label: "SKUs",
-            value: products.length.toString(),
-            hint: `${products.filter((p) => p.status === "in_stock").length} in stock`,
-          },
-          {
-            label: "Low stock",
-            value: lowStockCount.toString(),
-            goodWhenUp: false,
-            hint: lowStockCount > 0 ? "needs reorder" : "all healthy",
-          },
-          {
-            label: "Out of stock",
-            value: outOfStockCount.toString(),
-            goodWhenUp: false,
-          },
-          {
-            label: "Inventory value",
-            value: `$${(inventoryValue / 1000).toFixed(1)}k`,
-          },
-          {
-            label: "Pending orders",
-            value: pendingOrders.toString(),
-            sparkline: orderSparkline,
-            hint: `$${(totalOrderValue / 1000).toFixed(1)}k total`,
-          },
-          {
-            label: "Active WOs",
-            value: activeWOs.toString(),
-            hint: `${workOrders.length} total`,
-          },
-        ]}
-      />
-
-      <div
-        style={{
-          padding: "8px 20px 0",
-          borderBottom: "1px solid var(--content-border)",
-          background: "var(--content-bg)",
-          flexShrink: 0,
-        }}
-      >
-        {/* Tab bar */}
-        <div style={{ display: "flex", gap: 2 }}>
-          {tabs.map(({ id, label, icon }) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 14px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: 12,
-                fontWeight: 500,
-                background: "transparent",
-                color:
-                  tab === id
-                    ? "var(--vyne-accent, var(--vyne-purple))"
-                    : "var(--text-secondary)",
-                borderBottom:
-                  tab === id ? "2px solid #06B6D4" : "2px solid transparent",
-                transition: "all 0.15s",
-              }}
-            >
-              {icon} {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Content */}
+      {/* Single scroll region: the Overview KPIs scroll away, the tab bar
+          sticks to the top, and tab content gets the full remaining height
+          instead of being squeezed into a tiny box below a fixed Overview. */}
       <div
         className="content-scroll"
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: tab === "dashboard" ? 0 : 20,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
         }}
       >
-        {tab === "dashboard" && <OpsDashboardView />}
-        {tab === "overview" && (
-          <OverviewTab products={products} orders={orders} />
-        )}
-        {tab === "inventory" && (
-          <InventoryTab products={products} setProducts={setProducts} />
-        )}
-        {tab === "orders" && (
-          <OrdersTab orders={orders} setOrders={setOrders} />
-        )}
-        {tab === "suppliers" && (
-          <SuppliersTab suppliers={suppliers} setSuppliers={setSuppliers} />
-        )}
-        {tab === "manufacturing" && (
-          <ManufacturingTab
-            boms={boms}
-            workOrders={workOrders}
-            setWorkOrders={setWorkOrders}
-            products={products}
-          />
-        )}
+        <PageDashboard
+          storageKey="ops"
+          range={dash.range}
+          onRangeChange={dash.setRange}
+          kpis={[
+            {
+              label: "SKUs",
+              value: products.length.toString(),
+              hint: `${products.filter((p) => p.status === "in_stock").length} in stock`,
+            },
+            {
+              label: "Low stock",
+              value: lowStockCount.toString(),
+              goodWhenUp: false,
+              hint: lowStockCount > 0 ? "needs reorder" : "all healthy",
+            },
+            {
+              label: "Out of stock",
+              value: outOfStockCount.toString(),
+              goodWhenUp: false,
+            },
+            {
+              label: "Inventory value",
+              value: `$${(inventoryValue / 1000).toFixed(1)}k`,
+            },
+            {
+              label: "Pending orders",
+              value: pendingOrders.toString(),
+              sparkline: orderSparkline,
+              hint: `$${(totalOrderValue / 1000).toFixed(1)}k total`,
+            },
+            {
+              label: "Active WOs",
+              value: activeWOs.toString(),
+              hint: `${workOrders.length} total`,
+            },
+          ]}
+        />
+
+        <div
+          style={{
+            padding: "8px 20px 0",
+            borderBottom: "1px solid var(--content-border)",
+            background: "var(--content-bg)",
+            position: "sticky",
+            top: 0,
+            zIndex: 5,
+          }}
+        >
+          {/* Tab bar */}
+          <div style={{ display: "flex", gap: 2 }}>
+            {tabs.map(({ id, label, icon }) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 14px",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: "transparent",
+                  color:
+                    tab === id
+                      ? "var(--vyne-accent, var(--vyne-purple))"
+                      : "var(--text-secondary)",
+                  borderBottom:
+                    tab === id ? "2px solid #06B6D4" : "2px solid transparent",
+                  transition: "all 0.15s",
+                }}
+              >
+                {icon} {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content (flows inside the shared scroll region above) */}
+        <div
+          style={{
+            padding: tab === "dashboard" ? 0 : 20,
+          }}
+        >
+          {tab === "dashboard" && <OpsDashboardView />}
+          {tab === "overview" && (
+            <OverviewTab products={products} orders={orders} />
+          )}
+          {tab === "inventory" && (
+            <InventoryTab products={products} setProducts={setProducts} />
+          )}
+          {tab === "orders" && (
+            <OrdersTab orders={orders} setOrders={setOrders} />
+          )}
+          {tab === "suppliers" && (
+            <SuppliersTab suppliers={suppliers} setSuppliers={setSuppliers} />
+          )}
+          {tab === "manufacturing" && (
+            <ManufacturingTab
+              boms={boms}
+              workOrders={workOrders}
+              setWorkOrders={setWorkOrders}
+              products={products}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
