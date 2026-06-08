@@ -1645,7 +1645,7 @@ function CustomersTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Customer | null>(null);
 
-  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
   const filtered = useSearchIndex(customers, (c) => [c.name, c.email], search);
   const { sorted, sortKey, sortDir, handleSort } = useSortableData(
     filtered,
@@ -1846,7 +1846,7 @@ function CustomersTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted customer â€” ${snapshot.name}`,
+              label: `Deleted customer — ${snapshot.name}`,
               mutate: () => deleteCustomer(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addCustomer({
@@ -1873,7 +1873,7 @@ function InvoicesTab() {
   const selectedInvoice = invoiceDetail.id
     ? invoices.find((i) => i.id === invoiceDetail.id)
     : undefined;
-  // Saved views (Phase 11.1) â€” status filter is the only persisted
+  // Saved views (Phase 11.1) — status filter is the only persisted
   // dimension for invoices today. Built-ins ship for the common
   // "Overdue" + "Drafts" filter combinations so the bar feels
   // populated on first load.
@@ -1897,11 +1897,11 @@ function InvoicesTab() {
     { type: "create" } | { type: "edit"; invoice: Invoice } | null
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
-  // Bulk-selection (Phase 10.4) â€” multi-select invoices for batch
+  // Bulk-selection (Phase 10.4) — multi-select invoices for batch
   // mark-paid / mark-sent / delete. Pattern matches the Contacts wiring.
   const sel = useBulkSelection();
 
-  // Pull-to-refresh (Phase 11.4) â€” placeholder until invoicing store
+  // Pull-to-refresh (Phase 11.4) — placeholder until invoicing store
   // grows a server-backed hydrate. Subscribing now still re-runs the
   // route which re-renders any RSC.
   usePullToRefresh(() => {
@@ -2397,7 +2397,7 @@ function InvoicesTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted invoice â€” ${snapshot.number}`,
+              label: `Deleted invoice — ${snapshot.number}`,
               mutate: () => deleteInvoice(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addInvoice({
@@ -2553,7 +2553,7 @@ function InvoiceDetailPanel({
                       <div
                         style={{ color: "var(--text-tertiary)", fontSize: 11 }}
                       >
-                        {li.qty} Ã— {fmtFull(li.rate)}
+                        {li.qty} × {fmtFull(li.rate)}
                       </div>
                     </div>
                     <div
@@ -2755,7 +2755,7 @@ function CreditNotesTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted credit note â€” ${snapshot.number}`,
+              label: `Deleted credit note — ${snapshot.number}`,
               mutate: () => deleteCreditNote(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addCreditNote({
@@ -2983,7 +2983,7 @@ function PaymentsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted payment â€” ${snapshot.number}`,
+              label: `Deleted payment — ${snapshot.number}`,
               mutate: () => deletePayment(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addPayment({
@@ -3013,7 +3013,7 @@ function VendorsTab() {
   >(null);
   const [deleteTarget, setDeleteTarget] = useState<Vendor | null>(null);
 
-  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
   const filtered = useSearchIndex(
     vendors,
     (v) => [v.name, v.contact, v.email],
@@ -3197,7 +3197,7 @@ function VendorsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted vendor â€” ${snapshot.name}`,
+              label: `Deleted vendor — ${snapshot.name}`,
               mutate: () => deleteVendor(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addVendor({
@@ -3486,7 +3486,7 @@ function BillsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted bill â€” ${snapshot.number}`,
+              label: `Deleted bill — ${snapshot.number}`,
               mutate: () => deleteBill(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addBill({
@@ -3682,7 +3682,7 @@ function RefundsTab() {
           onConfirm={() => {
             const snapshot = deleteTarget;
             undoableDelete({
-              label: `Deleted refund â€” ${snapshot.number}`,
+              label: `Deleted refund — ${snapshot.number}`,
               mutate: () => deleteRefund(snapshot.id),
               restore: () =>
                 useInvoicingStore.getState().addRefund({
@@ -3858,7 +3858,7 @@ function InvoicingPageInner() {
           },
           {
             label: "DSO",
-            value: dso > 0 ? `${dso}d` : "â€”",
+            value: dso > 0 ? `${dso}d` : "—",
             hint: "days sales outstanding",
             goodWhenUp: false,
           },

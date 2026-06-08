@@ -1964,7 +1964,7 @@ function OpportunitiesTab() {
               void _id;
               void _ca;
               undoableDelete({
-                label: `Deleted opportunity â€” ${snapshot.name}`,
+                label: `Deleted opportunity — ${snapshot.name}`,
                 mutate: () => deleteDeal(deleteId),
                 restore: () => useSalesStore.getState().addDeal(rest),
               });
@@ -2080,11 +2080,11 @@ function OpportunityDetailPanel({
 
           <DetailSection title="Details">
             <DetailRow label="Company" value={deal.company} />
-            <DetailRow label="Contact" value={deal.contact || "â€”"} />
+            <DetailRow label="Contact" value={deal.contact || "—"} />
             <DetailRow label="Assignee" value={deal.assignee} />
             <DetailRow
               label="Expected close"
-              value={deal.expectedClose || "â€”"}
+              value={deal.expectedClose || "—"}
             />
             <DetailRow
               label="Created"
@@ -2350,7 +2350,7 @@ function QuotationsTab() {
               .quotations.find((q) => q.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted quote â€” ${snapshot.number}`,
+                label: `Deleted quote — ${snapshot.number}`,
                 mutate: () => deleteQuotation(deleteId),
                 restore: () =>
                   useSalesStore.getState().addQuotation({
@@ -2572,7 +2572,7 @@ function SalesOrdersTab() {
               .salesOrders.find((o) => o.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted sales order â€” ${snapshot.number}`,
+                label: `Deleted sales order — ${snapshot.number}`,
                 mutate: () => deleteSalesOrder(deleteId),
                 restore: () =>
                   useSalesStore.getState().addSalesOrder({
@@ -3620,7 +3620,7 @@ function SalesPageInner() {
             label: "Weighted forecast",
             value: fmt(weightedPipeline),
             sparkline: orderSparkline,
-            hint: "value Ã— probability",
+            hint: "value × probability",
           },
           {
             label: "Order revenue",
@@ -3903,7 +3903,7 @@ function WinLossInsights({
             }}
           >
             {loading
-              ? "Categorisingâ€¦"
+              ? "Categorising…"
               : counts
                 ? "Regenerate"
                 : "Categorise with AI"}
@@ -3913,7 +3913,7 @@ function WinLossInsights({
 
       {lostDeals.length === 0 ? (
         <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)" }}>
-          No lost deals yet â€” nothing to categorise.
+          No lost deals yet — nothing to categorise.
         </p>
       ) : counts ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

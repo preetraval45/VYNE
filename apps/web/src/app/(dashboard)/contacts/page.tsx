@@ -1046,8 +1046,8 @@ function AccountsTab() {
     ? accounts.find((a) => a.id === deleteId)
     : null;
 
-  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke
-  // instead of O(n Ã— fields Ã— query-len) for the linear toLowerCase().includes()
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke
+  // instead of O(n × fields × query-len) for the linear toLowerCase().includes()
   // pattern. Built once when the accounts array reference changes.
   const searchHits = useSearchIndex(
     accounts,
@@ -1437,7 +1437,7 @@ function ContactsTabContent() {
   const companies = [...new Set(contacts.map((c) => c.company))].sort();
   const departments = [...new Set(contacts.map((c) => c.department))].sort();
 
-  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
   const searchHits = useSearchIndex(
     contacts,
     (c) => [c.name, c.email, c.title, c.company],
@@ -1618,7 +1618,7 @@ function ContactsTabContent() {
                       // when a real `archived` flag lands we just patch
                       // updateContact in place.
                       undoableDelete({
-                        label: `Archived contact â€” ${contact.name}`,
+                        label: `Archived contact — ${contact.name}`,
                         mutate: () => deleteContact(contact.id),
                         restore: () =>
                           useContactsStore.getState().addContact(contact),
@@ -1830,7 +1830,7 @@ function ContactsTabContent() {
               .contacts.find((c) => c.id === deleteId);
             if (snapshot) {
               undoableDelete({
-                label: `Deleted contact â€” ${snapshot.name}`,
+                label: `Deleted contact — ${snapshot.name}`,
                 mutate: () => deleteContact(deleteId),
                 restore: () => useContactsStore.getState().addContact(snapshot),
               });
@@ -1914,7 +1914,7 @@ function ContactsTabContent() {
 // user can see which action they're about to commit.
 //
 // Children render the table cells exactly as they did before. The
-// swipe is touch-only â€” desktop click + hover behaviour is unchanged
+// swipe is touch-only — desktop click + hover behaviour is unchanged
 // because `useSwipeGesture`'s axis lock requires `touchstart`.
 function SwipeableContactRow({
   contact,
@@ -1968,7 +1968,7 @@ function SwipeableContactRow({
         (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
-      {/* The first <Td> in `children` is the checkbox cell â€” we don't
+      {/* The first <Td> in `children` is the checkbox cell — we don't
           re-render it here. `onSelect` is invoked from the children's
           checkbox onChange (passed in from the parent map), so this
           wrapper only needs to add the swipe behaviour + hint colour
@@ -2809,10 +2809,10 @@ function AccountDetailPanel({
             <DetailRow label="Industry" value={account.industry} />
             <DetailRow
               label="Website"
-              value={account.website || "â€”"}
+              value={account.website || "—"}
               mono={!!account.website}
             />
-            <DetailRow label="Phone" value={account.phone || "â€”"} />
+            <DetailRow label="Phone" value={account.phone || "—"} />
             <DetailRow
               label="Owner"
               value={
@@ -2936,11 +2936,11 @@ function ContactDetailPanel({
           <DetailSection title="Contact">
             <DetailRow
               label="Email"
-              value={contact.email || "â€”"}
+              value={contact.email || "—"}
               mono={!!contact.email}
             />
-            <DetailRow label="Phone" value={contact.phone || "â€”"} />
-            <DetailRow label="Department" value={contact.department || "â€”"} />
+            <DetailRow label="Phone" value={contact.phone || "—"} />
+            <DetailRow label="Department" value={contact.department || "—"} />
             <DetailRow
               label="Last contact"
               value={daysSinceStr(contact.lastContact)}

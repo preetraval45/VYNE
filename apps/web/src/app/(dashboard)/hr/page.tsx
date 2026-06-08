@@ -237,7 +237,7 @@ function EmployeeModal({
           </button>
         </div>
 
-        {/* Modal body â€” two columns */}
+        {/* Modal body — two columns */}
         <div
           className="two-pane-layout"
           style={{
@@ -347,8 +347,8 @@ function EmployeeModal({
 
             {/* Emergency */}
             <Section title="Emergency Contact">
-              <InfoRow label="Name" value="On file â€” confidential" />
-              <InfoRow label="Phone" value="On file â€” confidential" />
+              <InfoRow label="Name" value="On file — confidential" />
+              <InfoRow label="Phone" value="On file — confidential" />
             </Section>
 
             {/* Current tasks */}
@@ -1064,7 +1064,7 @@ function LeaveTab() {
               marginBottom: 14,
             }}
           >
-            May 2026 â€” Who&apos;s Out
+            May 2026 — Who&apos;s Out
           </div>
           <CalendarStrip />
           <div
@@ -1093,7 +1093,7 @@ function LeaveTab() {
                 marginBottom: 3,
               }}
             >
-              JC â€” James Chen (May 28)
+              JC — James Chen (May 28)
             </div>
             <div
               style={{
@@ -1102,10 +1102,10 @@ function LeaveTab() {
                 marginBottom: 3,
               }}
             >
-              AR â€” Alex Rhodes (May 30)
+              AR — Alex Rhodes (May 30)
             </div>
             <div style={{ fontSize: 11, color: "var(--text-secondary)" }}>
-              LP â€” Lisa Park (back Jun 1)
+              LP — Lisa Park (back Jun 1)
             </div>
           </div>
         </div>
@@ -1165,7 +1165,7 @@ function PayrollTab() {
               margin: 0,
             }}
           >
-            Payroll â€” May 2026
+            Payroll — May 2026
           </h2>
           <p
             style={{
@@ -1208,7 +1208,7 @@ function PayrollTab() {
               cursor: "pointer",
             }}
           >
-            {payrollRun ? "Payroll Run âœ“" : "Run Payroll â€” May 2026"}
+            {payrollRun ? "Payroll Run âœ“" : "Run Payroll — May 2026"}
           </button>
         </div>
       </div>
@@ -1372,7 +1372,7 @@ function PayrollTab() {
                       fontWeight: emp.bonus > 0 ? 600 : 400,
                     }}
                   >
-                    {emp.bonus > 0 ? `+${fmtSalary(emp.bonus)}` : "â€”"}
+                    {emp.bonus > 0 ? `+${fmtSalary(emp.bonus)}` : "—"}
                   </td>
                   <td
                     style={{
@@ -1422,7 +1422,7 @@ function PayrollTab() {
                   color: "var(--text-secondary)",
                 }}
               >
-                â€”
+                —
               </td>
               <td
                 style={{

@@ -58,6 +58,14 @@ export function GlobalSearchInput() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // The results panel renders with position:fixed (not absolute) so it can't
+  // be clipped by the topbar's `overflow-x: auto` — a horizontal scroll on an
+  // ancestor makes the vertical axis `auto` too, which would otherwise hide
+  // this dropdown entirely. We anchor it to the input via its bounding rect.
+  const [anchor, setAnchor] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
 
   const hits = useMemo(() => {
     const trimmed = debounced.trim();
@@ -109,6 +117,26 @@ export function GlobalSearchInput() {
     return () => document.removeEventListener("mousedown", onClick);
   }, [open]);
 
+  // Keep the fixed-position panel pinned under the input as the layout
+  // shifts (scroll, resize). Recomputes from the container's viewport rect.
+  const showPanel = open && query.trim().length > 0;
+  useEffect(() => {
+    if (!showPanel) return;
+    function place() {
+      const el = containerRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setAnchor({ top: r.bottom + 6, right: window.innerWidth - r.right });
+    }
+    place();
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => {
+      window.removeEventListener("resize", place);
+      window.removeEventListener("scroll", place, true);
+    };
+  }, [showPanel]);
+
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Escape") {
       setOpen(false);
@@ -138,8 +166,6 @@ export function GlobalSearchInput() {
       setSelectedIndex((i) => (i - 1 + flat.length) % flat.length);
     }
   }
-
-  const showPanel = open && query.trim().length > 0;
 
   return (
     <div
@@ -242,19 +268,19 @@ export function GlobalSearchInput() {
         </button>
       </div>
 
-      {showPanel && (
+      {showPanel && anchor && (
         <div
           role="listbox"
           aria-label="Search results"
           style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            right: 0,
+            position: "fixed",
+            top: anchor.top,
+            right: anchor.right,
             width: 380,
             maxWidth: "calc(100vw - 24px)",
             maxHeight: "min(440px, 70vh)",
             overflowY: "auto",
-            zIndex: 70,
+            zIndex: 1200,
             background: "var(--content-bg)",
             border: "1px solid var(--content-border)",
             borderRadius: 12,

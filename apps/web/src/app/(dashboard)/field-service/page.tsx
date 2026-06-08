@@ -266,7 +266,7 @@ function FieldServicePageInner() {
     () => [
       {
         id: "fs-bulk-assign",
-        label: "Assign toâ€¦",
+        label: "Assign to…",
         icon: UserPlus,
         onClick: () => {
           const target = window.prompt(
@@ -418,7 +418,7 @@ function FieldServicePageInner() {
         priority: j.priority,
         status: j.status,
         technician:
-          technicians.find((t) => t.id === j.technicianId)?.name ?? "â€”",
+          technicians.find((t) => t.id === j.technicianId)?.name ?? "—",
         start: j.scheduledStart,
         end: j.scheduledEnd,
         estimatedHours: j.estimatedHours,

@@ -98,7 +98,7 @@ const MOCK_CAMPAIGNS: Campaign[] = [
   },
   {
     id: "c3",
-    name: "Google Ads â€” Q1 Push",
+    name: "Google Ads — Q1 Push",
     channel: "PPC",
     status: "Completed",
     startDate: "2026-01-01",
@@ -146,7 +146,7 @@ const MOCK_CAMPAIGNS: Campaign[] = [
   },
   {
     id: "c7",
-    name: "Retargeting â€” Cart Abandonment",
+    name: "Retargeting — Cart Abandonment",
     channel: "PPC",
     status: "Active",
     startDate: "2026-03-10",
@@ -196,7 +196,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e3",
     campaignName: "Product Demo Invite",
-    subjectLine: "Join our live demo â€” March 25",
+    subjectLine: "Join our live demo — March 25",
     recipients: 3400,
     sent: 3398,
     openRate: 41.3,
@@ -207,7 +207,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e4",
     campaignName: "Customer Onboarding Drip #1",
-    subjectLine: "Welcome to VYNE â€” Getting Started",
+    subjectLine: "Welcome to VYNE — Getting Started",
     recipients: 560,
     sent: 558,
     openRate: 62.1,
@@ -229,7 +229,7 @@ const MOCK_EMAIL_CAMPAIGNS: EmailCampaign[] = [
   {
     id: "e6",
     campaignName: "Re-engagement Series",
-    subjectLine: "We miss you â€” here's 20% off",
+    subjectLine: "We miss you — here's 20% off",
     recipients: 4800,
     sent: 0,
     openRate: 0,
@@ -877,7 +877,7 @@ function CampaignsTab() {
                   <td
                     style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}
                   >
-                    {c.leadsGenerated > 0 ? fmtNum(c.leadsGenerated) : "â€”"}
+                    {c.leadsGenerated > 0 ? fmtNum(c.leadsGenerated) : "—"}
                   </td>
                   <td
                     style={{
@@ -892,7 +892,7 @@ function CampaignsTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {c.roi > 0 ? `${c.roi.toFixed(1)}x` : "â€”"}
+                    {c.roi > 0 ? `${c.roi.toFixed(1)}x` : "—"}
                   </td>
                 </tr>
               );
@@ -1027,7 +1027,7 @@ function EmailMarketingTab() {
                     {fmtNum(e.recipients)}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    {e.sent > 0 ? fmtNum(e.sent) : "â€”"}
+                    {e.sent > 0 ? fmtNum(e.sent) : "—"}
                   </td>
                   <td
                     style={{
@@ -1042,7 +1042,7 @@ function EmailMarketingTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {e.openRate > 0 ? `${e.openRate}%` : "â€”"}
+                    {e.openRate > 0 ? `${e.openRate}%` : "—"}
                   </td>
                   <td
                     style={{
@@ -1057,10 +1057,10 @@ function EmailMarketingTab() {
                             : "var(--text-tertiary)",
                     }}
                   >
-                    {e.clickRate > 0 ? `${e.clickRate}%` : "â€”"}
+                    {e.clickRate > 0 ? `${e.clickRate}%` : "—"}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "right" }}>
-                    {e.bounced > 0 ? e.bounced : "â€”"}
+                    {e.bounced > 0 ? e.bounced : "—"}
                   </td>
                   <td style={tdStyle}>
                     <Badge label={e.status} bg={es.bg} color={es.color} />
@@ -1378,7 +1378,7 @@ function LandingPagesTab() {
                       </code>
                     </td>
                     <td style={{ ...tdStyle, textAlign: "right" }}>
-                      {l.visits > 0 ? fmtNum(l.visits) : "â€”"}
+                      {l.visits > 0 ? fmtNum(l.visits) : "—"}
                     </td>
                     <td
                       style={{
@@ -1387,7 +1387,7 @@ function LandingPagesTab() {
                         fontWeight: 600,
                       }}
                     >
-                      {l.conversions > 0 ? fmtNum(l.conversions) : "â€”"}
+                      {l.conversions > 0 ? fmtNum(l.conversions) : "—"}
                     </td>
                     <td
                       style={{
@@ -1402,7 +1402,7 @@ function LandingPagesTab() {
                               : "var(--text-tertiary)",
                       }}
                     >
-                      {l.conversionRate > 0 ? `${l.conversionRate}%` : "â€”"}
+                      {l.conversionRate > 0 ? `${l.conversionRate}%` : "—"}
                     </td>
                     <td style={tdStyle}>
                       <Badge label={l.status} bg={ls.bg} color={ls.color} />
@@ -1689,7 +1689,7 @@ function AnalyticsTab() {
                   <td
                     style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}
                   >
-                    {cp.cpl > 0 ? fmt(Math.round(cp.cpl)) : "â€”"}
+                    {cp.cpl > 0 ? fmt(Math.round(cp.cpl)) : "—"}
                   </td>
                   <td style={tdStyle}>
                     {cp.leads > 0 && (

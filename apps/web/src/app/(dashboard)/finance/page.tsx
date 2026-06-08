@@ -225,7 +225,7 @@ function PLTab() {
               color: "var(--text-primary)",
             }}
           >
-            Profit & Loss â€” March 2026
+            Profit & Loss — March 2026
           </span>
           <button
             style={{
@@ -636,7 +636,7 @@ function JournalTab() {
                         return;
                       const snapshot = e;
                       undoableDelete({
-                        label: `Deleted journal â€” ${snapshot.entryNumber}`,
+                        label: `Deleted journal — ${snapshot.entryNumber}`,
                         mutate: () =>
                           useFinanceStore
                             .getState()

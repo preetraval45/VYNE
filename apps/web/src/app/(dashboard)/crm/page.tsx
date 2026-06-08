@@ -171,7 +171,7 @@ function TabBtn({
   );
 }
 
-// Deal-owners used in the assignee filter. Derived from fixture seed data â€”
+// Deal-owners used in the assignee filter. Derived from fixture seed data —
 // keep in sync with whichever names appear on `deal.assignee` below.
 const ASSIGNEES = ["Alex", "Jamie", "Morgan", "Sam", "Taylor"] as const;
 
@@ -209,7 +209,7 @@ function PipelineTab({
       {STAGES.map((stage) => {
         const stageDeals = deals.filter((d) => d.stage === stage);
         const stageTotal = stageDeals.reduce((s, d) => s + d.value, 0);
-        // Weighted total = sum(value Ã— probability/100). Won/Lost short-circuit
+        // Weighted total = sum(value × probability/100). Won/Lost short-circuit
         // to 100/0 so columns at the ends still match raw totals when expected.
         const stageWeighted = stageDeals.reduce((s, d) => {
           const prob =
@@ -230,7 +230,7 @@ function PipelineTab({
             key={stage}
             className="min-w-[260px] max-w-[260px] shrink-0 flex flex-col gap-2"
           >
-            {/* Column header â€” muted, uses kit Pill tone */}
+            {/* Column header — muted, uses kit Pill tone */}
             <div
               className="rounded-[10px] px-3 py-2.5"
               style={{
@@ -263,7 +263,7 @@ function PipelineTab({
               >
                 {fmt(stageTotal)}
               </div>
-              {/* Weighted line: value Ã— probability â€” what actually rolls into forecast */}
+              {/* Weighted line: value × probability — what actually rolls into forecast */}
               {stage !== "Lost" && stageDeals.length > 0 && (
                 <div
                   style={{
@@ -414,7 +414,7 @@ function DealsTableTab({
     }
   }
 
-  // DSA: token-trie search index â€” O(prefix-len + matches) per keystroke.
+  // DSA: token-trie search index — O(prefix-len + matches) per keystroke.
   const searchHits = useSearchIndex(
     deals,
     (d) => [d.company, d.contactName, d.email],
@@ -957,7 +957,7 @@ function CRMPageInner() {
       if (!d) return;
       const snapshot = { ...d };
       undoableDelete({
-        label: `Deleted deal â€” ${snapshot.company}`,
+        label: `Deleted deal — ${snapshot.company}`,
         mutate: () => deleteDealFromStore(snapshot.id),
         restore: () => useCRMStore.getState().addDeal(snapshot),
       });
@@ -1025,7 +1025,7 @@ function CRMPageInner() {
 
   const dash = usePageDashboard("crm", "30d");
 
-  // Saved views â€” URL-shareable filter presets for the deals table.
+  // Saved views — URL-shareable filter presets for the deals table.
   interface CrmFilters extends Record<string, unknown> {
     stage?: string;
     minValue?: number;
@@ -1188,7 +1188,7 @@ function CRMPageInner() {
             label: "Weighted forecast",
             value: fmt(weightedForecast),
             sparkline: forecastSparkline,
-            hint: "value Ã— probability",
+            hint: "value × probability",
           },
           {
             label: "Won (revenue)",
@@ -1250,7 +1250,7 @@ function CRMPageInner() {
           <EmptyState
             icon={<TrendingUp size={20} />}
             title="No deals yet"
-            description="Track your pipeline by creating a first deal â€” or have Vyne AI draft it for you in seconds."
+            description="Track your pipeline by creating a first deal — or have Vyne AI draft it for you in seconds."
             primary={{ label: "New deal", href: "/crm/deals/new" }}
             aiPrompt="Create a deal for "
           />
@@ -1471,7 +1471,7 @@ function DealDetailPanel({
             <DetailRow label="Contact" value={deal.contactName} />
             <DetailRow
               label="Email"
-              value={deal.email || "â€”"}
+              value={deal.email || "—"}
               mono={!!deal.email}
             />
             <DetailRow label="Source" value={deal.source} />

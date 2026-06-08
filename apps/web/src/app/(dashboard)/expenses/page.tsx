@@ -208,7 +208,7 @@ function Modal({
               color: "var(--text-secondary)",
             }}
           >
-            Ã—
+            ×
           </button>
         </div>
         {children}
@@ -238,7 +238,7 @@ function MyExpensesTab({
   onAdd: (e: Omit<Expense, "id">) => void;
   onSubmit: (id: string) => void;
 }>) {
-  // PH-F typecheck fix â€” pull updateExpense from the store so the
+  // PH-F typecheck fix — pull updateExpense from the store so the
   // inline EditableCell handlers below can mutate rows server-side.
   const updateExpense = useExpensesStore((s) => s.updateExpense);
   const [showModal, setShowModal] = useState(false);
@@ -847,7 +847,7 @@ function ApprovalsTab({
           }}
         >
           <div style={{ fontSize: 32, marginBottom: 10 }}>âœ…</div>
-          All caught up â€” no pending approvals
+          All caught up — no pending approvals
         </div>
       )}
 
