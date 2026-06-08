@@ -392,7 +392,7 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Invoices", href: "/invoicing?view=invoices" },
       { label: "Credit Notes", href: "/invoicing?view=creditNotes" },
       { label: "Payments", href: "/invoicing?view=payments" },
-      { label: "Vendors", href: "/invoicing?view=vendors" },
+      { label: "Vendors", href: "/vendors" },
       { label: "Bills", href: "/invoicing?view=bills" },
       { label: "Refunds", href: "/invoicing?view=refunds" },
     ],

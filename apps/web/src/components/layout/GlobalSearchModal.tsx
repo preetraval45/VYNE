@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -84,7 +78,10 @@ function loadRecent(): string[] {
 function saveRecent(items: string[]) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(RECENT_KEY, JSON.stringify(items.slice(0, MAX_RECENT)));
+    localStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify(items.slice(0, MAX_RECENT)),
+    );
   } catch {
     /* ignore */
   }
@@ -121,7 +118,11 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const saved = useSavedSearches();
-  const analytics = useSearchAnalytics();
+  // NOTE: do NOT subscribe to the analytics store here. The logging effect
+  // below calls record(), which mutates that store — subscribing would change
+  // this component's deps on every record and spin an infinite render loop
+  // (React #185, white-screen on every keystroke). Read it imperatively via
+  // getState() instead, exactly like CommandPalette does.
 
   useEffect(() => {
     if (!open) return;
@@ -135,7 +136,8 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
   const { hits, parsed, suggestion } = useMemo(() => {
     const trimmed = debounced.trim();
     const parsed = parseQuery(trimmed);
-    if (!trimmed) return { hits: [], parsed, suggestion: null as string | null };
+    if (!trimmed)
+      return { hits: [], parsed, suggestion: null as string | null };
     const corpus = buildGlobalCorpus();
     const result = searchCorpus(corpus, trimmed, 60);
     const suggestion =
@@ -148,7 +150,9 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
   const grouped = useMemo(() => groupByType(hits), [hits]);
   const flat = useMemo(() => Array.from(grouped.values()).flat(), [grouped]);
   const previewed: ScoredHit | null =
-    flat.length > 0 ? flat[Math.min(selectedIndex, flat.length - 1)] ?? null : null;
+    flat.length > 0
+      ? (flat[Math.min(selectedIndex, flat.length - 1)] ?? null)
+      : null;
 
   // Reset selection on query change.
   useEffect(() => setSelectedIndex(0), [debounced]);
@@ -156,14 +160,14 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
   // Log every settled search to analytics.
   useEffect(() => {
     if (!open || !debounced.trim()) return;
-    analytics.record({
+    useSearchAnalytics.getState().record({
       query: debounced,
       resultCount: hits.length,
       clicked: false,
     });
     // Snapshot for the lifetime of this query — we don't want a record
     // every keystroke; the debounce already smooths that.
-  }, [debounced, hits.length, open, analytics]);
+  }, [debounced, hits.length, open]);
 
   const commit = useCallback(
     (hit: ScoredHit) => {
@@ -176,7 +180,7 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
         .slice(0, MAX_RECENT);
       saveRecent(next);
       setRecent(next);
-      analytics.record({
+      useSearchAnalytics.getState().record({
         query: debounced,
         resultCount: hits.length,
         clicked: true,
@@ -185,7 +189,7 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
       router.push(hit.record.href);
       onClose();
     },
-    [debounced, recent, router, onClose, analytics, hits.length],
+    [debounced, recent, router, onClose, hits.length],
   );
 
   // Keyboard navigation.
@@ -274,7 +278,8 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
                 borderRadius: 999,
                 background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
                 color: "var(--vyne-accent, var(--vyne-purple))",
-                border: "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32)",
+                border:
+                  "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32)",
                 fontSize: 11,
                 fontWeight: 600,
                 whiteSpace: "nowrap",
@@ -339,7 +344,9 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
             style={{
               overflow: "auto",
               padding: 8,
-              borderRight: previewed ? "1px solid var(--content-border)" : undefined,
+              borderRight: previewed
+                ? "1px solid var(--content-border)"
+                : undefined,
             }}
           >
             {!query.trim() && (
@@ -348,10 +355,7 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
                   <Group title="Saved" icon={<Star size={11} />}>
                     {saved.items
                       .slice()
-                      .sort(
-                        (a, b) =>
-                          (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0),
-                      )
+                      .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
                       .map((s) => (
                         <SidebarRow
                           key={s.id}
@@ -600,7 +604,8 @@ export function GlobalSearchModal({ open, onClose }: GlobalSearchModalProps) {
                     color: "var(--text-tertiary)",
                   }}
                 >
-                  Updated: {new Date(previewed.record.updatedAt).toLocaleString()}
+                  Updated:{" "}
+                  {new Date(previewed.record.updatedAt).toLocaleString()}
                 </div>
               )}
               <button
@@ -822,7 +827,14 @@ function SidebarRow({
         }
       >
         <span style={{ color: "var(--text-tertiary)" }}>{icon}</span>
-        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            flex: 1,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {label}
         </span>
         {hint && (
@@ -867,7 +879,13 @@ function EmptyHint() {
       }}
     >
       <Search size={28} style={{ margin: "0 auto 10px", opacity: 0.4 }} />
-      <div style={{ fontWeight: 600, marginBottom: 4, color: "var(--text-secondary)" }}>
+      <div
+        style={{
+          fontWeight: 600,
+          marginBottom: 4,
+          color: "var(--text-secondary)",
+        }}
+      >
         Search every record
       </div>
       <div>Deals · contacts · tasks · invoices · docs · products.</div>

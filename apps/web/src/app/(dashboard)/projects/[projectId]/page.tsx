@@ -71,7 +71,12 @@ function toneFromColor(hex: string): Tone {
 }
 import toast from "react-hot-toast";
 import { CalendarView } from "@/components/shared/CalendarView";
-import { GanttBoard, type GanttRow, type GanttGroupBy, type GanttZoom } from "@/components/shared/gantt";
+import {
+  GanttBoard,
+  type GanttRow,
+  type GanttGroupBy,
+  type GanttZoom,
+} from "@/components/shared/gantt";
 import { optimisticAction } from "@/lib/optimistic";
 
 // ─── Constants ──────────────────────────────────────────────────────
@@ -141,7 +146,9 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
     return Math.round((done / tasks.length) * 100);
   }, [tasks]);
 
-  const inProgressCount = tasks.filter((t) => t.status === "in_progress").length;
+  const inProgressCount = tasks.filter(
+    (t) => t.status === "in_progress",
+  ).length;
   const blockedCount = tasks.filter((t) => t.status === "blocked").length;
   const overdueCount = tasks.filter((t) => {
     if (!t.dueDate || t.status === "done") return false;
@@ -404,8 +411,16 @@ export default function ProjectDetailPage({ params }: ProjectPageProps) {
         kpis={[
           { label: "Total tasks", value: tasks.length.toString() },
           { label: "In progress", value: inProgressCount.toString() },
-          { label: "Blocked", value: blockedCount.toString(), goodWhenUp: false },
-          { label: "Overdue", value: overdueCount.toString(), goodWhenUp: false },
+          {
+            label: "Blocked",
+            value: blockedCount.toString(),
+            goodWhenUp: false,
+          },
+          {
+            label: "Overdue",
+            value: overdueCount.toString(),
+            goodWhenUp: false,
+          },
           { label: "Progress", value: `${progress}%` },
         ]}
       />
@@ -808,7 +823,9 @@ function ViewBtn({
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
       style={{
         background: active ? "var(--content-bg)" : "transparent",
-        color: active ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
+        color: active
+          ? "var(--vyne-accent, var(--vyne-purple))"
+          : "var(--text-tertiary)",
         boxShadow: active ? "var(--shadow-sm)" : "none",
       }}
     >
@@ -1000,7 +1017,7 @@ function TaskListView({
                 </td>
                 <td className="px-3 py-2.5">
                   <div className="flex gap-1">
-                    {task.tags.slice(0, 2).map((tag) => (
+                    {(task.tags ?? []).slice(0, 2).map((tag) => (
                       <span
                         key={tag}
                         className="text-xs px-1.5 py-0.5 rounded font-medium"
@@ -1019,26 +1036,33 @@ function TaskListView({
                     aria-label="Delete"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!confirm("Delete this task? You'll have 5 seconds to undo.")) return;
+                      if (
+                        !confirm(
+                          "Delete this task? You'll have 5 seconds to undo.",
+                        )
+                      )
+                        return;
                       const snapshot = task;
                       undoableDelete({
                         label: `Deleted task — ${snapshot.title}`,
                         mutate: () => deleteTask(snapshot.id),
                         restore: () =>
-                          useProjectsStore.getState().addTask(snapshot.projectId, {
-                            title: snapshot.title,
-                            description: snapshot.description,
-                            status: snapshot.status,
-                            priority: snapshot.priority,
-                            assigneeId: snapshot.assigneeId,
-                            startDate: snapshot.startDate,
-                            dueDate: snapshot.dueDate,
-                            estimatedHours: snapshot.estimatedHours,
-                            timeSpent: snapshot.timeSpent,
-                            tags: snapshot.tags,
-                            subtasks: snapshot.subtasks,
-                            comments: snapshot.comments,
-                          }),
+                          useProjectsStore
+                            .getState()
+                            .addTask(snapshot.projectId, {
+                              title: snapshot.title,
+                              description: snapshot.description,
+                              status: snapshot.status,
+                              priority: snapshot.priority,
+                              assigneeId: snapshot.assigneeId,
+                              startDate: snapshot.startDate,
+                              dueDate: snapshot.dueDate,
+                              estimatedHours: snapshot.estimatedHours,
+                              timeSpent: snapshot.timeSpent,
+                              tags: snapshot.tags,
+                              subtasks: snapshot.subtasks,
+                              comments: snapshot.comments,
+                            }),
                       });
                     }}
                     className="p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
@@ -1277,7 +1301,9 @@ const DEFAULT_GANTT_PREFS: GanttPrefs = {
 function loadGanttPrefs(projectId: string): GanttPrefs {
   if (typeof window === "undefined") return DEFAULT_GANTT_PREFS;
   try {
-    const raw = window.localStorage.getItem(`vyne-gantt-pref:project:${projectId}`);
+    const raw = window.localStorage.getItem(
+      `vyne-gantt-pref:project:${projectId}`,
+    );
     if (!raw) return DEFAULT_GANTT_PREFS;
     const parsed = JSON.parse(raw) as Partial<GanttPrefs>;
     return { ...DEFAULT_GANTT_PREFS, ...parsed };
@@ -1310,7 +1336,9 @@ function TaskGanttView({
   const addDependency = useProjectsStore((s) => s.addDependency);
   const allDependencies = useProjectsStore((s) => s.taskDependencies);
 
-  const [prefs, setPrefs] = useState<GanttPrefs>(() => loadGanttPrefs(projectId));
+  const [prefs, setPrefs] = useState<GanttPrefs>(() =>
+    loadGanttPrefs(projectId),
+  );
   const setPref = useCallback(
     <K extends keyof GanttPrefs>(key: K, value: GanttPrefs[K]) => {
       setPrefs((prev) => {
@@ -1354,7 +1382,7 @@ function TaskGanttView({
       });
       // Indented subtask children — only those with a real dueDate so we
       // don't fabricate timeline slots out of thin air.
-      for (const s of t.subtasks) {
+      for (const s of t.subtasks ?? []) {
         if (!s.dueDate && !s.startDate) continue;
         const sStart = s.startDate ?? s.dueDate ?? start;
         const sEnd = s.dueDate ?? sStart;
@@ -1497,7 +1525,15 @@ function GanttToolbar({
     >
       <ZoomSegmented value={prefs.zoom} onChange={(z) => setPref("zoom", z)} />
 
-      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+      <label
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+        }}
+      >
         <Layers size={12} aria-hidden="true" />
         Group by
         <select
@@ -1513,7 +1549,15 @@ function GanttToolbar({
         </select>
       </label>
 
-      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+      <label
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+        }}
+      >
         <input
           type="checkbox"
           checked={prefs.showWeekends}
@@ -1522,7 +1566,15 @@ function GanttToolbar({
         Show weekends
       </label>
 
-      <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--text-tertiary)" }}>
+      <label
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 12,
+          color: "var(--text-tertiary)",
+        }}
+      >
         <input
           type="checkbox"
           checked={prefs.showCriticalPath}
@@ -1574,7 +1626,9 @@ function ZoomSegmented({
               fontWeight: 600,
               borderRadius: 4,
               border: "none",
-              background: selected ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+              background: selected
+                ? "var(--vyne-accent, var(--vyne-purple))"
+                : "transparent",
               color: selected ? "#fff" : "var(--text-secondary)",
               cursor: "pointer",
             }}
@@ -1747,7 +1801,7 @@ function BoardCard({
       </div>
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          {task.tags.slice(0, 1).map((tag) => (
+          {(task.tags ?? []).slice(0, 1).map((tag) => (
             <span
               key={tag}
               className="text-xs px-1.5 py-0.5 rounded font-medium"
@@ -1775,7 +1829,7 @@ function BoardCard({
               {formatDate(task.dueDate)}
             </span>
           )}
-          {task.comments.length > 0 && (
+          {(task.comments?.length ?? 0) > 0 && (
             <span
               className="flex items-center gap-1 text-xs"
               style={{ color: "var(--text-tertiary)" }}
@@ -2586,7 +2640,8 @@ function TaskDetailPanel({
                 }}
                 onFocus={(e) => {
                   e.target.style.border = "1px solid #06B6D4";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
+                  e.target.style.boxShadow =
+                    "0 0 0 3px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)";
                 }}
               />
             </div>
@@ -2808,7 +2863,10 @@ function TaskDetailPanel({
                     <div key={comment.id} className="flex gap-3">
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
-                        style={{ background: author?.color ?? "var(--vyne-accent, #06B6D4)" }}
+                        style={{
+                          background:
+                            author?.color ?? "var(--vyne-accent, #06B6D4)",
+                        }}
                       >
                         {author?.initials ?? "?"}
                       </div>
@@ -2875,7 +2933,10 @@ function TaskDetailPanel({
                 type="submit"
                 disabled={!commentText.trim()}
                 className="p-2.5 rounded-lg transition-all disabled:opacity-40"
-                style={{ background: "var(--vyne-accent, var(--vyne-purple))", color: "#FFFFFF" }}
+                style={{
+                  background: "var(--vyne-accent, var(--vyne-purple))",
+                  color: "#FFFFFF",
+                }}
               >
                 <Send size={16} />
               </button>
@@ -2922,7 +2983,11 @@ function PropRow({
 
 import { Sparkline as _Sparkline } from "@/components/code/Sparkline";
 
-function BurndownSparkline({ tasks }: { tasks: Array<{ status: string; updatedAt?: string }> }) {
+function BurndownSparkline({
+  tasks,
+}: {
+  tasks: Array<{ status: string; updatedAt?: string }>;
+}) {
   const series = (() => {
     const buckets = Array.from({ length: 14 }, () => 0);
     const now = Date.now();
@@ -2948,7 +3013,12 @@ function BurndownSparkline({ tasks }: { tasks: Array<{ status: string; updatedAt
       title="Tasks completed per day, last 14 days"
       style={{ color: "var(--vyne-accent, #5B5BD6)", display: "inline-flex" }}
     >
-      <_Sparkline values={series} width={84} height={18} ariaLabel="Burn-down trend" />
+      <_Sparkline
+        values={series}
+        width={84}
+        height={18}
+        ariaLabel="Burn-down trend"
+      />
     </span>
   );
 }

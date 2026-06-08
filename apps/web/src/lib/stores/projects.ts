@@ -331,7 +331,7 @@ export const useProjectsStore = create<ProjectsState>()(
           existingKeys.length > 0 ? Math.max(...existingKeys) + 1 : 1;
         const identifier = project?.identifier ?? "TASK";
 
-        const newTask: Task = {
+        const base = {
           id: uid(),
           projectId,
           key: `${identifier}-${nextNum}`,
@@ -341,6 +341,23 @@ export const useProjectsStore = create<ProjectsState>()(
           createdAt: now(),
           updatedAt: now(),
           ...taskData,
+        } as Task;
+        // Backfill required fields a loosely-typed quick-create caller (e.g.
+        // QuickCreateIssueModal passes only {title, status, priority} via a
+        // cast) may have omitted. Without these the board/list views crash on
+        // a fresh task with "Cannot read properties of undefined (reading
+        // 'slice')" the moment task.tags / task.comments are read.
+        const newTask: Task = {
+          ...base,
+          description: base.description ?? "",
+          assigneeId: base.assigneeId ?? null,
+          startDate: base.startDate ?? null,
+          dueDate: base.dueDate ?? null,
+          estimatedHours: base.estimatedHours ?? null,
+          timeSpent: base.timeSpent ?? null,
+          tags: base.tags ?? [],
+          subtasks: base.subtasks ?? [],
+          comments: base.comments ?? [],
         };
         set((s) => ({ tasks: [...s.tasks, newTask] }));
         mirrorTaskCreate(newTask);
@@ -451,9 +468,13 @@ export const useProjectsStore = create<ProjectsState>()(
 
       hydrateDependenciesFromServer: async () => {
         try {
-          const res = await fetch("/api/task-dependencies", { cache: "no-store" });
+          const res = await fetch("/api/task-dependencies", {
+            cache: "no-store",
+          });
           if (!res.ok) return;
-          const body = (await res.json()) as { taskDependencies?: TaskDependency[] };
+          const body = (await res.json()) as {
+            taskDependencies?: TaskDependency[];
+          };
           if (Array.isArray(body.taskDependencies)) {
             set({ taskDependencies: body.taskDependencies });
           }
@@ -594,7 +615,10 @@ export const useProject = (id: string) => {
 // (Minified React error #185 — Maximum update depth exceeded).
 export const useProjectTasks = (projectId: string) => {
   const tasks = useProjectsStore((s) => s.tasks);
-  return useMemo(() => tasks.filter((t) => t.projectId === projectId), [tasks, projectId]);
+  return useMemo(
+    () => tasks.filter((t) => t.projectId === projectId),
+    [tasks, projectId],
+  );
 };
 
 export const useTask = (taskId: string) => {

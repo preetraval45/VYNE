@@ -177,9 +177,7 @@ function plainTextStreamFromText(text: string): ReadableStream<Uint8Array> {
       const chunk = {
         choices: [{ delta: { content: text }, index: 0 }],
       };
-      controller.enqueue(
-        encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`),
-      );
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
       controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
       controller.close();
     },
@@ -213,8 +211,7 @@ export async function POST(req: Request) {
   // Try providers in order: GEMINI_API_KEY (preferred, generous free tier),
   // then GROQ_API_KEY (fallback). Both speak the OpenAI chat-completions
   // wire format so the rest of the code is uniform.
-  const geminiKey =
-    process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
 
   if (!geminiKey && !groqKey) {
@@ -261,10 +258,6 @@ export async function POST(req: Request) {
 
   const maxTokens = geminiKey ? 4096 : 1800;
 
-  // Gemini supports the Google Search grounding tool for live web info.
-  // Pass it via the OpenAI-compat endpoint's `tools` field; Gemini routes
-  // it to its native search retrieval. Groq doesn't have this tool, so
-  // we only include it on the Gemini path.
   const upstreamBody: Record<string, unknown> = {
     model: providerModel,
     max_tokens: maxTokens,
@@ -289,32 +282,67 @@ export async function POST(req: Request) {
         : { role: "user", content: question },
     ],
   };
-  if (geminiKey) {
+
+  // Google Search grounding for live web info. Gemini's NATIVE API takes
+  // `tools: [{ google_search: {} }]`, but we call its OpenAI-COMPAT endpoint
+  // (/v1beta/openai/…), which rejects that native shape with a 400 and sinks
+  // the whole answer — this was BUG #3 ("Vyne AI doesn't respond"). So:
+  //   • grounding is OFF unless GEMINI_ENABLE_GROUNDING is explicitly set,
+  //   • and even then we retry once WITHOUT it on a 400, so an optional
+  //     capability can never take down the core chat response.
+  const groundingEnabled =
+    !!geminiKey &&
+    ["1", "true", "yes"].includes(
+      (process.env.GEMINI_ENABLE_GROUNDING ?? "").toLowerCase(),
+    );
+  if (groundingEnabled) {
     upstreamBody.tools = [{ google_search: {} }];
   }
 
-  const upstream = await fetch(providerUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${providerKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(upstreamBody),
-  });
+  const callUpstream = (body: Record<string, unknown>) =>
+    fetch(providerUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${providerKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+  let upstream = await callUpstream(upstreamBody);
+
+  // Grounding fell over (400/4xx) → retry once without it before giving up.
+  if (
+    !upstream.ok &&
+    upstreamBody.tools &&
+    upstream.status >= 400 &&
+    upstream.status < 500
+  ) {
+    const retryBody = { ...upstreamBody };
+    delete retryBody.tools;
+    upstream = await callUpstream(retryBody);
+  }
 
   if (!upstream.ok || !upstream.body) {
     const errText = await upstream.text().catch(() => "Upstream error");
-    return new Response(
-      plainTextStreamFromText(
-        `Vyne AI ran into a problem: ${errText.slice(0, 240)}`,
-      ),
-      {
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache, no-transform",
-        },
+    // Turn opaque provider failures into something the user can act on
+    // instead of a silent dead conversation.
+    let friendly: string;
+    if (upstream.status === 429) {
+      friendly =
+        "Vyne AI is over its current usage limit (the AI provider returned a quota/rate error). Please wait a minute and try again, or upgrade the plan for higher limits.";
+    } else if (upstream.status === 401 || upstream.status === 403) {
+      friendly =
+        "Vyne AI can't reach its model — the configured API key is missing or invalid. An admin needs to set a valid GEMINI_API_KEY in the deployment environment.";
+    } else {
+      friendly = `Vyne AI ran into a problem (HTTP ${upstream.status}): ${errText.slice(0, 200)}`;
+    }
+    return new Response(plainTextStreamFromText(friendly), {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
       },
-    );
+    });
   }
 
   // Pass-through OpenAI-format SSE stream directly.

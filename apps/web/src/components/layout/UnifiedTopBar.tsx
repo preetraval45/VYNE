@@ -7,14 +7,13 @@ import {
   MessageSquare,
   StickyNote,
   Download as DownloadIcon,
-  Search,
 } from "lucide-react";
-import { useUIStore } from "@/lib/stores/ui";
 import { VyneLogo } from "@/components/brand/VyneLogo";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useMounted } from "@/hooks/useMounted";
 import { QuickCreateIssueModal } from "@/components/layout/QuickCreateIssueModal";
 import { NotificationBell } from "@/components/layout/NotificationBell";
+import { GlobalSearchInput } from "@/components/layout/GlobalSearchInput";
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Working late";
@@ -70,13 +69,14 @@ export function UnifiedTopBar() {
       })
     : "";
 
-  const userInitials = (user?.name ?? "")
-    .split(" ")
-    .map((p) => p[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase() || "U";
+  const userInitials =
+    (user?.name ?? "")
+      .split(" ")
+      .map((p) => p[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
 
   const iconBtn: React.CSSProperties = {
     width: 30,
@@ -95,246 +95,218 @@ export function UnifiedTopBar() {
 
   return (
     <>
-    <QuickCreateIssueModal
-      open={issueModalOpen}
-      onClose={() => setIssueModalOpen(false)}
-    />
-    <header
-      className="vyne-unified-topbar"
-      role="banner"
-      aria-label="Top navigation"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 45,
-        minHeight: 48,
-        background: "var(--content-bg)",
-        borderBottom: "1px solid var(--content-border)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        padding: "6px 16px",
-        gap: 10,
-        flexWrap: "nowrap",
-        overflowX: "auto",
-        flexShrink: 0,
-      }}
-      suppressHydrationWarning
-    >
-      {/* Left: logo + greeting (auto-margins push the rest right) */}
-      <div
+      <QuickCreateIssueModal
+        open={issueModalOpen}
+        onClose={() => setIssueModalOpen(false)}
+      />
+      <header
+        className="vyne-unified-topbar"
+        role="banner"
+        aria-label="Top navigation"
         style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 45,
+          minHeight: 48,
+          background: "var(--content-bg)",
+          borderBottom: "1px solid var(--content-border)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          minWidth: 0,
-          flexShrink: 0,
-          marginRight: "auto",
-        }}
-      >
-        <VyneLogo variant="mark" markSize={20} />
-        <h1
-          className="vyne-unified-greeting"
-          style={{
-            fontSize: 13,
-            fontWeight: 600,
-            color: "var(--text-primary)",
-            margin: 0,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            letterSpacing: "-0.01em",
-          }}
-          suppressHydrationWarning
-        >
-          {greeting}, {firstName} 👋
-        </h1>
-      </div>
-
-      <span
-        className="vyne-unified-date"
-        style={{
-          fontSize: 11.5,
-          color: "var(--text-tertiary)",
-          whiteSpace: "nowrap",
+          justifyContent: "flex-end",
+          padding: "6px 16px",
+          gap: 10,
+          flexWrap: "nowrap",
+          overflowX: "auto",
           flexShrink: 0,
         }}
         suppressHydrationWarning
       >
-        {todayLabel}
-      </span>
+        {/* Left: logo + greeting (auto-margins push the rest right) */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            minWidth: 0,
+            flexShrink: 0,
+            marginRight: "auto",
+          }}
+        >
+          <VyneLogo variant="mark" markSize={20} />
+          <h1
+            className="vyne-unified-greeting"
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              letterSpacing: "-0.01em",
+            }}
+            suppressHydrationWarning
+          >
+            {greeting}, {firstName} 👋
+          </h1>
+        </div>
 
-      <button
-        type="button"
-        onClick={() => setIssueModalOpen(true)}
-        aria-label="Create new issue"
-        className="vyne-unified-newissue"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--vyne-accent-light, #7c4dff) 0%, var(--vyne-accent, var(--vyne-purple)) 100%)",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "6px 12px",
-          fontSize: 11.5,
-          fontWeight: 600,
-          cursor: "pointer",
-          whiteSpace: "nowrap",
-          flexShrink: 0,
-          boxShadow:
-            "0 4px 12px rgba(124, 77, 255, 0.32), inset 0 1px 0 rgba(255,255,255,0.18)",
-        }}
-      >
-        <span className="vyne-unified-newissue-label">+ New Issue</span>
-      </button>
+        <span
+          className="vyne-unified-date"
+          style={{
+            fontSize: 11.5,
+            color: "var(--text-tertiary)",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+          suppressHydrationWarning
+        >
+          {todayLabel}
+        </span>
 
-      <div
-        aria-label={user?.name ?? "Profile"}
-        title={user?.name ?? "Profile"}
-        className="vyne-unified-avatar"
-        style={{
-          width: 26,
-          height: 26,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg,var(--vyne-accent, #06B6D4),var(--vyne-accent-deep, #0891B2))",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 10,
-          fontWeight: 700,
-          color: "#fff",
-          flexShrink: 0,
-          boxShadow: "0 2px 6px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32)",
-        }}
-      >
-        {userInitials}
-      </div>
+        <button
+          type="button"
+          onClick={() => setIssueModalOpen(true)}
+          aria-label="Create new issue"
+          className="vyne-unified-newissue"
+          style={{
+            background:
+              "linear-gradient(135deg, var(--vyne-accent-light, #7c4dff) 0%, var(--vyne-accent, var(--vyne-purple)) 100%)",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "6px 12px",
+            fontSize: 11.5,
+            fontWeight: 600,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            boxShadow:
+              "0 4px 12px rgba(124, 77, 255, 0.32), inset 0 1px 0 rgba(255,255,255,0.18)",
+          }}
+        >
+          <span className="vyne-unified-newissue-label">+ New Issue</span>
+        </button>
 
-      <div
-        aria-hidden="true"
-        className="vyne-unified-divider"
-        style={{
-          width: 1,
-          height: 22,
-          background: "var(--content-border)",
-          flexShrink: 0,
-        }}
-      />
+        <div
+          aria-label={user?.name ?? "Profile"}
+          title={user?.name ?? "Profile"}
+          className="vyne-unified-avatar"
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: "50%",
+            background:
+              "linear-gradient(135deg,var(--vyne-accent, #06B6D4),var(--vyne-accent-deep, #0891B2))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 10,
+            fontWeight: 700,
+            color: "#fff",
+            flexShrink: 0,
+            boxShadow:
+              "0 2px 6px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32)",
+          }}
+        >
+          {userInitials}
+        </div>
 
-      <Link
-        href="/ai/chat"
-        aria-label="Open Vyne AI"
-        title="Vyne AI — copilot, BRDs, diagrams, sheets, slides"
-        className="vyne-unified-vyne-ai"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          height: 30,
-          padding: "0 12px",
-          borderRadius: 8,
-          background:
-            "linear-gradient(135deg, var(--teal-400) 0%, var(--teal-600) 100%)",
-          border: "1px solid var(--teal-500)",
-          color: "#fff",
-          fontSize: 11.5,
-          fontWeight: 600,
-          textDecoration: "none",
-          flexShrink: 0,
-          boxShadow:
-            "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 6px 16px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.20)",
-        }}
-      >
-        <Sparkles size={12} strokeWidth={2.25} />
-        Vyne AI
-      </Link>
+        <div
+          aria-hidden="true"
+          className="vyne-unified-divider"
+          style={{
+            width: 1,
+            height: 22,
+            background: "var(--content-border)",
+            flexShrink: 0,
+          }}
+        />
 
-      <Link
-        href="/chat"
-        aria-label="Open messages"
-        title="Messages"
-        className="vyne-unified-chat"
-        style={iconBtn}
-      >
-        <MessageSquare size={14} />
-      </Link>
+        <Link
+          href="/ai/chat"
+          aria-label="Open Vyne AI"
+          title="Vyne AI — copilot, BRDs, diagrams, sheets, slides"
+          className="vyne-unified-vyne-ai"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            height: 30,
+            padding: "0 12px",
+            borderRadius: 8,
+            background:
+              "linear-gradient(135deg, var(--teal-400) 0%, var(--teal-600) 100%)",
+            border: "1px solid var(--teal-500)",
+            color: "#fff",
+            fontSize: 11.5,
+            fontWeight: 600,
+            textDecoration: "none",
+            flexShrink: 0,
+            boxShadow:
+              "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 6px 16px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.20)",
+          }}
+        >
+          <Sparkles size={12} strokeWidth={2.25} />
+          Vyne AI
+        </Link>
 
-      <NotificationBell />
+        <Link
+          href="/chat"
+          aria-label="Open messages"
+          title="Messages"
+          className="vyne-unified-chat"
+          style={iconBtn}
+        >
+          <MessageSquare size={14} />
+        </Link>
 
-      <SearchTopbarButton />
+        <NotificationBell />
 
-      <button
-        type="button"
-        onClick={() =>
-          globalThis.dispatchEvent(new CustomEvent("vyne:open-notes"))
-        }
-        aria-label="Open quick notes"
-        title="Quick notes"
-        className="vyne-unified-notes"
-        style={iconBtn}
-      >
-        <StickyNote size={14} />
-      </button>
+        <GlobalSearchInput />
 
-      <Link
-        href="/download"
-        aria-label="Download desktop and mobile apps"
-        title="Get the desktop & mobile apps"
-        className="vyne-unified-getapp"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          height: 30,
-          padding: "0 12px",
-          borderRadius: 8,
-          background:
-            "linear-gradient(135deg, var(--teal-500) 0%, var(--teal-700) 100%)",
-          color: "#fff",
-          fontSize: 11.5,
-          fontWeight: 600,
-          border: "1px solid var(--teal-500)",
-          textDecoration: "none",
-          flexShrink: 0,
-          whiteSpace: "nowrap",
-          boxShadow:
-            "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), 0 4px 12px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28), inset 0 1px 0 rgba(255,255,255,0.18)",
-        }}
-      >
-        <DownloadIcon size={12} strokeWidth={2.25} />
-        Get app
-      </Link>
-    </header>
+        <button
+          type="button"
+          onClick={() =>
+            globalThis.dispatchEvent(new CustomEvent("vyne:open-notes"))
+          }
+          aria-label="Open quick notes"
+          title="Quick notes"
+          className="vyne-unified-notes"
+          style={iconBtn}
+        >
+          <StickyNote size={14} />
+        </button>
+
+        <Link
+          href="/download"
+          aria-label="Download desktop and mobile apps"
+          title="Get the desktop & mobile apps"
+          className="vyne-unified-getapp"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            height: 30,
+            padding: "0 12px",
+            borderRadius: 8,
+            background:
+              "linear-gradient(135deg, var(--teal-500) 0%, var(--teal-700) 100%)",
+            color: "#fff",
+            fontSize: 11.5,
+            fontWeight: 600,
+            border: "1px solid var(--teal-500)",
+            textDecoration: "none",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+            boxShadow:
+              "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10), 0 4px 12px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28), inset 0 1px 0 rgba(255,255,255,0.18)",
+          }}
+        >
+          <DownloadIcon size={12} strokeWidth={2.25} />
+          Get app
+        </Link>
+      </header>
     </>
-  );
-}
-
-/** Magnifier button in the topbar — opens the Phase 14 global search
- *  modal. Keyboard shortcut Ctrl+/ does the same; this button surfaces
- *  the feature to mouse users. */
-function SearchTopbarButton() {
-  const setOpen = useUIStore((s) => s.setGlobalSearchOpen);
-  return (
-    <button
-      type="button"
-      onClick={() => setOpen(true)}
-      aria-label="Search workspace · Ctrl+/"
-      title="Search workspace (Ctrl+/)"
-      className="vyne-unified-search"
-      style={{
-        width: 32,
-        height: 32,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 8,
-        border: "1px solid transparent",
-        background: "transparent",
-        color: "var(--text-secondary)",
-        cursor: "pointer",
-      }}
-    >
-      <Search size={14} />
-    </button>
   );
 }

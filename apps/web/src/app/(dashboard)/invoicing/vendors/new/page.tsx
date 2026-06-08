@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   FormPageLayout,
@@ -21,13 +21,33 @@ const inputStyle: React.CSSProperties = {
 
 export default function NewVendorPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Where to land after save/cancel. The standalone /vendors page passes
+  // ?return=/vendors so the flow stays coherent; defaults to Invoicing.
+  const returnTo = searchParams.get("return") || "/invoicing";
   const addVendor = useInvoicingStore((s) => s.addVendor);
 
-  const [form, setForm] = useState({ name: "", contact: "", email: "", phone: "" });
+  const [form, setForm] = useState({
+    name: "",
+    contact: "",
+    email: "",
+    phone: "",
+    website: "",
+    category: "",
+    paymentTerms: "",
+    taxId: "",
+    address: "",
+    notes: "",
+  });
   const [submitting, setSubmitting] = useState(false);
 
-  const dirty = !!(form.name || form.contact || form.email || form.phone);
+  const dirty = Object.values(form).some((v) => v.trim().length > 0);
   const canSubmit = form.name.trim().length > 0;
+
+  const set =
+    (key: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,21 +58,30 @@ export default function NewVendorPage() {
       contact: form.contact.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
+      website: form.website.trim() || undefined,
+      category: form.category.trim() || undefined,
+      paymentTerms: form.paymentTerms.trim() || undefined,
+      taxId: form.taxId.trim() || undefined,
+      address: form.address.trim() || undefined,
+      notes: form.notes.trim() || undefined,
     });
     toast.success(`Vendor "${form.name}" created`);
-    router.push("/invoicing");
+    router.push(returnTo);
   }
 
   return (
     <FormPageLayout
       title="New vendor"
       subtitle="Add a vendor for bills and payments"
-      breadcrumbs={[{ label: "Invoicing", href: "/invoicing" }, { label: "New vendor" }]}
-      backHref="/invoicing"
+      breadcrumbs={[
+        { label: "Invoicing", href: "/invoicing" },
+        { label: "New vendor" },
+      ]}
+      backHref={returnTo}
       dirty={dirty}
       footer={
         <FormFooterButtons
-          onCancel={() => router.push("/invoicing")}
+          onCancel={() => router.push(returnTo)}
           primaryLabel="Create vendor"
           primaryForm="new-vendor-form"
           primaryDisabled={!canSubmit}
@@ -67,7 +96,7 @@ export default function NewVendorPage() {
               id="vendor-name"
               type="text"
               value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              onChange={set("name")}
               placeholder="Supplier Ltd."
               required
               autoFocus
@@ -80,19 +109,21 @@ export default function NewVendorPage() {
               id="vendor-contact"
               type="text"
               value={form.contact}
-              onChange={(e) => setForm((f) => ({ ...f, contact: e.target.value }))}
+              onChange={set("contact")}
               placeholder="Jane Smith"
               className={inputClass}
               style={inputStyle}
             />
           </FormField>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          >
             <FormField label="Email" htmlFor="vendor-email">
               <input
                 id="vendor-email"
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={set("email")}
                 placeholder="ap@vendor.com"
                 className={inputClass}
                 style={inputStyle}
@@ -103,13 +134,86 @@ export default function NewVendorPage() {
                 id="vendor-phone"
                 type="tel"
                 value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                onChange={set("phone")}
                 placeholder="+1 (555) 000-0000"
                 className={inputClass}
                 style={inputStyle}
               />
             </FormField>
           </div>
+        </FormSection>
+
+        <FormSection title="Details">
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          >
+            <FormField label="Website" htmlFor="vendor-website">
+              <input
+                id="vendor-website"
+                type="text"
+                value={form.website}
+                onChange={set("website")}
+                placeholder="vendor.com"
+                className={inputClass}
+                style={inputStyle}
+              />
+            </FormField>
+            <FormField label="Category" htmlFor="vendor-category">
+              <input
+                id="vendor-category"
+                type="text"
+                value={form.category}
+                onChange={set("category")}
+                placeholder="Raw materials, Logistics, SaaS…"
+                className={inputClass}
+                style={inputStyle}
+              />
+            </FormField>
+            <FormField label="Payment terms" htmlFor="vendor-terms">
+              <input
+                id="vendor-terms"
+                type="text"
+                value={form.paymentTerms}
+                onChange={set("paymentTerms")}
+                placeholder="Net 30"
+                className={inputClass}
+                style={inputStyle}
+              />
+            </FormField>
+            <FormField label="Tax ID / EIN" htmlFor="vendor-taxid">
+              <input
+                id="vendor-taxid"
+                type="text"
+                value={form.taxId}
+                onChange={set("taxId")}
+                placeholder="12-3456789"
+                className={inputClass}
+                style={inputStyle}
+              />
+            </FormField>
+          </div>
+          <FormField label="Address" htmlFor="vendor-address">
+            <input
+              id="vendor-address"
+              type="text"
+              value={form.address}
+              onChange={set("address")}
+              placeholder="123 Industrial Way, Charlotte, NC"
+              className={inputClass}
+              style={inputStyle}
+            />
+          </FormField>
+          <FormField label="Notes" htmlFor="vendor-notes">
+            <textarea
+              id="vendor-notes"
+              value={form.notes}
+              onChange={set("notes")}
+              placeholder="Preferred supplier, lead times, contract refs…"
+              rows={3}
+              className={inputClass}
+              style={{ ...inputStyle, resize: "vertical" }}
+            />
+          </FormField>
         </FormSection>
       </form>
     </FormPageLayout>

@@ -120,6 +120,15 @@ export interface Vendor {
   totalPurchased: number;
   outstanding: number;
   status: VendorStatus;
+  // Optional richer details captured on the New Vendor form / Vendors page.
+  website?: string;
+  category?: string;
+  /** e.g. "Net 30", "Due on receipt" */
+  paymentTerms?: string;
+  /** Tax ID / EIN / VAT number */
+  taxId?: string;
+  address?: string;
+  notes?: string;
 }
 
 export interface BillLineItem {
@@ -679,7 +688,8 @@ interface InvoicingStore {
 
   // Vendors
   addVendor: (
-    data: Omit<Vendor, "id" | "totalPurchased" | "outstanding" | "status">,
+    data: Omit<Vendor, "id" | "totalPurchased" | "outstanding" | "status"> &
+      Partial<Pick<Vendor, "status">>,
   ) => void;
   updateVendor: (id: string, data: Partial<Vendor>) => void;
   deleteVendor: (id: string) => void;
@@ -938,13 +948,10 @@ export const useInvoicingStore = create<InvoicingStore>()(
             ...state.vendors,
             {
               id: genId("v"),
-              name: data.name,
-              contact: data.contact,
-              email: data.email,
-              phone: data.phone,
               totalPurchased: 0,
               outstanding: 0,
-              status: "Active",
+              ...data,
+              status: data.status ?? "Active",
             },
           ],
         })),
