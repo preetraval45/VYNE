@@ -30,7 +30,17 @@ interface ReadReceiptsState {
   /** Get all receipts for a channel */
   receiptsFor: (channelId: string) => Record<string, ReadReceipt>;
   /** Returns the count of OTHER users who have seen a message sent at `messageTs`. */
-  seenCount: (channelId: string, messageTs: string, excludeUserId: string) => number;
+  seenCount: (
+    channelId: string,
+    messageTs: string,
+    excludeUserId: string,
+  ) => number;
+  /** Returns the NAMES of OTHER users who have seen a message sent at `messageTs`. */
+  seenNames: (
+    channelId: string,
+    messageTs: string,
+    excludeUserId: string,
+  ) => string[];
 }
 
 // Demo "team" presence: members whose seen timestamps simulate live activity.
@@ -109,6 +119,30 @@ export const useReadReceiptsStore = create<ReadReceiptsState>()(
           }
         }
         return count;
+      },
+
+      seenNames: (channelId, messageTs, excludeUserId) => {
+        // Same "has this peer seen it?" rule as seenCount, but returns the
+        // names so the read-receipt can show WHO saw it on hover.
+        const messageTime = new Date(messageTs).getTime();
+        const realReceipts = get().byChannel[channelId] ?? {};
+        const roster = DEMO_SEEN_ROSTER[channelId] ?? [];
+        const now = Date.now();
+        const names: string[] = [];
+        for (const peer of roster) {
+          if (peer.id === excludeUserId) continue;
+          const real = realReceipts[peer.id];
+          if (real && new Date(real.lastSeenAt).getTime() >= messageTime) {
+            names.push(real.name || peer.name);
+            continue;
+          }
+          const hash = simpleHash(`${peer.id}:${messageTs}`);
+          const simulatedDelay = 5_000 + (hash % 85_000); // 5-90s
+          if (now >= messageTime + simulatedDelay) {
+            names.push(peer.name);
+          }
+        }
+        return names;
       },
     }),
     { name: "vyne-read-receipts", version: 1 },

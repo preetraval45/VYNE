@@ -229,14 +229,25 @@ export function ConversationHistory({ open, onClose, onSelect }: Props) {
           )}
           {filtered.map((c) => {
             const active = c.id === activeId;
-            const preview = c.messages[c.messages.length - 1]?.content ?? "";
-            // Show year on conversations older than the current year so
-            // "Apr 28" doesn't ambiguously refer to either 2025 or 2026.
+            // Preview = first user message (the actual ask) so two convos with
+            // the same trailing error aren't indistinguishable; prefix a message
+            // count so same-prompt sessions still read differently.
+            const firstUser =
+              c.messages.find((m) => m.role === "user")?.content ??
+              c.messages[0]?.content ??
+              "";
+            const count = c.messages.length;
+            const preview = `${count} msg${count === 1 ? "" : "s"} · ${firstUser.trim() || "—"}`;
+            // Include the time so two conversations started the same day (e.g.
+            // two "generate a dog image" sessions) are tellable apart. Show the
+            // year only when it isn't the current one.
             const updated = new Date(c.updatedAt);
             const thisYear = new Date().getFullYear();
-            const when = updated.toLocaleDateString("en-US", {
+            const when = updated.toLocaleString("en-US", {
               month: "short",
               day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
               ...(updated.getFullYear() !== thisYear
                 ? { year: "numeric" }
                 : {}),
@@ -254,7 +265,9 @@ export function ConversationHistory({ open, onClose, onSelect }: Props) {
                     ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)"
                     : "transparent",
                   border: `1px solid ${
-                    active ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)" : "transparent"
+                    active
+                      ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)"
+                      : "transparent"
                   }`,
                   transition: "background 0.15s, border-color 0.15s",
                 }}

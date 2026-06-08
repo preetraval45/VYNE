@@ -152,7 +152,21 @@ export function AiFormFill({
           marginTop: 8,
         }}
       >
-        {error ? (
+        {busy ? (
+          <span
+            style={{
+              fontSize: 11,
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              fontWeight: 600,
+            }}
+          >
+            <Sparkles size={11} />
+            Parsing your input…
+          </span>
+        ) : error ? (
           <span style={{ fontSize: 11, color: "var(--status-danger)" }}>
             {error}
           </span>

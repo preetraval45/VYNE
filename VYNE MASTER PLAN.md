@@ -29,11 +29,11 @@ Findings from a paying-user walkthrough of prod. The report praised Chat, Video 
 
 ### UX polish
 
-- [ ] **Sidebar collapses on accidental click with no easy re-expand** — make collapse a deliberate, dedicated toggle; ensure an always-visible expand control when collapsed.
-- [ ] **AI chat history entries are indistinguishable** — both "generate a dog image" sessions show the same error snippet as preview. Use a unique title / first-user-message preview per conversation.
-- [ ] **AI auto-fill needs a loading state** — spinner / "Parsing your input…" so users don't re-click. (Ties to BUG #4.)
-- [ ] **Read receipt "Seen · 4" needs a tooltip** showing who saw it.
-- [ ] **Sales → Reports tab is empty** — render at least skeleton/demo charts so it doesn't read as broken.
+- [x] **Sidebar collapses on accidental click with no easy re-expand** — collapse was already deliberate (only the `PanelLeftClose` button), but when collapsed the only way back was the bare logo. Added a dedicated, always-visible expand button (`PanelLeftOpen`, bordered) under the logo in [Sidebar.tsx](apps/web/src/components/layout/Sidebar.tsx).
+- [x] **AI chat history entries are indistinguishable** — [ConversationHistory.tsx](apps/web/src/components/ai/ConversationHistory.tsx) used the LAST message (often a shared error) as the preview. Now shows the first user message + a message count as preview, and the timestamp includes the time so two same-day "generate a dog image" sessions are tellable apart.
+- [x] **AI auto-fill needs a loading state** — [AiFormFill](apps/web/src/components/shared/AiFormFill.tsx) already flips the button to "Filling…"; added an explicit accent "Parsing your input…" status line while busy.
+- [x] **Read receipt "Seen · N" needs a tooltip** — added `seenNames()` to the [readReceipts store](apps/web/src/lib/stores/readReceipts.ts); [MessageRow](apps/web/src/components/chat/MessageRow.tsx) now hovers "Seen by Sarah K., Tony M.…" (read imperatively via `getState()` to avoid the React #185 fresh-array-selector trap).
+- [x] **Sales → Reports tab is empty** — already populated in the current code (KPI cards, win/loss insights, monthly-revenue bar chart, top-deals tables); the Jun 5 "empty" note predates that content. No change needed.
 
 ### Enhancements (suggestions)
 

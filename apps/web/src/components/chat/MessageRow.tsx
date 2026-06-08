@@ -81,7 +81,11 @@ async function fetchTranslation(text: string): Promise<TranslationResult> {
     const demo: TranslationResult = {
       detectedLang: "English",
       translations: [
-        { lang: "Spanish", flag: "🇪🇸", text: `(Translation unavailable — set GROQ_API_KEY)` },
+        {
+          lang: "Spanish",
+          flag: "🇪🇸",
+          text: `(Translation unavailable — set GROQ_API_KEY)`,
+        },
       ],
       provider: "demo",
     };
@@ -103,7 +107,9 @@ export function MessageRow({
 }: MessageRowProps) {
   const [hovering, setHovering] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [translation, setTranslation] = useState<TranslationResult | null>(null);
+  const [translation, setTranslation] = useState<TranslationResult | null>(
+    null,
+  );
   const [translationLoading, setTranslationLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(msg.content);
@@ -123,6 +129,16 @@ export function MessageRow({
       ? s.seenCount(channelId, msg.createdAt, "me")
       : 0,
   );
+  // Read names imperatively (NOT via a selector — seenNames() returns a fresh
+  // array each call and would trip React #185). seenPeers above is the reactive
+  // trigger; recompute the names string when it changes to build the tooltip.
+  const seenByLabel =
+    seenPeers > 0 && channelId
+      ? useReadReceiptsStore
+          .getState()
+          .seenNames(channelId, msg.createdAt, "me")
+          .join(", ")
+      : "";
 
   // Reset draft if msg.content changes externally (e.g. server echo)
   useEffect(() => {
@@ -316,7 +332,8 @@ export function MessageRow({
                 : isUserMentioned(msg.content, ["Preet", "You"])
                   ? {
                       paddingLeft: 8,
-                      borderLeft: "3px solid var(--vyne-accent, var(--vyne-purple))",
+                      borderLeft:
+                        "3px solid var(--vyne-accent, var(--vyne-purple))",
                       background: "rgba(108, 71, 255, 0.04)",
                       borderRadius: "0 4px 4px 0",
                     }
@@ -326,7 +343,9 @@ export function MessageRow({
             {(() => {
               const stripped = msg.content.replace(/^\[!critical\]\s*/, "");
               const actionId = extractActionId(stripped);
-              const visibleBody = actionId ? stripActionToken(stripped) : stripped;
+              const visibleBody = actionId
+                ? stripActionToken(stripped)
+                : stripped;
               return (
                 <>
                   {visibleBody && renderMessageContent(visibleBody)}
@@ -462,12 +481,16 @@ export function MessageRow({
               marginTop: 3,
               fontSize: 10,
               color:
-                seenPeers > 0 ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-tertiary)",
+                seenPeers > 0
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-tertiary)",
               fontWeight: 500,
             }}
             title={
               seenPeers > 0
-                ? `Seen by ${seenPeers} ${seenPeers === 1 ? "person" : "people"}`
+                ? seenByLabel
+                  ? `Seen by ${seenByLabel}`
+                  : `Seen by ${seenPeers} ${seenPeers === 1 ? "person" : "people"}`
                 : "Sent"
             }
           >
@@ -614,11 +637,7 @@ export function MessageRow({
             deals, contacts, and projects. */}
         {msg.content &&
           extractTaskMentions(msg.content).map((m) => (
-            <MentionPreview
-              key={`${m.kind}:${m.id}`}
-              kind={m.kind}
-              id={m.id}
-            />
+            <MentionPreview key={`${m.kind}:${m.id}`} kind={m.kind} id={m.id} />
           ))}
 
         {/* Inline link previews (PR / Linear / Figma) */}
@@ -651,7 +670,9 @@ export function MessageRow({
                   border: r.userReacted
                     ? "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)"
                     : "1px solid var(--content-border)",
-                  color: r.userReacted ? "var(--vyne-accent, #06B6D4)" : "var(--text-secondary)",
+                  color: r.userReacted
+                    ? "var(--vyne-accent, #06B6D4)"
+                    : "var(--text-secondary)",
                 }}
               >
                 {r.emoji} <span style={{ fontWeight: 600 }}>{r.count}</span>
@@ -821,7 +842,8 @@ export function MessageRow({
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
                     "var(--content-secondary)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.background =
@@ -856,7 +878,8 @@ export function MessageRow({
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "var(--content-secondary)";
-                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
@@ -876,7 +899,9 @@ export function MessageRow({
                 padding: "4px 6px",
                 borderRadius: 6,
                 border: "none",
-                background: isSaved ? "rgba(245, 158, 11, 0.15)" : "transparent",
+                background: isSaved
+                  ? "rgba(245, 158, 11, 0.15)"
+                  : "transparent",
                 cursor: "pointer",
                 color: isSaved ? "#D97706" : "var(--text-secondary)",
                 display: "flex",
@@ -914,7 +939,9 @@ export function MessageRow({
                     ? "rgba(108, 71, 255, 0.12)"
                     : "transparent",
                   cursor: "pointer",
-                  color: translation ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-secondary)",
+                  color: translation
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--text-secondary)",
                   display: "flex",
                   alignItems: "center",
                 }}
@@ -1011,7 +1038,9 @@ export function MessageRow({
               <button
                 type="button"
                 onClick={handleDelete}
-                title={confirmingDelete ? "Click again to confirm" : "Delete message"}
+                title={
+                  confirmingDelete ? "Click again to confirm" : "Delete message"
+                }
                 aria-label="Delete message"
                 style={{
                   padding: "4px 6px",
