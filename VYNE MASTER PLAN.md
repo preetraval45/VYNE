@@ -60,30 +60,32 @@ Every advertised destination must resolve. For each path route below: **build it
 default: add thin `redirect()` pages so typed/bookmarked path URLs land on the
 working `?view=` section.
 
-- [ ] `/sales/quotations` → `/sales?view=quotations`
-- [ ] `/sales/orders` → `/sales?view=orders`
-- [ ] `/sales/products` → `/sales?view=products`
-- [ ] `/sales/customers` → `/sales?view=customers`
-- [ ] `/sales/reports` → `/sales?view=reports`
-- [ ] `/contacts/dashboard` → `/contacts?view=dashboard`
-- [ ] `/ops/inventory` → `/ops?view=inventory`
-- [ ] `/ops/orders` → `/ops?view=orders`
-- [ ] `/hr/leave` → `/hr?view=leave`
-- [ ] `/hr/payroll` → `/hr?view=payroll`
-- [ ] `/hr/org-chart` → `/hr?view=orgchart`
-- [ ] `/finance/invoices` → **build real page** (table-stakes), not a redirect
-- [ ] `/finance/journal` → `/finance?view=journal`
-- [ ] `/crm/forecasting` → `/crm?view=forecasting`
-- [ ] `/analytics` → build or remove the nav entry (route doesn't exist)
-- [ ] `/projects/roadmap` → `/roadmap` (and fix the wrong error surfaced)
-- [ ] **Done when:** clicking/typing every nav item in the app resolves to a real screen; add a route-coverage test that asserts no advertised href 404s.
+_Done via `next.config.ts` `redirects()` — every path below now resolves to its real `?view=` section (no more 404s)._
+
+- [x] `/sales/quotations` → `/sales?view=quotations`
+- [x] `/sales/orders` → `/sales?view=orders`
+- [x] `/sales/products` → `/sales?view=products`
+- [x] `/sales/customers` → `/sales?view=customers`
+- [x] `/sales/reports` → `/sales?view=reports`
+- [x] `/contacts/dashboard` → `/contacts?view=dashboard`
+- [x] `/ops/inventory` → `/ops?view=inventory`
+- [x] `/ops/orders` → `/ops?view=orders` (exact-path; `/[id]` + `/new` unaffected)
+- [x] `/hr/leave` → `/hr?view=leave`
+- [x] `/hr/payroll` → `/hr?view=payroll`
+- [x] `/hr/org-chart` → `/hr?view=orgchart`
+- [~] `/finance/invoices` → redirected to `/invoicing?view=invoices` for now; **still build the real Finance Invoices page** (table-stakes, B3).
+- [x] `/finance/journal` → `/finance?view=journal`
+- [x] `/crm/forecasting` → `/crm?view=forecasting`
+- [x] `/analytics` → `/reporting` (no real analytics route; redirected to closest screen)
+- [x] `/projects/roadmap` → `/roadmap`
+- [x] **Done when:** route-coverage test (`src/__tests__/route-coverage.test.ts`) asserts every sidebar nav href resolves to a real page or a `next.config` redirect — passes, and guards against future 404-hole regressions.
 
 ### A2. Critical UI blockers
 
-- [~] **Ops duplicate Overview** — removed the redundant 4 icon-cards from `OverviewTab`; KPI strip is the single overview. _(done this session, pending deploy)_
-- [ ] **Docs recent-card title invisible** — fix near-white-on-white title contrast.
-- [ ] **404 page has no app shell** — render inside the shell (sidebar/header) or far more prominent "Back to home / Open dashboard" CTAs + search.
-- [ ] **Done when:** a new user never hits a screen that looks broken.
+- [x] **Ops duplicate Overview** — removed the redundant 4 icon-cards from `OverviewTab`; the page-level KPI strip is the single overview.
+- [x] **Docs recent-card title invisible** — root cause was hardcoded `bg-white` cards with theme-aware text → white-on-white in dark mode; cards + search rows now use `var(--content-bg)` and bolder titles.
+- [x] **404 page has no app shell** — added a "Jump to" quick-links grid (Home/Dashboard/Sales/CRM/Chat/Projects/AI/Settings) + the two prominent CTAs, so a 404 still offers a way in.
+- [x] **Done when:** a new user never hits a dead/broken-looking screen. ✅ (Phase A complete)
 
 ### A3. High/medium/polish UI (condensed from the Jun 8 walkthrough — 22 items)
 
