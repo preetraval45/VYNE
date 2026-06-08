@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Menu,
   FileSpreadsheet,
+  Building2,
   Contact,
   TrendingUp,
   Megaphone,
@@ -37,6 +38,7 @@ import {
   Download as DownloadIcon,
   X as XIcon,
   PanelLeftClose,
+  PanelLeftOpen,
   Calendar as CalendarIcon,
   Sparkles,
   Truck,
@@ -392,9 +394,22 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Invoices", href: "/invoicing?view=invoices" },
       { label: "Credit Notes", href: "/invoicing?view=creditNotes" },
       { label: "Payments", href: "/invoicing?view=payments" },
-      { label: "Vendors", href: "/vendors" },
+      { label: "Vendors", href: "/invoicing?view=vendors" },
       { label: "Bills", href: "/invoicing?view=bills" },
       { label: "Refunds", href: "/invoicing?view=refunds" },
+    ],
+  },
+  {
+    icon: Building2,
+    label: "Vendors",
+    href: "/vendors",
+    color: "#0EA5E9",
+    moduleId: "vendors",
+    subs: [
+      { label: "All Vendors", href: "/vendors" },
+      { label: "Active", href: "/vendors?status=active" },
+      { label: "Inactive", href: "/vendors?status=inactive" },
+      { label: "New Vendor", href: "/invoicing/vendors/new?return=/vendors" },
     ],
   },
   // /maintenance is demo-only and overlaps with /ops work-orders — hidden
@@ -2039,25 +2054,50 @@ export function Sidebar() {
         }}
       >
         {collapsed ? (
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            aria-label="Expand sidebar"
-            title="Expand sidebar"
+          <div
             style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              padding: 4,
-              borderRadius: 6,
-              color: "var(--text-secondary)",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
+              gap: 8,
             }}
           >
-            <VyneLogo variant="mark" markSize={28} />
-          </button>
+            <VyneLogo variant="mark" markSize={26} />
+            {/* Dedicated, always-visible expand control — the bare logo wasn't
+                an obvious way back (QA report: "no obvious way to re-expand"). */}
+            <button
+              type="button"
+              onClick={toggleCollapsed}
+              aria-label="Expand sidebar"
+              title="Expand sidebar"
+              style={{
+                background: "var(--content-secondary)",
+                border: "1px solid var(--content-border)",
+                cursor: "pointer",
+                padding: "5px 7px",
+                borderRadius: 7,
+                color: "var(--text-tertiary)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--vyne-accent, var(--vyne-purple))";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--vyne-accent, var(--vyne-purple))";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--text-tertiary)";
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  "var(--content-border)";
+              }}
+            >
+              <PanelLeftOpen size={15} />
+            </button>
+          </div>
         ) : (
           <>
             <div style={{ flex: 1 }}>

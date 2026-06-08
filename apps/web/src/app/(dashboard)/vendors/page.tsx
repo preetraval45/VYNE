@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
   Search,
@@ -23,23 +24,60 @@ function money(n: number): string {
   return `$${(n ?? 0).toLocaleString()}`;
 }
 
+const STATUS_TABS = [
+  { key: "all", label: "All" },
+  { key: "active", label: "Active" },
+  { key: "inactive", label: "Inactive" },
+] as const;
+
 export default function VendorsPage() {
+  return (
+    <Suspense fallback={null}>
+      <VendorsPageInner />
+    </Suspense>
+  );
+}
+
+function VendorsPageInner() {
   const mounted = useMounted();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const vendors = useInvoicingStore((s) => s.vendors);
   const deleteVendor = useInvoicingStore((s) => s.deleteVendor);
+
+  // Active sub-tab is driven by ?status= so the sidebar sub-links deep-link
+  // straight to a filtered view.
+  const statusParam = (searchParams.get("status") ?? "all").toLowerCase();
+  const activeStatus = STATUS_TABS.some((t) => t.key === statusParam)
+    ? statusParam
+    : "all";
 
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Vendor | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return vendors;
-    return vendors.filter((v) =>
-      [v.name, v.contact, v.email, v.category, v.phone]
+    return vendors.filter((v) => {
+      const matchStatus =
+        activeStatus === "all" ||
+        (v.status ?? "Active").toLowerCase() === activeStatus;
+      if (!matchStatus) return false;
+      if (!q) return true;
+      return [v.name, v.contact, v.email, v.category, v.phone]
         .filter(Boolean)
-        .some((field) => field!.toLowerCase().includes(q)),
-    );
-  }, [vendors, search]);
+        .some((field) => field!.toLowerCase().includes(q));
+    });
+  }, [vendors, search, activeStatus]);
+
+  const countFor = (key: string) =>
+    key === "all"
+      ? vendors.length
+      : vendors.filter((v) => (v.status ?? "Active").toLowerCase() === key)
+          .length;
+
+  function selectTab(key: string) {
+    router.push(key === "all" ? "/vendors" : `/vendors?status=${key}`);
+  }
 
   const totalOutstanding = useMemo(
     () => vendors.reduce((sum, v) => sum + (v.outstanding ?? 0), 0),
@@ -131,6 +169,69 @@ export default function VendorsPage() {
           New Vendor
         </Link>
       </header>
+
+      {/* Sub-tabs (status) */}
+      <div
+        role="tablist"
+        aria-label="Vendor status"
+        style={{
+          display: "flex",
+          gap: 4,
+          padding: "8px 24px 0",
+          borderBottom: "1px solid var(--content-border)",
+          background: "var(--content-bg)",
+        }}
+      >
+        {STATUS_TABS.map((t) => {
+          const active = t.key === activeStatus;
+          return (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              onClick={() => selectTab(t.key)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 14px",
+                border: "none",
+                background: "transparent",
+                color: active
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-tertiary)",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                borderBottom: active
+                  ? "2px solid var(--vyne-accent, var(--vyne-purple))"
+                  : "2px solid transparent",
+                marginBottom: -1,
+              }}
+            >
+              {t.label}
+              <span
+                suppressHydrationWarning
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "1px 7px",
+                  borderRadius: 999,
+                  background: active
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.14)"
+                    : "var(--content-secondary)",
+                  color: active
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "var(--text-tertiary)",
+                }}
+              >
+                {mounted ? countFor(t.key) : 0}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Toolbar */}
       <div
