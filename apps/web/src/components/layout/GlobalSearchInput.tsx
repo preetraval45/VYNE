@@ -144,17 +144,22 @@ export function GlobalSearchInput() {
   return (
     <div
       ref={containerRef}
-      className="vyne-unified-search"
       role="search"
-      style={{ position: "relative", flexShrink: 1, minWidth: 0 }}
+      style={{
+        position: "relative",
+        flexShrink: 1,
+        minWidth: 0,
+        width: "100%",
+        maxWidth: 520,
+      }}
     >
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: 6,
-          height: 32,
-          width: 240,
+          height: 34,
+          width: "100%",
           maxWidth: "100%",
           padding: "0 4px 0 10px",
           borderRadius: 999,
