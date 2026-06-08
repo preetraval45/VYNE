@@ -1,111 +1,250 @@
 # VYNE — Master Plan
 
-> Single source of truth for what's left to fix. Tick the box when a sub-task is verified in production.
+> The single source of truth for taking VYNE from a credible v1 surface to a
+> platform that competes on depth with Salesforce/HubSpot (CRM), Rithmiq/Odoo/
+> NetSuite (Ops/ERP), QuickBooks/Xero (Finance), BambooHR/Rippling (HR),
+> Linear/Jira/Asana (Projects), Slack (Chat) — while keeping the one thing none
+> of them have: **one AI brain across the whole business.**
 >
-> **Status legend** — `[x]` done · `[ ]` pending · `[~]` in progress / partially done.
+> **Status legend** — `[x]` done · `[ ]` pending · `[~]` in progress / partial.
+> Each epic lists: **Target** (who we're matching) · **Gap** (what's missing) ·
+> **Build** (concrete work) · **Data** (Prisma/store) · **Done when** (acceptance).
+> Work top-down: **Phase A (launch blockers) → B (module depth) → C (AI moat) → D (platform).**
 
 ---
 
-## Post-launch QA fixes (Jun 5, 2026 full-user testing report) ⏳
+## 0. Positioning & success criteria
 
-Findings from a paying-user walkthrough of prod. The report praised Chat, Video Call + AI Meeting Recap, Calendar "Find a Time", the custom-widget Dashboard, and Sales/Quotations. The items below are the gaps — fix order is P0 crashes → P1 AI core → P2 silent failures → UX polish → enhancements. File pointers marked _(confirm)_ are best-guess starting points, not yet root-caused.
+**Positioning:** _"VYNE is the only platform where your AI understands your entire
+business — deals, inventory, team, finances, and projects — in one place, with one
+AI brain connecting all of it."_ Market frame = **Notion + Slack + lightweight CRM
+for AI-first SMBs**, not feature-for-feature Salesforce.
 
-### P0 — Blockers (white-screen crashes, reproducible)
-
-- [x] **BUG #1 — Global search crashes the whole app on every keystroke** — ROOT CAUSE: [GlobalSearchModal.tsx](apps/web/src/components/layout/GlobalSearchModal.tsx) subscribed to the whole `useSearchAnalytics` store, then a keystroke effect called `record()` (which mutates that store) with the store object in its deps → infinite render loop → React #185 → white screen. Fix: read analytics via `getState()` (non-subscribing), like CommandPalette does. Verified typecheck-clean. _(Bonus: replaced the magnifier-icon-opens-popup with an inline [GlobalSearchInput](apps/web/src/components/layout/GlobalSearchInput.tsx) bar in the topbar — live results dropdown + gear → advanced modal.)_
-- [x] **BUG #2 — "+ New Issue" crashes after creation** — ROOT CAUSE: `addTask` in [projects.ts](apps/web/src/lib/stores/projects.ts) only defaulted `activity`/`attachments`; `QuickCreateIssueModal` passes only `{title, status, priority}`, so `tags`/`comments`/`subtasks` were `undefined` and the board card's `task.tags.slice(...)` threw `reading 'slice'`. Fix: `addTask` now backfills every required field (defense-in-depth for any partial caller) + render-site guards (`task.tags ?? []`, etc.) in [projects/[projectId]/page.tsx](<apps/web/src/app/(dashboard)/projects/[projectId]/page.tsx>) so already-persisted bad rows also survive. Verified typecheck-clean.
-
-### P1 — AI core non-functional (this is the product's identity)
-
-- [x] **BUG #3 — Vyne AI doesn't respond to chat queries** — ROOT CAUSE: [/api/ai/stream](apps/web/src/app/api/ai/stream/route.ts) always attached Gemini's NATIVE `google_search` grounding tool, but the request goes to Gemini's OpenAI-COMPAT endpoint (`/v1beta/openai/…`), which rejects that shape with a 400 and sinks the whole answer. Fix: grounding is now opt-in via `GEMINI_ENABLE_GROUNDING` (off by default) + a retry-without-grounding net on any 4xx, so an optional capability can't kill the core response; plus clearer surfaced errors for 429 (quota) and 401/403 (bad/missing key) instead of silent failure. Verified typecheck-clean. **Still needs a valid `GEMINI_API_KEY` in Vercel env** to actually answer.
-- [x] **BUG #4 — AI auto-fill does nothing** — ROOT CAUSE: [AiFormFill](apps/web/src/components/shared/AiFormFill.tsx) posted the description as `context.userText` to [/api/ai/ask](apps/web/src/app/api/ai/ask/route.ts), but that route's `serializeContext` drops unknown context keys (the model never saw the text) AND it supports only `ANTHROPIC_API_KEY`/`GROQ_API_KEY`, not the app's `GEMINI_API_KEY` → fell to a prose `localFallback` with no JSON. Fix: new purpose-built [/api/ai/extract](apps/web/src/app/api/ai/extract/route.ts) endpoint (Gemini→Groq→Claude with JSON mode + a regex local fallback for email/phone/url) and repointed AiFormFill at it with real error surfacing (shows the "no values found" / "needs API key" note instead of silently doing nothing). The "Filling…" spinner already existed, so UX item #7 is covered too. Verified typecheck-clean. **Needs `GEMINI_API_KEY` in Vercel env for full free-text extraction; demo mode still fills email/phone/url via regex.**
-- [x] **BUG #5 — AI Daily Brief never loads** — ROOT CAUSE: response-shape mismatch, not a key issue. The home card ([DailyDigestCard.tsx](apps/web/src/components/home/DailyDigestCard.tsx)) calls [/api/ai/digest](apps/web/src/app/api/ai/digest/route.ts), which returns `{ digest: {...}, provider, generatedAt }` (digest NESTED), but the card did `setData(json)` expecting `{headline, summary, bullets}` at top level → `data.headline` was always undefined so the headline fell through to "Click refresh to brief me on today" even on a successful 200. Compounded by a silent `if (!res.ok) return;`. Fix: unwrap `json.digest` (accept both shapes), surface real errors (429/HTTP/empty/network) in the card headline instead of silently reverting. The route already returns a valid FALLBACK digest, so it works even without an AI key. Verified typecheck-clean. **All five report bugs (P0 #1-2, P1 #3-5) now fixed.**
-
-### P2 — Correctness / silent failures
-
-- [x] **Character-encoding mojibake** — was a double-encoded middot (`·` U+00B7 saved as Latin-1 → `Â·`) NOT just on accounts/contacts but across **9 dashboard pages** (contacts, crm, finance, invoicing, hr, sales, ops, field-service, expenses). Fixed every occurrence to a proper UTF-8 `·`; verified zero `Â` left in `src/**`.
-- [x] **Sales view resets to a filtered state after product creation** — the opportunities filter is local state (so it resets on remount), but there was no escape if a filter WAS active. Added a visible **"✕ Clear · showing X of Y"** control to the [Opportunities toolbar](<apps/web/src/app/(dashboard)/sales/page.tsx>) (resets search + stage), and changed the [New Product form](<apps/web/src/app/(dashboard)/sales/products/new/page.tsx>) to redirect to `/sales?view=products` (the list you just added to) instead of the default Opportunities tab.
-- [x] **Opportunity form: no validation feedback** — the Create button was disabled when invalid, so clicking did nothing. Now the button is always enabled; submit runs inline validation, shows per-field error text + red border on the missing required field (name/company), and focuses + smooth-scrolls to the first invalid field. [opportunities/new](<apps/web/src/app/(dashboard)/sales/opportunities/new/page.tsx>).
-
-### UX polish
-
-- [x] **Sidebar collapses on accidental click with no easy re-expand** — collapse was already deliberate (only the `PanelLeftClose` button), but when collapsed the only way back was the bare logo. Added a dedicated, always-visible expand button (`PanelLeftOpen`, bordered) under the logo in [Sidebar.tsx](apps/web/src/components/layout/Sidebar.tsx).
-- [x] **AI chat history entries are indistinguishable** — [ConversationHistory.tsx](apps/web/src/components/ai/ConversationHistory.tsx) used the LAST message (often a shared error) as the preview. Now shows the first user message + a message count as preview, and the timestamp includes the time so two same-day "generate a dog image" sessions are tellable apart.
-- [x] **AI auto-fill needs a loading state** — [AiFormFill](apps/web/src/components/shared/AiFormFill.tsx) already flips the button to "Filling…"; added an explicit accent "Parsing your input…" status line while busy.
-- [x] **Read receipt "Seen · N" needs a tooltip** — added `seenNames()` to the [readReceipts store](apps/web/src/lib/stores/readReceipts.ts); [MessageRow](apps/web/src/components/chat/MessageRow.tsx) now hovers "Seen by Sarah K., Tony M.…" (read imperatively via `getState()` to avoid the React #185 fresh-array-selector trap).
-- [x] **Sales → Reports tab is empty** — already populated in the current code (KPI cards, win/loss insights, monthly-revenue bar chart, top-deals tables); the Jun 5 "empty" note predates that content. No change needed.
-
-### Enhancements (suggestions)
-
-- [x] **Cmd+K / Ctrl+K to open global search** — already bound (CommandPalette). Added a discoverable `⌘K`/`Ctrl K` badge to the inline [GlobalSearchInput](apps/web/src/components/layout/GlobalSearchInput.tsx) that opens the palette on click.
-- [x] **Screen-share gives no feedback** — already correct in code: [call store](apps/web/src/lib/stores/call.ts) `toggleScreenShare` calls the real `getDisplayMedia` and sets `error` on failure; [GlobalCallPanel](apps/web/src/components/layout/GlobalCallPanel.tsx) surfaces it via an `ErrorToast`. No change needed (the report's "no prompt" was likely a denied/blocked permission, which now shows the toast).
-- [x] **"Find a Time" should show day context** — [ScheduleMeetingModal](apps/web/src/components/calendar/ScheduleMeetingModal.tsx) slot chips now read "Today/Tomorrow/Mon, 08:00" instead of a bare time.
-- [x] **Home app-launcher grid customisation** — added a "Customize" toggle on the [home](<apps/web/src/app/(dashboard)/home/page.tsx>) app grid; in edit mode each tile shows a hide (×) / restore (+) badge, hidden tiles are dropped from the normal view and the count shows as "Apps · N hidden". Persisted to localStorage.
-- [x] **AI first-run onboarding prompt** — new `AiRolePrompt` on an empty [AI chat](<apps/web/src/app/(dashboard)/ai/chat/page.tsx>) asks "What's your role?" with quick options; the pick is saved as a persistent memory fact (`addFact`) so the stream endpoint calibrates answers. Self-dismisses once a role fact exists; "Skip" available.
+**Launch bar (credible):** zero dead nav, Sales Orders + Finance Invoices real,
+AI story front-and-center.
+**Parity bar (per module):** the "Done when" criteria in each Phase-B epic.
+**Moat bar:** cross-module AI answers grounded in live data (Phase C).
 
 ---
 
-## UI Review — Rating & Improvement Suggestions (Jun 8, 2026)
+## 1. Baseline already shipped (context only — do not re-do)
 
-A walkthrough of the Home, Dashboard, AI Chat, and navigation areas.
-
-### Overall Rating: **7.5 / 10**
-
-Strong, polished dark-mode aesthetic and a clear product identity — modern and professional for a B2B OS tool. Several friction points hold it back from being truly great, mostly around **discoverability** and **onboarding clarity**.
-
-### What's Working Well ✅
-
-- **Visual Design (9/10)** — dark navy scheme, rounded cards, colored emoji-style module icons, green accent → cohesive, premium feel. Clean, legible typography.
-- **Information Hierarchy on Home** — alerts (stock warning, plan usage, daily activity) prioritized at top in a clear card stack. Critical info first.
-- **Left Sidebar Navigation** — collapsible tree with icons is intuitive; active-item highlight (teal/green left border + text color) clearly shows location.
-- **AI Integration** — "Vyne AI" sits in both the top bar and the sidebar, making AI a first-class citizen rather than a bolt-on.
-- **Module Grid on Home** — colorful, distinguishable icon grid works as a visual launchpad.
-
-### Issues & What Can Be Improved ⚠️
-
-- [~] **1. Redundant Navigation (biggest UX issue)** — left sidebar and home module grid show the same destinations, creating cognitive duplication. _Mitigated: home grid is now grouped into named sections (#8) and already has a Customize/hide-tile feature so users can curate it into a personal launcher rather than a duplicate. Full "recent modules" auto-personalization still deferred._
-- [x] **2. Sidebar cut off at the bottom** — _Done: added a fade-out gradient at the bottom of the nav scroll area signaling more items below the fold (`Sidebar.tsx`)._
-- [x] **3. Unclear iconography in the top bar** — _Done (via tooltips): every top-bar icon (chat, bell, notes, Get app) has `title` + `aria-label`; Vyne AI and Get app also carry persistent text labels (`UnifiedTopBar.tsx`)._
-- [x] **4. "Vyne AI Daily Digest" card is passive** — _Done: added a prominent gradient "Generate brief" CTA button inside the card when no digest is loaded (`DailyDigestCard.tsx`)._
-- [x] **5. "Get Started" checklist is buried** — _Done: `WelcomeChecklist` is now pinned near the top of the home page (above the module grid), and remains collapsible (`home/page.tsx`)._
-- [x] **6. Dashboard widget labels are very small** — _Done: `KpiTile` labels bumped to 12.5px / weight 600, dropped the all-caps transform and wide tracking → sentence-case, more scannable across every page (`KpiTile.tsx`)._
-- [x] **7. "+ New Issue" button uses jargon** — _Done: renamed to "+ New Task" in the topbar, the quick-create modal heading + toast, and the home quick-actions fixture (`UnifiedTopBar.tsx`, `QuickCreateIssueModal.tsx`, `fixtures/home.ts`)._
-- [x] **8. No visual section grouping in the module grid** — _Done: module grid split into 5 labelled sections (People & Relationships, Sales & Revenue, Operations, Dev & Intelligence, Admin) with subtle headers (`home/page.tsx`)._
-- [x] **9. Bottom status bar is ambiguous** — _Done: the four footer icons (settings, theme, accent, logout) unified to consistent boxed 32×32 buttons with hover states + tooltips; "Set status" is now accent-coloured + non-italic for prominence (`Sidebar.tsx`)._
-
-### Quick Win Priority List
-
-| Priority  | Fix                                                      |
-| --------- | -------------------------------------------------------- |
-| 🔴 High   | Add visual scroll indicator / fade to sidebar            |
-| 🔴 High   | Add visible CTA button inside the AI Daily Digest card   |
-| 🟡 Medium | Group the module grid into labeled categories            |
-| 🟡 Medium | Surface the "Get Started" checklist higher for new users |
-| 🟡 Medium | Rename "+ New Issue" to something more intuitive         |
-| 🟢 Low    | Add labels or persistent tooltips to top-bar icons       |
-| 🟢 Low    | Increase label font size on Dashboard widgets            |
+Chat (channels/DMs/threads/reactions/AI summary), CRM pipeline + AI deal coach,
+Ops dashboard + inventory list + order detail + suppliers, Finance P&L + AR aging,
+HR employee directory, Projects board + AI sprint planner, Calendar, Timeline
+(multi-source feed), Vyne AI (workspace-grounded chat, memory, BRD/TRD/Spec/Diagram),
+My Dashboard (drag widgets), Docs (basic), Settings. Nav unified to the sidebar
+(`?view=` sections). Mojibake guard + `.editorconfig` in place.
 
 ---
 
-## Shipped this session (Jun 8, 2026) ✅
+## 2. Phase A — Launch blockers 🚨
 
-All items below are typecheck-verified (`tsc --noEmit`, exit 0). Committed as `6795c72` + pushed to GitHub `main`; deployed to Vercel prod.
+### A1. Kill the 404 hole (no dead nav at launch)
 
-### P0 crash fixes
+Every advertised destination must resolve. For each path route below: **build it**,
+**redirect path → `?view=`**, or **gate the nav entry** ("Coming soon"). Preferred
+default: add thin `redirect()` pages so typed/bookmarked path URLs land on the
+working `?view=` section.
 
-- [x] **BUG #1 — global search white-screen** — see the root-cause note under P0 above. Fixed in [GlobalSearchModal.tsx](apps/web/src/components/layout/GlobalSearchModal.tsx) (read analytics via `getState()`, not a store subscription). Lesson recorded in the `zustand-selector-stability` memory.
-- [x] **BUG #2 — "+ New Issue" crash** — see the root-cause note under P0 above. Fixed in [projects.ts](apps/web/src/lib/stores/projects.ts) `addTask` (backfills all required fields) + render guards in [projects/[projectId]/page.tsx](<apps/web/src/app/(dashboard)/projects/[projectId]/page.tsx>).
+- [ ] `/sales/quotations` → `/sales?view=quotations`
+- [ ] `/sales/orders` → `/sales?view=orders`
+- [ ] `/sales/products` → `/sales?view=products`
+- [ ] `/sales/customers` → `/sales?view=customers`
+- [ ] `/sales/reports` → `/sales?view=reports`
+- [ ] `/contacts/dashboard` → `/contacts?view=dashboard`
+- [ ] `/ops/inventory` → `/ops?view=inventory`
+- [ ] `/ops/orders` → `/ops?view=orders`
+- [ ] `/hr/leave` → `/hr?view=leave`
+- [ ] `/hr/payroll` → `/hr?view=payroll`
+- [ ] `/hr/org-chart` → `/hr?view=orgchart`
+- [ ] `/finance/invoices` → **build real page** (table-stakes), not a redirect
+- [ ] `/finance/journal` → `/finance?view=journal`
+- [ ] `/crm/forecasting` → `/crm?view=forecasting`
+- [ ] `/analytics` → build or remove the nav entry (route doesn't exist)
+- [ ] `/projects/roadmap` → `/roadmap` (and fix the wrong error surfaced)
+- [ ] **Done when:** clicking/typing every nav item in the app resolves to a real screen; add a route-coverage test that asserts no advertised href 404s.
 
-### P1 AI core
+### A2. Critical UI blockers
 
-- [x] **BUG #3 — Vyne AI doesn't respond** — see the root-cause note under P1 above. Fixed in [/api/ai/stream](apps/web/src/app/api/ai/stream/route.ts): grounding gated behind `GEMINI_ENABLE_GROUNDING` + retry-without-grounding on 4xx + clearer 429/401-403 messages. **Needs a valid `GEMINI_API_KEY` in Vercel env to actually answer.** BUG #4 (auto-fill) and BUG #5 (daily brief) still pending.
+- [~] **Ops duplicate Overview** — removed the redundant 4 icon-cards from `OverviewTab`; KPI strip is the single overview. _(done this session, pending deploy)_
+- [ ] **Docs recent-card title invisible** — fix near-white-on-white title contrast.
+- [ ] **404 page has no app shell** — render inside the shell (sidebar/header) or far more prominent "Back to home / Open dashboard" CTAs + search.
+- [ ] **Done when:** a new user never hits a screen that looks broken.
 
-### Global search — inline navbar bar (replaces the popup)
+### A3. High/medium/polish UI (condensed from the Jun 8 walkthrough — 22 items)
 
-- [x] **New [GlobalSearchInput](apps/web/src/components/layout/GlobalSearchInput.tsx) in the topbar** — always-visible "Search records…" bar with a live grouped results dropdown as you type (keyboard nav, click-to-navigate), plus a gear that opens the advanced filter modal. Replaced the old magnifier-icon-opens-popup (`SearchTopbarButton` removed from [UnifiedTopBar.tsx](apps/web/src/components/layout/UnifiedTopBar.tsx)). Reuses the existing corpus/scoring and reads analytics via `getState()` so it can't reintroduce BUG #1. The advanced modal (`GlobalSearchModal`, Ctrl+/) is retained behind the gear. Per-page **filter** search bars are untouched — global search and per-page filter are now two distinct bars, as requested.
+- [ ] Sidebar collapsed-state tooltips on every item (`title`/Radix tooltip).
+- [ ] Breadcrumb reflects active sub-section (module > section).
+- [ ] Standardize badge/pill style (one token: filled vs outlined).
+- [ ] One `formatCurrency` helper (`$96.8K` convention) used app-wide.
+- [ ] One shared Export-CSV button style.
+- [ ] One exact "Ask AI" green token (contextual == global Vyne AI).
+- [ ] Demote "Get app" to ghost/outline.
+- [ ] My Dashboard: prominent drag-onboarding affordance (arrow/ghost slot).
+- [ ] Chat formatting toolbar: show only on input focus.
+- [ ] Ops low-stock names: `title` tooltip / ellipsis-on-hover.
+- [ ] Docs: more sample docs or a real empty-state CTA.
+- [ ] HR header summary chip row (match Finance/Ops).
+- [ ] Calendar "Up Next": wrap or hover full title.
+- [ ] OVERVIEW toggle: inline chevron (▼/▲).
+- [ ] Projects sidebar "2" badge: pin precisely to icon corner.
+- [ ] Sidebar Vyne AI brain icon: integrate into nav flow / brand area.
+- [ ] Sample-data banner: soft blue-gray (not success green).
+- [ ] Responsive pass: tablet/mobile sidebar, stat-grid reflow, chat UI.
 
-### Vendors — dedicated page + sidebar link + richer form
+---
 
-- [x] **Standalone [/vendors](<apps/web/src/app/(dashboard)/vendors/page.tsx>) page** — searchable, sortable vendor list (name, contact, category, terms, outstanding, status), row-click detail drawer showing all fields, delete with confirm, empty state. Previously vendors were only reachable as a tab buried under Invoicing.
-- [x] **Sidebar "Vendors" link** now points to `/vendors` (was `/invoicing?view=vendors`) in [Sidebar.tsx](apps/web/src/components/layout/Sidebar.tsx). The Invoicing → Vendors tab still works at `/invoicing?view=vendors`.
-- [x] **Enriched `Vendor` model + add form** — added optional `website`, `category`, `paymentTerms`, `taxId`, `address`, `notes` to the [invoicing store](apps/web/src/lib/stores/invoicing.ts) `Vendor` type + `addVendor`; the [New Vendor form](<apps/web/src/app/(dashboard)/invoicing/vendors/new/page.tsx>) now captures them (was just name/contact/email/phone) and supports a `?return=` param so it routes back to `/vendors`.
+## 3. Phase B — Module depth to reach competitive parity
+
+> Each epic is a real product slice: data model + pages + stores + AI hooks +
+> acceptance. Build in the order that maximizes "looks like a real product":
+> **Sales/CRM → Finance → Ops → HR → Projects → Chat → Docs.**
+
+### B1. CRM → Salesforce / HubSpot
+
+**Target:** HubSpot Sales Hub depth for SMB. **Gap:** activity logging, sequences,
+lead scoring, reports, custom fields, email/calendar sync, mobile.
+
+- [ ] **Contacts/Accounts depth** — full contact record: company, role, social,
+      owner, lifecycle stage, tags, custom fields; account ↔ contacts ↔ deals graph.
+  - Data: `Contact`, `Account`, `Deal`, `Activity`, `CustomFieldDef/Value` Prisma models + relations.
+- [ ] **Activity timeline** — log calls, emails, meetings, notes per contact/deal; auto-capture from Chat/Calendar; manual quick-add.
+- [ ] **Email sequences / cadences** — multi-step templated outreach with delays, open/click tracking, auto-enroll rules; pause-on-reply.
+- [ ] **Lead scoring** — rule-based + AI score (fit × engagement); surfaced on pipeline cards and a "hot leads" view.
+- [ ] **Forecasting** — promote `ForecastingTab`: probability-weighted pipeline, commit/best-case/worst-case, quota attainment, period roll-up.
+- [ ] **Reports & dashboards** — pipeline by stage/owner, win/loss, velocity, conversion funnel, activity volume; saveable + scheduled email.
+- [ ] **Automation workflows** — "when deal stage = X, create task / send email / notify channel"; shared engine with Ops/HR (see D3).
+- [ ] **Email + calendar sync** — 2-way Gmail/Outlook + Google/O365 calendar; log emails to contacts automatically.
+- [ ] **Custom fields & pipelines** — admin-defined fields, multiple pipelines, stage probability config.
+- [ ] **Done when:** a rep can run a full cycle — capture lead → score → sequence → log activity → advance stages → forecast → win — without leaving VYNE, and the AI deal coach reads all of it.
+
+### B2. Ops / ERP → Rithmiq / Odoo / NetSuite
+
+**Target:** Odoo Inventory + Manufacturing + Purchase for SMB. **Gap:** order mgmt
+depth, SKU detail, POs, real WOs, warehousing, supplier mgmt, barcode, multi-currency.
+
+- [ ] **Order management (sales orders)** — full lifecycle: draft → confirm → pick/pack → ship → deliver → invoice; partial fulfillment, backorders; line-level status. (Detail page exists — extend it.)
+- [ ] **Inventory / SKU detail page** — `/ops/inventory/[sku]`: stock by location, movements ledger, reorder point, lead time, valuation (FIFO/avg), supplier links.
+- [ ] **Purchase orders** — create PO from low-stock or manually; receive against PO (full/partial); 3-way match (PO ↔ receipt ↔ bill).
+- [ ] **Manufacturing / work orders** — BOM → WO → consume components → produce finished goods; routing/operations; WIP. (Today is surface-only.)
+- [ ] **Warehousing / locations** — multi-location stock, transfers, bin/zone; per-location reorder.
+- [ ] **Supplier management** — supplier records, price lists, lead times, performance, linked POs/bills.
+- [ ] **Barcode** — scan-to-find / scan-to-adjust (web camera + manual entry); printable SKU labels.
+- [ ] **Multi-currency** — currency per order/PO/bill, FX rate snapshot, base-currency reporting.
+- [ ] **AI reorder** — extend existing reorder hints into one-click PO drafts with supplier + qty suggestions.
+- [ ] **Data:** `Product`, `StockMovement`, `Location`, `PurchaseOrder/Line`, `WorkOrder`, `Supplier`, `BOM/Component` Prisma models.
+- [ ] **Done when:** an SMB can run procure → stock → manufacture → sell → fulfill with accurate on-hand and valuation, and "ERP" in the nav is no longer over-promising.
+
+### B3. Finance → QuickBooks / Xero
+
+**Target:** QuickBooks SMB. **Gap:** invoices, journal, bank rec, tax, payroll, multi-entity.
+
+- [ ] **Invoices** — create/send invoices (from sales orders or standalone), payment links (Stripe), status (draft/sent/paid/overdue), reminders, PDF.
+- [ ] **Bills / AP** — vendor bills, approval, pay runs; from POs (3-way match).
+- [ ] **Journal entries & double-entry ledger** — real GL behind P&L (today P&L is read-only); manual journals, recurring, reversing.
+- [ ] **Chart of accounts** — editable COA, account types, mapping rules.
+- [ ] **Bank reconciliation** — import (CSV/Plaid), match transactions, rules, reconcile.
+- [ ] **Reports** — P&L (from GL), Balance Sheet, Cash Flow, Trial Balance, AR/AP aging, tax summary; period compare; export.
+- [ ] **Tax** — tax codes, per-line tax, tax report; (filing = integration/partner later).
+- [ ] **Payroll** — basic run (or Gusto/Rippling integration) feeding GL + HR.
+- [ ] **Multi-entity + accountant access** — entity switcher, read-only accountant role.
+- [ ] **AI anomaly detection** — flag unusual expenses, duplicate bills, margin drift.
+- [ ] **Data:** `Account`, `JournalEntry/Line`, `Invoice`, `Bill`, `Payment`, `BankTxn`, `TaxCode`, `Entity` models.
+- [ ] **Done when:** P&L is computed from a real ledger, invoices get paid via VYNE, and books reconcile.
+
+### B4. HR → BambooHR / Rippling
+
+**Target:** BambooHR core. **Gap:** leave, payroll, org chart, reviews, onboarding, benefits, time, compliance.
+
+- [ ] **Leave management** — balances, request → approve flow, calendar, accrual policies, holiday calendars.
+- [ ] **Org chart** — interactive reporting tree from `managerId`; drag to re-org; export.
+- [ ] **Payroll** — run (or integration) → payslips → GL/Finance sync; comp history.
+- [ ] **Performance reviews** — cycles, goals, self/peer/manager reviews, ratings.
+- [ ] **Onboarding/offboarding** — checklists, doc collection, provisioning tasks (ties to automation engine).
+- [ ] **Benefits & compliance** — enrollments, documents, audit log, policy acknowledgements.
+- [ ] **Time tracking** — clock in/out or timesheets feeding Projects + Payroll.
+- [ ] **Header summary chips** — headcount/active/on-leave/payroll (Phase A3 #16).
+- [ ] **Data:** `Employee`, `LeaveRequest/Policy/Balance`, `ReviewCycle/Review`, `OnboardingTask`, `TimeEntry`, `BenefitPlan` models.
+- [ ] **Done when:** an SMB can hire → onboard → manage leave/time → review → offboard in VYNE.
+
+### B5. Projects → Linear / Jira / Asana
+
+**Target:** Linear for small eng teams (closest today). **Gap:** roadmap, Gantt, dependencies, time, workflows, GitHub 2-way.
+
+- [ ] **Roadmap** — real `/roadmap` linked from Projects: initiatives → epics → milestones, timeline view.
+- [ ] **Gantt / timeline view** — task bars, dependencies, critical path.
+- [ ] **Dependencies & blocking** — blocks/blocked-by, surfaced on board + Gantt.
+- [ ] **Time tracking** — estimates vs actuals; feeds HR timesheets + Finance billing.
+- [ ] **Custom workflows** — per-project statuses, WIP limits, automation triggers.
+- [ ] **GitHub 2-way sync** — PR/branch/commit ↔ task status; deploy events into Timeline.
+- [ ] **Cycles/sprints depth** — velocity, burndown, carryover (extend AI sprint planner).
+- [ ] **Done when:** an eng team runs sprints with dependencies, time, and GitHub linkage — and the AI planner uses all of it.
+
+### B6. Chat → Slack
+
+**Target:** Slack core + ecosystem. **Gap:** integrations, workflow builder, shared/external channels, deep search, canvas, native mobile.
+
+- [ ] **Deep message search** — full-text across channels/DMs/threads/files, filters (from/in/has).
+- [ ] **App integrations + incoming webhooks** — post from GitHub/Stripe/Sentry into channels (reuse Timeline sources); slash commands.
+- [ ] **Workflow builder** — trigger → steps (message, form, approval) shared with the automation engine (D3).
+- [ ] **Shared/external channels** — guest access, per-channel external membership.
+- [ ] **Canvas/docs in chat** — attach a Doc to a channel (ties to B7).
+- [ ] **Huddles** — promote the existing voice/video button to real LiveKit huddles + recording (recap already exists).
+- [ ] **Done when:** Chat is a daily driver: searchable, integrated, automatable.
+
+### B7. Docs → Notion (lightweight)
+
+**Target:** Notion-lite knowledge base. **Gap:** depth, templates, structure, collaboration.
+
+- [ ] **Rich editor depth** — finish TipTap: tables, embeds, code, callouts, slash menu, cover/icon.
+- [ ] **Workspace tree** — nested pages, favorites, recents, sharing/permissions.
+- [ ] **Templates** — meeting notes, PRD, runbook, onboarding (tie to AI BRD/TRD generation).
+- [ ] **Real-time collaboration** — finish Yjs presence/cursors; comments.
+- [ ] **Seed data + empty state** — multiple sample docs; CTA when empty (Phase A3 #15).
+- [ ] **Done when:** Docs is usable as the company wiki, not a single placeholder.
+
+### B8. Sales (order-to-cash glue)
+
+- [ ] **Quotations → Sales Orders → Invoices** flow wired across CRM/Ops/Finance (CPQ-lite: products, pricing, discounts, approval).
+- [ ] **Customers** as shared entity with CRM Accounts + Finance.
+- [ ] **Done when:** a quote becomes an order becomes an invoice with no re-entry.
+
+---
+
+## 4. Phase C — The AI moat (the differentiator)
+
+> This is the only thing no incumbent can copy quickly. Invest here continuously,
+> not just once.
+
+- [ ] **Cross-module grounding** — one retrieval layer over CRM + Ops + Finance + HR + Projects + Chat so the AI answers "what should I focus on today?" with real, current data.
+- [ ] **Daily brief v2** — proactive, cross-module: overdue deals, low stock, AR risk, sprint slippage, leave conflicts — ranked by $ impact.
+- [ ] **Agentic actions** — let the AI _do_ (draft PO, create invoice, advance deal, schedule review) behind confirm dialogs; full audit log.
+- [ ] **Per-module copilots** — deepen "Ask AI about ops/deals/projects/finance" with module-specific tools + grounding.
+- [ ] **Correlated Timeline intelligence** — auto-explain "GitHub deploy → Sentry error → $X orders at risk" with suggested actions.
+- [ ] **Generation suite** — keep extending BRD/TRD/Spec/Diagram/Sheet/Slides; wire outputs into Docs/Projects.
+- [ ] **Done when:** a founder opens VYNE and the AI tells them the 3 things that matter today, with one-click actions, grounded in live data.
+
+---
+
+## 5. Phase D — Platform & infra
+
+- [ ] **D1. Native mobile** (or installable PWA) — sidebar collapse, chat, approvals, notifications on the go.
+- [ ] **D2. Integrations marketplace** — Gmail/Outlook, Google/O365 Calendar, Stripe, Plaid, GitHub, Gusto/Rippling, Slack-import; OAuth + webhook framework.
+- [ ] **D3. Automation/workflow engine** — one shared trigger→condition→action engine powering CRM, Ops, HR, Chat, Projects.
+- [ ] **D4. Multi-tenant + RBAC** — org isolation, roles/permissions per module, audit log, accountant/guest roles.
+- [ ] **D5. Billing & plans** — Stripe metered plans, seats, usage limits, in-app upgrade (PlanLimitBanner already exists).
+- [ ] **D6. Security & compliance** — SSO/SAML, 2FA (otpauth present), data export/delete, SOC2 runway.
+- [ ] **D7. Notifications** — unified web-push + email + in-app, per-module preferences.
+- [ ] **D8. Search** — global semantic search across all entities (extend GlobalSearch).
+
+---
+
+## 6. Sequencing / milestones
+
+- [ ] **M0 — Launchable (Phase A):** no dead nav, Sales Orders + Finance Invoices real, critical UI fixed, AI front-and-center.
+- [ ] **M1 — "Real CRM + Finance" (B1, B3, B8):** order-to-cash works end to end.
+- [ ] **M2 — "Real Ops + HR" (B2, B4):** procure→make→sell→fulfill; hire→manage→offboard.
+- [ ] **M3 — "Team OS" (B5, B6, B7):** Projects/Chat/Docs are daily drivers.
+- [ ] **M4 — "AI moat" (Phase C):** proactive cross-module intelligence + agentic actions.
+- [ ] **M5 — "Platform" (Phase D):** mobile, integrations, automation, multi-tenant, billing, security.
