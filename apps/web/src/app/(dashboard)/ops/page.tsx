@@ -56,7 +56,6 @@ import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { Trash2 } from "lucide-react";
 import {
   MOCK_PRODUCTS,
-  MOCK_ORDERS,
   MOCK_SUPPLIERS,
   MOCK_BOMS,
   MOCK_WORK_ORDERS,
@@ -1529,7 +1528,11 @@ function OrdersTab({
             {filtered.map((o) => (
               <tr
                 key={o.id}
-                style={{ borderTop: "1px solid var(--content-border)" }}
+                onClick={() => router.push(`/ops/orders/${o.id}`)}
+                style={{
+                  borderTop: "1px solid var(--content-border)",
+                  cursor: "pointer",
+                }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLTableRowElement).style.background =
                     "var(--content-secondary)";
@@ -1589,7 +1592,10 @@ function OrdersTab({
                 <td style={{ padding: "10px 14px" }}>
                   <StatusBadge status={o.status} />
                 </td>
-                <td style={{ padding: "10px 14px" }}>
+                <td
+                  style={{ padding: "10px 14px" }}
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div style={{ display: "flex", gap: 4 }}>
                     {o.status === "draft" && (
                       <button
@@ -2781,7 +2787,11 @@ function OpsPageInner() {
     }
   }, [urlView]);
   const [products, setProducts] = useState<ERPProduct[]>(MOCK_PRODUCTS);
-  const [orders, setOrders] = useState<ERPOrder[]>(MOCK_ORDERS);
+  // Orders are store-backed (not local state) so the /ops/orders/[id] detail
+  // route reads + writes the same source: status changes and deletes there
+  // reflect in this table when you navigate back.
+  const orders = useOpsStore((s) => s.orders);
+  const setOrders = useOpsStore((s) => s.setOrders);
   const [suppliers, setSuppliers] = useState<ERPSupplier[]>(MOCK_SUPPLIERS);
   const [boms] = useState<ERPBOM[]>(MOCK_BOMS);
   const [workOrders, setWorkOrders] =
@@ -2801,7 +2811,7 @@ function OpsPageInner() {
       .listSuppliers()
       .then((r) => setSuppliers(r.data))
       .catch(() => {});
-  }, []);
+  }, [setOrders]);
 
   const tabs: Array<{ id: typeof tab; label: string; icon: React.ReactNode }> =
     [
