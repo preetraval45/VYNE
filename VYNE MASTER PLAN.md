@@ -17,7 +17,7 @@ Findings from a paying-user walkthrough of prod. The report praised Chat, Video 
 
 ### P1 — AI core non-functional (this is the product's identity)
 
-- [ ] **BUG #3 — Vyne AI doesn't respond to chat queries** — sending a question creates a conversation but produces no answer; prior sessions show `400` errors from the `google_search` grounding tool. Almost certainly the same Gemini key issue as image gen (quota/config) plus a grounding-tool request that the current model/endpoint rejects. Audit [/api/ai/stream](apps/web/src/app/api/ai/stream/route.ts): verify GEMINI_API_KEY validity/quota, and make the `google_search` tool optional (retry without grounding on 400 instead of failing the whole stream). Surface a real error in the bubble rather than silent failure.
+- [x] **BUG #3 — Vyne AI doesn't respond to chat queries** — ROOT CAUSE: [/api/ai/stream](apps/web/src/app/api/ai/stream/route.ts) always attached Gemini's NATIVE `google_search` grounding tool, but the request goes to Gemini's OpenAI-COMPAT endpoint (`/v1beta/openai/…`), which rejects that shape with a 400 and sinks the whole answer. Fix: grounding is now opt-in via `GEMINI_ENABLE_GROUNDING` (off by default) + a retry-without-grounding net on any 4xx, so an optional capability can't kill the core response; plus clearer surfaced errors for 429 (quota) and 401/403 (bad/missing key) instead of silent failure. Verified typecheck-clean. **Still needs a valid `GEMINI_API_KEY` in Vercel env** to actually answer.
 - [ ] **BUG #4 — AI auto-fill does nothing** — "AI will fill the form" on New Contact and New Quotation shows no response after clicking Auto-fill. Wire the button to its endpoint, confirm the endpoint exists/returns, and add error surfacing. Pairs with UX item below (no loading state).
 - [ ] **BUG #5 — AI Daily Brief never loads** — home shows "Generating digest…" then reverts to "Click refresh to brief me on today"; never completes. Check [/api/ai/brief](apps/web/src/app/api/ai/brief/route.ts) + the home BriefCard — same Gemini-key root cause is likely; ensure a failure shows an error instead of silently reverting.
 
@@ -89,12 +89,16 @@ Strong, polished dark-mode aesthetic and a clear product identity — modern and
 
 ## Shipped this session (Jun 8, 2026) ✅
 
-All items below are typecheck-verified (`tsc --noEmit`, exit 0). Not yet committed.
+All items below are typecheck-verified (`tsc --noEmit`, exit 0). Committed as `6795c72` + pushed to GitHub `main`; deployed to Vercel prod.
 
 ### P0 crash fixes
 
 - [x] **BUG #1 — global search white-screen** — see the root-cause note under P0 above. Fixed in [GlobalSearchModal.tsx](apps/web/src/components/layout/GlobalSearchModal.tsx) (read analytics via `getState()`, not a store subscription). Lesson recorded in the `zustand-selector-stability` memory.
 - [x] **BUG #2 — "+ New Issue" crash** — see the root-cause note under P0 above. Fixed in [projects.ts](apps/web/src/lib/stores/projects.ts) `addTask` (backfills all required fields) + render guards in [projects/[projectId]/page.tsx](<apps/web/src/app/(dashboard)/projects/[projectId]/page.tsx>).
+
+### P1 AI core
+
+- [x] **BUG #3 — Vyne AI doesn't respond** — see the root-cause note under P1 above. Fixed in [/api/ai/stream](apps/web/src/app/api/ai/stream/route.ts): grounding gated behind `GEMINI_ENABLE_GROUNDING` + retry-without-grounding on 4xx + clearer 429/401-403 messages. **Needs a valid `GEMINI_API_KEY` in Vercel env to actually answer.** BUG #4 (auto-fill) and BUG #5 (daily brief) still pending.
 
 ### Global search — inline navbar bar (replaces the popup)
 
