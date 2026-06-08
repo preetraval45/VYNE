@@ -11,6 +11,8 @@
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "mojibake:check": "node scripts/mojibake.mjs --check",
+    "mojibake:fix": "node scripts/mojibake.mjs --fix",
     "clean": "turbo run clean && rm -rf node_modules",
     "db:migrate": "bash scripts/db-migrate.sh",
     "db:seed": "bash scripts/seed.sh",
@@ -21,9 +23,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
+      "node scripts/mojibake.mjs --check",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml,css}": [
+      "node scripts/mojibake.mjs --check",
       "prettier --write"
     ]
   },

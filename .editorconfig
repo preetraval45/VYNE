@@ -1,0 +1,15 @@
+# EditorConfig — https://editorconfig.org
+# Enforces UTF-8 so editors stop re-saving source as Windows-1252, which was
+# corrupting punctuation/emoji into mojibake (— → "â€"", … → "â€¦", etc.).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
