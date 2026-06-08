@@ -2600,7 +2600,7 @@ function ContactsPageInner() {
       <PageHeader
         icon={<Users size={16} />}
         title="Accounts & Contacts"
-        subtitle={`${accounts.length} accounts Â· ${contacts.length} contacts`}
+        subtitle={`${accounts.length} accounts · ${contacts.length} contacts`}
       />
 
       <PageDashboard
@@ -2714,7 +2714,7 @@ function AccountDetailPanel({
       title={account?.name ?? ""}
       subtitle={
         account
-          ? `${account.industry} Â· ${account.employees.toLocaleString()} employees`
+          ? `${account.industry} · ${account.employees.toLocaleString()} employees`
           : undefined
       }
       badge={
@@ -2826,7 +2826,7 @@ function AccountDetailPanel({
           </DetailSection>
 
           {contacts.length > 0 && (
-            <DetailSection title={`People Â· ${contacts.length}`}>
+            <DetailSection title={`People · ${contacts.length}`}>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {contacts.slice(0, 5).map((c) => (
                   <Link
@@ -2915,7 +2915,7 @@ function ContactDetailPanel({
       title={contact?.name ?? ""}
       subtitle={
         contact
-          ? [contact.title, contact.company].filter(Boolean).join(" Â· ")
+          ? [contact.title, contact.company].filter(Boolean).join(" · ")
           : undefined
       }
       headerActions={
@@ -2993,7 +2993,7 @@ function ContactDetailPanel({
                     {account.name}
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-tertiary)" }}>
-                    {account.industry} {"Â·"} {fmtRevenue(account.revenue)}
+                    {account.industry} {"·"} {fmtRevenue(account.revenue)}
                   </div>
                 </div>
                 <ArrowRight

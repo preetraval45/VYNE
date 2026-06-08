@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
@@ -889,7 +889,7 @@ function FinancePageInner() {
       <PageHeader
         icon={<DollarSign size={16} />}
         title="Finance"
-        subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} Â· Profit ${fmt(profit)}`}
+        subtitle={`${MONTHS[now.getMonth()]} ${now.getFullYear()} · Profit ${fmt(profit)}`}
         actions={
           <>
             <Pill tone="success" dot>

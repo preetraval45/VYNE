@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
@@ -532,7 +532,7 @@ function OverviewTab({
                     <div
                       style={{ fontSize: 10, color: "var(--text-tertiary)" }}
                     >
-                      {p.sku} Â· {p.stockQty} left
+                      {p.sku} · {p.stockQty} left
                     </div>
                   </div>
                   <StatusBadge status={p.status ?? "in_stock"} />
@@ -2157,7 +2157,7 @@ function ManufacturingTab({
                 >
                   {DEMO_BOM_TREES.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.name} Â· {t.sku}
+                      {t.name} · {t.sku}
                     </option>
                   ))}
                 </select>
@@ -2854,7 +2854,7 @@ function OpsPageInner() {
       <PageHeader
         icon={<Package size={16} />}
         title="Operations"
-        subtitle="ERP Â· Inventory Â· Manufacturing Â· Orders"
+        subtitle="ERP · Inventory · Manufacturing · Orders"
         actions={
           <>
             <Pill tone="warn" dot>

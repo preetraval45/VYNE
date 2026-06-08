@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
@@ -279,7 +279,7 @@ function PipelineTab({
                   <span>â‰ˆ {fmt(stageWeighted)} weighted</span>
                   {sharePct > 0 && (
                     <>
-                      <span style={{ opacity: 0.4 }}>Â·</span>
+                      <span style={{ opacity: 0.4 }}>·</span>
                       <span>{sharePct}% of pipeline</span>
                     </>
                   )}
@@ -614,7 +614,7 @@ function DealsTableTab({
                   <td className="px-[14px] py-[10px]">
                     <span
                       className="flex items-center gap-1.5 text-xs font-bold text-vyne-purple"
-                      title="Click to open Â· Double-click to edit"
+                      title="Click to open · Double-click to edit"
                     >
                       <button
                         type="button"
@@ -1134,7 +1134,7 @@ function CRMPageInner() {
       <PageHeader
         icon={<TrendingUp size={16} />}
         title="CRM Pipeline"
-        subtitle={`${activeCount} active Â· ${fmt(totalPipeline)} pipeline`}
+        subtitle={`${activeCount} active · ${fmt(totalPipeline)} pipeline`}
         actions={
           <>
             <Pill tone="success" dot>
@@ -1198,7 +1198,7 @@ function CRMPageInner() {
           {
             label: "Win rate",
             value: `${winRate}%`,
-            hint: `${wonDeals.length} won Â· ${lostDeals.length} lost`,
+            hint: `${wonDeals.length} won · ${lostDeals.length} lost`,
             goodWhenUp: true,
           },
         ]}
@@ -1349,7 +1349,7 @@ function DealDetailPanel({
       title={deal?.company ?? ""}
       subtitle={
         deal
-          ? `${deal.contactName}${deal.email ? ` Â· ${deal.email}` : ""}`
+          ? `${deal.contactName}${deal.email ? ` · ${deal.email}` : ""}`
           : undefined
       }
       fullPageHref={deal ? `/crm/deals/${deal.id}` : undefined}

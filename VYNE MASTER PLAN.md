@@ -23,9 +23,9 @@ Findings from a paying-user walkthrough of prod. The report praised Chat, Video 
 
 ### P2 — Correctness / silent failures
 
-- [ ] **Character-encoding mojibake** — subtitle reads `"10 accounts Â· 15 contacts"`; the `·` is being emitted as Latin-1 not UTF-8. Find the literal middot in the accounts/contacts subtitle string and fix the encoding (use `·` U+00B7 in a UTF-8 source, or `&middot;`). Visible on every page load.
-- [ ] **Sales view resets to a filtered state after product creation** — returning to Sales after creating a product shows 1 opportunity ($75K) instead of all 13; no "Clear filter / Show all" escape. Preserve (or reset to "all") the pipeline filter on redirect, and add a visible Clear-filter control.
-- [ ] **Opportunity form: no validation feedback** — submitting without the required Company field fails silently; doesn't highlight/scroll to the missing field. Add inline validation + focus-on-error.
+- [x] **Character-encoding mojibake** — was a double-encoded middot (`·` U+00B7 saved as Latin-1 → `Â·`) NOT just on accounts/contacts but across **9 dashboard pages** (contacts, crm, finance, invoicing, hr, sales, ops, field-service, expenses). Fixed every occurrence to a proper UTF-8 `·`; verified zero `Â` left in `src/**`.
+- [x] **Sales view resets to a filtered state after product creation** — the opportunities filter is local state (so it resets on remount), but there was no escape if a filter WAS active. Added a visible **"✕ Clear · showing X of Y"** control to the [Opportunities toolbar](<apps/web/src/app/(dashboard)/sales/page.tsx>) (resets search + stage), and changed the [New Product form](<apps/web/src/app/(dashboard)/sales/products/new/page.tsx>) to redirect to `/sales?view=products` (the list you just added to) instead of the default Opportunities tab.
+- [x] **Opportunity form: no validation feedback** — the Create button was disabled when invalid, so clicking did nothing. Now the button is always enabled; submit runs inline validation, shows per-field error text + red border on the missing required field (name/company), and focuses + smooth-scrolls to the first invalid field. [opportunities/new](<apps/web/src/app/(dashboard)/sales/opportunities/new/page.tsx>).
 
 ### UX polish
 

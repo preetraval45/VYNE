@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState, useMemo } from "react";
 import Link from "next/link";
@@ -1939,7 +1939,7 @@ function InvoicesTab() {
     downloadInvoicePdf(payload, {
       name: "VYNE Demo Org",
       email: "billing@vyne.dev",
-      address: "Charlotte, NC Â· https://vyne.vercel.app",
+      address: "Charlotte, NC · https://vyne.vercel.app",
       accentColor: "var(--vyne-accent, #06B6D4)",
     });
   }
@@ -2439,7 +2439,7 @@ function InvoiceDetailPanel({
       title={invoice?.number ?? ""}
       subtitle={
         invoice
-          ? `${invoice.customer} Â· due ${fmtDate(invoice.dueDate)}`
+          ? `${invoice.customer} · due ${fmtDate(invoice.dueDate)}`
           : undefined
       }
       badge={

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
@@ -1590,6 +1590,33 @@ function OpportunitiesTab() {
             options={stages}
             onChange={setStageFilter}
           />
+          {(search || stageFilter) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setStageFilter("");
+              }}
+              title="Clear search and stage filter"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                height: 32,
+                padding: "0 10px",
+                borderRadius: 8,
+                border: "1px solid var(--content-border)",
+                background: "var(--vyne-teal-soft, var(--content-secondary))",
+                color: "var(--vyne-teal, var(--vyne-accent, #06B6D4))",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              ✕ Clear · showing {filtered.length} of {deals.length}
+            </button>
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <ExportButton
@@ -1972,7 +1999,7 @@ function OpportunityDetailPanel({
       title={deal?.name ?? ""}
       subtitle={
         deal
-          ? `${deal.company}${deal.contact ? ` Â· ${deal.contact}` : ""}`
+          ? `${deal.company}${deal.contact ? ` · ${deal.contact}` : ""}`
           : undefined
       }
       badge={
@@ -3575,7 +3602,7 @@ function SalesPageInner() {
       <PageHeader
         icon={<ShoppingCart size={16} />}
         title="Sales"
-        subtitle={`${deals.length} opportunities Â· ${salesOrders.length} orders`}
+        subtitle={`${deals.length} opportunities · ${salesOrders.length} orders`}
       />
 
       <PageDashboard
@@ -3854,7 +3881,7 @@ function WinLossInsights({
               color: "var(--text-tertiary)",
             }}
           >
-            {lostDeals.length} lost Â· {wonCount} won Â· AI-categorised reasons
+            {lostDeals.length} lost · {wonCount} won · AI-categorised reasons
           </p>
         </div>
         {lostDeals.length > 0 && (
@@ -3934,7 +3961,7 @@ function WinLossInsights({
                     color: "var(--text-primary)",
                   }}
                 >
-                  {n} Â· {pct}%
+                  {n} · {pct}%
                 </div>
               </div>
             );

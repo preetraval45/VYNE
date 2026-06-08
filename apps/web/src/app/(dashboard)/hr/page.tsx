@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -110,7 +110,7 @@ function StatusBadge({ emp }: Readonly<{ emp: Employee }>) {
         color: "var(--badge-warning-text)",
       }}
     >
-      On Leave{emp.leaveNote ? ` Â· ${emp.leaveNote}` : ""}
+      On Leave{emp.leaveNote ? ` · ${emp.leaveNote}` : ""}
     </span>
   );
 }
@@ -1174,7 +1174,7 @@ function PayrollTab() {
               margin: "3px 0 0",
             }}
           >
-            8 employees Â· next run Jun 1
+            8 employees · next run Jun 1
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -1836,7 +1836,7 @@ function HRPageInner() {
                 margin: "2px 0 0",
               }}
             >
-              {EMPLOYEES.length} employees Â·{" "}
+              {EMPLOYEES.length} employees ·{" "}
               {EMPLOYEES.filter((e) => e.status === "Active").length} active
             </p>
           </div>

@@ -49,14 +49,20 @@ export default function NewProductPage() {
       stock: Number(form.stock) || 0,
     });
     toast.success(`Product "${form.name}" created`);
-    router.push("/sales");
+    // Return to the Products list (where the new product shows) rather than
+    // the default Opportunities tab — avoids the "Sales looks filtered after
+    // creating a product" confusion from the QA report.
+    router.push("/sales?view=products");
   }
 
   return (
     <FormPageLayout
       title="New product"
       subtitle="Add a product or service to your catalog"
-      breadcrumbs={[{ label: "Sales", href: "/sales" }, { label: "New product" }]}
+      breadcrumbs={[
+        { label: "Sales", href: "/sales" },
+        { label: "New product" },
+      ]}
       backHref="/sales"
       dirty={dirty}
       footer={
@@ -71,13 +77,17 @@ export default function NewProductPage() {
     >
       <form id="new-product-form" onSubmit={handleSubmit}>
         <FormSection title="Product">
-          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}
+          >
             <FormField label="Name" htmlFor="prod-name" required>
               <input
                 id="prod-name"
                 type="text"
                 value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, name: e.target.value }))
+                }
                 placeholder="Pro plan"
                 required
                 autoFocus
@@ -90,7 +100,9 @@ export default function NewProductPage() {
                 id="prod-sku"
                 type="text"
                 value={form.sku}
-                onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value.toUpperCase() }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, sku: e.target.value.toUpperCase() }))
+                }
                 placeholder="PRO-001"
                 required
                 className={`${inputClass} font-mono uppercase`}
@@ -102,17 +114,25 @@ export default function NewProductPage() {
             <select
               id="prod-category"
               value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, category: e.target.value }))
+              }
               className={`${inputClass} cursor-pointer`}
               style={inputStyle}
             >
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
             </select>
           </FormField>
         </FormSection>
 
         <FormSection title="Pricing & inventory">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+          <div
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          >
             <FormField label="Unit price (USD)" htmlFor="prod-price" required>
               <input
                 id="prod-price"
@@ -120,20 +140,28 @@ export default function NewProductPage() {
                 min={0}
                 step="0.01"
                 value={form.price}
-                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, price: e.target.value }))
+                }
                 placeholder="99.00"
                 required
                 className={inputClass}
                 style={inputStyle}
               />
             </FormField>
-            <FormField label="Stock" htmlFor="prod-stock" hint="Status auto-derived: ≤0 Out, ≤10 Low, otherwise Active">
+            <FormField
+              label="Stock"
+              htmlFor="prod-stock"
+              hint="Status auto-derived: ≤0 Out, ≤10 Low, otherwise Active"
+            >
               <input
                 id="prod-stock"
                 type="number"
                 min={0}
                 value={form.stock}
-                onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, stock: e.target.value }))
+                }
                 placeholder="100"
                 className={inputClass}
                 style={inputStyle}

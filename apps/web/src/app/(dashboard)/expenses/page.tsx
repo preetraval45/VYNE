@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
@@ -792,7 +792,7 @@ function ApprovalsTab({
         }}
       >
         <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-          {pending.length} pending approval Â· total{" "}
+          {pending.length} pending approval · total{" "}
           {fmt(pending.reduce((s, e) => s + e.amount, 0))}
         </span>
         {selected.size > 0 && (

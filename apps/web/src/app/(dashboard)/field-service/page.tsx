@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -201,7 +201,7 @@ function FieldServicePageInner() {
       const baseColor = tech?.color ?? PRIORITY_COLOR[j.priority];
       return {
         id: j.id,
-        label: `${j.jobNumber} Â· ${j.title}`,
+        label: `${j.jobNumber} · ${j.title}`,
         start: j.scheduledStart,
         end: j.scheduledEnd,
         groupId: j.technicianId ?? "unassigned",
@@ -216,7 +216,7 @@ function FieldServicePageInner() {
               : j.status === "dispatched"
                 ? 0.25
                 : 0.1,
-        meta: `${j.customerName} Â· ${j.region} Â· ${j.skill} Â· ${j.priority}`,
+        meta: `${j.customerName} · ${j.region} · ${j.skill} · ${j.priority}`,
       };
     });
   }, [visibleJobs, technicians]);
@@ -250,7 +250,7 @@ function FieldServicePageInner() {
       const tech = technicians.find((t) => t.id === groupId);
       if (!tech) return groupId;
       const skills = tech.skills.map((s) => s.toUpperCase()).join(" / ");
-      return `${tech.name} Â· ${tech.region} Â· ${skills}`;
+      return `${tech.name} · ${tech.region} · ${skills}`;
     },
     [filters.groupBy, technicians],
   );
@@ -357,7 +357,7 @@ function FieldServicePageInner() {
       const j = jobs.find((x) => x.id === id);
       if (!j) return;
       toast(
-        `${j.jobNumber} Â· ${j.customerName}\n${j.address}\n${j.skill} Â· ${j.priority}`,
+        `${j.jobNumber} · ${j.customerName}\n${j.address}\n${j.skill} · ${j.priority}`,
         { duration: 4000 },
       );
     },
@@ -564,7 +564,7 @@ function FieldServicePageInner() {
       <PageHeader
         icon={<Truck size={16} />}
         title="Field Service"
-        subtitle={`${visibleJobs.length} job${visibleJobs.length === 1 ? "" : "s"} Â· ${
+        subtitle={`${visibleJobs.length} job${visibleJobs.length === 1 ? "" : "s"} · ${
           new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned")).size
         } tech${
           new Set(visibleJobs.map((j) => j.technicianId ?? "unassigned"))
@@ -611,7 +611,7 @@ function FieldServicePageInner() {
         >
           {capacityWarnings
             .map((w) => `${w.name} booked ${w.booked}h vs ${w.cap}h capacity`)
-            .join(" Â· ")}
+            .join(" · ")}
         </div>
       )}
 
