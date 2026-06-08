@@ -254,6 +254,54 @@ export function DailyDigestCard() {
         </button>
       </div>
 
+      {/* When no digest loaded yet and not loading — show prominent CTA */}
+      {!data && !loading && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 10,
+            padding: "12px 0 4px",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 12.5,
+              color: "var(--text-tertiary)",
+              textAlign: "center",
+              lineHeight: 1.5,
+            }}
+          >
+            Get a personalised AI summary of your day — meetings, overdue tasks,
+            and key updates.
+          </p>
+          <button
+            type="button"
+            onClick={() => generateDigest(true)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "8px 18px",
+              borderRadius: 8,
+              border: "none",
+              background:
+                "linear-gradient(135deg, rgba(108, 71, 255, 0.9) 0%, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.85) 100%)",
+              color: "#fff",
+              fontSize: 12.5,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(108,71,255,0.28)",
+            }}
+          >
+            <Sparkles size={13} strokeWidth={2.25} />
+            Generate brief
+          </button>
+        </div>
+      )}
+
       {data ? (
         <>
           <p

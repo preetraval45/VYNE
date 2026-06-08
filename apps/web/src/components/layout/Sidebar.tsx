@@ -1744,7 +1744,15 @@ function EmojiStatusLine() {
             </span>
           </>
         ) : (
-          <span style={{ fontStyle: "italic" }}>Set status</span>
+          <span
+            style={{
+              fontStyle: "normal",
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              fontWeight: 600,
+            }}
+          >
+            + Set status
+          </span>
         )}
       </button>
 
@@ -2174,404 +2182,422 @@ export function Sidebar() {
       </div>
 
       {/* ── Scrollable nav items ──────────────────── */}
-      <nav
-        className="sidebar-scroll"
-        aria-label="Navigation menu"
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          paddingTop: 4,
-          paddingBottom: 4,
-        }}
-      >
-        {/* ── Vyne AI featured panel ────────────────────────── */}
-        {!collapsed && (
-          <div style={{ padding: "10px 12px 4px" }}>
-            <Link
-              href="/ai/chat"
-              aria-label="Open Vyne AI"
+      <div style={{ flex: 1, position: "relative", minHeight: 0 }}>
+        {/* Bottom fade — signals that more items exist below the fold */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 48,
+            background:
+              "linear-gradient(to bottom, transparent 0%, var(--sidebar-bg, var(--content-bg)) 100%)",
+            pointerEvents: "none",
+            zIndex: 2,
+          }}
+        />
+        <nav
+          className="sidebar-scroll"
+          aria-label="Navigation menu"
+          style={{
+            height: "100%",
+            overflowY: "auto",
+            overflowX: "hidden",
+            paddingTop: 4,
+            paddingBottom: 4,
+          }}
+        >
+          {/* ── Vyne AI featured panel ────────────────────────── */}
+          {!collapsed && (
+            <div style={{ padding: "10px 12px 4px" }}>
+              <Link
+                href="/ai/chat"
+                aria-label="Open Vyne AI"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  background:
+                    "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18) 0%, rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.06) 100%)",
+                  border:
+                    "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
+                  color: "var(--sidebar-active)",
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
+                  position: "relative",
+                  overflow: "hidden",
+                  transition:
+                    "border-color 0.18s, transform 0.12s, box-shadow 0.18s",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor =
+                    "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)";
+                  el.style.transform = "translateY(-1px)";
+                  el.style.boxShadow =
+                    "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 10px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)";
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.borderColor =
+                    "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)";
+                  el.style.transform = "translateY(0)";
+                  el.style.boxShadow =
+                    "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)";
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 9,
+                    background:
+                      "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
+                    color: "#fff",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
+                  }}
+                >
+                  <Brain size={16} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      letterSpacing: "-0.01em",
+                      color: "#fff",
+                    }}
+                  >
+                    Vyne AI
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 10.5,
+                      color: "rgba(189, 209, 217, 0.75)",
+                      marginTop: 1,
+                    }}
+                  >
+                    BRD · Diagrams · Sheets · Slides
+                  </div>
+                </div>
+                <Sparkles
+                  size={13}
+                  style={{ color: "var(--teal-300, #67E8F9)", flexShrink: 0 }}
+                />
+              </Link>
+            </div>
+          )}
+          {collapsed && (
+            <div
               style={{
+                padding: "8px 6px 4px",
                 display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "10px 12px",
-                borderRadius: 12,
-                background:
-                  "linear-gradient(135deg, rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18) 0%, rgba(var(--vyne-accent-rgb, 34, 211, 238), 0.06) 100%)",
-                border:
-                  "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)",
-                color: "var(--sidebar-active)",
-                textDecoration: "none",
-                boxShadow:
-                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)",
-                position: "relative",
-                overflow: "hidden",
-                transition:
-                  "border-color 0.18s, transform 0.12s, box-shadow 0.18s",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor =
-                  "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.6)";
-                el.style.transform = "translateY(-1px)";
-                el.style.boxShadow =
-                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 10px 24px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor =
-                  "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.35)";
-                el.style.transform = "translateY(0)";
-                el.style.boxShadow =
-                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06), 0 6px 18px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18)";
+                justifyContent: "center",
               }}
             >
-              <div
+              <Link
+                href="/ai/chat"
+                aria-label="Open Vyne AI"
+                title="Vyne AI"
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 9,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
                   background:
                     "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
                   color: "#fff",
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  flexShrink: 0,
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25)",
+                  textDecoration: "none",
+                  boxShadow:
+                    "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)",
                 }}
               >
                 <Brain size={16} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    letterSpacing: "-0.01em",
-                    color: "#fff",
-                  }}
-                >
-                  Vyne AI
-                </div>
-                <div
-                  style={{
-                    fontSize: 10.5,
-                    color: "rgba(189, 209, 217, 0.75)",
-                    marginTop: 1,
-                  }}
-                >
-                  BRD · Diagrams · Sheets · Slides
-                </div>
-              </div>
-              <Sparkles
-                size={13}
-                style={{ color: "var(--teal-300, #67E8F9)", flexShrink: 0 }}
-              />
-            </Link>
-          </div>
-        )}
-        {collapsed && (
-          <div
-            style={{
-              padding: "8px 6px 4px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Link
-              href="/ai/chat"
-              aria-label="Open Vyne AI"
-              title="Vyne AI"
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background:
-                  "linear-gradient(135deg, var(--teal-400), var(--teal-700))",
-                color: "#fff",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textDecoration: "none",
-                boxShadow:
-                  "0 0 0 1px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.18), 0 4px 14px rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.28)",
-              }}
-            >
-              <Brain size={16} />
-            </Link>
-          </div>
-        )}
-
-        {/* ── Pinned ───────────────────────────────────────── */}
-        {!collapsed && pinned.length > 0 && (
-          <div style={{ padding: "8px 12px 6px" }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--sidebar-text)",
-                marginBottom: 6,
-                opacity: 0.7,
-              }}
-            >
-              <Star size={11} fill="currentColor" />
-              Pinned
+              </Link>
             </div>
-            {pinned.map((p, idx) => (
+          )}
+
+          {/* ── Pinned ───────────────────────────────────────── */}
+          {!collapsed && pinned.length > 0 && (
+            <div style={{ padding: "8px 12px 6px" }}>
               <div
-                key={p.href}
-                role="none"
-                draggable
-                onDragStart={(e) => {
-                  setPinDragIdx(idx);
-                  e.dataTransfer.effectAllowed = "move";
-                  e.dataTransfer.setData("text/plain", String(idx));
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.dataTransfer.dropEffect = "move";
-                  setPinOverIdx(idx);
-                }}
-                onDragLeave={() => {
-                  setPinOverIdx((cur) => (cur === idx ? null : cur));
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const from =
-                    pinDragIdx ?? Number(e.dataTransfer.getData("text/plain"));
-                  if (Number.isFinite(from) && from !== idx) {
-                    movePin(from, idx);
-                  }
-                  setPinDragIdx(null);
-                  setPinOverIdx(null);
-                }}
-                onDragEnd={() => {
-                  setPinDragIdx(null);
-                  setPinOverIdx(null);
-                }}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 4,
-                  padding: "2px 4px",
-                  borderRadius: 6,
-                  marginBottom: 2,
-                  cursor: pinDragIdx === idx ? "grabbing" : "grab",
-                  opacity: pinDragIdx === idx ? 0.4 : 1,
-                  borderTop:
-                    pinOverIdx === idx &&
-                    pinDragIdx !== null &&
-                    pinDragIdx > idx
-                      ? "2px solid var(--vyne-accent, var(--vyne-purple))"
-                      : "2px solid transparent",
-                  borderBottom:
-                    pinOverIdx === idx &&
-                    pinDragIdx !== null &&
-                    pinDragIdx < idx
-                      ? "2px solid var(--vyne-accent, var(--vyne-purple))"
-                      : "2px solid transparent",
-                  background: isActive(p.href)
-                    ? "rgba(255,255,255,0.06)"
-                    : "transparent",
-                  transition: "border-color 0.1s",
+                  gap: 6,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--sidebar-text)",
+                  marginBottom: 6,
+                  opacity: 0.7,
                 }}
               >
-                <button
-                  type="button"
-                  onClick={() => go(p.href)}
-                  aria-current={isActive(p.href) ? "page" : undefined}
+                <Star size={11} fill="currentColor" />
+                Pinned
+              </div>
+              {pinned.map((p, idx) => (
+                <div
+                  key={p.href}
+                  role="none"
+                  draggable
+                  onDragStart={(e) => {
+                    setPinDragIdx(idx);
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", String(idx));
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    setPinOverIdx(idx);
+                  }}
+                  onDragLeave={() => {
+                    setPinOverIdx((cur) => (cur === idx ? null : cur));
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const from =
+                      pinDragIdx ??
+                      Number(e.dataTransfer.getData("text/plain"));
+                    if (Number.isFinite(from) && from !== idx) {
+                      movePin(from, idx);
+                    }
+                    setPinDragIdx(null);
+                    setPinOverIdx(null);
+                  }}
+                  onDragEnd={() => {
+                    setPinDragIdx(null);
+                    setPinOverIdx(null);
+                  }}
                   style={{
-                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 4px",
+                    borderRadius: 6,
+                    marginBottom: 2,
+                    cursor: pinDragIdx === idx ? "grabbing" : "grab",
+                    opacity: pinDragIdx === idx ? 0.4 : 1,
+                    borderTop:
+                      pinOverIdx === idx &&
+                      pinDragIdx !== null &&
+                      pinDragIdx > idx
+                        ? "2px solid var(--vyne-accent, var(--vyne-purple))"
+                        : "2px solid transparent",
+                    borderBottom:
+                      pinOverIdx === idx &&
+                      pinDragIdx !== null &&
+                      pinDragIdx < idx
+                        ? "2px solid var(--vyne-accent, var(--vyne-purple))"
+                        : "2px solid transparent",
+                    background: isActive(p.href)
+                      ? "rgba(255,255,255,0.06)"
+                      : "transparent",
+                    transition: "border-color 0.1s",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => go(p.href)}
+                    aria-current={isActive(p.href) ? "page" : undefined}
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "4px 6px",
+                      borderRadius: 4,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 12,
+                      textAlign: "left",
+                      color: isActive(p.href)
+                        ? "var(--sidebar-active)"
+                        : "var(--sidebar-text)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Star
+                      size={12}
+                      fill="currentColor"
+                      style={{ flexShrink: 0, opacity: 0.8 }}
+                    />
+                    <span
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {p.label}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Unpin ${p.label}`}
+                    onClick={() => unpin(p.href)}
+                    style={{
+                      width: 22,
+                      height: 22,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 4,
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--sidebar-text)",
+                      cursor: "pointer",
+                      opacity: 0.6,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <XIcon size={11} />
+                  </button>
+                </div>
+              ))}
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(255,255,255,0.06)",
+                  margin: "10px 0 2px",
+                }}
+              />
+            </div>
+          )}
+
+          {/* ── Main nav with inline pin toggle on active row ─ */}
+          {visibleNavItems.map((item) => (
+            <NavRow
+              key={item.label}
+              item={item}
+              active={isActive(item.href)}
+              expanded={expandedItems.has(item.label)}
+              collapsed={collapsed}
+              onToggle={() => toggleExpand(item.label)}
+              onNavigate={go}
+            />
+          ))}
+
+          {/* ── Recent ───────────────────────────────────────── */}
+          {!collapsed && recent.length > 1 && (
+            <div style={{ padding: "12px 12px 6px" }}>
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(255,255,255,0.06)",
+                  marginBottom: 10,
+                }}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--sidebar-text)",
+                  marginBottom: 6,
+                  opacity: 0.7,
+                }}
+              >
+                <Clock size={11} />
+                Recent
+              </div>
+              {recent.slice(1, 6).map((r) => (
+                <div
+                  key={r.href}
+                  style={{
                     display: "flex",
                     alignItems: "center",
                     gap: 8,
-                    padding: "4px 6px",
-                    borderRadius: 4,
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: 12,
-                    textAlign: "left",
-                    color: isActive(p.href)
-                      ? "var(--sidebar-active)"
-                      : "var(--sidebar-text)",
-                    overflow: "hidden",
+                    padding: "5px 8px",
+                    borderRadius: 6,
+                    marginBottom: 2,
+                    fontSize: 11,
+                    color: "var(--sidebar-text)",
+                    opacity: 0.7,
                   }}
                 >
-                  <Star
-                    size={12}
-                    fill="currentColor"
-                    style={{ flexShrink: 0, opacity: 0.8 }}
-                  />
-                  <span
+                  <button
+                    type="button"
+                    onClick={() => go(r.href)}
                     style={{
+                      flex: 1,
+                      minWidth: 0,
+                      background: "transparent",
+                      border: "none",
+                      color: "inherit",
+                      cursor: "pointer",
+                      padding: 0,
+                      textAlign: "left",
+                      fontSize: "inherit",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {p.label}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  aria-label={`Unpin ${p.label}`}
-                  onClick={() => unpin(p.href)}
-                  style={{
-                    width: 22,
-                    height: 22,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 4,
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--sidebar-text)",
-                    cursor: "pointer",
-                    opacity: 0.6,
-                    flexShrink: 0,
-                  }}
-                >
-                  <XIcon size={11} />
-                </button>
-              </div>
-            ))}
-            <div
-              style={{
-                height: 1,
-                background: "rgba(255,255,255,0.06)",
-                margin: "10px 0 2px",
-              }}
-            />
-          </div>
-        )}
-
-        {/* ── Main nav with inline pin toggle on active row ─ */}
-        {visibleNavItems.map((item) => (
-          <NavRow
-            key={item.label}
-            item={item}
-            active={isActive(item.href)}
-            expanded={expandedItems.has(item.label)}
-            collapsed={collapsed}
-            onToggle={() => toggleExpand(item.label)}
-            onNavigate={go}
-          />
-        ))}
-
-        {/* ── Recent ───────────────────────────────────────── */}
-        {!collapsed && recent.length > 1 && (
-          <div style={{ padding: "12px 12px 6px" }}>
-            <div
-              style={{
-                height: 1,
-                background: "rgba(255,255,255,0.06)",
-                marginBottom: 10,
-              }}
-            />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 10,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                color: "var(--sidebar-text)",
-                marginBottom: 6,
-                opacity: 0.7,
-              }}
-            >
-              <Clock size={11} />
-              Recent
+                    {r.label}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={
+                      isPinned(r.href) ? `Unpin ${r.label}` : `Pin ${r.label}`
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePin({
+                        href: r.href,
+                        label: r.label,
+                        module: r.module,
+                      });
+                    }}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 4,
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--sidebar-text)",
+                      cursor: "pointer",
+                      opacity: 0.7,
+                    }}
+                  >
+                    {isPinned(r.href) ? (
+                      <Star size={10} fill="currentColor" />
+                    ) : (
+                      <StarOff size={10} />
+                    )}
+                  </button>
+                </div>
+              ))}
             </div>
-            {recent.slice(1, 6).map((r) => (
-              <div
-                key={r.href}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "5px 8px",
-                  borderRadius: 6,
-                  marginBottom: 2,
-                  fontSize: 11,
-                  color: "var(--sidebar-text)",
-                  opacity: 0.7,
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => go(r.href)}
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    background: "transparent",
-                    border: "none",
-                    color: "inherit",
-                    cursor: "pointer",
-                    padding: 0,
-                    textAlign: "left",
-                    fontSize: "inherit",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {r.label}
-                </button>
-                <button
-                  type="button"
-                  aria-label={
-                    isPinned(r.href) ? `Unpin ${r.label}` : `Pin ${r.label}`
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    togglePin({
-                      href: r.href,
-                      label: r.label,
-                      module: r.module,
-                    });
-                  }}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 4,
-                    background: "transparent",
-                    border: "none",
-                    color: "var(--sidebar-text)",
-                    cursor: "pointer",
-                    opacity: 0.7,
-                  }}
-                >
-                  {isPinned(r.href) ? (
-                    <Star size={10} fill="currentColor" />
-                  ) : (
-                    <StarOff size={10} />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+          )}
 
-        {/* Reference currentNavItem so linter sees it used */}
-        <div
-          style={{ display: "none" }}
-          data-current={currentNavItem?.href ?? ""}
-        />
-      </nav>
+          {/* Reference currentNavItem so linter sees it used */}
+          <div
+            style={{ display: "none" }}
+            data-current={currentNavItem?.href ?? ""}
+          />
+        </nav>
+      </div>
 
       {/* ── User footer ──────────────────────────── */}
       <div

@@ -53,9 +53,11 @@ export function QuickCreateIssueModal({ open, onClose }: Props) {
       } as Parameters<typeof addTask>[1]);
       // addTask returns void; navigate to the project so the new task
       // is visible. The user can drill in via the board view.
-      notifySuccess(`Issue created in ${
-        projects.find((p) => p.id === projectId)?.name ?? "project"
-      }`);
+      notifySuccess(
+        `Task created in ${
+          projects.find((p) => p.id === projectId)?.name ?? "project"
+        }`,
+      );
       router.push(`/projects/${projectId}`);
       onClose();
     } catch (e) {
@@ -121,7 +123,7 @@ export function QuickCreateIssueModal({ open, onClose }: Props) {
               color: "var(--text-primary)",
             }}
           >
-            New issue
+            New task
           </h2>
           <button
             type="button"

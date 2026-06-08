@@ -568,229 +568,284 @@ export default function HomePage() {
               {customizingApps ? "Done" : "Customize"}
             </button>
           </div>
-          <div
-            className="home-module-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-              gap: 12,
-              maxWidth: 800,
-              width: "100%",
-              margin: "0 auto",
-            }}
-          >
-            {[
-              {
-                label: "Home",
-                icon: "🏠",
-                color: "var(--vyne-accent, #06B6D4)",
-                href: "/home",
-              },
-              {
-                label: "Contacts",
-                icon: "📇",
-                color: "#2C3E50",
-                href: "/contacts",
-              },
-              { label: "Sales", icon: "📈", color: "#27AE60", href: "/sales" },
-              {
-                label: "Purchase",
-                icon: "🛒",
-                color: "#8E44AD",
-                href: "/purchase",
-              },
-              {
-                label: "Mfg",
-                icon: "🏭",
-                color: "#D35400",
-                href: "/manufacturing",
-              },
-              { label: "Chat", icon: "💬", color: "#3498DB", href: "/chat" },
-              {
-                label: "Projects",
-                icon: "📋",
-                color: "#0891B2",
-                href: "/projects",
-              },
-              { label: "Docs", icon: "📄", color: "#2ECC71", href: "/docs" },
-              {
-                label: "Ops / ERP",
-                icon: "📦",
-                color: "#F39C12",
-                href: "/ops",
-              },
-              {
-                label: "Finance",
-                icon: "💰",
-                color: "#1ABC9C",
-                href: "/finance",
-              },
-              { label: "CRM", icon: "🎯", color: "#E67E22", href: "/crm" },
-              { label: "HR", icon: "👥", color: "#3498DB", href: "/hr" },
-              {
-                label: "Expenses",
-                icon: "🧾",
-                color: "#95A5A6",
-                href: "/expenses",
-              },
-              { label: "Code", icon: "⌨️", color: "#8E44AD", href: "/code" },
-              {
-                label: "Observe",
-                icon: "📊",
-                color: "var(--vyne-accent, #06B6D4)",
-                href: "/observe",
-              },
-              {
-                label: "AI",
-                icon: "🧠",
-                color: "var(--vyne-accent, #06B6D4)",
-                href: "/ai",
-              },
-              {
-                label: "Automations",
-                icon: "⚡",
-                color: "#F1C40F",
-                href: "/automations",
-              },
-              {
-                label: "Roadmap",
-                icon: "🗺️",
-                color: "#1ABC9C",
-                href: "/roadmap",
-              },
-              {
-                label: "Invoicing",
-                icon: "📑",
-                color: "#2ECC71",
-                href: "/invoicing",
-              },
-              {
-                label: "Maintenance",
-                icon: "🔧",
-                color: "#E67E22",
-                href: "/maintenance",
-              },
-              {
-                label: "Marketing",
-                icon: "📣",
-                color: "#E91E63",
-                href: "/marketing",
-              },
-              {
-                label: "Reporting",
-                icon: "📊",
-                color: "#607D8B",
-                href: "/reporting",
-              },
-              {
-                label: "Settings",
-                icon: "⚙️",
-                color: "#7F8C8D",
-                href: "/settings",
-              },
-              { label: "Admin", icon: "🛡️", color: "#2C3E50", href: "/admin" },
-            ]
-              .filter((mod) => customizingApps || !hiddenTiles.has(mod.href))
-              .map((mod) => {
-                const isHidden = hiddenTiles.has(mod.href);
-                return (
-                  <button
-                    type="button"
-                    key={mod.href}
-                    onClick={() =>
-                      customizingApps
-                        ? toggleTileHidden(mod.href)
-                        : router.push(mod.href)
-                    }
-                    aria-label={
-                      customizingApps
-                        ? `${isHidden ? "Show" : "Hide"} ${mod.label}`
-                        : mod.label
-                    }
-                    style={{
-                      position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "16px 8px",
-                      borderRadius: 12,
-                      border: "1px solid var(--content-border)",
-                      background: "var(--content-bg)",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                      opacity: customizingApps && isHidden ? 0.4 : 1,
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        `rgba(${mod.color === "var(--vyne-accent, #06B6D4)" ? "108,71,255" : "0,0,0"}, 0.04)`;
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        mod.color;
-                      (e.currentTarget as HTMLElement).style.transform =
-                        "translateY(-2px)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--content-bg)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--content-border)";
-                      (e.currentTarget as HTMLElement).style.transform = "none";
-                    }}
-                  >
-                    {customizingApps && (
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          position: "absolute",
-                          top: 4,
-                          right: 4,
-                          width: 18,
-                          height: 18,
-                          borderRadius: "50%",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 12,
-                          fontWeight: 700,
-                          lineHeight: 1,
-                          background: isHidden
-                            ? "var(--vyne-accent, var(--vyne-purple))"
-                            : "var(--status-danger, #EF4444)",
-                          color: "#fff",
-                        }}
-                      >
-                        {isHidden ? "+" : "×"}
-                      </span>
-                    )}
-                    <div
-                      style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 10,
-                        background: `${mod.color}18`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: 22,
-                      }}
-                    >
-                      {mod.icon}
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 500,
-                        color: "var(--text-primary)",
-                        textAlign: "center",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {mod.label}
-                    </span>
-                  </button>
-                );
-              })}
-          </div>
+          {/* Module groups with section headers */}
+          {[
+            {
+              group: "People & Relationships",
+              modules: [
+                {
+                  label: "Contacts",
+                  icon: "📇",
+                  color: "#2C3E50",
+                  href: "/contacts",
+                },
+                { label: "CRM", icon: "🎯", color: "#E67E22", href: "/crm" },
+                { label: "HR", icon: "👥", color: "#3498DB", href: "/hr" },
+                {
+                  label: "Marketing",
+                  icon: "📣",
+                  color: "#E91E63",
+                  href: "/marketing",
+                },
+              ],
+            },
+            {
+              group: "Sales & Revenue",
+              modules: [
+                {
+                  label: "Sales",
+                  icon: "📈",
+                  color: "#27AE60",
+                  href: "/sales",
+                },
+                {
+                  label: "Invoicing",
+                  icon: "📑",
+                  color: "#2ECC71",
+                  href: "/invoicing",
+                },
+                {
+                  label: "Vendors",
+                  icon: "🏢",
+                  color: "#0EA5E9",
+                  href: "/vendors",
+                },
+                {
+                  label: "Expenses",
+                  icon: "🧾",
+                  color: "#95A5A6",
+                  href: "/expenses",
+                },
+                {
+                  label: "Finance",
+                  icon: "💰",
+                  color: "#1ABC9C",
+                  href: "/finance",
+                },
+              ],
+            },
+            {
+              group: "Operations",
+              modules: [
+                {
+                  label: "Projects",
+                  icon: "📋",
+                  color: "#0891B2",
+                  href: "/projects",
+                },
+                {
+                  label: "Ops / ERP",
+                  icon: "📦",
+                  color: "#F39C12",
+                  href: "/ops",
+                },
+                { label: "Chat", icon: "💬", color: "#3498DB", href: "/chat" },
+                {
+                  label: "Calendar",
+                  icon: "📅",
+                  color: "#6C47FF",
+                  href: "/calendar",
+                },
+                { label: "Docs", icon: "📄", color: "#2ECC71", href: "/docs" },
+                {
+                  label: "Roadmap",
+                  icon: "🗺️",
+                  color: "#1ABC9C",
+                  href: "/roadmap",
+                },
+              ],
+            },
+            {
+              group: "Dev & Intelligence",
+              modules: [
+                {
+                  label: "Vyne AI",
+                  icon: "🧠",
+                  color: "var(--vyne-accent, #06B6D4)",
+                  href: "/ai",
+                },
+                { label: "Code", icon: "⌨️", color: "#8E44AD", href: "/code" },
+                {
+                  label: "Observe",
+                  icon: "📡",
+                  color: "var(--vyne-accent, #06B6D4)",
+                  href: "/observe",
+                },
+                {
+                  label: "Automations",
+                  icon: "⚡",
+                  color: "#F1C40F",
+                  href: "/automations",
+                },
+                {
+                  label: "Reporting",
+                  icon: "📊",
+                  color: "#607D8B",
+                  href: "/reporting",
+                },
+              ],
+            },
+            {
+              group: "Admin",
+              modules: [
+                {
+                  label: "Settings",
+                  icon: "⚙️",
+                  color: "#7F8C8D",
+                  href: "/settings",
+                },
+                {
+                  label: "Admin",
+                  icon: "🛡️",
+                  color: "#2C3E50",
+                  href: "/admin",
+                },
+              ],
+            },
+          ].map(({ group, modules }) => {
+            const visible = modules.filter(
+              (mod) => customizingApps || !hiddenTiles.has(mod.href),
+            );
+            if (!customizingApps && visible.length === 0) return null;
+            return (
+              <div
+                key={group}
+                style={{ maxWidth: 800, width: "100%", margin: "0 auto 16px" }}
+              >
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.07em",
+                    color: "var(--text-tertiary)",
+                    marginBottom: 8,
+                    paddingLeft: 2,
+                  }}
+                >
+                  {group}
+                </div>
+                <div
+                  className="home-module-grid"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fill, minmax(100px, 1fr))",
+                    gap: 10,
+                  }}
+                >
+                  {modules
+                    .filter(
+                      (mod) => customizingApps || !hiddenTiles.has(mod.href),
+                    )
+                    .map((mod) => {
+                      const isHidden = hiddenTiles.has(mod.href);
+                      return (
+                        <button
+                          type="button"
+                          key={mod.href}
+                          onClick={() =>
+                            customizingApps
+                              ? toggleTileHidden(mod.href)
+                              : router.push(mod.href)
+                          }
+                          aria-label={
+                            customizingApps
+                              ? `${isHidden ? "Show" : "Hide"} ${mod.label}`
+                              : mod.label
+                          }
+                          style={{
+                            position: "relative",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "14px 8px",
+                            borderRadius: 12,
+                            border: "1px solid var(--content-border)",
+                            background: "var(--content-bg)",
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            opacity: customizingApps && isHidden ? 0.4 : 1,
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.background =
+                              "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.06)";
+                            (e.currentTarget as HTMLElement).style.borderColor =
+                              mod.color.startsWith("var")
+                                ? "var(--vyne-accent)"
+                                : mod.color;
+                            (e.currentTarget as HTMLElement).style.transform =
+                              "translateY(-2px)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.background =
+                              "var(--content-bg)";
+                            (e.currentTarget as HTMLElement).style.borderColor =
+                              "var(--content-border)";
+                            (e.currentTarget as HTMLElement).style.transform =
+                              "none";
+                          }}
+                        >
+                          {customizingApps && (
+                            <span
+                              aria-hidden="true"
+                              style={{
+                                position: "absolute",
+                                top: 4,
+                                right: 4,
+                                width: 18,
+                                height: 18,
+                                borderRadius: "50%",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 12,
+                                fontWeight: 700,
+                                lineHeight: 1,
+                                background: isHidden
+                                  ? "var(--vyne-accent, var(--vyne-purple))"
+                                  : "var(--status-danger, #EF4444)",
+                                color: "#fff",
+                              }}
+                            >
+                              {isHidden ? "+" : "×"}
+                            </span>
+                          )}
+                          <div
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 10,
+                              background: mod.color.startsWith("var")
+                                ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)"
+                                : `${mod.color}18`,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 22,
+                            }}
+                          >
+                            {mod.icon}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 500,
+                              color: "var(--text-primary)",
+                              textAlign: "center",
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            {mod.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                </div>
+              </div>
+            );
+          })}
         </section>
 
         {/* AI Alert Card */}
