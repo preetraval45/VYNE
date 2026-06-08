@@ -455,54 +455,22 @@ function FieldServicePageInner() {
   if (view === "dashboard") {
     return (
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        {/* Section heading — section navigation now lives in the left sidebar. */}
         <div
           style={{
-            padding: "8px 20px 0",
+            padding: "10px 20px",
             borderBottom: "1px solid var(--content-border)",
             background: "var(--content-bg)",
             flexShrink: 0,
             display: "flex",
-            gap: 6,
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--text-primary)",
           }}
         >
-          <button
-            type="button"
-            onClick={() => setView("dashboard")}
-            style={{
-              padding: "8px 14px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 500,
-              background: "transparent",
-              color: "var(--vyne-accent, var(--vyne-purple))",
-              borderBottom: "2px solid var(--vyne-accent, var(--vyne-purple))",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <BarChart3 size={13} /> Dashboard
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("schedule")}
-            style={{
-              padding: "8px 14px",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 500,
-              background: "transparent",
-              color: "var(--text-secondary)",
-              borderBottom: "2px solid transparent",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <CalendarClock size={13} /> Schedule
-          </button>
+          <BarChart3 size={14} /> Dashboard
         </div>
         <FieldServiceDashboardView />
       </div>
@@ -511,54 +479,22 @@ function FieldServicePageInner() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
-          padding: "8px 20px 0",
+          padding: "10px 20px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
           display: "flex",
-          gap: 6,
+          alignItems: "center",
+          gap: 8,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <button
-          type="button"
-          onClick={() => setView("dashboard")}
-          style={{
-            padding: "8px 14px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 12,
-            fontWeight: 500,
-            background: "transparent",
-            color: "var(--text-secondary)",
-            borderBottom: "2px solid transparent",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <BarChart3 size={13} /> Dashboard
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("schedule")}
-          style={{
-            padding: "8px 14px",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 12,
-            fontWeight: 500,
-            background: "transparent",
-            color: "var(--vyne-accent, var(--vyne-purple))",
-            borderBottom: "2px solid var(--vyne-accent, var(--vyne-purple))",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
-        >
-          <CalendarClock size={13} /> Schedule
-        </button>
+        <CalendarClock size={14} /> Schedule
       </div>
       <SavedViewsBar store={views} noun="field service" />
       <PageHeader

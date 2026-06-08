@@ -245,9 +245,11 @@ const NAV_ITEMS: NavItemDef[] = [
     moduleId: "erp",
     subs: [
       { label: "Dashboard", href: "/ops?view=dashboard" },
+      { label: "Overview", href: "/ops?view=overview" },
       { label: "Inventory", href: "/ops?view=inventory" },
       { label: "Orders", href: "/ops?view=orders" },
       { label: "Suppliers", href: "/ops?view=suppliers" },
+      { label: "Manufacturing", href: "/ops?view=manufacturing" },
     ],
   },
   {
@@ -273,9 +275,8 @@ const NAV_ITEMS: NavItemDef[] = [
     subs: [
       { label: "Dashboard", href: "/crm?view=dashboard" },
       { label: "Pipeline", href: "/crm?view=pipeline" },
-      { label: "Contacts", href: "/crm" },
-      { label: "Deals", href: "/crm" },
-      { label: "Activities", href: "/crm" },
+      { label: "Table", href: "/crm?view=table" },
+      { label: "Forecasting", href: "/crm?view=forecasting" },
     ],
   },
   {
@@ -301,6 +302,7 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Dashboard", href: "/expenses?view=dashboard" },
       { label: "My Expenses", href: "/expenses?view=mine" },
       { label: "Approvals", href: "/expenses?view=approvals" },
+      { label: "Mileage", href: "/expenses?view=mileage" },
       { label: "Reports", href: "/expenses?view=reports" },
     ],
   },
@@ -317,6 +319,7 @@ const NAV_ITEMS: NavItemDef[] = [
       { label: "Social Media", href: "/marketing?view=social" },
       { label: "Landing Pages", href: "/marketing?view=landing" },
       { label: "Analytics", href: "/marketing?view=analytics" },
+      { label: "Tools", href: "/marketing?view=tools" },
     ],
   },
   {

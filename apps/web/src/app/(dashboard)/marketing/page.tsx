@@ -1836,25 +1836,19 @@ function MarketingPageInner() {
         ]}
       />
 
-      {/* ─── Tabs ───────────────────────────────────── */}
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
-          display: "flex",
-          gap: 0,
           borderBottom: "1px solid var(--content-border)",
-          paddingLeft: 24,
+          padding: "10px 24px",
           background: "var(--content-bg)",
           flexShrink: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        {tabs.map((t) => (
-          <TabBtn
-            key={t.key}
-            label={t.label}
-            active={tab === t.key}
-            onClick={() => setTab(t.key)}
-          />
-        ))}
+        {tabs.find((t) => t.key === tab)?.label ?? tab}
       </div>
 
       {/* ─── Content ────────────────────────────────── */}

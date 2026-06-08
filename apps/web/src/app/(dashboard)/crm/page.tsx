@@ -1203,36 +1203,26 @@ function CRMPageInner() {
         ]}
       />
 
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         className="shrink-0"
         style={{
-          padding: "8px 20px 0",
+          padding: "10px 20px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <div className="flex gap-0.5">
-          <TabBtn
-            label="Dashboard"
-            active={tab === "dashboard"}
-            onClick={() => setTab("dashboard")}
-          />
-          <TabBtn
-            label="Pipeline"
-            active={tab === "pipeline"}
-            onClick={() => setTab("pipeline")}
-          />
-          <TabBtn
-            label="Deals Table"
-            active={tab === "table"}
-            onClick={() => setTab("table")}
-          />
-          <TabBtn
-            label="Forecasting"
-            active={tab === "forecasting"}
-            onClick={() => setTab("forecasting")}
-          />
-        </div>
+        {(
+          {
+            dashboard: "Dashboard",
+            pipeline: "Pipeline",
+            table: "Deals Table",
+            forecasting: "Forecasting",
+          } as Record<string, string>
+        )[tab] ?? tab}
       </div>
 
       {/* Content */}

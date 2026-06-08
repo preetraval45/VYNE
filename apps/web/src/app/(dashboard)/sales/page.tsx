@@ -3641,77 +3641,29 @@ function SalesPageInner() {
         ]}
       />
 
-      {/* Tabs */}
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
-          display: "flex",
-          gap: 0,
-          padding: "0 24px",
+          padding: "10px 24px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
-          overflowX: "auto",
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <TabBtn
-          label="Dashboard"
-          icon={<BarChart3 size={13} />}
-          active={activeTab === "dashboard"}
-          onClick={() => setActiveTab("dashboard")}
-        />
-        <TabBtn
-          label="Opportunities"
-          icon={<Target size={13} />}
-          active={activeTab === "opportunities"}
-          onClick={() => setActiveTab("opportunities")}
-        />
-        <TabBtn
-          label="Quotations"
-          icon={
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 2v6h6M16 13H8M16 17H8M10 9H8"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          }
-          active={activeTab === "quotations"}
-          onClick={() => setActiveTab("quotations")}
-        />
-        <TabBtn
-          label="Sales Orders"
-          icon={<ShoppingCart size={13} />}
-          active={activeTab === "orders"}
-          onClick={() => setActiveTab("orders")}
-        />
-        <TabBtn
-          label="Products"
-          icon={<Package size={13} />}
-          active={activeTab === "products"}
-          onClick={() => setActiveTab("products")}
-        />
-        <TabBtn
-          label="Customers"
-          icon={<Users size={13} />}
-          active={activeTab === "customers"}
-          onClick={() => setActiveTab("customers")}
-        />
-        <TabBtn
-          label="Reports"
-          icon={<BarChart3 size={13} />}
-          active={activeTab === "reports"}
-          onClick={() => setActiveTab("reports")}
-        />
+        {(
+          {
+            dashboard: "Dashboard",
+            opportunities: "Opportunities",
+            quotations: "Quotations",
+            orders: "Sales Orders",
+            products: "Products",
+            customers: "Customers",
+            reports: "Reports",
+          } as Record<string, string>
+        )[activeTab] ?? activeTab}
       </div>
 
       {/* Content */}

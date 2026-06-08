@@ -1450,42 +1450,43 @@ function ExpensesPageInner() {
         ]}
       />
 
-      {/* Tabs */}
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
           padding: "10px 24px",
           borderBottom: "1px solid var(--content-border)",
           display: "flex",
-          gap: 4,
+          alignItems: "center",
+          gap: 8,
           flexShrink: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <TabBtn
-          label="Dashboard"
-          active={tab === "dashboard"}
-          onClick={() => setTab("dashboard")}
-        />
-        <TabBtn
-          label="My Expenses"
-          active={tab === "mine"}
-          onClick={() => setTab("mine")}
-        />
-        <TabBtn
-          label="Approvals"
-          active={tab === "approvals"}
-          onClick={() => setTab("approvals")}
-          count={pendingCount}
-        />
-        <TabBtn
-          label="Reports"
-          active={tab === "reports"}
-          onClick={() => setTab("reports")}
-        />
-        <TabBtn
-          label="Mileage"
-          active={tab === "mileage"}
-          onClick={() => setTab("mileage")}
-        />
+        {(
+          {
+            dashboard: "Dashboard",
+            mine: "My Expenses",
+            approvals: "Approvals",
+            reports: "Reports",
+            mileage: "Mileage",
+          } as Record<string, string>
+        )[tab] ?? tab}
+        {tab === "approvals" && pendingCount > 0 && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.12)",
+              borderRadius: 999,
+              padding: "1px 8px",
+            }}
+          >
+            {pendingCount}
+          </span>
+        )}
       </div>
 
       {/* Content */}

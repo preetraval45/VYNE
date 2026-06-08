@@ -3870,62 +3870,30 @@ function InvoicingPageInner() {
         ]}
       />
 
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
-          padding: "8px 20px 0",
+          padding: "10px 20px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            gap: 2,
-            overflowX: "auto",
-          }}
-        >
-          <TabBtn
-            label="Dashboard"
-            active={tab === "dashboard"}
-            onClick={() => setTab("dashboard")}
-          />
-          <TabBtn
-            label="Customers"
-            active={tab === "customers"}
-            onClick={() => setTab("customers")}
-          />
-          <TabBtn
-            label="Invoices"
-            active={tab === "invoices"}
-            onClick={() => setTab("invoices")}
-          />
-          <TabBtn
-            label="Credit Notes"
-            active={tab === "creditNotes"}
-            onClick={() => setTab("creditNotes")}
-          />
-          <TabBtn
-            label="Payments"
-            active={tab === "payments"}
-            onClick={() => setTab("payments")}
-          />
-          <TabBtn
-            label="Vendors"
-            active={tab === "vendors"}
-            onClick={() => setTab("vendors")}
-          />
-          <TabBtn
-            label="Bills"
-            active={tab === "bills"}
-            onClick={() => setTab("bills")}
-          />
-          <TabBtn
-            label="Refunds"
-            active={tab === "refunds"}
-            onClick={() => setTab("refunds")}
-          />
-        </div>
+        {(
+          {
+            dashboard: "Dashboard",
+            customers: "Customers",
+            invoices: "Invoices",
+            creditNotes: "Credit Notes",
+            payments: "Payments",
+            vendors: "Vendors",
+            bills: "Bills",
+            refunds: "Refunds",
+          } as Record<string, string>
+        )[tab] ?? tab}
       </div>
 
       {/* Content */}

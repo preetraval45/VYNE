@@ -1890,15 +1890,16 @@ function HRPageInner() {
             />
           </div>
         </div>
-        <div style={{ display: "flex", gap: 2 }}>
-          {tabLabels.map(({ key, label }) => (
-            <TabBtn
-              key={key}
-              label={label}
-              active={tab === key}
-              onClick={() => setTab(key)}
-            />
-          ))}
+        {/* Section heading — section navigation now lives in the left sidebar. */}
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            padding: "2px 0",
+          }}
+        >
+          {tabLabels.find((t) => t.key === tab)?.label ?? tab}
         </div>
       </div>
 

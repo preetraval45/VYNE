@@ -2629,39 +2629,40 @@ function ContactsPageInner() {
         ]}
       />
 
-      {/* Tabs */}
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
           display: "flex",
-          gap: 0,
-          padding: "0 24px",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 24px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <TabBtn
-          label="Dashboard"
-          active={activeTab === "dashboard"}
-          onClick={() => setActiveTab("dashboard")}
-        />
-        <TabBtn
-          label="Accounts"
-          active={activeTab === "accounts"}
-          onClick={() => setActiveTab("accounts")}
-          count={accounts.length}
-        />
-        <TabBtn
-          label="Contacts"
-          active={activeTab === "contacts"}
-          onClick={() => setActiveTab("contacts")}
-          count={contacts.length}
-        />
-        <TabBtn
-          label="Import"
-          active={activeTab === "import"}
-          onClick={() => setActiveTab("import")}
-        />
+        {(
+          {
+            dashboard: "Dashboard",
+            accounts: "Accounts",
+            contacts: "Contacts",
+            import: "Import",
+          } as Record<string, string>
+        )[activeTab] ?? activeTab}
+        {(activeTab === "accounts" || activeTab === "contacts") && (
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--text-tertiary)",
+            }}
+          >
+            ({activeTab === "accounts" ? accounts.length : contacts.length})
+          </span>
+        )}
       </div>
 
       {/* Content */}

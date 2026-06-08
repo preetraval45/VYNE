@@ -3004,45 +3004,26 @@ function OpsPageInner() {
           ]}
         />
 
+        {/* Section heading — navigation lives in the left sidebar now, so this
+            is just a sticky label telling the user which section they're in. */}
         <div
           style={{
-            padding: "8px 20px 0",
+            padding: "10px 20px",
             borderBottom: "1px solid var(--content-border)",
             background: "var(--content-bg)",
             position: "sticky",
             top: 0,
             zIndex: 5,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 13,
+            fontWeight: 700,
+            color: "var(--text-primary)",
           }}
         >
-          {/* Tab bar */}
-          <div style={{ display: "flex", gap: 2 }}>
-            {tabs.map(({ id, label, icon }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  padding: "8px 14px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  background: "transparent",
-                  color:
-                    tab === id
-                      ? "var(--vyne-accent, var(--vyne-purple))"
-                      : "var(--text-secondary)",
-                  borderBottom:
-                    tab === id ? "2px solid #06B6D4" : "2px solid transparent",
-                  transition: "all 0.15s",
-                }}
-              >
-                {icon} {label}
-              </button>
-            ))}
-          </div>
+          {tabs.find((t) => t.id === tab)?.icon}
+          {tabs.find((t) => t.id === tab)?.label}
         </div>
 
         {/* Content (flows inside the shared scroll region above) */}

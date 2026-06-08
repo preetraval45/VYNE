@@ -950,36 +950,26 @@ function FinancePageInner() {
         ]}
       />
 
+      {/* Section heading — section navigation now lives in the left sidebar. */}
       <div
         style={{
-          padding: "8px 20px 0",
+          padding: "10px 20px",
           borderBottom: "1px solid var(--content-border)",
           background: "var(--content-bg)",
           flexShrink: 0,
+          fontSize: 13,
+          fontWeight: 700,
+          color: "var(--text-primary)",
         }}
       >
-        <div style={{ display: "flex", gap: 2 }}>
-          <TabBtn
-            label="Dashboard"
-            active={tab === "dashboard"}
-            onClick={() => setTab("dashboard")}
-          />
-          <TabBtn
-            label="P&L Statement"
-            active={tab === "pl"}
-            onClick={() => setTab("pl")}
-          />
-          <TabBtn
-            label="Journal Entries"
-            active={tab === "journal"}
-            onClick={() => setTab("journal")}
-          />
-          <TabBtn
-            label="Chart of Accounts"
-            active={tab === "accounts"}
-            onClick={() => setTab("accounts")}
-          />
-        </div>
+        {(
+          {
+            dashboard: "Dashboard",
+            pl: "P&L Statement",
+            journal: "Journal Entries",
+            accounts: "Chart of Accounts",
+          } as Record<string, string>
+        )[tab] ?? tab}
       </div>
 
       <div
