@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { INITIAL_DEALS, type Deal } from "@/lib/fixtures/crm";
 import { useActivityStore } from "@/lib/stores/activity";
+import { useAutomationsStore } from "@/lib/stores/automations";
 import { subscribe as rtSubscribe, isRealtimeEnabled } from "@/lib/realtime";
 import { seedOrEmpty, shouldSeedFixtures } from "@/lib/stores/seedMode";
 
@@ -63,16 +64,66 @@ export const useCRMStore = create<CRMState>()(
         // Auto-capture a stage change into the (Postgres-backed) activity feed
         // so the deal timeline records progression without manual logging.
         if (patch.stage && prev && patch.stage !== prev.stage) {
+          const newStage = patch.stage;
           useActivityStore.getState().log({
             recordType: "deal",
             recordId: id,
             kind: "change",
             verb: "moved",
-            summary: `Stage moved to ${patch.stage}`,
+            summary: `Stage moved to ${newStage}`,
             field: "stage",
             from: prev.stage,
-            to: patch.stage,
+            to: newStage,
           });
+
+          // Run user-defined automation rules for this stage. Actions are
+          // in-app + fully functional. set_* actions patch the row directly
+          // (not via updateDeal) so they can't recurse the stage trigger.
+          const rules = useAutomationsStore
+            .getState()
+            .rules.filter(
+              (r) =>
+                r.enabled && r.module === "crm" && r.triggerStage === newStage,
+            );
+          for (const rule of rules) {
+            if (rule.actionType === "log_note" && rule.actionValue) {
+              useActivityStore.getState().log({
+                recordType: "deal",
+                recordId: id,
+                kind: "note",
+                verb: "logged",
+                summary: "Automation",
+                body: rule.actionValue,
+                actor: "Automation",
+              });
+            } else if (rule.actionType === "set_next_action") {
+              set((s) => ({
+                deals: s.deals.map((d) =>
+                  d.id === id ? { ...d, nextAction: rule.actionValue } : d,
+                ),
+              }));
+              void fetch(`/api/deals/${encodeURIComponent(id)}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nextAction: rule.actionValue }),
+              }).catch(() => {});
+            } else if (rule.actionType === "set_probability") {
+              const prob = Math.max(
+                0,
+                Math.min(100, Number(rule.actionValue) || 0),
+              );
+              set((s) => ({
+                deals: s.deals.map((d) =>
+                  d.id === id ? { ...d, probability: prob } : d,
+                ),
+              }));
+              void fetch(`/api/deals/${encodeURIComponent(id)}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ probability: prob }),
+              }).catch(() => {});
+            }
+          }
         }
       },
 

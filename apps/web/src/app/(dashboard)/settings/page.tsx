@@ -78,6 +78,9 @@ const SnippetsSettings = lazyPanel(
 const FormsSettings = lazyPanel(
   () => import("@/components/settings/FormsSettings"),
 );
+const AutomationsSettings = lazyPanel(
+  () => import("@/components/settings/AutomationsSettings"),
+);
 const IntegrationsSettings = lazyPanel(
   () => import("@/components/settings/IntegrationsSettings"),
 );
@@ -167,22 +170,43 @@ const TABS = [
   { id: "notifications", label: "Notifications", icon: <Bell size={14} /> },
   { id: "snippets", label: "Snippets", icon: <Zap size={14} /> },
   { id: "forms", label: "Forms", icon: <FormInput size={14} /> },
+  { id: "automations", label: "Automations", icon: <Zap size={14} /> },
   { id: "erp", label: "ERP Config", icon: <Package size={14} /> },
   { id: "billing", label: "Billing", icon: <DollarSign size={14} /> },
   { id: "integrations", label: "Integrations", icon: <Plug size={14} /> },
   { id: "growth", label: "Growth", icon: <Sparkles size={14} /> },
   { id: "analytics", label: "Analytics", icon: <BarChart3 size={14} /> },
-  { id: "search-analytics", label: "Search analytics", icon: <Search size={14} /> },
-  { id: "ai-preferences", label: "AI preferences", icon: <Sparkles size={14} /> },
+  {
+    id: "search-analytics",
+    label: "Search analytics",
+    icon: <Search size={14} />,
+  },
+  {
+    id: "ai-preferences",
+    label: "AI preferences",
+    icon: <Sparkles size={14} />,
+  },
   { id: "rag-documents", label: "RAG documents", icon: <Database size={14} /> },
   { id: "realtime", label: "Realtime", icon: <Radio size={14} /> },
   { id: "computer-use", label: "Computer use", icon: <Cpu size={14} /> },
   { id: "stale-channels", label: "Stale channels", icon: <Inbox size={14} /> },
-  { id: "chat-workflows", label: "Chat workflows", icon: <Workflow size={14} /> },
-  { id: "field-permissions", label: "Field permissions", icon: <Shield size={14} /> },
+  {
+    id: "chat-workflows",
+    label: "Chat workflows",
+    icon: <Workflow size={14} />,
+  },
+  {
+    id: "field-permissions",
+    label: "Field permissions",
+    icon: <Shield size={14} />,
+  },
   { id: "data", label: "Data & backups", icon: <Package size={14} /> },
   { id: "trash", label: "Trash", icon: <Code size={14} /> },
-  { id: "accessibility", label: "Accessibility & language", icon: <Shield size={14} /> },
+  {
+    id: "accessibility",
+    label: "Accessibility & language",
+    icon: <Shield size={14} />,
+  },
   { id: "mobile", label: "Mobile", icon: <Smartphone size={14} /> },
   { id: "security", label: "Security", icon: <Shield size={14} /> },
   { id: "compliance", label: "Compliance", icon: <ScrollText size={14} /> },
@@ -303,8 +327,14 @@ export default function SettingsPage() {
               border: "none",
               cursor: "pointer",
               fontSize: 13,
-              background: tab === id ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "transparent",
-              color: tab === id ? "var(--vyne-accent, #06B6D4)" : "var(--text-secondary)",
+              background:
+                tab === id
+                  ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
+                  : "transparent",
+              color:
+                tab === id
+                  ? "var(--vyne-accent, #06B6D4)"
+                  : "var(--text-secondary)",
               fontWeight: tab === id ? 500 : 400,
               marginBottom: 2,
               transition: "all 0.12s",
@@ -342,6 +372,7 @@ export default function SettingsPage() {
         {tab === "audit" && <AuditSettings onToast={showToast} />}
         {tab === "snippets" && <SnippetsSettings onToast={showToast} />}
         {tab === "forms" && <FormsSettings onToast={showToast} />}
+        {tab === "automations" && <AutomationsSettings onToast={showToast} />}
         {tab === "integrations" && <IntegrationsSettings onToast={showToast} />}
         {tab === "compliance" && <ComplianceSettings onToast={showToast} />}
         {tab === "growth" && <GrowthSettings onToast={showToast} />}

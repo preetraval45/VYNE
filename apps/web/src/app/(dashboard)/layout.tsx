@@ -37,6 +37,7 @@ import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 import { useCRMStore, bindCrmRealtime } from "@/lib/stores/crm";
 import { useActivityStore } from "@/lib/stores/activity";
+import { useAutomationsStore } from "@/lib/stores/automations";
 import { useContactsStore, bindContactsRealtime } from "@/lib/stores/contacts";
 import {
   useInvoicingStore,
@@ -146,6 +147,7 @@ export default function DashboardLayout({
     void useFieldServiceStore.getState().hydrateFromServer();
     void useHRStore.getState().hydrateFromServer();
     void useActivityStore.getState().hydrateFromServer();
+    void useAutomationsStore.getState().hydrateFromServer();
     // Subscribe to Pusher org-wide events. Two-tab edits become instant
     // once NEXT_PUBLIC_PUSHER_KEY is set; the helpers no-op silently
     // when realtime is not configured.

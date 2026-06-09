@@ -48,7 +48,8 @@ type PrismaModelKey =
   | "fieldTechnician"
   | "fieldJob"
   | "employee"
-  | "leaveRequest";
+  | "leaveRequest"
+  | "automationRule";
 
 interface CrudConfig {
   /** Prisma delegate name on the singleton (lowercased, matches schema model) */
