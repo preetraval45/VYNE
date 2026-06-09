@@ -46,6 +46,7 @@ const DocEditor = dynamic(
 function RecentDocsGrid({
   docs,
   onSelect,
+  onCreate,
 }: {
   docs: {
     id: string;
@@ -54,6 +55,7 @@ function RecentDocsGrid({
     updatedAt: string;
   }[];
   onSelect: (id: string) => void;
+  onCreate?: () => void;
 }) {
   if (docs.length === 0) {
     return (
@@ -67,9 +69,23 @@ function RecentDocsGrid({
         <p className="text-[15px] font-semibold text-[var(--text-primary)]">
           No documents yet
         </p>
-        <p className="text-[13px] text-[var(--text-tertiary)]">
-          Create your first page from the sidebar
+        <p className="text-[13px] text-[var(--text-tertiary)] max-w-[280px] text-center">
+          Start a wiki, meeting notes, a PRD, or a runbook — or ask Vyne AI to
+          draft one for you.
         </p>
+        {onCreate && (
+          <button
+            type="button"
+            onClick={onCreate}
+            className="mt-1 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold text-white"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--vyne-accent-light, #7c4dff) 0%, var(--vyne-accent, var(--vyne-purple)) 100%)",
+            }}
+          >
+            <Plus size={14} /> Create your first document
+          </button>
+        )}
       </div>
     );
   }
@@ -378,7 +394,11 @@ export default function DocsPage() {
                       Recent
                     </span>
                   </div>
-                  <RecentDocsGrid docs={recentDocs} onSelect={setActiveDocId} />
+                  <RecentDocsGrid
+                    docs={recentDocs}
+                    onSelect={setActiveDocId}
+                    onCreate={handleCreateRoot}
+                  />
                 </>
               )}
             </div>

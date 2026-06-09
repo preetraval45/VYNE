@@ -15,6 +15,8 @@ import {
   Users,
   Cpu,
   Layers,
+  Hand,
+  ArrowRight,
 } from "lucide-react";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 
@@ -358,6 +360,32 @@ export default function DashboardPage() {
           >
             Widgets
           </div>
+          {/* Onboarding affordance — makes the drag interaction obvious for
+              first-time users instead of relying on the small subtitle hint. */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 10px",
+              marginBottom: 10,
+              borderRadius: 9,
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.10)",
+              border:
+                "1px dashed rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)",
+              fontSize: 11,
+              fontWeight: 600,
+              color: "var(--vyne-accent, var(--vyne-purple))",
+              lineHeight: 1.4,
+            }}
+          >
+            <Hand size={14} style={{ flexShrink: 0 }} />
+            <span>Drag any widget onto the grid</span>
+            <ArrowRight
+              size={14}
+              style={{ flexShrink: 0, marginLeft: "auto" }}
+            />
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {PALETTE.map((w) => {
               const Icon = w.icon;
@@ -474,11 +502,19 @@ export default function DashboardPage() {
                 }}
               >
                 <div style={{ fontSize: 32, opacity: 0.5 }}>📊</div>
-                <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "var(--text-primary)" }}>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                  }}
+                >
                   Your dashboard is empty
                 </h3>
                 <p style={{ margin: 0, fontSize: 13, maxWidth: 360 }}>
-                  Drag a widget from the palette on the left, or click Reset to start with the default layout.
+                  Drag a widget from the palette on the left, or click Reset to
+                  start with the default layout.
                 </p>
                 <button
                   type="button"
@@ -558,7 +594,9 @@ function DropSlot({
         border: dragging
           ? `2px dashed ${over ? "var(--vyne-accent, var(--vyne-purple))" : "var(--content-border)"}`
           : "2px dashed transparent",
-        background: over ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)" : "transparent",
+        background: over
+          ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.08)"
+          : "transparent",
         transition: "background 0.1s, border-color 0.1s",
         pointerEvents: dragging ? "auto" : "none",
       }}
@@ -612,7 +650,10 @@ function Tile({
           size={13}
           style={{ color: "var(--text-tertiary)", cursor: "grab" }}
         />
-        <Icon size={13} style={{ color: "var(--vyne-accent, var(--vyne-purple))" }} />
+        <Icon
+          size={13}
+          style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+        />
         <span
           style={{
             fontSize: 11,
@@ -686,11 +727,27 @@ function WidgetBody({ type }: { type: WidgetType }) {
     case "stat-revenue":
       return <Stat label="MRR" value="$48,200" delta="+12% WoW" up />;
     case "stat-orders":
-      return <Stat label="Open orders" value="156" delta="4 urgent today" up={false} accent="warn" />;
+      return (
+        <Stat
+          label="Open orders"
+          value="156"
+          delta="4 urgent today"
+          up={false}
+          accent="warn"
+        />
+      );
     case "stat-active-users":
       return <Stat label="Active users (24h)" value="284" delta="+9%" up />;
     case "stat-system-health":
-      return <Stat label="System health" value="4 / 5" delta="1 service degraded" up={false} accent="danger" />;
+      return (
+        <Stat
+          label="System health"
+          value="4 / 5"
+          delta="1 service degraded"
+          up={false}
+          accent="danger"
+        />
+      );
     case "chart-revenue":
       return <RevenueChart />;
     case "list-incidents":
@@ -802,8 +859,16 @@ function RevenueChart() {
 
 function IncidentList() {
   const incidents = [
-    { sev: "critical", title: "api-service v2.4.1 deploy failed", meta: "47 orders · $12.4k risk" },
-    { sev: "minor", title: "AI latency p95 elevated", meta: "Resolved 30 min ago" },
+    {
+      sev: "critical",
+      title: "api-service v2.4.1 deploy failed",
+      meta: "47 orders · $12.4k risk",
+    },
+    {
+      sev: "minor",
+      title: "AI latency p95 elevated",
+      meta: "Resolved 30 min ago",
+    },
   ];
   return (
     <ul
@@ -868,10 +933,22 @@ function IncidentList() {
 
 function IssueList() {
   const issues = [
-    { id: "ENG-43", title: "Fix Secrets Manager IAM permission", priority: "urgent" },
-    { id: "ENG-45", title: "LangGraph agent orchestration review", priority: "high" },
+    {
+      id: "ENG-43",
+      title: "Fix Secrets Manager IAM permission",
+      priority: "urgent",
+    },
+    {
+      id: "ENG-45",
+      title: "LangGraph agent orchestration review",
+      priority: "high",
+    },
     { id: "ENG-47", title: "Add Stripe usage metering", priority: "high" },
-    { id: "ENG-41", title: "TimescaleDB metrics schema migration", priority: "medium" },
+    {
+      id: "ENG-41",
+      title: "TimescaleDB metrics schema migration",
+      priority: "medium",
+    },
   ];
   return (
     <ul
@@ -911,7 +988,14 @@ function IssueList() {
           >
             {i.id}
           </span>
-          <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span
+            style={{
+              flex: 1,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {i.title}
           </span>
           <span
@@ -970,9 +1054,10 @@ function AiSummary() {
           color: "var(--text-primary)",
         }}
       >
-        Deploy <strong>api-service v2.4.1</strong> failed → <strong>47 orders stuck</strong> in
-        processing → <strong style={{ color: "var(--status-danger)" }}>$12,400</strong> at risk.
-        Rollback queued — confirm in #alerts.
+        Deploy <strong>api-service v2.4.1</strong> failed →{" "}
+        <strong>47 orders stuck</strong> in processing →{" "}
+        <strong style={{ color: "var(--status-danger)" }}>$12,400</strong> at
+        risk. Rollback queued — confirm in #alerts.
       </p>
     </div>
   );
@@ -1001,7 +1086,12 @@ function TeamPresence() {
       {team.map((m) => (
         <li
           key={m.name}
-          style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 12,
+          }}
         >
           <div
             aria-hidden="true"
@@ -1021,7 +1111,9 @@ function TeamPresence() {
           >
             {m.name[0]}
           </div>
-          <span style={{ color: "var(--text-primary)", fontWeight: 500, flex: 1 }}>
+          <span
+            style={{ color: "var(--text-primary)", fontWeight: 500, flex: 1 }}
+          >
             {m.name}
           </span>
           <span

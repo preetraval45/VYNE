@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import {
   Sparkles,
@@ -54,6 +54,28 @@ function pageMetaFor(pathname: string | null): {
   return (seg && PAGE_META[seg]) || { title: "VYNE", emoji: "▦" };
 }
 
+// A few `?view=` keys aren't a simple Title-Case of the slug; the rest fall
+// through to capitalize. Powers the "Module › Section" breadcrumb.
+const SECTION_LABELS: Record<string, string> = {
+  pl: "P&L Statement",
+  orgchart: "Org Chart",
+  creditNotes: "Credit Notes",
+  mine: "My Expenses",
+  table: "Deals Table",
+  accounts: "Accounts",
+};
+
+function sectionLabelFor(view: string | null): string | null {
+  if (!view) return null;
+  if (SECTION_LABELS[view]) return SECTION_LABELS[view];
+  // camelCase → spaced, then capitalize each word.
+  const spaced = view.replace(/([a-z])([A-Z])/g, "$1 $2");
+  return spaced
+    .split(/[\s_-]+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 /**
  * Global unified top bar — renders at the top of every dashboard page.
  *
@@ -68,9 +90,11 @@ export function UnifiedTopBar() {
   const user = useAuthStore((s) => s.user);
   const mounted = useMounted();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [issueModalOpen, setIssueModalOpen] = useState(false);
 
   const page = pageMetaFor(pathname);
+  const sectionLabel = sectionLabelFor(searchParams.get("view"));
   const displayName = mounted ? (user?.name ?? "User") : "User";
   const roleLabel = mounted ? (user?.role ?? "Member") : "Member";
 
@@ -167,6 +191,30 @@ export function UnifiedTopBar() {
           >
             {page.title}
           </h1>
+          {/* Sub-section breadcrumb (Module › Section) from ?view= so deep
+              sub-pages keep the user oriented in the topbar, not just in-page. */}
+          {sectionLabel && (
+            <span
+              className="vyne-unified-section"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--text-tertiary)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+              }}
+            >
+              <span aria-hidden="true" style={{ opacity: 0.5 }}>
+                ›
+              </span>
+              {sectionLabel}
+            </span>
+          )}
         </div>
 
         {/* Center: global search */}

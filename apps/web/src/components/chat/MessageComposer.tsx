@@ -55,6 +55,7 @@ export function MessageComposer({
   const [mentionIdx, setMentionIdx] = useState(0);
   const [capturing, setCapturing] = useState<"audio" | "video" | null>(null);
   const [critical, setCritical] = useState(false);
+  const [focused, setFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,9 +144,7 @@ export function MessageComposer({
     if (/^\/save-template\s+\S+\s+.+/is.test(trimmed)) {
       const saved = saveTemplateFromTrigger(trimmed);
       if (saved) {
-        toast.success(
-          `Template saved: /t ${saved.slug ?? saved.id}`,
-        );
+        toast.success(`Template saved: /t ${saved.slug ?? saved.id}`);
         setText("");
         if (textareaRef.current) textareaRef.current.style.height = "auto";
         return;
@@ -301,8 +300,7 @@ export function MessageComposer({
     setMentionQuery(null);
     requestAnimationFrame(() => {
       ta.focus();
-      const newCaret =
-        before.replace(/@([\w.-]*)$/, `@${name} `).length;
+      const newCaret = before.replace(/@([\w.-]*)$/, `@${name} `).length;
       ta.setSelectionRange(newCaret, newCaret);
     });
   }
@@ -505,71 +503,79 @@ export function MessageComposer({
             </div>
           </div>
         )}
-        {/* Toolbar */}
-        <div
-          data-chat-format-row
-          style={{
-            display: "flex",
-            gap: 2,
-            padding: "6px 10px",
-            borderBottom: "1px solid var(--content-bg-secondary)",
-          }}
-        >
-          {[
-            {
-              icon: <Bold size={13} />,
-              title: "Bold",
-              action: () => setText((t) => `**${t}**`),
-            },
-            {
-              icon: <Italic size={13} />,
-              title: "Italic",
-              action: () => setText((t) => `_${t}_`),
-            },
-            {
-              icon: <Code size={13} />,
-              title: "Code",
-              action: () => setText((t) => `\`${t}\``),
-            },
-            {
-              icon: <Zap size={13} />,
-              title: "Slash command",
-              action: () => {
-                setText("/");
-                setSlashMenuOpen(true);
-                textareaRef.current?.focus();
+        {/* Toolbar — only while the composer is focused or has text, so it
+            doesn't add permanent clutter (Slack/Teams behaviour). */}
+        {(focused || text.length > 0) && (
+          <div
+            data-chat-format-row
+            style={{
+              display: "flex",
+              gap: 2,
+              padding: "6px 10px",
+              borderBottom: "1px solid var(--content-bg-secondary)",
+            }}
+          >
+            {[
+              {
+                icon: <Bold size={13} />,
+                title: "Bold",
+                action: () => setText((t) => `**${t}**`),
               },
-            },
-          ].map(({ icon, title, action }) => (
-            <button
-              key={title}
-              onClick={action}
-              title={title}
-              style={{
-                padding: "3px 6px",
-                borderRadius: 5,
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                color: "var(--text-tertiary)",
-                display: "flex",
-                alignItems: "center",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
-                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background =
-                  "transparent";
-                (e.currentTarget as HTMLElement).style.color =
-                  "var(--text-tertiary)";
-              }}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
+              {
+                icon: <Italic size={13} />,
+                title: "Italic",
+                action: () => setText((t) => `_${t}_`),
+              },
+              {
+                icon: <Code size={13} />,
+                title: "Code",
+                action: () => setText((t) => `\`${t}\``),
+              },
+              {
+                icon: <Zap size={13} />,
+                title: "Slash command",
+                action: () => {
+                  setText("/");
+                  setSlashMenuOpen(true);
+                  textareaRef.current?.focus();
+                },
+              },
+            ].map(({ icon, title, action }) => (
+              <button
+                key={title}
+                type="button"
+                // Keep focus on the textarea so the toolbar doesn't blur-hide
+                // before the click registers.
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={action}
+                title={title}
+                style={{
+                  padding: "3px 6px",
+                  borderRadius: 5,
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  color: "var(--text-tertiary)",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = "#EEEEF8";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-accent, #06B6D4)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background =
+                    "transparent";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--text-tertiary)";
+                }}
+              >
+                {icon}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Textarea */}
         <textarea
@@ -577,6 +583,8 @@ export function MessageComposer({
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder={placeholder}
           rows={1}
           style={{
@@ -645,13 +653,19 @@ export function MessageComposer({
                 borderRadius: 6,
                 border: "none",
                 background:
-                  files.length > 0 ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)" : "transparent",
+                  files.length > 0
+                    ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
+                    : "transparent",
                 cursor: "pointer",
-                color: files.length > 0 ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
+                color:
+                  files.length > 0
+                    ? "var(--vyne-accent, #06B6D4)"
+                    : "var(--text-tertiary)",
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 if (files.length === 0)
@@ -731,7 +745,8 @@ export function MessageComposer({
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.color =
@@ -759,7 +774,8 @@ export function MessageComposer({
                 display: "flex",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                (e.currentTarget as HTMLElement).style.color =
+                  "var(--vyne-accent, #06B6D4)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.color =
@@ -780,11 +796,14 @@ export function MessageComposer({
                     ? "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.1)"
                     : "transparent",
                   cursor: "pointer",
-                  color: scheduleOpen ? "var(--vyne-accent, #06B6D4)" : "var(--text-tertiary)",
+                  color: scheduleOpen
+                    ? "var(--vyne-accent, #06B6D4)"
+                    : "var(--text-tertiary)",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--vyne-accent, #06B6D4)";
+                  (e.currentTarget as HTMLElement).style.color =
+                    "var(--vyne-accent, #06B6D4)";
                 }}
                 onMouseLeave={(e) => {
                   if (!scheduleOpen)
@@ -893,7 +912,9 @@ export function MessageComposer({
               borderRadius: 7,
               border: "none",
               cursor: canSend ? "pointer" : "default",
-              background: canSend ? "var(--vyne-accent, #06B6D4)" : "var(--content-border)",
+              background: canSend
+                ? "var(--vyne-accent, #06B6D4)"
+                : "var(--content-border)",
               color: canSend ? "#fff" : "var(--text-tertiary)",
               display: "flex",
               alignItems: "center",

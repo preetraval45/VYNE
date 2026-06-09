@@ -90,21 +90,21 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 ### A3. High/medium/polish UI (condensed from the Jun 8 walkthrough — 22 items)
 
 - [x] Sidebar collapsed-state tooltips — already present (`title={collapsed ? label}` on every nav row).
-- [ ] Breadcrumb reflects active sub-section (module > section). _Deferred — topbar enhancement; in-page sticky section heading already shows it._
-- [ ] Standardize badge/pill style — shared `Pill` (`Kit.tsx`) already exists; needs an audit to adopt it everywhere. _Deferred._
+- [x] Breadcrumb reflects active sub-section — topbar now shows "Module › Section" from `?view=` (`UnifiedTopBar`).
+- [ ] Standardize badge/pill style — shared `Pill` (`Kit.tsx`) already exists; needs a broad adoption audit. _Deferred (audit, not a quick fix)._
 - [x] `formatCurrency` (`$96.8K`) — helper already existed; applied to Ops KPI strip (was lowercase `$69.9k`) + order total. _(Remaining pages adopt incrementally.)_
-- [ ] One shared Export-CSV button — shared `ExportButton` exists; needs adoption audit. _Deferred._
+- [ ] One shared Export-CSV button — shared `ExportButton` exists; needs a broad adoption audit. _Deferred (audit)._
 - [x] "Ask AI" green — `AskAiButton` already uses the same `teal-400→teal-600` token as the topbar Vyne AI button (consistent).
 - [x] Demote "Get app" to ghost/outline — done (transparent bg + border in `UnifiedTopBar`).
-- [ ] My Dashboard: prominent drag-onboarding affordance. _Deferred (medium)._
-- [ ] Chat formatting toolbar: show only on input focus. _Deferred (medium)._
+- [x] My Dashboard drag-onboarding affordance — added a dashed accent callout ("Drag any widget onto the grid →" with hand + arrow icons) at the top of the palette.
+- [x] Chat formatting toolbar — now shows only when the composer is focused or has text (Slack/Teams behaviour); buttons `preventDefault` mousedown so they don't blur-hide.
 - [x] Ops low-stock names — `title` tooltip + ellipsis-on-hover.
-- [ ] Docs: more sample docs / real empty-state CTA — basic empty state exists; richer seed deferred to B7.
+- [x] Docs empty state — actionable "Create your first document" CTA + warmer copy (wired to `handleCreateRoot`). _(Richer seed data still under B7.)_
 - [x] HR header summary chip row — already present (Active / Remote / On Leave chips).
 - [x] Calendar "Up Next" — added hover `title` + `overflow-wrap` so long titles stay readable.
 - [x] OVERVIEW toggle — already uses an inline chevron (`ChevronDown/Up` in `PageDashboard`).
 - [x] Projects sidebar badge — re-pinned to the icon's top-right corner with a sidebar-bg ring so it reads cleanly.
-- [ ] Sidebar Vyne AI brain icon: integrate / reposition. _Deferred (subjective design)._
+- [~] Sidebar Vyne AI brain icon — **kept** as a deliberate featured panel (owner wants AI first-class); not de-emphasized by design.
 - [x] Sample-data banner — recolored to neutral slate / blue-gray (no longer reads as success green).
 - [ ] Responsive pass: tablet/mobile. _Deferred — its own effort (D1)._
 
