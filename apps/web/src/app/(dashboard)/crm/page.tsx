@@ -780,6 +780,66 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   const winRate =
     closedDeals.length > 0 ? (wonDeals.length / closedDeals.length) * 100 : 0;
 
+  // ── Scenario forecast (Salesforce-style categories) ──────────────
+  const wonValue = wonDeals.reduce((s, d) => s + d.value, 0);
+  const openDeals = deals.filter(
+    (d) => d.stage !== "Won" && d.stage !== "Lost",
+  );
+  const weighted = openDeals.reduce(
+    (s, d) => s + d.value * (d.probability / 100),
+    0,
+  );
+  // Commit = high-confidence open deals (≥60% or in Negotiation).
+  const commit = openDeals
+    .filter((d) => d.probability >= 60 || d.stage === "Negotiation")
+    .reduce((s, d) => s + d.value, 0);
+  const bestCase = openDeals.reduce((s, d) => s + d.value, 0); // everything open
+  const forecast = wonValue + weighted; // closed + weighted pipeline
+
+  // Editable quota (persisted) → attainment bar. Default to a sensible round
+  // target above the current forecast so the bar is meaningful out of the box.
+  const [quota, setQuota] = useState<number>(() => {
+    if (typeof window === "undefined") return 500_000;
+    const saved = Number(localStorage.getItem("vyne-crm-quota"));
+    return Number.isFinite(saved) && saved > 0 ? saved : 500_000;
+  });
+  const [editingQuota, setEditingQuota] = useState(false);
+  const closedPct = quota > 0 ? Math.min(100, (wonValue / quota) * 100) : 0;
+  const commitPct =
+    quota > 0 ? Math.min(100 - closedPct, (commit / quota) * 100) : 0;
+
+  const scenarios: Array<{
+    label: string;
+    value: number;
+    color: string;
+    sub: string;
+  }> = [
+    {
+      label: "Closed Won",
+      value: wonValue,
+      color: "var(--status-success)",
+      sub: `${wonDeals.length} deals`,
+    },
+    {
+      label: "Commit",
+      value: wonValue + commit,
+      color: "var(--vyne-accent, var(--vyne-purple))",
+      sub: "won + high-confidence",
+    },
+    {
+      label: "Forecast",
+      value: forecast,
+      color: "var(--status-warning)",
+      sub: "won + weighted pipeline",
+    },
+    {
+      label: "Best Case",
+      value: wonValue + bestCase,
+      color: "var(--text-secondary)",
+      sub: "won + all open",
+    },
+  ];
+
   const stageData = STAGES.filter((s) => s !== "Lost").map((stage) => {
     const stageDeals = deals.filter((d) => d.stage === stage);
     const total = stageDeals.reduce((s, d) => s + d.value, 0);
@@ -846,6 +906,111 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
             <div className="text-[11px] mt-0.5 text-text-tertiary">{sub}</div>
           </div>
         ))}
+      </div>
+
+      {/* Scenario forecast + quota attainment */}
+      <div
+        className="rounded-xl px-5 py-[18px]"
+        style={{
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-[13px] font-bold text-text-primary">
+            Forecast scenarios
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-text-tertiary">
+            <span>Quota</span>
+            {editingQuota ? (
+              <input
+                autoFocus
+                type="number"
+                aria-label="Quota target"
+                title="Quota target"
+                placeholder="Quota"
+                defaultValue={quota}
+                onBlur={(e) => {
+                  const v = Number(e.target.value);
+                  if (Number.isFinite(v) && v > 0) {
+                    setQuota(v);
+                    try {
+                      localStorage.setItem("vyne-crm-quota", String(v));
+                    } catch {
+                      /* ignore */
+                    }
+                  }
+                  setEditingQuota(false);
+                }}
+                className="w-28 px-2 py-1 rounded-md text-xs outline-none"
+                style={{
+                  border: "1px solid var(--content-border)",
+                  background: "var(--content-secondary)",
+                  color: "var(--text-primary)",
+                }}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditingQuota(true)}
+                className="font-semibold text-text-secondary underline decoration-dotted underline-offset-2"
+              >
+                {fmt(quota)}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Scenario numbers */}
+        <div className="grid grid-cols-4 gap-3 mb-5">
+          {scenarios.map((sc) => (
+            <div key={sc.label}>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: sc.color }}
+                />
+                <span className="text-[11px] font-semibold text-text-secondary">
+                  {sc.label}
+                </span>
+              </div>
+              <div className="text-lg font-bold text-text-primary tracking-[-0.02em]">
+                {fmt(Math.round(sc.value))}
+              </div>
+              <div className="text-[10px] text-text-tertiary">{sc.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Attainment bar: closed (solid) + commit (lighter) toward quota */}
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-medium text-text-secondary">
+            Quota attainment
+          </span>
+          <span className="text-[11px] font-bold text-text-primary">
+            {((wonValue / Math.max(quota, 1)) * 100).toFixed(0)}% closed ·{" "}
+            {(((wonValue + commit) / Math.max(quota, 1)) * 100).toFixed(0)}%
+            committed
+          </span>
+        </div>
+        <div className="h-3 rounded-full overflow-hidden flex bg-[var(--content-bg-secondary)]">
+          <div
+            className="h-full"
+            style={{
+              width: `${closedPct}%`,
+              background: "var(--status-success)",
+            }}
+            title={`Closed ${fmt(wonValue)}`}
+          />
+          <div
+            className="h-full"
+            style={{
+              width: `${commitPct}%`,
+              background: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.45)",
+            }}
+            title={`Commit ${fmt(commit)}`}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-[14px]">
