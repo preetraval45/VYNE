@@ -49,6 +49,8 @@ import { AskAiButton } from "@/components/shared/AskAiButton";
 import { useAiSuggestedPrompts } from "@/hooks/useAiSuggestedPrompts";
 import { useRegisterAiCommands } from "@/hooks/useRegisterAiCommands";
 import { useSavedViews } from "@/hooks/useSavedViews";
+import { LeadScoreBadge } from "@/components/crm/LeadScoreCard";
+import { scoreDeal } from "@/lib/crm/scoring";
 
 // ─── API adapter ─────────────────────────────────────────────────
 function statusToStage(status: string): Stage {
@@ -332,8 +334,11 @@ function PipelineTab({
                       boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div className="text-xs font-bold mb-[3px] truncate text-text-primary">
-                      {deal.company}
+                    <div className="flex items-center justify-between gap-2 mb-[3px]">
+                      <span className="text-xs font-bold truncate text-text-primary">
+                        {deal.company}
+                      </span>
+                      <LeadScoreBadge deal={deal} />
                     </div>
                     <div className="text-[11px] mb-2 truncate text-text-secondary">
                       {deal.contactName}
@@ -384,7 +389,7 @@ function PipelineTab({
 }
 
 // ─── Deals Table Tab ──────────────────────────────────────────────
-type SortKey = "company" | "value" | "stage" | "lastActivity";
+type SortKey = "company" | "value" | "stage" | "lastActivity" | "score";
 type SortDir = "asc" | "desc";
 
 function DealsTableTab({
@@ -436,6 +441,8 @@ function DealsTableTab({
         cmp =
           new Date(a.lastActivity).getTime() -
           new Date(b.lastActivity).getTime();
+      else if (sortKey === "score")
+        cmp = scoreDeal(a).score - scoreDeal(b).score;
       return sortDir === "asc" ? cmp : -cmp;
     });
 
@@ -544,6 +551,9 @@ function DealsTableTab({
               </th>
               <th className={thClass} onClick={() => toggleSort("stage")}>
                 Stage{sortArrow("stage")}
+              </th>
+              <th className={thClass} onClick={() => toggleSort("score")}>
+                Score{sortArrow("score")}
               </th>
               <th className={thNoSortClass}>Source</th>
               <th className={thNoSortClass}>Assignee</th>
@@ -678,6 +688,9 @@ function DealsTableTab({
                       options={STAGES.map((s) => ({ value: s, label: s }))}
                       render={(v) => <StagePill stage={v as Stage} />}
                     />
+                  </td>
+                  <td className="px-[14px] py-[10px]">
+                    <LeadScoreBadge deal={deal} />
                   </td>
                   <td className="px-[14px] py-[10px] text-[11px] capitalize text-text-tertiary">
                     {deal.source}
