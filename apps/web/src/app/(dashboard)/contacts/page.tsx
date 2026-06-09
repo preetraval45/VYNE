@@ -25,6 +25,7 @@ import {
   DetailRow,
   useDetailParam,
 } from "@/components/shared/DetailPanel";
+import { RecordActivityTimeline } from "@/components/shared/RecordActivityTimeline";
 import {
   useContactsStore,
   type Account,
@@ -3014,6 +3015,8 @@ function ContactDetailPanel({
               </div>
             </DetailSection>
           )}
+
+          <RecordActivityTimeline recordType="contact" recordId={contact.id} />
         </>
       )}
     </DetailPanel>

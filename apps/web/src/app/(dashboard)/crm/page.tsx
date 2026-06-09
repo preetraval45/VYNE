@@ -853,6 +853,18 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
 
+  // ── Conversion funnel ────────────────────────────────────────────
+  // Count of deals that reached *at least* each stage (current stage index ≥
+  // target), so the funnel narrows Lead → Won and shows step conversion %.
+  const stageIdx = (s: Stage) => STAGES.indexOf(s);
+  const funnel = STAGES.filter((s) => s !== "Lost").map((stage) => ({
+    stage,
+    reached: deals.filter(
+      (d) => d.stage !== "Lost" && stageIdx(d.stage) >= stageIdx(stage),
+    ).length,
+  }));
+  const funnelTop = Math.max(funnel[0]?.reached ?? 0, 1);
+
   return (
     <div className="flex flex-col gap-[18px]">
       {/* KPI cards */}
@@ -1103,6 +1115,50 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Conversion funnel */}
+      <div
+        className="rounded-xl px-5 py-[18px]"
+        style={{
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
+        }}
+      >
+        <div className="text-[13px] font-bold mb-4 text-text-primary">
+          Conversion funnel
+        </div>
+        <div className="flex flex-col gap-2.5">
+          {funnel.map(({ stage, reached }, i) => {
+            const widthPct = (reached / funnelTop) * 100;
+            const prev = i > 0 ? funnel[i - 1].reached : reached;
+            const stepConv = prev > 0 ? (reached / prev) * 100 : 0;
+            return (
+              <div key={stage} className="flex items-center gap-3">
+                <span className="w-[88px] shrink-0 text-xs font-medium text-text-secondary">
+                  {stage}
+                </span>
+                <div className="flex-1 h-6 rounded-md overflow-hidden bg-[var(--content-bg-secondary)]">
+                  <div
+                    className="h-full rounded-md flex items-center px-2 text-[11px] font-bold text-white transition-[width] duration-500"
+                    style={{
+                      width: `${Math.max(widthPct, 6)}%`,
+                      background: stageColor(stage),
+                    }}
+                  >
+                    {reached}
+                  </div>
+                </div>
+                <span className="w-[64px] shrink-0 text-right text-[11px] text-text-tertiary">
+                  {i === 0 ? "—" : `${stepConv.toFixed(0)}%`}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-2 text-[10px] text-text-tertiary">
+          Right column = step conversion from the previous stage.
         </div>
       </div>
     </div>
