@@ -12,6 +12,21 @@ export type ContactTag =
   | "Billing"
   | "Primary";
 
+// HubSpot-style lifecycle stage — where a person sits in the funnel.
+export type ContactLifecycle =
+  | "Lead"
+  | "MQL"
+  | "SQL"
+  | "Customer"
+  | "Evangelist";
+export const CONTACT_LIFECYCLES: ContactLifecycle[] = [
+  "Lead",
+  "MQL",
+  "SQL",
+  "Customer",
+  "Evangelist",
+];
+
 export interface Account {
   id: string;
   name: string;
@@ -35,6 +50,12 @@ export interface Contact {
   department: string;
   lastContact: string;
   tags: ContactTag[];
+  /** CRM depth — optional so existing seed/server rows stay valid. */
+  lifecycleStage?: ContactLifecycle;
+  owner?: string;
+  linkedin?: string;
+  /** Per-contact values for admin-defined custom fields (Studio, module "contacts"). */
+  customFields?: Record<string, string>;
 }
 
 // ─── Mock Data ───────────────────────────────────────────────────

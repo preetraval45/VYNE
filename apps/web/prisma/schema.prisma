@@ -127,19 +127,25 @@ model Activity {
 
 // CRM contacts (people). Paired with Account in the contacts module.
 model Contact {
-  id          String   @id @default(cuid())
-  orgId       String   @default("demo") @map("org_id")
-  name        String
-  email       String   @default("")
-  phone       String   @default("")
-  company     String   @default("")
-  accountId   String   @default("") @map("account_id")
-  title       String   @default("")
-  department  String   @default("")
-  lastContact String   @default("") @map("last_contact")
-  tags        String[] @default([])
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(cuid())
+  orgId          String   @default("demo") @map("org_id")
+  name           String
+  email          String   @default("")
+  phone          String   @default("")
+  company        String   @default("")
+  accountId      String   @default("") @map("account_id")
+  title          String   @default("")
+  department     String   @default("")
+  lastContact    String   @default("") @map("last_contact")
+  tags           String[] @default([])
+  // CRM depth: lifecycle stage (Lead → Customer), owning rep, social, and
+  // per-contact values for admin-defined custom fields (Studio).
+  lifecycleStage String   @default("Lead") @map("lifecycle_stage")
+  owner          String   @default("")
+  linkedin       String   @default("")
+  customFields   Json?    @map("custom_fields")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@index([orgId])
   @@index([accountId])

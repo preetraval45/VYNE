@@ -121,9 +121,7 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 **Target:** HubSpot Sales Hub depth for SMB. **Gap:** activity logging, sequences,
 lead scoring, reports, custom fields, email/calendar sync, mobile.
 
-- [ ] **Contacts/Accounts depth** — full contact record: company, role, social,
-      owner, lifecycle stage, tags, custom fields; account ↔ contacts ↔ deals graph.
-  - Data: `Contact`, `Account`, `Deal`, `Activity`, `CustomFieldDef/Value` Prisma models + relations.
+- [~] **Contacts/Accounts depth** — _Added **lifecycle stage** (editable Lead→Customer), **owner**, **LinkedIn/social**, and **custom fields** to the contact record — production-grade (Prisma `Contact` columns + `/api/contacts` + store type, hydrates from Postgres). Contact detail panel now shows them plus a **related-deals graph** (deals at the contact's company, linking through to CRM) and the activity timeline. Account already carries industry/website/revenue/employees/owner/status._ Still to do: richer Account detail page, contact custom-field admin surfaced in Studio.
 - [~] **Activity timeline** — _Built `RecordActivityTimeline`: per-record feed with quick-add for Note/Call/Email/Meeting, wired into **both the CRM deal detail (bumps `lastActivity`) and the contact detail panel**. **Production-grade persistence**: Prisma `Activity` model + tenant-scoped `/api/activities` route (rate-limited, Pusher realtime) + the activity store mirrors writes to Postgres and hydrates from the server on mount (optimistic local cache, like deals)._ Still to do: auto-capture from Chat/Calendar.
 - [ ] **Email sequences / cadences** — multi-step templated outreach with delays, open/click tracking, auto-enroll rules; pause-on-reply.
 - [x] **Lead scoring** — _`lib/crm/scoring.ts`: deterministic, explainable 0–100 score (stage + recency + source + value) → tier + reasons, no AI key needed. Surfaced as a gauge+reasons `LeadScoreCard` on the deal detail, a `LeadScoreBadge` on **pipeline cards + the table**, and a sortable **Score column** (sort desc = hot-leads view)._

@@ -26,6 +26,10 @@ import {
   useDetailParam,
 } from "@/components/shared/DetailPanel";
 import { RecordActivityTimeline } from "@/components/shared/RecordActivityTimeline";
+import { useCRMStore } from "@/lib/stores/crm";
+import { useCustomFieldsStore } from "@/lib/stores/customFields";
+import { CustomFieldsList } from "@/components/shared/CustomFieldsRenderer";
+import { CONTACT_LIFECYCLES } from "@/lib/stores/contacts";
 import {
   useContactsStore,
   type Account,
@@ -2910,6 +2914,20 @@ function ContactDetailPanel({
   account: Account | undefined;
   onClose: () => void;
 }) {
+  const deals = useCRMStore((s) => s.deals);
+  const updateContact = useContactsStore((s) => s.updateContact);
+  const contactFields =
+    useCustomFieldsStore((s) => s.schemas["contacts"]?.fields) ?? [];
+  // account ↔ contacts ↔ deals graph: deals at this contact's company.
+  const relatedDeals = contact
+    ? deals.filter(
+        (d) =>
+          !!d.company &&
+          !!contact.company &&
+          d.company.toLowerCase() === contact.company.toLowerCase(),
+      )
+    : [];
+
   return (
     <DetailPanel
       open={!!contact}
@@ -2943,6 +2961,59 @@ function ContactDetailPanel({
             />
             <DetailRow label="Phone" value={contact.phone || "—"} />
             <DetailRow label="Department" value={contact.department || "—"} />
+            <DetailRow label="Owner" value={contact.owner || "—"} />
+            <DetailRow
+              label="LinkedIn"
+              value={
+                contact.linkedin ? (
+                  <a
+                    href={
+                      contact.linkedin.startsWith("http")
+                        ? contact.linkedin
+                        : `https://${contact.linkedin}`
+                    }
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ color: "var(--vyne-accent, var(--vyne-purple))" }}
+                  >
+                    View profile ↗
+                  </a>
+                ) : (
+                  "—"
+                )
+              }
+            />
+            <DetailRow
+              label="Lifecycle"
+              value={
+                <select
+                  value={contact.lifecycleStage ?? "Lead"}
+                  onChange={(e) =>
+                    updateContact(contact.id, {
+                      lifecycleStage: e.target
+                        .value as Contact["lifecycleStage"],
+                    })
+                  }
+                  aria-label="Lifecycle stage"
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: "3px 8px",
+                    borderRadius: 7,
+                    border: "1px solid var(--content-border)",
+                    background: "var(--content-secondary)",
+                    color: "var(--text-primary)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {CONTACT_LIFECYCLES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              }
+            />
             <DetailRow
               label="Last contact"
               value={daysSinceStr(contact.lastContact)}
@@ -3013,6 +3084,55 @@ function ContactDetailPanel({
                   <TagPill key={tag} tag={tag} />
                 ))}
               </div>
+            </DetailSection>
+          )}
+
+          {relatedDeals.length > 0 && (
+            <DetailSection title={`Deals (${relatedDeals.length})`}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {relatedDeals.map((d) => (
+                  <Link
+                    key={d.id}
+                    href={`/crm/deals/${d.id}`}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      background: "var(--content-secondary)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {d.stage} · ${d.value.toLocaleString()}
+                    </span>
+                    <ArrowRight
+                      size={13}
+                      style={{ color: "var(--text-tertiary)", flexShrink: 0 }}
+                    />
+                  </Link>
+                ))}
+              </div>
+            </DetailSection>
+          )}
+
+          {contactFields.length > 0 && (
+            <DetailSection title="Custom fields">
+              <CustomFieldsList
+                fields={contactFields}
+                values={contact.customFields}
+              />
             </DetailSection>
           )}
 

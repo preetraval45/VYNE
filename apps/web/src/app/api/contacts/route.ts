@@ -20,6 +20,11 @@ const handlers = createCrudHandlers({
     department: typeof b.department === "string" ? b.department : "",
     lastContact: typeof b.lastContact === "string" ? b.lastContact : "",
     tags: Array.isArray(b.tags) ? b.tags : [],
+    lifecycleStage:
+      typeof b.lifecycleStage === "string" ? b.lifecycleStage : "Lead",
+    owner: typeof b.owner === "string" ? b.owner : "",
+    linkedin: typeof b.linkedin === "string" ? b.linkedin : "",
+    customFields: (b.customFields ?? null) as Record<string, string> | null,
   }),
 });
 
