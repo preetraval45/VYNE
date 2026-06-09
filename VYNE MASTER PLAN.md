@@ -89,24 +89,24 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 
 ### A3. High/medium/polish UI (condensed from the Jun 8 walkthrough — 22 items)
 
-- [ ] Sidebar collapsed-state tooltips on every item (`title`/Radix tooltip).
-- [ ] Breadcrumb reflects active sub-section (module > section).
-- [ ] Standardize badge/pill style (one token: filled vs outlined).
-- [ ] One `formatCurrency` helper (`$96.8K` convention) used app-wide.
-- [ ] One shared Export-CSV button style.
-- [ ] One exact "Ask AI" green token (contextual == global Vyne AI).
-- [ ] Demote "Get app" to ghost/outline.
-- [ ] My Dashboard: prominent drag-onboarding affordance (arrow/ghost slot).
-- [ ] Chat formatting toolbar: show only on input focus.
-- [ ] Ops low-stock names: `title` tooltip / ellipsis-on-hover.
-- [ ] Docs: more sample docs or a real empty-state CTA.
-- [ ] HR header summary chip row (match Finance/Ops).
-- [ ] Calendar "Up Next": wrap or hover full title.
-- [ ] OVERVIEW toggle: inline chevron (▼/▲).
-- [ ] Projects sidebar "2" badge: pin precisely to icon corner.
-- [ ] Sidebar Vyne AI brain icon: integrate into nav flow / brand area.
-- [ ] Sample-data banner: soft blue-gray (not success green).
-- [ ] Responsive pass: tablet/mobile sidebar, stat-grid reflow, chat UI.
+- [x] Sidebar collapsed-state tooltips — already present (`title={collapsed ? label}` on every nav row).
+- [ ] Breadcrumb reflects active sub-section (module > section). _Deferred — topbar enhancement; in-page sticky section heading already shows it._
+- [ ] Standardize badge/pill style — shared `Pill` (`Kit.tsx`) already exists; needs an audit to adopt it everywhere. _Deferred._
+- [x] `formatCurrency` (`$96.8K`) — helper already existed; applied to Ops KPI strip (was lowercase `$69.9k`) + order total. _(Remaining pages adopt incrementally.)_
+- [ ] One shared Export-CSV button — shared `ExportButton` exists; needs adoption audit. _Deferred._
+- [x] "Ask AI" green — `AskAiButton` already uses the same `teal-400→teal-600` token as the topbar Vyne AI button (consistent).
+- [x] Demote "Get app" to ghost/outline — done (transparent bg + border in `UnifiedTopBar`).
+- [ ] My Dashboard: prominent drag-onboarding affordance. _Deferred (medium)._
+- [ ] Chat formatting toolbar: show only on input focus. _Deferred (medium)._
+- [x] Ops low-stock names — `title` tooltip + ellipsis-on-hover.
+- [ ] Docs: more sample docs / real empty-state CTA — basic empty state exists; richer seed deferred to B7.
+- [x] HR header summary chip row — already present (Active / Remote / On Leave chips).
+- [x] Calendar "Up Next" — added hover `title` + `overflow-wrap` so long titles stay readable.
+- [x] OVERVIEW toggle — already uses an inline chevron (`ChevronDown/Up` in `PageDashboard`).
+- [x] Projects sidebar badge — re-pinned to the icon's top-right corner with a sidebar-bg ring so it reads cleanly.
+- [ ] Sidebar Vyne AI brain icon: integrate / reposition. _Deferred (subjective design)._
+- [x] Sample-data banner — recolored to neutral slate / blue-gray (no longer reads as success green).
+- [ ] Responsive pass: tablet/mobile. _Deferred — its own effort (D1)._
 
 ---
 

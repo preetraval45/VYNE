@@ -589,19 +589,21 @@ function NavRow({
           }}
         >
           <Icon size={16} />
-          {/* Collapsed mode badge dot */}
+          {/* Collapsed mode badge dot — ringed in the sidebar bg so it reads as
+              cleanly pinned to the icon's top-right corner, not floating. */}
           {collapsed && item.badge !== undefined && item.badge > 0 && (
             <span
               aria-label={`${item.badge} notifications`}
               style={{
                 position: "absolute",
-                top: -3,
-                right: -3,
-                minWidth: 14,
-                height: 14,
-                padding: "0 3px",
-                borderRadius: 7,
+                top: -4,
+                right: -4,
+                minWidth: 16,
+                height: 16,
+                padding: "0 4px",
+                borderRadius: 8,
                 background: "var(--vyne-accent, var(--vyne-purple))",
+                border: "2px solid var(--sidebar-bg, var(--content-bg))",
                 color: "#fff",
                 fontSize: 9,
                 fontWeight: 700,
@@ -609,6 +611,7 @@ function NavRow({
                 alignItems: "center",
                 justifyContent: "center",
                 lineHeight: 1,
+                boxSizing: "border-box",
               }}
             >
               {item.badge > 9 ? "9+" : item.badge}

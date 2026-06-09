@@ -40,8 +40,10 @@ export function DemoDataBanner({
         alignItems: "center",
         gap: 10,
         padding: "10px 14px",
-        borderBottom: "1px solid var(--vyne-teal-border)",
-        background: "var(--vyne-teal-soft)",
+        // Neutral slate / blue-gray (not success green) so the "sample data"
+        // notice reads as informational, not as a status/success state.
+        borderBottom: "1px solid rgba(100, 116, 139, 0.25)",
+        background: "rgba(100, 116, 139, 0.10)",
         color: "var(--text-primary)",
         fontSize: 12.5,
         lineHeight: 1.5,
@@ -49,7 +51,7 @@ export function DemoDataBanner({
     >
       <Info
         size={14}
-        style={{ color: "var(--vyne-teal)", flexShrink: 0 }}
+        style={{ color: "#64748B", flexShrink: 0 }}
         aria-hidden="true"
       />
       <span>

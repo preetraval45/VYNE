@@ -40,6 +40,7 @@ import {
   type ERPWorkOrder,
 } from "@/lib/api/client";
 import { formatRelativeTime } from "@/lib/utils";
+import { formatCurrency } from "@/lib/format";
 import { useDebounce } from "@/hooks/useDebounce";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
@@ -407,7 +408,16 @@ function OverviewTab({
                     }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, color: "var(--text-primary)" }}>
+                    <div
+                      title={p.name}
+                      style={{
+                        fontSize: 12,
+                        color: "var(--text-primary)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {p.name}
                     </div>
                     <div
@@ -2870,13 +2880,13 @@ function OpsPageInner() {
             },
             {
               label: "Inventory value",
-              value: `$${(inventoryValue / 1000).toFixed(1)}k`,
+              value: formatCurrency(inventoryValue, { compact: true }),
             },
             {
               label: "Pending orders",
               value: pendingOrders.toString(),
               sparkline: orderSparkline,
-              hint: `$${(totalOrderValue / 1000).toFixed(1)}k total`,
+              hint: `${formatCurrency(totalOrderValue, { compact: true })} total`,
             },
             {
               label: "Active WOs",

@@ -274,18 +274,19 @@ export function UnifiedTopBar() {
             title="Get the desktop & mobile apps"
             className="vyne-unified-getapp"
             style={{
+              // Secondary utility action — ghost/outline so the primary CTAs
+              // (Vyne AI, + New Task) clearly read as the prominent ones.
               display: "inline-flex",
               alignItems: "center",
               gap: 5,
               height: 30,
               padding: "0 12px",
               borderRadius: 8,
-              background:
-                "linear-gradient(135deg, var(--teal-500) 0%, var(--teal-700) 100%)",
-              color: "#fff",
+              background: "transparent",
+              color: "var(--text-secondary)",
               fontSize: 11.5,
               fontWeight: 600,
-              border: "1px solid var(--teal-500)",
+              border: "1px solid var(--content-border)",
               textDecoration: "none",
               flexShrink: 0,
               whiteSpace: "nowrap",

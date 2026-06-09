@@ -14,10 +14,7 @@ import {
   X,
   Trash2,
 } from "lucide-react";
-import {
-  useCalendarStore,
-  type CalendarEvent,
-} from "@/lib/stores/calendar";
+import { useCalendarStore, type CalendarEvent } from "@/lib/stores/calendar";
 import { useCallStore } from "@/lib/stores/call";
 import { ScheduleMeetingModal } from "@/components/calendar/ScheduleMeetingModal";
 import { PageDashboard } from "@/components/shared/PageDashboard";
@@ -42,11 +39,31 @@ const MONTH_NAMES = [
 ];
 
 const TYPE_COLOR: Record<string, { bg: string; fg: string; border: string }> = {
-  meeting: { bg: "rgba(108, 71, 255, 0.15)", fg: "var(--vyne-accent, var(--vyne-purple))", border: "rgba(108, 71, 255, 0.4)" },
-  call: { bg: "rgba(34, 197, 94, 0.15)", fg: "#22C55E", border: "rgba(34, 197, 94, 0.4)" },
-  focus: { bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)", fg: "var(--vyne-accent, #06B6D4)", border: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)" },
-  deadline: { bg: "rgba(239, 68, 68, 0.15)", fg: "#EF4444", border: "rgba(239, 68, 68, 0.4)" },
-  other: { bg: "rgba(245, 158, 11, 0.15)", fg: "#F59E0B", border: "rgba(245, 158, 11, 0.4)" },
+  meeting: {
+    bg: "rgba(108, 71, 255, 0.15)",
+    fg: "var(--vyne-accent, var(--vyne-purple))",
+    border: "rgba(108, 71, 255, 0.4)",
+  },
+  call: {
+    bg: "rgba(34, 197, 94, 0.15)",
+    fg: "#22C55E",
+    border: "rgba(34, 197, 94, 0.4)",
+  },
+  focus: {
+    bg: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.15)",
+    fg: "var(--vyne-accent, #06B6D4)",
+    border: "rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.4)",
+  },
+  deadline: {
+    bg: "rgba(239, 68, 68, 0.15)",
+    fg: "#EF4444",
+    border: "rgba(239, 68, 68, 0.4)",
+  },
+  other: {
+    bg: "rgba(245, 158, 11, 0.15)",
+    fg: "#F59E0B",
+    border: "rgba(245, 158, 11, 0.4)",
+  },
 };
 
 function pad(n: number): string {
@@ -79,7 +96,9 @@ export default function CalendarPage() {
   const [detailEvent, setDetailEvent] = useState<CalendarEvent | null>(null);
 
   const today = new Date();
-  const eventsToday = events.filter((e) => isSameDay(new Date(e.startsAt), today));
+  const eventsToday = events.filter((e) =>
+    isSameDay(new Date(e.startsAt), today),
+  );
   const eventsThisWeek = events.filter((e) => {
     const t = new Date(e.startsAt).getTime();
     return Math.abs(t - today.getTime()) < 7 * 86400000;
@@ -299,8 +318,7 @@ export default function CalendarPage() {
                   padding: "6px 14px",
                   borderRadius: 6,
                   border: "none",
-                  background:
-                    view === v ? "var(--content-bg)" : "transparent",
+                  background: view === v ? "var(--content-bg)" : "transparent",
                   color:
                     view === v
                       ? "var(--text-primary)"
@@ -309,10 +327,7 @@ export default function CalendarPage() {
                   fontWeight: 600,
                   cursor: "pointer",
                   textTransform: "capitalize",
-                  boxShadow:
-                    view === v
-                      ? "0 2px 6px rgba(0,0,0,0.06)"
-                      : "none",
+                  boxShadow: view === v ? "0 2px 6px rgba(0,0,0,0.06)" : "none",
                 }}
               >
                 {v}
@@ -347,7 +362,11 @@ export default function CalendarPage() {
         <PageDashboard
           storageKey="calendar"
           kpis={[
-            { label: "Today", value: eventsToday.length.toString(), hint: `${meetingsToday} meeting${meetingsToday === 1 ? "" : "s"}` },
+            {
+              label: "Today",
+              value: eventsToday.length.toString(),
+              hint: `${meetingsToday} meeting${meetingsToday === 1 ? "" : "s"}`,
+            },
             { label: "This week", value: eventsThisWeek.length.toString() },
             { label: "Focus blocks", value: focusBlocksToday.toString() },
             { label: "Total events", value: events.length.toString() },
@@ -471,8 +490,8 @@ export default function CalendarPage() {
               margin: 0,
             }}
           >
-            Type <code style={kbdStyle}>/schedule</code> in any chat channel
-            to drop a meeting card with one command.
+            Type <code style={kbdStyle}>/schedule</code> in any chat channel to
+            drop a meeting card with one command.
           </p>
         </div>
       </aside>
@@ -597,7 +616,9 @@ function MonthView({
                   fontSize: 12,
                   fontWeight: isToday ? 700 : 500,
                   color: isToday ? "#fff" : "var(--text-primary)",
-                  background: isToday ? "var(--vyne-accent, var(--vyne-purple))" : "transparent",
+                  background: isToday
+                    ? "var(--vyne-accent, var(--vyne-purple))"
+                    : "transparent",
                   borderRadius: 99,
                   padding: isToday ? "2px 8px" : "0",
                   minWidth: 22,
@@ -729,7 +750,9 @@ function WeekView({
               style={{
                 fontSize: 18,
                 fontWeight: 700,
-                color: isToday ? "var(--vyne-accent, var(--vyne-purple))" : "var(--text-primary)",
+                color: isToday
+                  ? "var(--vyne-accent, var(--vyne-purple))"
+                  : "var(--text-primary)",
                 marginBottom: 8,
               }}
             >
@@ -754,7 +777,9 @@ function WeekView({
                       cursor: "pointer",
                     }}
                   >
-                    <div style={{ fontWeight: 600 }}>{fmtTime(ev.startsAt)}</div>
+                    <div style={{ fontWeight: 600 }}>
+                      {fmtTime(ev.startsAt)}
+                    </div>
                     <div
                       style={{
                         whiteSpace: "nowrap",
@@ -851,7 +876,14 @@ function DayView({
               >
                 {pad(h)}:00
               </div>
-              <div style={{ padding: 6, display: "flex", flexDirection: "column", gap: 4 }}>
+              <div
+                style={{
+                  padding: 6,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                }}
+              >
                 {hourEvents.map((ev) => {
                   const c = TYPE_COLOR[ev.type] ?? TYPE_COLOR.meeting;
                   const startD = new Date(ev.startsAt);
@@ -923,9 +955,7 @@ function UpcomingCard({
 }) {
   const c = TYPE_COLOR[event.type] ?? TYPE_COLOR.meeting;
   const start = new Date(event.startsAt);
-  const minsUntil = Math.round(
-    (start.getTime() - Date.now()) / 60_000,
-  );
+  const minsUntil = Math.round((start.getTime() - Date.now()) / 60_000);
   const isToday = isSameDay(start, new Date());
   const startsSoon = minsUntil >= 0 && minsUntil <= 15;
   return (
@@ -973,11 +1003,14 @@ function UpcomingCard({
         </span>
       </div>
       <div
+        title={event.title}
         style={{
           fontSize: 13,
           fontWeight: 600,
           color: "var(--text-primary)",
           marginBottom: 6,
+          overflowWrap: "anywhere",
+          lineHeight: 1.35,
         }}
       >
         {event.title}
