@@ -865,6 +865,23 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
   }));
   const funnelTop = Math.max(funnel[0]?.reached ?? 0, 1);
 
+  // ── Pipeline by owner ────────────────────────────────────────────
+  const byOwner = Object.entries(
+    deals
+      .filter((d) => d.stage !== "Lost")
+      .reduce<Record<string, { total: number; count: number }>>((acc, d) => {
+        const o = d.assignee || "Unassigned";
+        acc[o] = {
+          total: (acc[o]?.total ?? 0) + d.value,
+          count: (acc[o]?.count ?? 0) + 1,
+        };
+        return acc;
+      }, {}),
+  )
+    .map(([owner, v]) => ({ owner, ...v }))
+    .sort((a, b) => b.total - a.total);
+  const byOwnerMax = Math.max(...byOwner.map((o) => o.total), 1);
+
   return (
     <div className="flex flex-col gap-[18px]">
       {/* KPI cards */}
@@ -1159,6 +1176,53 @@ function ForecastingTab({ deals }: Readonly<{ deals: Deal[] }>) {
         </div>
         <div className="mt-2 text-[10px] text-text-tertiary">
           Right column = step conversion from the previous stage.
+        </div>
+      </div>
+
+      {/* Pipeline by owner */}
+      <div
+        className="rounded-xl px-5 py-[18px]"
+        style={{
+          background: "var(--content-bg)",
+          border: "1px solid var(--content-border)",
+        }}
+      >
+        <div className="text-[13px] font-bold mb-4 text-text-primary">
+          Pipeline by owner
+        </div>
+        <div className="flex flex-col gap-3">
+          {byOwner.map(({ owner, total, count }) => {
+            const pct = (total / byOwnerMax) * 100;
+            return (
+              <div key={owner}>
+                <div className="flex justify-between mb-[5px]">
+                  <div className="flex items-center gap-[7px]">
+                    <div className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[10px] font-bold text-vyne-purple bg-vyne-purple/[12%]">
+                      {initials(owner)}
+                    </div>
+                    <span className="text-xs font-medium text-text-primary">
+                      {owner}
+                    </span>
+                    <span className="text-[11px] text-text-tertiary">
+                      ({count})
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-text-primary">
+                    {fmt(total)}
+                  </span>
+                </div>
+                <div className="h-2 rounded overflow-hidden bg-[var(--content-bg-secondary)]">
+                  <div
+                    className="h-full rounded transition-[width] duration-[0.6s] ease-in-out"
+                    style={{
+                      width: `${pct}%`,
+                      background: "var(--vyne-accent, var(--vyne-purple))",
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
