@@ -133,7 +133,7 @@ model AutomationRule {
   orgId        String   @default("demo") @map("org_id")
   name         String   @default("")
   module       String   @default("crm")
-  triggerStage String   @default("") @map("trigger_stage")
+  trigger      String   @default("") @map("trigger_key")
   actionType   String   @default("log_note") @map("action_type")
   actionValue  String   @default("") @map("action_value")
   enabled      Boolean  @default(true)

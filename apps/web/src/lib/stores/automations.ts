@@ -16,8 +16,10 @@ export type AutomationActionType =
 export interface AutomationRule {
   id: string;
   name: string;
+  /** Entity domain, e.g. "crm", "ops", "hr". */
   module: string;
-  triggerStage: string;
+  /** The trigger value the engine matches on (CRM: the deal stage). */
+  trigger: string;
   actionType: AutomationActionType;
   actionValue: string;
   enabled: boolean;

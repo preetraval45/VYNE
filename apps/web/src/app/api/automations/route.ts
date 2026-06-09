@@ -15,7 +15,7 @@ const handlers = createCrudHandlers({
   withDefaults: (b) => ({
     name: typeof b.name === "string" ? b.name : "",
     module: typeof b.module === "string" ? b.module : "crm",
-    triggerStage: typeof b.triggerStage === "string" ? b.triggerStage : "",
+    trigger: typeof b.trigger === "string" ? b.trigger : "",
     actionType: typeof b.actionType === "string" ? b.actionType : "log_note",
     actionValue: typeof b.actionValue === "string" ? b.actionValue : "",
     enabled: typeof b.enabled === "boolean" ? b.enabled : true,

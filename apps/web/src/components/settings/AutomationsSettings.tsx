@@ -46,7 +46,7 @@ export default function AutomationsSettings({ onToast }: Props) {
     addRule({
       name: `When deal → ${triggerStage}`,
       module: "crm",
-      triggerStage,
+      trigger: triggerStage,
       actionType,
       actionValue: actionValue.trim(),
       enabled: true,
@@ -208,7 +208,7 @@ export default function AutomationsSettings({ onToast }: Props) {
                     color: "var(--text-primary)",
                   }}
                 >
-                  When deal → <strong>{r.triggerStage}</strong>
+                  When deal → <strong>{r.trigger}</strong>
                 </div>
                 <div
                   style={{
