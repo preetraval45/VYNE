@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   Sparkles,
   MessageSquare,
@@ -76,6 +76,36 @@ function sectionLabelFor(view: string | null): string | null {
     .join(" ");
 }
 
+// `?view=` breadcrumb segment. Isolated in its own component (wrapped in
+// <Suspense> by the caller) because `useSearchParams()` otherwise opts the
+// whole statically-prerendered page out / errors during `next build`.
+function SectionBreadcrumb() {
+  const sectionLabel = sectionLabelFor(useSearchParams().get("view"));
+  if (!sectionLabel) return null;
+  return (
+    <span
+      className="vyne-unified-section"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontSize: 13,
+        fontWeight: 600,
+        color: "var(--text-tertiary)",
+        whiteSpace: "nowrap",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        minWidth: 0,
+      }}
+    >
+      <span aria-hidden="true" style={{ opacity: 0.5 }}>
+        ›
+      </span>
+      {sectionLabel}
+    </span>
+  );
+}
+
 /**
  * Global unified top bar — renders at the top of every dashboard page.
  *
@@ -90,11 +120,9 @@ export function UnifiedTopBar() {
   const user = useAuthStore((s) => s.user);
   const mounted = useMounted();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [issueModalOpen, setIssueModalOpen] = useState(false);
 
   const page = pageMetaFor(pathname);
-  const sectionLabel = sectionLabelFor(searchParams.get("view"));
   const displayName = mounted ? (user?.name ?? "User") : "User";
   const roleLabel = mounted ? (user?.role ?? "Member") : "Member";
 
@@ -192,29 +220,11 @@ export function UnifiedTopBar() {
             {page.title}
           </h1>
           {/* Sub-section breadcrumb (Module › Section) from ?view= so deep
-              sub-pages keep the user oriented in the topbar, not just in-page. */}
-          {sectionLabel && (
-            <span
-              className="vyne-unified-section"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--text-tertiary)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                minWidth: 0,
-              }}
-            >
-              <span aria-hidden="true" style={{ opacity: 0.5 }}>
-                ›
-              </span>
-              {sectionLabel}
-            </span>
-          )}
+              sub-pages keep the user oriented in the topbar, not just in-page.
+              Suspense-wrapped so useSearchParams doesn't break static prerender. */}
+          <Suspense fallback={null}>
+            <SectionBreadcrumb />
+          </Suspense>
         </div>
 
         {/* Center: global search */}
