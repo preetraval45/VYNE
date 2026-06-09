@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { INITIAL_DEALS, type Deal } from "@/lib/fixtures/crm";
+import { useActivityStore } from "@/lib/stores/activity";
 import { subscribe as rtSubscribe, isRealtimeEnabled } from "@/lib/realtime";
 import { seedOrEmpty, shouldSeedFixtures } from "@/lib/stores/seedMode";
 
@@ -48,6 +49,7 @@ export const useCRMStore = create<CRMState>()(
       },
 
       updateDeal: (id, patch) => {
+        const prev = get().deals.find((d) => d.id === id);
         set((s) => ({
           deals: s.deals.map((d) => (d.id === id ? { ...d, ...patch } : d)),
         }));
@@ -58,6 +60,20 @@ export const useCRMStore = create<CRMState>()(
         }).catch(() => {
           // ignore — optimistic state remains
         });
+        // Auto-capture a stage change into the (Postgres-backed) activity feed
+        // so the deal timeline records progression without manual logging.
+        if (patch.stage && prev && patch.stage !== prev.stage) {
+          useActivityStore.getState().log({
+            recordType: "deal",
+            recordId: id,
+            kind: "change",
+            verb: "moved",
+            summary: `Stage moved to ${patch.stage}`,
+            field: "stage",
+            from: prev.stage,
+            to: patch.stage,
+          });
+        }
       },
 
       deleteDeal: (id) => {
