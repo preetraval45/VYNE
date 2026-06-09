@@ -19,6 +19,7 @@ import {
 import { useDealById, useCRMStore } from "@/lib/stores/crm";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import { CustomFieldsList } from "@/components/shared/CustomFieldsRenderer";
+import { RecordActivityTimeline } from "@/components/shared/RecordActivityTimeline";
 import { undoableDelete } from "@/lib/undo";
 import toast from "react-hot-toast";
 
@@ -51,6 +52,7 @@ export default function DealDetailPage() {
   const dealId = params?.dealId as string;
   const deal = useDealById(dealId);
   const deleteDeal = useCRMStore((s) => s.deleteDeal);
+  const updateDeal = useCRMStore((s) => s.updateDeal);
   const customFields =
     useCustomFieldsStore((s) => s.schemas["crm"]?.fields) ?? [];
 
@@ -85,7 +87,9 @@ export default function DealDetailPage() {
   }
 
   function handleDelete() {
-    if (!confirm(`Delete deal "${deal!.company}"? You'll have 5 seconds to undo.`))
+    if (
+      !confirm(`Delete deal "${deal!.company}"? You'll have 5 seconds to undo.`)
+    )
       return;
     const snapshot = { ...deal! };
     undoableDelete({
@@ -323,6 +327,16 @@ export default function DealDetailPage() {
 
             <DealAIInsights deal={deal} />
 
+            <RecordActivityTimeline
+              recordType="deal"
+              recordId={deal.id}
+              onLogged={() =>
+                updateDeal(deal.id, {
+                  lastActivity: new Date().toISOString(),
+                })
+              }
+            />
+
             {deal.notes && (
               <section
                 style={{
@@ -492,7 +506,9 @@ interface DealLite {
 function DealAIInsights({ deal }: { deal: DealLite }) {
   const [stalled, setStalled] = useState<string | null>(null);
   const [next, setNext] = useState<string | null>(null);
-  const [loadingKind, setLoadingKind] = useState<"stalled" | "next" | null>(null);
+  const [loadingKind, setLoadingKind] = useState<"stalled" | "next" | null>(
+    null,
+  );
 
   const daysSinceActivity = Math.max(
     0,
@@ -540,7 +556,10 @@ function DealAIInsights({ deal }: { deal: DealLite }) {
         // ignore
       }
     } catch (err) {
-      toast.error("Couldn't reach AI: " + (err instanceof Error ? err.message : "unknown"));
+      toast.error(
+        "Couldn't reach AI: " +
+          (err instanceof Error ? err.message : "unknown"),
+      );
     } finally {
       setLoadingKind(null);
     }
@@ -556,7 +575,14 @@ function DealAIInsights({ deal }: { deal: DealLite }) {
         marginBottom: 16,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 10,
+        }}
+      >
         <span
           style={{
             width: 24,
@@ -583,7 +609,14 @@ function DealAIInsights({ deal }: { deal: DealLite }) {
           Vyne AI insights
         </h2>
       </div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: stalled || next ? 10 : 0 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          marginBottom: stalled || next ? 10 : 0,
+        }}
+      >
         <button
           type="button"
           onClick={() => ask("stalled")}
@@ -605,7 +638,13 @@ function DealAIInsights({ deal }: { deal: DealLite }) {
       </div>
       {stalled && (
         <div style={aiOutStyle}>
-          <strong style={{ display: "block", marginBottom: 4, color: "var(--text-primary)" }}>
+          <strong
+            style={{
+              display: "block",
+              marginBottom: 4,
+              color: "var(--text-primary)",
+            }}
+          >
             Why stalled
           </strong>
           {stalled}
@@ -613,7 +652,13 @@ function DealAIInsights({ deal }: { deal: DealLite }) {
       )}
       {next && (
         <div style={{ ...aiOutStyle, marginTop: stalled ? 8 : 0 }}>
-          <strong style={{ display: "block", marginBottom: 4, color: "var(--text-primary)" }}>
+          <strong
+            style={{
+              display: "block",
+              marginBottom: 4,
+              color: "var(--text-primary)",
+            }}
+          >
             Suggested next move
           </strong>
           {next}

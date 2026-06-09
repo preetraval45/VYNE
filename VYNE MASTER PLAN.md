@@ -124,14 +124,14 @@ lead scoring, reports, custom fields, email/calendar sync, mobile.
 - [ ] **Contacts/Accounts depth** — full contact record: company, role, social,
       owner, lifecycle stage, tags, custom fields; account ↔ contacts ↔ deals graph.
   - Data: `Contact`, `Account`, `Deal`, `Activity`, `CustomFieldDef/Value` Prisma models + relations.
-- [ ] **Activity timeline** — log calls, emails, meetings, notes per contact/deal; auto-capture from Chat/Calendar; manual quick-add.
+- [~] **Activity timeline** — _Built `RecordActivityTimeline` (`components/shared/`): per-record feed with quick-add for Note/Call/Email/Meeting, persisted via the extended activity store (added `kind` + `body`), interleaving logged interactions with system audit entries; wired into the CRM deal detail and bumps `lastActivity` on log._ Still to do: add to contact detail, auto-capture from Chat/Calendar.
 - [ ] **Email sequences / cadences** — multi-step templated outreach with delays, open/click tracking, auto-enroll rules; pause-on-reply.
 - [ ] **Lead scoring** — rule-based + AI score (fit × engagement); surfaced on pipeline cards and a "hot leads" view.
 - [ ] **Forecasting** — promote `ForecastingTab`: probability-weighted pipeline, commit/best-case/worst-case, quota attainment, period roll-up.
 - [ ] **Reports & dashboards** — pipeline by stage/owner, win/loss, velocity, conversion funnel, activity volume; saveable + scheduled email.
 - [ ] **Automation workflows** — "when deal stage = X, create task / send email / notify channel"; shared engine with Ops/HR (see D3).
 - [ ] **Email + calendar sync** — 2-way Gmail/Outlook + Google/O365 calendar; log emails to contacts automatically.
-- [ ] **Custom fields & pipelines** — admin-defined fields, multiple pipelines, stage probability config.
+- [~] **Custom fields & pipelines** — _Custom fields already shipped: `customFieldsStore` (typed fields/statuses per module) + `FieldSchemaEditor`/`FormBuilder` in Settings → **Forms**, rendered on CRM deals (and projects) via `CustomFieldsRenderer`. M1's Studio metadata foundation is effectively this._ Still to do: multiple pipelines + per-stage probability config.
 - [ ] **Done when:** a rep can run a full cycle — capture lead → score → sequence → log activity → advance stages → forecast → win — without leaving VYNE, and the AI deal coach reads all of it.
 
 ### B2. Ops / ERP → Rithmiq / Odoo / NetSuite
@@ -320,8 +320,10 @@ depth, SKU detail, POs, real WOs, warehousing, supplier mgmt, barcode, multi-cur
 ## 6. Sequencing / milestones
 
 - [ ] **M0 — Launchable (Phase A):** no dead nav, Sales Orders + Finance Invoices real, critical UI fixed, AI front-and-center.
-- [ ] **M1 — "Real persistence + Studio foundation":** move modules off local-only
-      state to Postgres; ship the metadata engine (entity/field registry, org config) + custom fields/views so B-work is built customization-ready from day one (§3.5).
+- [~] **M1 — "Real persistence + Studio foundation":** _Studio custom-fields
+  metadata engine already exists (`customFieldsStore` + `FieldSchemaEditor`/
+  `FormBuilder` in Settings → Forms, rendered via `CustomFieldsRenderer`)._
+  Remaining: move modules off local-only state to **Postgres** (the big lift) + the rest of §3.5 (custom objects, view/layout builders, RBAC).
 - [ ] **M2 — "Real CRM + Finance" (B1, B3, B8):** order-to-cash works end to end.
 - [ ] **M3 — "Real Ops/ERP + MRP + HR" (B2, B4):** procure→make→sell→fulfill with MRP; hire→manage→offboard.
 - [ ] **M4 — "Team OS" (B5, B6, B7):** Projects/Chat/Docs are daily drivers.

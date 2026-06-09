@@ -17,14 +17,26 @@ export type ActivityRecordType =
   | "invoice"
   | "product";
 
+/**
+ * "change" = a system audit entry (status moved, field updated…).
+ * The rest are user-logged CRM interactions (call/email/meeting/note) with a
+ * free-text `body`. Defaulting to "change" keeps every existing `log()` caller
+ * backward-compatible.
+ */
+export type ActivityKind = "change" | "note" | "call" | "email" | "meeting";
+
 export interface ActivityEntry {
   id: string;
   recordType: ActivityRecordType;
   recordId: string;
-  /** Short imperative verb — "moved", "updated", "created", "archived" */
+  /** Short imperative verb — "moved", "updated", "created", "archived", "logged" */
   verb: string;
   /** Human-readable one-liner shown in the feed */
   summary: string;
+  /** What kind of entry — audit change vs. a logged interaction. */
+  kind?: ActivityKind;
+  /** Free-text body for logged interactions (call notes, email gist, etc.) */
+  body?: string;
   /** Optional field that was changed, e.g. "status" */
   field?: string;
   /** Optional before/after values rendered as chips */
@@ -43,7 +55,10 @@ interface ActivityStore {
       actor?: string;
     },
   ) => ActivityEntry;
-  entriesFor: (recordType: ActivityRecordType, recordId: string) => ActivityEntry[];
+  entriesFor: (
+    recordType: ActivityRecordType,
+    recordId: string,
+  ) => ActivityEntry[];
   recent: (limit?: number) => ActivityEntry[];
   clear: () => void;
 }
