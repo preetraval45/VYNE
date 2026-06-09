@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ExpensesDashboardView } from "@/components/expenses/ExpensesDashboardView";
+import { ExportButton } from "@/components/shared/ExportButton";
 import {
   CATEGORY_LIMITS,
   type Expense,
@@ -1145,21 +1146,14 @@ function ReportsTab({ expenses }: Readonly<{ expenses: Expense[] }>) {
           >
             Monthly Trend
           </span>
-          <button
-            style={{
-              fontSize: 12,
-              color: "var(--vyne-accent, var(--vyne-purple))",
-              background: "none",
-              border:
-                "1px solid rgba(var(--vyne-accent-rgb, 6, 182, 212), 0.3)",
-              borderRadius: 6,
-              padding: "3px 10px",
-              cursor: "pointer",
-              fontWeight: 500,
-            }}
-          >
-            Export CSV
-          </button>
+          <ExportButton
+            data={monthly}
+            filename="expenses-monthly-trend"
+            columns={[
+              { key: "month", header: "Month" },
+              { key: "amount", header: "Amount" },
+            ]}
+          />
         </div>
         <div
           style={{

@@ -6,6 +6,7 @@ import { HRDashboardView } from "@/components/hr/HRDashboardView";
 import { ExportButton } from "@/components/shared/ExportButton";
 import { DemoDataBanner } from "@/components/shared/DemoDataBanner";
 import { PageDashboard } from "@/components/shared/PageDashboard";
+import { Pill } from "@/components/shared/Kit";
 import { useRegisterCommands } from "@/hooks/useRegisterCommands";
 import { Plus, Calendar, DollarSign } from "lucide-react";
 import { OrgChartTree } from "@/components/hr/OrgChartTree";
@@ -1841,39 +1842,15 @@ function HRPageInner() {
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 10px",
-                borderRadius: 20,
-                background: "rgba(34,197,94,0.1)",
-                color: "var(--badge-success-text)",
-              }}
-            >
+            <Pill tone="success" dot>
               {EMPLOYEES.filter((e) => e.status === "Active").length} Active
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 10px",
-                borderRadius: 20,
-                background: "rgba(59,130,246,0.1)",
-                color: "#1E40AF",
-              }}
-            >
+            </Pill>
+            <Pill tone="info" dot>
               {EMPLOYEES.filter((e) => e.status === "Remote").length} Remote
-            </span>
-            <span
-              style={{
-                fontSize: 11,
-                padding: "3px 10px",
-                borderRadius: 20,
-                background: "rgba(245,158,11,0.1)",
-                color: "var(--badge-warning-text)",
-              }}
-            >
+            </Pill>
+            <Pill tone="warn" dot>
               {EMPLOYEES.filter((e) => e.status === "On Leave").length} On Leave
-            </span>
+            </Pill>
             <ExportButton
               data={EMPLOYEES as unknown as Record<string, unknown>[]}
               filename="vyne-employees"

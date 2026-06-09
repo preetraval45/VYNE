@@ -91,9 +91,9 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 
 - [x] Sidebar collapsed-state tooltips — already present (`title={collapsed ? label}` on every nav row).
 - [x] Breadcrumb reflects active sub-section — topbar now shows "Module › Section" from `?view=` (`UnifiedTopBar`).
-- [ ] Standardize badge/pill style — shared `Pill` (`Kit.tsx`) already exists; needs a broad adoption audit. _Deferred (audit, not a quick fix)._
+- [x] Standardize badge/pill style — audited: most module headers already use the shared `Pill` (`Kit.tsx`); converted HR's hand-rolled Active/Remote/On-Leave chips to `<Pill tone=…>` so they match Ops/Sales. _(Per-row status badges remain their own semantic.)_
 - [x] `formatCurrency` (`$96.8K`) — helper already existed; applied to Ops KPI strip (was lowercase `$69.9k`) + order total. _(Remaining pages adopt incrementally.)_
-- [ ] One shared Export-CSV button — shared `ExportButton` exists; needs a broad adoption audit. _Deferred (audit)._
+- [x] One shared Export-CSV button — audited: `ExportButton` is used across 10+ modules; the one rogue inline (and dead, no-onClick) "Export CSV" in Expenses → Reports is now the shared `ExportButton` wired to the monthly data.
 - [x] "Ask AI" green — `AskAiButton` already uses the same `teal-400→teal-600` token as the topbar Vyne AI button (consistent).
 - [x] Demote "Get app" to ghost/outline — done (transparent bg + border in `UnifiedTopBar`).
 - [x] My Dashboard drag-onboarding affordance — added a dashed accent callout ("Drag any widget onto the grid →" with hand + arrow icons) at the top of the palette.
@@ -104,7 +104,7 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 - [x] Calendar "Up Next" — added hover `title` + `overflow-wrap` so long titles stay readable.
 - [x] OVERVIEW toggle — already uses an inline chevron (`ChevronDown/Up` in `PageDashboard`).
 - [x] Projects sidebar badge — re-pinned to the icon's top-right corner with a sidebar-bg ring so it reads cleanly.
-- [~] Sidebar Vyne AI brain icon — **kept** as a deliberate featured panel (owner wants AI first-class); not de-emphasized by design.
+- [x] Sidebar Vyne AI brain icon — **decision: keep** the featured panel. It's a polished hero card (brain-in-teal-square + "BRD · Diagrams · Sheets · Slides") sitting directly under the brand logo. The AI is the product's moat, so a prominent, distinct panel is correct; matching it to the line-icon nav would bury the differentiator. Best-for-product call, not an oversight.
 - [x] Sample-data banner — recolored to neutral slate / blue-gray (no longer reads as success green).
 - [ ] Responsive pass: tablet/mobile. _Deferred — its own effort (D1)._
 
