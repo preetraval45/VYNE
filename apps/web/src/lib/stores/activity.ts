@@ -50,6 +50,7 @@ export interface ActivityEntry {
 
 interface ActivityStore {
   entries: ActivityEntry[];
+  hydrated: boolean;
   log: (
     entry: Omit<ActivityEntry, "id" | "createdAt" | "actor"> & {
       actor?: string;
@@ -61,6 +62,8 @@ interface ActivityStore {
   ) => ActivityEntry[];
   recent: (limit?: number) => ActivityEntry[];
   clear: () => void;
+  /** Replace the local cache with the canonical server feed (Postgres). */
+  hydrateFromServer: () => Promise<void>;
 }
 
 const newId = () =>
@@ -72,6 +75,7 @@ export const useActivityStore = create<ActivityStore>()(
   persist(
     (set, get) => ({
       entries: [],
+      hydrated: false,
       log: (entry) => {
         const row: ActivityEntry = {
           ...entry,
@@ -79,8 +83,18 @@ export const useActivityStore = create<ActivityStore>()(
           createdAt: new Date().toISOString(),
           actor: entry.actor ?? "You",
         };
-        // Cap at 400 entries so localStorage doesn't balloon.
+        // Optimistic local insert (cap so localStorage doesn't balloon).
         set((state) => ({ entries: [row, ...state.entries].slice(0, 400) }));
+        // Mirror to Postgres via /api/activities (fire-and-forget). Send the
+        // locally-minted id so the server row matches the optimistic one.
+        void fetch("/api/activities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(row),
+        }).catch(() => {
+          // Offline / server hiccup — optimistic row stays; a later
+          // hydrateFromServer reconciles.
+        });
         return row;
       },
       entriesFor: (recordType, recordId) =>
@@ -89,6 +103,18 @@ export const useActivityStore = create<ActivityStore>()(
         ),
       recent: (limit = 20) => get().entries.slice(0, limit),
       clear: () => set({ entries: [] }),
+      hydrateFromServer: async () => {
+        try {
+          const res = await fetch("/api/activities", { cache: "no-store" });
+          if (!res.ok) return;
+          const body = (await res.json()) as { activities?: ActivityEntry[] };
+          if (Array.isArray(body.activities)) {
+            set({ entries: body.activities, hydrated: true });
+          }
+        } catch {
+          // Offline — keep the local cache as-is.
+        }
+      },
     }),
     { name: "vyne-activity", version: 1 },
   ),

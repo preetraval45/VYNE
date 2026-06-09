@@ -20,6 +20,7 @@ import { useDealById, useCRMStore } from "@/lib/stores/crm";
 import { useCustomFieldsStore } from "@/lib/stores/customFields";
 import { CustomFieldsList } from "@/components/shared/CustomFieldsRenderer";
 import { RecordActivityTimeline } from "@/components/shared/RecordActivityTimeline";
+import { LeadScoreCard } from "@/components/crm/LeadScoreCard";
 import { undoableDelete } from "@/lib/undo";
 import toast from "react-hot-toast";
 
@@ -324,6 +325,8 @@ export default function DealDetailPage() {
                 ))}
               </div>
             </section>
+
+            <LeadScoreCard deal={deal} />
 
             <DealAIInsights deal={deal} />
 

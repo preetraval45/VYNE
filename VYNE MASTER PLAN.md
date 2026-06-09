@@ -124,9 +124,9 @@ lead scoring, reports, custom fields, email/calendar sync, mobile.
 - [ ] **Contacts/Accounts depth** — full contact record: company, role, social,
       owner, lifecycle stage, tags, custom fields; account ↔ contacts ↔ deals graph.
   - Data: `Contact`, `Account`, `Deal`, `Activity`, `CustomFieldDef/Value` Prisma models + relations.
-- [~] **Activity timeline** — _Built `RecordActivityTimeline` (`components/shared/`): per-record feed with quick-add for Note/Call/Email/Meeting, persisted via the extended activity store (added `kind` + `body`), interleaving logged interactions with system audit entries; wired into the CRM deal detail and bumps `lastActivity` on log._ Still to do: add to contact detail, auto-capture from Chat/Calendar.
+- [~] **Activity timeline** — _Built `RecordActivityTimeline`: per-record feed with quick-add for Note/Call/Email/Meeting, wired into the CRM deal detail (bumps `lastActivity`). **Production-grade persistence**: new Prisma `Activity` model + tenant-scoped `/api/activities` route (rate-limited, Pusher realtime) + the activity store now mirrors writes to Postgres and hydrates from the server on mount (optimistic local cache, like deals) — not localStorage-only._ Still to do: add to contact detail, auto-capture from Chat/Calendar.
 - [ ] **Email sequences / cadences** — multi-step templated outreach with delays, open/click tracking, auto-enroll rules; pause-on-reply.
-- [ ] **Lead scoring** — rule-based + AI score (fit × engagement); surfaced on pipeline cards and a "hot leads" view.
+- [~] **Lead scoring** — _Built `lib/crm/scoring.ts`: deterministic, explainable 0–100 score from stage progression + activity recency + source quality + deal size, with tier (hot/warm/cold) + reasons (works with no AI key). Surfaced as a gauge + reasons `LeadScoreCard` on the deal detail; reusable `LeadScoreBadge` for cards/tables._ Still to do: badge on pipeline/table + a "hot leads" view/sort.
 - [ ] **Forecasting** — promote `ForecastingTab`: probability-weighted pipeline, commit/best-case/worst-case, quota attainment, period roll-up.
 - [ ] **Reports & dashboards** — pipeline by stage/owner, win/loss, velocity, conversion funnel, activity volume; saveable + scheduled email.
 - [ ] **Automation workflows** — "when deal stage = X, create task / send email / notify channel"; shared engine with Ops/HR (see D3).

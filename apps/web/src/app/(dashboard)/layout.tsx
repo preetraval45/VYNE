@@ -36,6 +36,7 @@ import { ModuleErrorBoundary } from "@/components/shared/ModuleErrorBoundary";
 import { SkipToContent } from "@/components/shared/SkipToContent";
 import { useUIStore } from "@/lib/stores/ui";
 import { useCRMStore, bindCrmRealtime } from "@/lib/stores/crm";
+import { useActivityStore } from "@/lib/stores/activity";
 import { useContactsStore, bindContactsRealtime } from "@/lib/stores/contacts";
 import {
   useInvoicingStore,
@@ -102,6 +103,7 @@ export default function DashboardLayout({
           useSalesStore.getState().hydrateFromServer(),
           useFieldServiceStore.getState().hydrateFromServer(),
           useHRStore.getState().hydrateFromServer(),
+          useActivityStore.getState().hydrateFromServer(),
         ]);
         window.dispatchEvent(new CustomEvent("vyne:soft-refresh"));
         toastModule.default.success("Up to date", {
@@ -143,6 +145,7 @@ export default function DashboardLayout({
     void useSalesStore.getState().hydrateFromServer();
     void useFieldServiceStore.getState().hydrateFromServer();
     void useHRStore.getState().hydrateFromServer();
+    void useActivityStore.getState().hydrateFromServer();
     // Subscribe to Pusher org-wide events. Two-tab edits become instant
     // once NEXT_PUBLIC_PUSHER_KEY is set; the helpers no-op silently
     // when realtime is not configured.

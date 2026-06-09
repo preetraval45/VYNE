@@ -101,6 +101,30 @@ model Deal {
   @@map("deals")
 }
 
+// Per-record activity feed (CRM-style): user-logged interactions
+// (call/email/meeting/note, with a free-text body) plus system audit entries.
+// Scoped by (recordType, recordId) so any record's detail page reads its own
+// history. Append-only — no update/delete API surface.
+model Activity {
+  id         String   @id @default(cuid())
+  orgId      String   @default("demo") @map("org_id")
+  recordType String   @map("record_type")
+  recordId   String   @map("record_id")
+  kind       String   @default("change")
+  verb       String   @default("logged")
+  summary    String   @default("")
+  body       String   @default("")
+  field      String   @default("")
+  fromVal    String   @default("") @map("from_val")
+  toVal      String   @default("") @map("to_val")
+  actor      String   @default("You")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([orgId, recordType, recordId])
+  @@index([orgId, createdAt])
+  @@map("activities")
+}
+
 // CRM contacts (people). Paired with Account in the contacts module.
 model Contact {
   id          String   @id @default(cuid())
