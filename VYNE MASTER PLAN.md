@@ -106,7 +106,7 @@ _Done via `next.config.ts` `redirects()` — every path below now resolves to it
 - [x] Projects sidebar badge — re-pinned to the icon's top-right corner with a sidebar-bg ring so it reads cleanly.
 - [x] Sidebar Vyne AI brain icon — **decision: keep** the featured panel. It's a polished hero card (brain-in-teal-square + "BRD · Diagrams · Sheets · Slides") sitting directly under the brand logo. The AI is the product's moat, so a prominent, distinct panel is correct; matching it to the line-icon nav would bury the differentiator. Best-for-product call, not an oversight.
 - [x] Sample-data banner — recolored to neutral slate / blue-gray (no longer reads as success green).
-- [ ] Responsive pass: tablet/mobile. _Deferred — its own effort (D1)._
+- [~] Responsive pass: tablet/mobile — audited the existing system (mature: ~70 media queries, `MobileBottomNav`, `MobileLayoutNormalizer`, `two-pane-layout` stacking, auto-fit stat grids). Filled the gaps my recent changes introduced: topbar breadcrumb + avatar name/role now hidden ≤640px; home two-column rail now uses `two-pane-layout` so it stacks on phones instead of squeezing. _(Full device-matrix QA — real iOS/Android Safari/Chrome — still wants a hands-on pass; tracked under D1.)_
 
 ---
 

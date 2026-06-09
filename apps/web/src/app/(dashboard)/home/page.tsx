@@ -1008,8 +1008,10 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Two-column layout */}
+        {/* Two-column layout — `two-pane-layout` stacks it to one column on
+            phones/tablets (see globals.css) instead of squeezing the rail. */}
         <div
+          className="two-pane-layout"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0,1fr) minmax(0,280px)",
